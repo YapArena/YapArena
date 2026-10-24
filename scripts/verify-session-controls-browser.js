@@ -44,6 +44,15 @@ try {
     if (!response.ok()) throw new Error(`test sign-in: ${response.status()}`);
   };
   await signIn(first);
+  // A private profile keeps the handle pop-up off the sign-out controls.
+  const profile = await first.request.post(`${origin}/api/me/profile`, {
+    data: {
+      handle: `f03-${randomUUID().slice(0, 8)}`,
+      displayName: "Session check",
+    },
+  });
+  if (profile.status() !== 201)
+    throw new Error(`test profile: ${profile.status()}`);
   await a.goto(`${origin}/account`);
   await a.locator("#signed-in:not([hidden])").waitFor();
   await a

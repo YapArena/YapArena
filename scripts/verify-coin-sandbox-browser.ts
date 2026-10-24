@@ -1,6 +1,6 @@
 // Coin sandbox browser acceptance against a real local backend. It creates
 // its own native PostgreSQL cluster, migrates it, serves the built
-// account-coins.js on a fixture account page at /account and mounts the real
+// account-coins.js on a fixture coins page at /coins and mounts the real
 // coin sandbox and auth routers. Sign-in confirmation (Decision 0009, point 8)
 // runs against the in-process OpenID Connect issuer (oidc-test-issuer.ts),
 // whose stand-in Universal Login page Chrome drives: opening the sandbox, a
@@ -147,7 +147,7 @@ const evidenceSources = [
   ]),
 ];
 // The account page the coin sandbox returns to after a confirmation.
-const accountReturn = "/account#coin-sandbox",
+const accountReturn = "/coins#coin-sandbox",
   confirmationKey = "yaparena-coin-confirmation",
   settled =
     "Sandbox balances refreshed. Simulated withdrawals require manual operator review.",
@@ -464,9 +464,9 @@ try {
   app.get("/axe.js", (_request, response) =>
     response.type("js").send(axe.source),
   );
-  app.get("/account", (_request, response) =>
+  app.get("/coins", (_request, response) =>
     response.send(
-      `<!doctype html><html lang="en"><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>YapArena coin sandbox browser acceptance</title><link rel="stylesheet" href="/assets/site.css"><link rel="stylesheet" href="/assets/arena.css"><link rel="stylesheet" href="/assets/account-auth.css"><script defer src="/assets/session-coordination.js"></script><script defer src="/axe.js"></script></head><body class="account-page"><main class="container"><h1>Account and coins</h1><p>LOCAL REAL BACKEND · Synthetic accounts · Deterministic simulation · Local sign-in provider · No live funds</p><section id="account-wallet" class="information-card account-card"></section></main><script type="module" src="/assets/account-coins.js"></script></body></html>`,
+      `<!doctype html><html lang="en"><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>YapArena coin sandbox browser acceptance</title><link rel="stylesheet" href="/assets/site.css"><link rel="stylesheet" href="/assets/arena.css"><link rel="stylesheet" href="/assets/account-auth.css"><script defer src="/assets/session-coordination.js"></script><script defer src="/axe.js"></script></head><body class="account-page"><main class="container"><h1>Account and coins</h1><p>LOCAL REAL BACKEND · Synthetic accounts · Deterministic simulation · Local sign-in provider · No live funds</p><section id="account-wallet" class="coin-wallet"></section></main><script type="module" src="/assets/account-coins.js"></script></body></html>`,
     ),
   );
   app.get("/api/public/debates", async (_request, response) =>
@@ -651,7 +651,7 @@ try {
         "SELECT count(*)::int n FROM coin_sandbox_openings WHERE user_id=$1",
         [account.userId],
       );
-    await page.goto(`${origin}/account`);
+    await page.goto(`${origin}/coins`);
     const root = page.locator("#coin-sandbox"),
       notice = root.locator("[data-coin-notice]"),
       opening = root.locator("[data-coin-opening]"),
@@ -780,7 +780,7 @@ try {
 
     phase = `${name}: a forged return with an unconfirmed operation opens nothing`;
     const forged = page.waitForResponse(posted("/api/coin-sandbox/opening"));
-    await page.goto(`${origin}/account?confirmed=${foreign.id}#coin-sandbox`);
+    await page.goto(`${origin}/coins?confirmed=${foreign.id}#coin-sandbox`);
     assert.equal((await forged).status(), 410);
     await notice.filter({ hasText: spentConfirmation }).waitFor();
     assert.equal(page.url(), `${origin}${accountReturn}`);
@@ -838,7 +838,7 @@ try {
     );
     await automatedA11y(page);
     checks.push(
-      `${name}: "Confirm by signing in again" reaches the provider with prompt=login, max_age=0 and the account's own address; signing in as the same account returns to /account, opens the sandbox exactly once with that operation and subject, keeps the device's session and removes ?confirmed= from the address`,
+      `${name}: "Confirm by signing in again" reaches the provider with prompt=login, max_age=0 and the account's own address; signing in as the same account returns to /coins, opens the sandbox exactly once with that operation and subject, keeps the device's session and removes ?confirmed= from the address`,
     );
 
     phase = `${name}: exactly-once grants and funded issuance`;
@@ -973,9 +973,7 @@ try {
     const replay = page.waitForResponse(
       posted(`/api/coin-sandbox/withdrawals/${request.id}`),
     );
-    await page.goto(
-      `${origin}/account?confirmed=${withdrawal.id}#coin-sandbox`,
-    );
+    await page.goto(`${origin}/coins?confirmed=${withdrawal.id}#coin-sandbox`);
     assert.equal((await replay).status(), 410);
     await notice.filter({ hasText: spentConfirmation }).waitFor();
     page.off("request", watchWithdrawal);
@@ -1003,7 +1001,7 @@ try {
     const latePage = await late.newPage();
     lastPage = latePage;
     observe(latePage);
-    await latePage.goto(`${origin}/account`);
+    await latePage.goto(`${origin}/coins`);
     const lateRoot = latePage.locator("#coin-sandbox");
     await lateRoot.getByText(settled, { exact: true }).waitFor();
     await openDetails(lateRoot.locator("details:has([data-coin-withdraw])"));

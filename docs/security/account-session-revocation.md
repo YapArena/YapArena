@@ -29,8 +29,10 @@ it does not replace the final hosted rollout and legacy-grant checks.
 By founder decision on 2026-10-22, Sign out works as in other apps: it ends this device only.
 Sign out all sessions and Sign out other sessions (`POST /api/auth/logout-all` and
 `/logout-other-sessions`, audited `sessions.logout_all`/`sessions.logout_others`) were
-removed; older audit rows keep those names. The account page's Active sessions list signs out
-one chosen device at a time. Neither control advances the generation. After Sign out the
+removed; older audit rows keep those names. By founder decision on 2026-10-24 the account page
+no longer shows an Active sessions list; `GET /api/auth/sessions` and
+`DELETE /api/auth/sessions/:id` remain and sign out one chosen device at a time, with no page
+calling them. Neither control advances the generation. After Sign out the
 browser navigates to Auth0's logout endpoint, which ends this browser's Auth0 session and
 returns to the home page; other tabs of this browser follow through the `yaparena-account`
 BroadcastChannel. An Auth0 session on another device is not ended. A YapArena session is

@@ -6,8 +6,22 @@ import {
   type AuthResumeAction,
 } from "./auth-return.js";
 import type { AuthRequest } from "./auth-events.js";
+import type { Profile } from "./account-types.js";
 import { apiErrorStatus, apiFetch } from "./lib/api.js";
 import { sessionStore } from "./lib/session.js";
+
+type HeaderProfile = Pick<
+  Profile,
+  "handle" | "displayName" | "publicationState"
+>;
+const initials = (name: string) =>
+  name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => [...part][0] ?? "")
+    .join("")
+    .toUpperCase();
 
 const header = document.querySelector<HTMLElement>("[data-site-header]");
 if (header) {
@@ -28,13 +42,66 @@ if (header) {
   let version = 0;
   let endedSessionNotice = "";
   let resumeNotice = "";
+  const identity = header.querySelector<HTMLElement>("[data-header-identity]")!;
+  const identityCaption = [...identity.childNodes].map((node) =>
+    node.cloneNode(true),
+  );
+  const profileLink = header.querySelector<HTMLAnchorElement>(
+    "[data-header-profile-link]",
+  )!;
+  const logout = header.querySelector<HTMLButtonElement>(
+    "[data-header-logout]",
+  )!;
   function clearAccount() {
     balance.textContent = "—";
     reserved.textContent = "Checking balance…";
     avatar.replaceChildren(...avatarIcon.map((node) => node.cloneNode(true)));
+    identity.replaceChildren(
+      ...identityCaption.map((node) => node.cloneNode(true)),
+    );
+    profileLink.href = "/account#profile";
     for (const menu of header!.querySelectorAll<HTMLDetailsElement>("details"))
       menu.open = false;
   }
+  // The menu names the account, and links to its public page once published.
+  function showProfile(profile: HeaderProfile) {
+    const letters = initials(profile.displayName);
+    if (letters) avatar.textContent = letters;
+    const name = document.createElement("strong");
+    const handle = document.createElement("span");
+    name.textContent = profile.displayName;
+    handle.textContent = `@${profile.handle}`;
+    identity.replaceChildren(name, handle);
+    profileLink.href =
+      profile.publicationState === "published"
+        ? `/people/${encodeURIComponent(profile.handle)}`
+        : "/account#profile";
+  }
+  // A signed-in account without a profile picks its name and handle first.
+  let setup: Promise<void> | undefined;
+  function requireProfile() {
+    // Signing out or switching account closes the pop-up with no profile.
+    setup ??= import("./profile-setup.js")
+      .then(({ openProfileSetup }) => openProfileSetup())
+      .then((profile) => {
+        if (!profile || header!.dataset.session !== "member") return;
+        status.textContent = `Welcome to YAP Arena, @${profile.handle}.`;
+        window.dispatchEvent(
+          new CustomEvent("yap:profile-changed", { detail: profile }),
+        );
+        resumeConfirmedAction();
+      })
+      .catch(() => {
+        status.textContent =
+          "Your profile setup couldn't load. Refresh the page to try again.";
+      })
+      .finally(() => {
+        setup = undefined;
+      });
+  }
+  window.addEventListener("yap:profile-changed", (event) => {
+    if (header.dataset.session === "member") showProfile(event.detail);
+  });
   function session(state: "checking" | "guest" | "member" | "unavailable") {
     header!.dataset.session = state;
     guest.hidden = state !== "guest";
@@ -75,7 +142,6 @@ if (header) {
       endedSessionNotice = "";
       session("member");
       status.textContent = resumeNotice;
-      resumeConfirmedAction();
       const [profileResponse, walletResponse] = await Promise.all([
         apiFetch("/api/me/profile", { cache: "no-store", timeout: 10000 }),
         apiFetch(emailFirst ? "/api/account-wallet" : "/api/a4/wallet", {
@@ -85,18 +151,12 @@ if (header) {
       ]);
       if (current !== version) return;
       if (profileResponse.ok) {
-        const value: { profile: { displayName: string } | null } =
-          await profileResponse.json();
+        const value: { profile: HeaderProfile } = await profileResponse.json();
         if (current !== version) return;
-        const initials = value.profile?.displayName
-          .trim()
-          .split(/\s+/)
-          .slice(0, 2)
-          .map((part) => part[0])
-          .join("")
-          .toUpperCase();
-        if (initials) avatar.textContent = initials;
-      }
+        showProfile(value.profile);
+        resumeConfirmedAction();
+      } else if (profileResponse.status === 404) requireProfile();
+      else resumeConfirmedAction();
       if (walletResponse.status === 401 || walletResponse.status === 403) {
         clearAccount();
         session("guest");
@@ -335,6 +395,15 @@ if (header) {
       else target.searchParams.delete("return");
       link.href = target.pathname + target.search;
     }
+    // The header's one Sign in button opens the account page, which offers
+    // both methods, and comes back here afterwards.
+    const account = header!.querySelector<HTMLAnchorElement>(
+      "a[data-header-sign-in]",
+    )!;
+    account.href =
+      next && !next.startsWith("/account")
+        ? `/account?next=${encodeURIComponent(next)}`
+        : "/account";
   }
   updateSignInLinks();
   window.addEventListener("hashchange", updateSignInLinks);
@@ -386,42 +455,40 @@ if (header) {
     }
   });
 
-  header
-    .querySelector<HTMLButtonElement>("[data-header-logout]")!
-    .addEventListener("click", async (event) => {
-      const button = event.currentTarget as HTMLButtonElement;
-      if (button.disabled) return;
-      const logoutVersion = version;
-      const expectedAccount = store.account();
-      button.disabled = true;
-      status.textContent = "Signing out…";
-      try {
-        const response = await store.fetch("/api/auth/logout", {
-          method: "POST",
-          signal: AbortSignal.timeout(45000),
-        });
-        if (logoutVersion !== version) {
-          if (expectedAccount && expectedAccount === store.account())
-            window.dispatchEvent(new Event("yap:account-changed"));
-          return;
-        }
-        if (!response.ok && response.status !== 401)
-          throw new Error("logout unavailable");
-        const redirectTo = await providerLogout(response);
-        clearAccount();
-        session("guest");
-        store.signedOut(response.status === 401);
-        // Signing out also ends this browser's provider session; the provider
-        // then returns to the home page.
-        if (redirectTo) location.assign(redirectTo);
-        else guest.querySelector<HTMLAnchorElement>("a")?.focus();
-      } catch {
-        if (logoutVersion === version)
-          status.textContent = "Log out could not complete. Please try again.";
-      } finally {
-        button.disabled = false;
+  logout.addEventListener("click", async (event) => {
+    const button = event.currentTarget as HTMLButtonElement;
+    if (button.disabled) return;
+    const logoutVersion = version;
+    const expectedAccount = store.account();
+    button.disabled = true;
+    status.textContent = "Signing out…";
+    try {
+      const response = await store.fetch("/api/auth/logout", {
+        method: "POST",
+        signal: AbortSignal.timeout(45000),
+      });
+      if (logoutVersion !== version) {
+        if (expectedAccount && expectedAccount === store.account())
+          window.dispatchEvent(new Event("yap:account-changed"));
+        return;
       }
-    });
+      if (!response.ok && response.status !== 401)
+        throw new Error("logout unavailable");
+      const redirectTo = await providerLogout(response);
+      clearAccount();
+      session("guest");
+      store.signedOut(response.status === 401);
+      // Signing out also ends this browser's provider session; the provider
+      // then returns to the home page.
+      if (redirectTo) location.assign(redirectTo);
+      else guest.querySelector<HTMLAnchorElement>("a")?.focus();
+    } catch {
+      if (logoutVersion === version)
+        status.textContent = "Sign out could not complete. Please try again.";
+    } finally {
+      button.disabled = false;
+    }
+  });
   for (const menu of header.querySelectorAll<HTMLDetailsElement>("details")) {
     menu.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
@@ -441,50 +508,5 @@ if (header) {
     for (const menu of header.querySelectorAll<HTMLDetailsElement>("details"))
       if (event.target instanceof Node && !menu.contains(event.target))
         menu.open = false;
-  });
-
-  const deposit = document.createElement("dialog");
-  deposit.className = "header-deposit-dialog";
-  deposit.setAttribute("aria-labelledby", "deposit-title");
-  const depositClose = document.createElement("button");
-  depositClose.type = "button";
-  depositClose.className = "site-auth-close";
-  depositClose.setAttribute("aria-label", "Close deposit");
-  depositClose.textContent = "×";
-  const depositTitle = document.createElement("h2");
-  depositTitle.id = "deposit-title";
-  depositTitle.textContent = "Add Yap Coins";
-  const depositEyebrow = document.createElement("span");
-  depositEyebrow.className = "eyebrow accent";
-  depositEyebrow.textContent = "YOUR ACCOUNT WALLET";
-  const depositRate = document.createElement("strong");
-  depositRate.className = "deposit-rate";
-  depositRate.textContent = "100 YC = 1 USDC";
-  const depositNotice = document.createElement("p");
-  depositNotice.textContent =
-    "Deposits are not open yet. Crypto purchases will appear here when funding is available.";
-  const depositLink = document.createElement("a");
-  depositLink.className = "header-signup";
-  depositLink.href = "/account#account-wallet";
-  depositLink.textContent = "View your balance →";
-  deposit.append(
-    depositClose,
-    depositEyebrow,
-    depositTitle,
-    depositRate,
-    depositNotice,
-    depositLink,
-  );
-  document.body.append(deposit);
-  const depositButton = header.querySelector<HTMLButtonElement>(
-    "[data-deposit-open]",
-  )!;
-  depositButton.addEventListener("click", () => {
-    if (header.dataset.session === "member") deposit.showModal();
-  });
-  depositClose.addEventListener("click", () => deposit.close());
-  deposit.addEventListener("close", () => depositButton.focus());
-  window.addEventListener("yap:account-changed", () => {
-    if (deposit.open) deposit.close();
   });
 }

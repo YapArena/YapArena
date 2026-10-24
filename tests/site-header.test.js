@@ -39,16 +39,27 @@ it("uses one navigation and session-aware account header across normal pages", (
       /href="\/live">Live<\/a><a href="\/debates">Explore<\/a><a href="\/match">Create<\/a>/,
     );
     assert.match(html, /data-header-member hidden/);
+    // One Sign in button opens the account page, which offers both methods.
     assert.match(
       html,
-      /href="\/api\/auth\/login\?connection=google" data-sign-in="google">Continue with Google</,
+      /<a class="header-signup" href="\/account" data-header-sign-in>Sign in<\/a>/,
+    );
+    const header = html.match(
+      /<header class="site-header"[\s\S]*?<\/header>/,
+    )[0];
+    assert.doesNotMatch(
+      header,
+      /data-sign-in="(?:google|email)">Continue with/,
     );
     assert.match(
       html,
-      /href="\/api\/auth\/login\?connection=email" data-sign-in="email">Continue with email</,
+      /<noscript><div class="header-auth-actions"><a class="header-login" href="\/api\/auth\/login\?connection=google">Continue with Google</,
     );
     assert.doesNotMatch(html, /data-auth-(?:open|script|style)/);
-    assert.match(html, /data-deposit-open/);
+    // Deposits are not open, so the header offers no deposit action.
+    assert.doesNotMatch(html, /data-deposit-open|>Deposit</);
+    assert.match(html, /data-header-identity/);
+    assert.match(html, /data-header-logout>Sign out /);
     assert.match(html, /site-header\.js/);
     assert.doesNotMatch(html, /class="ya-top"/);
   }

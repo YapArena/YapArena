@@ -236,7 +236,7 @@ describe("chat transport", () => {
     );
     await assert.rejects(
       api("/test"),
-      (error) => error.status === 401 && /Log in/.test(error.message),
+      (error) => error.status === 401 && /Sign in/.test(error.message),
     );
     mockFetch.mock.mockImplementation(
       async () =>

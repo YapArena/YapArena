@@ -5,7 +5,11 @@ import type {
   Page,
   Request,
 } from "playwright-core";
-import { signInForTest, testIdentityEntry } from "./browser-sign-in.ts";
+import {
+  createProfileForTest,
+  signInForTest,
+  testIdentityEntry,
+} from "./browser-sign-in.ts";
 import type { ChildProcess } from "node:child_process";
 import type { AddressInfo } from "node:net";
 import type { Run, Round, Fraction } from "./browser-fixture-types.ts";
@@ -177,6 +181,11 @@ try {
       base,
       `a4-browser-${tag}-${label}@example.test`,
     );
+    // A private profile keeps the handle pop-up away from this journey.
+    await createProfileForTest(page.context(), base, {
+      handle: `a4-${tag}-${label}`,
+      displayName: `A4 ${label}`,
+    });
     await page.goto(`${base}/account`);
     await page.locator("#signed-in").waitFor({ state: "visible" });
   }

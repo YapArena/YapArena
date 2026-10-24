@@ -6,7 +6,7 @@ import { chromium, type Browser, type Page } from "playwright-core";
 import axe from "axe-core";
 import pg from "pg";
 import { verifyChatClient } from "./verify-chat-client.ts";
-import { signInForTest } from "./browser-sign-in.ts";
+import { createProfileForTest, signInForTest } from "./browser-sign-in.ts";
 
 const base = process.env.BROWSER_BASE_URL ?? "http://localhost:53000";
 const chromePath =
@@ -72,6 +72,11 @@ async function register(name: string, publishProfile = false) {
   const email = `community-browser-${name}-${suffix}@example.test`;
   const context = await browser.newContext({ bypassCSP: true });
   const { user } = await signInForTest(context, base, email);
+  const handle = `browser-${name}-${suffix}`;
+  // Accounts that only moderate get a private profile, so the handle pop-up
+  // stays away; chat still refuses them until a profile is public.
+  if (!publishProfile)
+    await createProfileForTest(context, base, { handle, displayName: name });
   const page = await context.newPage();
   await page.goto(`${base}/account`);
   await page.locator("#signed-in").waitFor({ state: "visible" });
@@ -79,23 +84,20 @@ async function register(name: string, publishProfile = false) {
   assert.ok(userId, `registered ${name}`);
   accounts.push(userId);
   if (publishProfile) {
-    // The signed-in shell becomes visible before the profile read finishes.
-    // Wait for hydration so a delayed GET cannot clear fields during this trial.
+    // A new account picks its username and handle in the pop-up before
+    // anything else, and every profile is public.
+    const setup = page.locator("dialog.profile-setup");
+    await setup.waitFor({ state: "visible" });
+    await setup.getByLabel("Username", { exact: true }).fill(name);
+    await setup.getByLabel("Handle", { exact: true }).fill(handle);
+    await setup.getByText(`@${handle} is free.`).waitFor();
+    await setup.getByRole("button", { name: "Continue" }).click();
+    await setup.getByRole("button", { name: "Claim my handle" }).click();
+    await setup.getByRole("button", { name: "Start exploring" }).click();
+    await setup.waitFor({ state: "detached" });
     await page
-      .locator("#profile-state")
-      .getByText("Create a private draft.", { exact: false })
-      .waitFor();
-    await page
-      .locator("#profile-form input[name=handle]")
-      .fill(`browser-${name}-${suffix}`);
-    await page.locator("#profile-form input[name=displayName]").fill(name);
-    await page
-      .locator("#profile-form select[name=publicationState]")
-      .selectOption("published");
-    await page.locator("#profile-form button").click();
-    await page
-      .locator("#profile-state")
-      .getByText("published", { exact: false })
+      .locator("#account-handle")
+      .getByText(`@${handle}`, { exact: true })
       .waitFor();
   }
   return { context, page, userId };

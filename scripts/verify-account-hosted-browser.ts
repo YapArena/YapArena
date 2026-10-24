@@ -46,7 +46,7 @@ const assets = [
   "site-header.js",
   "site.js",
   "account.js",
-  "account-session-list.js",
+  "profile-setup.js",
   "account-coins.js",
   "account-auth.css",
   "site-header.css",
@@ -308,16 +308,13 @@ try {
     const guest = page.locator("[data-header-guest]");
     await guest.waitFor({ state: "visible" });
     assert.equal(await page.locator("[data-header-member]").isVisible(), false);
-    for (const [label, connection] of [
-      ["Continue with Google", "google"],
-      ["Continue with email", "email"],
-    ] as const)
-      assert.equal(
-        await guest
-          .getByRole("link", { name: label, exact: true })
-          .getAttribute("href"),
-        `/api/auth/login?connection=${connection}&return=%2Fdebates`,
-      );
+    // One Sign in button opens the account page, which offers both methods.
+    assert.equal(
+      await guest
+        .getByRole("link", { name: "Sign in", exact: true })
+        .getAttribute("href"),
+      "/account?next=%2Fdebates",
+    );
     const headerOverflow = await page.evaluate(
       () => document.documentElement.scrollWidth > innerWidth + 1,
     );
@@ -371,7 +368,7 @@ try {
     );
     await context.close();
     checks.push(
-      `${name}: guest header and account page offer Google and email links with return paths, no island/wallet/legacy sign-in, CSP and layout, and the provider's sign-in page opens (${providerScripts} provider scripts there)`,
+      `${name}: the guest header's Sign in button and the account page's Google and email links keep return paths, no island/wallet/legacy sign-in, CSP and layout, and the provider's sign-in page opens (${providerScripts} provider scripts there)`,
     );
   }
 

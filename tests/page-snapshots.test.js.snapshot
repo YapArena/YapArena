@@ -45,8 +45,7 @@ exports[`renders a debate 1`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -56,12 +55,9 @@ exports[`renders a debate 1`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -69,10 +65,13 @@ exports[`renders a debate 1`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -430,9 +429,6 @@ exports[`renders a debate 1`] = `
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333" target="_blank" rel="noopener">Full controls ↗</a>
 </div>
 </div>
-<p data-arena-signin>
-<a href="/account?next=%2Fdebates%2Fpublic-debate">Log in to participate →</a>
-</p>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
 <div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
 <dl class="arena-info">
@@ -534,8 +530,7 @@ exports[`renders a debate 2`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -545,12 +540,9 @@ exports[`renders a debate 2`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -558,10 +550,13 @@ exports[`renders a debate 2`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -921,9 +916,6 @@ exports[`renders a debate 2`] = `
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333" target="_blank" rel="noopener">Full controls ↗</a>
 </div>
 </div>
-<p data-arena-signin>
-<a href="/account?next=%2Fdebates%2Fpublic-debate">Log in to participate →</a>
-</p>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
 <div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
 <dl class="arena-info">
@@ -1025,8 +1017,7 @@ exports[`renders a debate 3`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -1036,12 +1027,9 @@ exports[`renders a debate 3`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -1049,10 +1037,13 @@ exports[`renders a debate 3`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -1410,9 +1401,6 @@ exports[`renders a debate 3`] = `
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333" target="_blank" rel="noopener">Full controls ↗</a>
 </div>
 </div>
-<p data-arena-signin>
-<a href="/account?next=%2Fdebates%2Fpublic-debate">Log in to participate →</a>
-</p>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
 <div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
 <dl class="arena-info">
@@ -1514,8 +1502,7 @@ exports[`renders a debate 4`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -1525,12 +1512,9 @@ exports[`renders a debate 4`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -1538,10 +1522,13 @@ exports[`renders a debate 4`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -1899,9 +1886,6 @@ exports[`renders a debate 4`] = `
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333" target="_blank" rel="noopener">Full controls ↗</a>
 </div>
 </div>
-<p data-arena-signin>
-<a href="/account?next=%2Fdebates%2Fpublic-debate">Log in to participate →</a>
-</p>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
 <div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
 <dl class="arena-info">
@@ -2003,8 +1987,7 @@ exports[`renders a debate 5`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -2014,12 +1997,9 @@ exports[`renders a debate 5`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -2027,10 +2007,13 @@ exports[`renders a debate 5`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -2388,9 +2371,6 @@ exports[`renders a debate 5`] = `
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333" target="_blank" rel="noopener">Full controls ↗</a>
 </div>
 </div>
-<p data-arena-signin>
-<a href="/account?next=%2Fdebates%2Fpublic-debate">Log in to participate →</a>
-</p>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
 <div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
 <dl class="arena-info">
@@ -2492,8 +2472,7 @@ exports[`renders a debate 6`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -2503,12 +2482,9 @@ exports[`renders a debate 6`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -2516,10 +2492,13 @@ exports[`renders a debate 6`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -2877,9 +2856,6 @@ exports[`renders a debate 6`] = `
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333" target="_blank" rel="noopener">Full controls ↗</a>
 </div>
 </div>
-<p data-arena-signin>
-<a href="/account?next=%2Fdebates%2Fpublic-debate">Log in to participate →</a>
-</p>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
 <div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
 <dl class="arena-info">
@@ -2981,8 +2957,7 @@ exports[`renders a debate 7`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -2992,12 +2967,9 @@ exports[`renders a debate 7`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -3005,10 +2977,13 @@ exports[`renders a debate 7`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -3367,9 +3342,6 @@ exports[`renders a debate 7`] = `
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333" target="_blank" rel="noopener">Full controls ↗</a>
 </div>
 </div>
-<p data-arena-signin>
-<a href="/account?next=%2Fdebates%2Fpublic-debate">Log in to participate →</a>
-</p>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
 <div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
 <dl class="arena-info">
@@ -3471,8 +3443,7 @@ exports[`renders a debate 8`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -3482,12 +3453,9 @@ exports[`renders a debate 8`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -3495,10 +3463,13 @@ exports[`renders a debate 8`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -3862,7 +3833,7 @@ exports[`renders a debate 8`] = `
 </div>
 </div>
 <p data-arena-signin>
-<a href="/account?next=%2Fdebates%2Fhostile-debate">Log in to participate →</a>
+<a href="/account?next=%2Fdebates%2Fhostile-debate">Sign in to participate →</a>
 </p>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
 <div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
@@ -3977,8 +3948,7 @@ exports[`renders a debate 9`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -3988,12 +3958,9 @@ exports[`renders a debate 9`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -4001,10 +3968,13 @@ exports[`renders a debate 9`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -4363,7 +4333,7 @@ exports[`renders a debate 9`] = `
 </div>
 </div>
 <p data-arena-signin>
-<a href="/account?next=%2Fdebates%2Fpublic-debate">Log in to participate →</a>
+<a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to participate →</a>
 </p>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
 <div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
@@ -4477,8 +4447,7 @@ exports[`renders a profile 1`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -4488,12 +4457,9 @@ exports[`renders a profile 1`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -4501,10 +4467,13 @@ exports[`renders a profile 1`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -4596,8 +4565,7 @@ exports[`renders a profile 2`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -4607,12 +4575,9 @@ exports[`renders a profile 2`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -4620,10 +4585,13 @@ exports[`renders a profile 2`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -4740,8 +4708,7 @@ exports[`renders a profile 3`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -4751,12 +4718,9 @@ exports[`renders a profile 3`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -4764,10 +4728,13 @@ exports[`renders a profile 3`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -4859,8 +4826,7 @@ exports[`renders a topic 1`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -4870,12 +4836,9 @@ exports[`renders a topic 1`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -4883,10 +4846,13 @@ exports[`renders a topic 1`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -4988,8 +4954,7 @@ exports[`renders a topic 2`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -4999,12 +4964,9 @@ exports[`renders a topic 2`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -5012,10 +4974,13 @@ exports[`renders a topic 2`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -5156,8 +5121,7 @@ exports[`renders community moderation and the broadcast overlay 1`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -5167,12 +5131,9 @@ exports[`renders community moderation and the broadcast overlay 1`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -5180,10 +5141,13 @@ exports[`renders community moderation and the broadcast overlay 1`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -5253,8 +5217,7 @@ exports[`renders community moderation and the broadcast overlay 2`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -5264,12 +5227,9 @@ exports[`renders community moderation and the broadcast overlay 2`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -5277,10 +5237,13 @@ exports[`renders community moderation and the broadcast overlay 2`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -5366,8 +5329,7 @@ exports[`renders community moderation and the broadcast overlay 3`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -5377,12 +5339,9 @@ exports[`renders community moderation and the broadcast overlay 3`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -5390,10 +5349,13 @@ exports[`renders community moderation and the broadcast overlay 3`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -5463,8 +5425,7 @@ exports[`renders community moderation and the broadcast overlay 4`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -5474,12 +5435,9 @@ exports[`renders community moderation and the broadcast overlay 4`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -5487,10 +5445,13 @@ exports[`renders community moderation and the broadcast overlay 4`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -5630,8 +5591,7 @@ exports[`renders the 404 and 500 pages 1`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -5641,12 +5601,9 @@ exports[`renders the 404 and 500 pages 1`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -5654,10 +5611,13 @@ exports[`renders the 404 and 500 pages 1`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -5736,8 +5696,7 @@ exports[`renders the 404 and 500 pages 2`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -5747,12 +5706,9 @@ exports[`renders the 404 and 500 pages 2`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -5760,10 +5716,13 @@ exports[`renders the 404 and 500 pages 2`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -5842,8 +5801,7 @@ exports[`renders the about and account pages 1`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -5853,12 +5811,9 @@ exports[`renders the about and account pages 1`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -5866,10 +5821,13 @@ exports[`renders the about and account pages 1`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -5889,7 +5847,7 @@ exports[`renders the about and account pages 1`] = `
 </section>
 <section class="container about-copy">
 <h2>What you can explore now</h2>
-<p>This public preview shows published topics, debate listings, and participant profiles. Log in to create a profile and follow people or topics. Listings marked Demo are fictional examples used to develop and test the product.</p>
+<p>This public preview shows published topics, debate listings, and participant profiles. Sign in to pick your handle and follow people or topics. Listings marked Demo are fictional examples used to develop and test the product.</p>
 <p>Live video and replay are available in a configured local prototype. A listing’s status does not prove that video is available or that a result has been determined. Yap Coins and labeled bot rounds are available when enabled. Real funds remain unavailable.</p>
 <h2 id="measurement">Optional usage measurement</h2>
 <p>We ask before recording discovery pages, watch time, replay starts, matching, follows, reports, or return visits. If you allow it, we use a random browser cookie, not your wallet address, and may associate events with your signed-in account to separate founder-affiliated activity. We do not store search text, chat text, IP addresses, or wallet addresses in product events. Use Measurement settings in the footer to turn it off and delete your measurements. Raw events and watch sessions are retained for up to 90 days; an unused consent expires after 180 days. Debate completion is counted from public event state without a browser identifier.</p>
@@ -5955,8 +5913,7 @@ exports[`renders the about and account pages 2`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -5966,12 +5923,9 @@ exports[`renders the about and account pages 2`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -5979,10 +5933,13 @@ exports[`renders the about and account pages 2`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -6008,207 +5965,145 @@ exports[`renders the about and account pages 2`] = `
 <circle cx="220" cy="30" r="3"/>
 </svg>
 <span>YOUR NEXT PERSPECTIVE STARTS HERE</span>
-</div>\\n          <div class="auth-benefits">
-<div>
-<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-<path d="m5 12 4 4L19 6"/>
-</svg>
-<span>One email. No password.</span>
-</div>
-<div>
-<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-<circle cx="12" cy="8" r="3.5"/>
-<path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
-</svg>
-<span>A profile, whenever you’re ready.</span>
-</div>
-<div>
-<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-<path d="m12 2 2.7 7.3L22 12l-7.3 2.7L12 22l-2.7-7.3L2 12l7.3-2.7L12 2Z"/>
-</svg>
-<span>Always free to explore and watch.</span>
-</div>
 </div>\\n        </aside>\\n        <div class="auth-panel">\\n          <div class="auth-card account-sign-in" id="account-sign-in">
-<span class="eyebrow accent">LOG IN OR SIGN UP</span>
+<span class="eyebrow accent">SIGN IN OR CREATE AN ACCOUNT</span>
 <h2>Join the arena</h2>
-<p class="auth-description">Continue with Google or a one-time code sent to your email. There is no password to remember.</p>
 <div class="auth-sign-in-actions">
 <a class="button" href="/api/auth/login?connection=google&amp;return=%2Faccount" data-sign-in="google">Continue with Google</a>
 <a class="button-secondary" href="/api/auth/login?connection=email&amp;return=%2Faccount" data-sign-in="email">Continue with email</a>
 </div>
-<p class="form-note">Signing in never approves a financial transaction.</p>
-</div>\\n        </div>\\n      </div>\\n    </div>\\n    <div id="signed-in" hidden>\\n      <div class="account-heading">
-<div class="account-identity">
-<span class="account-identity-icon">
-<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+</div>\\n        </div>\\n      </div>\\n    </div>\\n    <div id="signed-in" hidden>\\n      <header class="settings-hero">\\n        <span class="settings-avatar" id="account-avatar" aria-hidden="true">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
 <path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
 </svg>
+</span>\\n        <div class="settings-identity">
+<span class="eyebrow accent">SETTINGS</span>
+<h1 id="account-display-name">Your account</h1>
+<p>
+<span id="account-handle">
 </span>
-<div>
-<span class="eyebrow accent">YOUR CORNER OF THE ARENA</span>
-<h1>Your account.</h1>
-<h2 id="account-name">Your account</h2>
-</div>
-</div>
-<button class="button-secondary" id="sign-out" type="button">Sign out →</button>
-</div>\\n      <nav class="account-section-nav" aria-label="Account sections">
-<a href="#profile-settings">
-<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-<circle cx="12" cy="8" r="3.5"/>
-<path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
-</svg>Profile</a>
-<a href="#account-security">
-<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-<path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/>
-<path d="m8.5 12 2.5 2.5 4.5-5"/>
-</svg>Security</a>
-<a href="#account-wallet">
-<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-<path d="M20 8V5H6a3 3 0 0 1 0-6h12v4M3 3v16a2 2 0 0 0 2 2h15V8H6a3 3 0 0 1-3-3" transform="translate(0 2) scale(.9)"/>
-<path d="M21 12h-6v5h6M17 14.5h.01"/>
-</svg>Yap Coins</a>
-<a href="#account-activity">
-<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-<path d="M3 12h4l3-8 4 16 3-8h4"/>
-</svg>Activity</a>
-</nav>\\n      <div class="account-columns">\\n        <div class="account-main-stack">\\n          <section id="profile-settings" class="information-card account-card">
-<div class="account-card-heading">
-<span class="account-section-icon">
-<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<span id="account-name">
+</span>
+</p>
+</div>\\n        <div class="settings-hero-actions">
+<a class="button-secondary" id="view-profile" href="/account#profile" hidden>
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M14 5h5v5M19 5l-8 8M17 14v5H5V7h5"/>
+</svg>View profile</a>
+<button class="button-secondary" id="sign-out" type="button">Sign out</button>
+</div>\\n      </header>\\n      <div class="settings-layout">\\n        <nav class="settings-nav" aria-label="Settings">\\n          <div class="settings-tabs" role="tablist" aria-orientation="vertical">
+<a class="settings-tab" role="tab" id="tab-profile" href="#profile" aria-controls="panel-profile" aria-selected="true" tabindex="0">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
 <path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
 </svg>
-</span>
-<div>
-<span class="eyebrow">HOW YOU SHOW UP</span>
-<h2>Your profile</h2>
-</div>
-<span class="account-optional">Optional</span>
-</div>
-<p id="profile-state" class="account-section-note">
-</p>\\n            <form id="profile-form" class="stack-form account-profile-form">
-<div class="account-form-row">
-<label>Handle<input name="handle" placeholder="your-handle" maxlength="40" minlength="3" pattern="[a-z0-9][a-z0-9-]{2,39}" required>
-</label>
-<label>Display name<input name="displayName" placeholder="What should we call you?" maxlength="80" required>
-</label>
-</div>
-<label>Bio<textarea name="bio" placeholder="A little about you and the ideas you care about." maxlength="500" rows="3">
-</textarea>
-</label>
-<label>Visibility<select name="publicationState">
-<option value="draft">Private draft</option>
-<option value="published">Public</option>
-</select>
-</label>
-<div class="account-form-footer">
-<p class="form-note">Your handle is permanent. You decide when to publish.</p>
-<button class="button" type="submit">Save profile ↗</button>
-</div>
-</form>\\n          </section>\\n          <section id="account-security" class="information-card account-card">
-<div class="account-card-heading">
-<span class="account-section-icon">
-<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-<path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/>
-<path d="m8.5 12 2.5 2.5 4.5-5"/>
-</svg>
-</span>
-<div>
-<span class="eyebrow">ACCESS &amp; RECOVERY</span>
-<h2>Account security</h2>
-</div>
-</div>
-<div class="account-auth-methods">
-<h3>Sign-in methods</h3>
-<ul id="sign-in-methods" class="account-list">
-</ul>
-<p class="form-note">Google and email-code sign-in with the same address lead to this account after you confirm the email code.</p>
-</div>
-<div class="account-session-controls">
-<h3>Active sessions</h3>
-<p>Signing out only ends the session on that device. Sign out any session you don’t recognize.</p>
-</div>
-</section>\\n        </div>\\n        <div class="account-side">\\n          <section id="account-wallet" class="information-card account-card account-coin-card">
-<div class="account-card-heading">
-<span class="account-coin-symbol" aria-hidden="true">Y</span>
-<div>
-<span class="eyebrow">PLATFORM CURRENCY</span>
-<h2>Your Yap Coins</h2>
-</div>
-<span class="account-preview-label">Preview</span>
-</div>
-<section id="account-wallet-progress" class="wallet-money-summary" aria-label="Withdrawal balance and grant progress" hidden>
-</section>
-<dl class="account-balances">
-<div>
-<dt>Available</dt>
-<dd data-funds="available">—</dd>
-</div>
-<div>
-<dt>Reserved</dt>
-<dd data-funds="reserved">—</dd>
-</div>
-<div>
-<dt>Pending</dt>
-<dd data-funds="pending">—</dd>
-</div>
-<div>
-<dt>Promotional</dt>
-<dd data-funds="promotional">—</dd>
-</div>
-</dl>
-<div class="account-coin-note">
-<span>100 YC = 1 USDC</span>
-<p>Purchases and withdrawals are not yet available. Grant principal stays spend-only.</p>
-</div>
-</section>\\n          <section class="information-card account-card">
-<div class="account-card-heading">
-<span class="account-section-icon">
-<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-<path d="m12 2 2.7 7.3L22 12l-7.3 2.7L12 22l-2.7-7.3L2 12l7.3-2.7L12 2Z"/>
-</svg>
-</span>
-<div>
-<span class="eyebrow">YOUR PERSPECTIVE</span>
-<h2>Following</h2>
-</div>
-</div>
-<ul id="follow-list" class="account-list">
-</ul>
-<p class="form-note">Follow people and topics from their public pages.</p>
-</section>\\n          <section class="information-card account-card">
-<div class="account-card-heading">
-<div>
-<span class="eyebrow">STAY IN THE LOOP</span>
-<h2>Notifications</h2>
-</div>
-</div>
-<ul id="account-notifications" class="account-list">
-</ul>
-</section>\\n          <section id="account-activity" class="information-card account-card">
-<div class="account-card-heading">
-<span class="account-section-icon">
-<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-<path d="M3 12h4l3-8 4 16 3-8h4"/>
-</svg>
-</span>
-<div>
-<span class="eyebrow">AROUND THE ARENA</span>
-<h2>Recent activity</h2>
-</div>
-</div>
-<ul id="activity-list" class="account-list">
-</ul>
-<a class="account-text-link" href="/account/moderation">My reports and appeals <svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-<path d="M5 12h14m-6-6 6 6-6 6"/>
-</svg>
+<span>Profile</span>
 </a>
-</section>\\n        </div>\\n      </div>\\n    </div>\\n  </section>\\n  <script defer src="/assets/account.js?v=0123456789ab">
-</script>
-<script type="module" src="/assets/account-session-list.js?v=0123456789ab">
-</script>
-<script type="module" src="/assets/account-coins.js?v=0123456789ab">
+<a class="settings-tab" role="tab" id="tab-security" href="#security" aria-controls="panel-security" aria-selected="false" tabindex="-1">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/>
+<path d="m8.5 12 2.5 2.5 4.5-5"/>
+</svg>
+<span>Sign-in &amp; security</span>
+</a>
+<a class="settings-tab" role="tab" id="tab-notifications" href="#notifications" aria-controls="panel-notifications" aria-selected="false" tabindex="-1">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15L6 16Z"/>
+<path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>
+</svg>
+<span>Notifications</span>
+<span class="settings-badge" id="notification-count" hidden>
+</span>
+</a>
+<a class="settings-tab" role="tab" id="tab-privacy" href="#privacy" aria-controls="panel-privacy" aria-selected="false" tabindex="-1">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<rect x="5" y="10.5" width="14" height="10" rx="2.5"/>
+<path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/>
+</svg>
+<span>Privacy &amp; data</span>
+</a>
+</div>\\n          <a class="settings-tab settings-tab-link" href="/coins">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<circle cx="12" cy="12" r="8.5"/>
+<path d="M14.5 9.2c-.6-.8-1.5-1.2-2.6-1.2-1.6 0-2.6.8-2.6 2s1 1.7 2.7 2c1.7.3 2.7.9 2.7 2.1 0 1.3-1.1 2.1-2.7 2.1-1.2 0-2.2-.5-2.8-1.4M12 6.5V8m0 8v1.5"/>
+</svg>
+<span>Yap Coins</span>
+<span class="settings-tab-arrow" aria-hidden="true">↗</span>
+</a>\\n        </nav>\\n        <div class="settings-panels">\\n        <section class="settings-panel" role="tabpanel" id="panel-profile" aria-labelledby="tab-profile" tabindex="-1">\\n          <div class="settings-card">\\n            <div class="settings-card-head">
+<div>
+<h2>Public profile</h2>
+<p>How you show up in debates, chat and search.</p>
+</div>
+</div>\\n            <div class="settings-banner" id="profile-state-box" hidden>
+<p id="profile-state" role="status">
+</p>
+<button class="button-secondary" type="button" id="profile-publish" hidden>Make it public</button>
+</div>\\n            <form id="profile-form" class="settings-form" novalidate>\\n              <div class="settings-field">\\n                <div class="settings-label-row">
+<label for="profile-display-name">Username</label>
+<span class="settings-count" data-count-for="profile-display-name" aria-hidden="true">0/80</span>
+</div>\\n                <input id="profile-display-name" name="displayName" maxlength="80" autocomplete="name" required aria-describedby="profile-display-name-error">\\n                <p class="settings-error" id="profile-display-name-error" data-error-for="displayName" hidden>
+</p>\\n              </div>\\n              <div class="settings-field">\\n                <div class="settings-label-row">
+<label for="profile-handle">Handle</label>
+<span class="settings-lock">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<rect x="5" y="10.5" width="14" height="10" rx="2.5"/>
+<path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/>
+</svg>Permanent</span>
+</div>\\n                <div class="settings-handle">
+<span aria-hidden="true">@</span>
+<input id="profile-handle" name="handle" readonly aria-describedby="profile-handle-help">
+</div>\\n                <p class="settings-help" id="profile-handle-help">Handles never change, so links to you never break. <a id="profile-url" href="/account#profile">
+</a>
+</p>\\n              </div>\\n              <div class="settings-field">\\n                <div class="settings-label-row">
+<label for="profile-bio">Bio</label>
+<span class="settings-count" data-count-for="profile-bio" aria-hidden="true">0/500</span>
+</div>\\n                <textarea id="profile-bio" name="bio" maxlength="500" rows="4" placeholder="A little about you and the ideas you care about." aria-describedby="profile-bio-error">
+</textarea>\\n                <p class="settings-error" id="profile-bio-error" data-error-for="bio" hidden>
+</p>\\n              </div>\\n              <div class="settings-save">
+<p id="profile-save-status" role="status" aria-live="polite">
+</p>
+<button class="button" type="submit" disabled>Save changes</button>
+</div>\\n            </form>\\n          </div>\\n          <div class="settings-card">\\n            <div class="settings-card-head">
+<div>
+<h2>Following</h2>
+<p>People and topics you follow. Follow more from their public pages.</p>
+</div>
+</div>\\n            <ul id="follow-list" class="settings-list">
+</ul>\\n          </div>\\n        </section>\\n        <section class="settings-panel" role="tabpanel" id="panel-security" aria-labelledby="tab-security" tabindex="-1" hidden>\\n          <div class="settings-card">\\n            <div class="settings-card-head">
+<div>
+<h2>Sign-in methods</h2>
+<p>The ways you can sign in to this account.</p>
+</div>
+</div>\\n            <ul id="sign-in-methods" class="settings-methods">
+</ul>\\n            <p class="settings-help">Google and an email code for the same address both open this account. Signing out ends your session on this device only.</p>\\n          </div>\\n          <div class="settings-card">\\n            <div class="settings-card-head">
+<div>
+<h2>Recent account activity</h2>
+<p>Sign-ins and changes from the last 90 days.</p>
+</div>
+</div>\\n            <ul id="activity-list" class="settings-list settings-timeline">
+</ul>\\n            <a class="settings-link" href="/account/moderation">My reports and appeals<span aria-hidden="true">→</span>
+</a>\\n          </div>\\n        </section>\\n        <section class="settings-panel" role="tabpanel" id="panel-notifications" aria-labelledby="tab-notifications" tabindex="-1" hidden>\\n          <div class="settings-card">\\n            <div class="settings-card-head">
+<div>
+<h2>Notifications</h2>
+<p>Updates about your debates, sign-ins and account.</p>
+</div>
+</div>\\n            <ul id="account-notifications" class="settings-list settings-notifications">
+</ul>\\n          </div>\\n        </section>\\n        <section class="settings-panel" role="tabpanel" id="panel-privacy" aria-labelledby="tab-privacy" tabindex="-1" hidden>\\n          <div class="settings-card settings-row-card">\\n            <span class="settings-card-icon">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M4 19h16M7 16v-4m5 4V8m5 8v-6"/>
+</svg>
+</span>\\n            <div>
+<h2>Usage measurement</h2>
+<p>We only count page views and watch time if you allow it, and you can turn it off and delete that data anytime.</p>
+</div>\\n            <button class="button-secondary" type="button" data-open-measurement>Measurement settings</button>\\n          </div>\\n          <div class="settings-card settings-row-card">\\n            <span class="settings-card-icon">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/>
+</svg>
+</span>\\n            <div>
+<h2>Download your data</h2>
+<p>A JSON file with your profile, sign-in methods, follows, notifications and account activity.</p>
+</div>\\n            <a class="button-secondary" href="/api/me/export" download data-export>Download</a>\\n          </div>\\n        </section>\\n        </div>\\n      </div>\\n    </div>\\n  </section>\\n  <script defer src="/assets/account.js?v=0123456789ab">
 </script>
 </main>
 <footer class="site-footer">
@@ -6231,7 +6126,7 @@ exports[`renders the coins and match pages 1`] = `
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
 <title>Yap Coins · YAP Arena</title>
-<meta name="description" content="A4 play-money rounds and clearly labeled bot experiments.">
+<meta name="description" content="Your Yap Coins balance, plus play-money Bots mode rounds.">
 <link rel="canonical" href="https://arena.example/coins">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
@@ -6270,8 +6165,7 @@ exports[`renders the coins and match pages 1`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -6281,12 +6175,9 @@ exports[`renders the coins and match pages 1`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -6294,10 +6185,13 @@ exports[`renders the coins and match pages 1`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -6308,18 +6202,59 @@ exports[`renders the coins and match pages 1`] = `
 </noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
 </p>\\n    </div>\\n  </header>
 <main id="main">
-<section class="container page-intro a4-intro">
-<span class="eyebrow accent">A4 ADJUSTED FTM · PLAY MONEY</span>
-<h1>Your position.<br>
-<em>Your limit.</em>
+<link rel="stylesheet" href="/assets/account-auth.css?v=0123456789ab">
+<section class="container coin-wallet-shell">
+<div class="coin-wallet-intro">
+<span class="eyebrow accent">YOUR WALLET</span>
+<h1>Yap <em>Coins.</em>
 </h1>
+<p>The coins you use in debates. Buying and withdrawing aren’t open yet.</p>
+</div>
+<section id="account-wallet" class="coin-wallet" aria-labelledby="coin-wallet-title">
+<div class="coin-wallet-head">
+<span class="coin-wallet-symbol" aria-hidden="true">Y</span>
+<h2 id="coin-wallet-title">Your balance</h2>
+<span class="coin-wallet-rate">100 YC = 1 USDC</span>
+</div>
+<p data-coin-wallet-status role="status" aria-live="polite">Checking your balance…</p>
+<div class="coin-wallet-signed-out" data-coin-wallet-signed-out hidden>
+<p>Sign in to see your balance.</p>
+<a class="button" href="/account?next=%2Fcoins">Sign in</a>
+</div>
+<section id="account-wallet-progress" class="wallet-money-summary" aria-label="Withdrawal balance and grant progress" hidden>
+</section>
+<dl class="account-balances" data-coin-wallet-balances hidden>
+<div>
+<dt>Available</dt>
+<dd data-funds="available">—</dd>
+</div>
+<div>
+<dt>Reserved</dt>
+<dd data-funds="reserved">—</dd>
+</div>
+<div>
+<dt>Pending</dt>
+<dd data-funds="pending">—</dd>
+</div>
+<div>
+<dt>Promotional</dt>
+<dd data-funds="promotional">—</dd>
+</div>
+</dl>
+</section>
+</section>
+<section class="container page-intro a4-intro">
+<span class="eyebrow accent">BOTS MODE · PLAY MONEY</span>
+<h2>Your position.<br>
+<em>Your limit.</em>
+</h2>
 <p>Endorse an idea and choose a binding purchase ceiling. A shared offer is drawn after commitment. Settlement follows the unweighted YES endorsement share, including orders that never execute.</p>
-<p>Yap Coins are nonredeemable play money. No purchases, cash-out or future conversion.</p>
+<p>Bots mode uses separate play coins with no cash value. They never convert to Yap Coins.</p>
 </section>
 <section class="container section compact" data-a4>
 <p data-a4-notice class="notice" role="status" aria-live="polite">Checking your account…</p>
 <div data-a4-login hidden>
-<a class="button" href="/account?next=%2Fcoins">Log in to use Yap Coins →</a>
+<a class="button" href="/account?next=%2Fcoins">Sign in to use Bots mode →</a>
 </div>
 <div data-a4-content hidden>
 <div class="a4-grid">
@@ -6389,7 +6324,7 @@ exports[`renders the coins and match pages 1`] = `
 <button type="button" data-a4-list>Refresh runs</button>
 </section>
 <section class="information-card">
-<span class="eyebrow">YOUR YAP COINS</span>
+<span class="eyebrow">YOUR PLAY COINS</span>
 <h2 data-a4-balance>Balance</h2>
 <p data-a4-reserved>
 </p>
@@ -6464,6 +6399,8 @@ exports[`renders the coins and match pages 1`] = `
 </dialog>
 <script type="module" src="/assets/a4.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/account-coins.js?v=0123456789ab">
+</script>
 </main>
 <footer class="site-footer">
 <div class="container footer-inner">
@@ -6524,8 +6461,7 @@ exports[`renders the coins and match pages 2`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -6535,12 +6471,9 @@ exports[`renders the coins and match pages 2`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -6548,10 +6481,13 @@ exports[`renders the coins and match pages 2`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -6572,8 +6508,8 @@ exports[`renders the coins and match pages 2`] = `
 <section class="container section compact match-page">
 <p id="match-notice" class="notice" role="status" aria-live="polite">Checking your account…</p>
 <div id="match-signed-out" hidden class="information-card">
-<p>Log in and publish a profile before opening or joining a debate.</p>
-<a class="button" href="/account?next=%2Fmatch">Log in ↗</a>
+<p>Sign in with a public profile to open or join a debate.</p>
+<a class="button" href="/account?next=%2Fmatch">Sign in ↗</a>
 </div>
 <div id="match-signed-in" hidden>
 <div class="match-grid">
@@ -6714,8 +6650,7 @@ exports[`renders the debate list 1`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -6725,12 +6660,9 @@ exports[`renders the debate list 1`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -6738,10 +6670,13 @@ exports[`renders the debate list 1`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -6843,8 +6778,7 @@ exports[`renders the debate list 2`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -6854,12 +6788,9 @@ exports[`renders the debate list 2`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -6867,10 +6798,13 @@ exports[`renders the debate list 2`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -7015,8 +6949,7 @@ exports[`renders the debate list 3`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -7026,12 +6959,9 @@ exports[`renders the debate list 3`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -7039,10 +6969,13 @@ exports[`renders the debate list 3`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -7167,8 +7100,7 @@ exports[`renders the debate list 4`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -7178,12 +7110,9 @@ exports[`renders the debate list 4`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -7191,10 +7120,13 @@ exports[`renders the debate list 4`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -7317,8 +7249,7 @@ exports[`renders the home page 1`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -7328,12 +7259,9 @@ exports[`renders the home page 1`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -7341,10 +7269,13 @@ exports[`renders the home page 1`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -7576,8 +7507,7 @@ exports[`renders the home page 2`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -7587,12 +7517,9 @@ exports[`renders the home page 2`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -7600,10 +7527,13 @@ exports[`renders the home page 2`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -7835,8 +7765,7 @@ exports[`renders the home page 3`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -7846,12 +7775,9 @@ exports[`renders the home page 3`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -7859,10 +7785,13 @@ exports[`renders the home page 3`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -8094,8 +8023,7 @@ exports[`renders the home page 4`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -8105,12 +8033,9 @@ exports[`renders the home page 4`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -8118,10 +8043,13 @@ exports[`renders the home page 4`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -8418,8 +8346,7 @@ exports[`renders the home page 5`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -8429,12 +8356,9 @@ exports[`renders the home page 5`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -8442,10 +8366,13 @@ exports[`renders the home page 5`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -8804,8 +8731,7 @@ exports[`renders the home page 6`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -8815,12 +8741,9 @@ exports[`renders the home page 6`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -8828,10 +8751,13 @@ exports[`renders the home page 6`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -9429,8 +9355,7 @@ exports[`renders the home page 7`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -9440,12 +9365,9 @@ exports[`renders the home page 7`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -9453,10 +9375,13 @@ exports[`renders the home page 7`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -9750,8 +9675,7 @@ exports[`renders the live page 1`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -9761,12 +9685,9 @@ exports[`renders the live page 1`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -9774,10 +9695,13 @@ exports[`renders the live page 1`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -9893,8 +9817,7 @@ exports[`renders the live page 2`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -9904,12 +9827,9 @@ exports[`renders the live page 2`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -9917,10 +9837,13 @@ exports[`renders the live page 2`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -10118,8 +10041,7 @@ exports[`renders the measurement dashboard 1`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -10129,12 +10051,9 @@ exports[`renders the measurement dashboard 1`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -10142,10 +10061,13 @@ exports[`renders the measurement dashboard 1`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -10335,8 +10257,7 @@ exports[`renders the measurement dashboard 2`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -10346,12 +10267,9 @@ exports[`renders the measurement dashboard 2`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -10359,10 +10277,13 @@ exports[`renders the measurement dashboard 2`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -10559,8 +10480,7 @@ exports[`renders the topic list 1`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -10570,12 +10490,9 @@ exports[`renders the topic list 1`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -10583,10 +10500,13 @@ exports[`renders the topic list 1`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -10677,8 +10597,7 @@ exports[`renders the topic list 2`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -10688,12 +10607,9 @@ exports[`renders the topic list 2`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -10701,10 +10617,13 @@ exports[`renders the topic list 2`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>
@@ -10810,8 +10729,7 @@ exports[`renders the topic list 3`] = `
 </form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
 <span class="sr-only">Checking your account…</span>
 </span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-login" href="/api/auth/login?connection=google" data-sign-in="google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email" data-sign-in="email">Continue with email</a>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
 </div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
 <summary aria-label="Yap Coins balance and actions">
 <span class="header-balance-label">Balance</span>
@@ -10821,12 +10739,9 @@ exports[`renders the topic list 3`] = `
 <div class="arena-wallet-popover">
 <strong data-header-balance-heading>Your Yap Coins</strong>
 <span data-header-reserved>Checking balance…</span>
-<a href="/account#account-wallet" data-header-balances-link>Balances &amp; activity →</a>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
 </div>
-</details>\\n          <button class="header-deposit" type="button" data-deposit-open>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>
-</svg>Deposit</button>\\n          <details class="header-user-menu">
+</details>\\n          <details class="header-user-menu">
 <summary class="arena-avatar" data-header-account aria-label="Open account menu">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
 <circle cx="12" cy="8" r="3.5"/>
@@ -10834,10 +10749,13 @@ exports[`renders the topic list 3`] = `
 </svg>
 </summary>
 <div class="header-user-popover">
-<span class="header-menu-caption">YOUR ACCOUNT</span>
-<a href="/account">Account settings</a>
-<a href="/account#account-wallet">Yap Coins &amp; activity</a>
-<button type="button" data-header-logout>Log out <span aria-hidden="true">↗</span>
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
 </button>
 </div>
 </details>\\n        </div>\\n        <noscript>

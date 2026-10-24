@@ -368,6 +368,30 @@ describe("public discovery", () => {
     ])
       assert.doesNotMatch(account.text, retired);
     assert.match(account.text, /id="sign-in-methods"/);
+    // Settings are four tabbed sections. The sessions list and the wallet
+    // left the page: sign out ends this device, coins live on /coins.
+    for (const tab of ["profile", "security", "notifications", "privacy"])
+      assert.match(
+        account.text,
+        new RegExp(`role="tab" id="tab-${tab}" href="#${tab}"`),
+      );
+    assert.match(account.text, /href="\/api\/me\/export" download/);
+    assert.match(account.text, /href="\/coins"/);
+    for (const retired of [
+      /account-session-list\.js/,
+      /account-coins\.js/,
+      /data-funds=/,
+      /Signing in never approves/,
+      /Active sessions/,
+    ])
+      assert.doesNotMatch(account.text, retired);
+    // The handle field accepts nothing: handles are chosen once, in the pop-up.
+    assert.match(account.text, /name="handle" readonly/);
+    const coins = (await request(app).get("/coins")).text;
+    assert.match(coins, /id="account-wallet"/);
+    assert.match(coins, /data-funds="available"/);
+    assert.match(coins, /account-coins\.js/);
+    assert.doesNotMatch(coins, /nonredeemable play money/);
     assert.match(
       (await request(app).get("/topics/public-topic")).text,
       /data-follow-type="topics"/,

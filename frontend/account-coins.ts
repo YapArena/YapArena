@@ -153,7 +153,7 @@ function confirmBySignIn(
     );
   }
   const target = new URL(confirmation.confirmPath, location.origin);
-  target.searchParams.set("return", "/account#coin-sandbox");
+  target.searchParams.set("return", "/coins#coin-sandbox");
   location.assign(target.pathname + target.search);
 }
 const container = document.querySelector<HTMLElement>("#account-wallet");

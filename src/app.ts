@@ -435,7 +435,13 @@ export function createApp({
     app.use(
       "/api/me",
       createRequireAuthentication({ sessions, environment }),
-      createIdentityRouter({ identity, recordProductAction }),
+      createIdentityRouter({
+        identity,
+        recordProductAction,
+        exportSources: auth0
+          ? { signInMethods: (userId) => auth0.accounts.methods(userId) }
+          : {},
+      }),
     );
   }
   if (matching && identity) {

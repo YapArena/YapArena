@@ -590,7 +590,7 @@ function initEvent(root: HTMLElement) {
         updateLocal(record!);
         sendStatus.textContent = `${record.state === "unconfirmed" ? "Delivery unconfirmed. The message may have arrived." : record.state === "cooldown" ? "Posting allowance reached." : "Message rejected."} ${(error as DeliveryError).message} Use the message’s retry or draft recovery actions.`;
         if ((error as DeliveryError).status === 401) {
-          const login = element("a", "Log in to continue");
+          const login = element("a", "Sign in to continue");
           login.href = `/account?next=${encodeURIComponent(location.pathname + location.search + location.hash)}`;
           sendStatus.append(" ", login);
         }
@@ -1031,7 +1031,7 @@ function initEvent(root: HTMLElement) {
       currentLiked = false;
       like.setAttribute("aria-pressed", "false");
       like.textContent = "Like this event";
-      like.title = "Log in to like this event";
+      like.title = "Sign in to like this event";
     }
   }
   window.addEventListener("yap:account-changed", () => void refreshAccount());

@@ -549,8 +549,11 @@ explicit URLs those integration suites are skipped; that is not race-safety evid
 quality job provisions a disposable PostgreSQL service and includes both suites under coverage.
 Wallet sign-in, retained wallets and their browser trial were removed with
 [Decision 0009](decisions/0009-auth0.md); `node scripts/verify-email-auth-browser.ts` (with a
-disposable `A4_TEST_DATABASE_URL`) drives Auth0 sign-in, Google linking and sign-out in Chrome
-against a local OIDC issuer instead.
+disposable `A4_TEST_DATABASE_URL`) drives Auth0 sign-in, the new-account handle pop-up, Google
+linking and sign-out in Chrome against a local OIDC issuer instead. Browser verifiers that sign
+in through the test identity entry give their accounts a profile first
+(`createProfileForTest` in `scripts/browser-sign-in.ts`), because every page asks a profile-less
+account to choose its handle.
 
 The [operational TypeScript guide](operational-typescript.md) lists the maintained database,
 release and security sources, direct Node 24 commands and explicit quality-gate coverage.
