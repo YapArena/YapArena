@@ -85,8 +85,8 @@
 }
 .site-header {
   container: site-header / inline-size;
-  background: linear-gradient(100deg, #070e18, #0a1522 75%, #07101a);
-  border-color: #1a2b3a;
+  background: linear-gradient(100deg, #0a0a0a, #0e0e0e 75%, #0b0b0b);
+  border-color: #1d1d1d;
   position: relative;
   z-index: 20;
 }
@@ -116,11 +116,11 @@
   font-size: 0.94rem;
 }
 .arena-nav nav a {
-  color: #dce6f1;
+  color: #e5e5e5;
   padding: 12px 0;
 }
 .arena-nav nav a:hover {
-  color: #8bcfff;
+  color: #c4c4c4;
 }
 .arena-header-search {
   margin: 0 auto;
@@ -136,13 +136,13 @@
   min-height: 42px;
   padding: 9px 18px 9px 42px;
   border-radius: 28px;
-  border: 1px solid #253747;
-  background: #172634;
+  border: 1px solid #343434;
+  background: #1a1a1a;
   color: var(--text);
   font-size: 0.9rem;
 }
 .arena-header-search input::placeholder {
-  color: #8b9bae;
+  color: #999;
 }
 .arena-header-search svg {
   width: 21px;
@@ -150,7 +150,7 @@
   position: absolute;
   left: 14px;
   top: 11px;
-  stroke: #a2b4c7;
+  stroke: #b2b2b2;
   fill: none;
   stroke-width: 1.4;
 }
@@ -170,7 +170,7 @@
   min-height: 43px;
   padding: 6px 14px;
   border-radius: 20px;
-  border: 1px solid #294054;
+  border: 1px solid #3d3d3d;
   cursor: pointer;
   white-space: nowrap;
   list-style: none;
@@ -186,7 +186,7 @@
   stroke-width: 1.4;
 }
 .arena-wallet-menu .arena-chevron {
-  color: #91a7bb;
+  color: #a4a4a4;
   margin-left: 4px;
 }
 .arena-wallet-popover {
@@ -198,23 +198,23 @@
   display: grid;
   gap: 12px;
   padding: 24px;
-  background: #0d1c28;
-  border: 1px solid #2e4c59;
+  background: #121212;
+  border: 1px solid #474747;
   border-radius: 20px;
   box-shadow:
-    0 24px 80px #0009,
-    0 2px 12px #0004;
+    0 24px 80px #00000099,
+    0 2px 12px #00000044;
 }
 .arena-wallet-popover span {
   color: var(--muted);
 }
 .arena-wallet-popover a {
   font-size: 0.76rem;
-  color: #c3d9e1;
+  color: #d5d5d5;
   min-height: 36px;
   display: flex;
   align-items: center;
-  border-top: 1px solid #263c4a;
+  border-top: 1px solid #383838;
   padding-top: 10px;
 }
 .wallet-money-summary {
@@ -237,11 +237,11 @@
   display: block;
   font-size: 0.7rem;
   font-weight: 500;
-  color: #afc5d0;
+  color: #c1c1c1;
 }
 .wallet-available .wallet-available-amount {
   display: block;
-  color: #edf9f4;
+  color: #fff;
   font-size: clamp(2.1rem, 6vw, 2.75rem);
   font-weight: 600;
   line-height: 1.2;
@@ -258,12 +258,12 @@
   font-weight: 500;
 }
 .wallet-money-summary .wallet-availability-note {
-  color: #a4bcc9;
+  color: #b8b8b8;
   font-size: 0.73rem;
   line-height: 1.65;
   margin: 0 0 19px;
   padding-left: 10px;
-  border-left: 2px solid #3f8670;
+  border-left: 2px solid #757575;
 }
 .wallet-money-summary .wallet-balance-breakdown {
   display: grid;
@@ -274,13 +274,13 @@
 .wallet-money-summary .wallet-balance-breakdown > div {
   display: block;
   padding: 11px 12px;
-  background: #142633;
-  border: 1px solid #29404d;
+  background: #191919;
+  border: 1px solid #3c3c3c;
   border-radius: 10px;
 }
 .wallet-balance-breakdown dt {
   font-size: 0.62rem;
-  color: #a3bac9;
+  color: #b6b6b6;
   margin-bottom: 4px;
 }
 .wallet-money-summary .wallet-balance-breakdown dd {
@@ -289,24 +289,24 @@
   font-size: 0.8rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: #e1eef5;
+  color: #ececec;
 }
 .wallet-money-summary .wallet-grants-title {
   font-size: 0.76rem;
-  color: #d5e4eb;
+  color: #e1e1e1;
   letter-spacing: -0.01em;
   margin: 23px 0 12px;
 }
 .wallet-grant-row {
   padding: 13px 14px;
-  border: 1px solid #2b424e;
+  border: 1px solid #3e3e3e;
   border-radius: 11px;
-  background: #10232f;
+  background: #171717;
   margin-bottom: 8px;
 }
 .wallet-grant-row.is-qualified {
-  border-color: #305447;
-  background: #132a27;
+  border-color: #4b4b4b;
+  background: #1b1b1b;
 }
 .wallet-grant-progress label {
   display: flex;
@@ -315,11 +315,11 @@
   gap: 12px;
   font-size: 0.8rem;
   font-weight: 500;
-  color: #e2edf3;
+  color: #ebebeb;
 }
 .wallet-grant-progress label > .wallet-grant-state {
   font-size: 0.72rem;
-  color: #b4ccda;
+  color: #c8c8c8;
   white-space: nowrap;
 }
 .wallet-grant-row.is-qualified .wallet-grant-state {
@@ -334,11 +334,11 @@
   border-radius: 6px;
   overflow: hidden;
   margin: 12px 0 8px;
-  background: #29414b;
+  background: #3d3d3d;
   accent-color: var(--acid);
 }
 .wallet-grant-progress progress::-webkit-progress-bar {
-  background: #29414b;
+  background: #3d3d3d;
   border-radius: 6px;
 }
 .wallet-grant-progress progress::-webkit-progress-value {
@@ -352,11 +352,11 @@
 .wallet-grant-progress p {
   font-size: 0.72rem;
   line-height: 1.6;
-  color: #a8c0cd;
+  color: #bcbcbc;
   margin: 0;
 }
 .wallet-grant-progress .wallet-grants-empty {
-  border: 1px dashed #35505c;
+  border: 1px dashed #4b4b4b;
   border-radius: 11px;
   padding: 15px;
   font-size: 0.7rem;
@@ -364,10 +364,10 @@
 }
 .wallet-progress-enabled > strong {
   font-size: 0.7rem;
-  color: #b4c9d4;
+  color: #c5c5c5;
   margin-top: 10px;
   padding-top: 17px;
-  border-top: 1px solid #29404c;
+  border-top: 1px solid #3c3c3c;
 }
 .wallet-progress-enabled > [data-header-reserved] {
   font-size: 0.7rem;
@@ -376,7 +376,7 @@
   display: none;
 }
 .wallet-progress-enabled > [role="status"] {
-  color: #a6bfcc;
+  color: #bbb;
   font-size: 0.73rem;
 }
 .wallet-balance-dialog.information-card {
@@ -386,13 +386,13 @@
   overscroll-behavior: contain;
   padding: 26px;
   color: var(--text);
-  background: #0d1c28;
-  border: 1px solid #345348;
+  background: #121212;
+  border: 1px solid #4c4c4c;
   border-radius: 22px;
-  box-shadow: 0 30px 100px #0008;
+  box-shadow: 0 30px 100px #00000088;
 }
 .wallet-balance-dialog::backdrop {
-  background: #020911cc;
+  background: #060606cc;
   backdrop-filter: blur(9px);
 }
 .wallet-dialog-header {
@@ -403,7 +403,7 @@
   margin-bottom: 25px;
 }
 .wallet-dialog-header .eyebrow {
-  color: #91b3b5;
+  color: #acacac;
   font-size: 0.56rem;
   letter-spacing: 0.14em;
 }
@@ -418,15 +418,15 @@
   width: 44px;
   height: 44px;
   flex: 0 0 auto;
-  border: 1px solid #304b58;
+  border: 1px solid #464646;
   border-radius: 12px;
-  background: #152a37;
-  color: #c9dce5;
+  background: #1c1c1c;
+  color: #d9d9d9;
   font-size: 1.55rem;
   font-weight: 300;
 }
 .wallet-dialog-close:hover {
-  background: #203b48;
+  background: #363636;
   color: #fff;
 }
 .wallet-dialog-close:focus-visible,
@@ -435,7 +435,7 @@
   outline-offset: 3px;
 }
 .wallet-dialog-status {
-  color: #abc3d2;
+  color: #bfbfbf;
   font-size: 0.8rem;
   line-height: 1.6;
 }
@@ -447,16 +447,16 @@
   justify-content: center;
   align-items: center;
   min-height: 46px;
-  border: 1px solid #35515c;
+  border: 1px solid #4c4c4c;
   border-radius: 10px;
-  background: #142b35;
-  color: #deedf0;
+  background: #1c1c1c;
+  color: #eaeaea;
   font-size: 0.75rem;
   margin-top: 23px;
 }
 .wallet-balance-dialog > .wallet-dialog-account-link:hover {
-  border-color: #54a68b;
-  background: #1b3839;
+  border-color: #f5f5f5;
+  background: #323232;
 }
 @media (max-width: 600px) {
   .arena-wallet-popover {
@@ -474,8 +474,8 @@
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: linear-gradient(140deg, #1d3041, #111e2b);
-  border: 1px solid #23384b;
+  background: linear-gradient(140deg, #212121, #141414);
+  border: 1px solid #353535;
   font-size: 0.83rem;
   font-weight: 700;
 }
@@ -505,7 +505,7 @@
 .header-signup,
 .header-retry {
   appearance: none;
-  border: 1px solid #314a59;
+  border: 1px solid #464646;
   border-radius: 10px;
   min-height: 44px;
   padding: 11px 18px;
@@ -521,35 +521,35 @@
   cursor: pointer;
 }
 .header-login {
-  color: #d8e6ef;
+  color: #e4e4e4;
   background: transparent;
 }
 .header-signup {
-  color: #071b16;
-  background: #30dfa3;
-  border-color: #30dfa3;
+  color: #101010;
+  background: #f7f7f7;
+  border-color: #f7f7f7;
 }
 .header-signup:hover {
-  color: #061c14;
-  background: #69edbf;
-  border-color: #69edbf;
+  color: #101010;
+  background: #d6d6d6;
+  border-color: #d6d6d6;
 }
 .header-login:hover {
-  background: #142733;
-  border-color: #5d9a8b;
+  background: #1a1a1a;
+  border-color: #8c8c8c;
   color: #fff;
 }
 .header-retry {
-  background: #142432;
-  color: #c8dde8;
+  background: #181818;
+  color: #d9d9d9;
 }
 .header-session-loading {
   display: none;
   width: 168px;
   height: 42px;
-  border: 1px solid #1b3341;
+  border: 1px solid #222;
   border-radius: 10px;
-  background: linear-gradient(100deg, #0c1d28, #152c38, #0c1d28);
+  background: linear-gradient(100deg, #131313, #1d1d1d, #131313);
 }
 .site-header[data-enhanced] .header-session-loading {
   display: block;
@@ -566,23 +566,23 @@
 .header-balance-label {
   grid-column: 1;
   font-size: 0.64rem;
-  color: #a2b8c8;
+  color: #b4b4b4;
   line-height: 1.2;
 }
 .site-header [data-header-balance] {
   grid-column: 1;
   font-size: 0.92rem;
-  color: #35e3a4;
+  color: #f8f8f8;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
 }
 .site-header .arena-wallet-menu .arena-chevron {
   grid-column: 2;
   grid-row: 1 / 3;
-  color: #8faabb;
+  color: #a5a5a5;
 }
 .site-header .arena-wallet-menu > summary:hover {
-  background: #142632;
+  background: #191919;
 }
 .header-user-menu {
   position: relative;
@@ -598,9 +598,9 @@
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: linear-gradient(145deg, #1d4e43, #173247);
-  border: 1px solid #42705f;
-  color: #b3f6d9;
+  background: linear-gradient(145deg, #434343, #212121);
+  border: 1px solid #656565;
+  color: #fff;
   font-size: 0.8rem;
   font-weight: 650;
 }
@@ -614,14 +614,14 @@
   top: calc(100% + 14px);
   width: 225px;
   padding: 10px;
-  border: 1px solid #2c4655;
+  border: 1px solid #424242;
   border-radius: 14px;
-  background: #0d1c28;
-  box-shadow: 0 20px 60px #0008;
+  background: #121212;
+  box-shadow: 0 20px 60px #00000088;
 }
 .header-menu-caption {
   display: block;
-  color: #90aabd;
+  color: #a6a6a6;
   font-size: 0.56rem;
   letter-spacing: 0.12em;
   padding: 12px 11px 10px;
@@ -635,12 +635,12 @@
   letter-spacing: 0;
 }
 .header-menu-caption > strong {
-  color: #54a68b;
+  color: #f5f5f5;
   font-size: 0.84rem;
 }
 .header-menu-caption > strong + span {
   margin-top: 2px;
-  color: #86a3b6;
+  color: #9e9e9e;
   font-size: 0.72rem;
 }
 .header-user-popover a,
@@ -652,7 +652,7 @@
   width: 100%;
   padding: 12px 11px;
   min-height: 44px;
-  color: #d3e4ee;
+  color: #e1e1e1;
   font-size: 0.8rem;
   font-weight: 500;
   border: 0;
@@ -662,17 +662,17 @@
 }
 .header-user-popover a:hover,
 .header-user-popover button:hover {
-  background: #17302f;
-  color: #6cf0be;
+  background: #1f1f1f;
+  color: #fcfcfc;
 }
 .header-user-popover button {
-  border-top: 1px solid #29404d;
+  border-top: 1px solid #3c3c3c;
   border-radius: 0 0 7px 7px;
   margin-top: 6px;
   color: #e9b4b7;
 }
 .site-header :focus-visible {
-  outline: 2px solid #35e3a4;
+  outline: 2px solid #f8f8f8;
   outline-offset: 4px;
 }
 @media (max-width: 1100px) {
@@ -822,22 +822,22 @@
 /* Profile setup: the pop-up every new account completes before anything else
    (frontend/profile-setup.ts). */
 .profile-setup {
-  --ps-surface: #0b1722;
-  --ps-field: #07101a;
-  --ps-acid: #35e3a4;
+  --ps-surface: #0f0f0f;
+  --ps-field: #0b0b0b;
+  --ps-acid: #f8f8f8;
   --ps-danger: #ff8f9a;
   width: min(480px, calc(100vw - 32px));
   max-height: calc(100dvh - 32px);
   padding: 0;
-  border: 1px solid #2b4656;
+  border: 1px solid #414141;
   border-radius: 28px;
   background:
-    radial-gradient(120% 60% at 50% -12%, #203343 0%, transparent 62%),
+    radial-gradient(120% 60% at 50% -12%, #303030 0%, transparent 62%),
     var(--ps-surface);
-  color: #f0f4fa;
+  color: #f4f4f4;
   box-shadow:
     0 40px 140px #000000cc,
-    inset 0 1px 0 #edf9f40d;
+    inset 0 1px 0 #ffffff0d;
   overflow: hidden auto;
   overscroll-behavior: contain;
 }
@@ -845,7 +845,7 @@
   animation: ps-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .profile-setup::backdrop {
-  background: radial-gradient(circle at 50% 30%, #142632d9, #020910f0);
+  background: radial-gradient(circle at 50% 30%, #191919d9, #060606f0);
   backdrop-filter: blur(10px);
 }
 /* Stays inside the frame: wider glow would make the pop-up scroll sideways
@@ -857,8 +857,8 @@
   background: conic-gradient(
     from 200deg,
     transparent,
-    #35e3a433,
-    #afc1d026,
+    #f8f8f833,
+    #bebebe26,
     transparent 60%
   );
   filter: blur(44px);
@@ -879,7 +879,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #edf9f4;
+  color: #fff;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -918,8 +918,8 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: #edf9f4;
-  box-shadow: 0 0 12px #edf9f480;
+  background: #fff;
+  box-shadow: 0 0 12px #ffffff80;
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -942,9 +942,9 @@
   gap: 12px;
   margin: 4px 0;
   padding: 12px 14px;
-  border: 1px solid #29414b;
+  border: 1px solid #3d3d3d;
   border-radius: 18px;
-  background: #101926b3;
+  background: #111111b3;
 }
 .ps-avatar {
   display: grid;
@@ -952,10 +952,10 @@
   flex: 0 0 auto;
   width: 46px;
   height: 46px;
-  border: 1px solid #4c8e7d;
+  border: 1px solid #f3f3f3;
   border-radius: 50%;
-  background: linear-gradient(145deg, #1d6b52, #273033);
-  color: #edf9f4;
+  background: linear-gradient(145deg, #595959, #212121);
+  color: #fff;
   font-size: 0.95rem;
   font-weight: 700;
 }
@@ -970,7 +970,7 @@
   white-space: nowrap;
 }
 .ps-preview-text > span {
-  color: #9aacc0;
+  color: #aaa;
   font-size: 0.82rem;
 }
 .ps-field {
@@ -983,7 +983,7 @@
   align-items: baseline;
 }
 .ps-label-row label {
-  color: #dce8ef;
+  color: #e6e6e6;
   font-size: 0.8rem;
   font-weight: 650;
 }
@@ -1000,10 +1000,10 @@
   width: 17px;
   height: 17px;
   padding: 0;
-  border: 1px solid #3a4c60;
+  border: 1px solid #4a4a4a;
   border-radius: 50%;
   background: transparent;
-  color: #91a6b9;
+  color: #a3a3a3;
   font:
     700 0.62rem/1 Arial,
     Helvetica,
@@ -1012,8 +1012,8 @@
 }
 .ps-label:hover .ps-info,
 .ps-info:focus-visible {
-  border-color: #edf9f4;
-  color: #edf9f4;
+  border-color: #fff;
+  color: #fff;
 }
 /* Beside the label so it never hides the field above; above it on phones. */
 .ps-tip {
@@ -1025,9 +1025,9 @@
   width: max-content;
   max-width: min(290px, 74vw);
   padding: 10px 12px;
-  border: 1px solid #373947;
+  border: 1px solid #3a3a3a;
   border-radius: 12px;
-  background: #172634;
+  background: #1a1a1a;
   box-shadow: 0 16px 40px #000c;
   color: #d6d6d6;
   font-size: 0.74rem;
@@ -1057,7 +1057,7 @@
   }
 }
 .ps-count {
-  color: #7d93a4;
+  color: #909090;
   font-size: 0.68rem;
   font-variant-numeric: tabular-nums;
 }
@@ -1065,7 +1065,7 @@
   width: 100%;
   min-height: 52px;
   padding: 13px 15px;
-  border: 1px solid #3a5566;
+  border: 1px solid #505050;
   border-radius: 14px;
   background: var(--ps-field);
   color: #f4f8fb;
@@ -1076,12 +1076,12 @@
     box-shadow 0.15s;
 }
 .profile-setup input::placeholder {
-  color: #6e8797;
+  color: #838383;
 }
 .profile-setup input:not([type="checkbox"]):focus {
   outline: none;
   border-color: var(--ps-acid);
-  box-shadow: 0 0 0 4px #35e3a41f;
+  box-shadow: 0 0 0 4px #f8f8f81f;
 }
 .profile-setup input[aria-invalid="true"] {
   border-color: var(--ps-danger);
@@ -1094,7 +1094,7 @@
 .ps-at {
   position: absolute;
   left: 15px;
-  color: #859db4;
+  color: #9a9a9a;
   pointer-events: none;
 }
 .profile-setup .ps-handle input {
@@ -1109,13 +1109,13 @@
   border-radius: 50%;
 }
 .ps-handle[data-state="checking"] .ps-handle-icon {
-  border: 2px solid #345348;
+  border: 2px solid #4c4c4c;
   border-top-color: var(--ps-acid);
   animation: ps-spin 0.8s linear infinite;
 }
 .ps-handle[data-state="available"] .ps-handle-icon {
   background: var(--ps-acid)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e1c28' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 4 4L19 6'/%3E%3C/svg%3E")
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23131313' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 4 4L19 6'/%3E%3C/svg%3E")
     center / 12px no-repeat;
 }
 .ps-handle[data-state="taken"] .ps-handle-icon,
@@ -1132,7 +1132,7 @@
 }
 .ps-status {
   min-height: 1.1em;
-  color: #94a4b7;
+  color: #a2a2a2;
 }
 .ps-handle[data-state="available"] + .ps-status {
   color: var(--ps-acid);
@@ -1155,39 +1155,39 @@
 .ps-primary {
   margin-top: 4px;
   border: 0;
-  background: linear-gradient(180deg, #69edbf, #30dfa3);
-  color: #08121d;
+  background: linear-gradient(180deg, #fcfcfc, #f7f7f7);
+  color: #0c0c0c;
   box-shadow:
-    0 10px 30px #30dfa333,
-    inset 0 1px 0 #edf9f466;
+    0 10px 30px #f7f7f733,
+    inset 0 1px 0 #ffffff66;
   transition:
     filter 0.2s,
     box-shadow 0.2s,
     transform 0.12s;
 }
 .ps-primary:hover:not(:disabled) {
-  filter: brightness(1.06);
-  box-shadow: 0 14px 38px #30dfa352;
+  filter: brightness(0.88);
+  box-shadow: 0 14px 38px #f7f7f752;
 }
 .ps-primary:active:not(:disabled) {
   transform: translateY(1px);
 }
 .ps-primary:disabled,
 .ps-primary:disabled:hover {
-  background: #1a2b36;
-  color: #6e8797;
+  background: #1d1d1d;
+  color: #838383;
   box-shadow: none;
   cursor: not-allowed;
 }
 .ps-secondary {
   margin-top: 4px;
-  border: 1px solid #35505c;
-  background: #10212d;
-  color: #d6e4ec;
+  border: 1px solid #4b4b4b;
+  background: #161616;
+  color: #e2e2e2;
 }
 .ps-secondary:hover {
-  border-color: #4c8e7d;
-  background: #273033;
+  border-color: #f3f3f3;
+  background: #212121;
 }
 .ps-actions {
   display: grid;
@@ -1199,9 +1199,9 @@
   justify-items: center;
   gap: 4px;
   padding: 24px 18px;
-  border: 1px solid #3a4c60;
+  border: 1px solid #4a4a4a;
   border-radius: 22px;
-  background: radial-gradient(circle at 50% 0, #1f3443, #0b1822 72%);
+  background: radial-gradient(circle at 50% 0, #313131, #101010 72%);
   text-align: center;
   overflow-wrap: anywhere;
 }
@@ -1210,7 +1210,7 @@
   height: 76px;
   margin-bottom: 8px;
   font-size: 1.5rem;
-  box-shadow: 0 0 40px #35e3a433;
+  box-shadow: 0 0 40px #f8f8f833;
 }
 .ps-claim strong {
   font-size: 1.15rem;
@@ -1244,17 +1244,17 @@
   height: 76px;
   margin-bottom: 6px;
   border-radius: 50%;
-  background: radial-gradient(circle, #51e6bf 0, #eaf4f9 72%);
+  background: radial-gradient(circle, #fafafa 0, #f2f2f2 72%);
   box-shadow:
-    0 0 0 10px #35e3a41a,
-    0 0 60px #35e3a455;
+    0 0 0 10px #f8f8f81a,
+    0 0 60px #f8f8f855;
   animation: ps-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 .ps-check svg {
   width: 34px;
   height: 34px;
   fill: none;
-  stroke: #08121d;
+  stroke: #0c0c0c;
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;

@@ -1,17 +1,17 @@
 #ya-market-v4 {
-  --ya-bg: #000000;
-  --ya-panel: #0b1925;
-  --ya-raised: #172634;
-  --ya-text: #f0f4fa;
-  --ya-sub: #9aabbd;
-  --ya-line: #1c3040;
-  --ya-accent: #40e5a1;
-  --ya-accent-bg: #102e2a;
-  --ya-green: #40e5a1;
-  --ya-green-bg: #102e2a;
+  --ya-bg: #000;
+  --ya-panel: #101010;
+  --ya-raised: #1a1a1a;
+  --ya-text: #f4f4f4;
+  --ya-sub: #a9a9a9;
+  --ya-line: #202020;
+  --ya-accent: #f8f8f8;
+  --ya-accent-bg: #1c1c1c;
+  --ya-green: #f8f8f8;
+  --ya-green-bg: #1c1c1c;
   --ya-red: #fa9b8c;
   --ya-red-bg: #34252a;
-  --ya-chart: #f0f4fa;
+  --ya-chart: #f4f4f4;
   color-scheme: dark;
   background: var(--ya-bg);
   color: var(--ya-text);
@@ -46,12 +46,12 @@
   padding: 10px 15px;
   border-radius: 8px;
   min-height: 44px;
-  color: #a3b9c9;
+  color: #b5b5b5;
   font-weight: 600;
   cursor: pointer;
 }
 #ya-market-v4 .ya-view-tabs button[aria-pressed="true"] {
-  background: #17382f;
+  background: #303030;
   color: var(--ya-accent);
 }
 #ya-market-v4 .ya-idea-search {
@@ -61,10 +61,10 @@
   width: 100%;
   min-height: 44px;
   padding: 11px 14px;
-  border: 1px solid #375363;
+  border: 1px solid #4e4e4e;
   border-radius: 10px;
   color: var(--ya-text);
-  background: #0d1e2a;
+  background: #141414;
 }
 #ya-market-v4 button,
 #ya-market-v4 input,
@@ -841,7 +841,7 @@
   }
 }
 #ya-market-v4 .ya-top {
-  background: #07111c;
+  background: #0b0b0b;
 }
 #ya-market-v4 .ya-brand {
   font-size: 16px;
@@ -871,15 +871,15 @@
 #ya-market-v4 .ya-feature,
 #ya-market-v4 .ya-side,
 #ya-market-v4 .ya-marketcard {
-  background: linear-gradient(135deg, #0c1c29, #07111c);
+  background: linear-gradient(135deg, #121212, #0b0b0b);
   border-radius: 14px;
 }
 #ya-market-v4 .ya-ticker {
-  background: #07111c;
+  background: #0b0b0b;
 }
 #ya-market-v4 .ya-marketcard[aria-expanded="true"] {
   border-color: var(--ya-accent);
-  background: #10251f;
+  background: #171717;
 }
 #ya-market-v4 .ya-cardmetric > span,
 #ya-market-v4 .ya-cardmetric strong {
@@ -903,9 +903,9 @@
 #ya-market-v4 .ya-detail {
   grid-column: 1/-1;
   min-width: 0;
-  border: 1px solid #2c6653;
+  border: 1px solid #585858;
   border-radius: 14px;
-  background: #091721;
+  background: #0f0f0f;
   overflow: clip;
   position: relative;
 }
@@ -987,7 +987,7 @@
 #ya-market-v4 .ya-debates-area {
   border-top: 1px solid var(--ya-line);
   padding: 22px 24px 24px;
-  background: #07131e;
+  background: #0c0c0c;
 }
 #ya-market-v4 .ya-debates-heading {
   display: flex;
@@ -1021,7 +1021,7 @@
   border-color: var(--ya-accent);
 }
 #ya-market-v4 .ya-thumbnail {
-  background: linear-gradient(120deg, #13342f, #14293b);
+  background: linear-gradient(120deg, #202020, #1b1b1b);
   padding: 12px;
   position: relative;
   min-height: 120px;
@@ -1031,18 +1031,18 @@
   justify-content: space-between;
 }
 #ya-market-v4 .ya-thumbnail.ya-replay {
-  background: linear-gradient(120deg, #1a2b40, #10232d);
+  background: linear-gradient(120deg, #1d1d1d, #171717);
 }
 #ya-market-v4 .ya-thumb-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  color: #dce6f1;
+  color: #e5e5e5;
   font-size: 11px;
 }
 #ya-market-v4 .ya-badge-live {
-  background: #133b2f;
+  background: #323232;
   color: var(--ya-accent);
   padding: 3px 6px;
   border-radius: 4px;
@@ -1050,8 +1050,8 @@
   letter-spacing: 0.7px;
 }
 #ya-market-v4 .ya-badge-replay {
-  background: #24364c;
-  color: #bdccdf;
+  background: #343434;
+  color: #cacaca;
   padding: 3px 6px;
   border-radius: 4px;
   font-size: 11px;
@@ -1069,16 +1069,16 @@
   height: 42px;
   display: grid;
   place-items: center;
-  background: #1b4c40;
-  color: #8df0c6;
-  border: 1px solid #2a6857;
+  background: #414141;
+  color: #fff;
+  border: 1px solid #5a5a5a;
   border-radius: 50%;
   font-size: 15px;
 }
 #ya-market-v4 .ya-thumb-person:last-child {
-  background: #253b51;
-  border-color: #38546d;
-  color: #b6d6f2;
+  background: #383838;
+  border-color: #505050;
+  color: #d1d1d1;
 }
 #ya-market-v4 .ya-thumb-people > span:nth-child(2) {
   font-size: 11px;
@@ -1506,7 +1506,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(145deg, #0c1c29, #07111c);
+  background: linear-gradient(145deg, #121212, #0b0b0b);
   border: 1px solid var(--ya-line);
   border-radius: 14px;
   padding: 16px 14px 12px;
@@ -1649,7 +1649,7 @@
 #ya-market-v4 .ya-carousel-dot[aria-current="true"] .ya-dot-track {
   width: 32px;
   height: 6px;
-  background: #1b624b;
+  background: #515151;
   opacity: 1;
 }
 @keyframes ya-arguments-up {
@@ -1784,10 +1784,10 @@
 /* Local resets replace export-shell defaults; the product styles above are
    reproduced from the supplied #ya-market-v4 reference. */
 body.arena-market-home {
-  background: #000000;
+  background: #000;
 }
 body.arena-market-home .site-header {
-  background: #000000;
+  background: #000;
 }
 #ya-market-v4 h1 {
   line-height: 1.25;
