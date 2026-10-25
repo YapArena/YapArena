@@ -233,16 +233,10 @@ function show() {
     return value.length >= 3 ? value : "";
   }
 
+  // The username never rewrites the handle: they are separate choices.
   name.addEventListener("input", () => {
     nameError.hidden = true;
     name.removeAttribute("aria-invalid");
-    if (!handleEdited) {
-      const next = suggest(name.value) || suggested;
-      if (next !== handle.value) {
-        handle.value = next;
-        handleChanged();
-      }
-    }
     render();
   });
   handle.addEventListener("input", () => {
