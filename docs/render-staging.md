@@ -148,6 +148,20 @@ with **Object Read & Write** access to `MEDIA_S3_BUCKET`. Confirm the S3 endpoin
 same Cloudflare account. Replace both Render secrets together and redeploy before starting a new
 trial. [Cloudflare identifies 401 as missing or invalid credentials](https://developers.cloudflare.com/r2/api/error-codes/).
 
+## Enable turn trading windows
+
+[Decision 0012](decisions/0012-live-argument-outline.md) makes each live speaking turn one Yap Coins
+trading window. Apply its migration as the owner first, then deploy. Turn windows stay off until
+`TURN_WINDOWS_ENABLED=true` is set on **both** web and the jobs worker (it requires
+`COIN_SANDBOX_ENABLED=true`). Automatic voiding of a cancelled or under-review debate's open rounds
+runs whenever the coin sandbox is enabled. To check, start a debate with two test speakers and read
+`GET /api/public/debates/<id>/windows`: a window with `turnNumber` 1 should appear within about a
+second, cut off at the turn deadline, and a new one at each turn change.
+
+| Variable               | Default | Purpose                                                    |
+| ---------------------- | ------- | ---------------------------------------------------------- |
+| `TURN_WINDOWS_ENABLED` | `false` | One Yap Coins trading window per live turn; web and worker |
+
 ## Move background jobs to the worker
 
 While `RUN_BACKGROUND_JOBS` is true (the default), the web process runs the one-second A4/coin
@@ -166,7 +180,7 @@ URL, and deploys the release SHA to it after web. Its `deploy` mode accepts
 1. Create the worker from the `yaparena-staging-jobs` Blueprint entry (Starter or larger) and deploy
    the same reviewed commit as web, after its migrations. Give it the runtime `DATABASE_URL` and DB
    TLS settings used by web, never an owner/migration URL, plus web's `A4_MODE`/`A4_*`,
-   `COIN_SANDBOX_ENABLED` and all `LIVEKIT_*`/`MEDIA_*` media and replay variables. Never give it
+   `COIN_SANDBOX_ENABLED`, `TURN_WINDOWS_ENABLED` and all `LIVEKIT_*`/`MEDIA_*` media and replay variables. Never give it
    `AUTH0_*`: Auth0 settings belong to web only, and the worker reads no `REDIS_*`. Keep
    `LOG_LEVEL` at `info` or more verbose, and keep web's `RUN_BACKGROUND_JOBS=true` until step 3.
    A new environment created from `render.yaml` starts web with `false`: set it to `true` first,

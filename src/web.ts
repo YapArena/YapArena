@@ -100,6 +100,7 @@ export function createWebServer(
           reports: createSandboxErrorReports(database, "simulation"),
         }
       : undefined,
+    turnWindows: config.turnWindowsEnabled ? coinDebates : undefined,
     messages: createMessageRepository(database),
     database,
     a4,

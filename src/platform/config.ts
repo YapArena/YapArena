@@ -162,6 +162,12 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     throw new Error(
       "COIN_SANDBOX_WEBHOOK_SECRET requires enabled simulation and a secret of at least 32 bytes",
     );
+  // Decision 0012: one Yap Coins trading window per live speaking turn.
+  const turnWindows = environment.TURN_WINDOWS_ENABLED ?? "false";
+  if (!["true", "false"].includes(turnWindows))
+    throw new Error("TURN_WINDOWS_ENABLED must be true or false");
+  if (turnWindows === "true" && coinSandbox !== "true")
+    throw new Error("TURN_WINDOWS_ENABLED requires COIN_SANDBOX_ENABLED");
   if (!["true", "false"].includes(homepageReference))
     throw new Error("HOMEPAGE_REFERENCE_ENABLED must be true or false");
   if (homepageReference === "true" && nodeEnvironment === "production")
@@ -340,6 +346,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     environment: nodeEnvironment,
     homepageReferenceEnabled: homepageReference === "true",
     coinSandboxEnabled: coinSandbox === "true",
+    turnWindowsEnabled: turnWindows === "true",
     coinSandboxWebhookSecret,
     host,
     port,
