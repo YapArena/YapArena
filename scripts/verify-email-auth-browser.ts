@@ -229,16 +229,24 @@ try {
     .first()
     .waitFor();
   const handle = `b-${randomUUID().slice(0, 8)}`;
-  await setup.getByLabel("Username", { exact: true }).fill("Browser Person");
-  // Going back to a handle already checked shows its answer again.
-  await setup.getByLabel("Handle", { exact: true }).fill(suggested);
-  await setup.getByText(`@${suggested} is free.`).waitFor({ timeout: 1000 });
+  // Typing a username, key by key, leaves the handle alone.
+  await setup
+    .getByLabel("Username", { exact: true })
+    .pressSequentially("Browser Person");
+  assert.equal(
+    await setup.getByLabel("Handle", { exact: true }).inputValue(),
+    suggested,
+    "the username never rewrites the handle",
+  );
   await setup.getByLabel("Handle", { exact: true }).fill("Browser Person!");
   assert.equal(
     await setup.getByLabel("Handle", { exact: true }).inputValue(),
     "browser-person",
     "handles normalize as people type",
   );
+  // Going back to a handle already checked shows its answer again.
+  await setup.getByLabel("Handle", { exact: true }).fill(suggested);
+  await setup.getByText(`@${suggested} is free.`).waitFor({ timeout: 1000 });
   await setup.getByLabel("Handle", { exact: true }).fill(handle);
   await setup.getByText(`@${handle} is free.`).waitFor();
   await setup.getByRole("button", { name: "Continue" }).click();
@@ -257,7 +265,7 @@ try {
     "BP",
   );
   checks.push(
-    "a new account must pick a username and permanent handle in the pop-up (Escape keeps it open, a progress bar shows the step, hovering a label explains handles); the email suggests a handle, input normalizes, availability shows, and the profile is public",
+    "a new account must pick a username and permanent handle in the pop-up (Escape keeps it open, a progress bar shows the step, hovering a label explains handles); the email suggests a handle, the username never rewrites it, input normalizes, availability shows, and the profile is public",
   );
   const accountId = await account(first);
   assert.ok(accountId, "the strict session cookie arrives after the provider");
