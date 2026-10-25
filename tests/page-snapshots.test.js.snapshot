@@ -250,8 +250,8 @@ exports[`renders a debate 1`] = `
 <desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0%" stop-color="#22e99b" stop-opacity=".28"/>
-<stop offset="100%" stop-color="#22e99b" stop-opacity="0"/>
+<stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
+<stop offset="100%" stop-color="#f7f7f7" stop-opacity="0"/>
 </linearGradient>
 <linearGradient id="arena-no-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#ff536c" stop-opacity=".16"/>
@@ -737,8 +737,8 @@ exports[`renders a debate 2`] = `
 <desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0%" stop-color="#22e99b" stop-opacity=".28"/>
-<stop offset="100%" stop-color="#22e99b" stop-opacity="0"/>
+<stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
+<stop offset="100%" stop-color="#f7f7f7" stop-opacity="0"/>
 </linearGradient>
 <linearGradient id="arena-no-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#ff536c" stop-opacity=".16"/>
@@ -1222,8 +1222,8 @@ exports[`renders a debate 3`] = `
 <desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0%" stop-color="#22e99b" stop-opacity=".28"/>
-<stop offset="100%" stop-color="#22e99b" stop-opacity="0"/>
+<stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
+<stop offset="100%" stop-color="#f7f7f7" stop-opacity="0"/>
 </linearGradient>
 <linearGradient id="arena-no-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#ff536c" stop-opacity=".16"/>
@@ -1707,8 +1707,8 @@ exports[`renders a debate 4`] = `
 <desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0%" stop-color="#22e99b" stop-opacity=".28"/>
-<stop offset="100%" stop-color="#22e99b" stop-opacity="0"/>
+<stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
+<stop offset="100%" stop-color="#f7f7f7" stop-opacity="0"/>
 </linearGradient>
 <linearGradient id="arena-no-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#ff536c" stop-opacity=".16"/>
@@ -2192,8 +2192,8 @@ exports[`renders a debate 5`] = `
 <desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0%" stop-color="#22e99b" stop-opacity=".28"/>
-<stop offset="100%" stop-color="#22e99b" stop-opacity="0"/>
+<stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
+<stop offset="100%" stop-color="#f7f7f7" stop-opacity="0"/>
 </linearGradient>
 <linearGradient id="arena-no-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#ff536c" stop-opacity=".16"/>
@@ -2677,8 +2677,8 @@ exports[`renders a debate 6`] = `
 <desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0%" stop-color="#22e99b" stop-opacity=".28"/>
-<stop offset="100%" stop-color="#22e99b" stop-opacity="0"/>
+<stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
+<stop offset="100%" stop-color="#f7f7f7" stop-opacity="0"/>
 </linearGradient>
 <linearGradient id="arena-no-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#ff536c" stop-opacity=".16"/>
@@ -3163,8 +3163,8 @@ exports[`renders a debate 7`] = `
 <desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0%" stop-color="#22e99b" stop-opacity=".28"/>
-<stop offset="100%" stop-color="#22e99b" stop-opacity="0"/>
+<stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
+<stop offset="100%" stop-color="#f7f7f7" stop-opacity="0"/>
 </linearGradient>
 <linearGradient id="arena-no-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#ff536c" stop-opacity=".16"/>
@@ -3653,8 +3653,8 @@ exports[`renders a debate 8`] = `
 <desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0%" stop-color="#22e99b" stop-opacity=".28"/>
-<stop offset="100%" stop-color="#22e99b" stop-opacity="0"/>
+<stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
+<stop offset="100%" stop-color="#f7f7f7" stop-opacity="0"/>
 </linearGradient>
 <linearGradient id="arena-no-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#ff536c" stop-opacity=".16"/>
@@ -4153,8 +4153,8 @@ exports[`renders a debate 9`] = `
 <desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0%" stop-color="#22e99b" stop-opacity=".28"/>
-<stop offset="100%" stop-color="#22e99b" stop-opacity="0"/>
+<stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
+<stop offset="100%" stop-color="#f7f7f7" stop-opacity="0"/>
 </linearGradient>
 <linearGradient id="arena-no-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#ff536c" stop-opacity=".16"/>

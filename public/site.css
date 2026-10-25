@@ -1,12 +1,12 @@
 :root {
   color-scheme: dark;
-  --bg: #050c15;
-  --panel: #0b1723;
-  --line: #1c3040;
-  --text: #f0f4fa;
-  --muted: #9aabbd;
-  --acid: #40e5a1;
-  --orange: #80caff;
+  --bg: #000;
+  --panel: #0f0f0f;
+  --line: #202020;
+  --text: #f4f4f4;
+  --muted: #a9a9a9;
+  --acid: #f8f8f8;
+  --orange: #bebebe;
   font-family: Arial, Helvetica, sans-serif;
   font-synthesis: none;
 }
@@ -145,7 +145,7 @@ h3 {
 .preview-pill {
   margin-left: auto;
   color: var(--acid);
-  border: 1px solid #5d6c35;
+  border: 1px solid #656565;
   border-radius: 100px;
   padding: 6px 11px;
   font-size: 0.65rem;
@@ -156,7 +156,7 @@ h3 {
 .hero {
   background: radial-gradient(
     circle at 80% 45%,
-    #303420 0%,
+    #323232 0%,
     #151917 40%,
     var(--bg) 68%
   );
@@ -196,7 +196,7 @@ h3 {
   min-height: 54px;
 }
 .button:hover {
-  background: #ecff99;
+  background: #d6d6d6;
   color: #10120d;
 }
 .button-secondary,
@@ -217,7 +217,7 @@ h3 {
 }
 .orbit {
   position: absolute;
-  border: 1px solid #7b8d50;
+  border: 1px solid #858585;
   border-radius: 50%;
   transform: rotate(-27deg);
 }
@@ -228,7 +228,7 @@ h3 {
 .orbit-two {
   width: 270px;
   height: 460px;
-  border-color: #414b35;
+  border-color: #474747;
 }
 .art-a,
 .art-b {
@@ -318,8 +318,8 @@ h3 {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   padding: 5px 9px;
-  background: #3a4131;
-  color: #e1faa5;
+  background: #3e3e3e;
+  color: #efefef;
 }
 .status-live {
   background: #612a22;
@@ -327,8 +327,8 @@ h3 {
 }
 .status-replay,
 .status-finalized {
-  background: #373947;
-  color: #c8c7f6;
+  background: #3a3a3a;
+  color: #cbcbcb;
 }
 .status-cancelled {
   background: #3b3b3b;
@@ -602,7 +602,7 @@ h3 {
   max-width: 260px;
 }
 .media-placeholder {
-  background: radial-gradient(circle at 60% 30%, #333c2b, #17191c 65%);
+  background: radial-gradient(circle at 60% 30%, #393939, #17191c 65%);
   display: flex;
   flex-direction: column;
   align-items: start;
@@ -698,7 +698,7 @@ h3 {
 }
 .media-actions button:hover,
 .media-actions button:focus-visible {
-  background: #273033;
+  background: #212121;
 }
 .media-actions button:disabled {
   opacity: 0.55;
@@ -735,7 +735,7 @@ h3 {
 }
 .play-symbol {
   align-self: center;
-  border: 1px solid #768655;
+  border: 1px solid #7f7f7f;
   color: var(--acid);
   width: 75px;
   height: 75px;
@@ -976,16 +976,16 @@ h3 {
 }
 .small-button,
 .follow-button {
-  border: 1px solid #83975c;
+  border: 1px solid #8e8e8e;
   border-radius: 3px;
-  background: #252d1a;
+  background: #1e1e1e;
   color: var(--acid);
   font-weight: 700;
   padding: 8px 12px;
 }
 .small-button:hover,
 .follow-button:hover {
-  background: #344221;
+  background: #3d3d3d;
 }
 .follow-button {
   margin: 10px 12px 18px 0;
@@ -1062,9 +1062,9 @@ h3 {
 .live-chat [data-community-new] {
   align-self: center;
   margin: 6px 0;
-  border: 1px solid #83975c;
+  border: 1px solid #8e8e8e;
   border-radius: 3px;
-  background: #252d1a;
+  background: #1e1e1e;
   color: var(--acid);
   padding: 7px 10px;
   font-weight: 700;
@@ -1094,9 +1094,9 @@ h3 {
 }
 .live-chat form button {
   justify-self: start;
-  border: 1px solid #83975c;
+  border: 1px solid #8e8e8e;
   border-radius: 3px;
-  background: #252d1a;
+  background: #1e1e1e;
   color: var(--acid);
   padding: 9px 12px;
   font-weight: 700;
@@ -1141,9 +1141,9 @@ h3 {
 [data-community-refresh],
 [data-community-older],
 .community-case > button {
-  border: 1px solid #83975c;
+  border: 1px solid #8e8e8e;
   border-radius: 3px;
-  background: #252d1a;
+  background: #1e1e1e;
   color: var(--acid);
   padding: 9px 12px;
   font-weight: 700;
@@ -1266,14 +1266,14 @@ h3 {
   padding: 4px 6px;
   font: inherit;
   background: transparent;
-  color: #c6cbbf;
+  color: #c9c9c9;
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
 }
 .community-message-actions button:hover {
   color: var(--acid);
-  background: #252d1a;
+  background: #1e1e1e;
 }
 .community-message-actions button:disabled {
   color: #adb2ac;
@@ -1493,7 +1493,7 @@ h3 {
   margin-top: 1.5rem;
 }
 .a4-round {
-  border-top: 1px solid var(--line, #394045);
+  border-top: 1px solid var(--line, #3f3f3f);
   padding-block: 1.5rem;
 }
 .a4-receipt {
@@ -1519,7 +1519,7 @@ h3 {
 .a4-table td,
 .a4-table th {
   padding: 0.5rem;
-  border-bottom: 1px solid var(--line, #394045);
+  border-bottom: 1px solid var(--line, #3f3f3f);
 }
 .a4-round code {
   overflow-wrap: anywhere;
@@ -1537,7 +1537,7 @@ h3 {
   background: #151b1d;
 }
 [data-a4-review]::backdrop {
-  background: #000b;
+  background: #000000bb;
 }
 [data-a4-review] button {
   margin: 0.5rem;
@@ -1571,7 +1571,7 @@ h3 {
   background: #151b1d;
 }
 [data-inline-review]::backdrop {
-  background: #000b;
+  background: #000000bb;
 }
 [data-inline-review] button {
   margin: 0.5rem;
