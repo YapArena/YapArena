@@ -40,8 +40,9 @@ retained-credential proof, with its cookie published after the mutation commits.
 
 Current state — 2026-10-22: single-device logout is restored. A later decision had made
 normal Sign out end every session; by founder decision on 2026-10-22, Sign out ends only this
-device, and the sign-out-every-session and sign-out-other-sessions options were removed. The
-account page's Active sessions list still signs out one chosen device. See
+device, and the sign-out-every-session and sign-out-other-sessions options were removed. On
+2026-10-24 the founder removed the account page's Active sessions list; the session API remains.
+See
 [Decision 0008](0008-auth-simplification.md) point 4 and the
 [revocation contract](../security/account-session-revocation.md#owner-controls-and-semantics).
 
@@ -53,8 +54,11 @@ remain separate capabilities; no new recovery endpoint is implied.
 
 ## Profile and participation data
 
-Profiles start as private drafts and are published by an explicit account action. Handles cannot
-be edited once created, so shared links remain stable. Moderation can mark a profile hidden;
+A signed-in account without a profile must first choose a username and a permanent handle in a
+pop-up shown on every page (founder, 2026-10-24). Every profile is public: the pop-up publishes
+it and the account page offers no private option. A profile created through the API without a
+visibility choice still starts as a private draft, and the account page offers to publish it. Handles cannot be edited once created, so
+shared links remain stable. Moderation can mark a profile hidden;
 the owner cannot republish it. Follows target only published people or topics. The account page
 shows the account's follows and a 90-day identity activity view. Audit entries include session,
 profile, follow, role, and wallet-link changes; they do not store a wallet signature or session
@@ -72,9 +76,11 @@ participation is designed.
   backup expiry or establish a restore objective.
 - A user's current nonfinancial account data comprises their account identifier and email if
   present, profile, wallet addresses and chain IDs, follows, and the remaining audit activity.
-  The authenticated account APIs expose those records in pages. A single download/export
-  endpoint is **not yet implemented**. Until one exists, an operator must fulfill an authenticated
-  export request using a reviewed, owner-scoped database query and a secure delivery channel.
+  The authenticated account APIs expose those records in pages. `GET /api/me/export`
+  (Privacy & data on the account page) downloads the account's profile, sign-in methods, follows,
+  notifications and retained activity as one JSON file. Chat messages, reports, debate
+  participation and Yap Coins records are not in it yet; an operator fulfils a request for them
+  using a reviewed, owner-scoped database query and a secure delivery channel.
 - Self-service account deletion is **not yet implemented**. An operator must verify account
   control, check for any applicable legal hold or future financial record obligation, then remove
   the account and associated profile, wallets, follows, sessions, and challenges. The audit table

@@ -272,7 +272,8 @@ session row (audited `sessions.logout_one`); it does not advance the account
 generation or queue a Privy freeze/unfreeze. The browser ends its own Privy
 session with Privy `logout()`. Sign out all sessions and Sign out other sessions,
 with `POST /api/auth/logout-all` and `/logout-other-sessions`, were removed. The
-Active sessions list on the account page still signs out one chosen device. This
+account page's Active sessions list was removed on 2026-10-24 (founder); its API
+remains. This
 is implemented and locally tested on branch `fix/single-device-logout`, not
 hosted-tested; see [Decision 0008](decisions/0008-auth-simplification.md) point 4.
 The next two paragraphs record the earlier decision and the `92f11b4` correction.
@@ -535,8 +536,9 @@ Header session authority stays on the server. Outage/retry, cross-tab logout and
 late balance responses are covered locally; legacy A4 balance events cannot set
 the financial header. CSP now supports the lazy popup site-wide while retaining
 configured media origins. OAuth credential parameters are excluded from return
-paths and HTTP request logs. The Deposit button explains that funding is not yet
-available. No provider identity, wallet, money journal or financial adapter is
+paths and HTTP request logs. The Deposit button explained that funding was not yet
+available; on 2026-10-24 it was removed until funding opens, and visitors now see one
+Sign in button that opens the account page. No provider identity, wallet, money journal or financial adapter is
 created by this UI change. Responsive container queries support 200% header
 reflow; a desktop/mobile comparison verifies shared geometry and typography
 without the debate stylesheet. That earlier UI revision `f942dc6` was deployed and

@@ -20,7 +20,8 @@ in `0e226c9`. Application819421d now includes those auth/UI changes and is verif
 device's session and calls no Privy reset; Sign out all sessions and Sign out
 other sessions were removed. With them went the `92f11b4` logout overlap
 handling and its owner-only rearm, so the pending "exact reviewed owner rearm"
-below can no longer run. The per-device Active sessions list remains. This is
+below can no longer run. The per-device Active sessions list was later removed
+from the account page (founder, 2026-10-24); its API remains. This is
 implemented and locally tested on branch `fix/single-device-logout`, not
 hosted-tested; see the [account contract](email-first-accounts.md#ownership-sessions-and-recovery).
 The dated entries below are kept as recorded.

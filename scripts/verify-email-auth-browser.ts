@@ -88,6 +88,18 @@ async function completeAtProvider(
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
 }
 
+// The header's Sign in button opens the account page; it offers both methods.
+async function signInFromHeader(page: Page, method: "Google" | "email") {
+  await page
+    .locator("[data-header-guest]")
+    .getByRole("link", { name: "Sign in", exact: true })
+    .click();
+  await page
+    .locator("#account-sign-in")
+    .getByRole("link", { name: `Continue with ${method}`, exact: true })
+    .click();
+}
+
 try {
   await server.start();
   await mkdir(artifactDir, { recursive: true });
@@ -108,11 +120,12 @@ try {
     await page.goto(`${origin}/debates`);
     const guest = page.locator("[data-header-guest]");
     await guest.waitFor({ state: "visible" });
+    // One Sign in button opens the account page, which offers both methods.
     assert.equal(
       await guest
-        .getByRole("link", { name: "Continue with Google", exact: true })
+        .getByRole("link", { name: "Sign in", exact: true })
         .getAttribute("href"),
-      "/api/auth/login?connection=google&return=%2Fdebates",
+      "/account?next=%2Fdebates",
     );
     assert.equal(
       await page.evaluate(
@@ -142,7 +155,7 @@ try {
         );
       }),
       false,
-      `${name} brand and sign-in links do not overlap`,
+      `${name} brand and sign-in button do not overlap`,
     );
     await page.screenshot({ path: `${artifactDir}/header-${name}.png` });
     await page.goto(`${origin}/account?next=%2Flive`);
@@ -168,7 +181,7 @@ try {
     await page.context().close();
   }
   checks.push(
-    "guest header and account page offer Google and email links with return paths at desktop and mobile widths",
+    "the guest header's one Sign in button and the account page's Google and email links keep return paths at desktop and mobile widths",
   );
 
   stage = "email-code sign-in returns signed in";
@@ -177,14 +190,75 @@ try {
   const first = await newPage();
   await first.goto(`${origin}/debates`);
   await dismissConsent(first);
-  await first
-    .locator("[data-header-guest]")
-    .getByRole("link", { name: "Continue with email", exact: true })
-    .click();
+  await signInFromHeader(first, "email");
   assert.equal(await first.locator("[data-connection]").textContent(), "email");
   await completeAtProvider(first, emailIdentity);
   await first.waitForURL(`${origin}/debates`);
   await first.locator("[data-header-member]").waitFor({ state: "visible" });
+  checks.push(
+    "email-code sign-in from the header returns to the starting page signed in",
+  );
+
+  stage = "a new account picks its name and handle first";
+  const setup = first.locator("dialog.profile-setup");
+  await setup.waitFor({ state: "visible" });
+  const suggested = email.split("@")[0]!.slice(0, 40).replace(/-+$/, "");
+  // The suggestion arrives with the sign-in methods, then its check.
+  await setup.getByText(`@${suggested} is free.`).waitFor();
+  assert.equal(
+    await setup.getByLabel("Handle", { exact: true }).inputValue(),
+    suggested,
+    "the sign-in email suggests the first handle",
+  );
+  await first.keyboard.press("Escape");
+  assert.equal(await setup.isVisible(), true, "Escape keeps the step open");
+  assert.equal(
+    await setup.getByRole("progressbar").getAttribute("aria-valuetext"),
+    "Step 1 of 2",
+  );
+  assert.equal(
+    await setup.getByRole("switch").count(),
+    0,
+    "no visibility choice",
+  );
+  await setup.getByLabel("Handle", { exact: true }).click();
+  await setup.getByRole("button", { name: "About handles" }).hover();
+  await setup
+    .getByRole("tooltip")
+    .filter({ hasText: "Handles never change" })
+    .first()
+    .waitFor();
+  const handle = `b-${randomUUID().slice(0, 8)}`;
+  await setup.getByLabel("Username", { exact: true }).fill("Browser Person");
+  // Going back to a handle already checked shows its answer again.
+  await setup.getByLabel("Handle", { exact: true }).fill(suggested);
+  await setup.getByText(`@${suggested} is free.`).waitFor({ timeout: 1000 });
+  await setup.getByLabel("Handle", { exact: true }).fill("Browser Person!");
+  assert.equal(
+    await setup.getByLabel("Handle", { exact: true }).inputValue(),
+    "browser-person",
+    "handles normalize as people type",
+  );
+  await setup.getByLabel("Handle", { exact: true }).fill(handle);
+  await setup.getByText(`@${handle} is free.`).waitFor();
+  await setup.getByRole("button", { name: "Continue" }).click();
+  await setup.getByRole("button", { name: "Claim my handle" }).waitFor();
+  assert.equal(
+    await setup.getByRole("progressbar").getAttribute("aria-valuetext"),
+    "Step 2 of 2",
+  );
+  await setup.getByRole("button", { name: "Claim my handle" }).click();
+  await setup.getByText("Welcome to the arena, Browser").waitFor();
+  await first.screenshot({ path: `${artifactDir}/profile-setup-done.png` });
+  await setup.getByRole("button", { name: "Start exploring" }).click();
+  await setup.waitFor({ state: "detached" });
+  assert.equal(
+    (await first.locator("[data-header-account]").textContent())?.trim(),
+    "BP",
+  );
+  checks.push(
+    "a new account must pick a username and permanent handle in the pop-up (Escape keeps it open, a progress bar shows the step, hovering a label explains handles); the email suggests a handle, input normalizes, availability shows, and the profile is public",
+  );
   const accountId = await account(first);
   assert.ok(accountId, "the strict session cookie arrives after the provider");
   assert.equal(
@@ -192,12 +266,24 @@ try {
     false,
     "the session cookie is HTTP-only",
   );
-  await first.goto(`${origin}/account`);
+  await first.goto(`${origin}/account#security`);
   await first.locator("#signed-in").waitFor({ state: "visible" });
+  const emailMethod = first
+    .locator("#sign-in-methods .settings-method")
+    .filter({ hasText: "Email code" });
+  await emailMethod.getByText(email, { exact: true }).waitFor();
   await first
-    .locator("#sign-in-methods")
-    .getByText(`Email code · ${email}`)
+    .locator("#activity-list")
+    .getByText("Created your profile")
     .waitFor();
+  assert.equal(
+    await first
+      .locator("#activity-list")
+      .getByText(/\w+\.\w+/)
+      .count(),
+    0,
+    "activity shows no raw event names",
+  );
   for (const retired of [
     "#embedded-wallet",
     "#email-auth",
@@ -205,17 +291,14 @@ try {
   ])
     assert.equal(await first.locator(retired).count(), 0, retired);
   checks.push(
-    "email-code sign-in returns to the starting page signed in with an HTTP-only session; the account page lists the method and no wallet card",
+    "the session is HTTP-only; Sign-in & security lists the method and readable activity, and no wallet card",
   );
 
   stage = "Google sign-in links through an email code";
   const second = await newPage();
   await second.goto(`${origin}/live`);
   await dismissConsent(second);
-  await second
-    .locator("[data-header-guest]")
-    .getByRole("link", { name: "Continue with Google", exact: true })
-    .click();
+  await signInFromHeader(second, "Google");
   assert.equal(
     await second.locator("[data-connection]").textContent(),
     "google-oauth2",
@@ -235,11 +318,19 @@ try {
   await completeAtProvider(second, emailIdentity);
   await second.waitForURL(`${origin}/live`);
   assert.equal(await account(second), accountId, "linked to the same account");
-  await second.goto(`${origin}/account`);
+  await second.locator("[data-header-member]").waitFor({ state: "visible" });
+  assert.equal(
+    await second.locator("dialog.profile-setup").count(),
+    0,
+    "an account with a profile skips the pop-up",
+  );
+  await second.goto(`${origin}/account#security`);
   await second
-    .locator("#sign-in-methods")
-    .getByText(`Google · ${email}`)
+    .locator("#sign-in-methods .settings-method")
+    .filter({ hasText: "Google" })
+    .getByText(email, { exact: true })
     .waitFor();
+  await second.goto(`${origin}/account#notifications`);
   await second
     .locator("#account-notifications")
     .getByText("Google sign-in was linked", { exact: false })
@@ -264,10 +355,7 @@ try {
   stage = "cancelled sign-in";
   const third = await newPage();
   await third.goto(`${origin}/debates`);
-  await third
-    .locator("[data-header-guest]")
-    .getByRole("link", { name: "Continue with Google", exact: true })
-    .click();
+  await signInFromHeader(third, "Google");
   await third.waitForURL((url) => `${url.origin}/` === issuer.issuer);
   await third.getByRole("button", { name: "Cancel", exact: true }).click();
   await third.getByRole("heading", { name: "Sign-in cancelled" }).waitFor();

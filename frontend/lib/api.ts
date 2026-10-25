@@ -5,6 +5,8 @@
 export interface ApiErrorBody {
   error?: string;
   code?: string;
+  /** The form field the error describes, when there is one. */
+  field?: string;
   retryAfterSeconds?: number;
 }
 
@@ -12,16 +14,19 @@ export class ApiError extends Error {
   declare readonly status: number;
   declare readonly code: string | undefined;
   declare readonly retryAfterSeconds: number | undefined;
+  declare readonly field: string | undefined;
   constructor(
     message: string,
     status: number,
     code?: string,
     retryAfterSeconds?: number,
+    field?: string,
   ) {
     super(message);
     this.status = status;
     this.code = code;
     this.retryAfterSeconds = retryAfterSeconds;
+    this.field = field;
   }
 }
 
@@ -144,6 +149,7 @@ export async function apiError(
     body.code,
     body.retryAfterSeconds ??
       (header && /^\d+$/.test(header) ? Number(header) : undefined),
+    typeof body.field === "string" ? body.field : undefined,
   );
 }
 

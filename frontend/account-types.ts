@@ -15,6 +15,7 @@ export interface FollowEntry {
 }
 export interface ActivityEntry {
   eventType: string;
+  label: string;
   occurredAt: string;
 }
 export interface CollectionPage<T> {
@@ -23,4 +24,12 @@ export interface CollectionPage<T> {
 }
 export interface AccountError extends Error {
   status?: number;
+  field?: string;
+}
+
+declare global {
+  interface WindowEventMap {
+    /** The signed-in account created or changed its profile. */
+    "yap:profile-changed": CustomEvent<Profile>;
+  }
 }

@@ -1,4 +1,5 @@
 import type { Pool } from "pg";
+import { activityLabel, hiddenActivityTypes } from "./activity.ts";
 
 export interface OwnedProfile {
   id: string;
@@ -21,8 +22,18 @@ export interface FollowItem {
 export interface ActivityItem {
   id: string;
   eventType: string;
+  label: string;
   occurredAt: Date;
 }
+
+export interface NotificationItem {
+  eventType: string;
+  message: string;
+  readAt: Date | null;
+  createdAt: Date;
+}
+
+type ActivityRow = Omit<ActivityItem, "label"> & { subject: string | null };
 
 function page<T>(rows: T[], limit: number, offset: number) {
   return {
@@ -34,6 +45,22 @@ function page<T>(rows: T[], limit: number, offset: number) {
 const profileFields = `id, handle, display_name AS "displayName", bio,
   publication_state AS "publicationState", created_at AS "createdAt",
   updated_at AS "updatedAt"`;
+
+// Role and sign-in method events name the role or method in subject_id; other
+// subjects are record IDs and stay private to the database.
+const activityFields = `id, event_type AS "eventType", occurred_at AS "occurredAt",
+  CASE WHEN event_type IN ('account_roles.insert', 'account_roles.delete',
+    'sign_in.method_linked') THEN subject_id END AS subject`;
+
+const labelled = (rows: ActivityRow[]): ActivityItem[] =>
+  rows.map(({ subject, ...row }) => ({
+    ...row,
+    label: activityLabel(row.eventType, subject),
+  }));
+
+// Export reads are bounded; an account with more rows than this is exported
+// by an operator.
+const exportLimit = 5000;
 
 export function createIdentityRepository(database: Pool) {
   return Object.freeze({
@@ -50,11 +77,12 @@ export function createIdentityRepository(database: Pool) {
       handle: string,
       displayName: string,
       bio: string | null,
+      publicationState: "draft" | "published" = "draft",
     ) {
       const result = await database.query<OwnedProfile>(
-        `INSERT INTO public_profiles (user_id, handle, display_name, bio)
-         VALUES ($1, $2, $3, $4) RETURNING ${profileFields}`,
-        [userId, handle, displayName, bio],
+        `INSERT INTO public_profiles (user_id, handle, display_name, bio, publication_state)
+         VALUES ($1, $2, $3, $4, $5) RETURNING ${profileFields}`,
+        [userId, handle, displayName, bio, publicationState],
       );
       if (!result.rows[0]) throw new Error("created profile was not returned");
       return result.rows[0];
@@ -87,6 +115,15 @@ export function createIdentityRepository(database: Pool) {
         ],
       );
       return result.rows[0] ?? null;
+    },
+
+    // Drafts, hidden and demo profiles hold their handles too.
+    async isHandleTaken(handle: string): Promise<boolean> {
+      const result = await database.query<{ taken: boolean }>(
+        "SELECT EXISTS (SELECT 1 FROM public_profiles WHERE handle = $1) AS taken",
+        [handle],
+      );
+      return result.rows[0]?.taken ?? false;
     },
 
     async getRoles(userId: string): Promise<string[]> {
@@ -184,13 +221,67 @@ export function createIdentityRepository(database: Pool) {
     },
 
     async listActivity(userId: string, limit: number, offset: number) {
-      const result = await database.query<ActivityItem>(
-        `SELECT id, event_type AS "eventType", occurred_at AS "occurredAt"
-         FROM identity_audit_events WHERE user_id = $1
+      const result = await database.query<ActivityRow>(
+        `SELECT ${activityFields}
+         FROM identity_audit_events
+         WHERE user_id = $1 AND event_type <> ALL($4::text[])
          ORDER BY occurred_at DESC, id DESC LIMIT $2 OFFSET $3`,
-        [userId, limit + 1, offset],
+        [userId, limit + 1, offset, hiddenActivityTypes],
       );
-      return page(result.rows, limit, offset);
+      return page(labelled(result.rows), limit, offset);
+    },
+
+    // The account's own nonfinancial records for a download (Decision 0002).
+    async exportData(userId: string) {
+      const [profile, follows, activity, notifications] = await Promise.all([
+        database.query<OwnedProfile>(
+          `SELECT ${profileFields} FROM public_profiles WHERE user_id = $1`,
+          [userId],
+        ),
+        database.query<FollowItem>(
+          `SELECT f.id, 'topic' AS "targetType", t.slug, t.title, f.created_at AS "createdAt"
+           FROM follows f JOIN topics t ON t.id = f.topic_id
+           WHERE f.user_id = $1
+           UNION ALL
+           SELECT f.id, 'profile' AS "targetType", p.handle AS slug,
+             p.display_name AS title, f.created_at AS "createdAt"
+           FROM follows f JOIN public_profiles p ON p.id = f.profile_id
+           WHERE f.user_id = $1
+           ORDER BY "createdAt" DESC, id DESC LIMIT $2`,
+          [userId, exportLimit],
+        ),
+        database.query<ActivityRow>(
+          `SELECT ${activityFields}
+           FROM identity_audit_events
+           WHERE user_id = $1 AND event_type <> ALL($3::text[])
+           ORDER BY occurred_at DESC, id DESC LIMIT $2`,
+          [userId, exportLimit, hiddenActivityTypes],
+        ),
+        database.query<NotificationItem>(
+          `SELECT event_type AS "eventType", message, read_at AS "readAt",
+             created_at AS "createdAt"
+           FROM account_notifications WHERE user_id = $1
+           ORDER BY created_at DESC, id DESC LIMIT $2`,
+          [userId, exportLimit],
+        ),
+      ]);
+      return {
+        profile: profile.rows[0] ?? null,
+        follows: follows.rows.map(({ targetType, slug, title, createdAt }) => ({
+          targetType,
+          slug,
+          title,
+          createdAt,
+        })),
+        activity: labelled(activity.rows).map(
+          ({ eventType, label, occurredAt }) => ({
+            eventType,
+            label,
+            occurredAt,
+          }),
+        ),
+        notifications: notifications.rows,
+      };
     },
 
     async deleteExpiredAudit() {

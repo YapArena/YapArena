@@ -503,7 +503,6 @@
 }
 .header-login,
 .header-signup,
-.header-deposit,
 .header-retry {
   appearance: none;
   border: 1px solid #314a59;
@@ -525,14 +524,12 @@
   color: #d8e6ef;
   background: transparent;
 }
-.header-signup,
-.header-deposit {
+.header-signup {
   color: #071b16;
   background: #30dfa3;
   border-color: #30dfa3;
 }
-.header-signup:hover,
-.header-deposit:hover {
+.header-signup:hover {
   color: #061c14;
   background: #69edbf;
   border-color: #69edbf;
@@ -541,10 +538,6 @@
   background: #142733;
   border-color: #5d9a8b;
   color: #fff;
-}
-.header-deposit svg {
-  width: 18px;
-  height: 18px;
 }
 .header-retry {
   background: #142432;
@@ -633,6 +626,23 @@
   letter-spacing: 0.12em;
   padding: 12px 11px 10px;
 }
+.header-menu-caption > strong,
+.header-menu-caption > strong + span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0;
+}
+.header-menu-caption > strong {
+  color: #54a68b;
+  font-size: 0.84rem;
+}
+.header-menu-caption > strong + span {
+  margin-top: 2px;
+  color: #86a3b6;
+  font-size: 0.72rem;
+}
 .header-user-popover a,
 .header-user-popover button {
   display: flex;
@@ -661,82 +671,9 @@
   margin-top: 6px;
   color: #e9b4b7;
 }
-.site-header :focus-visible,
-.header-deposit-dialog :focus-visible {
+.site-header :focus-visible {
   outline: 2px solid #35e3a4;
   outline-offset: 4px;
-}
-.header-deposit-dialog {
-  --account-surface: #0d1a26;
-  --account-line: #243b49;
-  --account-soft: #112331;
-  color: #edf6fc;
-  background: #0d1a26;
-  width: min(440px, calc(100vw - 28px));
-  max-height: calc(100dvh - 40px);
-  border: 1px solid #2d4652;
-  border-radius: 22px;
-  padding: 0;
-  box-shadow: 0 35px 130px #0009;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-.header-deposit-dialog::backdrop {
-  background: #020910ba;
-  backdrop-filter: blur(7px);
-}
-.site-auth-close {
-  position: absolute;
-  right: 12px;
-  top: 12px;
-  z-index: 2;
-  width: 44px;
-  height: 44px;
-  min-height: 44px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  color: #9bb3c5;
-  font-size: 1.6rem;
-  line-height: 1;
-  cursor: pointer;
-  padding: 0;
-}
-.site-auth-close:hover {
-  background: #19303c;
-  color: #e9f7ff;
-}
-.header-deposit-dialog {
-  padding: 42px 30px 30px;
-}
-.header-deposit-dialog > .eyebrow {
-  font-size: 0.58rem;
-}
-.header-deposit-dialog h2 {
-  font-size: 1.65rem;
-  margin: 12px 0 26px;
-  letter-spacing: -0.04em;
-}
-.deposit-rate {
-  display: block;
-  padding: 24px;
-  border: 1px solid #31584b;
-  border-radius: 14px;
-  background: #122b27;
-  color: #62efb9;
-  font-size: 1.45rem;
-  text-align: center;
-}
-.header-deposit-dialog p {
-  color: #acc3d2;
-  line-height: 1.75;
-  font-size: 0.86rem;
-  margin: 22px 0;
-}
-.header-deposit-dialog > a {
-  width: 100%;
 }
 @media (max-width: 1100px) {
   .site-header .arena-nav {
@@ -773,8 +710,7 @@
 }
 @media (max-width: 560px) {
   .header-login,
-  .header-signup,
-  .header-deposit {
+  .header-signup {
     padding: 11px 13px;
     font-size: 0.75rem;
   }
@@ -793,10 +729,6 @@
   .site-header .arena-avatar {
     width: 38px;
     height: 38px;
-  }
-  .header-deposit svg {
-    width: 16px;
-    height: 16px;
   }
   .header-user-popover {
     top: calc(100% + 12px);
@@ -834,8 +766,7 @@
     gap: 8px;
   }
   .header-login,
-  .header-signup,
-  .header-deposit {
+  .header-signup {
     padding: 11px 13px;
     font-size: 0.75rem;
   }
@@ -865,16 +796,14 @@
   }
 }
 
-/* Signed-out and no-JavaScript headers show two sign-in links. At phone
-   widths the wordmark gives way to them, as it already does for members. */
+/* Without JavaScript the header shows both sign-in links. At phone widths
+   the wordmark gives way to them, as it already does for members. */
 @media (max-width: 560px) {
-  .site-header[data-session="guest"] .brand span,
   .site-header:not([data-enhanced]) .brand span {
     display: none;
   }
 }
 @container site-header (max-width: 560px) {
-  .site-header[data-session="guest"] .brand span,
   .site-header:not([data-enhanced]) .brand span {
     display: none;
   }
@@ -887,5 +816,514 @@
     line-height: 1.15;
     text-align: center;
     white-space: normal;
+  }
+}
+
+/* Profile setup: the pop-up every new account completes before anything else
+   (frontend/profile-setup.ts). */
+.profile-setup {
+  --ps-surface: #0b1722;
+  --ps-field: #07101a;
+  --ps-acid: #35e3a4;
+  --ps-danger: #ff8f9a;
+  width: min(480px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 1px solid #2b4656;
+  border-radius: 28px;
+  background:
+    radial-gradient(120% 60% at 50% -12%, #203343 0%, transparent 62%),
+    var(--ps-surface);
+  color: #f0f4fa;
+  box-shadow:
+    0 40px 140px #000000cc,
+    inset 0 1px 0 #edf9f40d;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+}
+.profile-setup[open] {
+  animation: ps-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.profile-setup::backdrop {
+  background: radial-gradient(circle at 50% 30%, #142632d9, #020910f0);
+  backdrop-filter: blur(10px);
+}
+/* Stays inside the frame: wider glow would make the pop-up scroll sideways
+   when a step moves focus. */
+.ps-glow {
+  position: absolute;
+  inset: -130px 0 auto;
+  height: 280px;
+  background: conic-gradient(
+    from 200deg,
+    transparent,
+    #35e3a433,
+    #afc1d026,
+    transparent 60%
+  );
+  filter: blur(44px);
+  pointer-events: none;
+}
+.ps-form {
+  position: relative;
+  padding: 30px 30px 28px;
+}
+.ps-step {
+  display: grid;
+  gap: 14px;
+}
+.ps-step[hidden] {
+  display: none;
+}
+.ps-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #edf9f4;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+.ps-mark {
+  width: 26px;
+  height: 30px;
+  fill: none;
+  stroke: var(--ps-acid);
+  stroke-width: 2.4;
+}
+.profile-setup h2 {
+  margin: 0;
+  font-size: clamp(1.55rem, 5vw, 1.95rem);
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+  outline: none;
+}
+/* Two segments: the first fills on step 1, both on step 2. No words; the
+   progress bar's value is announced instead. */
+.ps-progress {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 18px 0 22px;
+}
+.ps-progress > span {
+  position: relative;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #262626;
+}
+.ps-progress > span::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #edf9f4;
+  box-shadow: 0 0 12px #edf9f480;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.ps-progress > span:first-child::after,
+.ps-progress:not([data-progress="1"]) > span:last-child::after {
+  transform: scaleX(1);
+}
+.ps-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.ps-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0;
+  padding: 12px 14px;
+  border: 1px solid #29414b;
+  border-radius: 18px;
+  background: #101926b3;
+}
+.ps-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  border: 1px solid #4c8e7d;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #1d6b52, #273033);
+  color: #edf9f4;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.ps-preview-text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.ps-preview-text > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ps-preview-text > span {
+  color: #9aacc0;
+  font-size: 0.82rem;
+}
+.ps-field {
+  display: grid;
+  gap: 7px;
+}
+.ps-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.ps-label-row label {
+  color: #dce8ef;
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+/* The label and its info button show the handle note on hover or focus. */
+.ps-label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.ps-info {
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  padding: 0;
+  border: 1px solid #3a4c60;
+  border-radius: 50%;
+  background: transparent;
+  color: #91a6b9;
+  font:
+    700 0.62rem/1 Arial,
+    Helvetica,
+    sans-serif;
+  cursor: help;
+}
+.ps-label:hover .ps-info,
+.ps-info:focus-visible {
+  border-color: #edf9f4;
+  color: #edf9f4;
+}
+/* Beside the label so it never hides the field above; above it on phones. */
+.ps-tip {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  translate: 0 -50%;
+  z-index: 3;
+  width: max-content;
+  max-width: min(290px, 74vw);
+  padding: 10px 12px;
+  border: 1px solid #373947;
+  border-radius: 12px;
+  background: #172634;
+  box-shadow: 0 16px 40px #000c;
+  color: #d6d6d6;
+  font-size: 0.74rem;
+  font-weight: 400;
+  line-height: 1.5;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition:
+    opacity 0.15s,
+    transform 0.15s,
+    visibility 0.15s;
+  pointer-events: none;
+}
+.ps-label:hover .ps-tip,
+.ps-label:focus-within .ps-tip {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+@media (max-width: 560px) {
+  .ps-tip {
+    left: 0;
+    top: auto;
+    bottom: calc(100% + 10px);
+    translate: none;
+  }
+}
+.ps-count {
+  color: #7d93a4;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+}
+.profile-setup input:not([type="checkbox"]) {
+  width: 100%;
+  min-height: 52px;
+  padding: 13px 15px;
+  border: 1px solid #3a5566;
+  border-radius: 14px;
+  background: var(--ps-field);
+  color: #f4f8fb;
+  font: inherit;
+  font-size: 1rem;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.profile-setup input::placeholder {
+  color: #6e8797;
+}
+.profile-setup input:not([type="checkbox"]):focus {
+  outline: none;
+  border-color: var(--ps-acid);
+  box-shadow: 0 0 0 4px #35e3a41f;
+}
+.profile-setup input[aria-invalid="true"] {
+  border-color: var(--ps-danger);
+}
+.ps-handle {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.ps-at {
+  position: absolute;
+  left: 15px;
+  color: #859db4;
+  pointer-events: none;
+}
+.profile-setup .ps-handle input {
+  padding-left: 33px;
+  padding-right: 46px;
+}
+.ps-handle-icon {
+  position: absolute;
+  right: 15px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+.ps-handle[data-state="checking"] .ps-handle-icon {
+  border: 2px solid #345348;
+  border-top-color: var(--ps-acid);
+  animation: ps-spin 0.8s linear infinite;
+}
+.ps-handle[data-state="available"] .ps-handle-icon {
+  background: var(--ps-acid)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e1c28' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 4 4L19 6'/%3E%3C/svg%3E")
+    center / 12px no-repeat;
+}
+.ps-handle[data-state="taken"] .ps-handle-icon,
+.ps-handle[data-state="invalid"] .ps-handle-icon {
+  background: var(--ps-danger)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23300a10' stroke-width='3.4' stroke-linecap='round'%3E%3Cpath d='M7 7l10 10M17 7 7 17'/%3E%3C/svg%3E")
+    center / 11px no-repeat;
+}
+.ps-status,
+.ps-error {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+.ps-status {
+  min-height: 1.1em;
+  color: #94a4b7;
+}
+.ps-handle[data-state="available"] + .ps-status {
+  color: var(--ps-acid);
+}
+.ps-handle[data-state="taken"] + .ps-status,
+.ps-handle[data-state="invalid"] + .ps-status,
+.ps-error {
+  color: var(--ps-danger);
+}
+.ps-primary,
+.ps-secondary {
+  min-height: 52px;
+  padding: 0 20px;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.ps-primary {
+  margin-top: 4px;
+  border: 0;
+  background: linear-gradient(180deg, #69edbf, #30dfa3);
+  color: #08121d;
+  box-shadow:
+    0 10px 30px #30dfa333,
+    inset 0 1px 0 #edf9f466;
+  transition:
+    filter 0.2s,
+    box-shadow 0.2s,
+    transform 0.12s;
+}
+.ps-primary:hover:not(:disabled) {
+  filter: brightness(1.06);
+  box-shadow: 0 14px 38px #30dfa352;
+}
+.ps-primary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.ps-primary:disabled,
+.ps-primary:disabled:hover {
+  background: #1a2b36;
+  color: #6e8797;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.ps-secondary {
+  margin-top: 4px;
+  border: 1px solid #35505c;
+  background: #10212d;
+  color: #d6e4ec;
+}
+.ps-secondary:hover {
+  border-color: #4c8e7d;
+  background: #273033;
+}
+.ps-actions {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+}
+.ps-claim {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 24px 18px;
+  border: 1px solid #3a4c60;
+  border-radius: 22px;
+  background: radial-gradient(circle at 50% 0, #1f3443, #0b1822 72%);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.ps-avatar-large {
+  width: 76px;
+  height: 76px;
+  margin-bottom: 8px;
+  font-size: 1.5rem;
+  box-shadow: 0 0 40px #35e3a433;
+}
+.ps-claim strong {
+  font-size: 1.15rem;
+}
+.ps-claim > span:last-child {
+  color: var(--ps-acid);
+  font-weight: 650;
+}
+.ps-form-error {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #6b2f3b;
+  border-radius: 12px;
+  background: #3a1820;
+  color: #ffc2c8;
+  font-size: 0.8rem;
+}
+.ps-form-error[hidden] {
+  display: none;
+}
+.ps-done {
+  padding: 26px 0 8px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.ps-check {
+  display: grid;
+  justify-self: center;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  margin-bottom: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #51e6bf 0, #eaf4f9 72%);
+  box-shadow:
+    0 0 0 10px #35e3a41a,
+    0 0 60px #35e3a455;
+  animation: ps-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.ps-check svg {
+  width: 34px;
+  height: 34px;
+  fill: none;
+  stroke: #08121d;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ps-done .ps-primary {
+  width: 100%;
+  margin-top: 18px;
+}
+.profile-setup :focus-visible {
+  outline: 2px solid var(--ps-acid);
+  outline-offset: 3px;
+}
+/* Headings take focus only so screen readers hear the new step. */
+.profile-setup h2:focus-visible {
+  outline: none;
+}
+@keyframes ps-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+@keyframes ps-up {
+  from {
+    opacity: 0;
+    transform: translateY(48px);
+  }
+}
+@keyframes ps-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes ps-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+/* Phones get a bottom sheet. */
+@media (max-width: 560px) {
+  .profile-setup {
+    width: 100%;
+    max-width: 100%;
+    max-height: 94dvh;
+    margin: auto 0 0;
+    border-bottom: 0;
+    border-radius: 26px 26px 0 0;
+  }
+  .profile-setup[open] {
+    animation-name: ps-up;
+  }
+  .ps-form {
+    padding: 24px 20px 6px;
+  }
+  .ps-form {
+    padding-bottom: calc(22px + env(safe-area-inset-bottom));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .profile-setup[open],
+  .ps-check,
+  .ps-handle-icon {
+    animation: none !important;
+  }
+  .ps-progress > span::after,
+  .ps-tip,
+  .ps-primary,
+  .profile-setup input {
+    transition: none;
   }
 }

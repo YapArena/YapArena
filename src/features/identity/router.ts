@@ -21,34 +21,88 @@ function pagination(query: Record<string, unknown>) {
     : null;
 }
 
-function profileInput(body: unknown) {
+type ProfileField = "handle" | "displayName" | "bio" | "publicationState";
+type FieldProblem = { field?: ProfileField; message: string };
+
+// People see these messages next to the field they describe.
+const problems = {
+  body: { message: "invalid profile fields" },
+  handle: {
+    field: "handle",
+    message:
+      "Use 3 to 40 lowercase letters, numbers or hyphens, starting with a letter or number.",
+  },
+  displayName: {
+    field: "displayName",
+    message: "Enter a username between 1 and 80 characters.",
+  },
+  bio: { field: "bio", message: "Keep your bio to 500 characters or fewer." },
+  publicationState: {
+    field: "publicationState",
+    message: "Choose a public or private profile.",
+  },
+} as const satisfies Record<string, FieldProblem>;
+
+function invalid(response: Response, problem: FieldProblem) {
+  return response.status(400).json({
+    error: problem.message,
+    code: "invalid_profile",
+    ...(problem.field ? { field: problem.field } : {}),
+  });
+}
+
+function profileInput(body: unknown):
+  | {
+      value: {
+        handle: string;
+        displayName: string;
+        bio: string | null;
+        publicationState: "draft" | "published";
+      };
+    }
+  | { problem: FieldProblem } {
   if (typeof body !== "object" || body === null || Array.isArray(body))
-    return null;
+    return { problem: problems.body };
   const value = body as Record<string, unknown>;
   if (
     Object.keys(value).some(
-      (key) => !["handle", "displayName", "bio"].includes(key),
+      (key) =>
+        !["handle", "displayName", "bio", "publicationState"].includes(key),
     )
   )
-    return null;
+    return { problem: problems.body };
   const handle = value.handle;
   const displayName = value.displayName;
   const bio = value.bio ?? null;
-  if (typeof handle !== "string" || !handlePattern.test(handle)) return null;
+  const publicationState = value.publicationState ?? "draft";
+  if (typeof handle !== "string" || !handlePattern.test(handle))
+    return { problem: problems.handle };
   if (
     typeof displayName !== "string" ||
     displayName.trim().length < 1 ||
     displayName.trim().length > 80
   )
-    return null;
+    return { problem: problems.displayName };
   if (bio !== null && (typeof bio !== "string" || bio.length > 500))
-    return null;
-  return { handle, displayName: displayName.trim(), bio };
+    return { problem: problems.bio };
+  if (publicationState !== "draft" && publicationState !== "published")
+    return { problem: problems.publicationState };
+  return {
+    value: { handle, displayName: displayName.trim(), bio, publicationState },
+  };
 }
 
-function profileChanges(body: unknown) {
+function profileChanges(body: unknown):
+  | {
+      value: {
+        displayName?: string;
+        bio?: string | null;
+        publicationState?: "draft" | "published";
+      };
+    }
+  | { problem: FieldProblem } {
   if (typeof body !== "object" || body === null || Array.isArray(body))
-    return null;
+    return { problem: problems.body };
   const value = body as Record<string, unknown>;
   const keys = Object.keys(value);
   if (
@@ -57,7 +111,7 @@ function profileChanges(body: unknown) {
       (key) => !["displayName", "bio", "publicationState"].includes(key),
     )
   )
-    return null;
+    return { problem: problems.body };
   const changes: {
     displayName?: string;
     bio?: string | null;
@@ -69,7 +123,7 @@ function profileChanges(body: unknown) {
       value.displayName.trim().length < 1 ||
       value.displayName.trim().length > 80
     )
-      return null;
+      return { problem: problems.displayName };
     changes.displayName = value.displayName.trim();
   }
   if ("bio" in value) {
@@ -77,7 +131,7 @@ function profileChanges(body: unknown) {
       value.bio !== null &&
       (typeof value.bio !== "string" || value.bio.length > 500)
     )
-      return null;
+      return { problem: problems.bio };
     changes.bio = value.bio;
   }
   if ("publicationState" in value) {
@@ -85,27 +139,44 @@ function profileChanges(body: unknown) {
       value.publicationState !== "draft" &&
       value.publicationState !== "published"
     )
-      return null;
+      return { problem: problems.publicationState };
     changes.publicationState = value.publicationState;
   }
-  return changes;
+  return { value: changes };
 }
 
-function isUniqueViolation(error: unknown) {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    error.code === "23505"
-  );
+function uniqueViolation(error: unknown) {
+  if (
+    typeof error !== "object" ||
+    error === null ||
+    !("code" in error) ||
+    error.code !== "23505"
+  )
+    return null;
+  // public_profiles_handle_key versus public_profiles_user_id_key.
+  return "constraint" in error &&
+    typeof error.constraint === "string" &&
+    error.constraint.includes("user_id")
+    ? "profile"
+    : "handle";
 }
+
+export type ExportSources = {
+  signInMethods?: (
+    userId: string,
+  ) => Promise<readonly { method: string; email: string; linkedAt: Date }[]>;
+};
 
 export function createIdentityRouter({
   identity,
   recordProductAction,
+  exportSources = {},
+  now = () => new Date(),
 }: {
   identity: Repository;
   recordProductAction?: ProductActionRecorder;
+  exportSources?: ExportSources;
+  now?: () => Date;
 }) {
   const router = Router();
   const requireParticipant = createRequireRole(identity, ["participant"]);
@@ -122,37 +193,102 @@ export function createIdentityRouter({
   });
   router.post("/profile", requireParticipant, async (request, response) => {
     const input = profileInput(request.body);
-    if (!input)
-      return response.status(400).json({ error: "invalid profile fields" });
+    if ("problem" in input) return invalid(response, input.problem);
     try {
       const profile = await identity.createProfile(
         request.user!.id,
-        input.handle,
-        input.displayName,
-        input.bio,
+        input.value.handle,
+        input.value.displayName,
+        input.value.bio,
+        input.value.publicationState,
       );
       return response.status(201).json({ profile });
     } catch (error) {
-      if (isUniqueViolation(error))
-        return response
-          .status(409)
-          .json({ error: "profile or handle already exists" });
+      const duplicate = uniqueViolation(error);
+      if (duplicate === "handle")
+        return response.status(409).json({
+          error: "That handle is taken. Try another.",
+          code: "handle_taken",
+          field: "handle",
+        });
+      if (duplicate === "profile")
+        return response.status(409).json({
+          error: "You already have a profile.",
+          code: "profile_exists",
+        });
       throw error;
     }
   });
   router.patch("/profile", requireParticipant, async (request, response) => {
     const changes = profileChanges(request.body);
-    if (!changes)
-      return response.status(400).json({ error: "invalid profile fields" });
+    if ("problem" in changes) return invalid(response, changes.problem);
     const current = await identity.getProfile(request.user!.id);
     if (!current)
       return response.status(404).json({ error: "profile not found" });
     if (current.publicationState === "hidden")
-      return response.status(403).json({ error: "profile is restricted" });
-    const profile = await identity.updateProfile(request.user!.id, changes);
+      return response.status(403).json({
+        error:
+          "Your profile is restricted by moderation. Contact support before changing it.",
+      });
+    const profile = await identity.updateProfile(
+      request.user!.id,
+      changes.value,
+    );
     return profile
       ? response.json({ profile })
-      : response.status(409).json({ error: "profile could not be updated" });
+      : response.status(409).json({
+          error: "Your profile couldn't be saved. Refresh and try again.",
+        });
+  });
+
+  // Whether a handle can still be claimed. Requires a session, so it cannot be
+  // used to list drafts anonymously.
+  router.get("/handles/:handle", async (request, response) => {
+    const handle = request.params.handle;
+    if (typeof handle !== "string" || !handlePattern.test(handle))
+      return response.json({ handle, available: false, reason: "invalid" });
+    const taken = await identity.isHandleTaken(handle);
+    return response.json({
+      handle,
+      available: !taken,
+      ...(taken ? { reason: "taken" } : {}),
+    });
+  });
+
+  // Decision 0002: one download of the account's own nonfinancial records.
+  router.get("/export", async (request, response) => {
+    const user = request.user!;
+    const [data, methods] = await Promise.all([
+      identity.exportData(user.id),
+      exportSources.signInMethods?.(user.id) ?? [],
+    ]);
+    const exportedAt = now();
+    response
+      .type("application/json")
+      .attachment(
+        `yaparena-account-${exportedAt.toISOString().slice(0, 10)}.json`,
+      );
+    return response.send(
+      JSON.stringify(
+        {
+          exportedAt: exportedAt.toISOString(),
+          account: {
+            id: user.id,
+            createdAt: user.createdAt,
+            signInMethods: methods.map(({ method, email, linkedAt }) => ({
+              method,
+              email,
+              linkedAt,
+            })),
+          },
+          ...data,
+          notIncluded:
+            "Chat messages, reports, debate participation and Yap Coins records are not part of this download yet.",
+        },
+        null,
+        2,
+      ),
+    );
   });
 
   router.get("/roles", async (request, response) =>

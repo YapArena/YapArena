@@ -45,15 +45,14 @@ function showWalletSummary(target: HTMLElement, value: WalletView) {
   const note = document.createElement("p");
   note.className = "wallet-availability-note";
   note.textContent = value.withdrawalsEnabled
-    ? "Purchased coins have no profit target. Grant principal stays spend-only."
-    : "Withdrawals are not open yet. Grant principal stays spend-only.";
+    ? "Coins you buy can be withdrawn. Grant coins can only be spent; their profits unlock once the grant qualifies."
+    : "Withdrawals aren’t open yet.";
   const list = document.createElement("div");
   list.className = "wallet-grant-progress";
   if (!value.grants.length) {
     const empty = document.createElement("p");
     empty.className = "wallet-grants-empty";
-    empty.textContent =
-      "No promotional grants yet. Purchased coins have no profit target.";
+    empty.textContent = "No grants yet.";
     list.append(empty);
   }
   for (const [index, grant] of value.grants.entries()) {
@@ -117,12 +116,46 @@ function showWalletSummary(target: HTMLElement, value: WalletView) {
 const moneyCard = document.querySelector<HTMLElement>(
   "#account-wallet-progress",
 );
+// The /coins wallet: balances for members, a sign-in prompt for visitors.
+const coinWallet = document.querySelector<HTMLElement>("#account-wallet");
+function showCoinWallet(value: WalletView | null, problem = "") {
+  if (!coinWallet) return;
+  const status = coinWallet.querySelector<HTMLElement>(
+    "[data-coin-wallet-status]",
+  );
+  const signedOut = coinWallet.querySelector<HTMLElement>(
+    "[data-coin-wallet-signed-out]",
+  );
+  const balances = coinWallet.querySelector<HTMLElement>(
+    "[data-coin-wallet-balances]",
+  );
+  if (status) {
+    status.textContent = problem;
+    status.hidden = !problem;
+  }
+  if (signedOut) signedOut.hidden = Boolean(value) || Boolean(problem);
+  if (balances) balances.hidden = !value;
+  for (const target of coinWallet.querySelectorAll<HTMLElement>(
+    "[data-funds]",
+  )) {
+    const kind = target.dataset.funds;
+    const amount =
+      kind === "available" ||
+      kind === "reserved" ||
+      kind === "pending" ||
+      kind === "promotional"
+        ? value?.[kind]
+        : undefined;
+    target.textContent = amount ? `${amount} YC` : "—";
+  }
+}
 async function refreshMoneyCard() {
   if (!moneyCard) return;
   const epoch = walletEpoch;
   try {
     const value = await readWallet();
     if (epoch !== walletEpoch) return;
+    showCoinWallet(value);
     if (value) showWalletSummary(moneyCard, value);
     else {
       moneyCard.replaceChildren();
@@ -130,6 +163,10 @@ async function refreshMoneyCard() {
     }
   } catch {
     if (epoch !== walletEpoch) return;
+    showCoinWallet(
+      null,
+      "Your balance is temporarily unavailable. Refresh to try again.",
+    );
     moneyCard.textContent =
       "Withdrawal progress is temporarily unavailable. Try your balance menu again shortly.";
     moneyCard.hidden = false;
@@ -222,8 +259,8 @@ for (const opener of document.querySelectorAll<HTMLAnchorElement>(
   close.textContent = "×";
   status.role = "status";
   status.className = "wallet-dialog-status";
-  account.href = "/account#account-wallet";
-  account.textContent = "Account balances and settings →";
+  account.href = "/coins";
+  account.textContent = "Balances and Yap Coins →";
   account.className = "wallet-dialog-account-link";
   heading.append(eyebrow, title);
   header.append(heading, close);

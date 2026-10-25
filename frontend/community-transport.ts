@@ -45,7 +45,7 @@ export async function api<T = unknown>(
         (header && /^\d+$/.test(header) ? Number(header) : undefined);
       throw new CommunityApiError(
         response.status === 401
-          ? "Log in to continue."
+          ? "Sign in to continue."
           : data.error || `Request failed (${response.status}).`,
         response.status,
         data.code,

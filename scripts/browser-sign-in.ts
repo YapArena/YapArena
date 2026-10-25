@@ -21,6 +21,26 @@ export async function signInForTest(
   return body;
 }
 
+// Every page asks a signed-in account without a profile to pick its handle
+// first (frontend/profile-setup.ts). Verifiers that test something else give
+// their accounts a profile before opening a page.
+export async function createProfileForTest(
+  context: BrowserContext,
+  base: string,
+  profile: {
+    handle: string;
+    displayName: string;
+    bio?: string;
+    publicationState?: "draft" | "published";
+  },
+) {
+  const response = await context.request.post(`${base}/api/me/profile`, {
+    data: { publicationState: "draft", ...profile },
+  });
+  if (response.status() !== 201)
+    throw new Error(`test profile failed with HTTP ${response.status()}`);
+}
+
 // The entry the verifiers start instead of dist/server.js. It refuses
 // production, Render, provider settings and non-loopback origins.
 export const testIdentityEntry = "scripts/test-identity-entry.ts";

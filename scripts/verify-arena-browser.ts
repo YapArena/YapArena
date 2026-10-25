@@ -52,16 +52,17 @@ export async function verifyArenaBrowser({
       base,
       "neon-ui-" + randomUUID() + "@example.test",
     );
-    await page.goto(base + "/account");
-    const dismiss = page.getByRole("button", { name: "Not now", exact: true });
-    if (await dismiss.isVisible()) await dismiss.click();
-    await page.locator("#signed-in").waitFor({ state: "visible" });
+    // A published profile before the first page keeps the handle pop-up away.
     await api("me/profile", {
       handle: "ui-trial-" + randomUUID().slice(0, 8),
       displayName: "UI Test Participant",
       bio: "Synthetic local interface trial.",
+      publicationState: "published",
     });
-    await api("me/profile", { publicationState: "published" }, "patch");
+    await page.goto(base + "/account");
+    const dismiss = page.getByRole("button", { name: "Not now", exact: true });
+    if (await dismiss.isVisible()) await dismiss.click();
+    await page.locator("#signed-in").waitFor({ state: "visible" });
     const debates = await api<PublicList<PublicDebate>>(
         "public/debates?limit=50",
       ),

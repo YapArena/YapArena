@@ -474,7 +474,7 @@ if (root) {
               (m, i) =>
                 html`${cardMarkup(m, m.id === expandedIdea)}${i === insert ? detailMarkup(expanded()!, following.has(expandedIdea!)) : ""}`,
             )}`
-          : html`<p class="ya-empty">${data.available === false ? "Discovery temporarily unavailable. Try again shortly." : nav === "following" && followsState === "signed-out" ? html`Sign in to see your followed ideas. <a href="/account">Log in</a>.` : nav === "following" && followsState === "unavailable" ? "Follow status is unavailable. Try again when your connection returns." : "No ideas match this view. Try another category or follow an idea above."}</p>`
+          : html`<p class="ya-empty">${data.available === false ? "Discovery temporarily unavailable. Try again shortly." : nav === "following" && followsState === "signed-out" ? html`<a href="/account">Sign in</a> to see your followed ideas.` : nav === "following" && followsState === "unavailable" ? "Follow status is unavailable. Try again when your connection returns." : "No ideas match this view. Try another category or follow an idea above."}</p>`
       ).toString();
       revealSparks($("#ya-grid"));
       if (insert >= 0) {
