@@ -12,8 +12,6 @@ import { createPriceInspector } from "./arena-price.js";
 import { watchRoom } from "./community-stream.js";
 import {
   pointsRevision,
-  tooFewState,
-  tooFewText,
   windowPoints,
   type RevealedWindow,
 } from "./window-chart-model.js";
@@ -66,12 +64,7 @@ if (root) {
   const chart = createRoundChart(root, selectRound, (point) => {
     prices.show(point ?? defaultPrice);
   });
-  function renderSentiment(
-    point: RoundPoint,
-    caption: string,
-    kind: string,
-    emptyLabel = `No ${kind.toLowerCase()} endorsements`,
-  ) {
+  function renderSentiment(point: RoundPoint, caption: string, kind: string) {
     const pct = sharePercent(point.share);
     ui("yes").textContent = pct === null ? "—" : pct.toFixed(1) + "%";
     ui("no").textContent = pct === null ? "—" : (100 - pct).toFixed(1) + "%";
@@ -80,7 +73,7 @@ if (root) {
     ui("sentiment-bar").setAttribute(
       "aria-label",
       pct === null
-        ? emptyLabel
+        ? `No ${kind.toLowerCase()} endorsements`
         : `${kind} YES ${pct.toFixed(1)}%, NO ${(100 - pct).toFixed(1)}%`,
     );
     ui("sentiment-bar").style.setProperty("--yes-share", (pct ?? 0) + "%");
@@ -102,15 +95,7 @@ if (root) {
     ui("scope").textContent = "Yap Coins · revealed turn windows";
     ui("sync").textContent =
       "● Revealed results · updates when a turn's results are revealed";
-    if (latest.state === tooFewState)
-      renderSentiment(
-        latest,
-        `Yap Coins · turn ${latest.number} · ${tooFewText.toLowerCase()}`,
-        "Revealed",
-        tooFewText,
-      );
-    else
-      renderSentiment(latest, `Yap Coins · turn ${latest.number}`, "Revealed");
+    renderSentiment(latest, `Yap Coins · turn ${latest.number}`, "Revealed");
     ui("round-label").textContent = `Turn ${latest.number}`;
     ui("round-state").textContent = "revealed";
     ui("countdown").textContent = "Revealed Yap Coins results";

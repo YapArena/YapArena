@@ -285,7 +285,7 @@ export function createRoundChart(
               index === points.length - 1)
               ? "0"
               : "-1",
-          "aria-label": `Round ${point.number}: ${point.argumentLabel || "Argument not labeled"}. ${point.yes === null ? (point.state === "too_few" ? "Too few positions to show results" : "No endorsements") : `YES ${point.yes.toFixed(2)}%, NO ${(100 - point.yes).toFixed(2)}%`}. Offered price ${sharePercent(point.offer) === null ? "unavailable" : sharePercent(point.offer)!.toFixed(2) + " cents"}.`,
+          "aria-label": `Round ${point.number}: ${point.argumentLabel || "Argument not labeled"}. ${point.yes === null ? "No endorsements" : `YES ${point.yes.toFixed(2)}%, NO ${(100 - point.yes).toFixed(2)}%`}. Offered price ${sharePercent(point.offer) === null ? "unavailable" : sharePercent(point.offer)!.toFixed(2) + " cents"}.`,
           class: `arena-chart-point${point.id === selectedId ? " is-selected" : ""}`,
           "data-chart-round": point.id,
         });
