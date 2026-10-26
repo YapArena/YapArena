@@ -185,7 +185,7 @@ describe("room signals from the page's EventSource", () => {
       {
         room,
         cursor: "5",
-        topics: ["media", "round", "activity", "window"],
+        topics: ["media", "round", "activity", "window", "outline"],
       },
       { room, cursor: "7", topics: ["media", "round", "window"] },
     ]);

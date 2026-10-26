@@ -12,12 +12,18 @@ const publicDirectory = path.join(repository, "public");
 // own /assets/<name>.js URL. Only src/ imports are inlined: sibling frontend
 // imports such as ./arena-chart.js stay separate requests, exactly as the
 // per-file transform emits them.
-const inPlaceBundles = ["a4", "a4-inline"];
-// Classic (non-module) page scripts that use frontend/lib/ keep their URL and
-// script scope as IIFE bundles with their own copy of the shared code. The
-// session store in that code is shared through window.yapSession, so every
-// copy on a page reaches the same instance (see frontend/lib/session.ts).
-const classicBundles = ["session-coordination", "account", "account-balance"];
+const inPlaceBundles = ["a4", "a4-inline", "outline-state", "outline-panel"];
+// Classic (non-module) page scripts that use frontend/lib/ or another frontend
+// module keep their URL and script scope as IIFE bundles with their own copy of
+// the shared code. The session store in that code is shared through
+// window.yapSession, so every copy on a page reaches the same instance (see
+// frontend/lib/session.ts).
+const classicBundles = [
+  "session-coordination",
+  "account",
+  "account-balance",
+  "matching",
+];
 const keepSiblingImports: Plugin = {
   name: "keep-sibling-imports",
   setup(context) {

@@ -86,6 +86,7 @@ export function createWebServer(
     debaterSettings,
     transcription,
     transcriber,
+    outlines,
   } = services;
   // Web only: the jobs worker serves no streams.
   const matchmakingStreams = matchmaking
@@ -118,9 +119,14 @@ export function createWebServer(
     debaterSettings,
     transcriptionIngest:
       transcription && config.liveOutline.ingestSecret
-        ? { repository: transcription, secret: config.liveOutline.ingestSecret }
+        ? {
+            repository: transcription,
+            outlines,
+            secret: config.liveOutline.ingestSecret,
+          }
         : undefined,
     dispatchTranscriber: transcriber?.dispatch,
+    outlines,
     messages: createMessageRepository(database),
     database,
     a4,

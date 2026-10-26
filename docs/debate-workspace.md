@@ -26,6 +26,20 @@ existing surface: it preserves media nodes, tracks, playback and chat. Hover,
 keyboard focus and touch expose the control; Restore or Escape returns its exact
 original bounds. Keyboard focus stays inside the enlarged video until restored.
 
+**Layout since 2026-10-25 (founder-approved; supersedes the column order above):**
+chat sits in the left column. The centre column is the widest: any status banner above
+the video, then the 16:9 video, the debate line and topic tags, then the outline and
+the chart. The right column holds the participation (later betting) panel, then debate
+info; the panel keeps its natural height instead of ending at the graph's boundary. The
+debate question appears in the video's top-left corner, and the broadcast state with the
+watch count in its top-right corner, left of the expand button, while the pointer is over
+the video or focus is inside it. On touch screens a tap on the video shows them until the
+next tap elsewhere (the browser's hover emulation). They never take clicks, the question
+stays the page's `h1` for screen readers, and reduced motion removes the fade. From 1190 px down, chat moves below the video and panel. On phones the
+order is: banner, video, panel, chat, debate line, outline and chart, then the rest of the
+right column. The layout is in [`debate-web.ts`](../src/features/discovery/debate-web.ts)
+and the grid rules in `public/arena.css`.
+
 ## Data and interaction
 
 - Header search submits to the existing published-debate search. Navigation opens
@@ -118,6 +132,12 @@ on this page belong to the betting interface work (Decision 0013).
 With the live outline enabled, a captions line sits under the video once the page joins the
 LiveKit room. It shows the active speaker's latest words from the transcriber agent, at a fixed
 height so nothing below moves, and a Captions button turns it off for this browser.
+Below the video, an "AI outline" panel shows the active turn's arguments and points in the
+speaker's language, earlier turns underneath, and the debater's own flags. It has a fixed height
+and scrolls inside itself; live changes arrive over LiveKit and are highlighted briefly. After
+each turn a cleanup replaces that turn's entry with its final outline. On a replay the panel
+follows the video: it shows the outline as it was at the playing position, with earlier turns'
+final outlines.
 
 ## Verification and operation
 

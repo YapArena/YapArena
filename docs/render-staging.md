@@ -189,15 +189,17 @@ before deploying. Its secrets live in LiveKit Cloud and Render; never in the rep
 3. Set the agent's secrets with `lk agent update-secrets` (each update restarts it). LiveKit injects
    `LIVEKIT_URL`, `LIVEKIT_API_KEY` and `LIVEKIT_API_SECRET`; do not set them.
 
-   | Agent secret                    | Value                                                          |
-   | ------------------------------- | -------------------------------------------------------------- |
-   | `YAPARENA_INGEST_URL`           | The staging HTTPS origin, for example `https://<staging-host>` |
-   | `TRANSCRIPTION_INGEST_SECRET`   | The secret from step 1                                         |
-   | `TRANSCRIPTION_PROVIDER`        | `deepgram` (LiveKit Inference) or `elevenlabs`                 |
-   | `TRANSCRIPTION_SHADOW_PROVIDER` | Optional, the other provider, for the comparison trial         |
-   | `ELEVEN_API_KEY`                | Only when either provider is `elevenlabs`                      |
-   | `TRANSCRIBER_AGENT_NAME`        | Optional; defaults to `yaparena-transcriber`                   |
-   | `CAPTION_UPDATES_PER_SECOND`    | Optional; interim captions per second, 1–10, default 4         |
+   | Agent secret                    | Value                                                                |
+   | ------------------------------- | -------------------------------------------------------------------- |
+   | `YAPARENA_INGEST_URL`           | The staging HTTPS origin, for example `https://<staging-host>`       |
+   | `TRANSCRIPTION_INGEST_SECRET`   | The secret from step 1                                               |
+   | `TRANSCRIPTION_PROVIDER`        | `deepgram` (LiveKit Inference) or `elevenlabs`                       |
+   | `TRANSCRIPTION_SHADOW_PROVIDER` | Optional, the other provider, for the comparison trial               |
+   | `ELEVEN_API_KEY`                | Only when either provider is `elevenlabs`                            |
+   | `TRANSCRIBER_AGENT_NAME`        | Optional; defaults to `yaparena-transcriber`                         |
+   | `CAPTION_UPDATES_PER_SECOND`    | Optional; interim captions per second, 1–10, default 4               |
+   | `ANTHROPIC_API_KEY`             | Enables the AI outline (Claude Haiku 5.5); without it, captions only |
+   | `OUTLINE_MIN_INTERVAL_MS`       | Optional; at least this long between outline calls, default 3000     |
 
 4. On **both** web and the jobs worker, set `LIVE_OUTLINE_ENABLED=true`, the same
    `TRANSCRIPTION_INGEST_SECRET`, and `TRANSCRIBER_AGENT_NAME` if you changed it. Deploy.
@@ -205,6 +207,12 @@ before deploying. Its secrets live in LiveKit Cloud and Render; never in the rep
    the debate becomes ready, the agent joins within about a second (`lk agent logs`:
    `transcriber joined`). Captions appear under the video, and
    `SELECT count(*) FROM yaparena.transcript_segments WHERE debate_id=...` grows during each turn.
+   With `ANTHROPIC_API_KEY` set, the "AI outline" panel fills within a few seconds of each
+   sentence, and `lk agent logs` shows `live outline call` lines whose `cacheReadTokens` is above
+   zero after the first call of a turn. A few seconds after each turn, a `window cleanup call` line
+   (Claude Sonnet 5.5) appears and the turn's entry under "Earlier turns" changes to its final
+   outline; `SELECT final_source FROM yaparena.outline_windows WHERE debate_id=...` shows `cleanup`,
+   or `frozen` when no cleanup arrived within a minute.
    The agent leaves when the debate ends.
 
 Never run the agent locally with `start` against the staging project and the production agent name:

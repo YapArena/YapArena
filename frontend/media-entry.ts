@@ -49,7 +49,9 @@ if (root) {
   // The media page template supplies this event ID and the controls below.
   const id = root.dataset.mediaEvent!;
   // Decision 0012: captions and the AI outline follow this page's Room.
-  const liveOutline = document.querySelector("[data-live-captions]")
+  const liveOutline = document.querySelector(
+    "[data-live-captions],[data-live-outline]",
+  )
     ? import("./live-outline.js").then((outline) =>
         outline.startLiveOutline(id),
       )

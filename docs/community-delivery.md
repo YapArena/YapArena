@@ -239,8 +239,11 @@ room and projection).
 | `round`    | a human-only run is created or changes state, or one of its rounds changes state                                        | the signed-in A4 workspace              |
 | `activity` | a consenting creator's sandbox round settles, publication consent changes, or a seed round is added                     | `GET /api/public/debates/<id>/activity` |
 | `window`   | a Yap Coins round or turn window opens, settles or is voided ([Decision 0012](decisions/0012-live-argument-outline.md)) | `GET /api/public/debates/<id>/windows`  |
+| `outline`  | a window's AI outline is frozen or finalized, or a debater flags an outline item                                        | `GET /api/public/debates/<id>/outline`  |
 
-Migration `1792971645611_add-turn-trading-windows.js` adds `window`. Yap Coins rounds are shared
+Migration `1792971645611_add-turn-trading-windows.js` adds `window`, and
+`1792984708611_add-live-outline.js` adds `outline`. Live outline edits and final outlines never use the log: they
+reach viewers over LiveKit, and the `outline` signal is only their fallback. Yap Coins rounds are shared
 by everyone on the debate, and turn windows follow the public turn clock, so the signal reveals
 only timing that viewers already see. The coin loop settles a batch of rounds in one transaction,
 so a batch spanning several rooms takes their counters at COMMIT in settlement order, not UUID

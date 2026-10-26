@@ -10,6 +10,7 @@ import { AgentDispatchClient } from "livekit-server-sdk";
 import { createDebaterSettings } from "./features/transcription/debater-settings.ts";
 import { createTranscriberDispatcher } from "./features/transcription/dispatch.ts";
 import { createTranscriptionRepository } from "./features/transcription/repository.ts";
+import { createOutlineRepository } from "./features/outline/repository.ts";
 import { createMediaOperations } from "./features/media/operations.ts";
 import { createMediaAccountRevocation } from "./features/media/account-revocation.ts";
 import { createDebateAutoStart } from "./features/media/auto-start.ts";
@@ -85,6 +86,9 @@ export function createServices({
     config.liveOutline.enabled && config.media
       ? createTranscriptionRepository(database)
       : undefined;
+  const outlines = transcription
+    ? createOutlineRepository(database)
+    : undefined;
   const transcriber =
     transcription && config.media
       ? createTranscriberDispatcher({
@@ -196,15 +200,22 @@ export function createServices({
     debaterSettings,
     transcription,
     transcriber,
+    outlines,
     // Everything createRuntime needs except the web-only app and community
     // streams, and the per-process background-jobs switch.
     background: {
       a4,
       coinDebates,
       transcription:
-        transcription && transcriber
+        transcription && transcriber && outlines
           ? {
-              tick: () => transcriber.tick(),
+              // Warm-up dispatch, then freeze windows past their cutoff and
+              // keep the frozen outline as final when no cleanup came.
+              tick: async () => {
+                await transcriber.tick();
+                await outlines.freezeDue();
+                await outlines.finalizeDue();
+              },
               pruneExpired: () => transcription.pruneExpired(),
             }
           : undefined,

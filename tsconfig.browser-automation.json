@@ -30,6 +30,7 @@
     "scripts/verify-homepage-browser.ts",
     "scripts/verify-hero-browser.ts",
     "scripts/verify-measurement-browser.ts",
-    "scripts/seed-public-bots.ts"
+    "scripts/seed-public-bots.ts",
+    "scripts/verify-outline-browser.ts"
   ]
 }

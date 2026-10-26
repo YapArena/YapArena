@@ -2,11 +2,13 @@ import { Router, type Request, type Response } from "express";
 import {
   INGEST_MAX_BYTES,
   ingestHeaders,
+  parseOutlineCleanup,
   parseSessionRequest,
   parseTranscriptUpdate,
   verifyIngest,
 } from "./protocol.ts";
 import type { createTranscriptionRepository } from "./repository.ts";
+import type { createOutlineRepository } from "../outline/repository.ts";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -47,6 +49,7 @@ export function createDebateRateLimit({
 // body parser before JSON parsing, cookies and same-origin protection.
 export function createTranscriptionIngestRouter({
   repository,
+  outlines,
   secret,
   allow = createDebateRateLimit(),
   now = Date.now,
@@ -55,6 +58,8 @@ export function createTranscriptionIngestRouter({
     ReturnType<typeof createTranscriptionRepository>,
     "ingest" | "session"
   >;
+  /** Decision 0012: accepts the window cleanup when the outline is on. */
+  outlines?: Pick<ReturnType<typeof createOutlineRepository>, "applyCleanup">;
   secret: string;
   allow?: (debateId: string) => boolean;
   now?: () => number;
@@ -107,6 +112,15 @@ export function createTranscriptionIngestRouter({
     if (!update)
       return response.status(400).json({ error: "invalid transcript update" });
     const result = await repository.ingest(input.id, update);
+    return response.status(result.status).json(result.body);
+  });
+  router.post("/debates/:id/cleanup", async (request, response) => {
+    const input = authenticated(request, response);
+    if (!input) return;
+    const cleanup = parseOutlineCleanup(input.value);
+    if (!cleanup || !outlines)
+      return response.status(400).json({ error: "invalid outline cleanup" });
+    const result = await outlines.applyCleanup(input.id, cleanup);
     return response.status(result.status).json(result.body);
   });
   router.post("/debates/:id/session", async (request, response) => {

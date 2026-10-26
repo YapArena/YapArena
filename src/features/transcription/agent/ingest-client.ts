@@ -1,8 +1,10 @@
 import { setTimeout as delay } from "node:timers/promises";
+import type { TurnOutline } from "../../outline/reducer.ts";
 import {
   ingestHeaders,
   signIngest,
   type DebaterLanguage,
+  type OutlineCleanup,
   type Side,
   type TranscriptUpdate,
 } from "../protocol.ts";
@@ -14,6 +16,7 @@ import {
 export interface SessionState {
   debateId: string;
   debateStatus: string;
+  proposition: string;
   media: {
     state: string;
     turnNumber: number;
@@ -27,6 +30,11 @@ export interface SessionState {
     language: DebaterLanguage | null;
     consented: boolean;
   }[];
+  outline: {
+    version: number;
+    turn: TurnOutline | null;
+    map: { id: string; turnNumber: number; side: Side; label: string }[];
+  };
 }
 export interface IngestAnswer {
   status: number;
@@ -99,6 +107,10 @@ export function createIngestClient({
     },
     update(update: TranscriptUpdate) {
       return post("updates", update);
+    },
+    /** The window cleanup; the server accepts one per window. */
+    cleanup(cleanup: OutlineCleanup) {
+      return post("cleanup", cleanup);
     },
   });
 }

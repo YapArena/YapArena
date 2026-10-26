@@ -81,8 +81,10 @@ strict TypeScript in `src/features/transcription/agent/`, its own compiler proje
 `npm run build` emits it to `dist-transcriber/`. Its LiveKit packages are pinned development
 dependencies in the root lockfile, so the web image never installs them; its image
 (`deploy/transcriber/Dockerfile`) does. `stage-transcriber.ts`, checked in the database-tools
-project, copies only the agent's build context for `lk agent deploy`. `transcription-trial.ts`, in
-the same project, scores the providers for the
+project, copies only the agent's build context for `lk agent deploy`. `verify-outline-browser.ts`,
+checked in browser automation and run by `npm run verify:browser`, drives the outline panel in
+Chrome with synthetic LiveKit messages and an in-memory outline store. `transcription-trial.ts`, in the
+database-tools project, scores the providers for the
 [staging trial](transcription-provider-trial.md).
 
 These former JavaScript files retain their names with a `.ts` extension:

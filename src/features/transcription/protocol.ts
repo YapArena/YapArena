@@ -1,4 +1,15 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import {
+  parseCleanupArguments,
+  type CleanupArgument,
+} from "../outline/cleanup.ts";
+import {
+  OUTLINE_LIMITS,
+  proposedOps,
+  type ProposedEdit,
+  type Span,
+  type TurnOutline,
+} from "../outline/reducer.ts";
 
 // Decision 0012: the private protocol between the transcriber agent (LiveKit
 // Cloud) and the YapArena server, which stays the authority. Shared by both
@@ -39,6 +50,15 @@ export interface TranscriptSegment {
   /** Audio the provider received for this segment. */
   audioMs: number;
 }
+/** The live loop's proposal: the model's edits to the turn's outline. */
+export interface OutlineProposal {
+  /** The outline version the proposal was made against. */
+  baseVersion: number;
+  /** The summarized transcript, in milliseconds from the turn's start. */
+  span: Span;
+  edits: ProposedEdit[];
+  model: string;
+}
 export interface TranscriptUpdate {
   jobId: string;
   /** Monotonic per job, from 0. A retry repeats its sequence and body. */
@@ -47,10 +67,52 @@ export interface TranscriptUpdate {
   /** The agent's clock when it sent the update, epoch milliseconds. */
   sentAt: number;
   segments: TranscriptSegment[];
+  outline?: OutlineProposal;
+}
+/** The server's answer to an outline proposal. */
+export type OutlineAnswer =
+  | {
+      accepted: true;
+      version: number;
+      turnNumber: number;
+      side: Side;
+      language: DebaterLanguage;
+      edits: import("../outline/reducer.ts").OutlineEdit[];
+      rejected: number;
+    }
+  | {
+      accepted: false;
+      reason: "stale" | "unchanged";
+      version: number;
+      turn: TurnOutline | null;
+    };
+export { OUTLINE_TOPIC } from "../outline/public-types.ts";
+/** The reliable LiveKit data message for each accepted outline version. */
+export interface OutlineMessage {
+  v: 1;
+  type: "edits";
+  debateId: string;
+  version: number;
+  turnNumber: number;
+  side: Side;
+  language: DebaterLanguage;
+  edits: import("../outline/reducer.ts").OutlineEdit[];
 }
 export interface SessionRequest {
   jobId: string;
 }
+/**
+ * The window cleanup: Claude Sonnet 5.5's rewrite of a finished turn's
+ * outline, sent once after the turn ends. The server accepts at most one per
+ * window, until CLEANUP_ACCEPT_MS after the window froze.
+ */
+export interface OutlineCleanup {
+  jobId: string;
+  turnNumber: number;
+  model: string;
+  arguments: CleanupArgument[];
+}
+export const CLEANUP_ACCEPT_MS = 60_000;
 
 /** The room-metadata hint the server writes on every turn change. */
 export interface TurnHint {
@@ -156,13 +218,61 @@ function segment(value: unknown): TranscriptSegment | null {
   };
 }
 
+const nullableText = (value: unknown) =>
+  value === null || (typeof value === "string" && value.length <= 500);
+function proposal(value: unknown): OutlineProposal | null {
+  if (
+    !isObject(value) ||
+    !exactKeys(value, ["baseVersion", "span", "edits", "model"]) ||
+    !integer(value.baseVersion, 0, 10_000_000) ||
+    !isObject(value.span) ||
+    !exactKeys(value.span, ["startMs", "endMs"]) ||
+    !integer(value.span.startMs, 0, 3_600_000) ||
+    !integer(value.span.endMs, value.span.startMs as number, 3_600_000) ||
+    typeof value.model !== "string" ||
+    !/^[a-z0-9.-]{1,100}$/.test(value.model) ||
+    !Array.isArray(value.edits) ||
+    value.edits.length > OUTLINE_LIMITS.edits
+  )
+    return null;
+  const edits: ProposedEdit[] = [];
+  for (const edit of value.edits) {
+    if (
+      !isObject(edit) ||
+      !exactKeys(edit, ["op", "argument", "point", "key", "text", "target"]) ||
+      !proposedOps.includes(edit.op as ProposedEdit["op"]) ||
+      !["argument", "point", "key", "text", "target"].every((field) =>
+        nullableText(edit[field]),
+      )
+    )
+      return null;
+    edits.push(edit as unknown as ProposedEdit);
+  }
+  return {
+    baseVersion: value.baseVersion as number,
+    span: {
+      startMs: value.span.startMs as number,
+      endMs: value.span.endMs as number,
+    },
+    edits,
+    model: value.model,
+  };
+}
+
 /** Strict parse: unknown fields, bad types or exceeded limits give null. */
 export function parseTranscriptUpdate(value: unknown): TranscriptUpdate | null {
   if (
     !isObject(value) ||
-    !exactKeys(value, ["jobId", "sequence", "turnNumber", "sentAt", "segments"])
+    !exactKeys(
+      value,
+      ["jobId", "sequence", "turnNumber", "sentAt", "segments"],
+      ["outline"],
+    )
   )
     return null;
+  const outline =
+    value.outline === undefined ? undefined : proposal(value.outline);
+  if (outline === null) return null;
   if (
     !jobId(value.jobId) ||
     !integer(value.sequence, 0, 10_000_000) ||
@@ -180,7 +290,30 @@ export function parseTranscriptUpdate(value: unknown): TranscriptUpdate | null {
     turnNumber: value.turnNumber as number,
     sentAt: value.sentAt as number,
     segments: segments as TranscriptSegment[],
+    ...(outline ? { outline } : {}),
   };
+}
+
+export function parseOutlineCleanup(value: unknown): OutlineCleanup | null {
+  if (
+    !isObject(value) ||
+    !exactKeys(value, ["jobId", "turnNumber", "model", "arguments"]) ||
+    !jobId(value.jobId) ||
+    !Number.isSafeInteger(value.turnNumber) ||
+    (value.turnNumber as number) < 1 ||
+    typeof value.model !== "string" ||
+    !/^[a-z0-9.-]{1,100}$/.test(value.model)
+  )
+    return null;
+  const items = parseCleanupArguments(value.arguments);
+  return items
+    ? {
+        jobId: value.jobId,
+        turnNumber: value.turnNumber as number,
+        model: value.model,
+        arguments: items,
+      }
+    : null;
 }
 
 export function parseSessionRequest(value: unknown): SessionRequest | null {

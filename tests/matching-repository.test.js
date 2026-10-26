@@ -224,6 +224,20 @@ function fake(options = {}) {
     if (sql.startsWith("UPDATE event_participants SET active")) return row();
     if (sql.startsWith('SELECT user_id AS "userId" FROM event_participants'))
       return row([{ userId: "1" }, { userId: "2" }]);
+    // Direct challenges (Decision 0011): open-challenge counts, presence and time proposals.
+    if (sql.startsWith("SELECT count(*)::int AS count FROM match_requests"))
+      return row([{ count: options.outgoing ? 1 : 0 }]);
+    if (sql.startsWith("SELECT 1 FROM matchmaking_presence")) return row();
+    if (
+      sql.startsWith("INSERT INTO challenge_time_proposals") ||
+      sql.startsWith("UPDATE challenge_time_proposals")
+    )
+      return row();
+    if (
+      sql.startsWith('SELECT id, proposed_by AS "proposedBy"') ||
+      sql.startsWith('SELECT id, request_id AS "requestId"')
+    )
+      return row(options.proposals ?? []);
     throw new Error(`Unexpected SQL: ${sql}`);
   }
   const pool = { query, connect: async () => ({ query, release() {} }) };
@@ -374,11 +388,11 @@ describe("matching repository transaction boundaries", () => {
       () => active.repository.acceptRequest("2", id),
       MatchConflictError,
     );
+    // A booking's time window comes from the active rules, so none means no request.
     const missingRule = fake({ ruleMissing: true });
-    await missingRule.repository.createRequest("1", direct);
     await assert.rejects(
-      () => missingRule.repository.acceptRequest("2", id),
-      MatchConflictError,
+      () => missingRule.repository.createRequest("1", direct),
+      /no event rules are active/,
     );
     const wrongOwner = fake();
     await wrongOwner.repository.createRequest("1", direct);

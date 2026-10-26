@@ -204,8 +204,87 @@ concurrency, also halved for the turn overlap (Free 6, Starter 9, Creator 15, Pr
 Approximate costs per live debate hour: agent session $0.60 beyond included minutes, Nova-3
 monolingual $0.29, ElevenLabs Scribe v2 Realtime $0.39; a shadow provider adds its own cost.
 
-## Later pull requests
+## Pull request 3: the live AI outline
 
-3. Live outline: loop module, Haiku integration, shared reducer, outline versions, freeze, LiveKit
-   delivery, initial page state, outline panel.
-4. Sonnet cleanup, correlation, chart integration, replay sync and timeline endpoint.
+Also behind `LIVE_OUTLINE_ENABLED`; the agent writes outlines only when it has an
+`ANTHROPIC_API_KEY`. Migration `1792984708611_add-live-outline`.
+
+- **Shared reducer** (`src/features/outline/reducer.ts`, browser-safe). A turn's outline has at most
+  4 arguments (label ≤ 80 characters) of at most 6 points (≤ 120), each with its time span in the
+  turn. Canonical edits: `add_argument`, `update_argument`, `add_point`, `update_point`,
+  `remove_point`, `link_rebuttal`. IDs are window-scoped (`t3a1`, `t3a1p2`) and never reused.
+  The server resolves the model's proposal (temporary keys, no timings) into canonical edits with
+  `resolveEdits`; the server, agent and browsers all apply them with `applyEdits`.
+- **Live loop** (`src/features/transcription/agent/outline-loop.ts`, host-independent). Each final
+  sentence triggers a call when none is in flight and at least `OUTLINE_MIN_INTERVAL_MS` (default 3000) passed since the last started; otherwise one call is scheduled. Text accumulates; there is
+  never a backlog of calls; a skipped call's text is kept for the next. A turn's end flushes once.
+- **Claude Haiku 5.5** (`claude.ts`). Thinking off, effort low, a strict JSON schema, `max_tokens`
+  800, no retries, a 4 s abort; a refusal or a late answer is skipped (Claude Haiku 5.5 has no
+  server-side refusal fallback). The cached prefix is the stable instructions, with French and
+  English examples (over the model's 512-token cache minimum), then the proposition and
+  debate-wide argument map; the current outline, new text and about 20 s of context follow
+  uncached. Each call logs latency and cache read and write tokens.
+- **Ingest.** A transcript update may carry a proposal (`baseVersion`, `span`, `edits`, `model`).
+  The ingest transaction resolves it under the debate's outline head lock: a stale base answers
+  with the latest version and outline so the agent resynchronizes; edits that cannot apply, text
+  with French or English slurs or insults (`moderation.ts`), and an outline over 8 KB are
+  dropped. An accepted proposal becomes the next live version (`outline_versions`, contiguous per
+  debate). Its segments are stored either way.
+- **Delivery.** The agent publishes each accepted version as `{v, type: "edits", debateId, version,
+turnNumber, side, language, edits}` on the reliable LiveKit topic `yap.outline.v1`. Browsers
+  apply version N+1 and repair any gap with one `GET /api/public/debates/:id/outline?after=N`
+  (at most 50 versions, else a snapshot; ETag). A page that has not joined the video opens a
+  data-only LiveKit connection through the viewer-token endpoint after 3 s; only when that fails
+  does it re-read on the `outline` room signal, spread over 3 s. The debate page embeds the current
+  outline, so loading it needs no request.
+- **Freeze.** Each second the jobs loop records, for every window past its cutoff, the latest live
+  version created before it (`outline_windows.frozen_*`): what traders saw. Versions after the
+  cutoff are marked outside the window. Pull request 4 adds the final outline.
+- **Flags.** `POST /api/debates/:id/outline/flags` lets the debater who spoke a turn flag one of its
+  items as a mistake; the panel shows the flag publicly. Freezing and flagging send the `outline`
+  room signal.
+- **Panel** (`frontend/live-outline.ts`, `outline-panel.ts`, `outline-state.ts`, loaded with the
+  captions as one lazy chunk). Labeled "AI outline", in the speaker's language, side shown by name
+  and side label. Keyed DOM updates touch only changed text, once per animation frame and never
+  while the tab is hidden; a brief highlight on change (none under reduced motion); a fixed-height
+  body that scrolls inside itself; screen readers hear new arguments only, at most every 10 s.
+
+## Pull request 4: cleanup, replay sync and correlation
+
+No migration; it uses PR3's `outline_windows.final_*` columns and PR1c's `recording_clocks`. Still
+behind `LIVE_OUTLINE_ENABLED` and the agent's `ANTHROPIC_API_KEY`.
+
+- **Window cleanup (Claude Sonnet 5.5).** After a turn's last live call, the agent sends the whole
+  turn's transcript (at most its last 8,000 characters), the live outline and the debate's earlier
+  arguments to `claude-sonnet-5-5`. Adaptive thinking at low effort (the model rejects disabled
+  thinking), a strict JSON schema, a 20 s timeout and one retry, prompt caching of the stable
+  instructions. A policy decline is retried server-side on the default fallback
+  (`fallbacks: "default"`, beta `server-side-fallback-2026-07-01`); a refusal that remains is skipped.
+  The rewrite reuses live argument IDs, and links each argument to an earlier one it rebuts
+  (either side) or continues (same side).
+- **Final outline.** `POST /api/internal/transcription/debates/:id/cleanup` (signed like ingest)
+  accepts one cleanup per window, until 60 s after the window froze (`not_frozen` makes the agent
+  retry every 3 s, eight times). The server resolves it (`src/features/outline/cleanup.ts`): live
+  IDs, spans and unchanged points are kept; new items are numbered above every live one; links
+  must name earlier arguments; slurs drop their item; 8 KB at most. It becomes the window's final
+  outline (`final_source='cleanup'`), and the agent publishes `{v, type: "final", debateId, turn}` on
+  `yap.outline.v1`, which pages apply to that earlier turn. A window with no cleanup 60 s after its
+  freeze keeps its frozen outline as final (`final_source='frozen'`, jobs loop). Finalizing sends the
+  `outline` room signal, and the snapshot's ETag now includes the number of final windows.
+- **Replay timeline.** `GET /api/public/debates/:id/outline/timeline`: every live version with its
+  edits and its time in the recording (`at`, from the recording clock), and each turn's final
+  outline. Once the debate ended and every window is final it is immutable and cached for a day.
+  A replay page reads it once and, on the player's `yap:playback` event (`{debateId,
+positionSeconds, playing}`, dispatched by the replay player), shows the outline as it was: a
+  binary search for the last version shown by then, replayed forward incrementally; earlier turns
+  show their final outline. No request during playback.
+- **Correlation.** `GET /api/public/debates/:id/outline/correlation`, from revealed (settled)
+  windows with a final outline only, never unrevealed data. Per window: the quantity-weighted YES
+  share and its change from the previous reported window. Per argument: its thread (the first
+  argument of its `continues` chain), and the share of the window's commitments made while it was on
+  screen (live orders after it first appeared; replay orders at a later position). Nothing is
+  reported for a window with fewer than five commitments.
+- **Chart.** `windowArgumentLabel` in `frontend/arena-chart.ts` turns a window's final argument labels
+  into the heading slot's text, replacing the manual argument label for turn windows. Today's chart
+  shows A4 rounds, not turn windows; the betting panel's chart (B) passes it each settled window's
+  final labels from the timeline.
