@@ -22,6 +22,7 @@ import { createMetrics } from "./platform/metrics.ts";
 import { createCommunityStreams } from "./features/community/streams.ts";
 import { createServices } from "./services.ts";
 import { createUserStreams } from "./platform/user-streams.ts";
+import { RESULTS_CHANNEL } from "./features/account-wallet/debate-sandbox.ts";
 
 // Builds the web service. dist/server.js runs it for every deployment; the
 // local test identity entry under scripts/ wraps the same application.
@@ -102,7 +103,7 @@ export function createWebServer(
         },
         channels: {
           yaparena_user_v1: "state",
-          yaparena_results_v1: "results",
+          [RESULTS_CHANNEL]: "results",
         },
         presence: matchmaking
           ? (userIds) => matchmaking.touchMany(userIds)
