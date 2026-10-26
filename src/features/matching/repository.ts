@@ -1,6 +1,12 @@
 import { randomUUID } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
 import { withTransaction } from "../../platform/transaction.ts";
+import {
+  BOOKING_LEAD_SECONDS,
+  DEFAULT_MAXIMUM_DURATION_SECONDS,
+  QUEUE_JOIN_SECONDS,
+  SCHEDULED_JOIN_SECONDS,
+} from "./timings.ts";
 
 export class MatchConflictError extends Error {}
 export class MatchNotFoundError extends Error {}
@@ -84,13 +90,71 @@ export async function profileFor(client: PoolClient, userId: string) {
   return result.rows[0].id;
 }
 
-export async function ensureAvailable(client: PoolClient, userId: string) {
+export interface Reservation {
+  from: Date;
+  until: Date;
+}
+
+/** The enabled platform rule version, which every new debate snapshots. */
+export async function activeRules(client: PoolClient) {
+  const rule = await client.query<{ version: string; rules: object }>(
+    "SELECT version, rules FROM event_rule_versions WHERE enabled ORDER BY created_at DESC LIMIT 1",
+  );
+  if (!rule.rows[0]) throw new MatchConflictError("no event rules are active");
+  return rule.rows[0];
+}
+
+function maximumSeconds(rules: object) {
+  const value =
+    "maximum_duration_seconds" in rules
+      ? rules.maximum_duration_seconds
+      : undefined;
+  return typeof value === "number" && Number.isInteger(value) && value > 0
+    ? value
+    : DEFAULT_MAXIMUM_DURATION_SECONDS;
+}
+
+/**
+ * The time a seat holds (Decision 0011): a scheduled debate from a few minutes before its start
+ * to its latest possible end; a queue match from now to the end of its join window plus the
+ * rules' maximum duration.
+ */
+export function reservationFor(
+  booking: "now" | "scheduled",
+  start: Date,
+  rules: object,
+): Reservation {
+  const lead = booking === "scheduled" ? BOOKING_LEAD_SECONDS : 0;
+  const join =
+    booking === "scheduled" ? SCHEDULED_JOIN_SECONDS : QUEUE_JOIN_SECONDS;
+  return {
+    from: new Date(start.getTime() - lead * 1000),
+    until: new Date(start.getTime() + (join + maximumSeconds(rules)) * 1000),
+  };
+}
+
+// A player's seats must not overlap. A seat recorded before reservations has no window and
+// blocks every time until its debate ends; a live debate can overrun its window after pauses,
+// so it also blocks the next 15 minutes. Callers hold the player's lock (`lockUsers`).
+export async function ensureAvailable(
+  client: PoolClient,
+  userId: string,
+  reservation: Reservation,
+) {
   const result = await client.query(
-    "SELECT 1 FROM event_participants WHERE user_id = $1 AND active LIMIT 1",
-    [userId],
+    `SELECT 1 FROM event_participants WHERE user_id = $1 AND active
+       AND tstzrange(COALESCE(reserved_from, '-infinity'), GREATEST(
+         COALESCE(reserved_until, 'infinity'),
+         CASE WHEN EXISTS (SELECT 1 FROM debates WHERE debates.id = event_participants.debate_id
+           AND debates.status = 'live') THEN CURRENT_TIMESTAMP + interval '15 minutes' END))
+         && tstzrange($2, $3)
+     LIMIT 1`,
+    [userId, reservation.from, reservation.until],
   );
   if (result.rows[0])
-    throw new MatchConflictError("participant already has an active event");
+    throw new MatchConflictError(
+      "participant already has a debate at that time",
+    );
 }
 
 async function record(
@@ -162,6 +226,8 @@ export async function createPairedEvent(
     sideAUserId: string;
     sideBUserId: string;
     scheduledAt: Date;
+    // A queue match starts now; a challenge is booked for its agreed time.
+    booking: "now" | "scheduled";
     actorId: string;
     acceptedRequestId: string | null;
     notice: string;
@@ -171,8 +237,14 @@ export async function createPairedEvent(
   const bUser = pair.sideBUserId;
   if (aUser === bUser)
     throw new MatchConflictError("participants must be distinct");
-  await ensureAvailable(client, aUser);
-  await ensureAvailable(client, bUser);
+  const rule = await activeRules(client);
+  const reservation = reservationFor(
+    pair.booking,
+    pair.scheduledAt,
+    rule.rules,
+  );
+  await ensureAvailable(client, aUser, reservation);
+  await ensureAvailable(client, bUser, reservation);
   const [aProfile, bProfile] = await Promise.all([
     profileFor(client, aUser),
     profileFor(client, bUser),
@@ -182,10 +254,6 @@ export async function createPairedEvent(
     [pair.topicId],
   );
   if (!topic.rows[0]) throw new MatchConflictError("topic is no longer public");
-  const rule = await client.query<{ version: string; rules: object }>(
-    "SELECT version, rules FROM event_rule_versions WHERE enabled ORDER BY created_at DESC LIMIT 1",
-  );
-  if (!rule.rows[0]) throw new MatchConflictError("no event rules are active");
   const created = await client.query<EventRecord>(
     `INSERT INTO debates (slug, topic_id, proposition, speaker_a_profile_id,
        speaker_b_profile_id, status, publication_state, rules_version, rules_snapshot, scheduled_at)
@@ -197,16 +265,17 @@ export async function createPairedEvent(
       pair.proposition,
       aProfile,
       bProfile,
-      rule.rows[0].version,
-      rule.rows[0].rules,
+      rule.version,
+      rule.rules,
       pair.scheduledAt,
     ],
   );
   const event = created.rows[0];
   if (!event) throw new Error("created event was not returned");
   await client.query(
-    "INSERT INTO event_participants (debate_id, user_id, side) VALUES ($1, $2, 'A'), ($1, $3, 'B')",
-    [event.id, aUser, bUser],
+    `INSERT INTO event_participants (debate_id, user_id, side, reserved_from, reserved_until)
+     VALUES ($1, $2, 'A', $4, $5), ($1, $3, 'B', $4, $5)`,
+    [event.id, aUser, bUser, reservation.from, reservation.until],
   );
   if (pair.acceptedRequestId)
     await client.query(
@@ -221,8 +290,17 @@ export async function createPairedEvent(
     `UPDATE match_requests SET status = 'conflicted', updated_at = CURRENT_TIMESTAMP
      WHERE status = 'open' AND id IS DISTINCT FROM $1::uuid AND
        (initiator_user_id = ANY($2::bigint[]) OR target_user_id = ANY($2::bigint[]))
+       AND tstzrange(scheduled_at - make_interval(secs => $3),
+         scheduled_at + make_interval(secs => $4)) && tstzrange($5, $6)
      RETURNING id, initiator_user_id AS "initiatorUserId", target_user_id AS "targetUserId"`,
-    [pair.acceptedRequestId, [aUser, bUser]],
+    [
+      pair.acceptedRequestId,
+      [aUser, bUser],
+      BOOKING_LEAD_SECONDS,
+      SCHEDULED_JOIN_SECONDS + maximumSeconds(rule.rules),
+      reservation.from,
+      reservation.until,
+    ],
   );
   for (const entry of conflicted.rows) {
     await record(
@@ -362,6 +440,7 @@ async function completeMatch(
     sideBUserId:
       request.requestedSide === "B" ? request.initiatorUserId : accepterId,
     scheduledAt: request.scheduledAt,
+    booking: "scheduled",
     actorId,
     acceptedRequestId: request.id,
     notice: "Your debate is scheduled.",
@@ -434,7 +513,15 @@ export function createMatchingRepository(database: Pool) {
       return withTransaction(database, async (client) => {
         await lockUsers(client, userId);
         await profileFor(client, userId);
-        await ensureAvailable(client, userId);
+        await ensureAvailable(
+          client,
+          userId,
+          reservationFor(
+            "scheduled",
+            input.scheduledAt,
+            (await activeRules(client)).rules,
+          ),
+        );
         const expired = await client.query<{
           id: string;
           targetUserId: string | null;
