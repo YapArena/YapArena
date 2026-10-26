@@ -123,6 +123,87 @@ if (header) {
       ? `${value.scope} · reserved ${coins(value.reserved)}`
       : "Balance unavailable. Reopen to retry.";
   }
+  // Yap Coins are always on (Decision 0013): while the coin sandbox runs, the
+  // header shows its balance as the account's Yap Coins, with no other label.
+  // Without the sandbox route (404) it falls back to the live wallet.
+  async function balanceRequest() {
+    const options = { cache: "no-store" as const, timeout: 10000 };
+    if (emailFirst) {
+      const sandbox = await apiFetch("/api/coin-sandbox/summary", options);
+      if (sandbox.status !== 404)
+        return { response: sandbox, source: "sandbox" as const };
+    }
+    return {
+      response: await apiFetch(
+        emailFirst ? "/api/account-wallet" : "/api/a4/wallet",
+        options,
+      ),
+      source: emailFirst ? ("wallet" as const) : ("play" as const),
+    };
+  }
+  // 10,000 atomic units are one Yap Coin for both cash and grant principal.
+  const yapCoins = (atoms: bigint) => {
+    const fraction = String(atoms % 10_000n)
+      .padStart(4, "0")
+      .replace(/0+$/, "");
+    return `${atoms / 10_000n}${fraction ? `.${fraction}` : ""} YC`;
+  };
+  // Shows a balance response; returns false when the account is signed out.
+  async function showBalance(
+    { response, source }: Awaited<ReturnType<typeof balanceRequest>>,
+    current: number,
+  ) {
+    if (response.status === 401 || response.status === 403) return false;
+    if (!response.ok) {
+      balance.textContent = "—";
+      reserved.textContent = "Balance unavailable. Reopen to retry.";
+      return true;
+    }
+    if (source === "sandbox") {
+      const value: {
+        balances: {
+          cashAvailable: string;
+          reserved: string;
+          promotionalPrincipal: string;
+          promotionalReserved: string;
+        };
+      } = await response.json();
+      if (current !== version) return true;
+      const { balances } = value;
+      balance.textContent = yapCoins(
+        BigInt(balances.cashAvailable) + BigInt(balances.promotionalPrincipal),
+      );
+      reserved.textContent = `Reserved ${yapCoins(
+        BigInt(balances.reserved) + BigInt(balances.promotionalReserved),
+      )}`;
+    } else if (source === "wallet") {
+      const value: { available: string; reserved: string } =
+        await response.json();
+      if (current !== version) return true;
+      balance.textContent = `${value.available} YC`;
+      reserved.textContent = `Reserved ${value.reserved} YC`;
+    } else {
+      const value: { balances: { kind: string; amount: string }[] } =
+        await response.json();
+      if (current !== version) return true;
+      legacyBalance({
+        available:
+          value.balances.find((item) => item.kind === "available")?.amount ??
+          "0",
+        reserved:
+          value.balances.find((item) => item.kind === "reserved")?.amount ??
+          "0",
+        scope: "Ordinary play balance",
+      });
+      header!.querySelector<HTMLElement>(
+        "[data-header-balance-heading]",
+      )!.textContent = "Your play balance";
+      header!.querySelector<HTMLAnchorElement>(
+        "[data-header-balances-link]",
+      )!.href = "/coins";
+    }
+    return true;
+  }
   // The first read on a page and after an account change is shared with the
   // page's other account scripts; focus, the timer and retry ask again.
   async function refresh(fresh = true) {
@@ -142,12 +223,9 @@ if (header) {
       endedSessionNotice = "";
       session("member");
       status.textContent = resumeNotice;
-      const [profileResponse, walletResponse] = await Promise.all([
+      const [profileResponse, wallet] = await Promise.all([
         apiFetch("/api/me/profile", { cache: "no-store", timeout: 10000 }),
-        apiFetch(emailFirst ? "/api/account-wallet" : "/api/a4/wallet", {
-          cache: "no-store",
-          timeout: 10000,
-        }),
+        balanceRequest(),
       ]);
       if (current !== version) return;
       if (profileResponse.ok) {
@@ -157,41 +235,9 @@ if (header) {
         resumeConfirmedAction();
       } else if (profileResponse.status === 404) requireProfile();
       else resumeConfirmedAction();
-      if (walletResponse.status === 401 || walletResponse.status === 403) {
+      if (!(await showBalance(wallet, current))) {
         clearAccount();
         session("guest");
-        return;
-      }
-      if (!walletResponse.ok) {
-        balance.textContent = "—";
-        reserved.textContent = "Balance unavailable. Reopen to retry.";
-        return;
-      }
-      if (emailFirst) {
-        const value: { available: string; reserved: string } =
-          await walletResponse.json();
-        if (current !== version) return;
-        balance.textContent = `${value.available} YC`;
-        reserved.textContent = `Reserved ${value.reserved} YC`;
-      } else {
-        const value: { balances: { kind: string; amount: string }[] } =
-          await walletResponse.json();
-        if (current !== version) return;
-        legacyBalance({
-          available:
-            value.balances.find((item) => item.kind === "available")?.amount ??
-            "0",
-          reserved:
-            value.balances.find((item) => item.kind === "reserved")?.amount ??
-            "0",
-          scope: "Ordinary play balance",
-        });
-        header!.querySelector<HTMLElement>(
-          "[data-header-balance-heading]",
-        )!.textContent = "Your play balance";
-        header!.querySelector<HTMLAnchorElement>(
-          "[data-header-balances-link]",
-        )!.href = "/coins";
       }
     } catch {
       if (current !== version) return;
@@ -215,6 +261,21 @@ if (header) {
       return null;
     }
   }
+  window.addEventListener("yap:coins-changed", () => {
+    if (header.dataset.session !== "member") return;
+    const current = version;
+    void balanceRequest()
+      .then(async (wallet) => {
+        if (current !== version || (await showBalance(wallet, current))) return;
+        clearAccount();
+        session("guest");
+      })
+      .catch(() => {
+        if (current !== version) return;
+        balance.textContent = "—";
+        reserved.textContent = "Balance unavailable. Reopen to retry.";
+      });
+  });
   window.addEventListener("yap:balance", (event) => {
     if (!emailFirst && header.dataset.session === "member")
       legacyBalance(event.detail);
