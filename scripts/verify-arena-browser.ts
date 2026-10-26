@@ -84,6 +84,8 @@ export async function verifyArenaBrowser({
       );
     await page.goto(base + "/debates/" + debateSlug);
     if (await dismiss.isVisible()) await dismiss.click();
+    // The Bots sandbox sits behind its tab since Decision 0013.
+    await page.locator("[data-detail-tab=rounds]").click();
     await page.locator("[data-inline-access]").waitFor({ state: "visible" });
     await page
       .locator("[data-arena-sync]")
@@ -325,9 +327,9 @@ export async function verifyArenaBrowser({
     );
     await page.emulateMedia({ reducedMotion: "no-preference" });
     checks.rapidScrubbingAndReducedMotion = true;
-    // Layout since 2026-10-25: chat left, video centre, participation right,
-    // all three starting level at the top of the workspace.
-    const sidebar = (await page.locator("[data-arena-sidecar]").boundingBox())!,
+    // Layout since 2026-10-25: chat left, video centre, the betting panel
+    // right (Decision 0013), all three starting level.
+    const sidebar = (await page.locator("[data-stake-panel]").boundingBox())!,
       video = (await page.locator("[data-arena-video]").boundingBox())!,
       chatPanel = (await page
         .locator("[data-community-chat-panel]")
@@ -335,11 +337,11 @@ export async function verifyArenaBrowser({
     assert.ok(
       Math.abs(sidebar.y - video.y) <= 2 &&
         Math.abs(chatPanel.y - video.y) <= 2,
-      "chat, video and participation card start level",
+      "chat, video and betting panel start level",
     );
     assert.ok(
       chatPanel.x < video.x && video.x < sidebar.x,
-      "chat is left of the video and the participation card right of it",
+      "chat is left of the video and the betting panel right of it",
     );
     checks.hoverPricesArgumentsAndCompactSidebar = true;
     const media = (await page.locator("[data-media-event]").elementHandle())!,
@@ -437,6 +439,7 @@ export async function verifyArenaBrowser({
     phase = "mobile";
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload();
+    await page.locator("[data-detail-tab=rounds]").click();
     await page.locator("[data-inline-access]").waitFor({ state: "visible" });
     await page.evaluate(() => document.fonts.ready);
     assert.ok(

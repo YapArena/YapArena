@@ -122,6 +122,26 @@ export function createReplayPlayer({
     if (stableTimer !== undefined) cancel(stableTimer);
     stableTimer = undefined;
   };
+  // Decisions 0012 and 0013: a read-only playback position for the betting
+  // panel and the outline's replay sync. Previews, and players outside a
+  // debate's media section, send nothing.
+  const playbackDebate = preview
+    ? undefined
+    : video.closest?.<HTMLElement>("[data-media-event]")?.dataset.mediaEvent;
+  if (playbackDebate) {
+    const announce = () =>
+      window.dispatchEvent(
+        new CustomEvent("yap:playback", {
+          detail: {
+            debateId: playbackDebate,
+            positionSeconds: video.currentTime,
+            playing: !video.paused && !video.ended,
+          },
+        }),
+      );
+    for (const type of ["timeupdate", "seeked", "play", "pause"])
+      video.addEventListener(type, announce);
+  }
   video.addEventListener("playing", playing);
   video.addEventListener("waiting", waiting);
   video.addEventListener("pause", waiting);

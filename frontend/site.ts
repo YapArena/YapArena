@@ -19,6 +19,12 @@ declare global {
     "yap:balance": CustomEvent<HeaderBalance | null>;
     // A Yap Coins balance changed; the header reloads its balance.
     "yap:coins-changed": Event;
+    // The debate replay's position, for the betting panel and the outline.
+    "yap:playback": CustomEvent<{
+      debateId: string;
+      positionSeconds: number;
+      playing: boolean;
+    }>;
     "yap:follow": CustomEvent<FollowDetail>;
   }
 }

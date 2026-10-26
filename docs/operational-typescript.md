@@ -81,7 +81,10 @@ strict TypeScript in `src/features/transcription/agent/`, its own compiler proje
 `npm run build` emits it to `dist-transcriber/`. Its LiveKit packages are pinned development
 dependencies in the root lockfile, so the web image never installs them; its image
 (`deploy/transcriber/Dockerfile`) does. `stage-transcriber.ts`, checked in the database-tools
-project, copies only the agent's build context for `lk agent deploy`. `verify-outline-browser.ts`,
+project, copies only the agent's build context for `lk agent deploy`. In the image's build stage,
+`transcriber-runtime-modules.ts` (same project) copies only the packages the agent loads and
+their dependency tree, so the web app's and the build tools' packages stay out of it.
+`verify-outline-browser.ts`,
 checked in browser automation and run by `npm run verify:browser`, drives the outline panel in
 Chrome with synthetic LiveKit messages and an in-memory outline store. `verify-matchmaking-browser.ts`,
 also in browser automation, runs two accounts through the live queue and a "now" challenge against
