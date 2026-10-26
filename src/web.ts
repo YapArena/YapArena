@@ -83,6 +83,9 @@ export function createWebServer(
     sessions,
     accountSecurity,
     coinDebates,
+    debaterSettings,
+    transcription,
+    transcriber,
   } = services;
   // Web only: the jobs worker serves no streams.
   const matchmakingStreams = matchmaking
@@ -112,6 +115,12 @@ export function createWebServer(
         }
       : undefined,
     turnWindows: config.turnWindowsEnabled ? coinDebates : undefined,
+    debaterSettings,
+    transcriptionIngest:
+      transcription && config.liveOutline.ingestSecret
+        ? { repository: transcription, secret: config.liveOutline.ingestSecret }
+        : undefined,
+    dispatchTranscriber: transcriber?.dispatch,
     messages: createMessageRepository(database),
     database,
     a4,

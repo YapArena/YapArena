@@ -1032,3 +1032,40 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Decision 0012: debater language and transcription consent. */
+.settings-form select {
+  width: 100%;
+  min-height: 50px;
+  padding: 13px 15px;
+  border: 1px solid #4c4c4c;
+  border-radius: 14px;
+  background: #0b0b0b;
+  color: #f2f7fb;
+  font: inherit;
+  font-size: 1rem;
+}
+.settings-form select:focus {
+  outline: none;
+  border-color: var(--acid);
+  box-shadow: 0 0 0 4px #f8f8f81f;
+}
+.debater-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: #e5e5e5;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  cursor: pointer;
+}
+.settings-form .debater-consent input {
+  flex: none;
+  width: 20px;
+  min-height: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  padding: 0;
+  border-radius: 5px;
+  accent-color: #f8f8f8;
+}

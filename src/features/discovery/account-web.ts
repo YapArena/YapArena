@@ -1,4 +1,4 @@
-import { html } from "../../platform/html.ts";
+import { html, type SafeHtml } from "../../platform/html.ts";
 
 const icons = {
   person: html`<circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>`,
@@ -34,7 +34,9 @@ const signedOut = html`<div id="signed-out" hidden>
       </div>
     </div>`;
 
-const profilePanel = html`<section class="settings-panel" role="tabpanel" id="panel-profile" aria-labelledby="tab-profile" tabindex="-1">
+const profilePanel = (
+  debating: SafeHtml | "",
+) => html`<section class="settings-panel" role="tabpanel" id="panel-profile" aria-labelledby="tab-profile" tabindex="-1">
           <div class="settings-card">
             <div class="settings-card-head"><div><h2>Public profile</h2><p>How you show up in debates, chat and search.</p></div></div>
             <div class="settings-banner" id="profile-state-box" hidden><p id="profile-state" role="status"></p><button class="button-secondary" type="button" id="profile-publish" hidden>Make it public</button></div>
@@ -57,7 +59,7 @@ const profilePanel = html`<section class="settings-panel" role="tabpanel" id="pa
               <div class="settings-save"><p id="profile-save-status" role="status" aria-live="polite"></p><button class="button" type="submit" disabled>Save changes</button></div>
             </form>
           </div>
-          <div class="settings-card">
+${debating}          <div class="settings-card">
             <div class="settings-card-head"><div><h2>Following</h2><p>People and topics you follow. Follow more from their public pages.</p></div></div>
             <ul id="follow-list" class="settings-list"></ul>
           </div>
@@ -96,7 +98,28 @@ const privacyPanel = html`<section class="settings-panel" role="tabpanel" id="pa
           </div>
         </section>`;
 
-export function accountMarkup(asset: (name: string) => string) {
+// Decision 0012: debate language and transcription consent, shown only while
+// the live outline is enabled.
+const debaterCard = html`<div class="settings-card debater-settings" id="debater-settings" hidden>
+            <div class="settings-card-head"><div><h2>Debating</h2><p>Used when you debate live. Each of your turns is transcribed and summarized in a public AI outline.</p></div></div>
+            <form id="debater-settings-form" class="settings-form" novalidate>
+              <div class="settings-field">
+                <div class="settings-label-row"><label for="debater-language">Language you debate in</label></div>
+                <select id="debater-language" name="language" required aria-describedby="debater-language-help"><option value="">Choose a language</option><option value="fr" lang="fr">Français</option><option value="en" lang="en">English</option></select>
+                <p class="settings-help" id="debater-language-help">Transcription and the AI outline of your turns use this language.</p>
+              </div>
+              <div class="settings-field">
+                <label class="debater-consent"><input type="checkbox" id="debater-consent" name="consent" aria-describedby="debater-consent-help"><span>I agree that my speech in live debates is transcribed, stored with word timings, and summarized in a public AI outline shown with the debate and its replay.</span></label>
+                <p class="settings-help" id="debater-consent-help">Required to debate while transcription is on. You can withdraw anytime for future debates; debates already held keep their transcript.</p>
+              </div>
+              <div class="settings-save"><p id="debater-save-status" role="status" aria-live="polite"></p><button class="button" type="submit">Save debating settings</button></div>
+            </form>
+          </div>`;
+
+export function accountMarkup(
+  asset: (name: string) => string,
+  liveOutline = false,
+) {
   return html`<link rel="stylesheet" href="${asset("account-auth.css")}">
   <section class="container account-shell">
     <div class="account-status-row"><a class="account-back" data-auth-return href="/debates">← Back to the arena</a><p id="account-notice" role="status" aria-live="polite">Checking your account…</p></div>
@@ -116,7 +139,7 @@ export function accountMarkup(asset: (name: string) => string) {
           <a class="settings-tab settings-tab-link" href="/coins">${icon("coin")}<span>Yap Coins</span><span class="settings-tab-arrow" aria-hidden="true">↗</span></a>
         </nav>
         <div class="settings-panels">
-        ${profilePanel}
+        ${profilePanel(liveOutline ? debaterCard : "")}
         ${securityPanel}
         ${notificationsPanel}
         ${privacyPanel}
@@ -124,5 +147,10 @@ export function accountMarkup(asset: (name: string) => string) {
       </div>
     </div>
   </section>
-  <script defer src="${asset("account.js")}"></script>`;
+  <script defer src="${asset("account.js")}"></script>${
+    liveOutline
+      ? html`
+  <script type="module" src="${asset("debater-settings.js")}"></script>`
+      : ""
+  }`;
 }

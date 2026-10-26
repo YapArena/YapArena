@@ -75,6 +75,14 @@ live deployment status and readiness separately.
 The [account staging runbook](account-staging-release.md) gives the ordered
 commands, backup/rehearsal requirements and postflight boundaries.
 
+The live-outline transcriber agent ([Decision 0012](decisions/0012-live-argument-outline.md)) is
+strict TypeScript in `src/features/transcription/agent/`, its own compiler project
+`tsconfig.transcriber.json`. The server project excludes it, `npm run typecheck` checks it, and
+`npm run build` emits it to `dist-transcriber/`. Its LiveKit packages are pinned development
+dependencies in the root lockfile, so the web image never installs them; its image
+(`deploy/transcriber/Dockerfile`) does. `stage-transcriber.ts`, checked in the database-tools
+project, copies only the agent's build context for `lk agent deploy`.
+
 These former JavaScript files retain their names with a `.ts` extension:
 
 | Area                     | Sources under `scripts/`                                                                                                                                                                                    | Reason                                                                                                |

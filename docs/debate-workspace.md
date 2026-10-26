@@ -115,6 +115,10 @@ and signals `window` to the room; `GET /api/public/debates/<id>/windows` lists t
 for every viewer. This workspace's YAP round controls are unchanged; the YC round bar and ticket
 on this page belong to the betting interface work (Decision 0013).
 
+With the live outline enabled, a captions line sits under the video once the page joins the
+LiveKit room. It shows the active speaker's latest words from the transcriber agent, at a fixed
+height so nothing below moves, and a Captions button turns it off for this browser.
+
 ## Verification and operation
 
 No database migration, new dependency, provider configuration or paid mode is needed.

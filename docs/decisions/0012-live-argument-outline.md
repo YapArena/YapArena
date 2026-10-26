@@ -85,10 +85,103 @@ state, voidReason }] }`, the latest 100 windows in turn order. No orders, counts
   seeds. The signed-in view (`GET /api/coin-sandbox/debates/:id/rounds`) adds `kind`
   (`turn`/`manual`), `turnNumber`, `side` and `voidReason` to each round.
 
+## Pull request 1b: the founder's round rules
+
+Migration `1792984532958_add-turn-window-rules`. It applies to every Yap Coins debate round,
+windows and manual rounds, with or without `TURN_WINDOWS_ENABLED`. Until it is deployed, keep the
+flag off wherever user-created debates exist.
+
+- **Reveal mode (F11).** Each debate is `five_day` or `per_round`, and each round copies its
+  debate's mode when it is created.
+  - Five-day is the default and the only mode a user-created debate can have. A five-day round
+    takes orders until its cutoff and then stays open but locked. It prices and settles at the
+    debate's 120-hour close (`live_ended_at` plus 120 elapsed hours, once the debate is `ended`,
+    `replay` or `finalized`). Before that nobody sees a price, execution or seed.
+  - Per-round reveal is recorded only by the owner, for a founder-created debate, with the
+    `set-reveal-mode` command and a reason (`coin_debate_reveal_modes`, append-only). The debate's
+    first round locks the mode; the database refuses a later record and ignores any mode the
+    inserting code supplies.
+  - A cancelled or under-review debate's locked rounds are voided as before (F15: only unrevealed
+    rounds).
+  - Rounds created before this migration keep revealing at their cutoff.
+- **Manual rounds.** A locked five-day manual round no longer blocks the next one: asking for a
+  round returns the manual round still taking orders, or opens one. The one-open-manual-round index
+  now covers per-round rounds only; the coin transition lock serializes the rest.
+- **Participant count (F12).** The signed-in rounds view gives each round's `participants`, the
+  number of accounts that committed, at once. It never gives side totals. The drawn price appears
+  with the result, at the reveal.
+- **Debaters (F14).** Neither debater can take a position in their own debate: the server answers
+  403 and the database refuses the order. The signed-in view gives each round
+  `eligibility: { canTakePosition, reason }`, where `reason` is `debater`, `committed`,
+  `debate_unavailable`, `closed`, `paused` (financial activity paused for correction review), `full`
+  or `null`.
+- **Both views** give `revealMode` and `revealAt` for each round or window. `revealAt` is the
+  cutoff for a per-round round, the 120-hour close once a five-day debate has ended, the actual
+  reveal once revealed, and `null` before a five-day debate ends. The public window list also gives
+  the debate's own `revealMode` and `revealAt`. It still has no counts.
+
+## Pull request 2: transcription and captions
+
+Behind `LIVE_OUTLINE_ENABLED` (default `false`; needs LiveKit media and a
+`TRANSCRIPTION_INGEST_SECRET` of at least 32 bytes). Migration `1792975000000_add-live-transcription`.
+
+- **Debater settings** (`debater_settings`, `GET/PUT /api/me/debater-settings`): language (`fr`/`en`)
+  and consent to transcription and the public AI outline, stored with the consent wording's version
+  (`DEBATER_CONSENT_VERSION`). A new wording asks again. `checkDebaterSettings` and
+  `assertDebaterSettings` (409, code `debater_settings_required`) in
+  `src/features/transcription/debater-settings.ts` are the check matchmaking calls at queue entry
+  and challenge acceptance. The form is a "Debating" card in the account's Profile tab, shown only
+  when the flag is on.
+- **Dispatch.** The agent joins only when dispatched explicitly (`agentName`). The jobs loop
+  dispatches each ready or live, non-demo debate with a consenting debater once, so the agent is
+  warm before the first word; the operator start route calls the same exported function with one
+  line. A database claim per debate prevents a second agent (LiveKit dispatch is not idempotent).
+  Failures retry with backoff, five times at most.
+- **Turn hint.** The media permission reconciliation (every turn change, pause, resume and end, and
+  its five-second repair) writes `{v, debateStatus, mediaState, turnNumber, activeSide,
+turnDeadlineAt}` to room metadata, after permissions and best effort. The agent treats it as a
+  hint; ingest re-validates. Speaker languages and consent come from the server's session state
+  (`POST /api/internal/transcription/debates/:id/session`) rather than participant metadata, so
+  speaker tokens are unchanged.
+- **Agent** (`src/features/transcription/agent/`, its own compiler project
+  `tsconfig.transcriber.json`, image `deploy/transcriber/Dockerfile`). Hidden; subscribes only to the
+  active side's microphone; one speech-to-text channel per provider for the active speaker; opens the
+  next speaker's channel 1.5 s before the deadline; flushes finals at turn end and on pause.
+  `TRANSCRIPTION_PROVIDER=deepgram|elevenlabs`, optional `TRANSCRIPTION_SHADOW_PROVIDER`. Each final
+  segment records provider, role, word timings, latency (speech end to final) and audio length. It
+  stops when the debate ends or is cancelled, and gives up on a debate that has not started within
+  15 minutes.
+- **Captions.** Interim (at most four a second) and final text on LiveKit's `lk.transcription` text
+  stream, one stream per update with the speaker as sender. Browsers show one line under the video,
+  toggleable; the choice is remembered per browser.
+- **Ingest** (`POST /api/internal/transcription/debates/:id/updates`): HMAC-SHA256 over
+  `timestamp.body`, at most 30 s of skew, 32 KB, ten updates per debate in a burst then five a second.
+  One transaction: the debate is live and the turn current (or the turn that ended in the last 15 s,
+  for its final flush), segment sides match the turn, the speaker consented. Each segment maps to
+  its turn's window by spoken end time; speech after the cutoff has no window. Agent clock drift
+  beyond one second is corrected. Idempotent by (debate, job, sequence).
+- **Storage.** `transcript_segments` is append-only. Retention is in `docs/data-ownership.md`.
+
+### Capacity per LiveKit plan
+
+A live debate uses one agent session, one LiveKit Inference speech-to-text connection when Deepgram
+is the primary (two for about 1.5 s at each turn change), and one recording. Limits read on
+2026-10-25 from livekit.com/pricing:
+
+| Plan  | Agent sessions | Inference STT connections | Recordings (egress) | Live debates at most |
+| ----- | -------------- | ------------------------- | ------------------- | -------------------- |
+| Build | 5              | 5                         | 2                   | 2                    |
+| Ship  | 20             | 20                        | 100                 | 10                   |
+| Scale | 50 (up to 600) | 50                        | 500                 | 25                   |
+
+Keep matchmaking's `LIVE_DEBATE_CAPACITY` at or below min(agent sessions, half the Inference
+connections, recordings). ElevenLabs as primary or shadow is limited by its own plan's realtime
+concurrency, also halved for the turn overlap (Free 6, Starter 9, Creator 15, Pro 30).
+Approximate costs per live debate hour: agent session $0.60 beyond included minutes, Nova-3
+monolingual $0.29, ElevenLabs Scribe v2 Realtime $0.39; a shadow provider adds its own cost.
+
 ## Later pull requests
 
-2. Transcriber agent, provider switch with shadow mode, dispatch, room metadata, ingest endpoint,
-   transcript storage, debater settings and live captions.
 3. Live outline: loop module, Haiku integration, shared reducer, outline versions, freeze, LiveKit
    delivery, initial page state, outline panel.
 4. Sonnet cleanup, correlation, chart integration, replay sync and timeline endpoint.

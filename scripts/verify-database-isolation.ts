@@ -96,6 +96,7 @@ const applicationTables = [
   "coin_sandbox_books",
   "coin_debate_rounds",
   "coin_debate_orders",
+  "coin_debate_reveal_modes",
   "coin_sandbox_controls",
   "coin_sandbox_requests",
   "coin_sandbox_openings",
@@ -116,6 +117,11 @@ const applicationTables = [
   "matchmaking_tickets",
   "match_offers",
   "account_device_checks",
+  // Decision 0012: live transcription.
+  "debater_settings",
+  "transcription_dispatches",
+  "transcription_updates",
+  "transcript_segments",
   "challenge_time_proposals",
   "matchmaking_presence",
 ];

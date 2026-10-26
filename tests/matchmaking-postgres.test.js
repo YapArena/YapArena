@@ -411,7 +411,10 @@ describe(
       await matching.markReady(a, debateId);
       await matching.markReady(b, debateId);
       const first = autoStart.tryStart(debateId);
-      while (!release) await new Promise((resolve) => setImmediate(resolve));
+      // Bounded, so a start that never begins fails here instead of hanging the run.
+      for (let attempt = 0; !release && attempt < 2000; attempt += 1)
+        await new Promise((resolve) => setTimeout(resolve, 5));
+      assert.ok(release, "the automatic start began");
       assert.equal(await autoStart.tryStart(debateId), false);
       release();
       assert.equal(await first, true);

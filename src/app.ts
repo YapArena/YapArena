@@ -27,6 +27,8 @@ import type { createAccountWallet } from "./features/account-wallet/repository.t
 import type { createMediaAccountRevocation } from "./features/media/account-revocation.ts";
 import { createCoinSandboxRouter } from "./features/account-wallet/sandbox-router.ts";
 import { createTurnWindowRouter } from "./features/account-wallet/window-router.ts";
+import { createDebaterSettingsRouter } from "./features/transcription/settings-router.ts";
+import { createTranscriptionIngestRouter } from "./features/transcription/ingest-router.ts";
 import { createEmailAuthSecurity } from "./platform/auth/browser-security.ts";
 import { SessionUnavailableError } from "./platform/auth/sessions.ts";
 
@@ -142,6 +144,9 @@ export function createApp({
   coinSandbox,
   coinWebhook,
   turnWindows,
+  debaterSettings,
+  transcriptionIngest,
+  dispatchTranscriber,
   sharedAuthLimiter,
   sharedAccountLimiter,
   sharedRateLimits,
@@ -204,6 +209,10 @@ export function createApp({
   coinWebhook?: RequestHandler;
   // Decision 0012: public turn-window timing, mounted only when enabled.
   turnWindows?: Parameters<typeof createTurnWindowRouter>[0];
+  // Decision 0012: live transcription, mounted only when enabled.
+  debaterSettings?: Parameters<typeof createDebaterSettingsRouter>[0];
+  transcriptionIngest?: Parameters<typeof createTranscriptionIngestRouter>[0];
+  dispatchTranscriber?: (debateId: string) => Promise<unknown>;
 }) {
   const app = express();
   const mediaUrl = mediaProvider ? new URL(mediaProvider.publicUrl) : undefined;
@@ -267,6 +276,9 @@ export function createApp({
           : undefined,
       ),
     );
+  // The transcriber agent's private ingest has its own per-debate limit.
+  const internalIngest = (request: Request) =>
+    request.path.startsWith("/api/internal/transcription/");
   const liveRead = (request: Request) =>
     request.method === "GET" &&
     /^\/api\/community\/events\/[0-9a-f-]{36}(?:\/my-like|\/chat\/sync|\/updates)?$/i.test(
@@ -301,6 +313,7 @@ export function createApp({
       skip: (request) =>
         liveRead(request) ||
         streamRead(request) ||
+        internalIngest(request) ||
         Boolean(mediaDeliveryLane(request)),
       shared: sharedRateLimits?.("api", "open"),
     }),
@@ -317,6 +330,12 @@ export function createApp({
     );
   }
   if (coinWebhook) app.use("/api/coin-sandbox/webhook", coinWebhook);
+  if (transcriptionIngest)
+    app.use(
+      "/api/internal/transcription",
+      express.raw({ type: "application/json", limit: "32kb" }),
+      createTranscriptionIngestRouter(transcriptionIngest),
+    );
   app.use(express.json({ limit: requestBodyLimit }));
   app.use(cookieParser());
   app.use(createCsrfOriginProtection({ environment, applicationOrigin }));
@@ -388,6 +407,7 @@ export function createApp({
         applicationOrigin: applicationOrigin ?? "http://localhost:3000",
         emailFirst: true,
         matchmakingEnabled: Boolean(matchmaking && identity),
+        liveOutlineEnabled: Boolean(transcriptionIngest),
       }),
     );
   }
@@ -450,6 +470,12 @@ export function createApp({
     createRequireAuthentication({ sessions, environment }),
     createMessageRouter({ messages }),
   );
+  if (debaterSettings)
+    app.use(
+      "/api/me/debater-settings",
+      createRequireAuthentication({ sessions, environment }),
+      createDebaterSettingsRouter(debaterSettings),
+    );
   if (identity) {
     app.use(
       "/api/me",
@@ -501,6 +527,7 @@ export function createApp({
         matching,
         identity,
         requireAuth: createRequireAuthentication({ sessions, environment }),
+        dispatchTranscriber,
       }),
     );
   }

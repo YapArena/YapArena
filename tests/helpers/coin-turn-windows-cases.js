@@ -2,18 +2,21 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { before, after, describe, it } from "node:test";
 import pg from "pg";
-import { createCoinDebateSandbox } from "../dist/features/account-wallet/debate-sandbox.js";
+import { createCoinDebateSandbox } from "../../dist/features/account-wallet/debate-sandbox.js";
 import {
   createCoinSandboxRepository,
   createCoinSandboxOperatorRepository,
-} from "../dist/features/account-wallet/sandbox-repository.js";
-import { createSessionRepository } from "../dist/platform/auth/sessions.js";
-import { createSessionToken } from "../dist/platform/auth/session-tokens.js";
-import { attachSubject, openSandbox } from "./helpers/confirmations.js";
+} from "../../dist/features/account-wallet/sandbox-repository.js";
+import { createSessionRepository } from "../../dist/platform/auth/sessions.js";
+import { createSessionToken } from "../../dist/platform/auth/session-tokens.js";
+import { attachSubject, openSandbox } from "./confirmations.js";
 
-// Decision 0012: one Yap Coins trading window per live speaking turn. Other
-// PostgreSQL suites share this database in parallel, so every coin-loop call
-// here is scoped to this suite's own debates and never runs the global clocks.
+// Decision 0012: one Yap Coins trading window per live speaking turn. These
+// cases run inside coin-debate-postgres.test.js, so they never overlap its
+// fixtures: global settlement locks every due round's accounts, and those
+// fixtures hold account locks before waiting for the transition lock. Other
+// PostgreSQL suites share the database in parallel, so window opening and
+// voiding stay scoped to this file's own debates.
 const ownerUrl = process.env.A4_TEST_OWNER_URL,
   runtimeUrl = process.env.A4_TEST_DATABASE_URL;
 describe(
@@ -87,9 +90,11 @@ describe(
     }
     // Live fixtures are demos so they never compete for the featured slot
     // that featured-postgres checks in parallel.
+    // Recorded as per-round so windows settle at their cutoff (F11).
     async function liveDebate({
       status = "live",
       deadline = "60 seconds",
+      reveal = "per_round",
     } = {}) {
       const id = (
         await owner.query(
@@ -107,6 +112,11 @@ describe(
         VALUES($1,'running','A',1,clock_timestamp()+$2::interval,60000,0,clock_timestamp(),'recording')`,
         [id, deadline],
       );
+      if (reveal === "per_round")
+        await owner.query(
+          "INSERT INTO coin_debate_reveal_modes(debate_id,mode,reason) VALUES($1,'per_round','Founder-created test debate')",
+          [id],
+        );
       return id;
     }
     // The media clock's turn advance, as tick() writes it.
@@ -412,16 +422,43 @@ describe(
           [2, "B", "open", null],
         ],
       );
-      for (const window of view.windows)
+      assert.equal(view.revealMode, "per_round");
+      assert.equal(view.revealAt, null);
+      for (const window of view.windows) {
         assert.deepEqual(Object.keys(window).sort(), [
           "closesAt",
           "id",
           "opensAt",
+          "revealAt",
+          "revealMode",
           "side",
           "state",
           "turnNumber",
           "voidReason",
         ]);
+        assert.equal(window.revealMode, "per_round");
+        assert.equal(window.revealAt, window.closesAt, "reveals at its cutoff");
+      }
+      // A user-created debate reveals at its 120-hour close (F11).
+      const fiveDay = await liveDebate({ reveal: "five_day" });
+      await windows.openTurnWindows(20, [fiveDay]);
+      const pending = await windows.publicWindows(fiveDay);
+      assert.equal(pending.revealMode, "five_day");
+      assert.equal(pending.revealAt, null, "unknown until the debate ends");
+      assert.equal(pending.windows[0].revealMode, "five_day");
+      assert.equal(pending.windows[0].revealAt, null);
+      await owner.query(
+        "UPDATE debates SET status='ended',live_ended_at=clock_timestamp() WHERE id=$1",
+        [fiveDay],
+      );
+      const ended = await windows.publicWindows(fiveDay);
+      assert.ok(
+        ended.revealAt instanceof Date || typeof ended.revealAt === "string",
+      );
+      assert.equal(
+        new Date(ended.windows[0].revealAt).getTime(),
+        new Date(ended.revealAt).getTime(),
+      );
       await owner.query(
         "UPDATE debates SET publication_state='draft' WHERE id=$1",
         [debateId],
