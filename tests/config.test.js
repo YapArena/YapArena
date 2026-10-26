@@ -60,6 +60,10 @@ describe("configuration", () => {
       { MATCHMAKING_ENABLED: "yes" },
       { LIVE_DEBATE_CAPACITY: "0" },
       { LIVE_DEBATE_CAPACITY: "1001" },
+      {
+        MATCHMAKING_ENABLED: "true",
+        DATABASE_URL: databaseUrl.replace("5432", "6543"),
+      },
     ])
       assert.throws(() => loadConfig({ DATABASE_URL: databaseUrl, ...env }));
   });

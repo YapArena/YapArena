@@ -322,6 +322,10 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     throw new Error(
       "community LISTEN requires a direct or session-pooler connection",
     );
+  if (matchmaking.enabled && new URL(databaseUrl).port === "6543")
+    throw new Error(
+      "live queue LISTEN requires a direct or session-pooler connection",
+    );
   if (
     environment.DATABASE_MIGRATION_URL ||
     environment.DATABASE_ADMIN_URL ||

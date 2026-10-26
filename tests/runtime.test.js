@@ -550,4 +550,28 @@ describe("service runtime", () => {
       "matchmaking retention cleanup failed",
     ]);
   });
+
+  it("starts live queue streams after the server and stops them on shutdown", async () => {
+    const events = [];
+    const runtime = createRuntime({
+      database: { end: async () => events.push("database closed") },
+      sessions: { deleteExpired: async () => 0 },
+      matchmakingStreams: {
+        start: async () => events.push("streams started"),
+        stop: async () => events.push("streams stopped"),
+      },
+      logger: { info() {}, error() {} },
+      config: { port: 3000, host: "127.0.0.1" },
+      verifyDatabase: async () => events.push("verified"),
+      backgroundJobs: false,
+    });
+    await runtime.start();
+    await runtime.stop();
+    assert.deepEqual(events, [
+      "verified",
+      "streams started",
+      "streams stopped",
+      "database closed",
+    ]);
+  });
 });
