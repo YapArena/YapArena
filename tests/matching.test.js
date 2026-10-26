@@ -606,12 +606,14 @@ describe("direct challenge routes", () => {
       ["now", "scheduled", "scheduled"],
     );
     assert.equal(calls[1][1].proposedTimes.length, 2);
+    // One clock read: two later(2) calls can land a millisecond apart, which are distinct times.
+    const repeated = later(2);
     for (const body of [
       { ...challenge, mode: "now", scheduledAt: later(2) },
       { ...challenge, mode: "soon" },
       { ...challenge, proposedTimes: [] },
       { ...challenge, proposedTimes: [later(2), later(3), later(4), later(5)] },
-      { ...challenge, proposedTimes: [later(2), later(2)] },
+      { ...challenge, proposedTimes: [repeated, repeated] },
       { ...challenge, proposedTimes: [later(0.5)] },
       { ...challenge, proposedTimes: [later(2)], scheduledAt: later(3) },
       { ...challenge },
