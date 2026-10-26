@@ -34,6 +34,9 @@ encoder images for every `main` commit; [deploy the CI-published images](#deploy
 switches both services to those images, pinned by digest. After that switch, `render.yaml` only
 describes a source-built service.
 
+To roll out the matchmaking, Yap Coins turn window and live outline release (Decisions 0011 to
+0013), follow the step-by-step [staging rollout](staging-rollout.md).
+
 This is a small trial environment. Render Free sleeps after 15 minutes without inbound traffic and
 can take about a minute to wake. An open debate page still sends the app requests at least once a
 minute, but an instance restart can still interrupt the turn clock. The background jobs run in the paid jobs
