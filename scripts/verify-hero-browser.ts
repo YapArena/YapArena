@@ -106,6 +106,8 @@ try {
   });
   let grants = 0,
     deny = false;
+  // The page path that asked for each grant, from the request's Referer.
+  const grantPages: string[] = [];
   const app = express();
   app.use(
     "/assets",
@@ -115,8 +117,11 @@ try {
   app.get("/api/media/events/:id/thumbnail", (_r, s) =>
     s.sendFile(thumbnailPath),
   );
-  app.get("/api/media/events/:id/replay", (_r, s) => {
+  app.get("/api/media/events/:id/replay", (r, s) => {
     grants++;
+    grantPages.push(
+      new URL(r.get("referer") ?? "/", "http://fixture").pathname,
+    );
     if (deny) return s.status(404).json({ error: "unavailable" });
     return s.json({
       type: "file",
@@ -471,7 +476,10 @@ try {
   assert.equal(await page.locator("[data-media-event]").count(), 1);
   checks.sustainedHoverEntersWatchingInterface = true;
   await page.emulateMedia({ reducedMotion: "reduce" });
-  const beforeReduced = grants;
+  // Count only grants the /live document asks for. The debate page this tab
+  // just left can deliver its own grant request after this step starts, which
+  // the shared counter would wrongly count here.
+  const beforeReduced = grantPages.length;
   await page.goto(base + "/live");
   await page.waitForFunction(
     () =>
@@ -488,7 +496,10 @@ try {
       document.querySelector<HTMLElement>("[data-featured-preview]")!.dataset
         .playing === "true",
   );
-  assert.equal(grants, beforeReduced + 1);
+  assert.equal(
+    grantPages.slice(beforeReduced).filter((path) => path === "/live").length,
+    1,
+  );
   await page.locator("[data-featured-preview] [data-preview-open]").hover();
   assert.equal(await page.locator(".is-entering").count(), 0);
   checks.reducedMotionUsesExplicitPlay = true;
