@@ -19,13 +19,17 @@ RUN npm ci
 COPY tsconfig.json tsconfig.transcriber.json ./
 COPY src ./src
 RUN npx tsc --project tsconfig.transcriber.json
+# Keep only the packages the agent loads and their dependencies, at the
+# lockfile's versions; the web app's and the build tools' packages stay out.
+COPY scripts/transcriber-runtime-modules.ts ./scripts/
+RUN node scripts/transcriber-runtime-modules.ts /runtime
 
 FROM base
 ARG UID=10001
 RUN adduser --disabled-password --gecos "" --home /app --shell /sbin/nologin \
     --uid "${UID}" appuser
 WORKDIR /app
-COPY --from=build --chown=appuser:appuser /app/node_modules ./node_modules
+COPY --from=build --chown=appuser:appuser /runtime/node_modules ./node_modules
 COPY --from=build --chown=appuser:appuser /app/dist-transcriber ./dist-transcriber
 COPY --chown=appuser:appuser package.json ./
 USER appuser

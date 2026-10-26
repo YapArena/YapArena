@@ -35,6 +35,7 @@
     "scripts/smoke-staging.ts",
     "scripts/seed-discovery.ts",
     "scripts/migration-exports.d.ts",
-    "scripts/stage-transcriber.ts"
+    "scripts/stage-transcriber.ts",
+    "scripts/transcriber-runtime-modules.ts"
   ]
 }
