@@ -51,6 +51,16 @@ became `cancelled` or `void_review`, with reason `debate_unavailable`, and settl
 rounds. The runtime may void only those; the database refuses any other runtime void, so
 `void-round` below remains the owner's command for everything else.
 
+## Reveal mode and debaters
+
+Every debate round reveals in its debate's mode (Decision 0012, F11). **Five-day** is the default
+and the only mode of a user-created debate: rounds take orders until their cutoff, stay locked,
+and price and settle at the debate's 120-hour close, 120 elapsed hours after its live end. Until
+then participants see their own order and the participant count, not a price or execution.
+**Per-round** debates settle each round at its cutoff, as before. Record per-round only for a
+founder-created debate, before its first round, with `set-reveal-mode`; the first round locks the
+mode. Debaters cannot take a position in their own debate (F14).
+
 ## Rail and credential separation
 
 `coin_sandbox_controls` pins the physical database to `simulation` or
@@ -106,6 +116,7 @@ bytes, connection strings or provider error objects. Keep operator input private
 | `retry-correction`  | `correctionId`, `reportId`, `reviewId`, `idempotencyKey`                                                                                     | Require the same reviewed original funding and retry after reconciliation restores its original sources.                                                                                                                   |
 | `review-report`     | `reportId`, `outcome`, private `note`, `evidenceDigest`, `idempotencyKey`; optional safe `publicNote`, approved `amount` or recovery `quote` | Append owner evidence and a separately publishable outcome. An operator compensation review needs an exact atomic USDC amount. A recovery quote needs `amount`, pinned `network`, ISO `expiresAt`, and safe `description`. |
 | `compensate-report` | `reportId`, `reviewId`, atomic USDC `amount`, `idempotencyKey`                                                                               | Restore only evidence-reviewed original cash sources from separately funded correction cash. No new coin category, qualification progress or cash grant principal is created.                                              |
+| `set-reveal-mode`   | `debateId`, `mode` (`per_round` / `five_day`), `reason`                                                                                      | Founder-created debates only, before their first round: record the reveal mode. Repeating the same mode is a no-op; any other change is refused.                                                                           |
 | `void-round`        | `roundId`, `reason` (`debate_unavailable` / `operator_cancelled`)                                                                            | Owner-only refund of an open sandbox round, restoring exact sources and unused backing without earning profit.                                                                                                             |
 
 Completed purchases support USDC withdrawals only. Corrections are auditable

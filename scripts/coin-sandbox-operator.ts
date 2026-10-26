@@ -447,6 +447,19 @@ export async function runCoinSandboxOperator(input: {
         );
         break;
       }
+      case "set-reveal-mode": {
+        // F11: per-round reveal only for a founder-created debate, before
+        // its first round. Every other debate keeps the five-day default.
+        const body = fields(input.body, ["debateId", "mode", "reason"]);
+        if (body.mode !== "per_round" && body.mode !== "five_day")
+          invalid("reveal mode must be per_round or five_day");
+        const result = await createCoinDebateSandbox(
+          database,
+          rail,
+        ).setRevealMode(uuid(body.debateId), body.mode, text(body.reason));
+        status = result.created ? "recorded" : "unchanged";
+        break;
+      }
       case "review": {
         const body = fields(input.body, [
             "requestId",

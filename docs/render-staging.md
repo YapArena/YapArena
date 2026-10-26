@@ -151,12 +151,15 @@ trial. [Cloudflare identifies 401 as missing or invalid credentials](https://dev
 ## Enable turn trading windows
 
 [Decision 0012](decisions/0012-live-argument-outline.md) makes each live speaking turn one Yap Coins
-trading window. Apply its migration as the owner first, then deploy. Turn windows stay off until
+trading window. Apply its migrations as the owner first, then deploy. Turn windows stay off until
 `TURN_WINDOWS_ENABLED=true` is set on **both** web and the jobs worker (it requires
-`COIN_SANDBOX_ENABLED=true`). Automatic voiding of a cancelled or under-review debate's open rounds
-runs whenever the coin sandbox is enabled. To check, start a debate with two test speakers and read
+`COIN_SANDBOX_ENABLED=true`). Automatic voiding of a cancelled or under-review debate's open rounds,
+five-day reveal and the refusal of debaters' own positions apply whenever the coin sandbox is
+enabled. To check, start a debate with two test speakers and read
 `GET /api/public/debates/<id>/windows`: a window with `turnNumber` 1 should appear within about a
-second, cut off at the turn deadline, and a new one at each turn change.
+second, cut off at the turn deadline, and a new one at each turn change. A user-created debate's
+windows show `revealMode` `five_day`: they stay open but locked after their cutoff and settle 120
+hours after the debate ends.
 
 | Variable               | Default | Purpose                                                    |
 | ---------------------- | ------- | ---------------------------------------------------------- |
