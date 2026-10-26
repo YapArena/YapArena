@@ -203,9 +203,9 @@ export async function requireSandboxOpening(
   if (!opened) error("this account has not used its coin sandbox", 403);
 }
 // The one place that answers "may a testnet deposit follow an automatic
-// opening (operation_id NULL)?" Decision 0013 assumes yes; the founder's
-// answer is pending. If it is no, also require operation_id IS NOT NULL here
-// and bring back a one-time confirmed opening before a first testnet deposit.
+// opening (operation_id NULL)?" Yes: the founder accepted it on 2026-10-26
+// (Decision 0013). Reversing that means requiring operation_id IS NOT NULL
+// here and a one-time confirmed opening before a first testnet deposit.
 async function requireTestnetFundingOpening(
   client: PoolClient,
   userId: string,

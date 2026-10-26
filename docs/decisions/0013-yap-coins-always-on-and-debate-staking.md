@@ -25,7 +25,8 @@ their fresh sign-in.
    The Auth0 sign-in path and account creation are unchanged.
 
 Consequence: a testnet deposit no longer needs an earlier fresh sign-in, because the funding quote
-that precedes it opens the sandbox.
+that precedes it opens the sandbox. The founder accepted this on 2026-10-26: testnet deposits may
+follow an automatic opening.
 
 Migration `1792972953000_allow-automatic-sandbox-openings` makes `operation_id` nullable. It only
 expands the schema: the previous release keeps working, and it reads automatic openings as open.
