@@ -12,6 +12,8 @@ import type { createMessageRepository } from "./features/messages/repository.ts"
 import type { createDiscoveryRepository } from "./features/discovery/repository.ts";
 import type { createIdentityRepository } from "./features/identity/repository.ts";
 import type { createMatchingRepository } from "./features/matching/repository.ts";
+import type { createMatchmaking } from "./features/matching/matchmaking.ts";
+import type { SseResponse } from "./platform/sse.ts";
 import { createMediaTelemetry } from "./features/media/telemetry.ts";
 import type { createMediaRepository } from "./features/media/repository.ts";
 import type { createMediaProvider } from "./features/media/provider.ts";
@@ -38,6 +40,7 @@ import { createMessageRouter } from "./features/messages/router.ts";
 import { createDiscoveryRouter } from "./features/discovery/router.ts";
 import { createIdentityRouter } from "./features/identity/router.ts";
 import { createMatchingRouter } from "./features/matching/router.ts";
+import { createMatchmakingRouter } from "./features/matching/matchmaking-router.ts";
 import { createCommunityRouter } from "./features/community/router.ts";
 import {
   createMeasurementRouter,
@@ -116,6 +119,9 @@ export function createApp({
   discovery,
   identity,
   matching,
+  matchmaking,
+  matchmakingStreams,
+  debateAutoStart,
   media,
   mediaProvider,
   mediaAccountRevocation,
@@ -158,6 +164,13 @@ export function createApp({
   discovery?: ReturnType<typeof createDiscoveryRepository>;
   identity?: ReturnType<typeof createIdentityRepository>;
   matching?: ReturnType<typeof createMatchingRepository>;
+  // Live topic queue (Decision 0011); present only when MATCHMAKING_ENABLED=true.
+  matchmaking?: ReturnType<typeof createMatchmaking>;
+  debateAutoStart?: { tryStart(debateId: string): Promise<boolean> };
+  // Per-user live queue updates; absent, clients poll (Decision 0011).
+  matchmakingStreams?: {
+    subscribe(userId: string, response: SseResponse): void;
+  };
   media?: ReturnType<typeof createMediaRepository>;
   mediaProvider?: ReturnType<typeof createMediaProvider>;
   mediaAccountRevocation?: ReturnType<typeof createMediaAccountRevocation>;
@@ -399,6 +412,7 @@ export function createApp({
         mediaEnabled: Boolean(media && mediaProvider && matching && identity),
         applicationOrigin: applicationOrigin ?? "http://localhost:3000",
         emailFirst: true,
+        matchmakingEnabled: Boolean(matchmaking && identity),
         liveOutline: outlines
           ? { snapshot: (id: string) => outlines.snapshot(id) }
           : undefined,
@@ -496,7 +510,26 @@ export function createApp({
     app.use(
       "/api/matching",
       createRequireAuthentication({ sessions, environment }),
-      createMatchingRouter({ matching, identity, media, recordProductAction }),
+      createMatchingRouter({
+        matching,
+        identity,
+        media,
+        recordProductAction,
+        debateAutoStart,
+        liveQueue: Boolean(matchmaking),
+      }),
+    );
+  }
+  if (matchmaking && identity) {
+    app.use(
+      "/api/matchmaking",
+      createRequireAuthentication({ sessions, environment }),
+      createMatchmakingRouter({
+        matchmaking,
+        identity,
+        recordProductAction,
+        streams: matchmakingStreams,
+      }),
     );
   }
   if (media && mediaProvider && matching && identity) {

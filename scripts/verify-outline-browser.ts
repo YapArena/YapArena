@@ -180,7 +180,7 @@ try {
   );
   // The panel exactly as the debate page renders it, without the page's
   // other modules, driven by a fake LiveKit Room.
-  const page = renderDebate("http://localhost", debate, false, null, {
+  const page = renderDebate("http://localhost", debate, false, null, false, {
     state: snapshot(),
   });
   const panel = /<section class="live-outline"[\s\S]*?<\/section>/.exec(

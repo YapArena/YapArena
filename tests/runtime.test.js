@@ -552,4 +552,74 @@ describe("service runtime", () => {
     await runtime.stop();
     assert.deepEqual(events, ["egress unavailable", "retry:event-1"]);
   });
+
+  it("sweeps the live queue every second without overlap and prunes it hourly", async () => {
+    const callbacks = new Map();
+    const errors = [];
+    let sweeps = 0,
+      finish;
+    const runtime = createRuntime({
+      database: { end: async () => {} },
+      sessions: { deleteExpired: async () => 0 },
+      matchmaking: {
+        sweep: async () => {
+          sweeps += 1;
+          if (sweeps === 1)
+            await new Promise((resolve) => {
+              finish = resolve;
+            });
+          if (sweeps === 2) throw new Error("sweep failed");
+        },
+        pruneExpired: async () => {
+          throw new Error("prune failed");
+        },
+      },
+      logger: { info() {}, error: (_details, message) => errors.push(message) },
+      config: { port: 3000, host: "127.0.0.1" },
+      verifyDatabase: async () => {},
+      setIntervalFn: (callback, interval) => {
+        callbacks.set(interval, callback);
+        return { unref() {} };
+      },
+      clearIntervalFn: () => {},
+    });
+    await runtime.start();
+    const first = callbacks.get(1000)();
+    callbacks.get(1000)();
+    assert.equal(sweeps, 1);
+    finish();
+    await first;
+    await callbacks.get(1000)();
+    await callbacks.get(3600000)();
+    await runtime.stop();
+    assert.equal(sweeps, 2);
+    assert.deepEqual(errors, [
+      "matchmaking sweep failed",
+      "matchmaking retention cleanup failed",
+    ]);
+  });
+
+  it("starts live queue streams after the server and stops them on shutdown", async () => {
+    const events = [];
+    const runtime = createRuntime({
+      database: { end: async () => events.push("database closed") },
+      sessions: { deleteExpired: async () => 0 },
+      matchmakingStreams: {
+        start: async () => events.push("streams started"),
+        stop: async () => events.push("streams stopped"),
+      },
+      logger: { info() {}, error() {} },
+      config: { port: 3000, host: "127.0.0.1" },
+      verifyDatabase: async () => events.push("verified"),
+      backgroundJobs: false,
+    });
+    await runtime.start();
+    await runtime.stop();
+    assert.deepEqual(events, [
+      "verified",
+      "streams started",
+      "streams stopped",
+      "database closed",
+    ]);
+  });
 });

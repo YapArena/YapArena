@@ -242,7 +242,7 @@ room and projection).
 | `outline`  | a window's AI outline is frozen or finalized, or a debater flags an outline item                                        | `GET /api/public/debates/<id>/outline`  |
 
 Migration `1792971645611_add-turn-trading-windows.js` adds `window`, and
-`1792975658985_add-live-outline.js` adds `outline`. Live outline edits never use the log: they
+`1792980190970_add-live-outline.js` adds `outline`. Live outline edits never use the log: they
 reach viewers over LiveKit, and the `outline` signal is only their fallback. Yap Coins rounds are shared
 by everyone on the debate, and turn windows follow the public turn clock, so the signal reveals
 only timing that viewers already see. The coin loop settles a batch of rounds in one transaction,

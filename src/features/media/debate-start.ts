@@ -27,7 +27,8 @@ export function createDebateStart({
     logger,
   }: {
     debateId: string;
-    actorUserId: string;
+    // null for automatic start by the jobs worker or the ready route.
+    actorUserId: string | null;
     reason: string;
     logger: Pick<Logger, "error">;
   }) {
