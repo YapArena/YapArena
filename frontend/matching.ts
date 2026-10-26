@@ -14,6 +14,7 @@ import {
   requestActions,
   requestSummary,
 } from "./challenge-logic.js";
+import { needsDebaterSettings, showSettingsPrompt } from "./settings-prompt.js";
 interface RequestForm extends HTMLFormElement {
   readonly elements: HTMLFormControlsCollection & {
     topicSlug: HTMLInputElement;
@@ -41,6 +42,12 @@ class StaleAccountResponse extends Error {}
 function say(message: string) {
   notice.textContent = message;
 }
+// A refusal for missing debater settings links to them; other errors show their message.
+function sayError(error: unknown) {
+  const message = (error as Error).message;
+  if (needsDebaterSettings(error)) showSettingsPrompt(notice, message);
+  else say(message);
+}
 async function api<T = void>(
   path: string,
   method = "GET",
@@ -55,10 +62,13 @@ async function api<T = void>(
   });
   if (epoch !== accountEpoch) throw new StaleAccountResponse();
   if (response.status === 204) return null as T;
-  const data: { error?: string } = await response.json();
+  const data: { error?: string; code?: string } = await response.json();
   if (epoch !== accountEpoch) throw new StaleAccountResponse();
   if (!response.ok)
-    throw new Error(data.error || "Request failed. Please try again.");
+    throw Object.assign(
+      new Error(data.error || "Request failed. Please try again."),
+      { code: data.code },
+    );
   return data as T;
 }
 
@@ -86,7 +96,7 @@ function action(
       await handler();
       await refresh();
     } catch (error) {
-      if (epoch === accountEpoch) say((error as Error).message);
+      if (epoch === accountEpoch) sayError(error);
     } finally {
       if (epoch === accountEpoch) button.disabled = false;
     }
@@ -121,7 +131,7 @@ topicSlugInput.addEventListener("change", () =>
   loadTopic().catch((error: unknown) => {
     if (error instanceof StaleAccountResponse) return;
     sideMap.textContent = "Choose a published topic to see its side mapping.";
-    say((error as Error).message);
+    sayError(error);
   }),
 );
 
@@ -217,7 +227,7 @@ function proposeForm(item: HTMLLIElement, request: MatchingRequest) {
         openProposalForm = null;
         await refresh();
       } catch (error) {
-        if (epoch === accountEpoch) say((error as Error).message);
+        if (epoch === accountEpoch) sayError(error);
         send.disabled = false;
       }
     });
@@ -286,8 +296,7 @@ function refreshLater() {
   window.clearTimeout(refreshTimer);
   refreshTimer = window.setTimeout(() => {
     refresh().catch((error: unknown) => {
-      if (!(error instanceof StaleAccountResponse))
-        say((error as Error).message);
+      if (!(error instanceof StaleAccountResponse)) sayError(error);
     });
   }, 300);
 }
@@ -389,7 +398,7 @@ document
       say("Topic created as a private draft. Publish it when ready.");
       await refresh();
     } catch (error) {
-      if (epoch === accountEpoch) say((error as Error).message);
+      if (epoch === accountEpoch) sayError(error);
     }
   });
 
@@ -500,7 +509,7 @@ requestForm.addEventListener("submit", async (event) => {
       );
       await refresh();
     } catch (error) {
-      if (epoch === accountEpoch) say((error as Error).message);
+      if (epoch === accountEpoch) sayError(error);
     }
     return;
   }
@@ -527,7 +536,7 @@ requestForm.addEventListener("submit", async (event) => {
     );
     await refresh();
   } catch (error) {
-    if (epoch === accountEpoch) say((error as Error).message);
+    if (epoch === accountEpoch) sayError(error);
   }
 });
 
@@ -561,7 +570,7 @@ async function initialize() {
     if ((error as Error).message === "authentication required") {
       document.querySelector<HTMLElement>("#match-signed-out")!.hidden = false;
       say("Sign in to create topics and arrange debates.");
-    } else say((error as Error).message);
+    } else sayError(error);
   }
 }
 

@@ -86,7 +86,9 @@ project, copies only the agent's build context for `lk agent deploy`. In the ima
 their dependency tree, so the web app's and the build tools' packages stay out of it.
 `verify-outline-browser.ts`,
 checked in browser automation and run by `npm run verify:browser`, drives the outline panel in
-Chrome with synthetic LiveKit messages and an in-memory outline store. `transcription-trial.ts`, in the
+Chrome with synthetic LiveKit messages and an in-memory outline store. `verify-matchmaking-browser.ts`,
+also in browser automation, runs two accounts through the live queue and a "now" challenge against
+the isolation harness's fresh database. `transcription-trial.ts`, in the
 database-tools project, scores the providers for the
 [staging trial](transcription-provider-trial.md).
 

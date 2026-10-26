@@ -29,6 +29,7 @@ import {
   type Side,
   type Waiting,
 } from "./matchmaking-logic.js";
+import { needsDebaterSettings, showSettingsPrompt } from "./settings-prompt.js";
 
 declare global {
   interface WindowEventMap {
@@ -69,6 +70,13 @@ const status = document.querySelector<HTMLElement>("[data-header-status]");
 function announce(message: string) {
   if (status) status.textContent = message;
   if (panelNote) panelNote.textContent = message;
+}
+// A refusal for missing debater settings links to them; other errors show their message.
+function announceError(error: unknown) {
+  const message = error instanceof Error ? error.message : "Try again.";
+  announce(message);
+  if (panelNote && needsDebaterSettings(error))
+    showSettingsPrompt(panelNote, message);
 }
 
 // ---- Header pill -------------------------------------------------------------------------
@@ -514,8 +522,10 @@ async function answerChallenge(accept: boolean) {
     void refresh();
   } catch (error) {
     settledChallenge = null;
-    challengeStatus.textContent =
-      error instanceof Error ? error.message : "Try again.";
+    const message = error instanceof Error ? error.message : "Try again.";
+    if (needsDebaterSettings(error))
+      showSettingsPrompt(challengeStatus, message);
+    else challengeStatus.textContent = message;
     challengeAccept.disabled = false;
     challengeDecline.disabled = false;
   }
@@ -608,7 +618,7 @@ async function choose(side: Side, button: HTMLButtonElement) {
     announce("You're in the queue. Stay on YAP Arena to be matched.");
     void loadWaiting();
   } catch (error) {
-    announce(error instanceof Error ? error.message : "Try again.");
+    announceError(error);
   } finally {
     renderPanel();
   }
