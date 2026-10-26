@@ -71,6 +71,8 @@ interface Round {
   opens_at: Date;
   closes_at: Date;
   state: "open" | "settled" | "void";
+  // F11: copied from the debate when the round is created.
+  reveal_mode: RevealMode;
   result: {
     snapshot: Order[];
     snapshotHash: string;
@@ -81,6 +83,29 @@ interface Round {
   revealed_at: Date | null;
 }
 type VoidReason = "debate_unavailable" | "operator_cancelled";
+/**
+ * F11: a five-day round takes orders until its cutoff and prices and settles
+ * at the debate's 120-hour close; a per-round round settles at its cutoff.
+ * Five-day is the default and the only mode of a user-created debate.
+ */
+export type RevealMode = "five_day" | "per_round";
+export const REVEAL_CLOSE_HOURS = 120;
+const endedStatuses = "('ended','replay','finalized')";
+// True when a round (table alias) may price and settle, once past its cutoff.
+const revealDue = (round: string) =>
+  `(${round}.reveal_mode='per_round' OR EXISTS (SELECT 1 FROM debates rd
+    WHERE rd.id=${round}.debate_id AND rd.status IN ${endedStatuses}
+      AND rd.live_ended_at+INTERVAL '${REVEAL_CLOSE_HOURS} hours'<=clock_timestamp()))`;
+// When a round reveals: its cutoff, or its debate's 120-hour close once the
+// debate has ended (unknown before).
+const revealAt = (round: string, debate: string) =>
+  `CASE WHEN ${round}.revealed_at IS NOT NULL THEN ${round}.revealed_at
+    WHEN ${round}.reveal_mode='per_round' THEN ${round}.closes_at
+    WHEN ${debate}.status IN ${endedStatuses}
+      THEN ${debate}.live_ended_at+INTERVAL '${REVEAL_CLOSE_HOURS} hours' END`;
+/** F14 and the round's own limits: why this viewer cannot take a position. */
+export type Ineligibility =
+  "debater" | "committed" | "debate_unavailable" | "paused" | "closed" | "full";
 // A debate in one of these states takes no new commitments, and the coin loop
 // voids its open rounds instead of settling them (F15: only unopened rounds).
 const unavailableStatuses = "('cancelled','void_review')";
@@ -92,6 +117,8 @@ export interface TurnWindow {
   closesAt: Date;
   state: Round["state"];
   voidReason: VoidReason | null;
+  revealMode: RevealMode;
+  revealAt: Date | null;
 }
 interface StoredOrder {
   user_id: string;
@@ -265,7 +292,7 @@ export function createCoinDebateSandbox(
     const rounds = (
       await client.query<{ id: string }>(
         `SELECT r.id FROM coin_debate_rounds r WHERE r.state='open' AND r.rail=$1
-        AND r.closes_at<=clock_timestamp() AND NOT EXISTS (SELECT 1 FROM debates d
+        AND r.closes_at<=clock_timestamp() AND ${revealDue("r")} AND NOT EXISTS (SELECT 1 FROM debates d
           WHERE d.id=r.debate_id AND d.status IN ${unavailableStatuses})
         ORDER BY r.closes_at,r.id LIMIT $2`,
         [rail, limit],
@@ -316,7 +343,8 @@ export function createCoinDebateSandbox(
     if (round.state !== "open") return false;
     const due = (
       await client.query<{ due: boolean }>(
-        "SELECT clock_timestamp()>=closes_at AS due FROM coin_debate_rounds WHERE id=$1",
+        `SELECT clock_timestamp()>=r.closes_at AND ${revealDue("r")} AS due
+        FROM coin_debate_rounds r WHERE r.id=$1`,
         [round.id],
       )
     ).rows[0]!.due;
@@ -731,9 +759,13 @@ export function createCoinDebateSandbox(
           await assertCallerSession(client, context);
           return window;
         }
+        // A five-day manual round stays open after its cutoff until the
+        // debate's 120-hour close; only one still taking orders is current.
         const current = (
           await client.query<{ id: string }>(
-            "SELECT id FROM coin_debate_rounds WHERE debate_id=$1 AND state='open' AND turn_number IS NULL",
+            `SELECT id FROM coin_debate_rounds WHERE debate_id=$1 AND state='open' AND turn_number IS NULL
+            AND (reveal_mode='per_round' OR closes_at>clock_timestamp())
+            ORDER BY opens_at DESC,id LIMIT 1`,
             [debateId],
           )
         ).rows[0];
@@ -805,6 +837,28 @@ export function createCoinDebateSandbox(
           return { id: existing.id, created: false };
         }
         if (round.state !== "open") fail("sandbox round is closed");
+        // A five-day round stays open after its cutoff, until its reveal.
+        if (
+          !(
+            await client.query<{ accepting: boolean }>(
+              "SELECT clock_timestamp()<closes_at AS accepting FROM coin_debate_rounds WHERE id=$1",
+              [round.id],
+            )
+          ).rows[0]!.accepting
+        )
+          fail("sandbox debate is past cutoff");
+        // F14: debaters may not take a position in their own debate.
+        if (
+          (
+            await client.query(
+              `SELECT 1 FROM debates d JOIN public_profiles p
+                ON p.id IN (d.speaker_a_profile_id,d.speaker_b_profile_id)
+              WHERE d.id=$1 AND p.user_id=$2`,
+              [round.debate_id, context.userId],
+            )
+          ).rowCount
+        )
+          fail("debaters cannot take a position in their own debate", 403);
         if (
           !(
             await client.query(
@@ -943,11 +997,38 @@ export function createCoinDebateSandbox(
           context.sessionTokenHash,
         );
         const rounds = (
-          await client.query<Round>(
-            "SELECT * FROM coin_debate_rounds WHERE debate_id=$1 AND rail=$2 ORDER BY opens_at DESC,id LIMIT 20",
+          await client.query<
+            Round & {
+              participants: number;
+              accepting: boolean;
+              reveal_at: Date | null;
+            }
+          >(
+            `SELECT r.*, clock_timestamp()<r.closes_at AS accepting,
+              (SELECT count(*)::int FROM coin_debate_orders o WHERE o.round_id=r.id) AS participants,
+              ${revealAt("r", "d")} AS reveal_at
+            FROM coin_debate_rounds r JOIN debates d ON d.id=r.debate_id
+            WHERE r.debate_id=$1 AND r.rail=$2 ORDER BY r.opens_at DESC,r.id LIMIT 20`,
             [debateId, rail],
           )
         ).rows;
+        // The viewer's standing in this debate, for each round's eligibility.
+        const standing = (
+          await client.query<{
+            available: boolean;
+            debater: boolean;
+            paused: boolean;
+          }>(
+            `SELECT d.publication_state='published' AND t.publication_state='published'
+                AND d.status NOT IN ${unavailableStatuses} AS available,
+              EXISTS (SELECT 1 FROM public_profiles p
+                WHERE p.id IN (d.speaker_a_profile_id,d.speaker_b_profile_id) AND p.user_id=$2) AS debater,
+              EXISTS (SELECT 1 FROM coin_sandbox_requests q WHERE q.user_id=$2
+                AND q.kind='correction' AND q.status='uncertain') AS paused
+            FROM debates d JOIN topics t ON t.id=d.topic_id WHERE d.id=$1`,
+            [debateId, context.userId],
+          )
+        ).rows[0] ?? { available: false, debater: false, paused: false };
         return Promise.all(
           rounds.map(async (r) => {
             const own = (
@@ -959,6 +1040,19 @@ export function createCoinDebateSandbox(
             const outcome = r.result?.outcomes.find(
               (o) => o.participant === context.userId,
             );
+            const ineligible: Ineligibility | null = standing.debater
+              ? "debater"
+              : own
+                ? "committed"
+                : !standing.available
+                  ? "debate_unavailable"
+                  : r.state !== "open" || !r.accepting
+                    ? "closed"
+                    : standing.paused
+                      ? "paused"
+                      : r.participants >= r.terms.capacity
+                        ? "full"
+                        : null;
             return {
               id: r.id,
               debateId: r.debate_id,
@@ -973,6 +1067,17 @@ export function createCoinDebateSandbox(
                 r.state === "void" ? (r.result?.voidReason ?? null) : null,
               opensAt: r.opens_at,
               closesAt: r.closes_at,
+              // F11: when this round prices and settles; null for a five-day
+              // round until its debate ends.
+              revealMode: r.reveal_mode,
+              revealAt: r.reveal_at,
+              // F12: everyone who committed, never a side total.
+              participants: r.participants,
+              // F14 and the round's limits: can this viewer take a position?
+              eligibility: {
+                canTakePosition: ineligible === null,
+                reason: ineligible,
+              },
               terms: r.terms,
               asset: "USDC",
               precision: 6,
@@ -1030,6 +1135,53 @@ export function createCoinDebateSandbox(
         )
           fail("sandbox operator ownership is required", 403);
         return voidOpen(client, roundId, reason, "yaparena_owner");
+      });
+    },
+    // F11: the owner records per-round reveal for a founder-created debate,
+    // before its first round. User-created debates keep the five-day default.
+    async setRevealMode(debateId: string, mode: RevealMode, reason: string) {
+      resource(debateId);
+      if (mode !== "five_day" && mode !== "per_round")
+        fail("invalid reveal mode", 400);
+      const why = reason.trim();
+      if (why.length < 5 || why.length > 500)
+        fail("reason must be 5-500 characters", 400);
+      return transaction(async (client) => {
+        if (
+          (await client.query<{ role: string }>("SELECT current_user AS role"))
+            .rows[0]?.role !== "yaparena_owner"
+        )
+          fail("sandbox operator ownership is required", 403);
+        const recorded = (
+          await client.query<{ mode: RevealMode }>(
+            "SELECT mode FROM coin_debate_reveal_modes WHERE debate_id=$1",
+            [debateId],
+          )
+        ).rows[0];
+        if (recorded) {
+          if (recorded.mode !== mode)
+            fail("this debate's reveal mode is already recorded");
+          return { created: false };
+        }
+        if (
+          !(await client.query("SELECT 1 FROM debates WHERE id=$1", [debateId]))
+            .rowCount
+        )
+          fail("debate not found", 404);
+        if (
+          (
+            await client.query(
+              "SELECT 1 FROM coin_debate_rounds WHERE debate_id=$1 LIMIT 1",
+              [debateId],
+            )
+          ).rowCount
+        )
+          fail("the reveal mode is locked once a round opens");
+        await client.query(
+          "INSERT INTO coin_debate_reveal_modes(debate_id,mode,reason) VALUES($1,$2,$3)",
+          [debateId, mode, why],
+        );
+        return { created: true };
       });
     },
     // Coin loop: refund every open round of a cancelled or under-review debate
@@ -1093,17 +1245,24 @@ export function createCoinDebateSandbox(
         await database.query<{
           eventStatus: string;
           serverNow: Date;
+          revealMode: RevealMode;
+          revealAt: Date | null;
           windows: TurnWindow[];
         }>(
           `SELECT d.status AS "eventStatus", clock_timestamp() AS "serverNow",
+            COALESCE(m.mode,'five_day') AS "revealMode",
+            CASE WHEN COALESCE(m.mode,'five_day')='five_day' AND d.status IN ${endedStatuses}
+              THEN d.live_ended_at+INTERVAL '${REVEAL_CLOSE_HOURS} hours' END AS "revealAt",
             COALESCE((SELECT json_agg(json_build_object('id',w.id,'turnNumber',w.turn_number,
               'side',w.turn_side,'opensAt',w.opens_at,'closesAt',w.closes_at,'state',w.state,
-              'voidReason',CASE WHEN w.state='void' THEN w.result->>'voidReason' END)
+              'voidReason',CASE WHEN w.state='void' THEN w.result->>'voidReason' END,
+              'revealMode',w.reveal_mode,'revealAt',${revealAt("w", "d")})
               ORDER BY w.turn_number)
             FROM (SELECT * FROM coin_debate_rounds r WHERE r.debate_id=d.id AND r.rail=$2
               AND r.turn_number IS NOT NULL ORDER BY r.turn_number DESC LIMIT 100) w),
               '[]'::json) AS windows
           FROM debates d JOIN topics t ON t.id=d.topic_id
+          LEFT JOIN coin_debate_reveal_modes m ON m.debate_id=d.id
           WHERE d.id=$1 AND d.publication_state='published' AND t.publication_state='published'`,
           [debateId, rail],
         )

@@ -96,6 +96,7 @@ const applicationTables = [
   "coin_sandbox_books",
   "coin_debate_rounds",
   "coin_debate_orders",
+  "coin_debate_reveal_modes",
   "coin_sandbox_controls",
   "coin_sandbox_requests",
   "coin_sandbox_openings",
