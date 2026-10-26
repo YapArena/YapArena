@@ -523,5 +523,48 @@ describe(
       assert.equal(await status(), "cancelled");
       assert.equal(await ticket(a), undefined);
     });
+
+    it("signals only queue state changes to each affected player", async () => {
+      const listener = new pg.Client({
+        connectionString: runtimeUrl,
+        options: "-c search_path=pg_catalog,yaparena,pg_temp",
+      });
+      await listener.connect();
+      const heard = [];
+      listener.on("notification", (message) => {
+        if (message.channel === "yaparena_user_v1") heard.push(message.payload);
+      });
+      await listener.query("LISTEN yaparena_user_v1");
+      const drain = async () => {
+        await listener.query("SELECT 1");
+        const copy = [...heard];
+        heard.length = 0;
+        return copy.sort();
+      };
+      try {
+        const slug = await topic();
+        const [a, b] = [await player(), await player()];
+        await queue.enter(a, { topicSlug: slug, side: "A" });
+        assert.deepEqual(await drain(), [a]);
+        await queue.touch(a);
+        assert.equal(await queue.touchMany([a, b]), 1);
+        assert.deepEqual(await drain(), []);
+        const { offer } = await queue.enter(b, { topicSlug: slug, side: "B" });
+        assert.deepEqual(await drain(), [a, b].sort());
+        await queue.accept(a, offer.id);
+        assert.deepEqual(await drain(), [a, b].sort());
+        const { debateId, state } = await queue.accept(b, offer.id);
+        assert.deepEqual(await drain(), [a, b].sort());
+        assert.equal(state.debate.id, debateId);
+        assert.equal(state.debate.status, "scheduled");
+        const window =
+          new Date(state.debate.joinDeadlineAt).getTime() -
+          new Date(state.serverNow).getTime();
+        assert.ok(window > 80_000 && window <= 90_000);
+        assert.equal(await queue.touchMany([]), 0);
+      } finally {
+        await listener.end();
+      }
+    });
   },
 );

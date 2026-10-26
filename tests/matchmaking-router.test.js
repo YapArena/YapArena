@@ -16,7 +16,7 @@ const state = {
   debate: null,
 };
 
-function fixture({ failure, debateId = null } = {}) {
+function fixture({ failure, debateId = null, streams } = {}) {
   const calls = [];
   const actions = [];
   const run =
@@ -54,6 +54,7 @@ function fixture({ failure, debateId = null } = {}) {
       recordProductAction: async (_request, action) => {
         actions.push(action);
       },
+      streams,
     }),
   );
   app.use((error, _req, res, _next) => {
@@ -92,6 +93,27 @@ describe("live topic queue API", () => {
       "7",
       { topicSlug: "nuclear-power", side: "B" },
     ]);
+  });
+
+  it("opens the live stream for the signed-in player, or tells clients to poll", async () => {
+    const without = await request(fixture().app)
+      .get("/api/matchmaking/stream")
+      .set("x-user", "7");
+    assert.equal(without.status, 503);
+    const subscribed = [];
+    const f = fixture({
+      streams: {
+        subscribe(userId, response) {
+          subscribed.push(userId);
+          response.status(200).json({ subscribed: true });
+        },
+      },
+    });
+    const opened = await request(f.app)
+      .get("/api/matchmaking/stream")
+      .set("x-user", "8");
+    assert.equal(opened.status, 200);
+    assert.deepEqual(subscribed, ["8"]);
   });
 
   it("serves state, presence, leaving and waiting counts", async () => {

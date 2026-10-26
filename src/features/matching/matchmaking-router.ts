@@ -4,6 +4,7 @@ import type { createMatchmaking } from "./matchmaking.ts";
 import type { createIdentityRepository } from "../identity/repository.ts";
 import type { ProductActionRecorder } from "../measurement/router.ts";
 import { createRequireRole } from "../identity/router.ts";
+import type { SseResponse } from "../../platform/sse.ts";
 import { MatchConflictError, MatchNotFoundError } from "./repository.ts";
 
 const slugPattern = /^[a-z0-9][a-z0-9-]{2,79}$/;
@@ -48,10 +49,12 @@ export function createMatchmakingRouter({
   matchmaking,
   identity,
   recordProductAction,
+  streams,
 }: {
   matchmaking: ReturnType<typeof createMatchmaking>;
   identity: ReturnType<typeof createIdentityRepository>;
   recordProductAction?: ProductActionRecorder;
+  streams?: { subscribe(userId: string, response: SseResponse): void };
 }) {
   const router = Router();
   const participant = createRequireRole(identity, ["participant"]);
@@ -60,6 +63,14 @@ export function createMatchmakingRouter({
     next();
   });
 
+  // Live updates of this player's queue state; without it, clients poll /me.
+  router.get("/stream", (request, response) => {
+    if (!streams)
+      return response
+        .status(503)
+        .json({ error: "live queue updates are unavailable" });
+    return streams.subscribe(request.user!.id, response);
+  });
   router.get("/me", async (request, response) =>
     response.json({ state: await matchmaking.state(request.user!.id) }),
   );

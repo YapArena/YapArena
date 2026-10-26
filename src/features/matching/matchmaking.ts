@@ -76,7 +76,13 @@ export interface MatchmakingState {
     acceptedByMe: boolean;
     acceptedByOpponent: boolean;
   } | null;
-  debate: { id: string; slug: string } | null;
+  // The debate a matched ticket created; joinDeadlineAt is when an unstarted one is cancelled.
+  debate: {
+    id: string;
+    slug: string;
+    status: string;
+    joinDeadlineAt: string;
+  } | null;
 }
 
 const ticketFields = `id, user_id AS "userId", topic_id AS "topicId", side, status`;
@@ -337,12 +343,16 @@ export function createMatchmaking(
         sideLabel: string;
         debateId: string | null;
         debateSlug: string | null;
+        debateStatus: string | null;
+        joinDeadlineAt: Date | null;
         serverNow: Date;
       }>(
         `SELECT t.id, t.side, t.status, t.closed_reason AS "closedReason",
            t.priority_at AS "priorityAt", tp.slug AS "topicSlug", tp.title AS "topicTitle",
            CASE WHEN t.side = 'A' THEN tp.side_a_label ELSE tp.side_b_label END AS "sideLabel",
-           d.id AS "debateId", d.slug AS "debateSlug", clock_timestamp() AS "serverNow"
+           d.id AS "debateId", d.slug AS "debateSlug", d.status AS "debateStatus",
+           d.scheduled_at + make_interval(secs => ${QUEUE_JOIN_SECONDS}) AS "joinDeadlineAt",
+           clock_timestamp() AS "serverNow"
          FROM matchmaking_tickets t JOIN topics tp ON tp.id = t.topic_id
          LEFT JOIN debates d ON d.id = t.debate_id
          WHERE t.user_id = $1 AND (t.status IN ('searching', 'offered')
@@ -399,8 +409,17 @@ export function createMatchmaking(
         },
         offer,
         debate:
-          row.status === "matched" && row.debateId && row.debateSlug
-            ? { id: row.debateId, slug: row.debateSlug }
+          row.status === "matched" &&
+          row.debateId &&
+          row.debateSlug &&
+          row.debateStatus &&
+          row.joinDeadlineAt
+            ? {
+                id: row.debateId,
+                slug: row.debateSlug,
+                status: row.debateStatus,
+                joinDeadlineAt: new Date(row.joinDeadlineAt).toISOString(),
+              }
             : null,
       };
     },
@@ -448,6 +467,17 @@ export function createMatchmaking(
         await pairOldest(client, topicId, liveDebateCapacity);
       });
       return matchmaking.state(userId);
+    },
+
+    // Presence for every player with an open live stream, refreshed by the web process.
+    async touchMany(userIds: readonly string[]) {
+      if (!userIds.length) return 0;
+      const result = await database.query(
+        `UPDATE matchmaking_tickets SET last_seen_at = CURRENT_TIMESTAMP
+         WHERE user_id = ANY($1::bigint[]) AND status IN ('searching', 'offered')`,
+        [userIds],
+      );
+      return result.rowCount ?? 0;
     },
 
     async touch(userId: string) {
