@@ -592,11 +592,17 @@ textarea::placeholder {
   margin: 0 0 5px;
 }
 .arena-community-tools .community-toolbar button {
+  min-height: 24px;
   background: none;
   padding: 0;
   border: none;
   color: #c4c4c4;
   font-size: 0.66rem;
+}
+/* WCAG 2.2 target size: the narrower chat column wraps these small text
+   controls closer together, so each keeps a 24 px tall target. */
+.arena-community-tools > details > summary {
+  line-height: 24px;
 }
 .arena-community-tools select,
 .arena-community-tools textarea {
