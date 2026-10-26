@@ -529,3 +529,137 @@ describe("matching API with the live queue on", () => {
     assert.deepEqual(created, ["direct"]);
   });
 });
+
+describe("direct challenge routes", () => {
+  const later = (hoursAhead) =>
+    new Date(Date.now() + hoursAhead * 60 * 60 * 1000).toISOString();
+  function routes() {
+    const calls = [];
+    const app = express()
+      .use(express.json())
+      .use((req, _res, next) => {
+        req.user = { id: "7" };
+        next();
+      })
+      .use(
+        createMatchingRouter({
+          matching: {
+            createRequest: async (_user, input) => {
+              calls.push(["create", input]);
+              return { id };
+            },
+            acceptRequest: async (_user, requestId, choice) => {
+              calls.push(["accept", requestId, choice]);
+              return { id };
+            },
+            proposeTimes: async (_user, requestId, times) => {
+              calls.push(["propose", requestId, times.length]);
+              return { id };
+            },
+            searchPeople: async (_user, query) => {
+              calls.push(["search", query]);
+              return [{ handle: "riley", displayName: "Riley" }];
+            },
+          },
+          identity: { getRoles: async () => ["participant"] },
+        }),
+      );
+    return { app, calls };
+  }
+  const challenge = {
+    kind: "direct",
+    topicSlug: "civil-ai",
+    targetHandle: "other-speaker",
+    proposition: "Should cities use AI for public services?",
+    requestedSide: "A",
+  };
+
+  it("accepts now, one time or one to three proposed times, and nothing else", async () => {
+    const { app, calls } = routes();
+    const post = (body) => request(app).post("/requests").send(body);
+    assert.equal((await post({ ...challenge, mode: "now" })).status, 201);
+    assert.equal(
+      (await post({ ...challenge, proposedTimes: [later(2), later(3)] }))
+        .status,
+      201,
+    );
+    assert.equal(
+      (await post({ ...challenge, scheduledAt: later(2) })).status,
+      201,
+    );
+    assert.deepEqual(
+      calls.map(([, input]) => input.mode),
+      ["now", "scheduled", "scheduled"],
+    );
+    assert.equal(calls[1][1].proposedTimes.length, 2);
+    for (const body of [
+      { ...challenge, mode: "now", scheduledAt: later(2) },
+      { ...challenge, mode: "soon" },
+      { ...challenge, proposedTimes: [] },
+      { ...challenge, proposedTimes: [later(2), later(3), later(4), later(5)] },
+      { ...challenge, proposedTimes: [later(2), later(2)] },
+      { ...challenge, proposedTimes: [later(0.5)] },
+      { ...challenge, proposedTimes: [later(2)], scheduledAt: later(3) },
+      { ...challenge },
+      {
+        ...challenge,
+        kind: "queue",
+        targetHandle: undefined,
+        mode: "now",
+      },
+    ])
+      assert.equal((await post(body)).status, 400, JSON.stringify(body));
+  });
+
+  it("accepts a chosen proposal, takes counter-proposals and searches people", async () => {
+    const { app, calls } = routes();
+    const proposalId = "22222222-2222-4222-8222-222222222222";
+    assert.equal(
+      (await request(app).post(`/requests/${id}/accept`).send({ proposalId }))
+        .status,
+      201,
+    );
+    assert.equal(
+      (await request(app).post(`/requests/${id}/accept`).send({})).status,
+      201,
+    );
+    for (const body of [{ proposalId: "nope" }, { proposalId, extra: 1 }])
+      assert.equal(
+        (await request(app).post(`/requests/${id}/accept`).send(body)).status,
+        400,
+      );
+    assert.equal(
+      (
+        await request(app)
+          .post(`/requests/${id}/proposals`)
+          .send({ times: [later(4)] })
+      ).status,
+      200,
+    );
+    for (const body of [{ times: [] }, { times: [later(4)], note: "x" }, {}])
+      assert.equal(
+        (await request(app).post(`/requests/${id}/proposals`).send(body))
+          .status,
+        400,
+      );
+    assert.equal(
+      (await request(app).post("/requests/bad/proposals").send({})).status,
+      404,
+    );
+    const found = await request(app).get("/people?q=ri");
+    assert.deepEqual(found.body.people, [
+      { handle: "riley", displayName: "Riley" },
+    ]);
+    assert.deepEqual((await request(app).get("/people?q=r")).body.people, []);
+    assert.deepEqual(
+      calls
+        .filter(([name]) => name !== "search")
+        .map(([name, , extra]) => [name, extra]),
+      [
+        ["accept", { proposalId }],
+        ["accept", { proposalId: undefined }],
+        ["propose", 1],
+      ],
+    );
+  });
+});

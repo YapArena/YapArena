@@ -116,6 +116,8 @@ const applicationTables = [
   "matchmaking_tickets",
   "match_offers",
   "account_device_checks",
+  "challenge_time_proposals",
+  "matchmaking_presence",
 ];
 const container = `yaparena-isolation-${randomUUID().slice(0, 8)}`;
 const evidenceDirectory = `/tmp/${container}-evidence`;
