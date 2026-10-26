@@ -3,7 +3,7 @@ import type {
   PublicList,
   PublicDebate,
 } from "../src/features/discovery/public-types.ts";
-import type { Timeline, RoundPoint } from "../frontend/arena-types.ts";
+import type { RoundPoint, SharedActivity } from "../frontend/arena-types.ts";
 /* global document, window */
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
@@ -68,52 +68,23 @@ export async function verifyArenaBrowser({
       ),
       debate = debates.items.find((d) => d.slug === debateSlug);
     assert.ok(debate);
-    const histories = [];
-    for (let i = 0; i < 2; i++)
-      histories.push(
-        await api("a4/runs", {
-          debateId: debate.id,
-          mode: "mixed",
-          config: {
-            population: 500,
-            roundSeconds: 10,
-            argumentLabel: i ? "Cost analysis" : "Opening case",
-          },
-          speed: 20,
-        }),
-      );
+    // Decision 0013: the debate page shows only the shared, revealed bot
+    // history; Bots mode itself lives on /coins. Publishing lets this
+    // account's runs reach that history. Consent is withdrawn at the end so
+    // the shared-history check's exact round counts stay unaffected.
+    await api("a4/publication", { published: true });
+    const createRun = (argumentLabel: string) =>
+      api<{ id: string }>("a4/runs", {
+        debateId: debate.id,
+        mode: "mixed",
+        config: { population: 500, roundSeconds: 10, argumentLabel },
+        speed: 20,
+      });
+    for (const label of ["Opening case", "Cost analysis"])
+      await createRun(label);
     await page.goto(base + "/debates/" + debateSlug);
     if (await dismiss.isVisible()) await dismiss.click();
-    // The Bots sandbox sits behind its tab since Decision 0013.
-    await page.locator("[data-detail-tab=rounds]").click();
-    await page.locator("[data-inline-access]").waitFor({ state: "visible" });
-    await page
-      .locator("[data-arena-sync]")
-      .filter({ hasText: "Connected" })
-      .waitFor();
-    if (
-      (await page.locator("[data-inline-setup]").getAttribute("open")) === null
-    )
-      await page.locator("[data-inline-setup] summary").click();
-    await page.locator("[data-inline-argument]").fill("Pilot studies");
-    await page.locator("[data-inline-bots]").click();
-    await page.locator("[data-inline-form]").waitFor({ state: "visible" });
-    const remaining = Number(
-      await page
-        .locator("[data-arena-round-progress]")
-        .getAttribute("aria-valuenow"),
-    );
-    assert.ok(remaining > 0 && remaining <= 100);
-    await page.waitForFunction(
-      (before) =>
-        Number(
-          document
-            .querySelector<HTMLElement>("[data-arena-round-progress]")!
-            .getAttribute("aria-valuenow"),
-        ) < before,
-      remaining,
-    );
-    checks.roundProgressDrains = true;
+    await page.locator("[data-a4-inline]").waitFor();
     phase = "live chat";
     await page.waitForFunction(
       () =>
@@ -138,12 +109,17 @@ export async function verifyArenaBrowser({
       {},
       { timeout: 45000 },
     );
+    await page
+      .locator("[data-arena-sync]")
+      .filter({ hasText: "Synthetic activity" })
+      .waitFor();
     checks.chartUpdatedAfterRealSettlements = true;
-    const history = await api<Timeline>(
-        `a4/debates/${debate.id}/timeline?scope=sandbox`,
-      ),
-      first = history.items[0]!,
-      latest = history.items.at(-1)!;
+    const activity = () =>
+      api<SharedActivity>(`public/debates/${debate.id}/activity`);
+    let history = await activity();
+    assert.equal(history.items.length, 2);
+    const first = history.items[0]!;
+    let latest = history.items.at(-1)!;
     async function expectInspection(point: RoundPoint) {
       await page.waitForFunction(
         (id) =>
@@ -183,8 +159,7 @@ export async function verifyArenaBrowser({
           height: bounds.height,
         };
       });
-    const beforeHover = await page.locator("[data-inline-runs]").inputValue(),
-      originalStatement = await page
+    const originalStatement = await page
         .locator("[data-chart-statement]")
         .textContent(),
       originalGraph = await graphGeometry(),
@@ -235,21 +210,21 @@ export async function verifyArenaBrowser({
       /Median interval|NO median/,
     );
     assert.notEqual(await page.locator("[data-price-yes]").textContent(), "—");
-    assert.equal(
-      await page.locator("[data-inline-runs]").inputValue(),
-      beforeHover,
-    );
-    // A settled private sandbox has no deadline or room signal left, so its
-    // next timed refresh can be 30 s away. Returning focus refreshes the
-    // workspace now, without moving the pointer off the inspected round.
+    // A new published settlement re-renders the shared history through the
+    // room signal while the pointer stays on the inspected round.
     const refreshed = page.waitForResponse(
-      (r) =>
-        r.url().includes(`/api/a4/debates/${debate.id}/workspace`) &&
-        r.request().method() === "GET",
+      async (r) =>
+        r.url().includes(`/api/public/debates/${debate.id}/activity`) &&
+        r.ok() &&
+        ((await r.json()) as SharedActivity).items.length === 3,
+      { timeout: 45000 },
     );
-    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+    await createRun("Pilot studies");
     const response = await refreshed;
     await response.finished();
+    await page.waitForFunction(
+      () => document.querySelectorAll("[data-chart-round]").length === 3,
+    );
     await page.evaluate(
       () =>
         new Promise((resolve) =>
@@ -259,6 +234,15 @@ export async function verifyArenaBrowser({
         ),
     );
     await expectInspection(first);
+    assert.equal(
+      await page.locator("[data-chart-statement]").textContent(),
+      `“${first.argumentLabel}”`,
+    );
+    history = await activity();
+    assert.equal(history.items.length, 3);
+    assert.equal(history.items[0]!.id, first.id);
+    latest = history.items.at(-1)!;
+    assert.equal(latest.argumentLabel, "Pilot studies");
     assert.equal(await offerMarker.evaluate((node) => node.isConnected), true);
     assert.equal(await page.evaluate(() => window.__arenaHeadingMotion), true);
     assert.equal(
@@ -372,26 +356,6 @@ export async function verifyArenaBrowser({
     checks.expandEscapeRestoreExactBounds = true;
     phase = "desktop screenshot";
     await page.screenshot({ path: directory + "/desktop.png", fullPage: true });
-    phase = "commit";
-    await page.locator("[data-inline-form] input[name=side][value=NO]").check();
-    await page.locator("[data-inline-form] input[name=ceiling]").fill("0.78");
-    await page.locator('[data-inline-form] [data-quantity="50"]').click();
-    assert.equal(
-      await page
-        .locator("[data-inline-form] input[name=quantity]")
-        .inputValue(),
-      "50",
-    );
-    await page.locator("[data-inline-form] button[type=submit]").click();
-    await page.locator("[data-inline-review]").waitFor({ state: "visible" });
-    await page.locator("[data-inline-commit]").click();
-    await page.locator("[data-inline-review]").waitFor({ state: "hidden" });
-    await page
-      .locator("[data-inline-receipt]")
-      .getByText("committed", { exact: true })
-      .waitFor();
-    checks.bindingCommitmentAndQuickQuantity = true;
-    const active = await page.locator("[data-inline-runs]").inputValue();
     phase = "preserved live DOM";
     await page.locator("[data-arena-video]").hover();
     await page
@@ -403,21 +367,19 @@ export async function verifyArenaBrowser({
     assert.equal(await media.evaluate((n) => n.isConnected), true);
     assert.equal(await chat.evaluate((n) => n.isConnected), true);
     phase = "round selection";
-    await page.locator("[data-chart-round]").first().click();
-    await page.waitForFunction(
-      (id) =>
-        document.querySelector<HTMLSelectElement>("[data-inline-runs]")!
-          .value !== id,
-      active,
-    );
-    checks.chartSelectionLoadsRound = true;
-    await page.locator("[data-detail-tab=info]").click();
+    await page.locator(`[data-chart-round="${first.id}"]`).click();
+    await page
+      .locator(`[data-chart-round="${first.id}"].is-selected`)
+      .waitFor({ state: "attached" });
+    await expectInspection(first);
+    checks.chartSelectionMarksRound = true;
     assert.equal(
-      await page.locator("[data-detail-panel=info]").isVisible(),
-      true,
+      await page
+        .getByRole("link", { name: "Bots sandbox on Yap Coins →" })
+        .getAttribute("href"),
+      `/coins?debate=${debate.id}`,
     );
-    await page.locator("[data-detail-tab=rounds]").click();
-    checks.sidebarTabs = true;
+    checks.botsSandboxLink = true;
     phase = "a11y";
     await page.addScriptTag({ content: axe.source });
     const a11y = await page.evaluate(async () => {
@@ -439,8 +401,7 @@ export async function verifyArenaBrowser({
     phase = "mobile";
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload();
-    await page.locator("[data-detail-tab=rounds]").click();
-    await page.locator("[data-inline-access]").waitFor({ state: "visible" });
+    await page.locator("[data-chart-round]").first().waitFor();
     await page.evaluate(() => document.fonts.ready);
     assert.ok(
       await page.evaluate(
@@ -513,13 +474,14 @@ export async function verifyArenaBrowser({
       ),
       true,
     );
-    await page.locator("[data-detail-tab=info]").click();
-    await page.locator("[data-detail-tab=rounds]").click();
     await page.screenshot({
       path: directory + "/replay-desktop.png",
       fullPage: true,
     });
     checks.replayLayoutAndUninterruptedSyntheticPlayback = true;
+    await api("a4/publication", { published: false });
+    assert.equal((await activity()).items.length, 0);
+    checks.consentWithdrawalClearsSharedHistory = true;
     assert.deepEqual(errors, []);
     checks.noPageErrors = true;
     await writeFile(

@@ -47,22 +47,21 @@ on the `window` room signal (spread over up to 3 s) and every 15 s without the r
 joins the current window with `POST /api/coin-sandbox/debates/:id/rounds`, submits with an
 idempotency key, and on a five-day replay submits to the playing turn's window with the position
 from the replay player's `yap:playback` event. After a stake it dispatches `yap:coins-changed`
-for the header balance. The Bots sandbox moved behind a "Bots sandbox" tab next to Info.
+for the header balance. Bots mode lives on `/coins`; the debate page keeps the shared bot
+history chart and an info card that links to the Bots sandbox there.
 
 ## Data and interaction
 
 - Header search submits to the existing published-debate search. Navigation opens
-  actual discovery/matching/account routes. The balance menu uses authenticated
-  runtime data, and the debate balance is explicitly scoped to its current run.
-- `GET /api/a4/debates/:id/timeline?scope=human|sandbox` returns at most 100
-  settled, revealed rounds in settlement order. It rechecks account/session validity
-  and debate/topic publication. Human rounds and the creator's own mixed bot runs
-  are separate; observer runs and another creator's sandboxes never enter this feed.
-- `GET /api/a4/debates/:id/workspace?runId=...` combines the authorized run,
-  scoped balance, run list and timeline into one account-bound polling response.
-  One request per five-second refresh preserves the ordinary API request budget;
-  unrelated debate IDs and observer runs are rejected. Account/session rechecks
-  remain inside the repository transactions. No existing rate limit is increased.
+  actual discovery/matching/account routes. The header shows the Yap Coins balance
+  from authenticated runtime data.
+- The chart reads the anonymous `GET /api/public/debates/:id/activity`: at most 100
+  settled, revealed rounds from the seeded synthetic history and from mixed and
+  observer runs whose creators share them from `/coins`. Pending rounds and runs
+  before their final reveal never enter it. The page re-reads it on the `activity`
+  room signal, spread over up to 3 s, and otherwise every 15 s (60 s while the room
+  stream is live). The private `GET /api/a4/debates/:id/timeline` and `/workspace`
+  responses remain for API clients; the debate page no longer reads them.
 - Every chart point is the exact unweighted YES share for one final round; NO is
   its complement. Empty rounds break the line and have no invented percentage.
   Hover/touch/focus inspects the nearest round. The existing green/red numeric
@@ -71,17 +70,14 @@ for the header balance. The Bots sandbox moved behind a "Bots sandbox" tab next 
   argument replaces the debate proposition in the heading beneath “What fraction
   of participants endorse”; leaving the graph restores the proposition. No argument
   badge sits below the axis and no floating text card covers the plot. Inspection
-  never switches the commitment target; clicking or Enter selects the round's run
-  and its own receipts. Arrow keys, Home/End and the price inspector's round picker
-  provide keyboard navigation. Hovering does not issue backend requests.
-  Visible tabs refresh every five seconds, including after the selected run completes.
+  marks the round as selected. Arrow keys, Home/End and the price inspector's round
+  picker provide keyboard navigation. Hovering does not issue backend requests.
   A reconnect catches up from durable PostgreSQL state. No speculative values,
   pending counts, provisional payouts, hidden books or secret seeds enter the feed.
 - The price scale is the first element after the X-axis canvas; its heading,
   navigation and compact summaries follow it. The graph badges and scale share
   one inspection state. They show the latest settled round by default and restore
-  it on pointer leave/focus exit, including after a historical commitment target
-  was selected. A background refresh preserves an ongoing hover, and a new
+  it on pointer leave/focus exit, including after a round was selected. A background refresh preserves an ongoing hover, and a new
   settlement updates both default displays together. Empty latest rounds show
   unavailable rates rather than substituting an older round or a fictitious share.
   Persistent price/median markers glide horizontally to the inspected round's
@@ -90,18 +86,11 @@ for the header balance. The Bots sandbox moved behind a "Bots sandbox" tab next 
   graph stationary. Reduced-motion preferences make both changes immediate.
 - The inspector below the graph replaces the old horizontal round strip. It shows
   the settled median NO floor and YES ceiling, offered YES price and complementary
-  NO price, final YES share and the signed-in user's own YES-scale limit. Missing
-  sides and nonpositive median intervals are labeled explicitly; fallback offers
-  may lie outside the reported medians. It inspects settled chart history; the
-  current commitment form and countdown continue to represent their active run.
-  Pending medians/final rates remain sealed.
+  NO price and final YES share. Missing sides and nonpositive median intervals are
+  labeled explicitly; fallback offers may lie outside the reported medians. Pending
+  medians/final rates remain sealed.
   Prices on this scale use hundredths of one Yap Coin, denoted `¢`, with no cash value.
-- A horizontal countdown inside the chart section derives its remaining fraction
-  from the round's actual opening/cutoff timestamps. It updates every second,
-  clamps at zero and changes color for the final ten seconds. Its accessible
-  progress value includes remaining seconds; reduced-motion preferences disable
-  the draining transition. Hovering history does not alter the current countdown.
-- New round setup accepts an optional, single-line argument label (1–80 characters).
+- Run setup accepts an optional, single-line argument label (1–80 characters).
   The server validates and snapshots it in the existing immutable run configuration;
   all periods in a multi-period advanced run share that label. Historical runs
   without labels say “Argument not labeled.” This metadata does not change A4
@@ -110,15 +99,10 @@ for the header balance. The Bots sandbox moved behind a "Bots sandbox" tab next 
   Counts are labeled human/bot **commitments**, not people or adoption. Sentiment
   explicitly names its settled round; it is not an assertion about truth, a price,
   a rolling five-minute sample or an official debate winner.
-- Position buttons, quantity shortcuts and the purchase ceiling use the existing
-  server-side review/commit API. NO ceiling conversion, fee allowance, full
+- Bots mode commitments, receipts and the sharing choice are on `/coins`, using the
+  existing server-side review/commit API. NO ceiling conversion, fee allowance, full
   reservation, idempotent retry, first-binding submission and delayed finality are
-  unchanged. Open commitments cannot be cancelled. History shows actual receipts.
-- Initial signed-in setup marks the participation panel `aria-busy="true"` and
-  disables its form controls until publication/run/workspace initialization releases
-  the action guard. Controls then regain their prior disabled states and the panel
-  reports `aria-busy="false"`, including after initialization errors. Visibility alone
-  is not a readiness signal. See [the maintained startup regression](browser-release-checks.md#ci-and-diagnostics).
+  unchanged. Open commitments cannot be cancelled.
 - Existing live/replay controls, signed replay access, captions, operator controls,
   moderated chat, delivery/recovery, likes, sharing and reports remain connected.
   Replay chat follows the existing read-only policy. Synthetic demo listings label
@@ -163,8 +147,8 @@ DATABASE_TEST_MODE=host npm run verify:browser
 
 This builds and runs fresh/upgrade database checks and the full quality/browser gates.
 Omit the mode variable to use disposable Docker PostgreSQL instead. `verify-arena-browser.ts` extends that disposable browser
-trial with real settlements, a real published-profile chat message, search, tab
-selection, mobile checks, axe and uninterrupted synthetic replay playback during
+trial with real shared settlements, a real published-profile chat message, search, the
+Bots sandbox link, mobile checks, axe and uninterrupted synthetic replay playback during
 enlargement. It refuses a hosted target. Synthetic browser playback establishes
 component behavior, not LiveKit transport, R2 delivery quality or physical-device
 acceptance. See the [dated evidence](evidence/debate-workspace/acceptance-2026-10-15.md).

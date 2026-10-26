@@ -32,14 +32,14 @@ to its verifiers. Application processes receive runtime credentials only.
 
 ## What is enforced
 
-| Verifier                        | Scope                                                                                                                                                                                                                                                                                   |
-| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `verify-database-isolation.ts`  | Fresh/upgrade permissions, runtime identities, migrations, the retired YAP play freeze on upgrade, backend journeys, A4 PostgreSQL cases and the full local quality gate.                                                                                                               |
-| `verify-a4-browser.ts`          | Actual browser registration, inline commitment without replacing media/chat, advanced review, keyboard focus, receipt reload, controls, sealed data, exact deterministic execution/nonexecution, balances and reservation release, observer isolation, logout and cross-account denial. |
-| `verify-arena-browser.ts`       | Existing runtime-backed workspace, live chat, settlement chart, round/price inspection, animation, enlargement, responsive layout and accessibility checks. Called by the A4 verifier.                                                                                                  |
-| `verify-public-bots-browser.ts` | Owner seed idempotency, real worker settlement, public homepage/expanded/debate refresh, consent, synthetic labels and private/unrevealed/hidden exclusions. Called by the A4 verifier.                                                                                                 |
-| `verify-homepage-browser.ts`    | Six responsive widths, carousel/argument/ticker controls, pointer/touch/keyboard charts, reduced motion, follows/auth states, canonical navigation, no-JS fallback, unavailable data, CSP and axe checks. Controlled component repositories/auth responses.                             |
-| `verify-hero-browser.ts`        | Real synthetic WebM playback, one-preview handoff, looping, hover/click/mobile navigation, reduced motion, Save-Data and authorization-denial behavior.                                                                                                                                 |
+| Verifier                        | Scope                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `verify-database-isolation.ts`  | Fresh/upgrade permissions, runtime identities, migrations, the retired YAP play freeze on upgrade, backend journeys, A4 PostgreSQL cases and the full local quality gate.                                                                                                                                                               |
+| `verify-a4-browser.ts`          | Actual browser registration, a debate page with no private Bots controls and a working link to the Bots sandbox on `/coins`, advanced review, keyboard focus, receipt reload, controls, sealed data, exact deterministic execution/nonexecution, balances and reservation release, observer isolation, logout and cross-account denial. |
+| `verify-arena-browser.ts`       | Shared bot history with live settlement updates, live chat, round/price inspection, animation, enlargement, responsive layout and accessibility checks. Called by the A4 verifier.                                                                                                                                                      |
+| `verify-public-bots-browser.ts` | Owner seed idempotency, real worker settlement, public homepage/expanded/debate refresh, consent withdrawal on `/coins`, synthetic labels and private/unrevealed/hidden exclusions. Called by the A4 verifier.                                                                                                                          |
+| `verify-homepage-browser.ts`    | Six responsive widths, carousel/argument/ticker controls, pointer/touch/keyboard charts, reduced motion, follows/auth states, canonical navigation, no-JS fallback, unavailable data, CSP and axe checks. Controlled component repositories/auth responses.                                                                             |
+| `verify-hero-browser.ts`        | Real synthetic WebM playback, one-preview handoff, looping, hover/click/mobile navigation, reduced motion, Save-Data and authorization-denial behavior.                                                                                                                                                                                 |
 
 The existing community, replay pipeline, packaging, backup/restore, container,
 monitoring and deployment-configuration gates remain separate and unchanged.
@@ -81,17 +81,10 @@ The integration community job also runs the `npm run verify:community-native-set
 under C locale using actual native PostgreSQL, separately from this browser coordinator's
 Docker gate.
 
-The A4 inline regression holds the initial workspace request against the real
-disposable runtime. While it is pending, the visible participation panel reports
-`aria-busy="true"` and its form controls are disabled. Initialization restores each
-control's prior disabled state only after the busy guard is released; the verifier
-waits for the visible panel's `aria-busy="false"` before one normal creation click.
-It checks one creation request, one stored run, one open round and the visible
-commitment form, then continues every existing browser scenario. The held request
-is released and its route removed in `finally`, including on assertion failure.
-The existing integration job runs this regression as part of the full browser gate;
-no sleep, retry, forced click or timeout increase is involved. See the
-[readiness fix evidence](evidence/a4-readiness/2026-10-19.md).
+The A4 inline readiness regression retired with the inline Bots sandbox (Decision
+0013): the debate page has no private controls left to initialize, which the A4
+verifier asserts before it follows the link to `/coins`. The
+[readiness fix evidence](evidence/a4-readiness/2026-10-19.md) records the earlier check.
 
 The shared-data verifier registers its own synthetic account rather than copying
 the workspace account's cookies. The workspace intentionally leaves its normal

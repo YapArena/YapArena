@@ -57,6 +57,8 @@ is an A4 endorsement in one turn's 60-second window; there is no winner (F09).
   position in their own debate (F14). Replay viewers join only the window of the turn that's
   playing, sent with its recording position (F10). There is no staking before a scheduled debate
   starts. Results notices are in-app only.
-- Staged (founder, 2026-10-26): the YAP human-run and refill controls are removed now, and the
-  Bots sandbox moves behind a "Bots sandbox" tab next to Info. A later pull request moves Bots mode
-  to `/coins` entirely and rewrites its browser checks.
+- Staged (founder, 2026-10-26): the YAP human-run and refill controls were removed first, with the
+  Bots sandbox behind a tab next to Info. Bots mode then moved to `/coins` entirely: the debate
+  page keeps the shared bot history chart and an info card linking to `/coins?debate=…`. On
+  `/coins` the human mode option is gone and the run-scoped daily play-coin refill stays for Bots
+  runs; only the account-wide refill is retired (410).

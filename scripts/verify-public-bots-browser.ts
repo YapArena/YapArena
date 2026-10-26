@@ -159,10 +159,6 @@ export async function verifyPublicBotsBrowser({
       await watch.locator("[data-shared-argument-list] article").count(),
       6,
     );
-    assert.equal(
-      await watch.locator("[data-shared-view]").inputValue(),
-      "shared",
-    );
     assert.match(
       (await home.locator("#ya-metric-label").textContent())!,
       /Synthetic/,
@@ -310,19 +306,14 @@ export async function verifyPublicBotsBrowser({
       (await watch.locator("[data-price-context]").textContent())!,
       /Observer argument follow-up/,
     );
-    await watch.locator("[data-shared-view]").selectOption("private");
-    await watch.waitForFunction(() =>
-      document
-        .querySelector<HTMLElement>("[data-arena-scope]")!
-        .textContent.includes("private"),
+    // Decision 0013: the debate page has only the shared view; personal
+    // runs and receipts live in the Bots sandbox on /coins.
+    assert.equal(await watch.locator("[data-shared-view]").count(), 0);
+    assert.match(
+      (await watch.locator("[data-arena-scope]").textContent())!,
+      /Shared simulation/,
     );
-    assert.equal(
-      await watch.locator(`[data-chart-round="${observer}"]`).count(),
-      0,
-    );
-    await watch.locator("[data-shared-view]").selectOption("shared");
-    await watch.locator(`[data-chart-round="${observer}"]`).waitFor();
-    checks.publicAndPersonalHistoryRemainDistinct = true;
+    checks.debatePageShowsSharedHistoryOnly = true;
     await home.screenshot({
       path: artifactDir + "/home-expanded.png",
       fullPage: true,
@@ -373,19 +364,35 @@ export async function verifyPublicBotsBrowser({
     publicWatch.on("pageerror", (e) => errors.push(e.message));
     await publicWatch.goto(base + "/debates/" + debateSlug);
     await publicWatch.locator(`[data-chart-round="${mixed}"]`).waitFor();
-    assert.equal(
-      await publicWatch.locator("[data-inline-access]").isVisible(),
-      false,
-    );
+    for (const selector of [
+      "[data-inline-access]",
+      "[data-inline-form]",
+      "[data-a4-content]",
+    ])
+      assert.equal(await publicWatch.locator(selector).count(), 0);
     assert.equal(
       await publicWatch.locator("[data-shared-argument-list] article").count(),
       6,
     );
     await anonymous.close();
     checks.signedOutSharedHistoryWithoutPrivateAccess = true;
+    // Sharing is withdrawn from the Bots sandbox on /coins, while the debate
+    // page stays open to show the personal rounds leave the shared chart.
+    const coins = await isolated.newPage();
+    coins.on("pageerror", (e) => errors.push(e.message));
+    await coins.goto(`${base}/coins?debate=${debate}`);
+    await coins.locator("[data-a4-content]").waitFor({ state: "visible" });
+    assert.equal(await coins.locator("[data-a4-publish]").isChecked(), true);
+    const withdrawn = coins.waitForResponse(
+      (r) =>
+        new URL(r.url()).pathname === "/api/a4/publication" &&
+        r.request().method() === "POST" &&
+        r.ok(),
+    );
+    await coins.locator("[data-a4-publish]").uncheck();
+    await withdrawn;
+    await coins.close();
     await watch.bringToFront();
-    await watch.locator("[data-detail-tab=rounds]").click();
-    await watch.locator("[data-inline-publish]").uncheck();
     await watch.waitForFunction(
       (id) =>
         !document.querySelector<HTMLElement>(`[data-chart-round="${id}"]`)!,
