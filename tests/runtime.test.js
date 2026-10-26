@@ -20,7 +20,7 @@ describe("service runtime", () => {
       };
       const runtime = createRuntime({
         a4: { tick: run("play") },
-        coinDebates: { advance: run("sandbox") },
+        coinDebates: { tick: run("sandbox") },
         database: {
           end: async () => {
             closed = true;
@@ -100,6 +100,54 @@ describe("service runtime", () => {
     assert.equal(closed, true);
     assert.equal(cleared, 2);
   });
+  it("warms transcribers without overlap, logs failures and prunes transcripts hourly", async () => {
+    const callbacks = new Map(),
+      errors = [];
+    let ticks = 0,
+      pruned = 0,
+      finish;
+    const runtime = createRuntime({
+      database: { end: async () => {} },
+      sessions: { deleteExpired: async () => 0 },
+      transcription: {
+        tick: async () => {
+          ticks++;
+          if (ticks === 1)
+            return new Promise((resolve) => {
+              finish = resolve;
+            });
+          throw new Error("dispatch unavailable");
+        },
+        pruneExpired: async () => {
+          pruned++;
+          if (pruned === 2) throw new Error("prune failed");
+        },
+      },
+      logger: { info() {}, error: (entry) => errors.push(entry.error.message) },
+      config: { port: 3000, host: "127.0.0.1" },
+      verifyDatabase: async () => {},
+      setIntervalFn: (callback, interval) => {
+        callbacks.set(interval, callback);
+        return { unref() {} };
+      },
+      clearIntervalFn() {},
+    });
+    await runtime.start();
+    const tick = callbacks.get(1000);
+    const first = tick();
+    tick();
+    assert.equal(ticks, 1, "a running dispatch pass is not overlapped");
+    finish();
+    await first;
+    await tick();
+    assert.deepEqual(errors, ["dispatch unavailable"]);
+    await callbacks.get(3600000)();
+    await callbacks.get(3600000)();
+    assert.equal(pruned, 2);
+    assert.deepEqual(errors, ["dispatch unavailable", "prune failed"]);
+    await runtime.stop();
+  });
+
   it("runs only maintenance when no web app is supplied", async () => {
     const callbacks = new Map();
     const events = [];
@@ -503,5 +551,75 @@ describe("service runtime", () => {
     await callbacks.get(1000)();
     await runtime.stop();
     assert.deepEqual(events, ["egress unavailable", "retry:event-1"]);
+  });
+
+  it("sweeps the live queue every second without overlap and prunes it hourly", async () => {
+    const callbacks = new Map();
+    const errors = [];
+    let sweeps = 0,
+      finish;
+    const runtime = createRuntime({
+      database: { end: async () => {} },
+      sessions: { deleteExpired: async () => 0 },
+      matchmaking: {
+        sweep: async () => {
+          sweeps += 1;
+          if (sweeps === 1)
+            await new Promise((resolve) => {
+              finish = resolve;
+            });
+          if (sweeps === 2) throw new Error("sweep failed");
+        },
+        pruneExpired: async () => {
+          throw new Error("prune failed");
+        },
+      },
+      logger: { info() {}, error: (_details, message) => errors.push(message) },
+      config: { port: 3000, host: "127.0.0.1" },
+      verifyDatabase: async () => {},
+      setIntervalFn: (callback, interval) => {
+        callbacks.set(interval, callback);
+        return { unref() {} };
+      },
+      clearIntervalFn: () => {},
+    });
+    await runtime.start();
+    const first = callbacks.get(1000)();
+    callbacks.get(1000)();
+    assert.equal(sweeps, 1);
+    finish();
+    await first;
+    await callbacks.get(1000)();
+    await callbacks.get(3600000)();
+    await runtime.stop();
+    assert.equal(sweeps, 2);
+    assert.deepEqual(errors, [
+      "matchmaking sweep failed",
+      "matchmaking retention cleanup failed",
+    ]);
+  });
+
+  it("starts live queue streams after the server and stops them on shutdown", async () => {
+    const events = [];
+    const runtime = createRuntime({
+      database: { end: async () => events.push("database closed") },
+      sessions: { deleteExpired: async () => 0 },
+      matchmakingStreams: {
+        start: async () => events.push("streams started"),
+        stop: async () => events.push("streams stopped"),
+      },
+      logger: { info() {}, error() {} },
+      config: { port: 3000, host: "127.0.0.1" },
+      verifyDatabase: async () => events.push("verified"),
+      backgroundJobs: false,
+    });
+    await runtime.start();
+    await runtime.stop();
+    assert.deepEqual(events, [
+      "verified",
+      "streams started",
+      "streams stopped",
+      "database closed",
+    ]);
   });
 });

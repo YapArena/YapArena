@@ -24,6 +24,7 @@ import {
 import { postCoinJournal } from "../dist/features/account-wallet/ledger.js";
 import { createSessionRepository } from "../dist/platform/auth/sessions.js";
 import { createSessionToken } from "../dist/platform/auth/session-tokens.js";
+import { runCoinSandboxOperator } from "../scripts/coin-sandbox-operator.ts";
 import {
   attachSubject,
   confirmedApproval,
@@ -58,7 +59,8 @@ describe(
     after(async () => {
       await Promise.all([owner?.end(), runtime?.end()]);
     });
-    // An Auth0 account that, unless told otherwise, has opened the sandbox.
+    // An Auth0 account that, unless told otherwise, already has the automatic
+    // opening its first own request records (Decision 0013).
     async function actor({ opened = true } = {}) {
       const user = (
         await owner.query(
@@ -76,19 +78,27 @@ describe(
       if (opened) await openSandbox(owner, user.id);
       return { userId: user.id, sessionTokenHash: token.tokenHash, subject };
     }
-    async function debate() {
+    // Most cases settle at the cutoff, so their debates are recorded as
+    // founder-created per-round debates (F11); five-day is the default.
+    async function debate({ reveal = "per_round", speaker = null } = {}) {
       const topic = (
         await owner.query(
           "INSERT INTO topics(slug,title,summary,side_a_label,side_b_label,publication_state) VALUES($1,'Currency test','Synthetic currency fixture','Support','Oppose','published') RETURNING id",
           [`coin-a4-${randomUUID()}`],
         )
       ).rows[0];
-      return (
+      const id = (
         await owner.query(
-          "INSERT INTO debates(topic_id,slug,proposition,status,publication_state,rules_version,rules_snapshot) VALUES($1,$2,'Should we use this existing debate?','scheduled','published','preview-1','{}') RETURNING id",
-          [topic.id, `coin-a4-${randomUUID()}`],
+          "INSERT INTO debates(topic_id,slug,proposition,status,publication_state,rules_version,rules_snapshot,speaker_a_profile_id) VALUES($1,$2,'Should we use this existing debate?','scheduled','published','preview-1','{}',$3) RETURNING id",
+          [topic.id, `coin-a4-${randomUUID()}`, speaker],
         )
       ).rows[0].id;
+      if (reveal === "per_round")
+        await owner.query(
+          "INSERT INTO coin_debate_reveal_modes(debate_id,mode,reason) VALUES($1,'per_round','Founder-created test debate')",
+          [id],
+        );
+      return id;
     }
     async function seed(context, purpose, amount) {
       await operator.seedSandboxTreasury({
@@ -128,6 +138,13 @@ describe(
       } finally {
         client.release();
       }
+    }
+    async function roundState(roundId) {
+      return (
+        await owner.query("SELECT state FROM coin_debate_rounds WHERE id=$1", [
+          roundId,
+        ])
+      ).rows[0].state;
     }
     async function reconcile() {
       assert.equal(
@@ -246,25 +263,35 @@ describe(
         });
       return { quote, operation: { id }, approval };
     }
-    it("refuses debate participation until the account opened the sandbox", async () => {
+    it("opens the sandbox automatically on an account's first debate request (Decision 0013)", async () => {
       const newcomer = await actor({ opened: false }),
         host = await actor(),
         debateId = await debate(),
-        unopened = /confirm by signing in again to open the financial sandbox/;
-      await assert.rejects(
-        a4.create(newcomer, debateId, randomUUID()),
-        unopened,
-      );
+        openings = async () =>
+          (
+            await owner.query(
+              "SELECT operation_id FROM coin_sandbox_openings WHERE user_id=$1",
+              [newcomer.userId],
+            )
+          ).rows;
+      assert.equal((await sandbox.summary(newcomer)).opened, false);
+      assert.deepEqual(await openings(), []);
       const round = await a4.create(host, debateId, randomUUID());
-      await assert.rejects(
-        a4.submit(newcomer, round.id, randomUUID(), {
-          side: "YES",
-          limit: "1",
-          quantity: 1,
-        }),
-        unopened,
+      // Joining the open round is the newcomer's first request: no refusal and
+      // no confirmation, just an automatic opening.
+      assert.equal(
+        (await a4.create(newcomer, debateId, randomUUID())).id,
+        round.id,
       );
-      await assert.rejects(a4.advance(20, newcomer), unopened);
+      assert.deepEqual(await openings(), [{ operation_id: null }]);
+      await sandbox.initialize(newcomer);
+      await seed(newcomer, "center", "1000000");
+      await seed(newcomer, "promotional", "1000000");
+      await a4.submit(newcomer, round.id, randomUUID(), {
+        side: "YES",
+        limit: "1",
+        quantity: 1,
+      });
       assert.equal(
         (
           await owner.query(
@@ -272,13 +299,7 @@ describe(
             [newcomer.userId],
           )
         ).rows[0].n,
-        0,
-      );
-      assert.equal((await sandbox.summary(newcomer)).initialized, false);
-      await openSandbox(owner, newcomer.userId);
-      assert.equal(
-        (await a4.create(newcomer, debateId, randomUUID())).id,
-        round.id,
+        1,
       );
     });
     it("serializes purchased A4 stakes against fresh-authorized withdrawals without partial reservations in either lock order", async () => {
@@ -578,7 +599,9 @@ describe(
         await inFlight?.catch(() => {});
         await owner.query(`DROP FUNCTION yaparena.${expireFunction}(bigint)`);
       }
-      assert.equal((await a4.advance()).completed, 1);
+      // Other suites may have due rounds too; this one's due round settles.
+      assert.ok((await a4.advance()).completed >= 1);
+      assert.equal(await roundState(due.id), "settled");
       await reconcile();
     });
     it("locks every due account before shared ledger rows so unrelated payout reconciliation remains available", async () => {
@@ -672,7 +695,9 @@ describe(
         gate.release();
         await Promise.allSettled([advancing, payout]);
       }
-      assert.equal((await advancing).completed, 2);
+      assert.ok((await advancing).completed >= 2);
+      for (const round of rounds)
+        assert.equal(await roundState(round.id), "settled");
       assert.equal((await sandbox.summary(payee)).balances.pending, "0");
       await reconcile();
     });
@@ -953,10 +978,13 @@ describe(
       assert.equal(view.pricing, undefined);
       assert.equal(view.outcome, undefined);
       assert.equal(view.snapshotHash, undefined);
-      assert.equal((await a4.advance()).completed, 0);
+      await a4.advance();
+      assert.equal(await roundState(round.id), "open", "not before its cutoff");
       const summary = await sandbox.summary(context);
       assert.equal(summary.balances.cashAvailable, "0");
       assert.equal(summary.balances.promotionalPrincipal, "24000000");
+      // The 100 YC grant-funded reservation is visible as reserved principal.
+      assert.equal(summary.balances.promotionalReserved, "1000000");
       await assert.rejects(
         runtime.query(
           "UPDATE coin_debate_rounds SET closes_at=clock_timestamp() WHERE id=$1",
@@ -1075,10 +1103,18 @@ describe(
         ),
         COIN_DEBATE_FACE,
       );
-      const advances = await Promise.all([a4.advance(), a4Other.advance()]);
+      // Concurrent advances settle the round once (other suites may add
+      // their own due rounds to the totals).
+      await Promise.all([a4.advance(), a4Other.advance()]);
+      assert.equal(await roundState(round.id), "settled");
       assert.equal(
-        advances.reduce((n, r) => n + r.completed, 0),
-        1,
+        (
+          await owner.query(
+            "SELECT count(*)::int n FROM coin_sandbox_events WHERE kind='debate.settled' AND metadata->>'roundId'=$1",
+            [round.id],
+          )
+        ).rows[0].n,
+        2,
       );
       const views = await a4.view(one, debateId);
       assert.deepEqual(
@@ -1127,7 +1163,8 @@ describe(
         historyBefore,
       );
       await reconcile();
-      assert.equal((await a4.advance()).completed, 0);
+      await a4.advance();
+      assert.equal(await roundState(round.id), "settled");
     });
     it("rejects late or revoked commitments and preserves fixed terms and closed receipts", async () => {
       const context = await actor(),
@@ -1177,5 +1214,306 @@ describe(
       );
       await reconcile();
     });
+    // F11: the debate's ending, as the media clock records it.
+    async function end(debateId, endedAgo) {
+      await owner.query(
+        `UPDATE debates SET status='ended',
+          live_started_at=clock_timestamp()-$2::interval-INTERVAL '1 hour',
+          live_ended_at=clock_timestamp()-$2::interval WHERE id=$1`,
+        [debateId, endedAgo],
+      );
+    }
+    it("locks five-day rounds at the cutoff and settles them only at the 120-hour close", async () => {
+      const one = await actor(),
+        two = await actor(),
+        debateId = await debate({ reveal: "five_day" });
+      for (const context of [one, two]) {
+        await sandbox.initialize(context);
+        await seed(context, "center", "1000000");
+        await seed(context, "promotional", "1000000");
+      }
+      const round = await a4.create(one, debateId, randomUUID());
+      const stored = (
+        await owner.query(
+          "SELECT reveal_mode FROM coin_debate_rounds WHERE id=$1",
+          [round.id],
+        )
+      ).rows[0];
+      assert.equal(stored.reveal_mode, "five_day", "the default mode");
+      await a4.submit(one, round.id, randomUUID(), {
+        side: "YES",
+        limit: "0.6",
+        quantity: 10,
+      });
+      await a4.submit(two, round.id, randomUUID(), {
+        side: "NO",
+        limit: "0.6",
+        quantity: 10,
+      });
+      let [view] = await a4.view(one, debateId);
+      assert.equal(view.revealMode, "five_day");
+      assert.equal(view.revealAt, null, "unknown until the debate ends");
+      assert.equal(view.participants, 2, "a count, never side totals");
+      assert.deepEqual(view.eligibility, {
+        canTakePosition: false,
+        reason: "committed",
+        via: null,
+      });
+      await close(round.id);
+      await a4.advance();
+      assert.equal(
+        (
+          await owner.query(
+            "SELECT state FROM coin_debate_rounds WHERE id=$1",
+            [round.id],
+          )
+        ).rows[0].state,
+        "open",
+        "locked, not settled",
+      );
+      const late = await actor();
+      await sandbox.initialize(late);
+      await assert.rejects(
+        a4.submit(late, round.id, randomUUID(), {
+          side: "YES",
+          limit: "1",
+          quantity: 1,
+        }),
+        /past cutoff/,
+      );
+      [view] = await a4.view(late, debateId);
+      assert.equal(view.eligibility.reason, "closed");
+      assert.equal(view.pricing, undefined, "no price before the reveal");
+      // The locked round no longer holds back a new manual round.
+      const next = await a4.create(one, debateId, randomUUID());
+      assert.notEqual(next.id, round.id);
+      assert.equal(
+        (await a4.create(two, debateId, randomUUID())).id,
+        next.id,
+        "only one manual round takes orders",
+      );
+      const forge = () =>
+        runtime.query(
+          `UPDATE coin_debate_rounds SET state='settled',revealed_at=clock_timestamp(),
+            result='{"snapshot":[]}'::jsonb WHERE id=$1`,
+          [round.id],
+        );
+      await assert.rejects(forge(), /unauthorized outcome/);
+      // Ended an hour ago: the close is 119 hours away.
+      await end(debateId, "1 hour");
+      await a4.advance();
+      [view] = (await a4.view(one, debateId)).filter((r) => r.id === round.id);
+      assert.equal(view.state, "open");
+      assert.ok(
+        Math.abs(
+          new Date(view.revealAt).getTime() - (Date.now() + 119 * 3600_000),
+        ) < 120_000,
+      );
+      await assert.rejects(forge(), /unauthorized outcome/);
+      await end(debateId, "121 hours");
+      await a4.advance();
+      [view] = (await a4.view(one, debateId)).filter((r) => r.id === round.id);
+      assert.equal(view.state, "settled");
+      assert.ok(view.pricing, "the drawn price appears at the reveal");
+      assert.ok(view.seed);
+      assert.ok(new Date(view.revealAt) <= new Date());
+      await reconcile();
+    });
+    it("records per-round reveal only by the owner and only before a debate's first round", async () => {
+      const ownerSandbox = createCoinDebateSandbox(owner, "simulation");
+      const debateId = await debate({ reveal: "five_day" });
+      await assert.rejects(
+        runtime.query(
+          "INSERT INTO coin_debate_reveal_modes(debate_id,mode,reason) VALUES($1,'per_round','Runtime attempt')",
+          [debateId],
+        ),
+        /permission denied/,
+      );
+      await assert.rejects(
+        a4.setRevealMode(debateId, "per_round", "Runtime attempt"),
+        /operator ownership/,
+      );
+      await assert.rejects(
+        ownerSandbox.setRevealMode(debateId, "weekly", "Unknown mode"),
+        /invalid reveal mode/,
+      );
+      await assert.rejects(
+        ownerSandbox.setRevealMode(debateId, "per_round", " x "),
+        /5-500 characters/,
+      );
+      await assert.rejects(
+        ownerSandbox.setRevealMode(randomUUID(), "per_round", "Missing debate"),
+        /not found/,
+      );
+      assert.deepEqual(
+        await ownerSandbox.setRevealMode(
+          debateId,
+          "per_round",
+          "Founder-created launch debate",
+        ),
+        { created: true },
+      );
+      assert.deepEqual(
+        await ownerSandbox.setRevealMode(debateId, "per_round", "Repeated"),
+        { created: false },
+      );
+      await assert.rejects(
+        ownerSandbox.setRevealMode(debateId, "five_day", "Changed my mind"),
+        /already recorded/,
+      );
+      await assert.rejects(
+        owner.query(
+          "UPDATE coin_debate_reveal_modes SET mode='five_day' WHERE debate_id=$1",
+          [debateId],
+        ),
+      );
+      const context = await actor();
+      await sandbox.initialize(context);
+      const round = await a4.create(context, debateId, randomUUID());
+      assert.equal(
+        (
+          await owner.query(
+            "SELECT reveal_mode FROM coin_debate_rounds WHERE id=$1",
+            [round.id],
+          )
+        ).rows[0].reveal_mode,
+        "per_round",
+      );
+      // The owner command records it for another debate.
+      const commanded = await debate({ reveal: "five_day" });
+      const command = (body) =>
+        runCoinSandboxOperator({
+          command: "set-reveal-mode",
+          body,
+          environment: {
+            COIN_SANDBOX_OWNER_DATABASE_URL: ownerUrl,
+            COIN_SANDBOX_RAIL: "simulation",
+          },
+        });
+      const reason = "Founder-created launch debate";
+      assert.equal(
+        (await command({ debateId: commanded, mode: "per_round", reason }))
+          .status,
+        "recorded",
+      );
+      assert.equal(
+        (await command({ debateId: commanded, mode: "per_round", reason }))
+          .status,
+        "unchanged",
+      );
+      await assert.rejects(
+        command({ debateId: commanded, mode: "weekly", reason }),
+        /per_round or five_day/,
+      );
+      // The first round locks the mode, in the command and in the database.
+      const locked = await debate({ reveal: "five_day" });
+      await a4.create(context, locked, randomUUID());
+      await assert.rejects(
+        ownerSandbox.setRevealMode(locked, "per_round", "Too late now"),
+        /locked once a round opens/,
+      );
+      await assert.rejects(
+        owner.query(
+          "INSERT INTO coin_debate_reveal_modes(debate_id,mode,reason) VALUES($1,'per_round','Too late now')",
+          [locked],
+        ),
+        /locked once a round opens/,
+      );
+      // Inserting code cannot choose a round's mode.
+      const forged = randomUUID();
+      await runtime.query(
+        `INSERT INTO coin_debate_rounds(id,debate_id,creator_id,proposition,rail,reference,terms,
+          seed,seed_commitment,closes_at,reveal_mode)
+        SELECT $1,$2,$3,'Forged',rail,$4,terms,seed,seed_commitment,
+          clock_timestamp()+INTERVAL '1 minute','per_round'
+        FROM coin_debate_rounds WHERE id=$5`,
+        [
+          forged,
+          await debate({ reveal: "five_day" }),
+          context.userId,
+          randomUUID().replaceAll("-", "").padEnd(64, "0"),
+          round.id,
+        ],
+      );
+      assert.equal(
+        (
+          await owner.query(
+            "SELECT reveal_mode FROM coin_debate_rounds WHERE id=$1",
+            [forged],
+          )
+        ).rows[0].reveal_mode,
+        "five_day",
+      );
+    });
+    it("refuses a debater's position in their own debate (F14) and says why", async () => {
+      const debater = await actor(),
+        viewer = await actor();
+      const profile = (
+        await owner.query(
+          "INSERT INTO public_profiles(user_id,handle,display_name,publication_state) VALUES($1,$2,'Debater','published') RETURNING id",
+          [debater.userId, `debater-${randomUUID().slice(0, 8)}`],
+        )
+      ).rows[0].id;
+      const debateId = await debate({ speaker: profile });
+      for (const context of [debater, viewer]) {
+        await sandbox.initialize(context);
+        await seed(context, "center", "1000000");
+        await seed(context, "promotional", "1000000");
+      }
+      const round = await a4.create(viewer, debateId, randomUUID());
+      const before = await sandbox.summary(debater);
+      await assert.rejects(
+        a4.submit(debater, round.id, randomUUID(), {
+          side: "YES",
+          limit: "1",
+          quantity: 1,
+        }),
+        (error) =>
+          error.status === 403 && /cannot take a position/.test(error.message),
+      );
+      assert.deepEqual((await sandbox.summary(debater)).book, before.book);
+      const [own] = await a4.view(debater, debateId);
+      assert.deepEqual(own.eligibility, {
+        canTakePosition: false,
+        reason: "debater",
+        via: null,
+      });
+      let [other] = await a4.view(viewer, debateId);
+      assert.deepEqual(other.eligibility, {
+        canTakePosition: true,
+        reason: null,
+        via: "live",
+      });
+      assert.equal(other.participants, 0);
+      // The database refuses it too, before any other check.
+      await assert.rejects(
+        runtime.query(
+          `INSERT INTO coin_debate_orders(round_id,user_id,request_id,side,limit_value,quantity,
+            funding,center_reservation,promotional_reservation)
+          VALUES($1,$2,$3,'YES','1',1,'{}'::jsonb,1,0)`,
+          [round.id, debater.userId, randomUUID()],
+        ),
+        /cannot take a position in their own debate/,
+      );
+      await a4.submit(viewer, round.id, randomUUID(), {
+        side: "YES",
+        limit: "1",
+        quantity: 1,
+      });
+      [other] = await a4.view(viewer, debateId);
+      assert.equal(other.participants, 1);
+      assert.equal(other.eligibility.reason, "committed");
+      await owner.query("UPDATE debates SET status='cancelled' WHERE id=$1", [
+        debateId,
+      ]);
+      const third = await actor();
+      const [unavailable] = await a4.view(third, debateId);
+      assert.equal(unavailable.eligibility.reason, "debate_unavailable");
+      await a4.voidUnavailable(20, [debateId]);
+      await reconcile();
+    });
   },
 );
+
+// Turn windows share this file's database fixtures and run after its cases.
+await import("./helpers/coin-turn-windows-cases.js");

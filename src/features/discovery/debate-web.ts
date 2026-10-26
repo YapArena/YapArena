@@ -16,6 +16,9 @@ export function renderDebateWorkspace(
   enabled: boolean,
   asset: (name: string) => string,
   activity?: PublicBotActivity | null,
+  matchmaking = false,
+  // Decision 0012: live captions and the AI outline, when enabled.
+  liveOutline = false,
 ) {
   const replay = debate.status === "replay" || debate.status === "finalized";
   const live = debate.status === "live";
@@ -43,7 +46,7 @@ export function renderDebateWorkspace(
       </section>
     </div>
     <div class="arena-center">
-      <section class="arena-watch" aria-label="${replay ? "Debate replay" : "Debate broadcast"}" data-media-event="${id}" data-media-replay-player="${asset("replay.bundle.js")}"><span class="sr-only">LIVE DEBATE & REPLAY</span>
+      ${matchmaking ? html`<div class="queue-banner" data-queue-banner role="status" aria-live="polite" hidden></div>` : ""}<section class="arena-watch" aria-label="${replay ? "Debate replay" : "Debate broadcast"}" data-media-event="${id}" data-media-replay-player="${asset("replay.bundle.js")}"><span class="sr-only">LIVE DEBATE & REPLAY</span>
         <div class="arena-video-slot"><div class="arena-video-surface" data-arena-video>
           <div class="arena-video-overlay arena-video-topic"><h1>${title}</h1><span>${debate.topic.title}</span></div>
           <div class="arena-video-overlay arena-video-status"><div class="arena-video-status-badges"><span class="arena-broadcast-badge ${live ? "is-live" : ""}">${live ? html`<span class="arena-live-dot"></span>` : ""}${mode}</span>${debate.isDemo ? html`<span class="arena-demo">Demo</span>` : ""}</div><div class="arena-watch-meta"><span title="Active playback tabs on this staging instance">${icon("users")}<span data-arena-viewers>— watching</span></span><span>${icon("clock")}<span data-arena-playback>${replay ? "Replay" : live ? "Live broadcast" : "Awaiting broadcast"}</span></span></div></div>
@@ -52,7 +55,7 @@ export function renderDebateWorkspace(
           <video data-media-replay-video controls playsinline crossorigin="anonymous" preload="none" hidden><track kind="captions" src="/api/media/events/${id}/captions.vtt" srclang="en" label="English captions"></video>
           <button type="button" class="arena-video-expand" data-video-expand aria-label="Enlarge video" aria-expanded="false" title="Enlarge video">${icon("expand")}</button>
           <div class="arena-speaker-labels">${speaker(debate.speakerA, debate.topic.sideALabel)}${speaker(debate.speakerB, debate.topic.sideBLabel)}</div>
-        </div></div>
+        </div></div>${liveOutline && !replay ? html`<link rel="stylesheet" href="${asset("live-outline.css")}"><div class="live-captions" data-live-captions hidden><p class="live-captions-text" data-live-captions-text></p><button type="button" class="live-captions-toggle" data-live-captions-toggle aria-pressed="true">Captions</button></div>` : ""}
         <div class="media-status-row"><p data-media-status role="status" aria-live="polite">Checking media availability…</p><p data-media-microphone role="status" aria-live="polite" hidden></p><strong data-media-clock aria-live="off"></strong></div>
         <div class="media-actions"><button type="button" data-media-viewer hidden>Join as viewer</button><button type="button" data-media-speaker hidden>Check camera and join as speaker</button><button type="button" data-media-replay hidden>Play replay</button><button type="button" data-media-sound hidden>Enable sound</button><button type="button" data-media-mute aria-pressed="false" hidden>Mute microphone</button><button type="button" data-media-leave hidden>Leave live debate</button></div>
         <details class="media-operator" data-media-operator hidden><summary>Operator controls</summary><label>Reason for action<input data-media-reason maxlength="500" minlength="5" placeholder="Describe the action or incident"></label><div class="media-actions"><button type="button" data-media-action="start">Start</button><button type="button" data-media-action="pause">Pause</button><button type="button" data-media-action="resume">Resume</button><button type="button" data-media-action="end">End</button><button type="button" data-media-action="replay">Publish replay</button></div><label>Reviewed WebVTT captions<textarea data-media-captions rows="5" maxlength="200000" placeholder="WEBVTT"></textarea></label><button type="button" data-media-captions-submit>Publish captions</button></details>

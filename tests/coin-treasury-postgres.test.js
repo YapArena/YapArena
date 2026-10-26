@@ -23,7 +23,7 @@ const ownerUrl = process.env.COIN_TREASURY_TEST_OWNER_DATABASE_URL,
 const custody = "0x1111111111111111111111111111111111111111",
   network = "base-sepolia:84532",
   config = { rail: "base-sepolia", depositDestination: custody },
-  unopened = /confirm by signing in again to open the financial sandbox/;
+  unopened = /this account has not used its coin sandbox/;
 describe(
   "receipt-backed system treasury funding in a dedicated disposable Base Sepolia ledger",
   { skip: !ownerUrl || !runtimeUrl },
@@ -430,7 +430,9 @@ describe(
           JSON.stringify(terms),
         ],
       );
-      // Owner funding first requires the account's own sandbox opening.
+      // Owner funding first requires the account's own sandbox opening, as
+      // before Decision 0013. An automatic opening (no operation) is accepted
+      // for testnet funding: the next refusal is about the receipt, not it.
       await assert.rejects(
         operator.confirmFunding({
           userId: second,

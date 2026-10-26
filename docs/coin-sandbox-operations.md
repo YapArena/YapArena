@@ -39,6 +39,34 @@ caller must have a current session at admission and again before commit, includi
 an idempotent or existing-round return; workers can settle existing obligations
 without a user session.
 
+## Turn windows and automatic voiding
+
+With `TURN_WINDOWS_ENABLED=true` (web and worker), each live speaking turn is one trading window
+whose cutoff is the turn deadline, fixed at opening ([Decision 0012](decisions/0012-live-argument-outline.md)).
+The coin loop opens it within about a second of the turn starting; asking for a round during a
+live debate returns it instead of a five-minute round. Windows settle like any round.
+
+Whenever the coin sandbox is enabled, the coin loop also voids every open round of a debate that
+became `cancelled` or `void_review`, with reason `debate_unavailable`, and settlement skips such
+rounds. The runtime may void only those; the database refuses any other runtime void, so
+`void-round` below remains the owner's command for everything else.
+
+## Reveal mode and debaters
+
+Every debate round reveals in its debate's mode (Decision 0012, F11). **Five-day** is the default
+and the only mode of a user-created debate: rounds take orders until their cutoff, stay locked,
+and price and settle at the debate's 120-hour close, 120 elapsed hours after its live end. Until
+then participants see their own order and the participant count, not a price or execution.
+**Per-round** debates settle each round at its cutoff, as before. Record per-round only for a
+founder-created debate, before its first round, with `set-reveal-mode`; the first round locks the
+mode. Debaters cannot take a position in their own debate (F14).
+
+From a five-day debate's live end until its 120-hour close, replay viewers may join a turn
+window after its cutoff by giving the replay position they are watching (F10). The position must
+fall inside the window's span in the recording, measured from the recording file's start that
+LiveKit reports at completion (`recording_clocks`). A viewer who holds a position in a later
+turn's window cannot join an earlier one.
+
 ## Rail and credential separation
 
 `coin_sandbox_controls` pins the physical database to `simulation` or
@@ -94,6 +122,7 @@ bytes, connection strings or provider error objects. Keep operator input private
 | `retry-correction`  | `correctionId`, `reportId`, `reviewId`, `idempotencyKey`                                                                                     | Require the same reviewed original funding and retry after reconciliation restores its original sources.                                                                                                                   |
 | `review-report`     | `reportId`, `outcome`, private `note`, `evidenceDigest`, `idempotencyKey`; optional safe `publicNote`, approved `amount` or recovery `quote` | Append owner evidence and a separately publishable outcome. An operator compensation review needs an exact atomic USDC amount. A recovery quote needs `amount`, pinned `network`, ISO `expiresAt`, and safe `description`. |
 | `compensate-report` | `reportId`, `reviewId`, atomic USDC `amount`, `idempotencyKey`                                                                               | Restore only evidence-reviewed original cash sources from separately funded correction cash. No new coin category, qualification progress or cash grant principal is created.                                              |
+| `set-reveal-mode`   | `debateId`, `mode` (`per_round` / `five_day`), `reason`                                                                                      | Founder-created debates only, before their first round: record the reveal mode. Repeating the same mode is a no-op; any other change is refused.                                                                           |
 | `void-round`        | `roundId`, `reason` (`debate_unavailable` / `operator_cancelled`)                                                                            | Owner-only refund of an open sandbox round, restoring exact sources and unused backing without earning profit.                                                                                                             |
 
 Completed purchases support USDC withdrawals only. Corrections are auditable
@@ -115,10 +144,12 @@ not implement a holiday calendar, computed review deadline or automatic payout
 approval. Missing the target never releases a reserve, retries a payment or
 changes a customer's financial eligibility; reconcile the original operation.
 
-Since [Decision 0009](decisions/0009-auth0.md) an account opens the financial
-sandbox once, by confirming with a fresh Auth0 sign-in (email code or Google);
-the opening is recorded in `coin_sandbox_openings`. Every sandbox action, including
-the owner's operator paths for that account, requires that opening. Each withdrawal
+Yap Coins are always on ([Decision 0013](decisions/0013-yap-coins-always-on-and-debate-staking.md),
+amending [Decision 0009](decisions/0009-auth0.md)): an account's first own sandbox
+request records an automatic opening in `coin_sandbox_openings` (no operation), and
+the browser then claims the welcome grant. Openings confirmed by a fresh sign-in
+before that decision keep their operation. The owner's operator paths never open
+an account: owner funding and new payout authority require that opening. Each withdrawal
 and each recovery consent is confirmed by its own fresh sign-in, bound to the exact
 terms (see [the confirmation contract](security/account-session-revocation.md#confirmation-by-fresh-sign-in)).
 Retained passwords, wallets and passkeys no longer approve anything, and there is no

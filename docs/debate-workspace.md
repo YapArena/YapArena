@@ -121,6 +121,18 @@ and the grid rules in `public/arena.css`.
   people; it does not write measurement events or bypass measurement consent.
   Shared cross-instance audience measurement is outside this implementation.
 
+## Turn windows
+
+With [Decision 0012](decisions/0012-live-argument-outline.md) turn windows enabled, each live
+speaking turn is one Yap Coins trading window cut off at the turn deadline. The coin loop opens it
+and signals `window` to the room; `GET /api/public/debates/<id>/windows` lists the windows' timing
+for every viewer. This workspace's YAP round controls are unchanged; the YC round bar and ticket
+on this page belong to the betting interface work (Decision 0013).
+
+With the live outline enabled, a captions line sits under the video once the page joins the
+LiveKit room. It shows the active speaker's latest words from the transcriber agent, at a fixed
+height so nothing below moves, and a Captions button turns it off for this browser.
+
 ## Verification and operation
 
 No database migration, new dependency, provider configuration or paid mode is needed.

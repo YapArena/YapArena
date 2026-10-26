@@ -164,6 +164,7 @@ describe("room signals from the page's EventSource", () => {
         signal("media"),
         { type: "message", message: null, summary },
         signal("round"),
+        signal("window"),
       ]),
       roomCursor(room, "7"),
     );
@@ -181,8 +182,12 @@ describe("room signals from the page's EventSource", () => {
     );
     await delay(0);
     assert.deepEqual(s.received, [
-      { room, cursor: "5", topics: ["media", "round", "activity"] },
-      { room, cursor: "7", topics: ["media", "round"] },
+      {
+        room,
+        cursor: "5",
+        topics: ["media", "round", "activity", "window"],
+      },
+      { room, cursor: "7", topics: ["media", "round", "window"] },
     ]);
     s.transport.stop();
   });

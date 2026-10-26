@@ -16,5 +16,6 @@
     "types": ["node"],
     "declaration": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/features/transcription/agent/**"]
 }

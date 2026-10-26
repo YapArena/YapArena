@@ -12,6 +12,8 @@ import type { createMessageRepository } from "./features/messages/repository.ts"
 import type { createDiscoveryRepository } from "./features/discovery/repository.ts";
 import type { createIdentityRepository } from "./features/identity/repository.ts";
 import type { createMatchingRepository } from "./features/matching/repository.ts";
+import type { createMatchmaking } from "./features/matching/matchmaking.ts";
+import type { SseResponse } from "./platform/sse.ts";
 import { createMediaTelemetry } from "./features/media/telemetry.ts";
 import type { createMediaRepository } from "./features/media/repository.ts";
 import type { createMediaProvider } from "./features/media/provider.ts";
@@ -24,6 +26,9 @@ import type { RequestHandler } from "express";
 import type { createAccountWallet } from "./features/account-wallet/repository.ts";
 import type { createMediaAccountRevocation } from "./features/media/account-revocation.ts";
 import { createCoinSandboxRouter } from "./features/account-wallet/sandbox-router.ts";
+import { createTurnWindowRouter } from "./features/account-wallet/window-router.ts";
+import { createDebaterSettingsRouter } from "./features/transcription/settings-router.ts";
+import { createTranscriptionIngestRouter } from "./features/transcription/ingest-router.ts";
 import { createEmailAuthSecurity } from "./platform/auth/browser-security.ts";
 import { SessionUnavailableError } from "./platform/auth/sessions.ts";
 
@@ -31,6 +36,7 @@ import { createMessageRouter } from "./features/messages/router.ts";
 import { createDiscoveryRouter } from "./features/discovery/router.ts";
 import { createIdentityRouter } from "./features/identity/router.ts";
 import { createMatchingRouter } from "./features/matching/router.ts";
+import { createMatchmakingRouter } from "./features/matching/matchmaking-router.ts";
 import { createCommunityRouter } from "./features/community/router.ts";
 import {
   createMeasurementRouter,
@@ -109,6 +115,9 @@ export function createApp({
   discovery,
   identity,
   matching,
+  matchmaking,
+  matchmakingStreams,
+  debateAutoStart,
   media,
   mediaProvider,
   mediaAccountRevocation,
@@ -134,6 +143,10 @@ export function createApp({
   accountSecurity,
   coinSandbox,
   coinWebhook,
+  turnWindows,
+  debaterSettings,
+  transcriptionIngest,
+  dispatchTranscriber,
   sharedAuthLimiter,
   sharedAccountLimiter,
   sharedRateLimits,
@@ -146,6 +159,13 @@ export function createApp({
   discovery?: ReturnType<typeof createDiscoveryRepository>;
   identity?: ReturnType<typeof createIdentityRepository>;
   matching?: ReturnType<typeof createMatchingRepository>;
+  // Live topic queue (Decision 0011); present only when MATCHMAKING_ENABLED=true.
+  matchmaking?: ReturnType<typeof createMatchmaking>;
+  debateAutoStart?: { tryStart(debateId: string): Promise<boolean> };
+  // Per-user live queue updates; absent, clients poll (Decision 0011).
+  matchmakingStreams?: {
+    subscribe(userId: string, response: SseResponse): void;
+  };
   media?: ReturnType<typeof createMediaRepository>;
   mediaProvider?: ReturnType<typeof createMediaProvider>;
   mediaAccountRevocation?: ReturnType<typeof createMediaAccountRevocation>;
@@ -187,6 +207,12 @@ export function createApp({
     "sandbox" | "debates" | "operations" | "reports"
   >;
   coinWebhook?: RequestHandler;
+  // Decision 0012: public turn-window timing, mounted only when enabled.
+  turnWindows?: Parameters<typeof createTurnWindowRouter>[0];
+  // Decision 0012: live transcription, mounted only when enabled.
+  debaterSettings?: Parameters<typeof createDebaterSettingsRouter>[0];
+  transcriptionIngest?: Parameters<typeof createTranscriptionIngestRouter>[0];
+  dispatchTranscriber?: (debateId: string) => Promise<unknown>;
 }) {
   const app = express();
   const mediaUrl = mediaProvider ? new URL(mediaProvider.publicUrl) : undefined;
@@ -250,6 +276,9 @@ export function createApp({
           : undefined,
       ),
     );
+  // The transcriber agent's private ingest has its own per-debate limit.
+  const internalIngest = (request: Request) =>
+    request.path.startsWith("/api/internal/transcription/");
   const liveRead = (request: Request) =>
     request.method === "GET" &&
     /^\/api\/community\/events\/[0-9a-f-]{36}(?:\/my-like|\/chat\/sync|\/updates)?$/i.test(
@@ -284,6 +313,7 @@ export function createApp({
       skip: (request) =>
         liveRead(request) ||
         streamRead(request) ||
+        internalIngest(request) ||
         Boolean(mediaDeliveryLane(request)),
       shared: sharedRateLimits?.("api", "open"),
     }),
@@ -300,6 +330,12 @@ export function createApp({
     );
   }
   if (coinWebhook) app.use("/api/coin-sandbox/webhook", coinWebhook);
+  if (transcriptionIngest)
+    app.use(
+      "/api/internal/transcription",
+      express.raw({ type: "application/json", limit: "32kb" }),
+      createTranscriptionIngestRouter(transcriptionIngest),
+    );
   app.use(express.json({ limit: requestBodyLimit }));
   app.use(cookieParser());
   app.use(createCsrfOriginProtection({ environment, applicationOrigin }));
@@ -370,6 +406,8 @@ export function createApp({
         mediaEnabled: Boolean(media && mediaProvider && matching && identity),
         applicationOrigin: applicationOrigin ?? "http://localhost:3000",
         emailFirst: true,
+        matchmakingEnabled: Boolean(matchmaking && identity),
+        liveOutlineEnabled: Boolean(transcriptionIngest),
       }),
     );
   }
@@ -405,6 +443,7 @@ export function createApp({
         sharedRateLimits,
       }),
     );
+  if (turnWindows) app.use(createTurnWindowRouter(turnWindows));
   if (a4)
     app.use(
       "/api/a4",
@@ -431,6 +470,12 @@ export function createApp({
     createRequireAuthentication({ sessions, environment }),
     createMessageRouter({ messages }),
   );
+  if (debaterSettings)
+    app.use(
+      "/api/me/debater-settings",
+      createRequireAuthentication({ sessions, environment }),
+      createDebaterSettingsRouter(debaterSettings),
+    );
   if (identity) {
     app.use(
       "/api/me",
@@ -448,7 +493,26 @@ export function createApp({
     app.use(
       "/api/matching",
       createRequireAuthentication({ sessions, environment }),
-      createMatchingRouter({ matching, identity, media, recordProductAction }),
+      createMatchingRouter({
+        matching,
+        identity,
+        media,
+        recordProductAction,
+        debateAutoStart,
+        liveQueue: Boolean(matchmaking),
+      }),
+    );
+  }
+  if (matchmaking && identity) {
+    app.use(
+      "/api/matchmaking",
+      createRequireAuthentication({ sessions, environment }),
+      createMatchmakingRouter({
+        matchmaking,
+        identity,
+        recordProductAction,
+        streams: matchmakingStreams,
+      }),
     );
   }
   if (media && mediaProvider && matching && identity) {
@@ -463,6 +527,7 @@ export function createApp({
         matching,
         identity,
         requireAuth: createRequireAuthentication({ sessions, environment }),
+        dispatchTranscriber,
       }),
     );
   }

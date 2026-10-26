@@ -1576,3 +1576,85 @@ h3 {
 [data-inline-review] button {
   margin: 0.5rem;
 }
+
+/* Live topic queue (Decision 0011): topic panel, header pill, match dialog, debate banner. */
+.queue-panel {
+  display: grid;
+  gap: 1rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  border-top: 1px solid var(--line);
+}
+.queue-panel h2 {
+  margin: 0.25rem 0;
+}
+.queue-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.queue-actions .button[aria-pressed="true"] {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--acid);
+}
+.queue-actions .button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.queue-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.25rem 0.25rem 0.75rem;
+  border: 1px solid var(--acid);
+  border-radius: 999px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.queue-pill[hidden] {
+  display: none;
+}
+.queue-pill .small-button {
+  min-height: 0;
+}
+.match-dialog {
+  width: min(26rem, calc(100vw - 2rem));
+  padding: 1.5rem;
+  border: 1px solid var(--acid);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  text-align: center;
+}
+.match-dialog::backdrop {
+  background: #000000cc;
+}
+.match-dialog h2 {
+  margin: 0 0 0.5rem;
+}
+.match-dialog-topic {
+  font-weight: 700;
+}
+.match-countdown {
+  margin: 1rem 0;
+  font-size: 3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.match-dialog-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+.queue-banner {
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--acid);
+  border-radius: 4px;
+  font-weight: 700;
+}
+.queue-banner[hidden] {
+  display: none;
+}

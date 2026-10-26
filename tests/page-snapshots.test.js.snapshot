@@ -487,6 +487,497 @@ exports[`renders a debate 1`] = `
 </html>
 `;
 
+exports[`renders a debate 10`] = `
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Should we debate this? · YAP Arena</title>
+<meta name="description" content="Watch and participate in the debate: Should we debate this?">
+<link rel="canonical" href="https://arena.example/debates/public-debate">
+<link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
+<script defer src="/assets/session-coordination.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/site-header.js?v=0123456789ab">
+</script>
+<script defer src="/assets/site.js?v=0123456789ab">
+</script>
+<script defer src="/assets/account-balance.js?v=0123456789ab">
+</script>
+<script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+</head>
+<body class="arena-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" data-site-header data-session="checking">\\n    <div class="container nav arena-nav">\\n      <a class="brand" href="/" aria-label="YAP Arena home">
+<svg class="arena-brand-symbol" viewBox="0 0 40 40" aria-hidden="true">
+<ellipse cx="20" cy="20" rx="13" ry="16" transform="rotate(30 20 20)"/>
+<path d="M9 35 31 5"/>
+</svg>
+<span>YAP ARENA</span>
+</a>\\n      <nav aria-label="Main navigation">
+<a href="/live">Live</a>
+<a href="/debates">Explore</a>
+<a href="/match">Create</a>
+</nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search">
+<label class="sr-only" for="header-search">Search debates</label>
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="10.5" cy="10.5" r="6.5"/>
+<path d="m16 16 5 5"/>
+</svg>
+<input id="header-search" type="search" name="q" maxlength="80" placeholder="Search debates…">
+<button type="submit" class="sr-only">Search</button>
+</form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
+<span class="sr-only">Checking your account…</span>
+</span>\\n        <div class="header-auth-actions" data-header-guest hidden>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
+</div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
+<summary aria-label="Yap Coins balance and actions">
+<span class="header-balance-label">Balance</span>
+<strong data-header-balance>—</strong>
+<span class="arena-chevron" aria-hidden="true">⌄</span>
+</summary>
+<div class="arena-wallet-popover">
+<strong data-header-balance-heading>Your Yap Coins</strong>
+<span data-header-reserved>Checking balance…</span>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
+</div>
+</details>\\n          <details class="header-user-menu">
+<summary class="arena-avatar" data-header-account aria-label="Open account menu">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+<circle cx="12" cy="8" r="3.5"/>
+<path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
+</svg>
+</summary>
+<div class="header-user-popover">
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
+</button>
+</div>
+</details>\\n        </div>\\n        <noscript>
+<div class="header-auth-actions">
+<a class="header-login" href="/api/auth/login?connection=google">Continue with Google</a>
+<a class="header-signup" href="/api/auth/login?connection=email">Continue with email</a>
+</div>
+</noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
+</p>\\n    </div>\\n  </header>
+<main id="main">
+<div class="arena-workspace" data-arena data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="false">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="false">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
+<div class="live-chat-heading">
+<h2 id="community-chat-title">Live chat</h2>
+<span class="live-chat-connection" data-community-connection role="status" aria-live="polite">Connecting…</span>
+</div>
+<p class="live-chat-state" data-community-chat-state role="status" aria-live="polite">
+</p>
+<button type="button" data-community-older hidden>Load earlier messages</button>
+<ol class="community-messages" data-community-messages aria-label="Event chat messages" tabindex="0">
+</ol>
+<button type="button" data-community-new hidden>
+</button>
+<form data-community-chat-form>
+<label class="sr-only" for="community-chat-body">Message this event</label>
+<div class="arena-chat-compose">
+<textarea aria-describedby="community-chat-help" id="community-chat-body" name="body" maxlength="500" rows="1" placeholder="Say something…" required>
+</textarea>
+<button type="submit" aria-label="Send message">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+<path d="m3 3 19 9-19 9 4-9-4-9Zm4 9h15"/>
+</svg>
+</button>
+</div>
+<p class="form-help" id="community-chat-help">Published profile required. Enter sends · Shift+Enter adds a line.</p>
+<p data-community-cooldown aria-live="off">
+</p>
+<p class="sr-only" data-community-announcement role="status" aria-live="polite">
+</p>
+<p data-community-send-status role="status" aria-live="polite">
+</p>
+</form>
+</aside>\\n        <div class="arena-community-tools">
+<p role="status" aria-live="polite" data-community-status>Loading community activity…</p>
+<div class="community-toolbar">
+<button type="button" data-community-like aria-pressed="false">Like this event</button>
+<span data-community-likes>0 likes</span>
+<button type="button" data-community-share>Copy event link</button>
+<button type="button" data-community-refresh>Check chat now</button>
+</div>
+<details>
+<summary>Share &amp; report</summary>
+<p>
+<a href="/debates/public-debate/qr.svg" target="_blank" rel="noopener">Event QR code ↗</a> · <a href="/overlay/public-debate" target="_blank" rel="noopener">Broadcast overlay ↗</a>
+</p>
+<p>Likes and chat show interest only. They are not votes or official event support.</p>
+<form data-community-report-form>
+<label for="community-report-reason">Reason</label>
+<select id="community-report-reason" name="reasonCode" required>
+<option value="">Choose a reason</option>
+<option value="harassment">Harassment</option>
+<option value="hate">Hate</option>
+<option value="threat">Threat</option>
+<option value="spam">Spam</option>
+<option value="privacy">Privacy</option>
+<option value="other">Other</option>
+</select>
+<label for="community-report-detail">What happened?</label>
+<textarea id="community-report-detail" name="detail" minlength="10" maxlength="500" rows="3" required>
+</textarea>
+<button type="submit">Submit private report</button>
+</form>
+<a href="/account/moderation">My reports and appeals</a>
+</details>
+</div>\\n      </section>\\n    </div>\\n    <div class="arena-center">\\n      <div class="queue-banner" data-queue-banner role="status" aria-live="polite" hidden>
+</div>
+<section class="arena-watch" aria-label="Debate broadcast" data-media-event="33333333-3333-4333-8333-333333333333" data-media-replay-player="/assets/replay.bundle.js?v=0123456789ab">
+<span class="sr-only">LIVE DEBATE & REPLAY</span>\\n        <div class="arena-video-slot">
+<div class="arena-video-surface" data-arena-video>\\n          <div class="arena-video-overlay arena-video-topic">
+<h1>Should we debate this?</h1>
+<span>Public topic</span>
+</div>\\n          <div class="arena-video-overlay arena-video-status">
+<div class="arena-video-status-badges">
+<span class="arena-broadcast-badge ">Upcoming</span>
+</div>
+<div class="arena-watch-meta">
+<span title="Active playback tabs on this staging instance">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="9" cy="7" r="3"/>
+<path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5v2"/>
+</svg>
+<span data-arena-viewers>— watching</span>
+</span>
+<span>
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="12" cy="12" r="9"/>
+<path d="M12 7v6l4 2"/>
+</svg>
+<span data-arena-playback>Awaiting broadcast</span>
+</span>
+</div>
+</div>\\n          <div class="arena-video-empty">
+<span class="arena-video-symbol" aria-hidden="true">↗</span>
+<strong>The stage is set</strong>
+<span>Video appears here when the debate begins.</span>
+</div>\\n          <div class="media-videos" data-media-videos role="group" aria-label="Live debate video">
+</div>\\n          <video data-media-replay-video controls playsinline crossorigin="anonymous" preload="none" hidden>
+<track kind="captions" src="/api/media/events/33333333-3333-4333-8333-333333333333/captions.vtt" srclang="en" label="English captions">
+</video>\\n          <button type="button" class="arena-video-expand" data-video-expand aria-label="Enlarge video" aria-expanded="false" title="Enlarge video">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>
+</svg>
+</button>\\n          <div class="arena-speaker-labels">
+<div>
+<strong>
+<a href="/people/alex-public">Alex Public</a>
+</strong>
+<span>For</span>
+</div>
+<div>
+<strong>Speaker to be announced</strong>
+<span>Against</span>
+</div>
+</div>\\n        </div>
+</div>\\n        <div class="media-status-row">
+<p data-media-status role="status" aria-live="polite">Checking media availability…</p>
+<p data-media-microphone role="status" aria-live="polite" hidden>
+</p>
+<strong data-media-clock aria-live="off">
+</strong>
+</div>\\n        <div class="media-actions">
+<button type="button" data-media-viewer hidden>Join as viewer</button>
+<button type="button" data-media-speaker hidden>Check camera and join as speaker</button>
+<button type="button" data-media-replay hidden>Play replay</button>
+<button type="button" data-media-sound hidden>Enable sound</button>
+<button type="button" data-media-mute aria-pressed="false" hidden>Mute microphone</button>
+<button type="button" data-media-leave hidden>Leave live debate</button>
+</div>\\n        <details class="media-operator" data-media-operator hidden>
+<summary>Operator controls</summary>
+<label>Reason for action<input data-media-reason maxlength="500" minlength="5" placeholder="Describe the action or incident">
+</label>
+<div class="media-actions">
+<button type="button" data-media-action="start">Start</button>
+<button type="button" data-media-action="pause">Pause</button>
+<button type="button" data-media-action="resume">Resume</button>
+<button type="button" data-media-action="end">End</button>
+<button type="button" data-media-action="replay">Publish replay</button>
+</div>
+<label>Reviewed WebVTT captions<textarea data-media-captions rows="5" maxlength="200000" placeholder="WEBVTT">
+</textarea>
+</label>
+<button type="button" data-media-captions-submit>Publish captions</button>
+</details>\\n      </section>\\n      <section class="arena-debate-meta">
+<p>A public debate on Public topic.</p>
+<div class="arena-topic-tags">
+<a href="/topics/public-topic">Public topic</a>
+<span>Public debate</span>
+</div>
+</section>\\n      <section class="arena-panel arena-chart-panel" aria-labelledby="arena-chart-title">
+<div class="arena-graph-main" data-arena-graph-main>
+<div class="arena-chart-top">
+<div class="arena-round-state">
+<span data-arena-round-label>Round history</span>
+<span class="arena-state-chip" data-arena-round-state>waiting</span>
+</div>
+<span data-arena-countdown aria-live="off">Waiting for a round</span>
+<div class="arena-volume">
+<span>Settled volume · this view</span>
+<strong data-arena-volume>— Yap Coins</strong>
+<small data-arena-participants>Finalized commitments</small>
+</div>
+</div>
+<div class="arena-round-progress" data-arena-round-progress role="progressbar" aria-label="Time remaining in the round" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Waiting for an open round">
+<span>
+</span>
+</div>
+<p class="arena-chart-question">What fraction of participants endorse:</p>
+<h2 id="arena-chart-title">“Should we debate this?”</h2>
+<div class="arena-chart-wrap" data-arena-chart>
+<div class="arena-chart-plot">
+<svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
+<title id="endorsement-chart-title">Settled endorsement history</title>
+<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<defs>
+<linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
+<stop offset="100%" stop-color="#f7f7f7" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="arena-no-fill" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#ff536c" stop-opacity=".16"/>
+<stop offset="100%" stop-color="#ff536c" stop-opacity="0"/>
+</linearGradient>
+</defs>
+<g class="arena-chart-grid">
+<line x1="46" x2="652" y1="284" y2="284"/>
+<text x="34" y="289" text-anchor="end">0%</text>
+<line x1="46" x2="652" y1="221.5" y2="221.5"/>
+<text x="34" y="226.5" text-anchor="end">25%</text>
+<line x1="46" x2="652" y1="159" y2="159"/>
+<text x="34" y="164" text-anchor="end">50%</text>
+<line x1="46" x2="652" y1="96.5" y2="96.5"/>
+<text x="34" y="101.5" text-anchor="end">75%</text>
+<line x1="46" x2="652" y1="34" y2="34"/>
+<text x="34" y="39" text-anchor="end">100%</text>
+</g>
+<g data-chart-series>
+</g>
+<g data-chart-ticks>
+</g>
+<g data-chart-badges pointer-events="none">
+</g>
+<g data-chart-cursor pointer-events="none">
+</g>
+</svg>
+<div class="arena-chart-empty" data-chart-empty>Yap Coins rounds are currently unavailable.</div>
+</div>
+<section class="arena-price-inspector" aria-labelledby="arena-price-title">
+<svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
+<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
+<g data-price-drawing>
+</g>
+<line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
+<text x="46" y="91" text-anchor="middle">0¢</text>
+<line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
+<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
+<text x="349" y="91" text-anchor="middle">50¢</text>
+<line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
+<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
+<text x="652" y="91" text-anchor="middle">100¢</text>
+</svg>
+<div class="arena-price-heading">
+<h3 id="arena-price-title">Price &amp; median interval</h3>
+<div class="arena-price-navigation">
+<button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
+<label class="sr-only" for="arena-price-round">Inspect a settled round</label>
+<select id="arena-price-round" data-price-round disabled>
+<option value="">No settled rounds</option>
+</select>
+<button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
+</div>
+</div>
+<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<div class="arena-offer-values">
+<div>
+<span>Shared YES offer · p</span>
+<strong data-price-yes>—</strong>
+</div>
+<div>
+<span>Complementary NO price</span>
+<strong data-price-no>—</strong>
+</div>
+</div>
+<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-legend">
+<span class="lavender">● Median interval / offered price</span>
+<span class="yes">│ Final YES share</span>
+<span class="arena-limit-key">┆ Your YES-scale limit</span>
+</p>
+</section>
+</div>
+<div class="arena-chart-footer">
+<div class="arena-chart-key">
+<span class="yes">● YES</span>
+<span class="no">● NO</span>
+<label data-shared-controls hidden>History<select data-shared-view aria-label="History source">
+<option value="shared">Shared synthetic activity</option>
+<option value="private">My private history</option>
+</select>
+</label>
+</div>
+<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+</div>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+</div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
+<h2>Behind the position <small>Synthetic argument endorsements</small>
+</h2>
+<div data-shared-argument-list>
+</div>
+</section>
+<section class="arena-panel arena-orders">
+<div class="arena-tabbar" role="tablist" aria-label="Your commitments">
+<button type="button" id="arena-open-tab" role="tab" aria-selected="true" aria-controls="arena-open-orders" data-order-tab="open">Open commitments <span data-arena-open-count>(0)</span>
+</button>
+<button type="button" id="arena-history-tab" role="tab" aria-selected="false" aria-controls="arena-history-orders" tabindex="-1" data-order-tab="history">Trade history</button>
+</div>
+<div id="arena-open-orders" role="tabpanel" aria-labelledby="arena-open-tab" data-order-panel="open">
+<div data-inline-receipt class="arena-receipt">Your binding commitments will appear here.</div>
+</div>
+<div id="arena-history-orders" role="tabpanel" aria-labelledby="arena-history-tab" data-order-panel="history" hidden>
+<div data-arena-history>No settled commitments in this run yet.</div>
+</div>
+<p>Successful commitments are binding. Unused reservations are released automatically.</p>
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
+<div class="arena-tabbar" role="tablist" aria-label="Participation and debate details">
+<button type="button" id="arena-rounds-tab" role="tab" aria-selected="true" aria-controls="arena-rounds-panel" data-detail-tab="rounds">Participate</button>
+<button type="button" id="arena-info-tab" role="tab" aria-selected="false" aria-controls="arena-info-panel" tabindex="-1" data-detail-tab="info">Info</button>
+</div>
+<div class="arena-sidecar-content">
+<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds">      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
+<div class="arena-section-top">
+<h2 id="arena-trade-title" data-arena-trade-title>Participate in a round</h2>
+<span data-arena-available>Your balance —</span>
+</div>
+<p data-inline-status class="arena-inline-status" role="status" aria-live="polite">Yap Coins participation is currently disabled.</p>\\n        <div data-inline-access hidden>
+<label class="arena-publish-choice">
+<input type="checkbox" data-inline-publish> Share my settled Bots + you and Bots-only aggregates publicly</label>
+<div class="arena-run-tools">
+<label class="sr-only" for="arena-runs">Select a run</label>
+<select id="arena-runs" data-inline-runs>
+<option value="">Choose a round</option>
+</select>
+<details class="arena-round-setup" data-inline-setup open>
+<summary>New round</summary>
+<label>Argument label<input data-inline-argument maxlength="80" placeholder="e.g. Cost analysis" autocomplete="off">
+</label>
+<div class="arena-create-buttons">
+<button type="button" data-inline-bots>Start Bots mode · 500 synthetic bots</button>
+<button type="button" data-inline-human>Open human-only round</button>
+</div>
+</details>
+<button class="arena-icon-button" type="button" data-inline-refresh aria-label="Refresh rounds">↻</button>
+</div>
+<p data-inline-balance class="arena-balance-note">
+</p>\\n        <form data-inline-form class="arena-commit-form" hidden>
+<div class="arena-position-row">
+<fieldset class="arena-side-choices">
+<legend class="sr-only">Your position</legend>
+<label class="arena-side yes">
+<input type="radio" name="side" value="YES" checked>
+<span>Endorse (YES)</span>
+</label>
+<label class="arena-side no">
+<input type="radio" name="side" value="NO">
+<span>Reject (NO)</span>
+</label>
+</fieldset>
+<label class="arena-quantity">Contracts<input name="quantity" type="number" min="1" max="100" value="10" required>
+</label>
+</div>
+<div class="arena-quick-amounts" aria-label="Choose contract quantity">
+<button type="button" data-quantity="1">1</button>
+<button type="button" data-quantity="10">10</button>
+<button type="button" data-quantity="50">50</button>
+<button type="button" data-quantity="100">100</button>
+</div>
+<div class="arena-price-row">
+<label>Maximum price · Yap Coins<input name="ceiling" inputmode="decimal" pattern="(0([.][0-9]{1,6})?|1([.]0{1,6})?)" value="0.50" required>
+</label>
+<details class="arena-order-explanation">
+<summary>How the price works</summary>
+<p data-arena-order-help>A YES contract pays the round’s final YES share. Your ceiling sets the highest purchase price you accept.</p>
+</details>
+</div>
+<p class="arena-reservation" data-arena-reservation>10 contracts · maximum reservation 10 Yap Coins</p>
+<button type="submit" class="arena-commit-button">Review commitment</button>
+</form>\\n        <div data-arena-commit-closed class="arena-commit-closed">Choose a round or start a sandbox to participate.</div>
+<div class="arena-wallet-actions">
+<button type="button" data-inline-refill>Get daily play coins</button>
+<a href="/coins?debate=33333333-3333-4333-8333-333333333333" target="_blank" rel="noopener">Full controls ↗</a>
+</div>
+</div>
+<p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
+<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
+<dl class="arena-info">
+<div>
+<dt>Debate</dt>
+<dd>Upcoming</dd>
+</div>
+<div>
+<dt>Scheduled</dt>
+<dd>Thu, 01 Oct 2026 17:00:00 GMT</dd>
+</div>
+<div>
+<dt>Rules version</dt>
+<dd>preview-1</dd>
+</div>
+<div>
+<dt>Settlement</dt>
+<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+</div>
+</dl>
+<p class="arena-info-note">Shared offers are random purchase prices. The chart shows revealed endorsement shares.</p>
+</div>
+</div>
+</section>\\n      <section class="arena-panel arena-sentiment">
+<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+</h2>
+<div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
+<span>
+</span>
+</div>
+<div class="arena-sentiment-values">
+<strong class="yes" data-arena-yes>—</strong>
+<strong class="no" data-arena-no>—</strong>
+</div>
+<p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
+</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    \\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/media.bundle.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/community.js?v=0123456789ab">
+</script>\\n  </div>
+</main>
+<footer class="site-footer">
+<div class="container footer-inner">
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
+</span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+</div>
+</footer>
+</body>
+</html>
+`;
+
 exports[`renders a debate 2`] = `
 <!doctype html>
 <html lang="en">
@@ -5114,6 +5605,149 @@ exports[`renders a topic 2`] = `
 </html>
 `;
 
+exports[`renders a topic 3`] = `
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; · YAP Arena</title>
+<meta name="description" content="Summary &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
+<link rel="canonical" href="https://arena.example/topics/hostile-topic">
+<link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
+<script defer src="/assets/session-coordination.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/site-header.js?v=0123456789ab">
+</script>
+<script defer src="/assets/site.js?v=0123456789ab">
+</script>
+<script defer src="/assets/account-balance.js?v=0123456789ab">
+</script>
+<script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" data-site-header data-session="checking">\\n    <div class="container nav arena-nav">\\n      <a class="brand" href="/" aria-label="YAP Arena home">
+<svg class="arena-brand-symbol" viewBox="0 0 40 40" aria-hidden="true">
+<ellipse cx="20" cy="20" rx="13" ry="16" transform="rotate(30 20 20)"/>
+<path d="M9 35 31 5"/>
+</svg>
+<span>YAP ARENA</span>
+</a>\\n      <nav aria-label="Main navigation">
+<a href="/live">Live</a>
+<a href="/debates">Explore</a>
+<a href="/match">Create</a>
+</nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search">
+<label class="sr-only" for="header-search">Search debates</label>
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="10.5" cy="10.5" r="6.5"/>
+<path d="m16 16 5 5"/>
+</svg>
+<input id="header-search" type="search" name="q" maxlength="80" placeholder="Search debates…">
+<button type="submit" class="sr-only">Search</button>
+</form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
+<span class="sr-only">Checking your account…</span>
+</span>\\n        <div class="header-auth-actions" data-header-guest hidden>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
+</div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
+<summary aria-label="Yap Coins balance and actions">
+<span class="header-balance-label">Balance</span>
+<strong data-header-balance>—</strong>
+<span class="arena-chevron" aria-hidden="true">⌄</span>
+</summary>
+<div class="arena-wallet-popover">
+<strong data-header-balance-heading>Your Yap Coins</strong>
+<span data-header-reserved>Checking balance…</span>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
+</div>
+</details>\\n          <details class="header-user-menu">
+<summary class="arena-avatar" data-header-account aria-label="Open account menu">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+<circle cx="12" cy="8" r="3.5"/>
+<path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
+</svg>
+</summary>
+<div class="header-user-popover">
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
+</button>
+</div>
+</details>\\n        </div>\\n        <noscript>
+<div class="header-auth-actions">
+<a class="header-login" href="/api/auth/login?connection=google">Continue with Google</a>
+<a class="header-signup" href="/api/auth/login?connection=email">Continue with email</a>
+</div>
+</noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
+</p>\\n    </div>\\n  </header>
+<main id="main">
+<section class="container detail-intro" data-measure-topic="44444444-4444-4444-8444-444444444444">
+<a class="back-link" href="/topics">← All topics</a>
+<span class="eyebrow accent">TOPIC · DEMO</span>
+<h1>Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</h1>
+<button class="follow-button" type="button" data-follow-type="topics" data-follow-slug="hostile-topic" aria-pressed="false">Follow topic</button>
+<span class="follow-message" role="status" aria-live="polite">
+</span>
+<p class="lead">Summary &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</p>
+<div class="side-panel">
+<div>
+<span class="eyebrow">SIDE A</span>
+<strong>Side A &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</strong>
+</div>
+<span class="versus">VS</span>
+<div>
+<span class="eyebrow">SIDE B</span>
+<strong>Side B &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</strong>
+</div>
+</div>
+</section>
+<section class="container queue-panel" data-queue-topic="hostile-topic" aria-labelledby="queue-heading">
+<div>
+<span class="eyebrow accent">DEBATE IT LIVE</span>
+<h2 id="queue-heading">Take a side and get matched</h2>
+<p>Pick your side. When someone queues on the other side, you both get 30 seconds to accept, then the debate starts.</p>
+</div>
+<div class="queue-actions">
+<button class="button" type="button" data-queue-side="A">Queue for Side A &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</button>
+<button class="button" type="button" data-queue-side="B">Queue for Side B &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</button>
+</div>
+<p class="form-note" data-queue-waiting aria-live="polite">
+</p>
+<p class="form-note" data-queue-note role="status">
+</p>
+</section>
+<section class="container section">
+<div class="section-heading">
+<div>
+<span class="eyebrow">ON THIS TOPIC</span>
+<h2>Debates</h2>
+</div>
+</div>
+<div class="empty-state">
+<h3>No public debates on this topic yet.</h3>
+</div>
+</section>
+</main>
+<footer class="site-footer">
+<div class="container footer-inner">
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
+</span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+</div>
+</footer>
+</body>
+</html>
+`;
+
 exports[`renders community moderation and the broadcast overlay 1`] = `
 <!doctype html>
 <html lang="en">
@@ -6602,6 +7236,193 @@ exports[`renders the coins and match pages 2`] = `
 <h2>Join a debate</h2>
 <ul id="open-queue" class="account-list">
 </ul>
+</section>
+<section class="information-card">
+<span class="eyebrow">YOUR REQUESTS</span>
+<h2>Challenges and queue</h2>
+<ul id="my-requests" class="account-list">
+</ul>
+</section>
+<section class="information-card">
+<span class="eyebrow">YOUR EVENTS</span>
+<h2>Debate lifecycle</h2>
+<ul id="my-events" class="account-list">
+</ul>
+</section>
+<section class="information-card">
+<span class="eyebrow">NOTIFICATIONS</span>
+<h2>Updates</h2>
+<ul id="match-notifications" class="account-list">
+</ul>
+</section>
+</div>
+</div>
+</section>
+<script defer src="/assets/matching.js?v=0123456789ab">
+</script>
+</main>
+<footer class="site-footer">
+<div class="container footer-inner">
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
+</span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+</div>
+</footer>
+</body>
+</html>
+`;
+
+exports[`renders the coins and match pages 3`] = `
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Match · YAP Arena</title>
+<meta name="description" content="Create topics and arrange debates on YAP Arena.">
+<link rel="canonical" href="https://arena.example/match">
+<link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
+<script defer src="/assets/session-coordination.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/site-header.js?v=0123456789ab">
+</script>
+<script defer src="/assets/site.js?v=0123456789ab">
+</script>
+<script defer src="/assets/account-balance.js?v=0123456789ab">
+</script>
+<script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" data-site-header data-session="checking">\\n    <div class="container nav arena-nav">\\n      <a class="brand" href="/" aria-label="YAP Arena home">
+<svg class="arena-brand-symbol" viewBox="0 0 40 40" aria-hidden="true">
+<ellipse cx="20" cy="20" rx="13" ry="16" transform="rotate(30 20 20)"/>
+<path d="M9 35 31 5"/>
+</svg>
+<span>YAP ARENA</span>
+</a>\\n      <nav aria-label="Main navigation">
+<a href="/live">Live</a>
+<a href="/debates">Explore</a>
+<a href="/match">Create</a>
+</nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search">
+<label class="sr-only" for="header-search">Search debates</label>
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="10.5" cy="10.5" r="6.5"/>
+<path d="m16 16 5 5"/>
+</svg>
+<input id="header-search" type="search" name="q" maxlength="80" placeholder="Search debates…">
+<button type="submit" class="sr-only">Search</button>
+</form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
+<span class="sr-only">Checking your account…</span>
+</span>\\n        <div class="header-auth-actions" data-header-guest hidden>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
+</div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
+<summary aria-label="Yap Coins balance and actions">
+<span class="header-balance-label">Balance</span>
+<strong data-header-balance>—</strong>
+<span class="arena-chevron" aria-hidden="true">⌄</span>
+</summary>
+<div class="arena-wallet-popover">
+<strong data-header-balance-heading>Your Yap Coins</strong>
+<span data-header-reserved>Checking balance…</span>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
+</div>
+</details>\\n          <details class="header-user-menu">
+<summary class="arena-avatar" data-header-account aria-label="Open account menu">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+<circle cx="12" cy="8" r="3.5"/>
+<path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
+</svg>
+</summary>
+<div class="header-user-popover">
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
+</button>
+</div>
+</details>\\n        </div>\\n        <noscript>
+<div class="header-auth-actions">
+<a class="header-login" href="/api/auth/login?connection=google">Continue with Google</a>
+<a class="header-signup" href="/api/auth/login?connection=email">Continue with email</a>
+</div>
+</noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
+</p>\\n    </div>\\n  </header>
+<main id="main">
+<section class="container page-intro">
+<span class="eyebrow accent">DEBATE MATCHING</span>
+<h1>Find the<br>
+<em>other side.</em>
+</h1>
+<p>Create a topic or challenge a person. To debate right now, open a topic and queue on a side. A challenge becomes an event when both speakers agree to its proposition, sides, and start time.</p>
+</section>
+<section class="container section compact match-page">
+<p id="match-notice" class="notice" role="status" aria-live="polite">Checking your account…</p>
+<div id="match-signed-out" hidden class="information-card">
+<p>Sign in with a public profile to open or join a debate.</p>
+<a class="button" href="/account?next=%2Fmatch">Sign in ↗</a>
+</div>
+<div id="match-signed-in" hidden>
+<div class="match-grid">
+<section class="information-card">
+<span class="eyebrow">01 / START A TOPIC</span>
+<h2>Define both sides</h2>
+<form id="topic-create" class="stack-form">
+<label>URL slug<input name="slug" pattern="[a-z0-9][a-z0-9-]{2,79}" maxlength="80" required>
+</label>
+<label>Title<input name="title" minlength="5" maxlength="140" required>
+</label>
+<label>Summary<textarea name="summary" minlength="10" maxlength="600" required>
+</textarea>
+</label>
+<label>Side A label<input name="sideALabel" minlength="2" maxlength="80" required>
+</label>
+<label>Side B label<input name="sideBLabel" minlength="2" maxlength="80" required>
+</label>
+<button class="button" type="submit">Create private draft ↗</button>
+</form>
+<ul id="my-topics" class="account-list">
+</ul>
+</section>
+<section class="information-card">
+<span class="eyebrow">02 / OPEN A REQUEST</span>
+<h2>Set the proposition</h2>
+<form id="request-create" class="stack-form">
+<label>Type<select name="kind">
+<option value="direct">Direct challenge</option>
+</select>
+</label>
+<label>Published topic slug<input name="topicSlug" pattern="[a-z0-9][a-z0-9-]{2,79}" required>
+</label>
+<label>Proposition<input name="proposition" minlength="10" maxlength="240" required>
+</label>
+<label>Your side<select name="requestedSide">
+<option value="A">Side A</option>
+<option value="B">Side B</option>
+</select>
+</label>
+<label>Opponent handle for direct challenges<input name="targetHandle" pattern="[a-z0-9][a-z0-9-]{2,39}">
+</label>
+<label>Proposed start, your local time<input name="scheduledAt" type="datetime-local" required>
+</label>
+<button class="button" type="submit">Open request ↗</button>
+</form>
+<p class="form-note">The same platform rules apply to every event. Start times must be 1 hour to 90 days ahead.</p>
+</section>
+</div>
+<div class="match-grid">
+<section class="information-card">
+<span class="eyebrow">DEBATE NOW</span>
+<h2>Live queue</h2>
+<p>Open a <a href="/topics">topic</a> and queue on a side. You are matched with someone on the other side in seconds.</p>
 </section>
 <section class="information-card">
 <span class="eyebrow">YOUR REQUESTS</span>

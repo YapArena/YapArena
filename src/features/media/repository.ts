@@ -197,6 +197,22 @@ export function createMediaRepository(
         return { cameraOk, microphoneOk };
       });
     },
+    // The check taken before entering the live queue; the queue requires one in the last
+    // 30 minutes (Decision 0011).
+    async checkAccountDevice(
+      userId: string,
+      cameraOk: boolean,
+      microphoneOk: boolean,
+    ) {
+      await db.query(
+        `INSERT INTO account_device_checks (user_id, camera_ok, microphone_ok)
+         VALUES ($1, $2, $3) ON CONFLICT (user_id) DO UPDATE SET
+         camera_ok = EXCLUDED.camera_ok, microphone_ok = EXCLUDED.microphone_ok,
+         checked_at = CURRENT_TIMESTAMP`,
+        [userId, cameraOk, microphoneOk],
+      );
+      return { cameraOk, microphoneOk };
+    },
     async assertDeviceReady(debateId: string, userId: string) {
       const result = await db.query(
         `SELECT 1 FROM media_device_checks WHERE debate_id = $1 AND user_id = $2
@@ -423,7 +439,20 @@ export function createMediaRepository(
       egressId: string,
       success: boolean,
       key: string | null,
+      // Decision 0012: when the recording file starts, as LiveKit reports
+      // it; replay positions are measured from it. Written first and
+      // idempotently, so a retried completion still records it.
+      startedAt: Date | null = null,
     ) {
+      if (success && startedAt)
+        await db.query(
+          `INSERT INTO recording_clocks (debate_id, egress_id, started_at)
+          SELECT debate_id, egress_id, $3 FROM debate_media
+          WHERE egress_id = $1 AND recording_key = $2
+            AND recording_status IN ('recording', 'processing', 'ready')
+          ON CONFLICT (debate_id) DO NOTHING`,
+          [egressId, key, startedAt],
+        );
       const result = await db.query<MediaState>(
         `UPDATE debate_media SET recording_status = CASE
           WHEN $2 = 'ready' AND state <> 'ended' THEN 'failed'

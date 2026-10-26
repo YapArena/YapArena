@@ -40,7 +40,6 @@ import { createAccountOperationRepository } from "../dist/platform/auth/account-
 import {
   createCoinSandboxRepository,
   createCoinSandboxOperatorRepository,
-  sandboxOpeningTerms,
   withdrawalApprovalTerms,
 } from "../dist/features/account-wallet/sandbox-repository.js";
 import {
@@ -455,17 +454,9 @@ try {
     depositDestination: accounts.custody.address,
     withdrawalFee: "0",
   };
+  // Decision 0013: the account's first request (the funding quote below)
+  // opens its sandbox; no opening confirmation exists any more.
   const app = createCoinSandboxRepository(runtimePool, config);
-  if (!(await app.summary(context)).opened) {
-    const opening = await confirmed(
-      "sandbox.open",
-      sandboxOpeningTerms(context.userId),
-    );
-    await app.open(context, {
-      operationId: opening.id,
-      approval: opening.approval,
-    });
-  }
   const operator = createCoinSandboxOperatorRepository(ownerPool, config);
   const funding = await app.quoteFunding(context, {
     idempotencyKey: "actual-chain-funded-issuance-v1",

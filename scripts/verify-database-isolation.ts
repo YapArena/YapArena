@@ -96,6 +96,8 @@ const applicationTables = [
   "coin_sandbox_books",
   "coin_debate_rounds",
   "coin_debate_orders",
+  "coin_debate_reveal_modes",
+  "recording_clocks",
   "coin_sandbox_controls",
   "coin_sandbox_requests",
   "coin_sandbox_openings",
@@ -113,6 +115,14 @@ const applicationTables = [
   ...a4Tables,
   ...publicBotTables,
   "a4_play_closing_balances",
+  "matchmaking_tickets",
+  "match_offers",
+  "account_device_checks",
+  // Decision 0012: live transcription.
+  "debater_settings",
+  "transcription_dispatches",
+  "transcription_updates",
+  "transcript_segments",
 ];
 const container = `yaparena-isolation-${randomUUID().slice(0, 8)}`;
 const evidenceDirectory = `/tmp/${container}-evidence`;

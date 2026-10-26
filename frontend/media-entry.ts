@@ -48,6 +48,12 @@ if (root) {
   };
   // The media page template supplies this event ID and the controls below.
   const id = root.dataset.mediaEvent!;
+  // Decision 0012: captions and the AI outline follow this page's Room.
+  const liveOutline = document.querySelector("[data-live-captions]")
+    ? import("./live-outline.js").then((outline) =>
+        outline.startLiveOutline(id),
+      )
+    : undefined;
   const status = root.querySelector<HTMLElement>("[data-media-status]")!;
   const clock = root.querySelector<HTMLElement>("[data-media-clock]")!;
   const microphoneStatus = root.querySelector<HTMLElement>(
@@ -414,6 +420,7 @@ if (root) {
       throw Object.assign(new Error("Join cancelled"), { name: "AbortError" });
     }
     recovery.connected();
+    void liveOutline?.then((attach) => attach(nextRoom));
     leave.hidden = false;
     sound.hidden = nextRoom.canPlaybackAudio;
     for (const participant of nextRoom.remoteParticipants.values())

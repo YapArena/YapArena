@@ -47,11 +47,33 @@ describe("configuration", () => {
       assert.throws(() => loadConfig({ DATABASE_URL: databaseUrl, ...env }));
   });
 
+  it("enables the live queue only on request and bounds its capacity", () => {
+    assert.deepEqual(
+      loadConfig({
+        DATABASE_URL: databaseUrl,
+        MATCHMAKING_ENABLED: "true",
+        LIVE_DEBATE_CAPACITY: "100",
+      }).matchmaking,
+      { enabled: true, liveDebateCapacity: 100 },
+    );
+    for (const env of [
+      { MATCHMAKING_ENABLED: "yes" },
+      { LIVE_DEBATE_CAPACITY: "0" },
+      { LIVE_DEBATE_CAPACITY: "1001" },
+      {
+        MATCHMAKING_ENABLED: "true",
+        DATABASE_URL: databaseUrl.replace("5432", "6543"),
+      },
+    ])
+      assert.throws(() => loadConfig({ DATABASE_URL: databaseUrl, ...env }));
+  });
+
   it("provides safe development defaults", () => {
     assert.deepEqual(loadConfig({ DATABASE_URL: databaseUrl }), {
       environment: "development",
       homepageReferenceEnabled: false,
       coinSandboxEnabled: false,
+      turnWindowsEnabled: false,
       coinSandboxWebhookSecret: undefined,
       host: "0.0.0.0",
       port: 3000,
@@ -69,6 +91,12 @@ describe("configuration", () => {
       replayPackaging,
       backgroundJobs: true,
       communityStream,
+      matchmaking: { enabled: false, liveDebateCapacity: 2 },
+      liveOutline: {
+        enabled: false,
+        agentName: "yaparena-transcriber",
+        ingestSecret: undefined,
+      },
       a4Mode: "disabled",
       a4Funding: { starterCoins: 1000, refillCoins: 1000, botCoins: 1000 },
     });
@@ -95,6 +123,7 @@ describe("configuration", () => {
         environment: "production",
         homepageReferenceEnabled: false,
         coinSandboxEnabled: false,
+        turnWindowsEnabled: false,
         coinSandboxWebhookSecret: undefined,
         host: "127.0.0.1",
         port: 8080,
@@ -112,6 +141,12 @@ describe("configuration", () => {
         replayPackaging,
         backgroundJobs: true,
         communityStream,
+        matchmaking: { enabled: false, liveDebateCapacity: 2 },
+        liveOutline: {
+          enabled: false,
+          agentName: "yaparena-transcriber",
+          ingestSecret: undefined,
+        },
         a4Mode: "disabled",
         a4Funding: { starterCoins: 1000, refillCoins: 1000, botCoins: 1000 },
       },
@@ -127,6 +162,90 @@ describe("configuration", () => {
       assert.throws(
         () => loadConfig({ DATABASE_URL: databaseUrl, METRICS_TOKEN: value }),
         /METRICS_TOKEN/,
+      );
+  });
+
+  it("enables the live outline only with LiveKit media and a strong ingest secret", () => {
+    const media = {
+      LIVEKIT_URL: "http://localhost:7880",
+      LIVEKIT_PUBLIC_URL: "ws://localhost:7880",
+      LIVEKIT_API_KEY: "devkey",
+      LIVEKIT_API_SECRET: "secret",
+      MEDIA_S3_ENDPOINT: "http://localhost:8333",
+      MEDIA_S3_PUBLIC_ENDPOINT: "http://localhost:8333",
+      MEDIA_S3_REGION: "us-east-1",
+      MEDIA_S3_BUCKET: "replays",
+      MEDIA_S3_ACCESS_KEY: "local",
+      MEDIA_S3_SECRET_KEY: "local-secret",
+    };
+    const secret = "synthetic-transcription-ingest-secret-32b";
+    assert.deepEqual(
+      loadConfig({
+        DATABASE_URL: databaseUrl,
+        ...media,
+        LIVE_OUTLINE_ENABLED: "true",
+        TRANSCRIPTION_INGEST_SECRET: secret,
+        TRANSCRIBER_AGENT_NAME: "yaparena-transcriber-staging",
+      }).liveOutline,
+      {
+        enabled: true,
+        agentName: "yaparena-transcriber-staging",
+        ingestSecret: secret,
+      },
+    );
+    for (const [environment, message] of [
+      [{ LIVE_OUTLINE_ENABLED: "yes" }, /must be true or false/],
+      [
+        { LIVE_OUTLINE_ENABLED: "true", TRANSCRIPTION_INGEST_SECRET: secret },
+        /requires LiveKit media/,
+      ],
+      [
+        { ...media, LIVE_OUTLINE_ENABLED: "true" },
+        /TRANSCRIPTION_INGEST_SECRET of at least 32 bytes/,
+      ],
+      [
+        {
+          ...media,
+          LIVE_OUTLINE_ENABLED: "true",
+          TRANSCRIPTION_INGEST_SECRET: "short",
+        },
+        /at least 32 bytes/,
+      ],
+      [{ TRANSCRIBER_AGENT_NAME: "Bad Name" }, /TRANSCRIBER_AGENT_NAME/],
+    ])
+      assert.throws(
+        () => loadConfig({ DATABASE_URL: databaseUrl, ...environment }),
+        message,
+      );
+  });
+
+  it("enables turn windows only explicitly and only with the coin sandbox", () => {
+    assert.equal(
+      loadConfig({ DATABASE_URL: databaseUrl }).turnWindowsEnabled,
+      false,
+    );
+    assert.equal(
+      loadConfig({
+        DATABASE_URL: databaseUrl,
+        COIN_SANDBOX_ENABLED: "true",
+        TURN_WINDOWS_ENABLED: "true",
+      }).turnWindowsEnabled,
+      true,
+    );
+    assert.throws(
+      () =>
+        loadConfig({ DATABASE_URL: databaseUrl, TURN_WINDOWS_ENABLED: "true" }),
+      /requires COIN_SANDBOX_ENABLED/,
+    );
+    for (const value of ["1", "TRUE", "yes"])
+      assert.throws(
+        () =>
+          loadConfig({
+            DATABASE_URL: databaseUrl,
+            COIN_SANDBOX_ENABLED: "true",
+            TURN_WINDOWS_ENABLED: value,
+          }),
+        /TURN_WINDOWS_ENABLED must be true or false/,
       );
   });
 

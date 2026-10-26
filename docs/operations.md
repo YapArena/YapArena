@@ -200,8 +200,9 @@ in that procedure.
 Sign-in uses Auth0 only ([Decision 0009](decisions/0009-auth0.md)): email code and Google.
 Signed-in requests never call Auth0, so an Auth0 outage blocks only new sign-ins and
 confirmations. `GET /api/auth/provider` reports whether Auth0 is configured and which
-methods it offers. Sensitive operations (opening the financial sandbox once, each
-withdrawal and each recovery consent) are confirmed by a fresh sign-in; see
+methods it offers. Sensitive operations (each withdrawal and each recovery consent)
+are confirmed by a fresh sign-in; opening the coin sandbox is automatic
+([Decision 0013](decisions/0013-yap-coins-always-on-and-debate-staking.md)). See
 [the confirmation contract](security/account-session-revocation.md#confirmation-by-fresh-sign-in).
 `yaparena_auth_journey_total` counts `login_started`, `signin_completed`,
 `signup_completed`, `link_required`, `link_completed`, `confirmation_started`,

@@ -51,6 +51,8 @@ it("renders the live page", (t) => {
 it("renders the coins and match pages", (t) => {
   snapshot(t, web.renderCoins(origin));
   snapshot(t, web.renderMatchmaking(origin));
+  // Live topic queue on (Decision 0011).
+  snapshot(t, web.renderMatchmaking(origin, true));
 });
 
 it("renders the debate list", (t) => {
@@ -109,6 +111,8 @@ it("renders a topic", (t) => {
       }),
     ),
   );
+  // Live topic queue on (Decision 0011); the hostile labels prove escaping.
+  snapshot(t, web.renderTopic(origin, hostileTopic, empty, true));
 });
 
 it("renders a debate", (t) => {
@@ -134,6 +138,8 @@ it("renders a debate", (t) => {
   );
   snapshot(t, web.renderDebate(origin, hostileDebate, true, activity));
   snapshot(t, web.renderDebate(origin, debate, true, null));
+  // Live topic queue on (Decision 0011): the banner container above the video.
+  snapshot(t, web.renderDebate(origin, debate, false, null, true));
 });
 
 it("renders a profile", (t) => {

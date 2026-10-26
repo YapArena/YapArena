@@ -15,14 +15,17 @@ export function createRuntime({
   app,
   a4,
   coinDebates,
+  transcription,
   database,
   sessions,
   accountSecurityCleanup,
   mediaAccountRevocation,
   identity,
   matching,
+  matchmaking,
   community,
   communityStreams,
+  matchmakingStreams,
   measurement,
   media,
   mediaProvider,
@@ -37,7 +40,12 @@ export function createRuntime({
 }: {
   app?: Express;
   a4?: { tick(): Promise<void> };
-  coinDebates?: { advance(): Promise<unknown> };
+  coinDebates?: { tick(): Promise<unknown> };
+  // Decision 0012: transcriber warm-up dispatch and transcript retention.
+  transcription?: {
+    tick(): Promise<unknown>;
+    pruneExpired(): Promise<unknown>;
+  };
   database: Pick<Pool, "end">;
   sessions: Pick<ReturnType<typeof createSessionRepository>, "deleteExpired">;
   accountSecurityCleanup?: () => Promise<void>;
@@ -50,11 +58,13 @@ export function createRuntime({
     ReturnType<typeof createMatchingRepository>,
     "expireRequests"
   >;
+  matchmaking?: { sweep(): Promise<unknown>; pruneExpired(): Promise<unknown> };
   community?: Pick<
     ReturnType<typeof createCommunityRepository>,
     "pruneExpired"
   >;
   communityStreams?: { start(): Promise<void>; stop(): Promise<void> };
+  matchmakingStreams?: { start(): Promise<void>; stop(): Promise<void> };
   measurement?: Pick<
     ReturnType<typeof createMeasurementRepository>,
     "pruneExpired"
@@ -83,10 +93,16 @@ export function createRuntime({
   let speakerTimer: NodeJS.Timeout | undefined;
   let speakerTask: Promise<void> | undefined;
   let speakerWorking = false;
+  let transcriptionTimer: NodeJS.Timeout | undefined;
+  let transcriptionTask: Promise<void> | undefined;
+  let transcriptionWorking = false;
   let cleanupTimer: NodeJS.Timeout | undefined;
   let mediaTimer: NodeJS.Timeout | undefined;
   let mediaTicking = false;
   let mediaTask: Promise<void> | undefined;
+  let matchmakingTimer: NodeJS.Timeout | undefined;
+  let matchmakingTask: Promise<void> | undefined;
+  let matchmakingWorking = false;
   let stopping = false;
   const completedJobs = new Set<string>();
 
@@ -166,6 +182,13 @@ export function createRuntime({
         logger.error({ error }, "debate request expiry failed");
       }
     }
+    if (matchmaking) {
+      try {
+        await matchmaking.pruneExpired();
+      } catch (error) {
+        logger.error({ error }, "matchmaking retention cleanup failed");
+      }
+    }
     if (community) {
       try {
         await community.pruneExpired();
@@ -180,6 +203,13 @@ export function createRuntime({
         logger.error({ error }, "product measurement retention cleanup failed");
       }
     }
+    if (transcription) {
+      try {
+        await transcription.pruneExpired();
+      } catch (error) {
+        logger.error({ error }, "transcript retention cleanup failed");
+      }
+    }
     completed("cleanup");
   }
 
@@ -187,6 +217,7 @@ export function createRuntime({
     async start() {
       await verifyDatabase();
       await communityStreams?.start();
+      await matchmakingStreams?.start();
 
       if (app) {
         server = await new Promise<Server>((resolve, reject) => {
@@ -220,7 +251,7 @@ export function createRuntime({
           a4Timer = setIntervalFn(() => {
             if (a4Ticking || stopping) return a4Task;
             a4Ticking = true;
-            a4Task = Promise.allSettled([a4?.tick(), coinDebates?.advance()])
+            a4Task = Promise.allSettled([a4?.tick(), coinDebates?.tick()])
               .then((results) => {
                 for (const result of results)
                   if (result.status === "rejected")
@@ -237,6 +268,24 @@ export function createRuntime({
           }, 1000);
           if (app) a4Timer.unref();
         }
+        if (transcription) {
+          transcriptionTimer = setIntervalFn(() => {
+            if (transcriptionWorking || stopping) return transcriptionTask;
+            transcriptionWorking = true;
+            transcriptionTask = transcription
+              .tick()
+              .then(() => {})
+              .catch((error) =>
+                logger.error({ error }, "transcriber dispatch failed"),
+              )
+              .finally(() => {
+                transcriptionWorking = false;
+                completed("transcriber-dispatch");
+              });
+            return transcriptionTask;
+          }, 1000);
+          if (app) transcriptionTimer.unref();
+        }
         cleanupTimer = setIntervalFn(cleanupSessions, cleanupIntervalMs);
         if (app) cleanupTimer.unref();
         if (media) {
@@ -246,6 +295,25 @@ export function createRuntime({
           }, 1000);
           if (app) mediaTimer.unref();
         }
+        if (matchmaking) {
+          // Offer deadlines are 30 seconds, so the queue is swept every second.
+          matchmakingTimer = setIntervalFn(() => {
+            if (matchmakingWorking || stopping) return matchmakingTask;
+            matchmakingWorking = true;
+            matchmakingTask = matchmaking
+              .sweep()
+              .then(() => {})
+              .catch((error) =>
+                logger.error({ error }, "matchmaking sweep failed"),
+              )
+              .finally(() => {
+                matchmakingWorking = false;
+                completed("matchmaking");
+              });
+            return matchmakingTask;
+          }, 1000);
+          if (app) matchmakingTimer.unref();
+        }
       }
       return server;
     },
@@ -254,12 +322,16 @@ export function createRuntime({
       stopping = true;
       if (a4Timer) clearIntervalFn(a4Timer);
       if (speakerTimer) clearIntervalFn(speakerTimer);
+      if (transcriptionTimer) clearIntervalFn(transcriptionTimer);
       await speakerTask;
+      await transcriptionTask;
       await a4Task;
       if (cleanupTimer) clearIntervalFn(cleanupTimer);
       if (mediaTimer) clearIntervalFn(mediaTimer);
-      await Promise.all([mediaTask, mediaOperations?.stop()]);
+      if (matchmakingTimer) clearIntervalFn(matchmakingTimer);
+      await Promise.all([mediaTask, matchmakingTask, mediaOperations?.stop()]);
       await communityStreams?.stop();
+      await matchmakingStreams?.stop();
 
       if (server) {
         const listeningServer = server;

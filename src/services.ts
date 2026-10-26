@@ -3,10 +3,17 @@ import { createA4Repository } from "./features/a4/repository.ts";
 import { createCoinDebateSandbox } from "./features/account-wallet/debate-sandbox.ts";
 import { createIdentityRepository } from "./features/identity/repository.ts";
 import { createMatchingRepository } from "./features/matching/repository.ts";
+import { createMatchmaking } from "./features/matching/matchmaking.ts";
 import { createMediaRepository } from "./features/media/repository.ts";
-import { createMediaProvider } from "./features/media/provider.ts";
+import { createMediaProvider, debateRoom } from "./features/media/provider.ts";
+import { AgentDispatchClient } from "livekit-server-sdk";
+import { createDebaterSettings } from "./features/transcription/debater-settings.ts";
+import { createTranscriberDispatcher } from "./features/transcription/dispatch.ts";
+import { createTranscriptionRepository } from "./features/transcription/repository.ts";
 import { createMediaOperations } from "./features/media/operations.ts";
 import { createMediaAccountRevocation } from "./features/media/account-revocation.ts";
+import { createDebateAutoStart } from "./features/media/auto-start.ts";
+import { createDebateStart } from "./features/media/debate-start.ts";
 import { createReplayJobs } from "./features/media/replay-jobs.ts";
 import { createCommunityRepository } from "./features/community/repository.ts";
 import { createMeasurementRepository } from "./features/measurement/repository.ts";
@@ -41,6 +48,13 @@ export function createServices({
 }: ServiceOptions) {
   const identity = createIdentityRepository(database);
   const matching = createMatchingRepository(database);
+  const matchmaking = config.matchmaking.enabled
+    ? createMatchmaking(database, {
+        liveDebateCapacity: config.matchmaking.liveDebateCapacity,
+        // With media configured, players check camera and microphone before queueing.
+        requireDeviceCheck: Boolean(config.media),
+      })
+    : undefined;
   const community = createCommunityRepository(database);
   const measurement = createMeasurementRepository(database);
   const a4 = createA4Repository(database, config.a4Mode, config.a4Funding);
@@ -59,8 +73,33 @@ export function createServices({
         replayJobs
           ? (key) => replayJobs.ready(key.split("/")[1]!, key)
           : undefined,
+        { turnMetadata: config.liveOutline.enabled },
       )
     : undefined;
+  // Decision 0012: live transcription. The settings exist whenever the live
+  // outline is enabled; dispatch also needs LiveKit (required by config).
+  const debaterSettings = config.liveOutline.enabled
+    ? createDebaterSettings(database)
+    : undefined;
+  const transcription =
+    config.liveOutline.enabled && config.media
+      ? createTranscriptionRepository(database)
+      : undefined;
+  const transcriber =
+    transcription && config.media
+      ? createTranscriberDispatcher({
+          repository: transcription,
+          client: new AgentDispatchClient(
+            config.media.livekitUrl,
+            config.media.livekitKey,
+            config.media.livekitSecret,
+            { requestTimeout: 5 },
+          ),
+          agentName: config.liveOutline.agentName,
+          roomName: debateRoom,
+          logger,
+        })
+      : undefined;
   const mediaOperations =
     media && baseMediaProvider
       ? createMediaOperations({
@@ -86,6 +125,34 @@ export function createServices({
         },
       })
     : undefined;
+  // Automatic start replaces the operator start for matchmade debates (Decision 0011).
+  const debateAutoStart =
+    matchmaking && media && mediaProvider
+      ? createDebateAutoStart({
+          database,
+          startDebate: createDebateStart({
+            media,
+            provider: mediaProvider,
+            matching,
+            // Decision 0012: automatic starts dispatch the transcriber too.
+            dispatchTranscriber: transcriber?.dispatch,
+          }),
+          logger,
+        })
+      : undefined;
+  const matchmakingJobs = matchmaking
+    ? {
+        async sweep() {
+          const results = await Promise.allSettled([
+            matchmaking.sweep(),
+            debateAutoStart?.sweep(),
+          ]);
+          const failed = results.find((result) => result.status === "rejected");
+          if (failed) throw failed.reason;
+        },
+        pruneExpired: () => matchmaking.pruneExpired(),
+      }
+    : undefined;
   const abuseStore = abuseConfig
     ? createRedisAbuseStore({
         url: abuseConfig.redisUrl,
@@ -104,12 +171,16 @@ export function createServices({
     operations: createAccountOperationRepository(database),
   };
   const coinDebates = config.coinSandboxEnabled
-    ? createCoinDebateSandbox(database, "simulation")
+    ? createCoinDebateSandbox(database, "simulation", {
+        turnWindows: config.turnWindowsEnabled,
+      })
     : undefined;
 
   return Object.freeze({
     identity,
     matching,
+    matchmaking,
+    debateAutoStart,
     community,
     measurement,
     a4,
@@ -122,11 +193,21 @@ export function createServices({
     sessions,
     accountSecurity,
     coinDebates,
+    debaterSettings,
+    transcription,
+    transcriber,
     // Everything createRuntime needs except the web-only app and community
     // streams, and the per-process background-jobs switch.
     background: {
       a4,
       coinDebates,
+      transcription:
+        transcription && transcriber
+          ? {
+              tick: () => transcriber.tick(),
+              pruneExpired: () => transcription.pruneExpired(),
+            }
+          : undefined,
       database,
       sessions,
       accountSecurityCleanup: async () => {
@@ -138,6 +219,7 @@ export function createServices({
       mediaAccountRevocation,
       identity,
       matching,
+      matchmaking: matchmakingJobs,
       community,
       measurement,
       media,

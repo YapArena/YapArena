@@ -4,13 +4,22 @@ import { setTimeout as delay } from "node:timers/promises";
 import { runExclusiveDatabaseJob } from "../../platform/database-jobs.ts";
 import type { createMediaRepository } from "./repository.ts";
 import type { createMediaProvider } from "./provider.ts";
+import type { TurnHint } from "../transcription/protocol.ts";
 
-type Desired = { revision: number; side: "A" | "B" | null };
+type Desired = {
+  revision: number;
+  side: "A" | "B" | null;
+  // Decision 0012: the durable turn, written to room metadata as a hint.
+  hint?: TurnHint;
+};
 async function desired(client: PoolClient, id: string): Promise<Desired> {
   const result = await client.query<Desired>(
     `SELECT m.revision,
     CASE WHEN m.state='running' AND d.status='live' AND d.publication_state='published'
-      AND t.publication_state='published' THEN m.active_side ELSE NULL END AS side
+      AND t.publication_state='published' THEN m.active_side ELSE NULL END AS side,
+    json_build_object('v',1,'debateStatus',d.status,'mediaState',m.state,
+      'turnNumber',m.turn_number,'activeSide',m.active_side,
+      'turnDeadlineAt',m.turn_deadline_at) AS hint
     FROM debate_media m JOIN debates d ON d.id=m.debate_id JOIN topics t ON t.id=d.topic_id
     WHERE m.debate_id=$1`,
     [id],
@@ -82,7 +91,7 @@ export function createMediaOperations<
             ) {
               const generation = item.requested;
               const current = await desired(client, id);
-              await provider.setTurn(id, current.side);
+              await provider.setTurn(id, current.side, current.hint);
               const latest = await desired(client, id);
               if (
                 latest.revision === current.revision &&
@@ -208,6 +217,7 @@ export function createMediaOperations<
                   recording.egressId,
                   result.success,
                   result.key,
+                  ("startedAt" in result && result.startedAt) || null,
                 );
             } catch {
               if (!stopping)

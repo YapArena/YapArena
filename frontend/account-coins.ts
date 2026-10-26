@@ -79,7 +79,6 @@ interface Confirmation {
   confirmPath: string;
 }
 type PendingConfirmation = { operationId: string; expiresAt: number } & (
-  | { kind: "open" }
   | { kind: "withdrawal"; requestId: string }
   | { kind: "recovery"; reportId: string; quoteId: string }
 );
@@ -114,7 +113,6 @@ function takeConfirmation(): PendingConfirmation | null {
     )
       return null;
     const base = { operationId: entry.operationId, expiresAt: entry.expiresAt };
-    if (entry.kind === "open") return { ...base, kind: "open" };
     if (entry.kind === "withdrawal" && typeof entry.requestId === "string")
       return { ...base, kind: "withdrawal", requestId: entry.requestId };
     if (
@@ -136,7 +134,6 @@ function takeConfirmation(): PendingConfirmation | null {
 function confirmBySignIn(
   confirmation: Confirmation,
   pending:
-    | { kind: "open" }
     | { kind: "withdrawal"; requestId: string }
     | { kind: "recovery"; reportId: string; quoteId: string },
 ) {
@@ -187,9 +184,8 @@ if (container) {
   root.id = "coin-sandbox";
   root.hidden = true;
   root.innerHTML = `<h3>Coin sandbox</h3><p class="form-note">Simulated funds. No cash value. These balances are separate from historical play coins and live funds.</p>
-    <p data-coin-notice role="status" aria-live="polite" aria-atomic="true"></p><div data-coin-opening hidden><p>Confirm it's you to open the financial sandbox. You'll sign in again once; withdrawals and recovery consents ask each time.</p><button type="button" class="button" data-coin-confirm-open>Confirm by signing in again</button></div><dl class="account-balances" data-coin-balances></dl>
+    <p data-coin-notice role="status" aria-live="polite" aria-atomic="true"></p><dl class="account-balances" data-coin-balances></dl>
     <button type="button" class="button-secondary" data-coin-refresh>Refresh sandbox</button>
-    <button type="button" class="button-secondary" data-coin-initialize>Enter sandbox / claim welcome grant</button>
     <button type="button" class="button-secondary" data-coin-daily>Claim daily 500 YC</button><ul class="account-list" data-coin-grants></ul>
     <details class="account-details"><summary>Simulate a purchase</summary><form class="stack-form" data-coin-funding><label>Test USDC amount<input name="amount" inputmode="decimal" value="10" required autocomplete="off"></label><p>Fixed simulation: 1 test USDC buys 100 YC. No crypto is sent and no provider conversion is performed.</p><button class="button" type="submit">Get simulated quote</button></form></details>
     <details class="account-details"><summary>Request a simulated withdrawal</summary><form class="stack-form" data-coin-withdraw><label>Total to deduct (USDC)<input name="gross" inputmode="decimal" value="5" required autocomplete="off"></label><label>External wallet destination<input name="destination" maxlength="200" required autocomplete="off" spellcheck="false"></label><p>Minimum deduction: 5 USDC. The displayed fee comes out of that amount. No daily cap. Purchased funds need no profit target; only grant profits have qualification rules.</p><p>Manual review target: two business days (Toronto weekdays, excluding Canadian federal holidays). Network confirmation time is additional. Pending funds stay reserved.</p><button class="button" type="submit">Review amount and network fee</button></form></details>
@@ -284,7 +280,7 @@ if (container) {
     }
   }
   async function load(generation = version) {
-    const summary = await api<CoinSummary>("/summary");
+    let summary = await api<CoinSummary>("/summary");
     if (generation !== version) return;
     sessionId = summary.sessionId;
     // This browser journey intentionally supports the deterministic staging rail
@@ -292,6 +288,21 @@ if (container) {
     if (!summary.simulation || summary.rail !== "simulation") {
       root.hidden = true;
       return;
+    }
+    // Decision 0013: Yap Coins are always on. The first visit claims the
+    // welcome grant itself; there is no unlock or claim step. A failed claim
+    // still shows the sandbox, and Refresh sandbox tries again.
+    let welcomeFailed = false;
+    if (!summary.initialized && !summary.financialReviewRequired) {
+      try {
+        await api("/initialize", "POST", {});
+        if (generation !== version) return;
+        summary = await api<CoinSummary>("/summary");
+      } catch {
+        welcomeFailed = true;
+      }
+      if (generation !== version) return;
+      sessionId = summary.sessionId;
     }
     root.hidden = false;
     balanceList.replaceChildren();
@@ -339,16 +350,11 @@ if (container) {
       }
       receipts.append(item);
     }
-    select<HTMLElement>("[data-coin-opening]").hidden = summary.opened;
-    select<HTMLButtonElement>("[data-coin-initialize]").hidden =
-      summary.initialized || !summary.opened;
-    // Money-moving controls appear once the sandbox is opened.
-    select<HTMLButtonElement>("[data-coin-daily]").hidden = !summary.opened;
-    for (const form of [funding, withdraw, participation])
-      form.closest("details")!.hidden = !summary.opened;
     notice.textContent = summary.financialReviewRequired
       ? "Financial activity is paused for correction review. Ordinary account access remains available."
-      : "Sandbox balances refreshed. Simulated withdrawals require manual operator review.";
+      : welcomeFailed
+        ? "Your welcome grant couldn't be added yet. Use Refresh sandbox to try again."
+        : "Sandbox balances refreshed. Simulated withdrawals require manual operator review.";
     await loadReports(generation);
   }
   async function loadReports(generation = version) {
@@ -476,16 +482,6 @@ if (container) {
       await loadRounds(g);
       if (g === version && settlementError) throw settlementError;
     });
-  select<HTMLButtonElement>("[data-coin-confirm-open]").onclick = () =>
-    void action(async (g) => {
-      const confirmation = await api<Confirmation>(
-        "/opening/operations",
-        "POST",
-        {},
-      );
-      if (g !== version) return;
-      confirmBySignIn(confirmation, { kind: "open" });
-    });
   // Finishes the action a confirmation was started for, once, when the
   // provider returns here with ?confirmed=<operation>.
   async function finishConfirmation(generation: number) {
@@ -506,13 +502,7 @@ if (container) {
       return;
     }
     const approval = { id: pending.operationId };
-    if (pending.kind === "open") {
-      await api("/opening", "POST", { approval });
-      if (generation !== version) return;
-      await load(generation);
-      notice.textContent =
-        "Sandbox opened. You can now claim grants and use simulated funds.";
-    } else if (pending.kind === "withdrawal") {
+    if (pending.kind === "withdrawal") {
       await api(`/withdrawals/${pending.requestId}`, "POST", { approval });
       if (generation !== version) return;
       await load(generation);
@@ -532,11 +522,6 @@ if (container) {
     }
     root.scrollIntoView({ block: "start" });
   }
-  select<HTMLButtonElement>("[data-coin-initialize]").onclick = () =>
-    void action(async (g) => {
-      await api("/initialize", "POST", {});
-      await load(g);
-    });
   select<HTMLButtonElement>("[data-coin-daily]").onclick = () =>
     void action(async (g) => {
       await api("/grants/daily", "POST", {});

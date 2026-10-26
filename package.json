@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Backend foundation for a live debate platform",
   "scripts": {
-    "build": "npm run typecheck && tsc --project tsconfig.json && npm run build:frontend",
+    "build": "npm run typecheck && tsc --project tsconfig.json && tsc --project tsconfig.transcriber.json && npm run build:frontend",
     "build:frontend": "node scripts/build-frontend.ts",
     "watch:frontend": "node scripts/build-frontend.ts --watch",
     "typecheck": "npm run typecheck:operations && npm run typecheck:frontend",
@@ -34,11 +34,12 @@
     "verify:media-packaging": "node scripts/verify-media-packaging.ts",
     "verify:replay-pipeline": "npm run build && node scripts/verify-replay-pipeline.ts",
     "report:playback": "node scripts/report-playback.js",
-    "typecheck:operations": "tsc --project tsconfig.json --emitDeclarationOnly && tsc --project tsconfig.database-tools.json && tsc --project tsconfig.browser-automation.json && tsc --project tsconfig.community-tools.json && tsc --project tsconfig.replay-tools.json && tsc --project tsconfig.edge.json",
+    "typecheck:operations": "tsc --project tsconfig.json --emitDeclarationOnly && tsc --project tsconfig.database-tools.json && tsc --project tsconfig.browser-automation.json && tsc --project tsconfig.community-tools.json && tsc --project tsconfig.replay-tools.json && tsc --project tsconfig.edge.json && tsc --project tsconfig.transcriber.json --noEmit",
     "verify:community-native-setup": "npm run build && LC_ALL=C LANG=C COMMUNITY_POSTGRES_MODE=host node scripts/verify-community-local.ts --setup-only",
     "verify:auth-redis": "node scripts/verify-auth-redis.ts",
     "verify:email-auth-browser": "node scripts/verify-email-auth-browser.ts",
-    "reset:test-accounts": "node scripts/reset-test-accounts.ts"
+    "reset:test-accounts": "node scripts/reset-test-accounts.ts",
+    "start:transcriber": "node dist-transcriber/features/transcription/agent/main.js start"
   },
   "keywords": [],
   "author": "",
@@ -49,7 +50,8 @@
     "node": ">=24 <25"
   },
   "allowScripts": {
-    "esbuild@0.28.2": true
+    "esbuild@0.28.2": true,
+    "@livekit/local-inference@0.2.7": false
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1142.0",
@@ -73,6 +75,9 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@livekit/agents": "1.9.3",
+    "@livekit/agents-plugin-elevenlabs": "1.9.3",
+    "@livekit/rtc-node": "1.1.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/node": "^24.19.0",
@@ -88,7 +93,8 @@
     "prettier": "^3.9.6",
     "supertest": "^7.2.2",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.70.1"
+    "typescript-eslint": "^8.70.1",
+    "zod": "4.6.7"
   },
   "overrides": {
     "ws": "8.22.0",

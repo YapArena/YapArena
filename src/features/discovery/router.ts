@@ -92,28 +92,34 @@ export function createDiscoveryRouter({
   publicBots,
   applicationOrigin,
   emailFirst = false,
+  matchmakingEnabled = false,
+  liveOutlineEnabled = false,
 }: {
   discovery: Repository;
   a4Enabled?: boolean;
   mediaEnabled?: boolean;
+  // Decision 0012: debate pages carry captions and the AI outline.
+  liveOutlineEnabled?: boolean;
   homepageReferenceEnabled?: boolean;
   publicBots?: ReturnType<typeof createPublicBotRepository>;
   applicationOrigin: string;
   emailFirst?: boolean;
+  // Live topic queue (Decision 0011): pages load the queue module and show its controls.
+  matchmakingEnabled?: boolean;
 }) {
   const router = Router();
   const origin = applicationOrigin.replace(/\/$/, "");
   function html(response: Response, body: string, status = 200) {
+    const page = emailFirst
+      ? body.replace('<html lang="en">', '<html lang="en" data-email-first>')
+      : body;
     return response
       .status(status)
       .type("html")
       .send(
-        emailFirst
-          ? body.replace(
-              '<html lang="en">',
-              '<html lang="en" data-email-first>',
-            )
-          : body,
+        matchmakingEnabled
+          ? page.replace('<html lang="en"', '<html lang="en" data-matchmaking')
+          : page,
       );
   }
 
@@ -246,7 +252,7 @@ export function createDiscoveryRouter({
     html(response, renderCoins(origin)),
   );
   router.get("/match", (_request, response) =>
-    html(response, renderMatchmaking(origin)),
+    html(response, renderMatchmaking(origin, matchmakingEnabled)),
   );
   router.get("/debates", async (request, response) => {
     const parameters = listParameters(request, response);
@@ -285,7 +291,10 @@ export function createDiscoveryRouter({
       limit: parameters.limit,
       offset: parameters.offset,
     });
-    return html(response, renderTopic(origin, topic, debates));
+    return html(
+      response,
+      renderTopic(origin, topic, debates, matchmakingEnabled),
+    );
   });
   router.get("/debates/:slug", async (request, response) => {
     const key = slug(request.params.slug);
@@ -298,6 +307,8 @@ export function createDiscoveryRouter({
             debate,
             a4Enabled,
             publicBots ? await publicBots.debate(debate.id) : undefined,
+            matchmakingEnabled,
+            liveOutlineEnabled,
           ),
         )
       : html(response, renderNotFound(origin), 404);
@@ -319,7 +330,7 @@ export function createDiscoveryRouter({
     html(response, renderAbout(origin)),
   );
   router.get("/account", (_request, response) =>
-    html(response, renderAccount(origin)),
+    html(response, renderAccount(origin, liveOutlineEnabled)),
   );
   return router;
 }

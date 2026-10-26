@@ -55,10 +55,6 @@ export interface SandboxConfiguration {
   // Server configuration, never a browser-chosen fee. Deducted FROM gross.
   withdrawalFee?: string;
 }
-// The terms a sandbox-opening confirmation is bound to.
-export function sandboxOpeningTerms(userId: string) {
-  return { account: userId, action: "open coin sandbox" };
-}
 export type PreparedCoinApproval = Awaited<
   ReturnType<ReturnType<typeof createAccountOperationRepository>["prepare"]>
 >;
@@ -183,17 +179,38 @@ export async function assertSandboxRail(client: PoolClient, rail: SandboxRail) {
   if (row?.rail !== rail)
     error("sandbox rail does not match this isolated database", 503);
 }
-// Decision 0009, point 8: the account confirmed opening the financial
-// sandbox with a fresh sign-in (founder, 2026-10-23). Every point that once
-// required a standing "strong method" requires this record.
+// Decision 0013 (amends Decision 0009, point 8, for opening only): Yap Coins
+// are always on. Callers act for the signed-in account itself, so its first
+// own sandbox request records an automatic opening instead of asking for a
+// fresh sign-in. Withdrawals and recovery consents still confirm each request.
 export async function assertSandboxOpened(client: PoolClient, userId: string) {
+  await client.query(
+    "INSERT INTO coin_sandbox_openings(user_id) VALUES($1) ON CONFLICT(user_id) DO NOTHING",
+    [userId],
+  );
+}
+// Owner authority never opens a sandbox on an account's behalf: it requires
+// the opening that the account's own first request recorded.
+export async function requireSandboxOpening(
+  client: PoolClient,
+  userId: string,
+) {
   const opened = (
     await client.query("SELECT 1 FROM coin_sandbox_openings WHERE user_id=$1", [
       userId,
     ])
   ).rowCount;
-  if (!opened)
-    error("confirm by signing in again to open the financial sandbox", 403);
+  if (!opened) error("this account has not used its coin sandbox", 403);
+}
+// The one place that answers "may a testnet deposit follow an automatic
+// opening (operation_id NULL)?" Yes: the founder accepted it on 2026-10-26
+// (Decision 0013). Reversing that means requiring operation_id IS NOT NULL
+// here and a one-time confirmed opening before a first testnet deposit.
+async function requireTestnetFundingOpening(
+  client: PoolClient,
+  userId: string,
+) {
+  await requireSandboxOpening(client, userId);
 }
 export async function assertSandboxFinancialOpen(
   client: PoolClient,
@@ -218,7 +235,7 @@ export async function assertSandboxNewPayoutAuthorization(
 ) {
   if (!(await lockAccount(client, userId)))
     error("account unavailable for new payout authorization", 403);
-  await assertSandboxOpened(client, userId);
+  await requireSandboxOpening(client, userId);
   await assertSandboxFinancialOpen(client, userId);
 }
 export async function lockSandboxBook(
@@ -912,6 +929,9 @@ export function createCoinSandboxRepository(
               reserved: amount("USDC", "reserved"),
               pending: amount("USDC", "pending"),
               promotionalPrincipal: amount("YC_PROMO", "promotional"),
+              // Grant principal held by open stakes, so the header can show
+              // every reserved Yap Coin, not only reserved cash.
+              promotionalReserved: amount("YC_PROMO", "reserved"),
             },
             opened: Boolean(
               (
@@ -935,32 +955,9 @@ export function createCoinSandboxRepository(
         false,
       );
     },
-    // Records the confirmed opening; the confirmation is consumed with it.
-    async open(
-      context: SandboxContext,
-      input: { operationId: string; approval: PreparedCoinApproval },
-    ) {
-      input.approval.assertContext(context.userId, context.sessionTokenHash);
-      if (
-        input.approval.purpose !== "sandbox.open" ||
-        input.approval.termsDigest !==
-          accountOperationTermsDigest(sandboxOpeningTerms(context.userId))
-      )
-        error("confirmation does not open this sandbox", 403);
-      return tx(
-        context,
-        (client) =>
-          input.approval.consume(client, async () => {
-            await client.query(
-              `INSERT INTO coin_sandbox_openings(user_id,operation_id) VALUES($1,$2)
-               ON CONFLICT(user_id) DO NOTHING`,
-              [context.userId, input.operationId],
-            );
-            return { opened: true };
-          }),
-        false,
-      );
-    },
+    // Decision 0013: the account's first request opens its sandbox (through
+    // the strong transaction) and claims the welcome grant exactly once.
+    // Browsers call this as soon as a summary reports no welcome grant.
     initialize(context: SandboxContext) {
       return tx(context, (client) => claim(client, context, "welcome"));
     },
@@ -1097,7 +1094,7 @@ export function createCoinSandboxRepository(
       if (config.rail !== "simulation")
         error("simulated funding requires an isolated simulation ledger", 403);
       return ownerTx(database, config.rail, input.userId, async (client) => {
-        await assertSandboxOpened(client, input.userId);
+        await requireSandboxOpening(client, input.userId);
         await assertSandboxFinancialOpen(client, input.userId);
         const request = await requestForUpdate(
           client,
@@ -1130,7 +1127,7 @@ export function createCoinSandboxRepository(
       if (config.rail !== "base-sepolia")
         error("testnet funding cannot enter a simulation ledger", 403);
       return ownerTx(database, config.rail, input.userId, async (client) => {
-        await assertSandboxOpened(client, input.userId);
+        await requireTestnetFundingOpening(client, input.userId);
         await assertSandboxFinancialOpen(client, input.userId);
         const request = await requestForUpdate(
           client,

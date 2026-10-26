@@ -148,6 +148,37 @@ function parseMedia(environment: NodeJS.ProcessEnv, nodeEnvironment: string) {
   });
 }
 
+// Decision 0012: live transcription, captions and the AI outline. The
+// transcriber agent runs on LiveKit Cloud, so the server needs media
+// configured, and the agent authenticates to ingest with its own secret.
+function parseLiveOutline(environment: NodeJS.ProcessEnv, media: boolean) {
+  const enabled = environment.LIVE_OUTLINE_ENABLED ?? "false";
+  if (!["true", "false"].includes(enabled))
+    throw new Error("LIVE_OUTLINE_ENABLED must be true or false");
+  const agentName =
+    environment.TRANSCRIBER_AGENT_NAME ?? "yaparena-transcriber";
+  if (!/^[a-z0-9][a-z0-9-]{0,62}$/.test(agentName))
+    throw new Error(
+      "TRANSCRIBER_AGENT_NAME must be lowercase letters, digits and dashes",
+    );
+  const ingestSecret = environment.TRANSCRIPTION_INGEST_SECRET;
+  if (enabled === "true") {
+    if (!media)
+      throw new Error(
+        "LIVE_OUTLINE_ENABLED requires LiveKit media configuration",
+      );
+    if (!ingestSecret || Buffer.byteLength(ingestSecret) < 32)
+      throw new Error(
+        "LIVE_OUTLINE_ENABLED requires TRANSCRIPTION_INGEST_SECRET of at least 32 bytes",
+      );
+  }
+  return Object.freeze({
+    enabled: enabled === "true",
+    agentName,
+    ingestSecret: enabled === "true" ? ingestSecret! : undefined,
+  });
+}
+
 export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
   const nodeEnvironment = environment.NODE_ENV ?? "development";
   const homepageReference = environment.HOMEPAGE_REFERENCE_ENABLED ?? "false";
@@ -162,6 +193,12 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     throw new Error(
       "COIN_SANDBOX_WEBHOOK_SECRET requires enabled simulation and a secret of at least 32 bytes",
     );
+  // Decision 0012: one Yap Coins trading window per live speaking turn.
+  const turnWindows = environment.TURN_WINDOWS_ENABLED ?? "false";
+  if (!["true", "false"].includes(turnWindows))
+    throw new Error("TURN_WINDOWS_ENABLED must be true or false");
+  if (turnWindows === "true" && coinSandbox !== "true")
+    throw new Error("TURN_WINDOWS_ENABLED requires COIN_SANDBOX_ENABLED");
   if (!["true", "false"].includes(homepageReference))
     throw new Error("HOMEPAGE_REFERENCE_ENABLED must be true or false");
   if (homepageReference === "true" && nodeEnvironment === "production")
@@ -265,6 +302,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     }),
   });
   const backgroundJobs = environment.RUN_BACKGROUND_JOBS ?? "true";
+  const liveOutline = parseLiveOutline(environment, Boolean(media));
   const streamEnabled = environment.COMMUNITY_STREAM_ENABLED ?? "false";
   if (!["true", "false"].includes(streamEnabled))
     throw new Error("COMMUNITY_STREAM_ENABLED must be true or false");
@@ -286,6 +324,18 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     bufferBytes: 65536,
   });
 
+  const matchmakingEnabled = environment.MATCHMAKING_ENABLED ?? "false";
+  if (!["true", "false"].includes(matchmakingEnabled))
+    throw new Error("MATCHMAKING_ENABLED must be true or false");
+  const matchmaking = Object.freeze({
+    enabled: matchmakingEnabled === "true",
+    liveDebateCapacity: parseInteger(
+      environment.LIVE_DEBATE_CAPACITY ?? "2",
+      "LIVE_DEBATE_CAPACITY",
+      { minimum: 1, maximum: 1000 },
+    ),
+  });
+
   if (!environments.has(nodeEnvironment)) {
     throw new Error("NODE_ENV must be development, test, or production");
   }
@@ -303,6 +353,10 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
   if (communityStream.enabled && new URL(databaseUrl).port === "6543")
     throw new Error(
       "community LISTEN requires a direct or session-pooler connection",
+    );
+  if (matchmaking.enabled && new URL(databaseUrl).port === "6543")
+    throw new Error(
+      "live queue LISTEN requires a direct or session-pooler connection",
     );
   if (
     environment.DATABASE_MIGRATION_URL ||
@@ -340,6 +394,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     environment: nodeEnvironment,
     homepageReferenceEnabled: homepageReference === "true",
     coinSandboxEnabled: coinSandbox === "true",
+    turnWindowsEnabled: turnWindows === "true",
     coinSandboxWebhookSecret,
     host,
     port,
@@ -357,6 +412,8 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     replayPackaging,
     backgroundJobs: backgroundJobs === "true",
     communityStream,
+    matchmaking,
+    liveOutline,
     a4Funding,
     a4Mode: a4Mode as "disabled" | "yap-coins" | "bots",
   });

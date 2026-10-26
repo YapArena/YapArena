@@ -69,8 +69,9 @@ describe(
     after(async () => {
       await Promise.all([owner?.end(), a?.end(), b?.end()]);
     });
-    // An Auth0 account that opened the sandbox; its subject confirms operations.
-    async function actor() {
+    // An Auth0 account whose subject confirms operations. Unless told
+    // otherwise it already has the automatic opening (Decision 0013).
+    async function actor({ opened = true } = {}) {
       const user = (
           await owner.query(
             "INSERT INTO users DEFAULT VALUES RETURNING id,auth_generation",
@@ -84,7 +85,7 @@ describe(
           { authGeneration: user.auth_generation },
         );
       const subject = await attachSubject(owner, user.id);
-      await openSandbox(owner, user.id);
+      if (opened) await openSandbox(owner, user.id);
       return {
         userId: user.id,
         sessionTokenHash: token.tokenHash,
@@ -439,7 +440,9 @@ describe(
       );
     });
     it("consumes exact retained authorization for consent once, without charging, recovery execution or owner-note disclosure", async () => {
-      const context = await actor(),
+      // Opened automatically by its first request (the funding below); the
+      // recovery consent still needs a fresh sign-in (Decision 0013).
+      const context = await actor({ opened: false }),
         stranger = await actor(),
         funding = await fund(context),
         r = await report(context, funding.id),

@@ -148,6 +148,70 @@ with **Object Read & Write** access to `MEDIA_S3_BUCKET`. Confirm the S3 endpoin
 same Cloudflare account. Replace both Render secrets together and redeploy before starting a new
 trial. [Cloudflare identifies 401 as missing or invalid credentials](https://developers.cloudflare.com/r2/api/error-codes/).
 
+## Enable turn trading windows
+
+[Decision 0012](decisions/0012-live-argument-outline.md) makes each live speaking turn one Yap Coins
+trading window. Apply its migrations as the owner first, then deploy. Turn windows stay off until
+`TURN_WINDOWS_ENABLED=true` is set on **both** web and the jobs worker (it requires
+`COIN_SANDBOX_ENABLED=true`). Automatic voiding of a cancelled or under-review debate's open rounds,
+five-day reveal and the refusal of debaters' own positions apply whenever the coin sandbox is
+enabled. To check, start a debate with two test speakers and read
+`GET /api/public/debates/<id>/windows`: a window with `turnNumber` 1 should appear within about a
+second, cut off at the turn deadline, and a new one at each turn change. A user-created debate's
+windows show `revealMode` `five_day`: they stay open but locked after their cutoff and settle 120
+hours after the debate ends.
+
+| Variable               | Default | Purpose                                                    |
+| ---------------------- | ------- | ---------------------------------------------------------- |
+| `TURN_WINDOWS_ENABLED` | `false` | One Yap Coins trading window per live turn; web and worker |
+
+## Enable live transcription and captions
+
+[Decision 0012](decisions/0012-live-argument-outline.md) adds a LiveKit Cloud transcriber agent.
+It needs live video configured first, and the owner must apply the transcription migration
+before deploying. Its secrets live in LiveKit Cloud and Render; never in the repository.
+
+1. Generate a random ingest secret of at least 32 bytes (for example `openssl rand -hex 32`) and
+   keep it in the password manager.
+2. Stage the agent's build context outside the repository and create the agent once, in the
+   region nearest the LiveKit project (the region cannot change later):
+
+   ```sh
+   node scripts/stage-transcriber.ts ../yaparena-transcriber-deploy
+   cd ../yaparena-transcriber-deploy
+   lk agent create --region eu-central .
+   ```
+
+   `lk agent create` writes `livekit.toml` there; restaging keeps it. Later releases run
+   `node scripts/stage-transcriber.ts ../yaparena-transcriber-deploy` and then
+   `lk agent deploy ../yaparena-transcriber-deploy`.
+
+3. Set the agent's secrets with `lk agent update-secrets` (each update restarts it). LiveKit injects
+   `LIVEKIT_URL`, `LIVEKIT_API_KEY` and `LIVEKIT_API_SECRET`; do not set them.
+
+   | Agent secret                    | Value                                                          |
+   | ------------------------------- | -------------------------------------------------------------- |
+   | `YAPARENA_INGEST_URL`           | The staging HTTPS origin, for example `https://<staging-host>` |
+   | `TRANSCRIPTION_INGEST_SECRET`   | The secret from step 1                                         |
+   | `TRANSCRIPTION_PROVIDER`        | `deepgram` (LiveKit Inference) or `elevenlabs`                 |
+   | `TRANSCRIPTION_SHADOW_PROVIDER` | Optional, the other provider, for the comparison trial         |
+   | `ELEVEN_API_KEY`                | Only when either provider is `elevenlabs`                      |
+   | `TRANSCRIBER_AGENT_NAME`        | Optional; defaults to `yaparena-transcriber`                   |
+   | `CAPTION_UPDATES_PER_SECOND`    | Optional; interim captions per second, 1–10, default 4         |
+
+4. On **both** web and the jobs worker, set `LIVE_OUTLINE_ENABLED=true`, the same
+   `TRANSCRIPTION_INGEST_SECRET`, and `TRANSCRIBER_AGENT_NAME` if you changed it. Deploy.
+5. Check with two test debaters who chose a language and agreed on their account's Profile tab. When
+   the debate becomes ready, the agent joins within about a second (`lk agent logs`:
+   `transcriber joined`). Captions appear under the video, and
+   `SELECT count(*) FROM yaparena.transcript_segments WHERE debate_id=...` grows during each turn.
+   The agent leaves when the debate ends.
+
+Never run the agent locally with `start` against the staging project and the production agent name:
+it would compete for real debates. Use `lk agent dev` or a different `TRANSCRIBER_AGENT_NAME`.
+Capacity per LiveKit plan is in the decision record; keep matchmaking's `LIVE_DEBATE_CAPACITY`
+within it.
+
 ## Move background jobs to the worker
 
 While `RUN_BACKGROUND_JOBS` is true (the default), the web process runs the one-second A4/coin
@@ -166,7 +230,7 @@ URL, and deploys the release SHA to it after web. Its `deploy` mode accepts
 1. Create the worker from the `yaparena-staging-jobs` Blueprint entry (Starter or larger) and deploy
    the same reviewed commit as web, after its migrations. Give it the runtime `DATABASE_URL` and DB
    TLS settings used by web, never an owner/migration URL, plus web's `A4_MODE`/`A4_*`,
-   `COIN_SANDBOX_ENABLED` and all `LIVEKIT_*`/`MEDIA_*` media and replay variables. Never give it
+   `COIN_SANDBOX_ENABLED`, `TURN_WINDOWS_ENABLED`, `LIVE_OUTLINE_ENABLED`, `TRANSCRIPTION_INGEST_SECRET` and all `LIVEKIT_*`/`MEDIA_*` media and replay variables. Never give it
    `AUTH0_*`: Auth0 settings belong to web only, and the worker reads no `REDIS_*`. Keep
    `LOG_LEVEL` at `info` or more verbose, and keep web's `RUN_BACKGROUND_JOBS=true` until step 3.
    A new environment created from `render.yaml` starts web with `false`: set it to `true` first,

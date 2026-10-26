@@ -21,6 +21,7 @@ import { createRuntime } from "./platform/runtime.ts";
 import { createMetrics } from "./platform/metrics.ts";
 import { createCommunityStreams } from "./features/community/streams.ts";
 import { createServices } from "./services.ts";
+import { createMatchmakingStreams } from "./features/matching/matchmaking-streams.ts";
 
 // Builds the web service. dist/server.js runs it for every deployment; the
 // local test identity entry under scripts/ wraps the same application.
@@ -68,6 +69,8 @@ export function createWebServer(
   const {
     identity,
     matching,
+    matchmaking,
+    debateAutoStart,
     community,
     measurement,
     a4,
@@ -80,7 +83,18 @@ export function createWebServer(
     sessions,
     accountSecurity,
     coinDebates,
+    debaterSettings,
+    transcription,
+    transcriber,
   } = services;
+  // Web only: the jobs worker serves no streams.
+  const matchmakingStreams = matchmaking
+    ? createMatchmakingStreams({
+        databaseUrl: config.databaseUrl,
+        matchmaking,
+        logger,
+      })
+    : undefined;
   const sharedLimits = abuseConfig && abuseStore;
   const app = createApp({
     coinWebhook: config.coinSandboxWebhookSecret
@@ -100,6 +114,13 @@ export function createWebServer(
           reports: createSandboxErrorReports(database, "simulation"),
         }
       : undefined,
+    turnWindows: config.turnWindowsEnabled ? coinDebates : undefined,
+    debaterSettings,
+    transcriptionIngest:
+      transcription && config.liveOutline.ingestSecret
+        ? { repository: transcription, secret: config.liveOutline.ingestSecret }
+        : undefined,
+    dispatchTranscriber: transcriber?.dispatch,
     messages: createMessageRepository(database),
     database,
     a4,
@@ -107,6 +128,9 @@ export function createWebServer(
     discovery: createDiscoveryRepository(database),
     identity,
     matching,
+    matchmaking,
+    matchmakingStreams,
+    debateAutoStart,
     media,
     mediaProvider,
     mediaAccountRevocation,
@@ -177,6 +201,7 @@ export function createWebServer(
     ...services.background,
     app: wrap ? wrap(app, { ...services, config }) : app,
     communityStreams,
+    matchmakingStreams,
     backgroundJobs: config.backgroundJobs,
   });
 
