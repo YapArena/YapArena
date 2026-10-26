@@ -46,6 +46,7 @@ export default [
       "node_modules/",
       "coverage/",
       "dist/",
+      "dist-transcriber/",
       "public/**/*.js",
       ".env.*/**",
     ],

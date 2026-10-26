@@ -80,6 +80,9 @@ export function createWebServer(
     sessions,
     accountSecurity,
     coinDebates,
+    debaterSettings,
+    transcription,
+    transcriber,
   } = services;
   const sharedLimits = abuseConfig && abuseStore;
   const app = createApp({
@@ -101,6 +104,12 @@ export function createWebServer(
         }
       : undefined,
     turnWindows: config.turnWindowsEnabled ? coinDebates : undefined,
+    debaterSettings,
+    transcriptionIngest:
+      transcription && config.liveOutline.ingestSecret
+        ? { repository: transcription, secret: config.liveOutline.ingestSecret }
+        : undefined,
+    dispatchTranscriber: transcriber?.dispatch,
     messages: createMessageRepository(database),
     database,
     a4,

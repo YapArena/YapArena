@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist-transcriber",
+    "declaration": false
+  },
+  "include": ["src/features/transcription/agent/**/*.ts"],
+  "exclude": []
+}

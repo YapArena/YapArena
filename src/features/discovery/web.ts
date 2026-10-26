@@ -188,12 +188,13 @@ export function renderDebate(
   debate: PublicDebate,
   a4Enabled = false,
   activity?: PublicBotActivity | null,
+  liveOutline = false,
 ) {
   return layout(
     debate.proposition,
     `Watch and participate in the debate: ${debate.proposition}`,
     `${origin}/debates/${path(debate.slug)}`,
-    renderDebateWorkspace(debate, a4Enabled, asset, activity),
+    renderDebateWorkspace(debate, a4Enabled, asset, activity, liveOutline),
     "",
     "arena-page",
   );
@@ -223,12 +224,12 @@ export function renderAbout(origin: string) {
   );
 }
 
-export function renderAccount(origin: string) {
+export function renderAccount(origin: string, liveOutline = false) {
   return layout(
     "Account",
     "Your profile, security and Yap Coins.",
     `${origin}/account`,
-    accountMarkup(asset),
+    accountMarkup(asset, liveOutline),
     "",
     "account-page",
     true,

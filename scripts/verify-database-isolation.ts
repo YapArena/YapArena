@@ -113,6 +113,11 @@ const applicationTables = [
   ...a4Tables,
   ...publicBotTables,
   "a4_play_closing_balances",
+  // Decision 0012: live transcription.
+  "debater_settings",
+  "transcription_dispatches",
+  "transcription_updates",
+  "transcript_segments",
 ];
 const container = `yaparena-isolation-${randomUUID().slice(0, 8)}`;
 const evidenceDirectory = `/tmp/${container}-evidence`;

@@ -4,6 +4,7 @@ node_modules/
 !.env.example
 coverage/
 dist/
+dist-transcriber/
 public/**/*.js
 .DS_Store
 npm-debug.log*
