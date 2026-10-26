@@ -38,7 +38,10 @@ it("uses its IPv6 fixture when a different IPv4 service occupies the same port",
     }),
     { port: other.address().port, host: "::1", ipv6Only: true },
   );
-  assert.equal((await supertest(owned).get("/")).status, 401);
+  // Supertest 7.3 connects to the listener's own address, so plain supertest now
+  // reaches the IPv6 fixture too (403 without the cookie). Earlier versions reached
+  // the IPv4 service (401), which is why the adapter remains.
+  assert.equal((await supertest(owned).get("/")).status, 403);
   const response = await request(owned)
     .get("/")
     .set("Cookie", "session=synthetic");
