@@ -4,16 +4,6 @@ export {};
 /* global document, window */
 const arena = document.querySelector<HTMLElement>("[data-arena]")!;
 if (arena) {
-  const graphMain = arena.querySelector("[data-arena-graph-main]");
-  if (graphMain && window.ResizeObserver) {
-    new window.ResizeObserver(() => {
-      const height = Math.ceil(
-        graphMain.getBoundingClientRect().bottom -
-          graphMain.parentElement!.getBoundingClientRect().top,
-      );
-      arena.style.setProperty("--arena-graph-height", `${height}px`);
-    }).observe(graphMain);
-  }
   const surface = arena.querySelector<HTMLElement>("[data-arena-video]")!;
   const expand = arena.querySelector<HTMLButtonElement>("[data-video-expand]")!;
   let previousFocus: HTMLElement | null | undefined;

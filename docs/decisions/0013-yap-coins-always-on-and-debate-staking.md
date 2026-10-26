@@ -31,21 +31,32 @@ follow an automatic opening.
 Migration `1792972953000_allow-automatic-sandbox-openings` makes `operation_id` nullable. It only
 expands the schema: the previous release keeps working, and it reads automatic openings as open.
 
-## Staking on debates (approved design, not yet built)
+## Staking on debates
 
-Founder answers and snapshot approval, 2026-10-25. The panel is built after the turn-aligned
-trading windows of Decision 0012 merge. A stake is an A4 endorsement in one turn's 60-second
-window; there is no winner (F09).
+Founder answers and snapshot approval, 2026-10-25; sides correction and staging, 2026-10-26.
+Built on the turn windows and round rules of Decision 0012 (pull requests 1, 1b and 1c). A stake
+is an A4 endorsement in one turn's 60-second window; there is no winner (F09).
 
-- Layout: chat on the left, a large video in the centre, the betting panel on the right. The
-  debate question appears in the video's top-left corner and "Live · N watching" in its top-right
-  corner while the pointer is over the video.
-- The panel asks "Do you agree?" with a green Yes and a red No button, each with a text label and
-  icon. The word "bet" is not used.
-- A "read of the room" slider ("What share will say yes this turn?") sets the A4 limit; a plain
-  maximum price is under Advanced.
-- One confirm button names the exact terms. A review pop-up is optional, remembered per device.
-- Five-day reveal stays for user-created debates (F11). Replay viewers join only the window of the
-  turn that's playing. There is no staking before a scheduled debate starts. Results notices are
-  in-app only.
-- The YAP human-run and refill controls leave the debate page; Bots mode moves behind a link.
+- Layout: chat on the left, a large video in the centre, the betting panel at the top of the
+  right column. The debate question appears in the video's top-left corner and "Live · N
+  watching" in its top-right corner while the pointer is over the video.
+- The panel asks "Do you agree?" about the debate's proposition, with a green Yes and a red No
+  button, each with a text label and icon. The word "bet" is not used.
+- Yes and No belong only to the question. A turn names its speaker by display name and topic side
+  label ("Turn 3 · Maya speaking (People first)"); side A is not the yes side, and no speaker is
+  coloured by answer.
+- A "read of the room" slider ("What share will say yes this turn?") sets the A4 limit: the yes
+  ceiling is the read, the no ceiling is 100 minus it. A plain maximum price is under "Set a
+  maximum price instead".
+- One confirm button names the exact terms. A review pop-up is optional, remembered per device. A
+  one-time explanation shows the first time the ticket opens on a device.
+- A window that closes before the viewer confirms reserves nothing; the ticket keeps its values
+  and offers the next turn.
+- Five-day reveal stays for user-created debates (F11): live viewers see their receipt and the
+  participant count (F12), never side totals, until the 120-hour close. Debaters can't take a
+  position in their own debate (F14). Replay viewers join only the window of the turn that's
+  playing, sent with its recording position (F10). There is no staking before a scheduled debate
+  starts. Results notices are in-app only.
+- Staged (founder, 2026-10-26): the YAP human-run and refill controls are removed now, and the
+  Bots sandbox moves behind a "Bots sandbox" tab next to Info. A later pull request moves Bots mode
+  to `/coins` entirely and rewrites its browser checks.

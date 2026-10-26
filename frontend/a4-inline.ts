@@ -137,7 +137,7 @@ if (root) {
     ui("volume").textContent = "— Yap Coins";
     ui("participants").textContent = "Finalized commitments";
     ui("available").textContent = "Your balance —";
-    ui("trade-title").textContent = "Participate in a round";
+    ui("trade-title").textContent = "Bots sandbox";
     ui("round-label").textContent = "Round history";
     ui("round-state").textContent = "waiting";
     ui("countdown").dataset.opens = "";
@@ -296,8 +296,8 @@ if (root) {
       active?.state === "open" ? "open" : (active?.state ?? "waiting");
     ui("round-state").classList.toggle("is-open", active?.state === "open");
     ui("trade-title").textContent = active
-      ? `Participate in Round ${number}`
-      : "Participate in a round";
+      ? `Bots sandbox · Round ${number}`
+      : "Bots sandbox";
     ui("countdown").dataset.closes = active?.closesAt ?? "";
     ui("countdown").dataset.opens = active?.opensAt ?? "";
     ui("countdown").dataset.state = active?.state ?? "";
@@ -463,7 +463,9 @@ if (root) {
     );
     if (usingShared) renderShared();
   }
-  async function create(mode: "human" | "mixed") {
+  // Founder (2026-10-26, Decision 0013): YAP human rounds and the daily play
+  // refill are retired here; only the labeled Bots sandbox stays on the page.
+  async function create(mode: "mixed") {
     const result = await api<{ id: string }>("a4/runs", {
       debateId: root.dataset.a4Inline,
       mode,
@@ -478,7 +480,6 @@ if (root) {
     await list(result.id);
     await refresh();
   }
-  el("human").addEventListener("click", () => act(() => create("human")));
   el("bots").addEventListener("click", () => act(() => create("mixed")));
   el("publish").addEventListener("change", () =>
     act(async () => {
@@ -494,12 +495,6 @@ if (root) {
           el("publish").checked = !el("publish").checked;
         throw error;
       }
-    }),
-  );
-  el("refill").addEventListener("click", () =>
-    act(async () => {
-      await api("a4/refill", run ? { runId: run.id } : {});
-      await refresh();
     }),
   );
   el("refresh").addEventListener("click", () =>

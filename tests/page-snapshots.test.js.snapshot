@@ -364,15 +364,122 @@ exports[`renders a debate 1`] = `
 <div data-arena-history>No settled commitments in this run yet.</div>
 </div>
 <p>Successful commitments are binding. Unused reservations are released automatically.</p>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+<div class="stake-turn" data-stake-turn hidden>
+<div class="stake-turn-top">
+<strong data-stake-turn-title>
+</strong>
+<span data-stake-clock>
+</span>
+</div>
+<div class="stake-progress" data-stake-progress role="progressbar" aria-label="Time left to answer this turn" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+<span>
+</span>
+</div>
+<p class="stake-meta" data-stake-meta>
+</p>
+</div>
+<p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
+<h2 class="stake-question" id="stake-question">Do you agree?</h2>
+<p class="stake-proposition">“Should we debate this?”</p>
+<div class="stake-sides" role="group" aria-label="Your answer">
+<button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>
+<span aria-hidden="true">✓</span> Yes</button>
+<button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
+<span aria-hidden="true">✕</span> No</button>
+</div>
+<form class="stake-ticket" data-stake-ticket hidden>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-read-out>50%</output>
+</span>
+</label>
+<p class="stake-ceiling" data-stake-ceiling>
+</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+</label>
+</details>
+<dl class="stake-terms">
+<div>
+<dt>Reserved now</dt>
+<dd data-stake-term="reserved">
+</dd>
+</div>
+<div>
+<dt>Most you can lose</dt>
+<dd data-stake-term="lose">
+</dd>
+</div>
+<div>
+<dt>You get back</dt>
+<dd data-stake-term="back">
+</dd>
+</div>
+<div>
+<dt>Fee</dt>
+<dd>None</dd>
+</div>
+<div>
+<dt>Results</dt>
+<dd data-stake-term="results">
+</dd>
+</div>
+</dl>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
+<p class="stake-error" data-stake-error role="alert">
+</p>
+<button type="submit" class="stake-confirm" data-stake-confirm>
+</button>
+<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+</form>
+<div class="stake-receipt" data-stake-receipt hidden>
+</div>
+<p class="stake-balance" data-stake-balance>
+</p>
+<p class="stake-signin" data-stake-signin hidden>
+<a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
+</p>
+<details class="stake-positions" data-stake-positions-wrap hidden>
+<summary>Your positions <span data-stake-positions-count>
+</span>
+</summary>
+<ul data-stake-positions>
+</ul>
+</details>
+<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
+<h2 id="stake-review-title">Review your position</h2>
+<dl class="stake-terms" data-stake-review-terms>
+</dl>
+<p>Final once placed. You can't edit or cancel it.</p>
+<div class="stake-review-actions">
+<button type="button" class="button" data-stake-review-place>Place it</button>
+<button type="button" data-stake-review-back>Back</button>
+</div>
+</dialog>
+</section>\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
 <div class="arena-tabbar" role="tablist" aria-label="Participation and debate details">
-<button type="button" id="arena-rounds-tab" role="tab" aria-selected="true" aria-controls="arena-rounds-panel" data-detail-tab="rounds">Participate</button>
-<button type="button" id="arena-info-tab" role="tab" aria-selected="false" aria-controls="arena-info-panel" tabindex="-1" data-detail-tab="info">Info</button>
+<button type="button" id="arena-info-tab" role="tab" aria-selected="true" aria-controls="arena-info-panel" data-detail-tab="info">Info</button>
+<button type="button" id="arena-rounds-tab" role="tab" aria-selected="false" aria-controls="arena-rounds-panel" tabindex="-1" data-detail-tab="rounds">Bots sandbox</button>
 </div>
 <div class="arena-sidecar-content">
-<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds">      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
+<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds" hidden>      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
 <div class="arena-section-top">
-<h2 id="arena-trade-title" data-arena-trade-title>Participate in a round</h2>
+<h2 id="arena-trade-title" data-arena-trade-title>Bots sandbox</h2>
 <span data-arena-available>Your balance —</span>
 </div>
 <p data-inline-status class="arena-inline-status" role="status" aria-live="polite">Yap Coins participation is currently disabled.</p>\\n        <div data-inline-access hidden>
@@ -389,7 +496,6 @@ exports[`renders a debate 1`] = `
 </label>
 <div class="arena-create-buttons">
 <button type="button" data-inline-bots>Start Bots mode · 500 synthetic bots</button>
-<button type="button" data-inline-human>Open human-only round</button>
 </div>
 </details>
 <button class="arena-icon-button" type="button" data-inline-refresh aria-label="Refresh rounds">↻</button>
@@ -429,12 +535,11 @@ exports[`renders a debate 1`] = `
 <button type="submit" class="arena-commit-button">Review commitment</button>
 </form>\\n        <div data-arena-commit-closed class="arena-commit-closed">Choose a round or start a sandbox to participate.</div>
 <div class="arena-wallet-actions">
-<button type="button" data-inline-refill>Get daily play coins</button>
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333" target="_blank" rel="noopener">Full controls ↗</a>
 </div>
 </div>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
-<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
+<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info">
 <dl class="arena-info">
 <div>
 <dt>Debate</dt>
@@ -469,6 +574,8 @@ exports[`renders a debate 1`] = `
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
 </section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    \\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/media.bundle.js?v=0123456789ab">
 </script>
@@ -855,15 +962,122 @@ exports[`renders a debate 10`] = `
 <div data-arena-history>No settled commitments in this run yet.</div>
 </div>
 <p>Successful commitments are binding. Unused reservations are released automatically.</p>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+<div class="stake-turn" data-stake-turn hidden>
+<div class="stake-turn-top">
+<strong data-stake-turn-title>
+</strong>
+<span data-stake-clock>
+</span>
+</div>
+<div class="stake-progress" data-stake-progress role="progressbar" aria-label="Time left to answer this turn" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+<span>
+</span>
+</div>
+<p class="stake-meta" data-stake-meta>
+</p>
+</div>
+<p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
+<h2 class="stake-question" id="stake-question">Do you agree?</h2>
+<p class="stake-proposition">“Should we debate this?”</p>
+<div class="stake-sides" role="group" aria-label="Your answer">
+<button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>
+<span aria-hidden="true">✓</span> Yes</button>
+<button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
+<span aria-hidden="true">✕</span> No</button>
+</div>
+<form class="stake-ticket" data-stake-ticket hidden>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-read-out>50%</output>
+</span>
+</label>
+<p class="stake-ceiling" data-stake-ceiling>
+</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+</label>
+</details>
+<dl class="stake-terms">
+<div>
+<dt>Reserved now</dt>
+<dd data-stake-term="reserved">
+</dd>
+</div>
+<div>
+<dt>Most you can lose</dt>
+<dd data-stake-term="lose">
+</dd>
+</div>
+<div>
+<dt>You get back</dt>
+<dd data-stake-term="back">
+</dd>
+</div>
+<div>
+<dt>Fee</dt>
+<dd>None</dd>
+</div>
+<div>
+<dt>Results</dt>
+<dd data-stake-term="results">
+</dd>
+</div>
+</dl>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
+<p class="stake-error" data-stake-error role="alert">
+</p>
+<button type="submit" class="stake-confirm" data-stake-confirm>
+</button>
+<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+</form>
+<div class="stake-receipt" data-stake-receipt hidden>
+</div>
+<p class="stake-balance" data-stake-balance>
+</p>
+<p class="stake-signin" data-stake-signin hidden>
+<a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
+</p>
+<details class="stake-positions" data-stake-positions-wrap hidden>
+<summary>Your positions <span data-stake-positions-count>
+</span>
+</summary>
+<ul data-stake-positions>
+</ul>
+</details>
+<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
+<h2 id="stake-review-title">Review your position</h2>
+<dl class="stake-terms" data-stake-review-terms>
+</dl>
+<p>Final once placed. You can't edit or cancel it.</p>
+<div class="stake-review-actions">
+<button type="button" class="button" data-stake-review-place>Place it</button>
+<button type="button" data-stake-review-back>Back</button>
+</div>
+</dialog>
+</section>\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
 <div class="arena-tabbar" role="tablist" aria-label="Participation and debate details">
-<button type="button" id="arena-rounds-tab" role="tab" aria-selected="true" aria-controls="arena-rounds-panel" data-detail-tab="rounds">Participate</button>
-<button type="button" id="arena-info-tab" role="tab" aria-selected="false" aria-controls="arena-info-panel" tabindex="-1" data-detail-tab="info">Info</button>
+<button type="button" id="arena-info-tab" role="tab" aria-selected="true" aria-controls="arena-info-panel" data-detail-tab="info">Info</button>
+<button type="button" id="arena-rounds-tab" role="tab" aria-selected="false" aria-controls="arena-rounds-panel" tabindex="-1" data-detail-tab="rounds">Bots sandbox</button>
 </div>
 <div class="arena-sidecar-content">
-<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds">      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
+<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds" hidden>      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
 <div class="arena-section-top">
-<h2 id="arena-trade-title" data-arena-trade-title>Participate in a round</h2>
+<h2 id="arena-trade-title" data-arena-trade-title>Bots sandbox</h2>
 <span data-arena-available>Your balance —</span>
 </div>
 <p data-inline-status class="arena-inline-status" role="status" aria-live="polite">Yap Coins participation is currently disabled.</p>\\n        <div data-inline-access hidden>
@@ -880,7 +1094,6 @@ exports[`renders a debate 10`] = `
 </label>
 <div class="arena-create-buttons">
 <button type="button" data-inline-bots>Start Bots mode · 500 synthetic bots</button>
-<button type="button" data-inline-human>Open human-only round</button>
 </div>
 </details>
 <button class="arena-icon-button" type="button" data-inline-refresh aria-label="Refresh rounds">↻</button>
@@ -920,12 +1133,11 @@ exports[`renders a debate 10`] = `
 <button type="submit" class="arena-commit-button">Review commitment</button>
 </form>\\n        <div data-arena-commit-closed class="arena-commit-closed">Choose a round or start a sandbox to participate.</div>
 <div class="arena-wallet-actions">
-<button type="button" data-inline-refill>Get daily play coins</button>
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333" target="_blank" rel="noopener">Full controls ↗</a>
 </div>
 </div>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
-<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
+<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info">
 <dl class="arena-info">
 <div>
 <dt>Debate</dt>
@@ -960,6 +1172,8 @@ exports[`renders a debate 10`] = `
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
 </section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    \\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/media.bundle.js?v=0123456789ab">
 </script>
@@ -1346,15 +1560,122 @@ exports[`renders a debate 2`] = `
 <div data-arena-history>No settled commitments in this run yet.</div>
 </div>
 <p>Successful commitments are binding. Unused reservations are released automatically.</p>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="live" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+<div class="stake-turn" data-stake-turn hidden>
+<div class="stake-turn-top">
+<strong data-stake-turn-title>
+</strong>
+<span data-stake-clock>
+</span>
+</div>
+<div class="stake-progress" data-stake-progress role="progressbar" aria-label="Time left to answer this turn" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+<span>
+</span>
+</div>
+<p class="stake-meta" data-stake-meta>
+</p>
+</div>
+<p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
+<h2 class="stake-question" id="stake-question">Do you agree?</h2>
+<p class="stake-proposition">“Should we debate this?”</p>
+<div class="stake-sides" role="group" aria-label="Your answer">
+<button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>
+<span aria-hidden="true">✓</span> Yes</button>
+<button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
+<span aria-hidden="true">✕</span> No</button>
+</div>
+<form class="stake-ticket" data-stake-ticket hidden>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-read-out>50%</output>
+</span>
+</label>
+<p class="stake-ceiling" data-stake-ceiling>
+</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+</label>
+</details>
+<dl class="stake-terms">
+<div>
+<dt>Reserved now</dt>
+<dd data-stake-term="reserved">
+</dd>
+</div>
+<div>
+<dt>Most you can lose</dt>
+<dd data-stake-term="lose">
+</dd>
+</div>
+<div>
+<dt>You get back</dt>
+<dd data-stake-term="back">
+</dd>
+</div>
+<div>
+<dt>Fee</dt>
+<dd>None</dd>
+</div>
+<div>
+<dt>Results</dt>
+<dd data-stake-term="results">
+</dd>
+</div>
+</dl>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
+<p class="stake-error" data-stake-error role="alert">
+</p>
+<button type="submit" class="stake-confirm" data-stake-confirm>
+</button>
+<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+</form>
+<div class="stake-receipt" data-stake-receipt hidden>
+</div>
+<p class="stake-balance" data-stake-balance>
+</p>
+<p class="stake-signin" data-stake-signin hidden>
+<a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
+</p>
+<details class="stake-positions" data-stake-positions-wrap hidden>
+<summary>Your positions <span data-stake-positions-count>
+</span>
+</summary>
+<ul data-stake-positions>
+</ul>
+</details>
+<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
+<h2 id="stake-review-title">Review your position</h2>
+<dl class="stake-terms" data-stake-review-terms>
+</dl>
+<p>Final once placed. You can't edit or cancel it.</p>
+<div class="stake-review-actions">
+<button type="button" class="button" data-stake-review-place>Place it</button>
+<button type="button" data-stake-review-back>Back</button>
+</div>
+</dialog>
+</section>\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
 <div class="arena-tabbar" role="tablist" aria-label="Participation and debate details">
-<button type="button" id="arena-rounds-tab" role="tab" aria-selected="true" aria-controls="arena-rounds-panel" data-detail-tab="rounds">Participate</button>
-<button type="button" id="arena-info-tab" role="tab" aria-selected="false" aria-controls="arena-info-panel" tabindex="-1" data-detail-tab="info">Info</button>
+<button type="button" id="arena-info-tab" role="tab" aria-selected="true" aria-controls="arena-info-panel" data-detail-tab="info">Info</button>
+<button type="button" id="arena-rounds-tab" role="tab" aria-selected="false" aria-controls="arena-rounds-panel" tabindex="-1" data-detail-tab="rounds">Bots sandbox</button>
 </div>
 <div class="arena-sidecar-content">
-<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds">      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
+<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds" hidden>      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
 <div class="arena-section-top">
-<h2 id="arena-trade-title" data-arena-trade-title>Participate in a round</h2>
+<h2 id="arena-trade-title" data-arena-trade-title>Bots sandbox</h2>
 <span data-arena-available>Your balance —</span>
 </div>
 <p data-inline-status class="arena-inline-status" role="status" aria-live="polite">Yap Coins participation is currently disabled.</p>\\n        <div data-inline-access hidden>
@@ -1371,7 +1692,6 @@ exports[`renders a debate 2`] = `
 </label>
 <div class="arena-create-buttons">
 <button type="button" data-inline-bots>Start Bots mode · 500 synthetic bots</button>
-<button type="button" data-inline-human>Open human-only round</button>
 </div>
 </details>
 <button class="arena-icon-button" type="button" data-inline-refresh aria-label="Refresh rounds">↻</button>
@@ -1411,12 +1731,11 @@ exports[`renders a debate 2`] = `
 <button type="submit" class="arena-commit-button">Review commitment</button>
 </form>\\n        <div data-arena-commit-closed class="arena-commit-closed">Choose a round or start a sandbox to participate.</div>
 <div class="arena-wallet-actions">
-<button type="button" data-inline-refill>Get daily play coins</button>
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333" target="_blank" rel="noopener">Full controls ↗</a>
 </div>
 </div>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
-<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
+<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info">
 <dl class="arena-info">
 <div>
 <dt>Debate</dt>
@@ -1451,6 +1770,8 @@ exports[`renders a debate 2`] = `
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
 </section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    \\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/media.bundle.js?v=0123456789ab">
 </script>
@@ -1835,15 +2156,122 @@ exports[`renders a debate 3`] = `
 <div data-arena-history>No settled commitments in this run yet.</div>
 </div>
 <p>Successful commitments are binding. Unused reservations are released automatically.</p>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="replay" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+<div class="stake-turn" data-stake-turn hidden>
+<div class="stake-turn-top">
+<strong data-stake-turn-title>
+</strong>
+<span data-stake-clock>
+</span>
+</div>
+<div class="stake-progress" data-stake-progress role="progressbar" aria-label="Time left to answer this turn" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+<span>
+</span>
+</div>
+<p class="stake-meta" data-stake-meta>
+</p>
+</div>
+<p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
+<h2 class="stake-question" id="stake-question">Do you agree?</h2>
+<p class="stake-proposition">“Should we debate this?”</p>
+<div class="stake-sides" role="group" aria-label="Your answer">
+<button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>
+<span aria-hidden="true">✓</span> Yes</button>
+<button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
+<span aria-hidden="true">✕</span> No</button>
+</div>
+<form class="stake-ticket" data-stake-ticket hidden>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-read-out>50%</output>
+</span>
+</label>
+<p class="stake-ceiling" data-stake-ceiling>
+</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+</label>
+</details>
+<dl class="stake-terms">
+<div>
+<dt>Reserved now</dt>
+<dd data-stake-term="reserved">
+</dd>
+</div>
+<div>
+<dt>Most you can lose</dt>
+<dd data-stake-term="lose">
+</dd>
+</div>
+<div>
+<dt>You get back</dt>
+<dd data-stake-term="back">
+</dd>
+</div>
+<div>
+<dt>Fee</dt>
+<dd>None</dd>
+</div>
+<div>
+<dt>Results</dt>
+<dd data-stake-term="results">
+</dd>
+</div>
+</dl>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
+<p class="stake-error" data-stake-error role="alert">
+</p>
+<button type="submit" class="stake-confirm" data-stake-confirm>
+</button>
+<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+</form>
+<div class="stake-receipt" data-stake-receipt hidden>
+</div>
+<p class="stake-balance" data-stake-balance>
+</p>
+<p class="stake-signin" data-stake-signin hidden>
+<a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
+</p>
+<details class="stake-positions" data-stake-positions-wrap hidden>
+<summary>Your positions <span data-stake-positions-count>
+</span>
+</summary>
+<ul data-stake-positions>
+</ul>
+</details>
+<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
+<h2 id="stake-review-title">Review your position</h2>
+<dl class="stake-terms" data-stake-review-terms>
+</dl>
+<p>Final once placed. You can't edit or cancel it.</p>
+<div class="stake-review-actions">
+<button type="button" class="button" data-stake-review-place>Place it</button>
+<button type="button" data-stake-review-back>Back</button>
+</div>
+</dialog>
+</section>\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
 <div class="arena-tabbar" role="tablist" aria-label="Participation and debate details">
-<button type="button" id="arena-rounds-tab" role="tab" aria-selected="true" aria-controls="arena-rounds-panel" data-detail-tab="rounds">Participate</button>
-<button type="button" id="arena-info-tab" role="tab" aria-selected="false" aria-controls="arena-info-panel" tabindex="-1" data-detail-tab="info">Info</button>
+<button type="button" id="arena-info-tab" role="tab" aria-selected="true" aria-controls="arena-info-panel" data-detail-tab="info">Info</button>
+<button type="button" id="arena-rounds-tab" role="tab" aria-selected="false" aria-controls="arena-rounds-panel" tabindex="-1" data-detail-tab="rounds">Bots sandbox</button>
 </div>
 <div class="arena-sidecar-content">
-<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds">      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
+<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds" hidden>      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
 <div class="arena-section-top">
-<h2 id="arena-trade-title" data-arena-trade-title>Participate in a round</h2>
+<h2 id="arena-trade-title" data-arena-trade-title>Bots sandbox</h2>
 <span data-arena-available>Your balance —</span>
 </div>
 <p data-inline-status class="arena-inline-status" role="status" aria-live="polite">Yap Coins participation is currently disabled.</p>\\n        <div data-inline-access hidden>
@@ -1860,7 +2288,6 @@ exports[`renders a debate 3`] = `
 </label>
 <div class="arena-create-buttons">
 <button type="button" data-inline-bots>Start Bots mode · 500 synthetic bots</button>
-<button type="button" data-inline-human>Open human-only round</button>
 </div>
 </details>
 <button class="arena-icon-button" type="button" data-inline-refresh aria-label="Refresh rounds">↻</button>
@@ -1900,12 +2327,11 @@ exports[`renders a debate 3`] = `
 <button type="submit" class="arena-commit-button">Review commitment</button>
 </form>\\n        <div data-arena-commit-closed class="arena-commit-closed">Choose a round or start a sandbox to participate.</div>
 <div class="arena-wallet-actions">
-<button type="button" data-inline-refill>Get daily play coins</button>
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333" target="_blank" rel="noopener">Full controls ↗</a>
 </div>
 </div>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
-<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
+<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info">
 <dl class="arena-info">
 <div>
 <dt>Debate</dt>
@@ -1940,6 +2366,8 @@ exports[`renders a debate 3`] = `
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
 </section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    \\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/media.bundle.js?v=0123456789ab">
 </script>
@@ -2324,15 +2752,122 @@ exports[`renders a debate 4`] = `
 <div data-arena-history>No settled commitments in this run yet.</div>
 </div>
 <p>Successful commitments are binding. Unused reservations are released automatically.</p>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="finalized" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+<div class="stake-turn" data-stake-turn hidden>
+<div class="stake-turn-top">
+<strong data-stake-turn-title>
+</strong>
+<span data-stake-clock>
+</span>
+</div>
+<div class="stake-progress" data-stake-progress role="progressbar" aria-label="Time left to answer this turn" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+<span>
+</span>
+</div>
+<p class="stake-meta" data-stake-meta>
+</p>
+</div>
+<p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
+<h2 class="stake-question" id="stake-question">Do you agree?</h2>
+<p class="stake-proposition">“Should we debate this?”</p>
+<div class="stake-sides" role="group" aria-label="Your answer">
+<button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>
+<span aria-hidden="true">✓</span> Yes</button>
+<button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
+<span aria-hidden="true">✕</span> No</button>
+</div>
+<form class="stake-ticket" data-stake-ticket hidden>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-read-out>50%</output>
+</span>
+</label>
+<p class="stake-ceiling" data-stake-ceiling>
+</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+</label>
+</details>
+<dl class="stake-terms">
+<div>
+<dt>Reserved now</dt>
+<dd data-stake-term="reserved">
+</dd>
+</div>
+<div>
+<dt>Most you can lose</dt>
+<dd data-stake-term="lose">
+</dd>
+</div>
+<div>
+<dt>You get back</dt>
+<dd data-stake-term="back">
+</dd>
+</div>
+<div>
+<dt>Fee</dt>
+<dd>None</dd>
+</div>
+<div>
+<dt>Results</dt>
+<dd data-stake-term="results">
+</dd>
+</div>
+</dl>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
+<p class="stake-error" data-stake-error role="alert">
+</p>
+<button type="submit" class="stake-confirm" data-stake-confirm>
+</button>
+<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+</form>
+<div class="stake-receipt" data-stake-receipt hidden>
+</div>
+<p class="stake-balance" data-stake-balance>
+</p>
+<p class="stake-signin" data-stake-signin hidden>
+<a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
+</p>
+<details class="stake-positions" data-stake-positions-wrap hidden>
+<summary>Your positions <span data-stake-positions-count>
+</span>
+</summary>
+<ul data-stake-positions>
+</ul>
+</details>
+<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
+<h2 id="stake-review-title">Review your position</h2>
+<dl class="stake-terms" data-stake-review-terms>
+</dl>
+<p>Final once placed. You can't edit or cancel it.</p>
+<div class="stake-review-actions">
+<button type="button" class="button" data-stake-review-place>Place it</button>
+<button type="button" data-stake-review-back>Back</button>
+</div>
+</dialog>
+</section>\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
 <div class="arena-tabbar" role="tablist" aria-label="Participation and debate details">
-<button type="button" id="arena-rounds-tab" role="tab" aria-selected="true" aria-controls="arena-rounds-panel" data-detail-tab="rounds">Participate</button>
-<button type="button" id="arena-info-tab" role="tab" aria-selected="false" aria-controls="arena-info-panel" tabindex="-1" data-detail-tab="info">Info</button>
+<button type="button" id="arena-info-tab" role="tab" aria-selected="true" aria-controls="arena-info-panel" data-detail-tab="info">Info</button>
+<button type="button" id="arena-rounds-tab" role="tab" aria-selected="false" aria-controls="arena-rounds-panel" tabindex="-1" data-detail-tab="rounds">Bots sandbox</button>
 </div>
 <div class="arena-sidecar-content">
-<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds">      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
+<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds" hidden>      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
 <div class="arena-section-top">
-<h2 id="arena-trade-title" data-arena-trade-title>Participate in a round</h2>
+<h2 id="arena-trade-title" data-arena-trade-title>Bots sandbox</h2>
 <span data-arena-available>Your balance —</span>
 </div>
 <p data-inline-status class="arena-inline-status" role="status" aria-live="polite">Yap Coins participation is currently disabled.</p>\\n        <div data-inline-access hidden>
@@ -2349,7 +2884,6 @@ exports[`renders a debate 4`] = `
 </label>
 <div class="arena-create-buttons">
 <button type="button" data-inline-bots>Start Bots mode · 500 synthetic bots</button>
-<button type="button" data-inline-human>Open human-only round</button>
 </div>
 </details>
 <button class="arena-icon-button" type="button" data-inline-refresh aria-label="Refresh rounds">↻</button>
@@ -2389,12 +2923,11 @@ exports[`renders a debate 4`] = `
 <button type="submit" class="arena-commit-button">Review commitment</button>
 </form>\\n        <div data-arena-commit-closed class="arena-commit-closed">Choose a round or start a sandbox to participate.</div>
 <div class="arena-wallet-actions">
-<button type="button" data-inline-refill>Get daily play coins</button>
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333" target="_blank" rel="noopener">Full controls ↗</a>
 </div>
 </div>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
-<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
+<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info">
 <dl class="arena-info">
 <div>
 <dt>Debate</dt>
@@ -2429,6 +2962,8 @@ exports[`renders a debate 4`] = `
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
 </section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    \\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/media.bundle.js?v=0123456789ab">
 </script>
@@ -2813,15 +3348,122 @@ exports[`renders a debate 5`] = `
 <div data-arena-history>No settled commitments in this run yet.</div>
 </div>
 <p>Successful commitments are binding. Unused reservations are released automatically.</p>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="cancelled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+<div class="stake-turn" data-stake-turn hidden>
+<div class="stake-turn-top">
+<strong data-stake-turn-title>
+</strong>
+<span data-stake-clock>
+</span>
+</div>
+<div class="stake-progress" data-stake-progress role="progressbar" aria-label="Time left to answer this turn" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+<span>
+</span>
+</div>
+<p class="stake-meta" data-stake-meta>
+</p>
+</div>
+<p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
+<h2 class="stake-question" id="stake-question">Do you agree?</h2>
+<p class="stake-proposition">“Should we debate this?”</p>
+<div class="stake-sides" role="group" aria-label="Your answer">
+<button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>
+<span aria-hidden="true">✓</span> Yes</button>
+<button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
+<span aria-hidden="true">✕</span> No</button>
+</div>
+<form class="stake-ticket" data-stake-ticket hidden>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-read-out>50%</output>
+</span>
+</label>
+<p class="stake-ceiling" data-stake-ceiling>
+</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+</label>
+</details>
+<dl class="stake-terms">
+<div>
+<dt>Reserved now</dt>
+<dd data-stake-term="reserved">
+</dd>
+</div>
+<div>
+<dt>Most you can lose</dt>
+<dd data-stake-term="lose">
+</dd>
+</div>
+<div>
+<dt>You get back</dt>
+<dd data-stake-term="back">
+</dd>
+</div>
+<div>
+<dt>Fee</dt>
+<dd>None</dd>
+</div>
+<div>
+<dt>Results</dt>
+<dd data-stake-term="results">
+</dd>
+</div>
+</dl>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
+<p class="stake-error" data-stake-error role="alert">
+</p>
+<button type="submit" class="stake-confirm" data-stake-confirm>
+</button>
+<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+</form>
+<div class="stake-receipt" data-stake-receipt hidden>
+</div>
+<p class="stake-balance" data-stake-balance>
+</p>
+<p class="stake-signin" data-stake-signin hidden>
+<a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
+</p>
+<details class="stake-positions" data-stake-positions-wrap hidden>
+<summary>Your positions <span data-stake-positions-count>
+</span>
+</summary>
+<ul data-stake-positions>
+</ul>
+</details>
+<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
+<h2 id="stake-review-title">Review your position</h2>
+<dl class="stake-terms" data-stake-review-terms>
+</dl>
+<p>Final once placed. You can't edit or cancel it.</p>
+<div class="stake-review-actions">
+<button type="button" class="button" data-stake-review-place>Place it</button>
+<button type="button" data-stake-review-back>Back</button>
+</div>
+</dialog>
+</section>\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
 <div class="arena-tabbar" role="tablist" aria-label="Participation and debate details">
-<button type="button" id="arena-rounds-tab" role="tab" aria-selected="true" aria-controls="arena-rounds-panel" data-detail-tab="rounds">Participate</button>
-<button type="button" id="arena-info-tab" role="tab" aria-selected="false" aria-controls="arena-info-panel" tabindex="-1" data-detail-tab="info">Info</button>
+<button type="button" id="arena-info-tab" role="tab" aria-selected="true" aria-controls="arena-info-panel" data-detail-tab="info">Info</button>
+<button type="button" id="arena-rounds-tab" role="tab" aria-selected="false" aria-controls="arena-rounds-panel" tabindex="-1" data-detail-tab="rounds">Bots sandbox</button>
 </div>
 <div class="arena-sidecar-content">
-<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds">      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
+<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds" hidden>      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
 <div class="arena-section-top">
-<h2 id="arena-trade-title" data-arena-trade-title>Participate in a round</h2>
+<h2 id="arena-trade-title" data-arena-trade-title>Bots sandbox</h2>
 <span data-arena-available>Your balance —</span>
 </div>
 <p data-inline-status class="arena-inline-status" role="status" aria-live="polite">Yap Coins participation is currently disabled.</p>\\n        <div data-inline-access hidden>
@@ -2838,7 +3480,6 @@ exports[`renders a debate 5`] = `
 </label>
 <div class="arena-create-buttons">
 <button type="button" data-inline-bots>Start Bots mode · 500 synthetic bots</button>
-<button type="button" data-inline-human>Open human-only round</button>
 </div>
 </details>
 <button class="arena-icon-button" type="button" data-inline-refresh aria-label="Refresh rounds">↻</button>
@@ -2878,12 +3519,11 @@ exports[`renders a debate 5`] = `
 <button type="submit" class="arena-commit-button">Review commitment</button>
 </form>\\n        <div data-arena-commit-closed class="arena-commit-closed">Choose a round or start a sandbox to participate.</div>
 <div class="arena-wallet-actions">
-<button type="button" data-inline-refill>Get daily play coins</button>
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333" target="_blank" rel="noopener">Full controls ↗</a>
 </div>
 </div>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
-<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
+<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info">
 <dl class="arena-info">
 <div>
 <dt>Debate</dt>
@@ -2918,6 +3558,8 @@ exports[`renders a debate 5`] = `
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
 </section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    \\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/media.bundle.js?v=0123456789ab">
 </script>
@@ -3302,15 +3944,122 @@ exports[`renders a debate 6`] = `
 <div data-arena-history>No settled commitments in this run yet.</div>
 </div>
 <p>Successful commitments are binding. Unused reservations are released automatically.</p>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="void_review" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+<div class="stake-turn" data-stake-turn hidden>
+<div class="stake-turn-top">
+<strong data-stake-turn-title>
+</strong>
+<span data-stake-clock>
+</span>
+</div>
+<div class="stake-progress" data-stake-progress role="progressbar" aria-label="Time left to answer this turn" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+<span>
+</span>
+</div>
+<p class="stake-meta" data-stake-meta>
+</p>
+</div>
+<p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
+<h2 class="stake-question" id="stake-question">Do you agree?</h2>
+<p class="stake-proposition">“Should we debate this?”</p>
+<div class="stake-sides" role="group" aria-label="Your answer">
+<button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>
+<span aria-hidden="true">✓</span> Yes</button>
+<button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
+<span aria-hidden="true">✕</span> No</button>
+</div>
+<form class="stake-ticket" data-stake-ticket hidden>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-read-out>50%</output>
+</span>
+</label>
+<p class="stake-ceiling" data-stake-ceiling>
+</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+</label>
+</details>
+<dl class="stake-terms">
+<div>
+<dt>Reserved now</dt>
+<dd data-stake-term="reserved">
+</dd>
+</div>
+<div>
+<dt>Most you can lose</dt>
+<dd data-stake-term="lose">
+</dd>
+</div>
+<div>
+<dt>You get back</dt>
+<dd data-stake-term="back">
+</dd>
+</div>
+<div>
+<dt>Fee</dt>
+<dd>None</dd>
+</div>
+<div>
+<dt>Results</dt>
+<dd data-stake-term="results">
+</dd>
+</div>
+</dl>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
+<p class="stake-error" data-stake-error role="alert">
+</p>
+<button type="submit" class="stake-confirm" data-stake-confirm>
+</button>
+<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+</form>
+<div class="stake-receipt" data-stake-receipt hidden>
+</div>
+<p class="stake-balance" data-stake-balance>
+</p>
+<p class="stake-signin" data-stake-signin hidden>
+<a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
+</p>
+<details class="stake-positions" data-stake-positions-wrap hidden>
+<summary>Your positions <span data-stake-positions-count>
+</span>
+</summary>
+<ul data-stake-positions>
+</ul>
+</details>
+<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
+<h2 id="stake-review-title">Review your position</h2>
+<dl class="stake-terms" data-stake-review-terms>
+</dl>
+<p>Final once placed. You can't edit or cancel it.</p>
+<div class="stake-review-actions">
+<button type="button" class="button" data-stake-review-place>Place it</button>
+<button type="button" data-stake-review-back>Back</button>
+</div>
+</dialog>
+</section>\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
 <div class="arena-tabbar" role="tablist" aria-label="Participation and debate details">
-<button type="button" id="arena-rounds-tab" role="tab" aria-selected="true" aria-controls="arena-rounds-panel" data-detail-tab="rounds">Participate</button>
-<button type="button" id="arena-info-tab" role="tab" aria-selected="false" aria-controls="arena-info-panel" tabindex="-1" data-detail-tab="info">Info</button>
+<button type="button" id="arena-info-tab" role="tab" aria-selected="true" aria-controls="arena-info-panel" data-detail-tab="info">Info</button>
+<button type="button" id="arena-rounds-tab" role="tab" aria-selected="false" aria-controls="arena-rounds-panel" tabindex="-1" data-detail-tab="rounds">Bots sandbox</button>
 </div>
 <div class="arena-sidecar-content">
-<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds">      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
+<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds" hidden>      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
 <div class="arena-section-top">
-<h2 id="arena-trade-title" data-arena-trade-title>Participate in a round</h2>
+<h2 id="arena-trade-title" data-arena-trade-title>Bots sandbox</h2>
 <span data-arena-available>Your balance —</span>
 </div>
 <p data-inline-status class="arena-inline-status" role="status" aria-live="polite">Yap Coins participation is currently disabled.</p>\\n        <div data-inline-access hidden>
@@ -3327,7 +4076,6 @@ exports[`renders a debate 6`] = `
 </label>
 <div class="arena-create-buttons">
 <button type="button" data-inline-bots>Start Bots mode · 500 synthetic bots</button>
-<button type="button" data-inline-human>Open human-only round</button>
 </div>
 </details>
 <button class="arena-icon-button" type="button" data-inline-refresh aria-label="Refresh rounds">↻</button>
@@ -3367,12 +4115,11 @@ exports[`renders a debate 6`] = `
 <button type="submit" class="arena-commit-button">Review commitment</button>
 </form>\\n        <div data-arena-commit-closed class="arena-commit-closed">Choose a round or start a sandbox to participate.</div>
 <div class="arena-wallet-actions">
-<button type="button" data-inline-refill>Get daily play coins</button>
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333" target="_blank" rel="noopener">Full controls ↗</a>
 </div>
 </div>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
-<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
+<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info">
 <dl class="arena-info">
 <div>
 <dt>Debate</dt>
@@ -3407,6 +4154,8 @@ exports[`renders a debate 6`] = `
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
 </section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    \\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/media.bundle.js?v=0123456789ab">
 </script>
@@ -3792,15 +4541,122 @@ exports[`renders a debate 7`] = `
 <div data-arena-history>No settled commitments in this run yet.</div>
 </div>
 <p>Successful commitments are binding. Unused reservations are released automatically.</p>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Speaker A" data-speaker-b="Morgan Lee" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+<div class="stake-turn" data-stake-turn hidden>
+<div class="stake-turn-top">
+<strong data-stake-turn-title>
+</strong>
+<span data-stake-clock>
+</span>
+</div>
+<div class="stake-progress" data-stake-progress role="progressbar" aria-label="Time left to answer this turn" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+<span>
+</span>
+</div>
+<p class="stake-meta" data-stake-meta>
+</p>
+</div>
+<p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
+<h2 class="stake-question" id="stake-question">Do you agree?</h2>
+<p class="stake-proposition">“Should we debate this?”</p>
+<div class="stake-sides" role="group" aria-label="Your answer">
+<button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>
+<span aria-hidden="true">✓</span> Yes</button>
+<button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
+<span aria-hidden="true">✕</span> No</button>
+</div>
+<form class="stake-ticket" data-stake-ticket hidden>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-read-out>50%</output>
+</span>
+</label>
+<p class="stake-ceiling" data-stake-ceiling>
+</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+</label>
+</details>
+<dl class="stake-terms">
+<div>
+<dt>Reserved now</dt>
+<dd data-stake-term="reserved">
+</dd>
+</div>
+<div>
+<dt>Most you can lose</dt>
+<dd data-stake-term="lose">
+</dd>
+</div>
+<div>
+<dt>You get back</dt>
+<dd data-stake-term="back">
+</dd>
+</div>
+<div>
+<dt>Fee</dt>
+<dd>None</dd>
+</div>
+<div>
+<dt>Results</dt>
+<dd data-stake-term="results">
+</dd>
+</div>
+</dl>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
+<p class="stake-error" data-stake-error role="alert">
+</p>
+<button type="submit" class="stake-confirm" data-stake-confirm>
+</button>
+<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+</form>
+<div class="stake-receipt" data-stake-receipt hidden>
+</div>
+<p class="stake-balance" data-stake-balance>
+</p>
+<p class="stake-signin" data-stake-signin hidden>
+<a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
+</p>
+<details class="stake-positions" data-stake-positions-wrap hidden>
+<summary>Your positions <span data-stake-positions-count>
+</span>
+</summary>
+<ul data-stake-positions>
+</ul>
+</details>
+<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
+<h2 id="stake-review-title">Review your position</h2>
+<dl class="stake-terms" data-stake-review-terms>
+</dl>
+<p>Final once placed. You can't edit or cancel it.</p>
+<div class="stake-review-actions">
+<button type="button" class="button" data-stake-review-place>Place it</button>
+<button type="button" data-stake-review-back>Back</button>
+</div>
+</dialog>
+</section>\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
 <div class="arena-tabbar" role="tablist" aria-label="Participation and debate details">
-<button type="button" id="arena-rounds-tab" role="tab" aria-selected="true" aria-controls="arena-rounds-panel" data-detail-tab="rounds">Participate</button>
-<button type="button" id="arena-info-tab" role="tab" aria-selected="false" aria-controls="arena-info-panel" tabindex="-1" data-detail-tab="info">Info</button>
+<button type="button" id="arena-info-tab" role="tab" aria-selected="true" aria-controls="arena-info-panel" data-detail-tab="info">Info</button>
+<button type="button" id="arena-rounds-tab" role="tab" aria-selected="false" aria-controls="arena-rounds-panel" tabindex="-1" data-detail-tab="rounds">Bots sandbox</button>
 </div>
 <div class="arena-sidecar-content">
-<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds">      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
+<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds" hidden>      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
 <div class="arena-section-top">
-<h2 id="arena-trade-title" data-arena-trade-title>Participate in a round</h2>
+<h2 id="arena-trade-title" data-arena-trade-title>Bots sandbox</h2>
 <span data-arena-available>Your balance —</span>
 </div>
 <p data-inline-status class="arena-inline-status" role="status" aria-live="polite">Yap Coins participation is currently disabled.</p>\\n        <div data-inline-access hidden>
@@ -3817,7 +4673,6 @@ exports[`renders a debate 7`] = `
 </label>
 <div class="arena-create-buttons">
 <button type="button" data-inline-bots>Start Bots mode · 500 synthetic bots</button>
-<button type="button" data-inline-human>Open human-only round</button>
 </div>
 </details>
 <button class="arena-icon-button" type="button" data-inline-refresh aria-label="Refresh rounds">↻</button>
@@ -3857,12 +4712,11 @@ exports[`renders a debate 7`] = `
 <button type="submit" class="arena-commit-button">Review commitment</button>
 </form>\\n        <div data-arena-commit-closed class="arena-commit-closed">Choose a round or start a sandbox to participate.</div>
 <div class="arena-wallet-actions">
-<button type="button" data-inline-refill>Get daily play coins</button>
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333" target="_blank" rel="noopener">Full controls ↗</a>
 </div>
 </div>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
-<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
+<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info">
 <dl class="arena-info">
 <div>
 <dt>Debate</dt>
@@ -3897,6 +4751,8 @@ exports[`renders a debate 7`] = `
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
 </section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    \\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/media.bundle.js?v=0123456789ab">
 </script>
@@ -4286,15 +5142,122 @@ exports[`renders a debate 8`] = `
 <div data-arena-history>No settled commitments in this run yet.</div>
 </div>
 <p>Successful commitments are binding. Unused reservations are released automatically.</p>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="55555555-5555-4555-8555-555555555555" data-debate-slug="hostile-debate" data-debate-status="live" data-speaker-a="Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-speaker-b="Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-side-a="Side A &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-side-b="Side B &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" aria-labelledby="stake-question">
+<div class="stake-turn" data-stake-turn hidden>
+<div class="stake-turn-top">
+<strong data-stake-turn-title>
+</strong>
+<span data-stake-clock>
+</span>
+</div>
+<div class="stake-progress" data-stake-progress role="progressbar" aria-label="Time left to answer this turn" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+<span>
+</span>
+</div>
+<p class="stake-meta" data-stake-meta>
+</p>
+</div>
+<p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
+<h2 class="stake-question" id="stake-question">Do you agree?</h2>
+<p class="stake-proposition">“Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;”</p>
+<div class="stake-sides" role="group" aria-label="Your answer">
+<button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>
+<span aria-hidden="true">✓</span> Yes</button>
+<button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
+<span aria-hidden="true">✕</span> No</button>
+</div>
+<form class="stake-ticket" data-stake-ticket hidden>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-read-out>50%</output>
+</span>
+</label>
+<p class="stake-ceiling" data-stake-ceiling>
+</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+</label>
+</details>
+<dl class="stake-terms">
+<div>
+<dt>Reserved now</dt>
+<dd data-stake-term="reserved">
+</dd>
+</div>
+<div>
+<dt>Most you can lose</dt>
+<dd data-stake-term="lose">
+</dd>
+</div>
+<div>
+<dt>You get back</dt>
+<dd data-stake-term="back">
+</dd>
+</div>
+<div>
+<dt>Fee</dt>
+<dd>None</dd>
+</div>
+<div>
+<dt>Results</dt>
+<dd data-stake-term="results">
+</dd>
+</div>
+</dl>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
+<p class="stake-error" data-stake-error role="alert">
+</p>
+<button type="submit" class="stake-confirm" data-stake-confirm>
+</button>
+<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+</form>
+<div class="stake-receipt" data-stake-receipt hidden>
+</div>
+<p class="stake-balance" data-stake-balance>
+</p>
+<p class="stake-signin" data-stake-signin hidden>
+<a href="/account?next=%2Fdebates%2Fhostile-debate">Sign in to answer →</a>
+</p>
+<details class="stake-positions" data-stake-positions-wrap hidden>
+<summary>Your positions <span data-stake-positions-count>
+</span>
+</summary>
+<ul data-stake-positions>
+</ul>
+</details>
+<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
+<h2 id="stake-review-title">Review your position</h2>
+<dl class="stake-terms" data-stake-review-terms>
+</dl>
+<p>Final once placed. You can't edit or cancel it.</p>
+<div class="stake-review-actions">
+<button type="button" class="button" data-stake-review-place>Place it</button>
+<button type="button" data-stake-review-back>Back</button>
+</div>
+</dialog>
+</section>\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
 <div class="arena-tabbar" role="tablist" aria-label="Participation and debate details">
-<button type="button" id="arena-rounds-tab" role="tab" aria-selected="true" aria-controls="arena-rounds-panel" data-detail-tab="rounds">Participate</button>
-<button type="button" id="arena-info-tab" role="tab" aria-selected="false" aria-controls="arena-info-panel" tabindex="-1" data-detail-tab="info">Info</button>
+<button type="button" id="arena-info-tab" role="tab" aria-selected="true" aria-controls="arena-info-panel" data-detail-tab="info">Info</button>
+<button type="button" id="arena-rounds-tab" role="tab" aria-selected="false" aria-controls="arena-rounds-panel" tabindex="-1" data-detail-tab="rounds">Bots sandbox</button>
 </div>
 <div class="arena-sidecar-content">
-<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds">      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
+<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds" hidden>      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
 <div class="arena-section-top">
-<h2 id="arena-trade-title" data-arena-trade-title>Participate in a round</h2>
+<h2 id="arena-trade-title" data-arena-trade-title>Bots sandbox</h2>
 <span data-arena-available>Your balance —</span>
 </div>
 <p data-inline-status class="arena-inline-status" role="status" aria-live="polite">Checking your Yap Coins account…</p>\\n        <div data-inline-access hidden>
@@ -4311,7 +5274,6 @@ exports[`renders a debate 8`] = `
 </label>
 <div class="arena-create-buttons">
 <button type="button" data-inline-bots>Start Bots mode · 500 synthetic bots</button>
-<button type="button" data-inline-human>Open human-only round</button>
 </div>
 </details>
 <button class="arena-icon-button" type="button" data-inline-refresh aria-label="Refresh rounds">↻</button>
@@ -4351,7 +5313,6 @@ exports[`renders a debate 8`] = `
 <button type="submit" class="arena-commit-button">Review commitment</button>
 </form>\\n        <div data-arena-commit-closed class="arena-commit-closed">Choose a round or start a sandbox to participate.</div>
 <div class="arena-wallet-actions">
-<button type="button" data-inline-refill>Get daily play coins</button>
 <a href="/coins?debate=55555555-5555-4555-8555-555555555555" target="_blank" rel="noopener">Full controls ↗</a>
 </div>
 </div>
@@ -4359,7 +5320,7 @@ exports[`renders a debate 8`] = `
 <a href="/account?next=%2Fdebates%2Fhostile-debate">Sign in to participate →</a>
 </p>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
-<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
+<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info">
 <dl class="arena-info">
 <div>
 <dt>Debate</dt>
@@ -4406,6 +5367,8 @@ exports[`renders a debate 8`] = `
 <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <template data-shared-bootstrap>{&quot;scope&quot;:&quot;shared&quot;,&quot;synthetic&quot;:true,&quot;revision&quot;:&quot;fixture-revision&quot;,&quot;hasMore&quot;:false,&quot;window&quot;:30,&quot;items&quot;:[{&quot;id&quot;:&quot;round-1&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:1,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;52&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:{&quot;n&quot;:&quot;40&quot;,&quot;d&quot;:&quot;100&quot;},&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;},{&quot;id&quot;:&quot;round-2&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:2,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;47&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:null,&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;}],&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:61,&quot;endorsed&quot;:305,&quot;population&quot;:500},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:39,&quot;endorsed&quot;:195,&quot;population&quot;:500}],&quot;category&quot;:&quot;Category &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;totals&quot;:{&quot;premium&quot;:&quot;5000000000&quot;,&quot;humanCommitments&quot;:4,&quot;botCommitments&quot;:996,&quot;executed&quot;:240}}</template>
 <script type="module" src="/assets/arena.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/media.bundle.js?v=0123456789ab">
 </script>
@@ -4790,15 +5753,122 @@ exports[`renders a debate 9`] = `
 <div data-arena-history>No settled commitments in this run yet.</div>
 </div>
 <p>Successful commitments are binding. Unused reservations are released automatically.</p>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+<div class="stake-turn" data-stake-turn hidden>
+<div class="stake-turn-top">
+<strong data-stake-turn-title>
+</strong>
+<span data-stake-clock>
+</span>
+</div>
+<div class="stake-progress" data-stake-progress role="progressbar" aria-label="Time left to answer this turn" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+<span>
+</span>
+</div>
+<p class="stake-meta" data-stake-meta>
+</p>
+</div>
+<p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
+<h2 class="stake-question" id="stake-question">Do you agree?</h2>
+<p class="stake-proposition">“Should we debate this?”</p>
+<div class="stake-sides" role="group" aria-label="Your answer">
+<button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>
+<span aria-hidden="true">✓</span> Yes</button>
+<button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
+<span aria-hidden="true">✕</span> No</button>
+</div>
+<form class="stake-ticket" data-stake-ticket hidden>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-read-out>50%</output>
+</span>
+</label>
+<p class="stake-ceiling" data-stake-ceiling>
+</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+</label>
+</details>
+<dl class="stake-terms">
+<div>
+<dt>Reserved now</dt>
+<dd data-stake-term="reserved">
+</dd>
+</div>
+<div>
+<dt>Most you can lose</dt>
+<dd data-stake-term="lose">
+</dd>
+</div>
+<div>
+<dt>You get back</dt>
+<dd data-stake-term="back">
+</dd>
+</div>
+<div>
+<dt>Fee</dt>
+<dd>None</dd>
+</div>
+<div>
+<dt>Results</dt>
+<dd data-stake-term="results">
+</dd>
+</div>
+</dl>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
+<p class="stake-error" data-stake-error role="alert">
+</p>
+<button type="submit" class="stake-confirm" data-stake-confirm>
+</button>
+<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+</form>
+<div class="stake-receipt" data-stake-receipt hidden>
+</div>
+<p class="stake-balance" data-stake-balance>
+</p>
+<p class="stake-signin" data-stake-signin hidden>
+<a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
+</p>
+<details class="stake-positions" data-stake-positions-wrap hidden>
+<summary>Your positions <span data-stake-positions-count>
+</span>
+</summary>
+<ul data-stake-positions>
+</ul>
+</details>
+<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
+<h2 id="stake-review-title">Review your position</h2>
+<dl class="stake-terms" data-stake-review-terms>
+</dl>
+<p>Final once placed. You can't edit or cancel it.</p>
+<div class="stake-review-actions">
+<button type="button" class="button" data-stake-review-place>Place it</button>
+<button type="button" data-stake-review-back>Back</button>
+</div>
+</dialog>
+</section>\\n      <section class="arena-panel arena-sidecar" data-arena-sidecar>
 <div class="arena-tabbar" role="tablist" aria-label="Participation and debate details">
-<button type="button" id="arena-rounds-tab" role="tab" aria-selected="true" aria-controls="arena-rounds-panel" data-detail-tab="rounds">Participate</button>
-<button type="button" id="arena-info-tab" role="tab" aria-selected="false" aria-controls="arena-info-panel" tabindex="-1" data-detail-tab="info">Info</button>
+<button type="button" id="arena-info-tab" role="tab" aria-selected="true" aria-controls="arena-info-panel" data-detail-tab="info">Info</button>
+<button type="button" id="arena-rounds-tab" role="tab" aria-selected="false" aria-controls="arena-rounds-panel" tabindex="-1" data-detail-tab="rounds">Bots sandbox</button>
 </div>
 <div class="arena-sidecar-content">
-<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds">      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
+<div id="arena-rounds-panel" role="tabpanel" aria-labelledby="arena-rounds-tab" data-detail-panel="rounds" hidden>      <section class="arena-panel arena-trade" aria-labelledby="arena-trade-title">
 <div class="arena-section-top">
-<h2 id="arena-trade-title" data-arena-trade-title>Participate in a round</h2>
+<h2 id="arena-trade-title" data-arena-trade-title>Bots sandbox</h2>
 <span data-arena-available>Your balance —</span>
 </div>
 <p data-inline-status class="arena-inline-status" role="status" aria-live="polite">Checking your Yap Coins account…</p>\\n        <div data-inline-access hidden>
@@ -4815,7 +5885,6 @@ exports[`renders a debate 9`] = `
 </label>
 <div class="arena-create-buttons">
 <button type="button" data-inline-bots>Start Bots mode · 500 synthetic bots</button>
-<button type="button" data-inline-human>Open human-only round</button>
 </div>
 </details>
 <button class="arena-icon-button" type="button" data-inline-refresh aria-label="Refresh rounds">↻</button>
@@ -4855,7 +5924,6 @@ exports[`renders a debate 9`] = `
 <button type="submit" class="arena-commit-button">Review commitment</button>
 </form>\\n        <div data-arena-commit-closed class="arena-commit-closed">Choose a round or start a sandbox to participate.</div>
 <div class="arena-wallet-actions">
-<button type="button" data-inline-refill>Get daily play coins</button>
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333" target="_blank" rel="noopener">Full controls ↗</a>
 </div>
 </div>
@@ -4863,7 +5931,7 @@ exports[`renders a debate 9`] = `
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to participate →</a>
 </p>
 <p class="arena-play-note">Play coins · no cash value. Each locked endorsement counts equally.</p>\\n      </section>\\n</div>
-<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info" hidden>
+<div id="arena-info-panel" role="tabpanel" aria-labelledby="arena-info-tab" data-detail-panel="info">
 <dl class="arena-info">
 <div>
 <dt>Debate</dt>
@@ -4909,6 +5977,8 @@ exports[`renders a debate 9`] = `
 </dialog>
 <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/media.bundle.js?v=0123456789ab">
 </script>
