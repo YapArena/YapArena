@@ -169,104 +169,237 @@ The live topic queue, direct challenges and personal live updates
 ([Decision 0011](decisions/0011-live-matchmaking-and-challenges.md)). Step 1 applied their
 migrations (#91, #101 and #107). Everything stays off until `MATCHMAKING_ENABLED` is set, and
 turning it off again is the rollback. Automatic start and recording need live video configured;
-without it the queue still matches players, but debates never start by themselves. Staging's web
+without it, the queue still matches players, but debates never start by themselves. Staging's web
 service is Render Free, which sleeps after 15 idle minutes. That's fine for this trial with a page
 open, but not for a public queue
 ([capacity and cost](decisions/0011-live-matchmaking-and-challenges.md#capacity-and-cost)).
 
+**Where things are.** Every item below uses these places:
+
+- **Render:** [dashboard.render.com](https://dashboard.render.com), then the staging web service
+  or the jobs worker `yaparena-staging-jobs`. Each service's left pane has:
+  - **Events:** deploys; a finished deploy reads "Deploy live".
+  - **Logs:** a search box at the top filters the lines.
+  - **Environment:** its variables.
+- **Supabase SQL editor:** [supabase.com/dashboard](https://supabase.com/dashboard), then the
+  staging project, **SQL Editor** in the left sidebar, then **+ New query**. Paste the query and
+  click **Run** (Cmd+Enter). The result grid appears under the editor.
+- **Terminal:** a local terminal in the checkout from step 0.4, with `lk` signed in to the staging
+  project.
+- **Chrome DevTools:** on a staging page, **View › Developer › Developer Tools** (Cmd+Option+I),
+  then the **Network** tab.
+
+**Values you'll fill in:**
+
+| Placeholder                | Where to find it                                                                                                              |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `<staging-host>`           | Render → web service → the address under its name at the top, without `https://`, for example `yaparena-staging.onrender.com` |
+| `<capacity>`               | The number you choose in 8.1                                                                                                  |
+| `<handle-a>`, `<handle-b>` | The handles you give accounts A and B in 8.5                                                                                  |
+| `<topic-slug>`             | The "URL slug" you type when creating the trial topic in 8.5, for example `staging-queue-trial`                               |
+| `<debate-slug>`            | The end of a debate page's address: `https://<staging-host>/debates/<debate-slug>`                                            |
+| `<debate-id>`              | The `id` returned by the first query in the 8.6 checks                                                                        |
+
+**The switches:**
+
 | Variable               | Set on                  | Value                                                                   |
 | ---------------------- | ----------------------- | ----------------------------------------------------------------------- |
 | `MATCHMAKING_ENABLED`  | Web **and** jobs worker | `true`. The worker runs the one-second queue sweep and automatic start. |
-| `LIVE_DEBATE_CAPACITY` | Web **and** jobs worker | Debates starting or live at once, plus pending matches. Default `2`.    |
-| `USER_STREAM_ENABLED`  | Web                     | Leave `false`: live updates are always on with matchmaking (see below). |
+| `LIVE_DEBATE_CAPACITY` | Web **and** jobs worker | `<capacity>`: debates starting or live at once, plus pending matches.   |
+| `USER_STREAM_ENABLED`  | Web                     | Leave unset or `false`: live updates are always on with matchmaking.    |
 
-1. **Choose the capacity.** Use the smallest limit from step 0.2 for your LiveKit plan: 2 on Build;
-   on Ship, 10 with the live outline on or 100 without it.
-   - Check: the value is at or below that limit, and it is the same on web and the worker.
-   - If unsure, keep the default `2` for the trial.
-2. **Check both database URLs.** In Render, open web's and the worker's environment and, without
-   copying the value, confirm `DATABASE_URL` is the runtime Session pooler URL on port 5432. Live
-   updates hold one LISTEN connection per web process, which the 6543 pooler can't carry.
-   - Check: port 5432 on both.
-   - If it is 6543, replace it with the runtime Session pooler URL; otherwise startup refuses with
+1. **Choose the capacity.** Use the LiveKit plan you chose in step 0.2:
+
+   | LiveKit plan | Outline off (`LIVE_OUTLINE_ENABLED=false`) | Outline on |
+   | ------------ | ------------------------------------------ | ---------- |
+   | Build        | 2                                          | 2          |
+   | Ship         | 100                                        | 10         |
+   | Scale        | 500                                        | 25         |
+
+   Write the number down as `<capacity>`.
+   - Check: `<capacity>` is at or below the table's number for your plan and outline setting.
+   - If you're unsure, use `2`.
+
+2. **Check both database URLs.**
+   1. Render → `yaparena-staging-jobs` → **Environment**.
+   2. On the `DATABASE_URL` row, click the eye icon to reveal the value. Read it without copying it,
+      then hide it again.
+   3. Repeat on the web service.
+   - Check: both values contain `:5432/` (the Session pooler).
+   - If one contains `:6543/` (the transaction pooler):
+     1. In Supabase, open the project's **Connect** button (top bar), then **Session pooler**.
+     2. Build the runtime URL as in [create the database](render-staging.md#create-the-database).
+     3. Paste it into that service's `DATABASE_URL`, then choose **Save only**; 8.3 deploys.
+
+     Otherwise that service won't start, and its Logs show
      `live queue LISTEN requires a direct or session-pooler connection`.
-3. **Turn it on, on both services.** Set `MATCHMAKING_ENABLED=true` and `LIVE_DEBATE_CAPACITY` on
-   **both** the jobs worker and web before deploying either, then deploy the worker and web. The
-   worker pairs players: with the switch on web only, players can queue but are never matched.
+3. **Turn it on, jobs worker first.** The worker pairs players, so it goes first.
+   1. Render → `yaparena-staging-jobs` → **Environment** → **+ Add Environment Variable**. Key
+      `MATCHMAKING_ENABLED`, value `true`.
+   2. **+ Add Environment Variable** again. Key `LIVE_DEBATE_CAPACITY`, value `<capacity>`.
+      If either key already exists, edit its value on its row instead.
+   3. Click **Save and deploy**.
+   4. Open **Events** and wait until the new deploy reads "Deploy live".
+   5. Repeat items 1–4 on the web service.
+   - Check, worker: Render → `yaparena-staging-jobs` → **Logs** → search `background job ran`.
+     Within a few seconds of the deploy, a line shows `"job":"matchmaking"`. Searching
+     `matchmaking sweep failed` shows nothing.
+   - Check, web: in the terminal, run
+
+     ```sh
+     curl -fsS https://<staging-host>/topics | grep -c data-matchmaking
+     ```
+
+     It prints `1`.
+
+   - If the worker line is missing, the variable isn't saved on the worker or its deploy isn't live
+     (check its **Events**). If `curl` prints `0`, the same applies to web.
+4. **Check live updates.**
+   1. In the Supabase SQL editor, run:
+
+      ```sql
+      SELECT count(*) FROM pg_stat_activity
+      WHERE application_name = 'yaparena-user-streams-listener'
+         OR query = 'LISTEN yaparena_results_v1';
+      ```
+
+   2. Sign in to `https://<staging-host>` in Chrome, open DevTools → **Network**, type `stream` in
+      the **Filter** box, and reload (Cmd+R).
    - Check:
-     - The worker's Render log shows one `background job ran` line with `job: "matchmaking"`
-       within a few seconds, and no `matchmaking sweep failed` lines.
-     - `curl -fsS https://<staging-host>/topics/<topic-slug> | grep -c data-matchmaking` prints
-       `1`, and the topic page shows "Take a side and get matched".
-   - If not, the switch isn't saved on that service or the service didn't redeploy.
-4. **Check live updates.** As the owner (Supabase SQL editor):
-   `SELECT count(*) FROM pg_stat_activity WHERE application_name = 'yaparena-user-streams-listener' OR query = 'LISTEN yaparena_results_v1';`
-   - Check:
-     - It prints `1`, one per web process.
-     - In a signed-in browser, DevTools → Network shows `/api/me/stream` open with status 200.
-   - If it prints `0`, look for repeating `user-streams listener connection lost` lines in web's
-     log; that is usually the URL from 8.2. The site still works by polling, but "now"
+     - The query's grid shows one row with `count` = `1` (one per web process).
+     - DevTools shows a row named `stream`, with Status `200` and Type `eventsource`, that stays
+       pending.
+   - If `count` is `0`: Render → web service → **Logs** → search `listener connection lost`.
+     Repeating lines mean the database URL (8.2). The site still works by polling, but "now"
      challenges and matches arrive up to 30 seconds late.
-5. **Prepare two test accounts, A and B,** in two browser profiles or two devices; one browser
-   shares its sign-in across tabs.
-   - **Each account:** sign in, publish a profile with a handle, allow the camera and microphone,
-     and (with the outline on) choose a language and agree on the Profile tab, as in step 6.
-   - **A topic:** on `/match`, "Start a topic", then publish it.
-   - Check: both profiles open at `/people/<handle>`, and the topic at `/topics/<topic-slug>`.
-   - If the queue later answers "Choose your debate language…", follow its "Open your account
-     settings" link.
-6. **Queue, accept and start automatically.** A opens the topic and clicks "Queue for <side A>",
-   allowing the camera check. B opens the same page and clicks "Queue for <side B>". Both click
-   Accept, then "Check camera and join as speaker" on the debate page.
-   - Check:
-     - A's header shows "In queue", and B's page says "1 person waiting for <side A>".
-     - Within about two seconds of B queueing, both see "Match found" with a 30-second countdown.
-     - After Accept, both open the same `/debates/<slug>`, showing "Waiting for both speakers to
-       join".
-     - Within about two seconds of the second speaker joining, the debate goes live by itself.
-       LiveKit shows one recording for the room, and with the outline on, `transcriber joined`
-       follows.
-     - `SELECT reason FROM yaparena.event_history WHERE debate_id = '<id>' AND action = 'start';`
-       returns "Automatic start: both speakers are ready and connected."
-   - If no match appears, check the worker log and the capacity query below; two players on the
-     same side are never matched. If it doesn't start, look for `automatic debate start failed` in
-     the worker log, then start it as operator to finish the trial.
-7. **Automatic no-show.** A and B queue again and accept; only A joins as speaker.
-   - Check: 90 seconds later, A's page says "This debate was cancelled because a speaker didn't
-     join in time.", and A is back in the queue at their place.
-   - If it still waits after two minutes, check the worker log for sweep errors.
-8. **Challenge to debate now.** A stays on any signed-in page. On `/match`, B uses "Challenge a
-   person": B finds A by handle or name, picks the topic, writes a proposition, picks a side,
-   chooses "Now" and sends it.
-   - Check:
-     - B's notice says "@<A> has 2 minutes to answer." and B's header shows "Challenge sent".
-     - A sees "Debate now?" at once, with a countdown.
-     - Accept opens the room for both, then continue as in 8.6.
-     - On a second challenge, A's "Later" keeps it in A's list on `/match`. Two minutes later, B's
-       Updates on `/match` say it "wasn't answered in time".
-   - If A sees no popup, A wasn't online (8.4); the challenge waits in A's list instead.
-9. **Challenge at an agreed time.** This needs an hour or more, so run it beside the others.
-   1. B challenges A with "Propose times" and two times at least an hour ahead.
-   2. A clicks "Propose times" and sends another time.
-   3. B accepts A's time.
-   4. Both join as speakers at the start.
-   - Check:
-     - A's list on `/match` shows "From @<B>", with "Accept <time>" buttons in A's own time zone.
-     - After A's counter, B's list updates by itself with A's time.
-     - After B accepts, both lists say "booked".
-     - Five minutes before the start, both get "Your debate starts in a few minutes. Join now." in
-       Updates, a header "Debate in 4:59", and a countdown on the debate page.
-     - At the start time, it goes live by itself.
-   - If a speaker doesn't join, it is cancelled 10 minutes after the start.
-10. **End the trial debates** as operator, or let them reach their maximum duration.
-    - Check: each recording stops in LiveKit.
-    - If one doesn't stop, end it as operator.
+5. **Prepare accounts A and B, and a topic.** Use two Chrome profiles (click the profile icon at
+   the top right of Chrome, then **Add**) or two devices, because one browser profile shares its
+   sign-in across tabs. In each profile:
+   1. Open `https://<staging-host>/account` and sign in with that account's email.
+   2. If asked, pick a handle: `<handle-a>` for A, `<handle-b>` for B.
+   3. On **Profile**, if the banner shows **Make it public**, click it.
+   4. If the outline is on, find the **Debating** card on the same tab. Choose **Language you
+      debate in**, tick the agreement box, and click **Save debating settings**.
 
-**While it runs, watch:**
+   Then, as A:
+   1. Open `https://<staging-host>/match`.
+   2. Under **01 / START A TOPIC**, fill in **URL slug** `<topic-slug>`, a **Title**, a
+      **Summary**, **Side A label** `For` and **Side B label** `Against`.
+   3. Click **Create private draft**, then **Publish** on its row below.
+   - Check:
+     - `https://<staging-host>/people/<handle-a>` and `/people/<handle-b>` open both profiles.
+     - `https://<staging-host>/topics/<topic-slug>` shows "Take a side and get matched", with
+       **Queue for For** and **Queue for Against**.
+   - If the queue later answers "Choose your debate language…", click its **Open your account
+     settings** link and do item 4.
 
-- **LiveKit:** concurrent recordings and rooms (and agent sessions with the outline) stay at or
-  below `LIVE_DEBATE_CAPACITY`. At capacity, queued players wait without a match.
-- **Capacity in use**, the count the queue checks before offering a match:
+6. **Queue, accept and start automatically.**
+   1. A opens `https://<staging-host>/topics/<topic-slug>`, clicks **Queue for For**, and allows the
+      camera and microphone.
+   2. B opens the same address, clicks **Queue for Against**, and allows them.
+   3. Both click **Accept** in the "Match found" window.
+   4. On the debate page, both click **Check camera and join as speaker**.
+   - Check:
+     - After item 1, A's header shows "In queue · 0:01", counting up. B's page reads
+       "1 person waiting for For" under the buttons.
+     - Within about two seconds of item 2, both see "Match found" with a countdown from 30.
+     - After item 3, both are on the same `https://<staging-host>/debates/<debate-slug>`, showing
+       "Waiting for both speakers to join · 1:2x left" above the video.
+     - Within about two seconds of item 4, the debate is live. In the SQL editor:
+
+       ```sql
+       SELECT id, status FROM yaparena.debates WHERE slug = '<debate-slug>';
+       ```
+
+       This returns `status` `live`. Keep its `id` as `<debate-id>`.
+
+       ```sql
+       SELECT reason FROM yaparena.event_history WHERE debate_id = '<debate-id>' AND action = 'start';
+       ```
+
+       This returns `Automatic start: both speakers are ready and connected.`
+
+     - In the terminal:
+
+       ```sh
+       lk egress list --room debate-<debate-id> --active --json
+       ```
+
+       This lists one egress whose status is `EGRESS_ACTIVE`. With the outline on,
+       `lk agent logs` shows `transcriber joined`.
+   - If no "Match found" appears within 10 seconds:
+     - In the worker's **Logs**, search `matchmaking sweep failed`.
+     - Run the capacity query under "While it runs". If `used` is at `<capacity>`, wait for a
+       debate to end.
+     - Players on the same side are never matched.
+   - If it isn't live within 10 seconds of both joining:
+     - In the worker's **Logs**, search `automatic debate start failed`.
+     - Compare `lk egress list --active --json` with your plan's recording limit.
+7. **Automatic no-show.**
+   1. A and B each open the topic again and queue, A for For and B for Against.
+   2. Both accept.
+   3. Only A clicks **Check camera and join as speaker**.
+   - Check:
+     - 90 seconds after the match, A's banner reads "This debate was cancelled because a speaker
+       didn't join in time.".
+     - A's header shows "In queue" again; A keeps their place.
+     - `SELECT status FROM yaparena.debates WHERE slug = '<debate-slug>';` returns `cancelled`.
+   - If it still shows the countdown at 0:00 after two minutes, search the worker's **Logs** for
+     `matchmaking sweep failed`.
+8. **Challenge to debate now.** A stays on any signed-in page.
+   1. B opens `https://<staging-host>/match`.
+   2. Under **02 / CHALLENGE A PERSON**, B fills in **Opponent** `<handle-a>`, **Published topic
+      slug** `<topic-slug>`, a **Proposition** (at least 10 characters) and **Your side**
+      **Side B — Against**.
+   3. B picks **When: Now** and clicks **Send challenge**.
+   4. A clicks **Accept** in the "Debate now?" window.
+   - Check:
+     - B's page notice reads "Challenge sent. @<handle-a> has 2 minutes to answer.", and B's
+       header shows "Challenge sent · 1:5x".
+     - A sees "Debate now?" at once, naming B's display name and `@<handle-b>`, with a countdown.
+     - After item 4, both land on a new `/debates/<debate-slug>`. Continue with item 4 of 8.6.
+   - Try "Later" on a second "now" challenge: A clicks **Later**. It stays in A's **Your
+     challenges** list on `/match`. Two minutes later, B's **Updates** list on `/match` reads
+     "Your challenge to debate now wasn't answered in time. It stays open so you can agree a
+     time."
+   - If A sees no window, A wasn't online (check 8.4). The challenge then waits in A's **Your
+     challenges** list instead.
+9. **Challenge at an agreed time.** This takes an hour or more, so start it beside the others.
+   1. B fills in the same form as in 8.8, picks **When: Propose times**, enters two times at least
+      an hour ahead in **First choice** and **Second choice**, and clicks **Send challenge**.
+   2. A opens `/match`. Under **Your challenges**, A clicks **Propose times** on B's challenge,
+      enters another time, and clicks **Send times**.
+   3. B clicks **Accept <time>** on A's time.
+   4. At the start, both open the debate from **Your events** on `/match` and click **Check
+      camera and join as speaker**.
+   - Check:
+     - After item 1, A's entry reads "From @<handle-b> …" with one **Accept <time>** button per
+       time, in A's time zone.
+     - After item 2, B's entry updates by itself to show A's time.
+     - After item 3, both entries read "… · booked · <time>".
+     - Five minutes before the start:
+       - **Updates** on `/match` shows "Your debate starts in a few minutes. Join now.";
+       - the header shows "Debate in 4:5x";
+       - the debate page shows "Your debate starts in …".
+     - At the start time, it goes live by itself (same checks as 8.6).
+   - If a speaker doesn't join, the debate is cancelled 10 minutes after the start (same check as
+     8.7).
+10. **End the trial debates.** Each ends by itself at its rules' maximum length. In the SQL
+    editor,
+    `SELECT rules_snapshot->>'maximum_duration_seconds' FROM yaparena.debates WHERE slug = '<debate-slug>';`
+    shows that length in seconds. An account with the `operator` role can also end one early: the
+    debate page's **Operator controls**, a **Reason for action**, then **End**.
+    - Check: `lk egress list --room debate-<debate-id> --active --json` no longer lists an egress,
+      and `SELECT status FROM yaparena.debates WHERE slug = '<debate-slug>';` returns `ended`.
+    - If the egress stays active after the debate ended, stop it in the terminal with
+      `lk egress stop --id <egress-id>`, using the egress ID from that list.
+
+**While it runs, watch** these (SQL in the Supabase SQL editor, the rest where it names):
+
+- **Recordings:** `lk egress list --active --json` in the terminal lists no more egresses than
+  `<capacity>`. With the outline on, `lk agent logs` shows no more sessions than the plan allows.
+- **Capacity in use**, the count the queue checks before offering a match. It stays at or below
+  `<capacity>`; at capacity, queued players wait without a match:
 
   ```sql
   SELECT (SELECT count(*) FROM yaparena.debates WHERE NOT is_demo AND (status = 'live'
@@ -277,30 +410,39 @@ open, but not for a public queue
 
 - **The queue:**
   `SELECT status, count(*) FROM yaparena.matchmaking_tickets WHERE updated_at > now() - interval '1 hour' GROUP BY 1;`
-- **Players online** (they can receive "now" challenges):
+- **Players online** (who can receive "now" challenges):
   `SELECT count(*) FROM yaparena.matchmaking_presence WHERE seen_at > now() - interval '60 seconds';`
-- **Database connections:** the 8.4 query stays at one per web process.
-- **Web log:** `live update failed`, `live update presence failed`,
-  `user-streams listener connection lost` and `live update stream fell behind`. One-off lines are
-  fine; repeating ones are not.
-- **Worker log:** `matchmaking sweep failed`, `automatic debate start failed` and
+- **Database connections:** the 8.4 query stays at `1` per web process.
+- **Web service Logs** (search each): `live update failed`, `live update presence failed`,
+  `listener connection lost` and `live update stream fell behind`. One-off lines are fine;
+  repeating ones are not.
+- **Worker Logs** (search each): `matchmaking sweep failed`, `automatic debate start failed` and
   `matchmaking retention cleanup failed`.
 
 **Results notices with matchmaking off.** Live updates also carry the notice when a player's Yap
-Coins results are revealed. They are always on with matchmaking. To run them with matchmaking off,
-set `USER_STREAM_ENABLED=true` on web, with the same port 5432 rule, and check 8.4.
+Coins results are revealed. They are always on with matchmaking. To run them with matchmaking off:
 
-**Turning it off.** Finish any trial debate, then set `MATCHMAKING_ENABLED=false` on the worker and
-web (and `USER_STREAM_ENABLED=false` if set), and deploy both.
+1. Render → web service → **Environment** → **+ Add Environment Variable**. Key
+   `USER_STREAM_ENABLED`, value `true`.
+2. Click **Save and deploy**.
+3. Run the 8.4 checks; the 8.2 port rule applies.
+
+**Turning it off.** Let any trial debate end first (8.10).
+
+1. Render → `yaparena-staging-jobs` → **Environment**. Set `MATCHMAKING_ENABLED` to `false`, then
+   **Save and deploy**, and wait for "Deploy live" in **Events**.
+2. Repeat on the web service. Set `USER_STREAM_ENABLED` to `false` there too if you set it.
 
 - Check:
-  - The `data-matchmaking` count in 8.3 prints `0`.
-  - The 8.4 query prints `0`.
-  - The worker logs no more matchmaking lines.
+  - `curl -fsS https://<staging-host>/topics | grep -c data-matchmaking` prints `0`.
+  - The 8.4 query returns `0`.
+  - The worker's **Logs** show no `background job ran` line with `"job":"matchmaking"` after the
+    deploy.
 - What stays:
   - **Queue tickets:** they stay in the database unused, and close as stale if it's turned on
     again.
-  - **Booked debates:** debates booked through challenges stay scheduled; start them as operator.
+  - **Booked debates:** debates booked through challenges stay scheduled. Start them with
+    **Operator controls**.
   - **Open challenges:** they can still be answered on `/match`.
 
 ## Rollback
