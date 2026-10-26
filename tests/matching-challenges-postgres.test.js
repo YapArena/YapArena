@@ -8,6 +8,10 @@ import {
   createMatchingRepository,
   MatchConflictError,
 } from "../dist/features/matching/repository.js";
+import {
+  DEBATER_CONSENT_VERSION,
+  DebaterSettingsRequiredError,
+} from "../dist/features/transcription/debater-settings.js";
 
 // Sweeps take a database lock that a parallel suite's sweep may hold; retry until one runs.
 async function sweepOnce(instance) {
@@ -265,6 +269,65 @@ describe(
       await sweepOnce(queue);
       assert.equal(await notices(c.id, "event.starting"), 1);
       assert.equal(await notices(d.id, "event.starting"), 1);
+    });
+
+    it("asks for a debate language and consent before queueing, challenging or accepting", async () => {
+      const strict = createMatchingRepository(runtime, {
+        requireDebaterSettings: true,
+      });
+      const strictQueue = createMatchmaking(runtime, {
+        liveDebateCapacity: 0,
+        requireDebaterSettings: true,
+      });
+      const slug = await topic();
+      const [a, b] = await Promise.all([player(), player()]);
+      const ready = (user, version = DEBATER_CONSENT_VERSION) =>
+        owner.query(
+          `INSERT INTO debater_settings (user_id, language, consent_version, consented_at)
+           VALUES ($1, 'en', $2, CURRENT_TIMESTAMP)
+           ON CONFLICT (user_id) DO UPDATE SET consent_version = $2`,
+          [user.id, version],
+        );
+      const send = (extra) =>
+        strict.createRequest(a.id, {
+          kind: "direct",
+          topicSlug: slug,
+          targetHandle: b.handle,
+          proposition: "Canada should expand nuclear power",
+          requestedSide: "A",
+          scheduledAt: hours(3),
+          ...extra,
+        });
+      await assert.rejects(send(), (error) => {
+        assert.ok(error instanceof DebaterSettingsRequiredError);
+        assert.deepEqual(error.missing, ["language", "consent"]);
+        return true;
+      });
+      await assert.rejects(
+        strictQueue.enter(a.id, { topicSlug: slug, side: "A" }),
+        DebaterSettingsRequiredError,
+      );
+      // Consent to older wording no longer counts.
+      await ready(a, "2020-01-01");
+      await assert.rejects(send(), (error) => {
+        assert.deepEqual(error.missing, ["consent"]);
+        return true;
+      });
+      await ready(a);
+      const request = await send();
+      await assert.rejects(
+        strict.acceptRequest(b.id, request.id),
+        DebaterSettingsRequiredError,
+      );
+      await ready(b);
+      const debate = await strict.acceptRequest(b.id, request.id);
+      assert.equal(debate.status, "scheduled");
+      const entered = await strictQueue.enter(a.id, {
+        topicSlug: slug,
+        side: "A",
+      });
+      assert.equal(entered.ticket.status, "searching");
+      await strictQueue.leave(a.id);
     });
 
     it("puts a booked debate in both players' live state from a day ahead", async () => {

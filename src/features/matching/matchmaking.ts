@@ -1,6 +1,7 @@
 import type { Pool, PoolClient } from "pg";
 import { withTransaction } from "../../platform/transaction.ts";
 import { runExclusiveDatabaseJob } from "../../platform/database-jobs.ts";
+import { assertDebaterSettings } from "../transcription/debater-settings.ts";
 import {
   activeRules,
   remindScheduledDebate,
@@ -339,7 +340,14 @@ export function createMatchmaking(
   {
     liveDebateCapacity,
     requireDeviceCheck = false,
-  }: { liveDebateCapacity: number; requireDeviceCheck?: boolean },
+    // While the live outline is on, queueing needs a debate language and transcription consent:
+    // a 30-second accept leaves no time for forms (Decision 0011).
+    requireDebaterSettings = false,
+  }: {
+    liveDebateCapacity: number;
+    requireDeviceCheck?: boolean;
+    requireDebaterSettings?: boolean;
+  },
 ) {
   async function participantOffer(userId: string, offerId: string) {
     const result = await database.query<OfferRow>(
@@ -601,6 +609,7 @@ export function createMatchmaking(
       await withTransaction(database, async (client) => {
         await lockUsers(client, userId);
         await profileFor(client, userId);
+        if (requireDebaterSettings) await assertDebaterSettings(client, userId);
         await ensureAvailable(
           client,
           userId,

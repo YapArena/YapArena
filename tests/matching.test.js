@@ -10,6 +10,7 @@ import {
   MatchNotFoundError,
 } from "../dist/features/matching/repository.js";
 import { createLogger } from "../dist/platform/logger.js";
+import { DebaterSettingsRequiredError } from "../dist/features/transcription/debater-settings.js";
 
 const id = "11111111-1111-4111-8111-111111111111";
 const user = { id: "7", email: null, createdAt: new Date("2026-09-01") };
@@ -248,6 +249,19 @@ describe("matching API", () => {
       404,
     );
     assert.equal(calls.filter((entry) => entry[1] === "7").length >= 5, true);
+  });
+
+  it("asks for debater settings before a challenge is sent or accepted", async () => {
+    const f = fixture({
+      failure: new DebaterSettingsRequiredError(["consent"]),
+    });
+    const accepted = await f.authenticated(
+      "post",
+      `/api/matching/requests/${id}/accept`,
+    );
+    assert.equal(accepted.status, 409);
+    assert.equal(accepted.body.code, "debater_settings_required");
+    assert.deepEqual(accepted.body.missing, ["consent"]);
   });
 
   it("maps missing and conflicting requests to deterministic responses", async () => {
