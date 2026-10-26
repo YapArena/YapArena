@@ -107,8 +107,13 @@ describe(
       );
       const debate = await matching.acceptRequest(b.id, request.id);
       assert.ok(Date.now() - new Date(debate.scheduledAt).getTime() < 60_000);
-      const joining = (await queue.state(a.id)).debate;
-      assert.equal(joining.slug, debate.slug);
+      const joining = await queue.state(a.id);
+      assert.equal(joining.debate.slug, debate.slug);
+      assert.equal(
+        joining.upcoming,
+        null,
+        "a now debate has its own countdown",
+      );
       assert.equal((await queue.state(b.id)).challenge, null);
     });
 
@@ -144,6 +149,10 @@ describe(
         ),
         [first.getTime(), second.getTime()],
       );
+      assert.equal(listed.initiatorHandle, a.handle);
+      assert.equal(listed.debateStatus, null);
+      assert.equal(listed.initiatorName, "Challenge player");
+      assert.equal(listed.targetHandle, b.handle);
       await assert.rejects(
         matching.acceptRequest(b.id, request.id),
         /choose one of the proposed times/,
@@ -256,6 +265,36 @@ describe(
       await sweepOnce(queue);
       assert.equal(await notices(c.id, "event.starting"), 1);
       assert.equal(await notices(d.id, "event.starting"), 1);
+    });
+
+    it("puts a booked debate in both players' live state from a day ahead", async () => {
+      const slug = await topic();
+      const [a, b, c, d] = await Promise.all([
+        player(),
+        player(),
+        player(),
+        player(),
+      ]);
+      const when = hours(3);
+      const request = await challenge(a, b, slug, { scheduledAt: when });
+      assert.equal((await queue.state(a.id)).upcoming, null);
+      const debate = await matching.acceptRequest(b.id, request.id);
+      for (const speaker of [a, b]) {
+        const { upcoming } = await queue.state(speaker.id);
+        assert.equal(upcoming.slug, debate.slug);
+        assert.equal(
+          upcoming.proposition,
+          "Canada should expand nuclear power",
+        );
+        assert.equal(new Date(upcoming.startsAt).getTime(), when.getTime());
+        assert.equal(
+          new Date(upcoming.joinDeadlineAt).getTime() - when.getTime(),
+          600_000,
+        );
+      }
+      const later = await challenge(c, d, slug, { scheduledAt: hours(30) });
+      await matching.acceptRequest(d.id, later.id);
+      assert.equal((await queue.state(c.id)).upcoming, null);
     });
 
     it("accepts a request opened before time proposals at its original time", async () => {

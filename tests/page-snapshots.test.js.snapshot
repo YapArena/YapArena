@@ -7393,13 +7393,13 @@ exports[`renders the coins and match pages 3`] = `
 </ul>
 </section>
 <section class="information-card">
-<span class="eyebrow">02 / OPEN A REQUEST</span>
-<h2>Set the proposition</h2>
-<form id="request-create" class="stack-form">
-<label>Type<select name="kind">
-<option value="direct">Direct challenge</option>
-</select>
+<span class="eyebrow">02 / CHALLENGE A PERSON</span>
+<h2>Pick an opponent</h2>
+<form id="challenge-create" class="stack-form">
+<label>Opponent<input name="targetHandle" list="people-options" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Search by handle or name" required>
 </label>
+<datalist id="people-options">
+</datalist>
 <label>Published topic slug<input name="topicSlug" pattern="[a-z0-9][a-z0-9-]{2,79}" required>
 </label>
 <label>Proposition<input name="proposition" minlength="10" maxlength="240" required>
@@ -7409,13 +7409,24 @@ exports[`renders the coins and match pages 3`] = `
 <option value="B">Side B</option>
 </select>
 </label>
-<label>Opponent handle for direct challenges<input name="targetHandle" pattern="[a-z0-9][a-z0-9-]{2,39}">
+<fieldset class="choice-group">
+<legend>When</legend>
+<label>
+<input type="radio" name="mode" value="now" checked> Now</label>
+<label>
+<input type="radio" name="mode" value="scheduled"> Propose times</label>
+</fieldset>
+<div class="challenge-times" data-challenge-times hidden>
+<label>First choice, your local time<input name="time1" type="datetime-local">
 </label>
-<label>Proposed start, your local time<input name="scheduledAt" type="datetime-local" required>
+<label>Second choice (optional)<input name="time2" type="datetime-local">
 </label>
-<button class="button" type="submit">Open request ↗</button>
+<label>Third choice (optional)<input name="time3" type="datetime-local">
+</label>
+</div>
+<button class="button" type="submit">Send challenge ↗</button>
 </form>
-<p class="form-note">The same platform rules apply to every event. Start times must be 1 hour to 90 days ahead.</p>
+<p class="form-note">Now: if they're online, they have 2 minutes to answer; otherwise the challenge waits for them. Proposed times must be 1 hour to 90 days ahead. Unanswered challenges expire after 7 days.</p>
 </section>
 </div>
 <div class="match-grid">
@@ -7425,8 +7436,8 @@ exports[`renders the coins and match pages 3`] = `
 <p>Open a <a href="/topics">topic</a> and queue on a side. You are matched with someone on the other side in seconds.</p>
 </section>
 <section class="information-card">
-<span class="eyebrow">YOUR REQUESTS</span>
-<h2>Challenges and queue</h2>
+<span class="eyebrow">YOUR CHALLENGES</span>
+<h2>Answer or follow up</h2>
 <ul id="my-requests" class="account-list">
 </ul>
 </section>
