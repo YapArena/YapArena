@@ -148,7 +148,7 @@ monolingual $0.29, ElevenLabs Scribe v2 Realtime $0.39; a shadow provider adds i
 ## Pull request 3: the live AI outline
 
 Also behind `LIVE_OUTLINE_ENABLED`; the agent writes outlines only when it has an
-`ANTHROPIC_API_KEY`. Migration `1792980190970_add-live-outline`.
+`ANTHROPIC_API_KEY`. Migration `1792984708611_add-live-outline`.
 
 - **Shared reducer** (`src/features/outline/reducer.ts`, browser-safe). A turn's outline has at most
   4 arguments (label ≤ 80 characters) of at most 6 points (≤ 120), each with its time span in the
