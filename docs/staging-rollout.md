@@ -3,45 +3,321 @@
 Prepared on 2026-10-26 and not run yet. This runbook takes staging from the last deployed release
 to current `main`: the migrations from #90 to #107, Yap Coins turn windows and their round rules
 ([Decision 0012](decisions/0012-live-argument-outline.md)), the transcriber agent, captions and the
-AI outline, and matchmaking ([Decision 0011](decisions/0011-live-matchmaking-and-challenges.md)).
-Each step names a check that proves it worked and what to do when the check fails. Nothing here
-runs by itself; the founder performs each step. It links the existing guides rather than repeating
-them: the [staging guide](render-staging.md), the [operations runbook](operations.md) and the
+AI outline, the speech-to-text provider trial, and matchmaking
+([Decision 0011](decisions/0011-live-matchmaking-and-challenges.md)). The founder performs each
+step; nothing here runs by itself. Each step says where to do it, gives every command and click,
+shows the output that proves it worked, and says what to do when it doesn't. Background is in the
+[staging guide](render-staging.md), the [operations runbook](operations.md) and the
 [coin sandbox operations](coin-sandbox-operations.md).
 
-Secrets are named, never written down here. Keep their values in the password manager, Render's
-environment and LiveKit Cloud's agent secrets.
+Secrets are named here, never written down. Their values live in your password manager, the
+private folder from step 0.3, Render's environment and LiveKit Cloud's agent secrets. Never paste
+them into a chat, an issue or the repository.
+
+## How to use this runbook
+
+**Where things are.** Each item names one of these places:
+
+- **Terminal:** the macOS Terminal app. Unless an item says otherwise, run commands in the release
+  checkout from step 0.4 (`cd ~/yaparena-release`). Paste a command block as it is and press
+  Return. Replace every `<PLACEHOLDER>` first, angle brackets included.
+- **Render:** [dashboard.render.com](https://dashboard.render.com), in the workspace that holds
+  `yaparena-staging-web`. Staging has three services: the web service `yaparena-staging-web`, the
+  jobs worker `yaparena-staging-jobs` and the replay encoder `yaparena-replay-worker`. Click a
+  service's name to open it. Its left pane has:
+  - **Events:** deploys; a finished deploy reads "Deploy live".
+  - **Logs:** a search box at the top filters the lines.
+  - **Environment:** its variables. The eye icon on a row reveals the value.
+  - **Settings** and **Metrics**.
+- **Supabase SQL editor:** [supabase.com/dashboard](https://supabase.com/dashboard), the staging
+  project, **SQL Editor** in the left sidebar, then **+ New query**. Paste the query, click **Run**
+  (Cmd+Return) and read the grid under the editor. The editor runs as an administrator, so use it
+  only for the queries given here.
+- **LiveKit Cloud:** [cloud.livekit.io](https://cloud.livekit.io), the staging project: the one
+  whose URL matches `LIVEKIT_PUBLIC_URL` in the Render web service's **Environment**
+  (`wss://<name>.livekit.cloud`). **Agents** in its left sidebar lists the transcriber.
+- **Two browser profiles:** test accounts A and B each need their own Chrome profile (the profile
+  icon at the top right of Chrome, then **Add**) or their own device, because one profile shares its
+  sign-in across tabs.
+
+Staging's address is `https://yaparena-staging-web.onrender.com` (step 8 calls its host
+`<staging-host>`). Render Free puts it to sleep after 15 idle minutes, so the first request after a
+pause can take about a minute.
+
+**Values you'll fill in:**
+
+| Placeholder                                                                | What it is                                                                      | Where you get it                            |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------- |
+| `<COMMIT_SHA>`, `<RUN_ID>`                                                 | The release commit (40 characters) and its CI run                               | Step 0.1                                    |
+| `<WEB_IMAGE>`, `<ENCODER_IMAGE>`                                           | `ghcr.io/boufe/yaparena@sha256:…` and `ghcr.io/boufe/yaparena-encoder@sha256:…` | Step 0.1                                    |
+| `<MAC_HOME>`                                                               | Your home folder, for example `/Users/yourname`                                 | Terminal: `echo $HOME`                      |
+| `<PROJECT_REF>`, `<POOLER_HOST>`                                           | The Supabase project ID and its session pooler host                             | Step 0.3                                    |
+| `<OWNER_PASSWORD>`, `<RUNTIME_PASSWORD>`                                   | The `yaparena_owner` and `yaparena_runtime` database passwords                  | Step 0.3                                    |
+| `<INGEST_SECRET>`                                                          | The secret the agent and the app share                                          | Step 5.1                                    |
+| `<ELEVENLABS_KEY>`, `<ANTHROPIC_KEY>`                                      | API keys                                                                        | Steps 5.2 and 5.3                           |
+| `<handle-a>`, `<handle-b>`, `<topic-slug>`, `<debate-slug>`, `<debate-id>` | The test accounts' handles, the trial topic, and a debate's address and ID      | [Start a test debate](#start-a-test-debate) |
+
+### Start a test debate
+
+Steps 3, 6 and 7 each need a live debate between test accounts A and B. Until matchmaking is on
+(step 8), an operator starts it. Afterwards, the topic queue (step 8, items 5 and 6) is quicker
+because the debate starts by itself.
+
+1. **Accounts (once).** In A's profile, open `https://yaparena-staging-web.onrender.com/account`
+   and sign in with test account A's email. If asked, pick a handle: `<handle-a>`. On the
+   **Profile** tab, if the banner shows **Make it public**, click it. Do the same for B in B's
+   profile, with `<handle-b>`. From step 6 on, both also fill in the **Debating** card (step 6,
+   item 4).
+2. **Operator (once).** One of your test accounts needs the `operator` role. In the SQL editor,
+   list who has it:
+
+   ```sql
+   SELECT r.user_id, p.handle
+   FROM yaparena.account_roles r
+   LEFT JOIN yaparena.public_profiles p USING (user_id)
+   WHERE r.role = 'operator';
+   ```
+
+   If none of the rows is a test account of yours, give the role to A:
+
+   ```sql
+   INSERT INTO yaparena.account_roles (user_id, role)
+   SELECT user_id, 'operator' FROM yaparena.public_profiles WHERE handle = '<handle-a>'
+   ON CONFLICT DO NOTHING;
+   ```
+
+   - Check: signed in as that account, `https://yaparena-staging-web.onrender.com/api/me/roles`
+     shows `"operator"` in its `roles` list.
+
+3. **Topic (once).** As A, open `https://yaparena-staging-web.onrender.com/match`. Under
+   **01 / START A TOPIC**, fill in **URL slug** `<topic-slug>` (for example `staging-trial`), a
+   **Title**, a **Summary** of at least 10 characters, **Side A label** `For` and **Side B label**
+   `Against`. Click **Create private draft ↗**, then **Publish** on its row. The notice reads
+   "Topic published."
+4. **Request.** As A, under **02 / OPEN A REQUEST**, choose **Type** `Open matchmaking`, fill in
+   **Published topic slug** `<topic-slug>`, a **Proposition** of at least 10 characters, **Your
+   side** `Side A`, and a **Proposed start** at least 1 hour 5 minutes from now. Click **Open
+   request ↗**. The notice reads "Request opened. It expires after 24 hours or 30 minutes before
+   the proposed start."
+5. **Join.** As B, on the same `/match` page, under **OPEN QUEUE / Join a debate**, click **Join**
+   on A's request, then **OK**. The notice reads "Joined. Your event is scheduled."
+6. **Speakers.** A and B each click the debate's row under **YOUR EVENTS**. It opens
+   `https://yaparena-staging-web.onrender.com/debates/<debate-slug>`. Both click **Check camera and
+   join as speaker** and allow the camera and microphone.
+7. **Debate ID.** In the SQL editor:
+
+   ```sql
+   SELECT id, status FROM yaparena.debates WHERE slug = '<debate-slug>';
+   ```
+
+   Keep `id` as `<debate-id>`. `status` reads `ready` once both speakers have joined.
+
+8. **Start.** As the operator, on the debate page, open **Operator controls** under the video, type
+   a **Reason for action** (for example `Staging rollout check`) and click **Start**. You don't
+   need to wait for the proposed start time.
+   - Check: the item 7 query returns `live`.
+   - If it says "both speakers must be connected before start", wait until both speakers' video
+     appears, then click **Start** again.
+
+The debate ends by itself after its rules' maximum length;
+`SELECT rules_snapshot->>'maximum_duration_seconds' FROM yaparena.debates WHERE slug = '<debate-slug>';`
+shows it in seconds. To end it early: **Operator controls**, a **Reason for action**, then **End**.
 
 ## 0. Before you start
 
-1. **Choose the commit.** Take the newest `main` commit whose CI run passed every job, and copy the
-   web and encoder image digests from that run's summary
-   ([CI-published images](render-staging.md#deploy-the-ci-published-images)).
-   - Check: `gh run list --branch main --limit 3` shows `success` for that commit.
-   - If no recent run passed, stop and ask for the failing job to be fixed first.
-2. **Decide the accounts and plans.** Before step 5:
-   - **LiveKit:** at most 2 live debates on Build, 10 on Ship and 25 on Scale for the
-     transcriber; Ship allows 100 concurrent recordings. `LIVE_DEBATE_CAPACITY` must stay at or
-     below the smallest limit.
-   - **ElevenLabs:** a plan whose realtime concurrency covers the trial.
-   - **Anthropic:** API billing (Claude Haiku 5.5 live, Claude Sonnet 5.5 cleanup).
-   - **Render and Supabase:** the hub's plan lists Render always-on, Supabase paid and encoder
-     sizing for a public launch; staging can stay on today's plans for the trial.
-3. **Back up the database.** Follow [create a backup](operations.md#create-a-backup) or take a
-   Supabase backup.
-   - Check: the backup (or Supabase's backup list) shows today's time.
-4. **Prepare a local checkout** of the chosen commit for the operator scripts:
-   - Node 24, then `npm ci` and `npm run build`. `npm ci` is needed because #96 added the
-     `@livekit/agents` packages; the CI images already contain them.
-   - The LiveKit CLI (`lk`), signed in to the staging project.
-   - Check: `node --version` prints v24, and `lk project list` shows the staging project.
+### 0.1 Choose the commit and its images
+
+Terminal, in any folder:
+
+```sh
+gh run list --repo Boufe/YapArena --workflow CI --branch main --event push --limit 5 \
+  --json status,conclusion,databaseId,headSha,displayTitle \
+  --jq '.[] | "\(.status) \(.conclusion) \(.databaseId) \(.headSha) \(.displayTitle)"'
+```
+
+Each line reads `<status> <conclusion> <run id> <commit SHA> <title>`, newest first. Take the first
+line that starts with `completed success`: its third word is `<RUN_ID>` and its fourth is
+`<COMMIT_SHA>`. Open `https://github.com/Boufe/YapArena/actions/runs/<RUN_ID>` in the browser. On
+its **Summary** page, scroll down to **web image** and **encoder image**, and copy each
+`ghcr.io/…@sha256:…` line: they are `<WEB_IMAGE>` and `<ENCODER_IMAGE>`.
+
+- Check: the summary lists both images, and the commit's title is a merge of #119 or later.
+- If:
+  - `gh` says you aren't logged in: run `gh auth login`, choose **GitHub.com**, **HTTPS** and
+    **Login with a web browser**, then rerun.
+  - None of the five lines is `completed success`: stop and ask for the failing job to be fixed
+    first. For example, the 2026-10-26 runs failed the encoder's OpenSSL scan until #123.
+  - The commit is a merge after #124: newer PRs may add migrations. Run
+    `ls ~/yaparena-release/migrations | tail -15` after step 0.4 and compare it with the table in
+    step 1; read the PR of any name that isn't there before continuing.
+
+### 0.2 Decide the accounts and plans
+
+- **LiveKit Cloud:** the plan sets how many debates can run at once. Build allows 100 connections,
+  5 agent sessions and 2 recordings at once; Ship 1,000, 20 and 100
+  ([pricing](https://livekit.com/pricing), read 2026-10-26). Step 8.1 turns that into
+  matchmaking's capacity. Deepgram speech-to-text runs on LiveKit Inference and is billed by
+  LiveKit: $0.0048 a minute on Build and Ship, after the plan's included credits.
+- **ElevenLabs:** only for the trial (step 7). Any plan with API access to speech to text works;
+  the trial uses one realtime stream at a time. Your plan is at
+  [elevenlabs.io/app/subscription](https://elevenlabs.io/app/subscription).
+- **Anthropic:** the AI outline calls Claude Haiku 5.5 live and Claude Sonnet 5.5 once per turn,
+  paid from prepaid API credits. In the [Claude Console](https://platform.claude.com), open
+  **Settings → Billing** and buy credits (for example $20 for the trial).
+- **Render and Supabase:** today's plans (web Free, jobs worker Starter, Supabase Free) are enough
+  for this rollout and the trial. The public-launch plan is a separate decision.
+
+### 0.3 Make your private folder
+
+The scripts read database URLs from files outside the repository. Terminal:
+
+```sh
+mkdir -p ~/yaparena-private/trial && chmod 700 ~/yaparena-private
+echo $HOME
+```
+
+The second line prints `<MAC_HOME>`.
+
+1. **Certificate.** In Supabase, open the staging project's **Project Settings** (gear icon at the
+   bottom of the left sidebar), then **Database**, then **Download certificate** under **SSL
+   Configuration**. Then, in the Terminal:
+
+   ```sh
+   mv ~/Downloads/prod-ca-2021.crt ~/yaparena-private/supabase-ca.crt
+   head -1 ~/yaparena-private/supabase-ca.crt
+   ```
+
+   It prints `-----BEGIN CERTIFICATE-----`. If the download has another name, use that name in
+   the `mv` line.
+
+2. **Host and project ID.** In Supabase, click **Connect** in the top bar and choose **Session
+   pooler** (port 5432; never the transaction pooler on port 6543). The string reads
+   `postgresql://postgres.<PROJECT_REF>:[YOUR-PASSWORD]@<POOLER_HOST>:5432/postgres`. Note the
+   two values.
+3. **Passwords.** `<OWNER_PASSWORD>` and `<RUNTIME_PASSWORD>` are in your password manager from
+   when the roles were provisioned ([database isolation](security/database-isolation.md)). The
+   runtime one is also inside `DATABASE_URL` in the Render web service's **Environment**, between
+   the `:` and the `@`. If a password has characters other than letters, digits, `-`, `_`, `.` and
+   `~`, encode it:
+
+   ```sh
+   read -rs "PW?Password: " && echo && PW="$PW" node -e 'console.log(encodeURIComponent(process.env.PW))'; unset PW
+   ```
+
+   Paste the password at the prompt (it stays hidden), press Return, and use the printed value.
+
+4. **Owner file.** Run `nano ~/yaparena-private/owner.env`, type these three lines with your values,
+   save with Ctrl+O and Return, and quit with Ctrl+X:
+
+   ```text
+   DATABASE_URL='postgresql://yaparena_owner.<PROJECT_REF>:<OWNER_PASSWORD>@<POOLER_HOST>:5432/postgres?sslmode=verify-full&sslrootcert=<MAC_HOME>/yaparena-private/supabase-ca.crt'
+   COIN_SANDBOX_OWNER_DATABASE_URL='<the same URL as DATABASE_URL>'
+   COIN_SANDBOX_RAIL=simulation
+   ```
+
+5. **Runtime file**, read-only, for the trial report. Run `nano ~/yaparena-private/runtime.env`:
+
+   ```text
+   TRANSCRIPTION_TRIAL_DATABASE_URL='postgresql://yaparena_runtime.<PROJECT_REF>:<RUNTIME_PASSWORD>@<POOLER_HOST>:5432/postgres?sslmode=verify-full&sslrootcert=<MAC_HOME>/yaparena-private/supabase-ca.crt'
+   ```
+
+6. Make both files readable only by you:
+
+   ```sh
+   chmod 600 ~/yaparena-private/*.env
+   ```
+
+- Check: these print `yaparena_owner` and then `yaparena_runtime`:
+
+  ```sh
+  (set -a; source ~/yaparena-private/owner.env; psql "$DATABASE_URL" -tAc 'SELECT current_user')
+  (set -a; source ~/yaparena-private/runtime.env; psql "$TRANSCRIPTION_TRIAL_DATABASE_URL" -tAc 'SELECT current_user')
+  ```
+
+- If it prints:
+  - `password authentication failed`: the password is wrong, or it needs encoding (item 3).
+  - `Tenant or user not found`: the user part must be `yaparena_owner.<PROJECT_REF>` (or
+    `yaparena_runtime.<PROJECT_REF>`).
+  - `root certificate file … does not exist`: fix the `sslrootcert` path.
+  - `command not found: psql`: run `brew install postgresql@17`, then retry.
+
+### 0.4 Prepare the release checkout
+
+Terminal. The first line is your existing YapArena clone; change it if yours is elsewhere:
+
+```sh
+cd ~/Documents/Codex/YapArena
+git fetch origin
+git worktree add --detach ~/yaparena-release <COMMIT_SHA>
+cd ~/yaparena-release
+node --version
+npm ci
+npm run build
+```
+
+If `~/yaparena-release` already exists from an earlier release, replace the third line with
+`git -C ~/yaparena-release checkout --detach <COMMIT_SHA>`. `npm ci` matters: #96 added the
+`@livekit/agents` packages.
+
+Then install the LiveKit CLI and link it to the staging project:
+
+```sh
+brew install livekit-cli
+lk cloud auth
+lk project list
+```
+
+`lk cloud auth` opens the browser: sign in to LiveKit Cloud, select the staging project and
+confirm. If the terminal asks whether to make it the default project, answer yes.
+
+- Check:
+  - `node --version` prints `v24.` followed by more digits.
+  - `npm run build` ends without an `error` line.
+  - `git -C ~/yaparena-release log -1 --format=%H` prints `<COMMIT_SHA>`.
+  - `lk project list` marks the staging project with `*`, and its URL matches Render's
+    `LIVEKIT_PUBLIC_URL`.
+  - `pg_dump --version` prints `pg_dump (PostgreSQL) 17.` and more digits.
+- If:
+  - Node isn't version 24: install Node 24 from [nodejs.org](https://nodejs.org), open a new
+    Terminal window and rerun from `cd ~/yaparena-release`.
+  - The `*` is on another project: `lk project set-default <name of the staging project>`.
+
+### 0.5 Back up the database
+
+Supabase Free makes no automatic backups, so take one now. Terminal:
+
+```sh
+(set -a; source ~/yaparena-private/owner.env; pg_dump --format=custom --schema=yaparena --schema=yaparena_migrations --file="$HOME/yaparena-private/staging-before-rollout.dump" --dbname="$DATABASE_URL")
+pg_restore --list ~/yaparena-private/staging-before-rollout.dump | head -5
+```
+
+- Check: the first command prints nothing. The second prints lines starting with `;`, including
+  `; Archive created at` and today's date.
+- If:
+  - It says `server version mismatch`: install the server's version
+    (`brew install postgresql@<its major version>`) and use that `pg_dump`.
+  - It says `permission denied`: stop; `owner.env` doesn't sign in as the owner (step 0.3 check).
+  - The project is on Supabase Pro: **Database → Backups** also lists today's daily backup.
 
 ## 1. Apply the owner migrations
 
-Web refuses to start while migrations are pending, so the owner applies them first. Run the
-reviewed web image as a one-off process with the owner URL, as in step 2 of
-[deploy the web service](render-staging.md#deploy-the-web-service)
-(`node scripts/migrate-database.ts`). This release adds:
+Web refuses to start while migrations are pending, so the owner applies them first. The release
+checkout holds the same migration files as the release images.
+
+1. Note where staging stands. In the SQL editor:
+
+   ```sql
+   SELECT count(*) AS applied, max(name) AS newest FROM yaparena_migrations.pgmigrations;
+   ```
+
+2. Terminal:
+
+   ```sh
+   cd ~/yaparena-release
+   node --env-file="$HOME/yaparena-private/owner.env" scripts/migrate-database.ts
+   ```
+
+This release adds:
 
 | Migration                                        | PR   |
 | ------------------------------------------------ | ---- |
@@ -59,109 +335,525 @@ reviewed web image as a one-off process with the owner URL, as in step 2 of
 
 Staging may also be missing older ones; the runner applies every pending migration in order.
 
-- Check: the job prints `Database migrations completed with the migration identity.` As the owner
-  (Supabase SQL editor or `psql`),
-  `SELECT name FROM yaparena_migrations.pgmigrations ORDER BY run_on DESC, id DESC LIMIT 11;`
-  lists the eleven names above.
-- If it prints `Wrong migration identity`, the URL is not the owner's; fix the URL and rerun. Any
-  other failure stops the release: keep the old release running, keep the job's output, and do not
-  deploy. Migrations are never rolled back.
+- Check: it prints `Database migrations completed with the migration identity.` Then, in the SQL
+  editor:
 
-## 2. Deploy web and the jobs worker together
+  ```sql
+  SELECT name, run_on FROM yaparena_migrations.pgmigrations ORDER BY name DESC LIMIT 11;
+  ```
 
-Deploy both, straight after step 1 and to the same web digest, as in
-[deploy a later commit](render-staging.md#deploy-a-later-commit), then the encoder from the same CI
-run. Don't wait between them: once #100's migration is in, the previous release can no longer
-settle five-day rounds, so its coin loop fails until the new release runs.
+  It lists the eleven names above, from `1792986588837_add-challenge-scheduling` down to
+  `1792971645611_add-turn-trading-windows`. The `applied` count from item 1 grew by the number of
+  names that were new.
 
-- Check:
-  - `curl -fsS https://<staging-host>/ready` returns status 200 with `"ready"`.
-  - `SMOKE_BASE_URL=https://<staging-host> node scripts/smoke-staging.ts` prints every check
-    with its expected status.
-  - The worker's Render log shows `background worker started`, and the encoder passes its startup
-    checks.
-- If `/ready` fails with pending migrations, step 1 didn't complete. If the worker logs coin
-  loop errors, confirm it runs the same digest as web. To back out, set the previous digests (see
-  [Rollback](#rollback)).
+- If it prints:
+  - `Database migration failed (28P01).`: wrong owner password; fix `owner.env`.
+  - `Database migration failed (ENOTFOUND).`: wrong pooler host.
+  - `ENOENT: no such file or directory` with the certificate's path: fix `sslrootcert`.
+  - `Database migration failed (check provisioning and migration review).`: the URL doesn't sign
+    in as `yaparena_owner` (step 0.3 check).
+  - Any other `Database migration failed (…)`: a migration failed. Stop: keep the old release
+    running, copy the output, send it to S, and deploy nothing. Migrations are never rolled back.
+
+## 2. Deploy web, the jobs worker and the encoder
+
+Do this straight after step 1, without waiting between services: once #100's migration is in, the
+previous release can no longer settle five-day rounds, so its coin loop fails until the new release
+runs.
+
+First, see how each service gets its code. In Render, open the service, then **Settings**. A
+service that shows an **Image URL** is image-backed (use A). One that shows a **Repository** and a
+**Branch** builds from GitHub (use B). Check all three; they may differ.
+
+**A. Image-backed services.** For each service, in this order:
+
+1. `yaparena-staging-web` → **Settings** → **Image URL** → **Edit**. Paste `<WEB_IMAGE>`, then
+   **Save Changes**.
+2. `yaparena-staging-jobs`: the same, also with `<WEB_IMAGE>`; the worker runs the web image.
+3. `yaparena-replay-worker`: the same, with `<ENCODER_IMAGE>`.
+4. Open each service's **Events**. If no new deploy started within a minute, click **Manual
+   Deploy** (top right), then **Deploy latest reference**.
+
+Leave each service's Docker Command as it is: `/bin/sh /app/scripts/start-staging.sh` for web,
+`node dist/worker.js` for the jobs worker and `node dist/replay-worker.js` for the encoder.
+
+**B. Services built from GitHub.** On each of the three, click **Manual Deploy** (top right), then
+**Deploy a specific commit**, choose or paste `<COMMIT_SHA>`, and click **Deploy**.
+
+Wait until each service's **Events** shows "Deploy live". Web, on Render Free, can take several
+minutes.
+
+- Check, Terminal:
+
+  ```sh
+  curl -fsS https://yaparena-staging-web.onrender.com/ready
+  ```
+
+  prints `{"status":"ready"}`.
+
+  ```sh
+  cd ~/yaparena-release
+  SMOKE_BASE_URL=https://yaparena-staging-web.onrender.com node scripts/smoke-staging.ts
+  ```
+
+  prints a JSON report whose `results` list seven paths: `status` 200 for each, except 401 for
+  `/api/measurement/dashboard` and `/measurement`. A failing check stops with an `AssertionError`
+  naming the path.
+
+- Check, Render **Logs** (search each):
+  - `yaparena-staging-web`: `server started`, once after the deploy.
+  - `yaparena-staging-jobs`: `background worker started`, then `background job ran` lines.
+  - `yaparena-replay-worker`: `Automatic replay worker started`.
+- If:
+  - Web's deploy fails and its **Logs** show `database migrations are pending`: step 1 didn't
+    complete. Finish it, then deploy web again.
+  - The worker's **Logs** repeat coin errors: it isn't running the same commit or image as web;
+    compare the two services' **Settings**.
+  - To go back, see [Rollback](#rollback).
 
 ## 3. Turn on Yap Coins turn windows
 
-Needs `COIN_SANDBOX_ENABLED=true`. Set `TURN_WINDOWS_ENABLED=true` on **both** web and the jobs
-worker, then deploy both ([enable turn trading windows](render-staging.md#enable-turn-trading-windows)).
-It is safe for user-created debates: their rounds reveal after five days (#100) and debaters
-can't take positions in their own debate.
+Each live turn becomes one Yap Coins trading window. It's safe for user-created debates: their
+rounds reveal five days after the debate (#100), and debaters can't take positions in their own
+debate.
 
-- Check: start a debate with two test speakers. Within about a second,
-  `GET https://<staging-host>/api/public/debates/<id>/windows` lists a window with `turnNumber` 1,
-  `revealMode` `five_day`, and a new one at each turn change.
-- If the route answers 404, the switch is off on web. If no window appears, it is off on the
-  worker, which opens windows. To turn it off, set it to `false` on both and deploy.
+1. Render → `yaparena-staging-web` → **Environment**. Confirm `COIN_SANDBOX_ENABLED` is `true`.
+   Click **+ Add Environment Variable**, enter key `TURN_WINDOWS_ENABLED` and value `true` (if the
+   key already exists, edit the value on its row instead), then choose **Save and deploy**.
+2. Do the same on `yaparena-staging-jobs`: it opens the windows.
+3. Wait for "Deploy live" in both services' **Events**.
+
+- Check: [start a test debate](#start-a-test-debate). Once it's live, Terminal:
+
+  ```sh
+  curl -fsS https://yaparena-staging-web.onrender.com/api/public/debates/<debate-id>/windows | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const r=JSON.parse(s);console.log(r.revealMode,r.windows.map(w=>w.turnNumber+w.side).join(" "))})'
+  ```
+
+  Within a second of the start it prints `five_day 1A` (or `1B` if B speaks first). Run it again
+  after the first turn change: `five_day 1A 2B`.
+
+- If:
+  - curl reports error 404: web doesn't have the switch; check its **Environment** and **Events**.
+  - It prints `five_day` and nothing else: the worker doesn't have the switch.
+  - To turn it off: set `TURN_WINDOWS_ENABLED` to `false` on both services and **Save and deploy**.
 
 ## 4. Per-round reveal for founder-created debates (optional)
 
-Every debate is five-day unless the owner records per-round reveal before its first round. For
-each founder-created debate that should reveal per round, run the operator command from the local
-checkout, with `COIN_SANDBOX_OWNER_DATABASE_URL` and `COIN_SANDBOX_RAIL` in the operator's
-private environment ([coin sandbox operations](coin-sandbox-operations.md#reveal-mode-and-debaters)):
+Every debate is five-day unless the owner records per-round reveal before its first round opens,
+that is, before it goes live. Skip this step unless a founder-created debate should reveal each
+round at its cutoff.
 
-```sh
-node scripts/coin-sandbox-operator.ts set-reveal-mode < /private/path/reveal-mode.json
-```
+1. Get its ID. In the SQL editor,
+   `SELECT id, status FROM yaparena.debates WHERE slug = '<debate-slug>';` must show `scheduled` or
+   `ready`. Its `id` is `<debate-id>`.
+2. Run `nano ~/yaparena-private/reveal-mode.json`, type this line, save and quit:
 
-The JSON has `debateId`, `mode` (`per_round`) and `reason`.
+   ```json
+   {
+     "debateId": "<debate-id>",
+     "mode": "per_round",
+     "reason": "Founder-created debate"
+   }
+   ```
 
-- Check: it prints status `recorded` (`unchanged` when it was already recorded).
-- If it says the reveal mode is locked once a round opens, the debate already has a round and
-  stays five-day.
+3. Terminal:
+
+   ```sh
+   cd ~/yaparena-release
+   node --env-file="$HOME/yaparena-private/owner.env" scripts/coin-sandbox-operator.ts set-reveal-mode < ~/yaparena-private/reveal-mode.json
+   ```
+
+- Check: it prints
+  `{"command":"set-reveal-mode","environment":"sandbox","rail":"simulation","status":"recorded","processed":0}`
+  (`"unchanged"` instead of `"recorded"` if it was already recorded). In the SQL editor,
+  `SELECT mode FROM yaparena.coin_debate_reveal_modes WHERE debate_id = '<debate-id>';` returns
+  `per_round`.
+- If it prints:
+  - `Sandbox operator command failed; inspect private database audit evidence.`: run
+    `SELECT count(*) FROM yaparena.coin_debate_rounds WHERE debate_id = '<debate-id>';`. Above 0
+    means a round already opened and the debate stays five-day; 0 means the debate ID is wrong.
+  - `COIN_SANDBOX_RAIL must explicitly select simulation or base-sepolia` or
+    `dedicated owner connection required`: fix `owner.env` (step 0.3).
 
 ## 5. Deploy the transcriber agent to LiveKit Cloud
 
-Follow steps 1 to 3 of [enable live transcription and captions](render-staging.md#enable-live-transcription-and-captions):
+### 5.1 Make the ingest secret
 
-1. Generate the ingest secret.
-2. Stage the agent and create it once with `lk agent create --region eu-central`. The region can't
-   change later.
-3. Set its secrets with `lk agent update-secrets`:
-   - `YAPARENA_INGEST_URL`, `TRANSCRIPTION_INGEST_SECRET` and `TRANSCRIPTION_PROVIDER`;
-   - for the trial, `TRANSCRIPTION_SHADOW_PROVIDER` and `ELEVEN_API_KEY`;
-   - `ANTHROPIC_API_KEY`, for the AI outline.
+Terminal:
 
-   LiveKit sets its own URL and keys.
+```sh
+openssl rand -hex 32
+```
 
-- Check: `lk agent status` (or the LiveKit Cloud dashboard's Agents page) shows the agent running.
-  `lk agent logs` shows it registered, with no ingest errors.
-- If the build fails, restage from the chosen commit and run `lk agent deploy` again. Never run
-  the agent locally with `start` against staging: it would compete for real debates.
+It prints 64 characters: `<INGEST_SECRET>`. Save it in your password manager, for example as
+"YapArena staging transcription ingest secret". The agent, web and the jobs worker all get this
+same value.
+
+### 5.2 Create the ElevenLabs key (for the trial)
+
+1. Open [elevenlabs.io/app](https://elevenlabs.io/app) and sign in with the account whose plan you
+   chose in step 0.2.
+2. In the left sidebar, click **Developers**, then the **API Keys** tab, then **Create API key**.
+3. Name it `yaparena-staging-transcriber`. Keep **Restrict key** on, set **Speech to Text** to
+   **Access** and everything else to **No access**. Optionally set a credit limit.
+4. Click **Create** and copy the key; it is shown only once. This is `<ELEVENLABS_KEY>`; save it in
+   your password manager.
+
+### 5.3 Create the Anthropic key (for the AI outline)
+
+1. Open the [Claude Console](https://platform.claude.com) and sign in with the account that holds
+   the API credits from step 0.2.
+2. Click **Settings**, then **API keys**, then **Create Key**. Choose the **Default** workspace,
+   name it `yaparena-staging-outline`, and click **Add**.
+3. Copy the key, which starts with `sk-ant-` and is shown only once. This is `<ANTHROPIC_KEY>`;
+   save it in your password manager.
+
+### 5.4 Write the agent's secrets file
+
+Run `nano ~/yaparena-private/transcriber-secrets.env`, type these lines with your values (no
+quotes, no spaces around `=`), save and quit:
+
+```text
+YAPARENA_INGEST_URL=https://yaparena-staging-web.onrender.com
+TRANSCRIPTION_INGEST_SECRET=<INGEST_SECRET>
+TRANSCRIPTION_PROVIDER=deepgram
+TRANSCRIPTION_SHADOW_PROVIDER=elevenlabs
+ELEVEN_API_KEY=<ELEVENLABS_KEY>
+ANTHROPIC_API_KEY=<ANTHROPIC_KEY>
+```
+
+Then `chmod 600 ~/yaparena-private/transcriber-secrets.env`. Deepgram runs through LiveKit
+Inference and needs no key. LiveKit sets the agent's own URL and keys. The other settings
+([staging guide](render-staging.md#enable-live-transcription-and-captions)) keep their defaults.
+
+### 5.5 Stage and deploy the agent
+
+Terminal:
+
+```sh
+cd ~/yaparena-release
+node scripts/stage-transcriber.ts ~/yaparena-transcriber-deploy
+lk agent list
+```
+
+The first command prints `staged the transcriber build context in <MAC_HOME>/yaparena-transcriber-deploy`.
+
+**If `lk agent list` shows no agent** (the first time):
+
+```sh
+cd ~/yaparena-transcriber-deploy
+lk agent create --region us-east --secrets-file ~/yaparena-private/transcriber-secrets.env .
+```
+
+Answer `y` if it asks you to confirm. It writes `livekit.toml` into the folder (later restaging
+keeps it), then builds and deploys the agent. The region can't change later. `us-east` (Ashburn,
+Virginia) is the nearest to Render's Ohio web service and to North American debaters; choose
+`eu-central` (Frankfurt) only if most debaters will be in Europe.
+
+**If an agent already exists:**
+
+```sh
+cd ~/yaparena-transcriber-deploy
+lk agent update-secrets --secrets-file ~/yaparena-private/transcriber-secrets.env
+lk agent deploy .
+```
+
+- Check:
+  - `lk agent status` shows one row whose **Status** is `Running`. While it says `Building` or
+    `Setting Up`, wait a minute and run it again.
+  - `lk agent logs` shows `registered worker`. Press Ctrl+C to stop following the logs.
+  - LiveKit Cloud's **Agents** page shows the same agent as running.
+- If the status is:
+  - `Build Failed`: `lk agent logs --log-type build` shows why. Restage (the first command block),
+    then run `lk agent deploy .` in `~/yaparena-transcriber-deploy`.
+  - `CrashLoop`: `lk agent logs` names the bad setting, for example
+    `TRANSCRIPTION_INGEST_SECRET must be at least 32 bytes` or
+    `ELEVEN_API_KEY is required for ElevenLabs transcription`. Fix the file, then run
+    `lk agent update-secrets --secrets-file ~/yaparena-private/transcriber-secrets.env` there.
+- Never run the agent locally with `start` against staging: it would compete for real debates.
 
 ## 6. Turn on captions and the AI outline
 
-On **both** web and the jobs worker, set `LIVE_OUTLINE_ENABLED=true` and the same
-`TRANSCRIPTION_INGEST_SECRET` as the agent (and `TRANSCRIBER_AGENT_NAME` if you changed it), then
-deploy both.
+1. Render → `yaparena-staging-web` → **Environment**. Add (or edit) `LIVE_OUTLINE_ENABLED` with
+   value `true` and `TRANSCRIPTION_INGEST_SECRET` with value `<INGEST_SECRET>`, then choose **Save
+   and deploy**.
+2. Do the same on `yaparena-staging-jobs`: it sends the agent to debates.
+3. Wait for "Deploy live" in both services' **Events**.
+4. In A's and B's browser profiles, open `https://yaparena-staging-web.onrender.com/account`,
+   **Profile** tab, **Debating** card. Choose **Language you debate in** (`Français` for A and
+   `English` for B, as the trial needs), tick the agreement box, and click **Save debating
+   settings**. It reads "Saved. You're ready to debate."
+5. In a second Terminal tab, follow the agent's logs:
 
-- Check, following step 5 of
-  [enable live transcription and captions](render-staging.md#enable-live-transcription-and-captions):
-  1. Two test debaters choose a language and agree on their account's Profile tab ("Debating").
-  2. When their debate becomes ready, `lk agent logs` shows `transcriber joined`.
-  3. Captions appear under the video, and the AI outline panel fills within seconds of each
-     sentence.
-  4. After each turn, `SELECT final_source FROM yaparena.outline_windows WHERE debate_id='<id>'`
-     shows `cleanup` (or `frozen`).
-- If the agent logs ingest 401s, the two ingest secrets differ. If it never joins, check
-  `TRANSCRIBER_AGENT_NAME` on both sides. If there are captions but no outline,
-  `ANTHROPIC_API_KEY` is missing. To turn everything off, set `LIVE_OUTLINE_ENABLED=false` and
-  deploy; the agent then receives no debates.
+   ```sh
+   cd ~/yaparena-transcriber-deploy
+   lk agent logs
+   ```
+
+6. [Start a test debate](#start-a-test-debate).
+
+- Check:
+  - The **Debating** card appears at all; it stays hidden while web doesn't have the switch.
+  - Within a second of the debate becoming ready, the logs show
+    `{"message":"transcriber joined","debateId":"<debate-id>","provider":"deepgram","shadow":"elevenlabs"}`.
+  - Captions appear under the video. The **AI outline** panel fills within a few seconds of each
+    sentence, and the logs show `live outline call` lines; after a turn's first call, their
+    `cacheReadTokens` is above 0.
+  - A few seconds after each turn, the logs show a `window cleanup call` line.
+  - In the SQL editor, during the debate,
+
+    ```sql
+    SELECT role, provider, count(*) FROM yaparena.transcript_segments
+    WHERE debate_id = '<debate-id>' GROUP BY 1, 2;
+    ```
+
+    returns two rows, `primary` `deepgram` and `shadow` `elevenlabs`, whose counts grow.
+
+  - After each turn,
+
+    ```sql
+    SELECT turn_number, final_source, final_model FROM yaparena.outline_windows
+    WHERE debate_id = '<debate-id>' ORDER BY 1;
+    ```
+
+    shows `cleanup` with a Claude Sonnet model, or `frozen` when no cleanup arrived within a minute.
+
+- If the logs show:
+  - `debate is not awaiting transcription` with `"status":"unknown"`: the app refused the agent.
+    The ingest secret differs between the agent and web, `YAPARENA_INGEST_URL` is wrong, or web
+    lacks `LIVE_OUTLINE_ENABLED`.
+  - Nothing at all for this debate: the worker didn't send the agent. Search the worker's **Logs**
+    for `transcriber dispatch failed`, and check that both speakers saved the **Debating** card.
+  - `transcript update refused` with `"status":403`: that speaker hasn't agreed on the **Debating**
+    card.
+  - `speech provider error` with `"provider":"elevenlabs"`: check the ElevenLabs key, its **Speech
+    to Text** permission and the plan.
+  - `live outline call failed` with `"status":401`: the Anthropic key is wrong; with `400`, the
+    credits have probably run out (step 0.2).
+- To turn it off: set `LIVE_OUTLINE_ENABLED` to `false` on web and the worker and **Save and
+  deploy**. The agent then gets no debates.
 
 ## 7. Run the provider trial
 
-Run the [transcription provider trial](transcription-provider-trial.md): two sessions with the
-providers swapped, hand-corrected references, and the report script. Then choose the primary
-provider. Set `TRANSCRIPTION_PROVIDER` to it and remove `TRANSCRIPTION_SHADOW_PROVIDER` (the shadow
-doubles speech-to-text cost).
+Two debates read from the same scripts. Session 1 uses Deepgram for captions and the outline and
+runs ElevenLabs in the shadow on the same audio; session 2 swaps them. What it measures and the
+targets are in the [transcription provider trial](transcription-provider-trial.md). Allow about an
+hour for the sessions and an hour for scoring.
 
-- Check: the report prints one row per provider and language, and the trial's results table is
-  filled in.
-- Send the results to S for the post-trial docs PR.
+You need test accounts A (French) and B (English) with the **Debating** card saved (step 6, item 4) on two computers or phones with the microphones users would use; a third device as viewer,
+ideally a phone that can record its screen; and the operator account.
+
+### 7.1 Write the scripts
+
+Write `~/yaparena-private/trial/script-fr.txt` for A and `~/yaparena-private/trial/script-en.txt`
+for B: five turns each, about 60 seconds of speech per turn (130 to 150 words), on the trial topic.
+Include numbers ("1,2 million", "2035"), proper names and technical terms, and in two turns, a
+sentence that ends right at the turn deadline. Speakers read naturally, at a normal pace.
+
+### 7.2 Session 1: Deepgram primary, ElevenLabs shadow
+
+1. Check that `~/yaparena-private/transcriber-secrets.env` says `TRANSCRIPTION_PROVIDER=deepgram`
+   and `TRANSCRIPTION_SHADOW_PROVIDER=elevenlabs`, as step 5 deployed it.
+2. In a second Terminal tab, keep the agent's logs for this session:
+
+   ```sh
+   cd ~/yaparena-transcriber-deploy
+   lk agent logs | tee ~/yaparena-private/trial/agent-session-1.log
+   ```
+
+3. Start a test debate (A on side A, B on side B), items 4 to 8 of
+   [start a test debate](#start-a-test-debate).
+4. On the viewer phone, open `https://yaparena-staging-web.onrender.com/debates/<debate-slug>`,
+   tap **Join as viewer** and **Enable sound**, and start a screen recording (iPhone: Control
+   Center, then **Screen Recording**; Android: Quick Settings, then **Screen record** with media
+   sound). Keep the captions and the AI outline panel in view.
+5. A and B read their scripts, one turn each, until the debate ends.
+6. Stop the screen recording, then press Ctrl+C in the second tab. Keep the debate's ID as
+   `<debate-id-1>`.
+
+- Check, in the SQL editor:
+
+  ```sql
+  SELECT turn_number, side, language, role, provider, count(*) AS segments
+  FROM yaparena.transcript_segments WHERE debate_id = '<debate-id-1>'
+  GROUP BY 1, 2, 3, 4, 5 ORDER BY 1, 4;
+  ```
+
+  Every turn has a `primary` `deepgram` row and a `shadow` `elevenlabs` row. Keep this result: it
+  gives each turn's number and language for the references (7.4).
+
+- If a turn has no `shadow` row, search the session's log for `speech provider error`.
+
+### 7.3 Session 2: ElevenLabs primary, Deepgram shadow
+
+1. Swap the providers. Terminal:
+
+   ```sh
+   cd ~/yaparena-transcriber-deploy
+   lk agent update-secrets --secrets TRANSCRIPTION_PROVIDER=elevenlabs --secrets TRANSCRIPTION_SHADOW_PROVIDER=deepgram
+   lk agent status
+   ```
+
+   The update restarts the agent; rerun `lk agent status` until it shows `Running`. Then change
+   the same two lines in `~/yaparena-private/transcriber-secrets.env`, so that a later update from
+   the file doesn't swap them back.
+
+2. Repeat 7.2 from item 2, with `agent-session-2.log`, a new debate `<debate-id-2>` and the same
+   scripts.
+
+- Check: the log's `transcriber joined` line shows `"provider":"elevenlabs","shadow":"deepgram"`,
+  and the 7.2 query for `<debate-id-2>` shows `primary` `elevenlabs` and `shadow` `deepgram` rows.
+
+### 7.4 Write the reference transcripts
+
+A reference is what the speakers actually said, written by a person. Make one per session:
+
+1. A few minutes after a debate ends, open its page and click **Play replay**.
+2. For each turn, start from the script's text and correct it to what was said: words skipped,
+   repeated, changed or added. Never copy either provider's text.
+3. Run `nano ~/yaparena-private/trial/reference-1.json` and write one entry per turn, with the
+   turn number and language from the 7.2 query:
+
+   ```json
+   {
+     "turns": [
+       {
+         "turnNumber": 1,
+         "language": "fr",
+         "text": "Le nucléaire est pilotable : il produit à la demande."
+       },
+       {
+         "turnNumber": 2,
+         "language": "en",
+         "text": "Renewables are cheaper and faster to build."
+       }
+     ]
+   }
+   ```
+
+   Leave out any turn you don't want scored. Write `reference-2.json` the same way for session 2.
+
+- Check:
+
+  ```sh
+  node -e 'const r=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));console.log(r.turns.length+" turns")' ~/yaparena-private/trial/reference-1.json
+  ```
+
+  prints `10 turns` (or however many you wrote). A `SyntaxError` names the place to fix, usually a
+  missing comma or quote.
+
+Scoring lowercases, removes punctuation and splits French elisions (`l'énergie` is `l'` and
+`énergie`), the same way for the reference and both providers, so only words count.
+
+### 7.5 Run the report
+
+Look up the current prices per hour of audio. Deepgram Nova-3 on LiveKit Inference is on
+[livekit.com/pricing](https://livekit.com/pricing): $0.0048 a minute ($0.288 an hour) on Build and
+Ship when read on 2026-10-26. ElevenLabs Scribe v2 Realtime is on
+[elevenlabs.io/pricing/api](https://elevenlabs.io/pricing/api) (the script's default is $0.39 an
+hour); call it `<ELEVENLABS_PER_HOUR>`. Terminal:
+
+```sh
+cd ~/yaparena-release
+node --env-file="$HOME/yaparena-private/runtime.env" scripts/transcription-trial.ts <debate-id-1> ~/yaparena-private/trial/reference-1.json --deepgram-per-hour=0.288 --elevenlabs-per-hour=<ELEVENLABS_PER_HOUR> | tee ~/yaparena-private/trial/report-1.json
+node --env-file="$HOME/yaparena-private/runtime.env" scripts/transcription-trial.ts <debate-id-2> ~/yaparena-private/trial/reference-2.json --deepgram-per-hour=0.288 --elevenlabs-per-hour=<ELEVENLABS_PER_HOUR> | tee ~/yaparena-private/trial/report-2.json
+```
+
+- Check: each prints JSON with four `rows`, one per provider and language. One row looks like this
+  (the numbers are only an example):
+
+  ```json
+  {
+    "provider": "deepgram",
+    "role": "primary",
+    "language": "en",
+    "turns": 5,
+    "words": 690,
+    "errors": 41,
+    "substitutions": 25,
+    "deletions": 9,
+    "insertions": 7,
+    "wer": 0.0594,
+    "latencyP50Ms": 420,
+    "latencyP95Ms": 910,
+    "audioMinutes": 5.1,
+    "costPerMinute": 0.0048,
+    "estimatedCost": 0.0245
+  }
+  ```
+
+  `wer` is the word error rate as a fraction: 0.0594 is 5.9%. The latencies run from the end of
+  speech to the final text. `estimatedCost` is this session's cost in US dollars.
+
+- If it prints:
+  - `"rows": []`: the debate ID is wrong, or the reference's turn numbers don't match the debate.
+  - `trial report failed; check the database URL and the debate id`: check `runtime.env` with the
+    step 0.3 check, then the ID.
+  - `the reference needs turns: [{ turnNumber, language, text }]`: fix the JSON's field names.
+  - `Cannot find module` with `dist`: run `npm run build` in `~/yaparena-release`.
+
+### 7.6 Measure the caption and outline delays
+
+Use the two screen recordings: session 1 shows Deepgram's captions, session 2 ElevenLabs'. On a
+Mac, open each in QuickTime Player. **Window → Show Movie Inspector** shows its frame rate (FPS).
+To time a delay, pause where the event starts, press the Right arrow key one frame at a time until
+the result shows, and divide the number of presses by the frame rate.
+
+1. **Captions:** for ten sentence ends, time from the last word heard to the caption showing that
+   sentence's final text. Note the median and the largest. Target: 1 second or less.
+2. **Outline:** for ten sentences, time from the sentence's end to the AI outline panel's change.
+   Note the median and the largest. Target: 3 seconds typical, 5 at most.
+3. **The model's share** of the outline delay, in milliseconds per call:
+
+   ```sh
+   grep '"live outline call"' ~/yaparena-private/trial/agent-session-1.log | grep -o '"latencyMs":[0-9]*'
+   ```
+
+   The rest of the delay is the app and LiveKit delivery.
+
+### 7.7 Fan-out check (optional)
+
+Decision 0012 expects 500 viewers to receive the outline through LiveKit without extra work for the
+web service. The LiveKit CLI simulates at most 50 viewers, and LiveKit's acceptable use policy
+restricts load tests on LiveKit Cloud, so this is a small check; ask LiveKit before testing more.
+The simulated viewers don't run the page: the check covers LiveKit's delivery, not browser code.
+
+1. During a debate with the outline on (a third session, or session 2), in a third Terminal tab:
+
+   ```sh
+   lk load-test --room debate-<debate-id> --subscribers 50 --duration 5m
+   ```
+
+   It downloads the debate's audio and video 50 times, so use a fast connection.
+
+- Check:
+  - The viewer phone's outline keeps updating within the delays you measured.
+  - Render → `yaparena-staging-web` → **Metrics**: CPU stays flat during those 5 minutes.
+  - The table that `lk load-test` prints at the end shows packet loss near 0%.
+
+### 7.8 Record the results and choose the provider
+
+1. Copy the results table from the [trial](transcription-provider-trial.md#results) into
+   `~/yaparena-private/trial/results.md` and fill in one row per report row. Give WER as a
+   percentage. The caption and outline delays belong to the primary rows.
+2. Send `results.md`, `report-1.json` and `report-2.json` to the hub session for S's post-trial
+   docs PR. They contain no transcript text, account details or secrets. Don't send the scripts,
+   references or recordings.
+3. Choose the primary provider: the lower WER, at an acceptable latency and cost. Then run it alone
+   (the shadow doubles speech-to-text cost). In `~/yaparena-private/transcriber-secrets.env`, set
+   `TRANSCRIPTION_PROVIDER` to `deepgram` or `elevenlabs`, delete the
+   `TRANSCRIPTION_SHADOW_PROVIDER` line, and delete the `ELEVEN_API_KEY` line if Deepgram won. Then:
+
+   ```sh
+   cd ~/yaparena-transcriber-deploy
+   lk agent update-secrets --secrets-file ~/yaparena-private/transcriber-secrets.env --overwrite
+   ```
+
+   `--overwrite` replaces all the agent's secrets with the file's, which removes the shadow.
+
+- Check: at the next debate, the `transcriber joined` line shows `"shadow":"none"`.
+- If Deepgram won, you can delete the ElevenLabs key: **Developers** → **API Keys**, the key's
+  menu, **Delete**.
 
 ## 8. Matchmaking (M)
 
@@ -191,14 +883,14 @@ open, but not for a public queue
 
 **Values you'll fill in:**
 
-| Placeholder                | Where to find it                                                                                                              |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `<staging-host>`           | Render → web service → the address under its name at the top, without `https://`, for example `yaparena-staging.onrender.com` |
-| `<capacity>`               | The number you choose in 8.1                                                                                                  |
-| `<handle-a>`, `<handle-b>` | The handles you give accounts A and B in 8.5                                                                                  |
-| `<topic-slug>`             | The "URL slug" you type when creating the trial topic in 8.5, for example `staging-queue-trial`                               |
-| `<debate-slug>`            | The end of a debate page's address: `https://<staging-host>/debates/<debate-slug>`                                            |
-| `<debate-id>`              | The `id` returned by the first query in the 8.6 checks                                                                        |
+| Placeholder                | Where to find it                                                                                                      |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `<staging-host>`           | Render → web service → the address under its name at the top, without `https://`: `yaparena-staging-web.onrender.com` |
+| `<capacity>`               | The number you choose in 8.1                                                                                          |
+| `<handle-a>`, `<handle-b>` | The handles you give accounts A and B in 8.5                                                                          |
+| `<topic-slug>`             | The "URL slug" you type when creating the trial topic in 8.5, for example `staging-queue-trial`                       |
+| `<debate-slug>`            | The end of a debate page's address: `https://<staging-host>/debates/<debate-slug>`                                    |
+| `<debate-id>`              | The `id` returned by the first query in the 8.6 checks                                                                |
 
 **The switches:**
 
@@ -447,13 +1139,29 @@ Coins results are revealed. They are always on with matchmaking. To run them wit
 
 ## Rollback
 
-- **Migrations** are additive and stay; never roll back the schema.
-- **Feature switches:** set `TURN_WINDOWS_ENABLED` or `LIVE_OUTLINE_ENABLED` to `false` on web and
-  the worker and deploy. Removing only `ANTHROPIC_API_KEY` from the agent keeps captions and stops
-  the outline.
-- **Code:** setting the previous digests works for web and the encoder. After #100's migration the
-  previous release can't settle five-day rounds, though, so prefer fixing forward
-  ([deploy a later commit](render-staging.md#deploy-a-later-commit)).
-- **Agent:** restage the previous commit and run `lk agent deploy` again.
+- **Migrations** are additive and stay; never roll back the schema. The step 0.5 backup is for a
+  data accident, not for undoing a release.
+- **Feature switches:** in Render, open the service's **Environment**, set `TURN_WINDOWS_ENABLED` or
+  `LIVE_OUTLINE_ENABLED` to `false`, and choose **Save and deploy**; do it on both
+  `yaparena-staging-web` and `yaparena-staging-jobs`. To stop only the AI outline and keep
+  captions, delete the `ANTHROPIC_API_KEY` line from `~/yaparena-private/transcriber-secrets.env`,
+  then, in `~/yaparena-transcriber-deploy`, run
+  `lk agent update-secrets --secrets-file ~/yaparena-private/transcriber-secrets.env --overwrite`.
+- **Code:** prefer fixing forward ([deploy a later commit](render-staging.md#deploy-a-later-commit)):
+  after #100's migration, the previous release can't settle five-day rounds. To go back anyway, take
+  the previous release's images or commit from an older line of step 0.1's list. Image-backed
+  services: **Settings** → **Image URL** → **Edit**, paste the previous image, **Save Changes**.
+  Services built from GitHub: **Manual Deploy** → **Deploy a specific commit** → the previous
+  commit.
+- **Agent:** in the Terminal,
+
+  ```sh
+  cd ~/yaparena-transcriber-deploy
+  lk agent versions
+  lk agent rollback --version <previous version>
+  ```
+
+  `lk agent versions` lists the deployed versions and their dates.
+
 - **Matchmaking:** set `MATCHMAKING_ENABLED=false` on web and the worker and deploy; see
   [turning it off](#8-matchmaking-m) for what stays.
