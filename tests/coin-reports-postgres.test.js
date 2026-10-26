@@ -24,6 +24,7 @@ import {
   openSandbox,
 } from "./helpers/confirmations.js";
 import { postCoinJournal } from "../dist/features/account-wallet/ledger.js";
+import { lockLedger } from "../dist/features/account-wallet/debate-sandbox.js";
 import { runCoinSandboxOperator } from "../scripts/coin-sandbox-operator.ts";
 const ownerUrl = process.env.A4_TEST_OWNER_URL,
   runtimeUrl = process.env.A4_TEST_DATABASE_URL;
@@ -653,8 +654,11 @@ describe(
         await client.query("SELECT id FROM users WHERE id=$1 FOR UPDATE", [
           context.userId,
         ]);
-        const buckets = await ensureSandboxBuckets(client, context.userId),
-          locked = await client.query(
+        const buckets = await ensureSandboxBuckets(client, context.userId);
+        // Lock in the repository's global order before the treasury rows, as
+        // the coin debate suite's empty-treasury fixture does.
+        await lockLedger(client, [buckets]);
+        const locked = await client.query(
             "SELECT id FROM coin_accounts WHERE id=ANY($1::uuid[]) ORDER BY id FOR UPDATE",
             [
               [
