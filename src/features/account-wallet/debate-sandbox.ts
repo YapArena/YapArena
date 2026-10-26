@@ -204,7 +204,12 @@ function transfer(
       { accountId: to, amount: String(amount) },
     );
 }
-async function lockLedger(
+/**
+ * Locks every ledger account the given buckets can touch, in the one global
+ * order: cash-asset accounts by ID, then promotional ones by ID. Exported so
+ * that test fixtures holding treasury rows lock in the same order.
+ */
+export async function lockLedger(
   client: PoolClient,
   buckets: readonly SandboxBuckets[],
 ) {
