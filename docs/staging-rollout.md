@@ -130,14 +130,14 @@ shows it in seconds. To end it early: **Operator controls**, a **Reason for acti
 Terminal, in any folder:
 
 ```sh
-gh run list --repo Boufe/YapArena --workflow CI --branch main --event push --limit 5 \
+gh run list --repo YapArena/YapArena --workflow CI --branch main --event push --limit 5 \
   --json status,conclusion,databaseId,headSha,displayTitle \
   --jq '.[] | "\(.status) \(.conclusion) \(.databaseId) \(.headSha) \(.displayTitle)"'
 ```
 
 Each line reads `<status> <conclusion> <run id> <commit SHA> <title>`, newest first. Take the first
 line that starts with `completed success`: its third word is `<RUN_ID>` and its fourth is
-`<COMMIT_SHA>`. Open `https://github.com/Boufe/YapArena/actions/runs/<RUN_ID>` in the browser. On
+`<COMMIT_SHA>`. Open `https://github.com/YapArena/YapArena/actions/runs/<RUN_ID>` in the browser. On
 its **Summary** page, scroll down to **web image** and **encoder image**, and copy each
 `ghcr.io/…@sha256:…` line: they are `<WEB_IMAGE>` and `<ENCODER_IMAGE>`.
 
