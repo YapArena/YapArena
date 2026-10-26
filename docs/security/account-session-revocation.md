@@ -78,8 +78,9 @@ confirmation. To end existing sessions sooner, use the incident procedure below.
 
 ## Confirmation by fresh sign-in
 
-Sensitive operations (opening the financial sandbox once per account, each withdrawal and
-each recovery consent) start a pending `account_operations` row bound to the account,
+Sensitive operations (each withdrawal and each recovery consent; opening the coin sandbox is
+automatic since [Decision 0013](../decisions/0013-yap-coins-always-on-and-debate-staking.md))
+start a pending `account_operations` row bound to the account,
 the invoking session, its generation, a purpose and exact terms. The browser then goes
 to `GET /api/auth/confirm?operation=…`, which sends the person to Auth0 with
 `prompt=login` and `max_age=0`. The callback accepts the confirmation only when:

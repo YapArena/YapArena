@@ -88,7 +88,7 @@ state, voidReason }] }`, the latest 100 windows in turn order. No orders, counts
 ## Pull request 2: transcription and captions
 
 Behind `LIVE_OUTLINE_ENABLED` (default `false`; needs LiveKit media and a
-`TRANSCRIPTION_INGEST_SECRET` of at least 32 bytes). Migration `1792972860422_add-live-transcription`.
+`TRANSCRIPTION_INGEST_SECRET` of at least 32 bytes). Migration `1792975000000_add-live-transcription`.
 
 - **Debater settings** (`debater_settings`, `GET/PUT /api/me/debater-settings`): language (`fr`/`en`)
   and consent to transcription and the public AI outline, stored with the consent wording's version
