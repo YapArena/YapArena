@@ -127,6 +127,8 @@ const applicationTables = [
   "outline_versions",
   "outline_windows",
   "outline_flags",
+  "challenge_time_proposals",
+  "matchmaking_presence",
 ];
 const container = `yaparena-isolation-${randomUUID().slice(0, 8)}`;
 const evidenceDirectory = `/tmp/${container}-evidence`;

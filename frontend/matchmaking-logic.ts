@@ -3,7 +3,13 @@
 
 export type Side = "A" | "B";
 export type ClosedReason =
-  "left" | "declined" | "missed" | "stale" | "unavailable" | "topic_closed";
+  | "left"
+  | "declined"
+  | "missed"
+  | "stale"
+  | "unavailable"
+  | "topic_closed"
+  | "booking";
 
 export interface QueueState {
   serverNow: string;
@@ -105,6 +111,7 @@ const closedMessages: Record<ClosedReason, string> = {
   unavailable: "The match was cancelled because you can't debate right now.",
   topic_closed:
     "The match was cancelled because the topic is no longer public.",
+  booking: "You left the queue because your scheduled debate starts soon.",
 };
 
 /**

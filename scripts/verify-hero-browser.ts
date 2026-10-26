@@ -509,7 +509,18 @@ try {
       configurable: true,
     }),
   );
-  const beforeSaved = grants;
+  // Count only grants this saved /live tab requests. The debate page the
+  // other tab just opened may request its own grant at any moment, which a
+  // shared server counter would wrongly attribute to the saved tab.
+  let savedGrants = 0;
+  saved.on("request", (request) => {
+    if (
+      /^\/api\/media\/events\/[^/]+\/replay$/.test(
+        new URL(request.url()).pathname,
+      )
+    )
+      savedGrants++;
+  });
   await saved.goto(base + "/live");
   await saved
     .locator("[data-featured-preview]")
@@ -518,7 +529,7 @@ try {
   await saved.evaluate(
     () => new Promise((resolve) => window.setTimeout(resolve, 2000)),
   );
-  assert.equal(grants, beforeSaved);
+  assert.equal(savedGrants, 0);
   assert.equal(
     await saved
       .locator("[data-featured-preview] [data-preview-thumbnail]")

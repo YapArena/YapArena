@@ -7,6 +7,7 @@ import type { ProductActionRecorder } from "../measurement/router.ts";
 import { MediaConflictError } from "../media/repository.ts";
 import { createRequireRole } from "../identity/router.ts";
 import { MatchConflictError, MatchNotFoundError } from "./repository.ts";
+import { PROPOSAL_MIN_LEAD_MINUTES } from "./timings.ts";
 
 type Repository = ReturnType<typeof createMatchingRepository>;
 const slugPattern = /^[a-z0-9][a-z0-9-]{2,79}$/;
@@ -56,6 +57,33 @@ function topicInput(body: unknown) {
   return { slug, title, summary, sideALabel, sideBLabel };
 }
 
+// A proposed or scheduled time: 1 hour to 90 days ahead, in UTC ISO form.
+function startTime(value: unknown) {
+  if (
+    typeof value !== "string" ||
+    !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,3})?Z$/.test(value)
+  )
+    return null;
+  const time = new Date(value);
+  return Number.isFinite(time.getTime()) &&
+    time.getTime() >= Date.now() + PROPOSAL_MIN_LEAD_MINUTES * 60 * 1000 &&
+    time.getTime() <= Date.now() + 90 * 24 * 60 * 60 * 1000
+    ? time
+    : null;
+}
+
+// One to three distinct proposed times (Decision 0011).
+function proposedTimes(value: unknown) {
+  if (!Array.isArray(value) || value.length < 1 || value.length > 3)
+    return null;
+  const times = value.map(startTime);
+  if (times.some((time) => time === null)) return null;
+  const valid = times.filter((time): time is Date => time !== null);
+  return new Set(valid.map((time) => time.getTime())).size === valid.length
+    ? valid
+    : null;
+}
+
 function requestInput(body: unknown) {
   const value = object(body);
   if (
@@ -69,6 +97,8 @@ function requestInput(body: unknown) {
           "proposition",
           "requestedSide",
           "scheduledAt",
+          "mode",
+          "proposedTimes",
         ].includes(key),
     )
   )
@@ -89,26 +119,32 @@ function requestInput(body: unknown) {
   )
     return null;
   if (kind === "queue" && targetHandle !== undefined) return null;
-  if (
-    typeof value.scheduledAt !== "string" ||
-    !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,3})?Z$/.test(value.scheduledAt)
-  )
+  const mode = value.mode ?? "scheduled";
+  if (mode !== "now" && mode !== "scheduled") return null;
+  if (kind === "queue" && (mode !== "scheduled" || value.proposedTimes))
     return null;
-  const scheduledAt = new Date(value.scheduledAt);
-  if (
-    !Number.isFinite(scheduledAt.getTime()) ||
-    scheduledAt.getTime() < Date.now() + 60 * 60 * 1000 ||
-    scheduledAt.getTime() > Date.now() + 90 * 24 * 60 * 60 * 1000
-  )
-    return null;
-  return {
+  const base = {
     kind: kind as "direct" | "queue",
     topicSlug,
     targetHandle: typeof targetHandle === "string" ? targetHandle : undefined,
     proposition,
     requestedSide: requestedSide as "A" | "B",
-    scheduledAt,
   };
+  // "now" carries no time; otherwise one scheduledAt or one to three proposedTimes.
+  if (mode === "now")
+    return value.scheduledAt === undefined && value.proposedTimes === undefined
+      ? { ...base, mode: "now" as const }
+      : null;
+  if (value.proposedTimes !== undefined) {
+    const times = proposedTimes(value.proposedTimes);
+    return times && value.scheduledAt === undefined
+      ? { ...base, mode: "scheduled" as const, proposedTimes: times }
+      : null;
+  }
+  const scheduledAt = startTime(value.scheduledAt);
+  return scheduledAt
+    ? { ...base, mode: "scheduled" as const, scheduledAt }
+    : null;
 }
 
 function errorResponse(response: Response, error: unknown) {
@@ -225,8 +261,18 @@ export function createMatchingRouter({
     async (request, response) => {
       const id = idFrom(request);
       if (!id) return response.status(404).json({ error: "request not found" });
+      const body = object(request.body) ?? {};
+      const proposalId = body.proposalId;
+      if (
+        Object.keys(body).some((key) => key !== "proposalId") ||
+        (proposalId !== undefined &&
+          (typeof proposalId !== "string" || !uuidPattern.test(proposalId)))
+      )
+        return response.status(400).json({ error: "invalid proposal" });
       try {
-        const event = await matching.acceptRequest(request.user!.id, id);
+        const event = await matching.acceptRequest(request.user!.id, id, {
+          proposalId,
+        });
         await recordProductAction?.(request, {
           type: "match_accepted",
           debateId: event.id,
@@ -237,6 +283,39 @@ export function createMatchingRouter({
       }
     },
   );
+  // Either player answers with one to three new times (Decision 0011).
+  router.post(
+    "/requests/:id/proposals",
+    participant,
+    async (request, response) => {
+      const id = idFrom(request);
+      if (!id) return response.status(404).json({ error: "request not found" });
+      const body = object(request.body);
+      const times =
+        body && Object.keys(body).every((key) => key === "times")
+          ? proposedTimes(body.times)
+          : null;
+      if (!times)
+        return response.status(400).json({
+          error: "propose one to three times, 1 hour to 90 days ahead",
+        });
+      try {
+        return response.json({
+          request: await matching.proposeTimes(request.user!.id, id, times),
+        });
+      } catch (error) {
+        return errorResponse(response, error);
+      }
+    },
+  );
+  // People to challenge, by handle prefix or part of a display name.
+  router.get("/people", async (request, response) => {
+    const query = text(request.query.q, 40, 2);
+    if (!query) return response.json({ people: [] });
+    return response.json({
+      people: await matching.searchPeople(request.user!.id, query),
+    });
+  });
   router.post("/queue/:id/join", participant, async (request, response) => {
     const id = idFrom(request);
     if (!id)

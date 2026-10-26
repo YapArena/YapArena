@@ -15,6 +15,16 @@ import {
   MediaConflictError,
 } from "../dist/features/media/repository.js";
 
+// Sweeps take a database lock that a parallel suite's sweep may hold; retry until one runs.
+async function sweepOnce(instance) {
+  for (let attempt = 0; attempt < 200; attempt += 1) {
+    const result = await instance.sweep();
+    if (result.acquired) return result;
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+  throw new Error("the matchmaking sweep lock stayed busy");
+}
+
 const ownerUrl = process.env.A4_TEST_OWNER_URL,
   runtimeUrl = process.env.A4_TEST_DATABASE_URL;
 
@@ -24,6 +34,8 @@ describe(
   { skip: !ownerUrl || !runtimeUrl },
   () => {
     let owner, runtime, queue;
+    // Other PostgreSQL suites share this database, so cleanup touches only this suite's players.
+    const players = [];
     before(async () => {
       for (const value of [ownerUrl, runtimeUrl]) {
         const url = new URL(value);
@@ -41,10 +53,12 @@ describe(
     afterEach(async () => {
       // Only this suite writes queue rows; leave nothing waiting for the next test's sweeps.
       await owner.query(
-        "UPDATE match_offers SET status = 'cancelled' WHERE status = 'pending'",
+        "UPDATE match_offers SET status = 'cancelled' WHERE status = 'pending' AND (user_a_id = ANY($1::bigint[]) OR user_b_id = ANY($1::bigint[]))",
+        [players],
       );
       await owner.query(
-        "UPDATE matchmaking_tickets SET status = 'closed', closed_reason = 'left' WHERE status IN ('searching', 'offered')",
+        "UPDATE matchmaking_tickets SET status = 'closed', closed_reason = 'left' WHERE status IN ('searching', 'offered') AND user_id = ANY($1::bigint[])",
+        [players],
       );
     });
     after(async () => {
@@ -55,6 +69,7 @@ describe(
       const id = (
         await owner.query("INSERT INTO users DEFAULT VALUES RETURNING id")
       ).rows[0].id;
+      players.push(id);
       await owner.query(
         `INSERT INTO public_profiles (user_id, handle, display_name, publication_state)
          VALUES ($1, $2, 'Queue player', 'published')`,
@@ -178,7 +193,7 @@ describe(
         ...sideA.map((id) => queue.enter(id, { topicSlug: slug, side: "A" })),
         ...sideB.map((id) => queue.enter(id, { topicSlug: slug, side: "B" })),
       ]);
-      await queue.sweep();
+      await sweepOnce(queue);
       const made = await offers(slug);
       assert.equal(made.length, 3);
       assert.equal(new Set(made.map((offer) => offer.ticket_a_id)).size, 3);
@@ -212,7 +227,7 @@ describe(
       await queue.accept(a, offer.id);
       await expire(offer.id);
       await assert.rejects(queue.accept(b, offer.id), MatchConflictError);
-      const swept = await queue.sweep();
+      const swept = await sweepOnce(queue);
       assert.equal(swept.acquired, true);
       assert.equal((await offers(slug))[0].status, "expired");
       const requeued = await ticket(a);
@@ -307,16 +322,16 @@ describe(
         [a],
       );
       assert.deepEqual(await queue.waiting(slug), { sideA: 0, sideB: 0 });
-      await queue.sweep();
+      await sweepOnce(queue);
       assert.equal((await ticket(a)).closed_reason, "stale");
 
       const full = createMatchmaking(runtime, { liveDebateCapacity: 0 });
       await full.enter(b, { topicSlug: slug, side: "A" });
       await full.enter(c, { topicSlug: slug, side: "B" });
-      await full.sweep();
+      await sweepOnce(full);
       assert.equal((await ticket(b)).status, "searching");
       assert.equal((await full.touch(b)).ticket.status, "searching");
-      await queue.sweep();
+      await sweepOnce(queue);
       assert.equal((await ticket(b)).status, "offered");
       assert.equal((await ticket(c)).status, "offered");
     });
@@ -396,7 +411,10 @@ describe(
       await matching.markReady(a, debateId);
       await matching.markReady(b, debateId);
       const first = autoStart.tryStart(debateId);
-      while (!release) await new Promise((resolve) => setImmediate(resolve));
+      // Bounded, so a start that never begins fails here instead of hanging the run.
+      for (let attempt = 0; !release && attempt < 2000; attempt += 1)
+        await new Promise((resolve) => setTimeout(resolve, 5));
+      assert.ok(release, "the automatic start began");
       assert.equal(await autoStart.tryStart(debateId), false);
       release();
       assert.equal(await first, true);
@@ -440,7 +458,7 @@ describe(
       await queue.accept(a, offer.id);
       const { debateId } = await queue.accept(b, offer.id);
       await createMatchingRepository(runtime).markReady(a, debateId);
-      await queue.sweep();
+      await sweepOnce(queue);
       assert.equal(
         (
           await owner.query("SELECT status FROM debates WHERE id = $1", [
@@ -453,7 +471,7 @@ describe(
         "UPDATE debates SET scheduled_at = CURRENT_TIMESTAMP - interval '91 seconds' WHERE id = $1",
         [debateId],
       );
-      const swept = await queue.sweep();
+      const swept = await sweepOnce(queue);
       assert.ok(swept.value.noShows >= 1);
       const debate = (
         await owner.query(
@@ -507,7 +525,7 @@ describe(
         "INSERT INTO event_participants (debate_id, user_id, side) VALUES ($1, $2, 'A'), ($1, $3, 'B')",
         [debateId, a, b],
       );
-      await queue.sweep();
+      await sweepOnce(queue);
       const status = async () =>
         (
           await owner.query("SELECT status FROM debates WHERE id = $1", [
@@ -519,7 +537,7 @@ describe(
         "UPDATE debates SET scheduled_at = CURRENT_TIMESTAMP - interval '11 minutes' WHERE id = $1",
         [debateId],
       );
-      await queue.sweep();
+      await sweepOnce(queue);
       assert.equal(await status(), "cancelled");
       assert.equal(await ticket(a), undefined);
     });
@@ -578,7 +596,7 @@ describe(
         requestedSide: "A",
         scheduledAt: new Date(Date.now() + 2 * 60 * 60 * 1000),
       });
-      await queue.sweep();
+      await sweepOnce(queue);
       const after = (
         await owner.query("SELECT status FROM match_requests WHERE id = $1", [
           open.id,

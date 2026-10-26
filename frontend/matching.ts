@@ -90,8 +90,8 @@ function fill<T>(
   if (!entries.length) list.append(row("Nothing here yet."));
   for (const entry of entries) list.append(render(entry));
 }
-function date(value: string) {
-  return new Date(value).toLocaleString();
+function date(value: string | null) {
+  return value ? new Date(value).toLocaleString() : "now";
 }
 async function loadTopic() {
   const slug = topicSlugInput.value.trim();

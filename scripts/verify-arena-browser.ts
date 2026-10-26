@@ -325,11 +325,21 @@ export async function verifyArenaBrowser({
     );
     await page.emulateMedia({ reducedMotion: "no-preference" });
     checks.rapidScrubbingAndReducedMotion = true;
+    // Layout since 2026-10-25: chat left, video centre, participation right,
+    // all three starting level at the top of the workspace.
     const sidebar = (await page.locator("[data-arena-sidecar]").boundingBox())!,
-      graph = (await page.locator("[data-arena-graph-main]").boundingBox())!;
+      video = (await page.locator("[data-arena-video]").boundingBox())!,
+      chatPanel = (await page
+        .locator("[data-community-chat-panel]")
+        .boundingBox())!;
     assert.ok(
-      Math.abs(sidebar.y + sidebar.height - graph.y - graph.height) <= 2,
-      "participation card ends at the main graph boundary",
+      Math.abs(sidebar.y - video.y) <= 2 &&
+        Math.abs(chatPanel.y - video.y) <= 2,
+      "chat, video and participation card start level",
+    );
+    assert.ok(
+      chatPanel.x < video.x && video.x < sidebar.x,
+      "chat is left of the video and the participation card right of it",
     );
     checks.hoverPricesArgumentsAndCompactSidebar = true;
     const media = (await page.locator("[data-media-event]").elementHandle())!,
