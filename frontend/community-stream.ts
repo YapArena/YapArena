@@ -1,12 +1,13 @@
 import type { CommunityFrame } from "./community-types.js";
 
 /** Public projections that a room signal asks the page to re-read. */
-export type RoomTopic = "media" | "round" | "activity" | "window";
+export type RoomTopic = "media" | "round" | "activity" | "window" | "outline";
 export const roomTopics: readonly RoomTopic[] = [
   "media",
   "round",
   "activity",
   "window",
+  "outline",
 ];
 export interface RoomSignalDetail {
   room: string;

@@ -123,6 +123,10 @@ const applicationTables = [
   "transcription_dispatches",
   "transcription_updates",
   "transcript_segments",
+  "outline_heads",
+  "outline_versions",
+  "outline_windows",
+  "outline_flags",
   "challenge_time_proposals",
   "matchmaking_presence",
 ];

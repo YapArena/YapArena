@@ -18,7 +18,7 @@ export function renderDebateWorkspace(
   activity?: PublicBotActivity | null,
   matchmaking = false,
   // Decision 0012: live captions and the AI outline, when enabled.
-  liveOutline = false,
+  liveOutline?: { state: unknown },
 ) {
   const replay = debate.status === "replay" || debate.status === "finalized";
   const live = debate.status === "live";
@@ -52,7 +52,27 @@ export function renderDebateWorkspace(
         <div class="media-status-row"><p data-media-status role="status" aria-live="polite">Checking media availability…</p><p data-media-microphone role="status" aria-live="polite" hidden></p><strong data-media-clock aria-live="off"></strong></div>
         <div class="media-actions"><button type="button" data-media-viewer hidden>Join as viewer</button><button type="button" data-media-speaker hidden>Check camera and join as speaker</button><button type="button" data-media-replay hidden>Play replay</button><button type="button" data-media-sound hidden>Enable sound</button><button type="button" data-media-mute aria-pressed="false" hidden>Mute microphone</button><button type="button" data-media-leave hidden>Leave live debate</button></div>
         <details class="media-operator" data-media-operator hidden><summary>Operator controls</summary><label>Reason for action<input data-media-reason maxlength="500" minlength="5" placeholder="Describe the action or incident"></label><div class="media-actions"><button type="button" data-media-action="start">Start</button><button type="button" data-media-action="pause">Pause</button><button type="button" data-media-action="resume">Resume</button><button type="button" data-media-action="end">End</button><button type="button" data-media-action="replay">Publish replay</button></div><label>Reviewed WebVTT captions<textarea data-media-captions rows="5" maxlength="200000" placeholder="WEBVTT"></textarea></label><button type="button" data-media-captions-submit>Publish captions</button></details>
-      </section>
+      </section>${
+        liveOutline
+          ? html`<section class="live-outline" data-live-outline aria-labelledby="live-outline-title"><header class="live-outline-head"><h2 id="live-outline-title">AI outline</h2><span class="live-outline-turn" data-live-outline-turn>Appears when a debater speaks</span></header><p class="live-outline-note">Written by AI from the live transcript, in the speaker’s language. It can be wrong; debaters can flag mistakes.</p><div class="live-outline-body" tabindex="0" aria-label="AI outline of the current turn"><ol class="live-outline-arguments" data-live-outline-arguments></ol><details class="live-outline-earlier" data-live-outline-earlier hidden><summary>Earlier turns</summary><ol data-live-outline-turns></ol></details></div><p class="sr-only" role="status" aria-live="polite" data-live-outline-announce></p><template data-live-outline-state>${JSON.stringify(
+              {
+                debateId: id,
+                live,
+                sides: {
+                  A: {
+                    name: debate.speakerA?.displayName ?? null,
+                    label: debate.topic.sideALabel,
+                  },
+                  B: {
+                    name: debate.speakerB?.displayName ?? null,
+                    label: debate.topic.sideBLabel,
+                  },
+                },
+                state: liveOutline.state,
+              },
+            )}</template></section>`
+          : ""
+      }
       <section class="arena-debate-meta"><h1>${title}</h1><p>A ${replay ? "recorded" : "public"} debate on ${debate.topic.title}.</p><div class="arena-topic-tags"><a href="/topics/${encodeURIComponent(debate.topic.slug)}">${debate.topic.title}</a>${debate.isDemo ? html`<span>Synthetic demo</span>` : html`<span>Public debate</span>`}</div><div class="arena-watch-meta"><span title="Active playback tabs on this staging instance">${icon("users")}<span data-arena-viewers>— watching</span></span><span>${icon("clock")}<span data-arena-playback>${replay ? "Replay" : live ? "Live broadcast" : "Awaiting broadcast"}</span></span></div></section>
       <section class="arena-community" data-community-event="${id}" data-community-demo="${String(debate.isDemo)}">
         <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title"><div class="live-chat-heading"><h2 id="community-chat-title">Live chat</h2><span class="live-chat-connection" data-community-connection role="status" aria-live="polite">Connecting…</span></div><p class="live-chat-state" data-community-chat-state role="status" aria-live="polite"></p><button type="button" data-community-older hidden>Load earlier messages</button><ol class="community-messages" data-community-messages aria-label="Event chat messages" tabindex="0"></ol><button type="button" data-community-new hidden></button><form data-community-chat-form><label class="sr-only" for="community-chat-body">Message this event</label><div class="arena-chat-compose"><textarea aria-describedby="community-chat-help" id="community-chat-body" name="body" maxlength="500" rows="1" placeholder="Say something…" required></textarea><button type="submit" aria-label="Send message">${icon("send")}</button></div><p class="form-help" id="community-chat-help">Published profile required. Enter sends · Shift+Enter adds a line.</p><p data-community-cooldown aria-live="off"></p><p class="sr-only" data-community-announcement role="status" aria-live="polite"></p><p data-community-send-status role="status" aria-live="polite"></p></form></aside>

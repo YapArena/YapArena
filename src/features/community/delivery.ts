@@ -61,7 +61,13 @@ export interface RoomRead {
 // Reference-only room signals name the public projection a client should
 // re-read. They are logged and sent as summary changes, so chat clients and
 // servers that predate them keep applying the shared room cursor.
-export const roomSignals = ["media", "round", "activity", "window"] as const;
+export const roomSignals = [
+  "media",
+  "round",
+  "activity",
+  "window",
+  "outline",
+] as const;
 export type RoomSignal = (typeof roomSignals)[number];
 
 export function publicChange(
