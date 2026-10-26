@@ -111,6 +111,16 @@ export interface MatchmakingState {
     sideLabel: string;
     respondBy: string;
   } | null;
+  // The player's next booked debate, from a day ahead until its join window closes, so every
+  // page can remind them shortly before it starts.
+  upcoming: {
+    id: string;
+    slug: string;
+    status: string;
+    proposition: string;
+    startsAt: string;
+    joinDeadlineAt: string;
+  } | null;
 }
 
 const ticketFields = `id, user_id AS "userId", topic_id AS "topicId", side, status`;
@@ -368,7 +378,7 @@ export function createMatchmaking(
 
   async function ticketState(
     userId: string,
-  ): Promise<Omit<MatchmakingState, "challenge">> {
+  ): Promise<Omit<MatchmakingState, "challenge" | "upcoming">> {
     const result = await database.query<{
       id: string;
       side: Side;
@@ -530,17 +540,61 @@ export function createMatchmaking(
       : null;
   }
 
+  async function upcomingDebate(
+    userId: string,
+  ): Promise<MatchmakingState["upcoming"]> {
+    const result = await database.query<{
+      id: string;
+      slug: string;
+      status: string;
+      proposition: string;
+      startsAt: Date;
+      joinDeadlineAt: Date;
+    }>(
+      `SELECT d.id, d.slug, d.status, d.proposition, d.scheduled_at AS "startsAt",
+         d.scheduled_at + make_interval(secs => ${SCHEDULED_JOIN_SECONDS}) AS "joinDeadlineAt"
+       FROM event_participants p JOIN debates d ON d.id = p.debate_id
+       WHERE p.user_id = $1 AND p.active AND d.status IN ('scheduled', 'ready')
+         AND NOT d.is_demo
+         AND d.scheduled_at < CURRENT_TIMESTAMP + interval '1 day'
+         AND d.scheduled_at > CURRENT_TIMESTAMP - make_interval(secs => ${SCHEDULED_JOIN_SECONDS})
+         -- Queue and "now" debates have their own 90-second join countdown.
+         AND NOT EXISTS (SELECT 1 FROM match_offers o WHERE o.debate_id = d.id)
+         AND NOT EXISTS (SELECT 1 FROM match_requests r
+           WHERE r.debate_id = d.id AND r.mode = 'now')
+       ORDER BY d.scheduled_at LIMIT 1`,
+      [userId],
+    );
+    const row = result.rows[0];
+    return row
+      ? {
+          id: row.id,
+          slug: row.slug,
+          status: row.status,
+          proposition: row.proposition,
+          startsAt: new Date(row.startsAt).toISOString(),
+          joinDeadlineAt: new Date(row.joinDeadlineAt).toISOString(),
+        }
+      : null;
+  }
+
   const matchmaking = Object.freeze({
     // Whether entering the queue needs a recent camera and microphone check.
     deviceCheckRequired: requireDeviceCheck,
 
     async state(userId: string): Promise<MatchmakingState> {
-      const [base, challenge, challengeDebate] = await Promise.all([
+      const [base, challenge, challengeDebate, upcoming] = await Promise.all([
         ticketState(userId),
         nowChallenge(userId),
         nowChallengeDebate(userId),
+        upcomingDebate(userId),
       ]);
-      return { ...base, debate: base.debate ?? challengeDebate, challenge };
+      return {
+        ...base,
+        debate: base.debate ?? challengeDebate,
+        challenge,
+        upcoming,
+      };
     },
 
     async enter(userId: string, input: { topicSlug: string; side: Side }) {

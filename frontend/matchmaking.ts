@@ -1,20 +1,28 @@
-// Live topic queue in the browser (Decision 0011): the header pill, the 30-second match dialog,
-// the topic page's queue buttons and the banner above a matched debate's video. The header loads
-// this module on pages with data-matchmaking. State arrives over the player's live stream, with
-// polling when the stream is unavailable; the server decides every outcome.
+// Live queue and challenges in the browser (Decision 0011): the header pill, the 30-second match
+// dialog, the "now" challenge dialog, the topic page's queue buttons and the banner above a
+// matched or booked debate's video. The header loads this module on pages with data-matchmaking.
+// A signed-in player keeps a live stream open, which also marks them online for "now"
+// challenges; polling takes over when the stream is unavailable. The server decides every outcome.
 import { api } from "./lib/api.js";
 import { sessionStore } from "./lib/session.js";
 import {
   bannerText,
+  bookedBannerText,
+  challengeNotice,
+  clock,
   clockOffset,
+  dueDebate,
+  isAnswering,
   isJoining,
   isQueued,
   needsLiveUpdates,
   pillDescription,
+  pillHref,
   pillText,
   secondsUntil,
   shouldOpenDebate,
   transitionNotice,
+  untilReminder,
   waitingText,
   type QueueState,
   type Side,
@@ -24,10 +32,14 @@ import {
 declare global {
   interface WindowEventMap {
     "yap:matchmaking": CustomEvent<QueueState | null>;
+    // The player's challenges or queue changed on the server (a live stream message).
+    "yap:matching-changed": Event;
   }
 }
 
 const POLL_MS = 3000;
+// Without a live stream, an idle player still checks in for "now" challenges.
+const IDLE_POLL_MS = 30_000;
 const WAITING_MS = 10_000;
 const store = sessionStore();
 const pageTitle = document.title;
@@ -37,7 +49,14 @@ let offset = 0;
 let source: EventSource | null = null;
 let streamUnavailable = false;
 let poll: number | undefined;
+let pollEvery = 0;
 let ticker: number | undefined;
+let reminderTimer: number | undefined;
+let alertedChallenge: string | null = null;
+// An incoming challenge the player chose to answer later, from the Match page.
+let deferredChallenge: string | null = null;
+// A challenge this player answered or withdrew here, which needs no notice from the server.
+let settledChallenge: string | null = null;
 let audio: AudioContext | undefined;
 let alertedOffer: string | null = null;
 let generation = 0;
@@ -65,7 +84,10 @@ pillLeave.className = "small-button";
 pillLeave.textContent = "Leave";
 pill.append(pillLabel, pillLeave);
 memberActions?.prepend(pill);
-pillLeave.addEventListener("click", () => void leave());
+pillLeave.addEventListener(
+  "click",
+  () => void (isQueued(state) ? leave() : withdrawChallenge()),
+);
 
 // ---- Match dialog ------------------------------------------------------------------------
 const dialog = document.createElement("dialog");
@@ -107,6 +129,61 @@ dialog.addEventListener("cancel", (event) => event.preventDefault());
 acceptButton.addEventListener("click", () => void answer("accept"));
 declineButton.addEventListener("click", () => void answer("decline"));
 
+// ---- "Now" challenge dialog --------------------------------------------------------------
+const challengeDialog = document.createElement("dialog");
+challengeDialog.className = "match-dialog";
+challengeDialog.setAttribute("aria-labelledby", "challenge-dialog-title");
+const challengeTitle = document.createElement("h2");
+challengeTitle.id = "challenge-dialog-title";
+challengeTitle.textContent = "Debate now?";
+const challengeFrom = document.createElement("p");
+const challengeTopic = document.createElement("p");
+challengeTopic.className = "match-dialog-topic";
+const challengeSide = document.createElement("p");
+const challengeCountdown = document.createElement("p");
+challengeCountdown.className = "match-countdown";
+const challengeStatus = document.createElement("p");
+challengeStatus.className = "form-note";
+challengeStatus.setAttribute("role", "status");
+const challengeAccept = document.createElement("button");
+challengeAccept.type = "button";
+challengeAccept.className = "button";
+challengeAccept.textContent = "Accept";
+const challengeDecline = document.createElement("button");
+challengeDecline.type = "button";
+challengeDecline.className = "small-button";
+challengeDecline.textContent = "Decline";
+const challengeLater = document.createElement("button");
+challengeLater.type = "button";
+challengeLater.className = "small-button";
+challengeLater.textContent = "Later";
+const challengeActions = document.createElement("div");
+challengeActions.className = "match-dialog-actions";
+challengeActions.append(challengeAccept, challengeDecline, challengeLater);
+challengeDialog.append(
+  challengeTitle,
+  challengeFrom,
+  challengeTopic,
+  challengeSide,
+  challengeCountdown,
+  challengeStatus,
+  challengeActions,
+);
+document.body.append(challengeDialog);
+// Escape and Later hide the dialog; the challenge stays open on the Match page.
+challengeDialog.addEventListener("cancel", () => {
+  deferredChallenge = state?.challenge?.id ?? null;
+});
+challengeLater.addEventListener("click", () => {
+  deferredChallenge = state?.challenge?.id ?? null;
+  challengeDialog.close();
+});
+challengeAccept.addEventListener("click", () => void answerChallenge(true));
+window.addEventListener("yap:challenge-settled", (event) => {
+  settledChallenge = event.detail;
+});
+challengeDecline.addEventListener("click", () => void answerChallenge(false));
+
 // ---- Topic page ----------------------------------------------------------------------------
 const panel = document.querySelector<HTMLElement>("[data-queue-topic]");
 const panelTopic = panel?.dataset.queueTopic ?? null;
@@ -134,11 +211,21 @@ function apply(next: QueueState) {
   const previous = state;
   offset = clockOffset(next, Date.now());
   state = next;
-  const notice = transitionNotice(previous, next);
+  const notice =
+    transitionNotice(previous, next) ??
+    (previous?.challenge?.id === settledChallenge
+      ? null
+      : challengeNotice(previous, next, now()));
   if (notice) announce(notice);
   if (next.offer && next.offer.id !== alertedOffer) {
     alertedOffer = next.offer.id;
     alertMatch(next);
+  }
+  const incoming =
+    next.challenge?.direction === "incoming" ? next.challenge : null;
+  if (incoming && incoming.id !== alertedChallenge) {
+    alertedChallenge = incoming.id;
+    alertChallenge(incoming.handle, incoming.topicTitle);
   }
   if (shouldOpenDebate(previous, next, location.pathname) && next.debate)
     location.assign(`/debates/${encodeURIComponent(next.debate.slug)}`);
@@ -163,12 +250,14 @@ async function refresh() {
 function stopPolling() {
   if (poll !== undefined) window.clearInterval(poll);
   poll = undefined;
+  pollEvery = 0;
 }
 
-// A live stream while queued or joining; polling if the stream is unavailable, and during the
+// A signed-in player keeps a live stream open. Polling replaces it when it is unavailable, quickly
+// while queued, joining or answering and every 30 seconds otherwise, and also runs during the
 // join window, whose debate status the stream does not carry.
 function connect() {
-  if (!member || !needsLiveUpdates(state)) {
+  if (!member) {
     source?.close();
     source = null;
     stopPolling();
@@ -178,8 +267,9 @@ function connect() {
     const opened = new EventSource("/api/matchmaking/stream");
     source = opened;
     opened.addEventListener("state", (event) => {
-      if (source === opened)
-        apply(JSON.parse((event as MessageEvent<string>).data) as QueueState);
+      if (source !== opened) return;
+      apply(JSON.parse((event as MessageEvent<string>).data) as QueueState);
+      window.dispatchEvent(new Event("yap:matching-changed"));
     });
     opened.addEventListener("error", () => {
       if (opened.readyState !== EventSource.CLOSED || source !== opened) return;
@@ -188,9 +278,20 @@ function connect() {
       connect();
     });
   }
-  if (streamUnavailable || !source || isJoining(state)) {
-    poll ??= window.setInterval(() => void refresh(), POLL_MS);
-  } else stopPolling();
+  const busy = needsLiveUpdates(state) || isAnswering(state, now());
+  const every =
+    streamUnavailable || !source
+      ? busy
+        ? POLL_MS
+        : IDLE_POLL_MS
+      : isJoining(state)
+        ? POLL_MS
+        : 0;
+  if (every !== pollEvery) stopPolling();
+  if (every && poll === undefined) {
+    poll = window.setInterval(() => void refresh(), every);
+    pollEvery = every;
+  }
 }
 
 // ---- Drawing ------------------------------------------------------------------------------
@@ -200,26 +301,67 @@ function render() {
   if (text) {
     pillLabel.textContent = text;
     pillLabel.title = pillDescription(state);
-    const joining = isJoining(state) && state?.debate;
-    pillLabel.href = joining
-      ? `/debates/${encodeURIComponent(joining.slug)}`
-      : `/topics/${encodeURIComponent(state?.ticket?.topicSlug ?? "")}`;
-    pillLeave.hidden = !isQueued(state);
+    pillLabel.href = pillHref(state, now());
+    const outgoing =
+      !isQueued(state) &&
+      state?.challenge?.direction === "outgoing" &&
+      isAnswering(state, now());
+    pillLeave.hidden = !isQueued(state) && !outgoing;
+    pillLeave.textContent = outgoing ? "Cancel" : "Leave";
   }
   renderDialog();
+  renderChallengeDialog();
   renderPanel();
   if (banner) {
-    const message = bannerText(state, pageSlug, now());
+    const message =
+      bannerText(state, pageSlug, now()) ??
+      bookedBannerText(state, pageSlug, now());
     banner.hidden = message === null;
     banner.textContent = message ?? "";
   }
-  const ticking = Boolean(member && needsLiveUpdates(state));
+  const ticking = Boolean(
+    member &&
+    (needsLiveUpdates(state) ||
+      isAnswering(state, now()) ||
+      dueDebate(state, now())),
+  );
   if (ticking && ticker === undefined) ticker = window.setInterval(render, 500);
   if (!ticking && ticker !== undefined) {
     window.clearInterval(ticker);
     ticker = undefined;
   }
+  // Wake up when a booked debate's reminder opens.
+  window.clearTimeout(reminderTimer);
+  const wait = member ? untilReminder(state, now()) : null;
+  reminderTimer =
+    wait === null
+      ? undefined
+      : window.setTimeout(render, Math.min(wait, 2 ** 31 - 1));
   flashTitle();
+}
+
+function renderChallengeDialog() {
+  const challenge =
+    member && state?.challenge?.direction === "incoming"
+      ? state.challenge
+      : null;
+  const left = challenge ? secondsUntil(challenge.respondBy, now()) : 0;
+  if (!challenge || !left || deferredChallenge === challenge.id) {
+    if (challengeDialog.open) challengeDialog.close();
+    return;
+  }
+  challengeFrom.textContent = `${challenge.displayName} (@${challenge.handle}) challenges you to debate now.`;
+  challengeTopic.textContent = challenge.topicTitle;
+  challengeSide.textContent = `You argue: ${challenge.sideLabel}`;
+  challengeCountdown.textContent = clock(left);
+  if (!challengeDialog.open) {
+    challengeStatus.textContent =
+      "Accept to start now. Later keeps the challenge on the Match page.";
+    challengeAccept.disabled = false;
+    challengeDecline.disabled = false;
+    challengeDialog.showModal();
+    challengeAccept.focus();
+  }
 }
 
 function renderDialog() {
@@ -301,10 +443,30 @@ function alertMatch(next: QueueState) {
   }
 }
 
+function alertChallenge(handle: string, topicTitle: string) {
+  beep();
+  if (
+    document.hidden &&
+    "Notification" in window &&
+    Notification.permission === "granted"
+  ) {
+    const notice = new Notification(`@${handle} challenges you to debate now`, {
+      body: `${topicTitle} · answer within 2 minutes`,
+      tag: "yaparena-challenge",
+    });
+    notice.addEventListener("click", () => window.focus());
+  }
+}
+
 function flashTitle() {
+  const flash = state?.offer
+    ? "Match found!"
+    : state?.challenge?.direction === "incoming" && isAnswering(state, now())
+      ? "Challenge!"
+      : null;
   document.title =
-    state?.offer && document.hidden && Math.floor(Date.now() / 1000) % 2
-      ? "Match found!"
+    flash && document.hidden && Math.floor(Date.now() / 1000) % 2
+      ? flash
       : pageTitle;
 }
 
@@ -327,6 +489,55 @@ async function answer(choice: "accept" | "decline") {
     dialogStatus.textContent =
       error instanceof Error ? error.message : "Try again.";
     void refresh();
+  }
+}
+
+async function answerChallenge(accept: boolean) {
+  const challenge = state?.challenge;
+  if (!challenge) return;
+  challengeAccept.disabled = true;
+  challengeDecline.disabled = true;
+  settledChallenge = challenge.id;
+  try {
+    if (accept) {
+      const { event } = await api<{ event: { slug: string } }>(
+        `/api/matching/requests/${encodeURIComponent(challenge.id)}/accept`,
+        { method: "POST", json: {}, timeout: 8000 },
+      );
+      challengeStatus.textContent = "Accepted. Opening your debate…";
+      location.assign(`/debates/${encodeURIComponent(event.slug)}`);
+      return;
+    }
+    await api(
+      `/api/matching/requests/${encodeURIComponent(challenge.id)}/declined`,
+      { method: "POST", timeout: 8000 },
+    );
+    deferredChallenge = challenge.id;
+    announce("Challenge declined.");
+    void refresh();
+  } catch (error) {
+    settledChallenge = null;
+    challengeStatus.textContent =
+      error instanceof Error ? error.message : "Try again.";
+    challengeAccept.disabled = false;
+    challengeDecline.disabled = false;
+  }
+}
+
+async function withdrawChallenge() {
+  const challenge = state?.challenge;
+  if (!challenge) return;
+  settledChallenge = challenge.id;
+  try {
+    await api(
+      `/api/matching/requests/${encodeURIComponent(challenge.id)}/withdrawn`,
+      { method: "POST", timeout: 8000 },
+    );
+    announce("Challenge withdrawn.");
+    void refresh();
+  } catch (error) {
+    settledChallenge = null;
+    announce(error instanceof Error ? error.message : "Try again.");
   }
 }
 
@@ -463,7 +674,7 @@ async function initialize() {
 window.addEventListener("yap:account-changed", () => void initialize());
 document.addEventListener("visibilitychange", () => {
   flashTitle();
-  if (!document.hidden && member && needsLiveUpdates(state)) void refresh();
+  if (!document.hidden && member) void refresh();
 });
 if (panel)
   window.setInterval(() => {
