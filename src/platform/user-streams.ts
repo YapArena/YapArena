@@ -12,29 +12,14 @@ export interface UserStreamKind {
   read?: (userId: string) => Promise<unknown>;
 }
 
-/**
- * The kind a notification is for. A channel's payload is a bare user id for the channel's own
- * kind, or JSON `{"user": "<id>", "kind": "<kind>"}` naming another registered kind.
- */
+/** The player a notification is for: each channel carries one kind, and its payload is a bare user id. */
 export function parseNotice(
   payload: string | undefined,
   channelKind: string,
   kinds: ReadonlySet<string>,
 ): { user: string; kind: string } | null {
-  if (payload === undefined) return null;
-  if (userId.test(payload))
-    return kinds.has(channelKind) ? { user: payload, kind: channelKind } : null;
-  let value: unknown;
-  try {
-    value = JSON.parse(payload);
-  } catch {
-    return null;
-  }
-  if (typeof value !== "object" || value === null) return null;
-  const user = "user" in value ? String(value.user) : "";
-  const kind = "kind" in value ? value.kind : undefined;
-  return userId.test(user) && typeof kind === "string" && kinds.has(kind)
-    ? { user, kind }
+  return payload !== undefined && userId.test(payload) && kinds.has(channelKind)
+    ? { user: payload, kind: channelKind }
     : null;
 }
 
@@ -60,7 +45,7 @@ export function createUserStreams({
   databaseUrl: string;
   logger: Pick<Logger, "warn">;
   kinds: Readonly<Record<string, UserStreamKind>>;
-  /** Database channel → the kind its bare-id payloads are for. */
+  /** Database channel → the one kind it carries; its payloads are bare user ids. */
   channels: Readonly<Record<string, string>>;
   /** Marks the connected players as present. */
   presence?: (userIds: readonly string[]) => Promise<unknown>;

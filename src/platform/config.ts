@@ -335,12 +335,14 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
       { minimum: 1, maximum: 1000 },
     ),
   });
-  // Personal live updates at /api/me/stream (interface 10). On by default with the live queue.
-  const userStreamEnabled =
-    environment.USER_STREAM_ENABLED ?? matchmaking.enabled.toString();
+  // Personal live updates at /api/me/stream (interface 10): always on with the live queue; with
+  // it off, only on request, so an always-open stream per signed-in tab stays a choice.
+  const userStreamEnabled = environment.USER_STREAM_ENABLED ?? "false";
   if (!["true", "false"].includes(userStreamEnabled))
     throw new Error("USER_STREAM_ENABLED must be true or false");
-  const userStream = Object.freeze({ enabled: userStreamEnabled === "true" });
+  const userStream = Object.freeze({
+    enabled: matchmaking.enabled || userStreamEnabled === "true",
+  });
 
   if (!environments.has(nodeEnvironment)) {
     throw new Error("NODE_ENV must be development, test, or production");

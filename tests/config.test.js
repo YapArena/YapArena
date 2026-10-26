@@ -68,7 +68,7 @@ describe("configuration", () => {
       assert.throws(() => loadConfig({ DATABASE_URL: databaseUrl, ...env }));
   });
 
-  it("runs personal live updates with the live queue unless set otherwise", () => {
+  it("runs personal live updates with the live queue, and otherwise only on request", () => {
     const load = (env) => loadConfig({ DATABASE_URL: databaseUrl, ...env });
     assert.deepEqual(load({}).userStream, { enabled: false });
     assert.deepEqual(load({ MATCHMAKING_ENABLED: "true" }).userStream, {
@@ -77,7 +77,7 @@ describe("configuration", () => {
     assert.deepEqual(
       load({ MATCHMAKING_ENABLED: "true", USER_STREAM_ENABLED: "false" })
         .userStream,
-      { enabled: false },
+      { enabled: true },
     );
     assert.deepEqual(load({ USER_STREAM_ENABLED: "true" }).userStream, {
       enabled: true,

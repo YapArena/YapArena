@@ -223,26 +223,27 @@ describe("personal live update streams", () => {
       );
   });
 
-  it("forwards results notices from their own channel or the user channel", async () => {
+  it("forwards results notices from their own channel without reading anything", async () => {
     const f = fixture();
     const response = new FakeResponse();
     f.streams.subscribe("7", response);
     await settle();
     f.reads.length = 0;
     f.wake("7", "yaparena_results_v1");
-    f.wake(JSON.stringify({ user: "7", kind: "results" }));
-    f.wake(JSON.stringify({ user: 7, kind: "results" }), "yaparena_results_v1");
+    f.wake("7", "yaparena_results_v1");
     await settle();
     await settle();
     // One commit's notices share a single push, which carries no body; nothing is read.
     assert.deepEqual(response.events("results"), [{}]);
     assert.deepEqual(f.reads, []);
-    f.wake(JSON.stringify({ user: "7", kind: "unknown" }));
-    f.wake(JSON.stringify({ user: "7", kind: "state" }));
+    // Each channel carries one kind as a bare user id; anything else is ignored.
+    f.wake(JSON.stringify({ user: "7", kind: "results" }));
+    f.wake("7", "yaparena_unknown_v1");
     await settle();
     await settle();
-    assert.deepEqual(f.reads, ["7"]);
+    assert.deepEqual(f.reads, []);
     assert.equal(response.events("results").length, 1);
+    assert.equal(response.events("state").length, 1);
   });
 
   it("re-sends only kinds with data after a reconnect", async () => {
@@ -257,27 +258,25 @@ describe("personal live update streams", () => {
     assert.deepEqual(response.events("results"), []);
   });
 
-  it("reads a notice's player and kind", () => {
+  it("reads a notice's player from a bare user id on its kind's channel", () => {
     const kinds = new Set(["state", "results"]);
     assert.deepEqual(parseNotice("42", "state", kinds), {
       user: "42",
       kind: "state",
     });
+    assert.deepEqual(parseNotice("42", "results", kinds), {
+      user: "42",
+      kind: "results",
+    });
     assert.equal(parseNotice("42", "", kinds), null);
     assert.equal(parseNotice("42", "missing", kinds), null);
-    assert.deepEqual(
-      parseNotice('{"user":42,"kind":"results"}', "state", kinds),
-      { user: "42", kind: "results" },
-    );
     for (const payload of [
       undefined,
       "0",
-      "not json",
-      "null",
-      '"42"',
-      '{"user":"x","kind":"results"}',
-      '{"user":"42"}',
-      '{"user":"42","kind":"other"}',
+      "-4",
+      "4.2",
+      "not a user",
+      '{"user":42,"kind":"results"}',
     ])
       assert.equal(parseNotice(payload, "state", kinds), null, payload);
   });
