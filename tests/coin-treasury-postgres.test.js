@@ -430,7 +430,9 @@ describe(
           JSON.stringify(terms),
         ],
       );
-      // Owner funding first requires the account's own sandbox opening.
+      // Owner funding first requires the account's own sandbox opening, as
+      // before Decision 0013. An automatic opening (no operation) is accepted
+      // for testnet funding: the next refusal is about the receipt, not it.
       await assert.rejects(
         operator.confirmFunding({
           userId: second,
