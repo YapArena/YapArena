@@ -1186,3 +1186,6 @@ describe(
     });
   },
 );
+
+// Turn windows share this file's database fixtures and run after its cases.
+await import("./helpers/coin-turn-windows-cases.js");
