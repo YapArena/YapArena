@@ -113,6 +113,7 @@ export function createApp({
   identity,
   matching,
   matchmaking,
+  debateAutoStart,
   media,
   mediaProvider,
   mediaAccountRevocation,
@@ -153,6 +154,7 @@ export function createApp({
   matching?: ReturnType<typeof createMatchingRepository>;
   // Live topic queue (Decision 0011); present only when MATCHMAKING_ENABLED=true.
   matchmaking?: ReturnType<typeof createMatchmaking>;
+  debateAutoStart?: { tryStart(debateId: string): Promise<boolean> };
   media?: ReturnType<typeof createMediaRepository>;
   mediaProvider?: ReturnType<typeof createMediaProvider>;
   mediaAccountRevocation?: ReturnType<typeof createMediaAccountRevocation>;
@@ -458,7 +460,13 @@ export function createApp({
     app.use(
       "/api/matching",
       createRequireAuthentication({ sessions, environment }),
-      createMatchingRouter({ matching, identity, media, recordProductAction }),
+      createMatchingRouter({
+        matching,
+        identity,
+        media,
+        recordProductAction,
+        debateAutoStart,
+      }),
     );
   }
   if (matchmaking && identity) {

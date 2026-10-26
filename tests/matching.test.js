@@ -34,6 +34,7 @@ function fixture({
   failure,
   participant = true,
   publicationState = "published",
+  debateAutoStart,
 } = {}) {
   const calls = [];
   const event = {
@@ -96,6 +97,7 @@ function fixture({
   };
   const app = createApp({
     matching,
+    debateAutoStart,
     identity: { getRoles: async () => roles },
     sessions: {
       findUserByTokenHash: async () => (signedIn ? user : null),
@@ -113,6 +115,26 @@ function fixture({
 }
 
 describe("matching API", () => {
+  it("starts the debate when the second speaker is ready, and never fails readiness on a start error", async () => {
+    const starts = [];
+    let failure;
+    const { authenticated } = fixture({
+      debateAutoStart: {
+        async tryStart(debateId) {
+          starts.push(debateId);
+          if (failure) throw failure;
+          return true;
+        },
+      },
+    });
+    const ready = () =>
+      authenticated("post", `/api/matching/events/${id}/ready`);
+    assert.equal((await ready()).body.event.status, "ready");
+    failure = new Error("egress unavailable");
+    assert.equal((await ready()).status, 200);
+    assert.deepEqual(starts, [id, id]);
+  });
+
   it("requires a session and exposes no account data anonymously", async () => {
     const { app } = fixture({ signedIn: false });
     for (const path of [

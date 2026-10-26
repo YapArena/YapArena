@@ -275,6 +275,43 @@ export async function createPairedEvent(
   return event;
 }
 
+// Cancels a debate that never went live because a speaker did not join in time, releasing both
+// seats. Runs from the jobs worker with no actor (Decision 0011). Returns the speakers' user ids.
+export async function cancelUnstartedDebate(
+  client: PoolClient,
+  debateId: string,
+  fromStatus: string,
+) {
+  await client.query(
+    `UPDATE debates SET status = 'cancelled', ended_reason = 'automatic_no_show',
+       updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+    [debateId],
+  );
+  const speakers = await client.query<{ userId: string }>(
+    `UPDATE event_participants SET active = false WHERE debate_id = $1
+     RETURNING user_id AS "userId"`,
+    [debateId],
+  );
+  await record(
+    client,
+    { debateId },
+    null,
+    "no_show",
+    fromStatus,
+    "cancelled",
+    "A speaker did not join before the join window closed.",
+  );
+  for (const speaker of speakers.rows)
+    await notify(
+      client,
+      speaker.userId,
+      "event.no_show",
+      "Your debate was cancelled because a speaker didn't join in time.",
+      { debateId },
+    );
+  return speakers.rows.map((speaker) => speaker.userId);
+}
+
 async function completeMatch(
   client: PoolClient,
   request: MatchRequest,
@@ -682,8 +719,9 @@ export function createMatchingRepository(database: Pool) {
         return updated;
       });
     },
+    // A null actor is the system: automatic start (Decision 0011).
     async operatorTransition(
-      actorId: string,
+      actorId: string | null,
       id: string,
       action:
         | "start"

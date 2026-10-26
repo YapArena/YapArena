@@ -5,9 +5,15 @@ import pg from "pg";
 
 import { createMatchmaking } from "../dist/features/matching/matchmaking.js";
 import {
+  createMatchingRepository,
   MatchConflictError,
   MatchNotFoundError,
 } from "../dist/features/matching/repository.js";
+import { createDebateAutoStart } from "../dist/features/media/auto-start.js";
+import {
+  createMediaRepository,
+  MediaConflictError,
+} from "../dist/features/media/repository.js";
 
 const ownerUrl = process.env.A4_TEST_OWNER_URL,
   runtimeUrl = process.env.A4_TEST_DATABASE_URL;
@@ -325,6 +331,196 @@ describe(
         [a],
       );
       assert.ok((await queue.pruneExpired()) >= 1);
+      assert.equal(await ticket(a), undefined);
+    });
+
+    // Both players accepted; returns the new debate's id.
+    async function matched(slug, a, b) {
+      await queue.enter(a, { topicSlug: slug, side: "A" });
+      const { offer } = await queue.enter(b, { topicSlug: slug, side: "B" });
+      await queue.accept(a, offer.id);
+      return (await queue.accept(b, offer.id)).debateId;
+    }
+
+    it("requires a recent camera and microphone check before queueing", async () => {
+      const slug = await topic();
+      const a = await player();
+      const checked = createMatchmaking(runtime, {
+        liveDebateCapacity: 100000,
+        requireDeviceCheck: true,
+      });
+      await assert.rejects(
+        checked.enter(a, { topicSlug: slug, side: "A" }),
+        /check your camera and microphone/,
+      );
+      const media = createMediaRepository(runtime);
+      await media.checkAccountDevice(a, true, false);
+      await assert.rejects(
+        checked.enter(a, { topicSlug: slug, side: "A" }),
+        /check your camera/,
+      );
+      await media.checkAccountDevice(a, true, true);
+      assert.equal(
+        (await checked.enter(a, { topicSlug: slug, side: "A" })).ticket.status,
+        "searching",
+      );
+      await owner.query(
+        "UPDATE account_device_checks SET checked_at = CURRENT_TIMESTAMP - interval '31 minutes' WHERE user_id = $1",
+        [a],
+      );
+      await checked.leave(a);
+      await assert.rejects(
+        checked.enter(a, { topicSlug: slug, side: "A" }),
+        /check your camera/,
+      );
+    });
+
+    it("starts a ready debate automatically, once, with the system as actor", async () => {
+      const slug = await topic();
+      const [a, b] = [await player(), await player()];
+      const debateId = await matched(slug, a, b);
+      const calls = [];
+      let release;
+      const autoStart = createDebateAutoStart({
+        database: runtime,
+        startDebate: async (input) => {
+          calls.push(input);
+          await new Promise((resolve) => {
+            release = resolve;
+          });
+        },
+        logger: { error() {} },
+      });
+      assert.equal(await autoStart.tryStart(debateId), false);
+      const matching = createMatchingRepository(runtime);
+      await matching.markReady(a, debateId);
+      await matching.markReady(b, debateId);
+      const first = autoStart.tryStart(debateId);
+      while (!release) await new Promise((resolve) => setImmediate(resolve));
+      assert.equal(await autoStart.tryStart(debateId), false);
+      release();
+      assert.equal(await first, true);
+      assert.equal(calls.length, 1);
+      assert.equal(calls[0].debateId, debateId);
+      assert.equal(calls[0].actorUserId, null);
+      assert.match(calls[0].reason, /Automatic start/);
+    });
+
+    it("waits for both speakers, and the worker logs start failures without stopping", async () => {
+      const slug = await topic();
+      const [a, b] = [await player(), await player()];
+      const debateId = await matched(slug, a, b);
+      const matching = createMatchingRepository(runtime);
+      await matching.markReady(a, debateId);
+      await matching.markReady(b, debateId);
+      const errors = [];
+      let failure = new MediaConflictError("both speakers must be connected");
+      const autoStart = createDebateAutoStart({
+        database: runtime,
+        startDebate: async () => {
+          throw failure;
+        },
+        logger: { error: (details) => errors.push(details.debateId) },
+      });
+      assert.equal(await autoStart.tryStart(debateId), false);
+      failure = new MatchConflictError("invalid event transition");
+      assert.equal(await autoStart.tryStart(debateId), false);
+      failure = new Error("egress unavailable");
+      await assert.rejects(autoStart.tryStart(debateId), /egress unavailable/);
+      await autoStart.sweep();
+      assert.ok(errors.includes(debateId));
+    });
+
+    it("cancels a matched debate nobody started and requeues the player who joined", async () => {
+      const slug = await topic();
+      const [a, b] = [await player(), await player()];
+      const queuedAt = (await queue.enter(a, { topicSlug: slug, side: "A" }))
+        .ticket.queuedAt;
+      const { offer } = await queue.enter(b, { topicSlug: slug, side: "B" });
+      await queue.accept(a, offer.id);
+      const { debateId } = await queue.accept(b, offer.id);
+      await createMatchingRepository(runtime).markReady(a, debateId);
+      await queue.sweep();
+      assert.equal(
+        (
+          await owner.query("SELECT status FROM debates WHERE id = $1", [
+            debateId,
+          ])
+        ).rows[0].status,
+        "scheduled",
+      );
+      await owner.query(
+        "UPDATE debates SET scheduled_at = CURRENT_TIMESTAMP - interval '91 seconds' WHERE id = $1",
+        [debateId],
+      );
+      const swept = await queue.sweep();
+      assert.ok(swept.value.noShows >= 1);
+      const debate = (
+        await owner.query(
+          "SELECT status, ended_reason FROM debates WHERE id = $1",
+          [debateId],
+        )
+      ).rows[0];
+      assert.deepEqual(debate, {
+        status: "cancelled",
+        ended_reason: "automatic_no_show",
+      });
+      const seats = await owner.query(
+        "SELECT count(*)::int AS count FROM event_participants WHERE debate_id = $1 AND active",
+        [debateId],
+      );
+      assert.equal(seats.rows[0].count, 0);
+      const back = await ticket(a);
+      assert.equal(back.status, "searching");
+      assert.equal(new Date(back.priority_at).toISOString(), queuedAt);
+      assert.equal((await ticket(b)).status, "matched");
+      const notices = await owner.query(
+        "SELECT count(*)::int AS count FROM account_notifications WHERE debate_id = $1 AND event_type = 'event.no_show'",
+        [debateId],
+      );
+      assert.equal(notices.rows[0].count, 2);
+      const history = await owner.query(
+        "SELECT actor_user_id, to_status FROM event_history WHERE debate_id = $1 AND action = 'no_show'",
+        [debateId],
+      );
+      assert.deepEqual(history.rows, [
+        { actor_user_id: null, to_status: "cancelled" },
+      ]);
+    });
+
+    it("gives a scheduled debate ten minutes to start before cancelling it", async () => {
+      const slug = await topic();
+      const [a, b] = [await player(), await player()];
+      const topicId = (
+        await owner.query("SELECT id FROM topics WHERE slug = $1", [slug])
+      ).rows[0].id;
+      const debateId = (
+        await owner.query(
+          `INSERT INTO debates (slug, topic_id, proposition, status, publication_state,
+             rules_version, rules_snapshot, scheduled_at)
+           VALUES ($1, $2, 'Canada should expand nuclear power', 'scheduled', 'published',
+             'preview-1', '{}', CURRENT_TIMESTAMP - interval '9 minutes') RETURNING id`,
+          [`debate-${randomUUID()}`, topicId],
+        )
+      ).rows[0].id;
+      await owner.query(
+        "INSERT INTO event_participants (debate_id, user_id, side) VALUES ($1, $2, 'A'), ($1, $3, 'B')",
+        [debateId, a, b],
+      );
+      await queue.sweep();
+      const status = async () =>
+        (
+          await owner.query("SELECT status FROM debates WHERE id = $1", [
+            debateId,
+          ])
+        ).rows[0].status;
+      assert.equal(await status(), "scheduled");
+      await owner.query(
+        "UPDATE debates SET scheduled_at = CURRENT_TIMESTAMP - interval '11 minutes' WHERE id = $1",
+        [debateId],
+      );
+      await queue.sweep();
+      assert.equal(await status(), "cancelled");
       assert.equal(await ticket(a), undefined);
     });
   },
