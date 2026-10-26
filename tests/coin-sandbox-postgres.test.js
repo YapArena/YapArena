@@ -31,7 +31,6 @@ import {
   ensureSandboxBuckets,
   lockSandboxBook,
   assertSandboxNewPayoutAuthorization,
-  sandboxOpeningTerms,
 } from "../dist/features/account-wallet/sandbox-repository.js";
 import { postCoinJournal } from "../dist/features/account-wallet/ledger.js";
 import {
@@ -43,7 +42,7 @@ import {
 const ownerUrl = process.env.A4_TEST_OWNER_URL;
 const runtimeUrl = process.env.A4_TEST_DATABASE_URL;
 const origin = "http://localhost:53024";
-const unopened = /confirm by signing in again to open the financial sandbox/;
+const unopened = /this account has not used its coin sandbox/;
 const expiredConfirmation = /confirmation expired or invalid/;
 const digest = (value) =>
   createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -135,8 +134,8 @@ describe(
     after(async () => {
       await Promise.all([owner?.end(), a?.end(), b?.end()]);
     });
-    // Every account signs in with an Auth0 subject; an opened account has
-    // also confirmed entering the financial sandbox once (Decision 0009).
+    // Every account signs in with an Auth0 subject. An opened account has the
+    // automatic opening its first own request records (Decision 0013).
     async function fixture(opened = true) {
       const user = (
         await owner.query(
@@ -189,9 +188,6 @@ describe(
         },
       });
     }
-    // The second at which an operation was created, from its five-minute expiry.
-    const createdSecond = (operation) =>
-      Math.floor(new Date(operation.expiresAt).getTime() / 1000) - 300;
     async function consumed(ids) {
       return (
         await owner.query(
@@ -523,133 +519,67 @@ describe(
         "10000000",
       );
     });
-    it("opens the financial sandbox once through a confirmed fresh sign-in over HTTP", async () => {
+    it("opens Yap Coins automatically on an account's first request, with no confirmation (Decision 0013)", async () => {
       const actor = await fixture(false),
-        intruder = await fixture(false),
+        newcomer = await fixture(false),
         server = sandboxApp(),
-        operations = createAccountOperationRepository(a),
-        as = async (context) => ({
-          cookie: `session=${context.sessionToken}`,
-          sessionId: (await repo.summary(context)).sessionId,
-        }),
-        self = await as(actor),
-        stranger = await as(intruder),
-        post = (path, body = {}, caller = self) =>
+        sessionId = (await repo.summary(actor)).sessionId,
+        post = (path, body = {}) =>
           request(server)
             .post(`/coins${path}`)
-            .set("Cookie", caller.cookie)
-            .set("X-YapArena-Session", caller.sessionId)
+            .set("Cookie", `session=${actor.sessionToken}`)
+            .set("X-YapArena-Session", sessionId)
             .set("Origin", origin)
             .send(body),
-        openings = async () =>
+        openings = async (context) =>
           (
             await owner.query(
-              "SELECT operation_id::text AS id FROM coin_sandbox_openings WHERE user_id=$1",
-              [actor.userId],
+              "SELECT operation_id FROM coin_sandbox_openings WHERE user_id=$1",
+              [context.userId],
             )
-          ).rows;
-      assert.equal((await repo.summary(actor)).opened, false);
-      assert.match(
-        (await post("/initialize").expect(403)).body.error,
-        unopened,
-      );
-      await post("/opening/operations", {
-        credential: { type: "password" },
-      }).expect(400);
-      const first = (await post("/opening/operations").expect(201)).body;
-      assert.equal(
-        first.confirmPath,
-        `/api/auth/confirm?operation=${first.id}`,
-      );
-      // Missing or unconfirmed confirmations open nothing.
-      await post("/opening").expect(400);
-      await post("/opening", { approval: { id: randomUUID() } }).expect(410);
-      assert.match(
-        (await post("/opening", { approval: { id: first.id } }).expect(410))
-          .body.error,
-        expiredConfirmation,
-      );
-      assert.deepEqual(await openings(), []);
-      // Only a sign-in at or after its creation by this account confirms it.
-      await assert.rejects(
-        signIn(
-          operations,
-          { ...actor, subject: intruder.subject },
-          first.id,
-          createdSecond(first),
-        ),
-        { code: "other_account" },
-      );
-      await assert.rejects(
-        signIn(operations, actor, first.id, createdSecond(first) - 1),
-        { code: "stale_sign_in" },
-      );
-      await signIn(operations, actor, first.id, createdSecond(first));
-      await post("/opening", { approval: { id: first.id } }, stranger).expect(
-        410,
-      );
-      assert.deepEqual(
-        (await post("/opening", { approval: { id: first.id } }).expect(200))
-          .body,
-        { opened: true },
-      );
-      assert.deepEqual(await openings(), [{ id: first.id }]);
-      assert.equal((await repo.summary(actor)).opened, true);
-      assert.equal((await repo.summary(intruder)).opened, false);
-      // The confirmation was consumed with the opening and cannot be replayed.
-      await post("/opening", { approval: { id: first.id } }).expect(410);
-      // Opening again is idempotent: one record, the new confirmation consumed.
-      const second = (await post("/opening/operations").expect(201)).body;
-      await signIn(operations, actor, second.id);
-      assert.deepEqual(
-        (await post("/opening", { approval: { id: second.id } }).expect(200))
-          .body,
-        { opened: true },
-      );
-      assert.deepEqual(await openings(), [{ id: first.id }]);
-      assert.deepEqual(await consumed([first.id, second.id]), [true, true]);
-      await post("/opening", { approval: { id: second.id } }).expect(410);
-      // A confirmation of another account's opening terms, or from another
-      // session, does not open this sandbox and stays unconsumed.
-      const foreign = await confirmedApproval(a, {
-        userId: intruder.userId,
-        sessionTokenHash: intruder.sessionTokenHash,
-        subject: intruder.subject,
-        purpose: "sandbox.open",
-        terms: sandboxOpeningTerms(actor.userId),
-      });
-      // open() validates synchronously before its transaction.
-      await assert.rejects(
-        async () =>
-          repo.open(intruder, {
-            operationId: foreign.id,
-            approval: foreign.approval,
-          }),
-        /confirmation does not open this sandbox/,
-      );
-      await assert.rejects(
-        async () =>
-          repo.open(actor, {
-            operationId: foreign.id,
-            approval: foreign.approval,
-          }),
-        /confirmation belongs to another session/,
-      );
-      assert.deepEqual(await consumed([foreign.id]), [false]);
-      assert.equal((await repo.summary(intruder)).opened, false);
+          ).rows,
+        welcomeGrants = async (context) =>
+          (
+            await owner.query(
+              "SELECT count(*)::int n FROM coin_grant_lots WHERE user_id=$1 AND kind='welcome'",
+              [context.userId],
+            )
+          ).rows[0].n;
+      // Reading the summary changes nothing.
+      const before = await repo.summary(actor);
+      assert.equal(before.opened, false);
+      assert.equal(before.initialized, false);
+      assert.deepEqual(await openings(actor), []);
+      // The opening confirmation routes are gone.
+      await post("/opening/operations").expect(404);
+      await post("/opening", { approval: { id: randomUUID() } }).expect(404);
+      // The first request opens the sandbox and claims the welcome grant once.
+      assert.equal((await post("/initialize").expect(200)).body.created, true);
+      assert.equal((await post("/initialize").expect(200)).body.created, false);
+      assert.deepEqual(await openings(actor), [{ operation_id: null }]);
+      assert.equal(await welcomeGrants(actor), 1);
+      const after = await repo.summary(actor);
+      assert.equal(after.opened, true);
+      assert.equal(after.initialized, true);
+      assert.equal(after.balances.promotionalPrincipal, "25000000");
       assert.equal(
         (
           await owner.query(
-            "SELECT count(*)::int n FROM identity_audit_events WHERE user_id=$1 AND event_type='account.operation_authorized' AND metadata->>'purpose'='sandbox.open'",
+            "SELECT count(*)::int n FROM account_operations WHERE user_id=$1",
             [actor.userId],
           )
         ).rows[0].n,
-        2,
+        0,
       );
-      assert.equal((await post("/initialize").expect(200)).body.created, true);
+      // Any first own request opens, here a daily grant without the welcome.
+      assert.equal((await repo.claimGrant(newcomer, "daily")).created, true);
+      assert.deepEqual(await openings(newcomer), [{ operation_id: null }]);
+      assert.equal(await welcomeGrants(newcomer), 0);
     });
     it("runs the authenticated HTTP quote, sign-in confirmation and reservation against the real ledger", async () => {
-      const actor = await fixture();
+      // Never opened beforehand: its first request below opens it (Decision
+      // 0013), and its withdrawal still needs a fresh sign-in.
+      const actor = await fixture(false);
       const intruder = await fixture();
       const app = sandboxApp();
       const operations = createAccountOperationRepository(a);
@@ -681,6 +611,15 @@ describe(
         .send({ amount: "10000000" })
         .expect(201);
       assert.equal(funding.body.terms.rail, "simulation");
+      assert.deepEqual(
+        (
+          await owner.query(
+            "SELECT operation_id FROM coin_sandbox_openings WHERE user_id=$1",
+            [actor.userId],
+          )
+        ).rows,
+        [{ operation_id: null }],
+      );
       await request(app)
         .post(`/coins/funding/${funding.body.id}/confirm`)
         .set("Cookie", cookie)
@@ -790,7 +729,7 @@ describe(
       assert.equal(summary.body.balances.reserved, "5000000");
       assert.equal((await repo.summary(intruder)).balances.cashAvailable, "0");
     });
-    it("keeps read-only summary empty until the sandbox is opened, and separates rails and owner review and funding authority", async () => {
+    it("keeps the summary read-only for a new account, and separates rails and owner review and funding authority", async () => {
       const newcomer = await fixture(false);
       const before = await repo.summary(newcomer);
       assert.equal(before.initialized, false);
@@ -805,23 +744,6 @@ describe(
         0,
       );
       assert.equal(before.opened, false);
-      await assert.rejects(repo.initialize(newcomer), unopened);
-      await assert.rejects(repo.claimGrant(newcomer, "daily"), unopened);
-      await assert.rejects(
-        repo.quoteFunding(newcomer, {
-          amount: "1",
-          idempotencyKey: randomUUID(),
-        }),
-        unopened,
-      );
-      await assert.rejects(
-        repo.quoteWithdrawal(newcomer, {
-          gross: "5000000",
-          destination: "synthetic-unopened-wallet",
-          idempotencyKey: randomUUID(),
-        }),
-        unopened,
-      );
       const base = createCoinSandboxRepository(a, {
         rail: "base-sepolia",
         depositDestination: `0x${"11".repeat(20)}`,

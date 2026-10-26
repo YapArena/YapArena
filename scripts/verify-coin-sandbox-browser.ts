@@ -3,11 +3,11 @@
 // account-coins.js on a fixture coins page at /coins and mounts the real
 // coin sandbox and auth routers. Sign-in confirmation (Decision 0009, point 8)
 // runs against the in-process OpenID Connect issuer (oidc-test-issuer.ts),
-// whose stand-in Universal Login page Chrome drives: opening the sandbox, a
-// withdrawal and a recovery cost consent are each confirmed by signing in
-// again, and a cancelled provider sign-in, a sign-in as another account, a
-// forged or replayed return and a confirmation that returns after its five
-// minutes change nothing. Grants, simulated funding, debate rounds, error
+// whose stand-in Universal Login page Chrome drives: a withdrawal and a
+// recovery cost consent are each confirmed by signing in again, and a
+// replayed return and a confirmation that returns after its five minutes
+// change nothing. Yap Coins are always on (Decision 0013): the first visit
+// opens the sandbox and claims the welcome grant. Grants, simulated funding, debate rounds, error
 // reports, the correction hold, account switches, logout and keyboard, mobile
 // and zoom checks run at desktop and mobile widths.
 //
@@ -37,7 +37,6 @@ import pg from "pg";
 import { runner } from "node-pg-migrate";
 import {
   chromium,
-  type APIResponse,
   type Browser,
   type BrowserContext,
   type Locator,
@@ -225,12 +224,6 @@ function expectConfirmation(page: Page, creation: string | RegExp) {
     assert.equal(link.searchParams.get("return"), accountReturn);
     return { id, confirmPath: `/api/auth/confirm?operation=${id}` };
   })();
-}
-async function errorOf(response: APIResponse) {
-  const body: unknown = await response.json();
-  return body !== null && typeof body === "object" && "error" in body
-    ? body.error
-    : undefined;
 }
 function posted(path: string | RegExp) {
   return (response: Response) =>
@@ -615,7 +608,7 @@ try {
     ["desktop", { width: 1440, height: 1100 }],
     ["mobile", { width: 390, height: 844 }],
   ] as const) {
-    phase = `${name}: unopened account offers confirmation by signing in again`;
+    phase = `${name}: Yap Coins open automatically with the welcome grant (Decision 0013)`;
     const account = await fixture(),
       replacement = await fixture(),
       currentToken = account.token,
@@ -646,205 +639,61 @@ try {
         counts,
       };
     }
-    const openings = () =>
-      count(
-        "SELECT count(*)::int n FROM coin_sandbox_openings WHERE user_id=$1",
-        [account.userId],
-      );
+    // Decision 0013: Yap Coins are always on. The first visit records an
+    // automatic opening (no confirmation id) and claims the welcome grant.
+    const automaticOpenings = () =>
+        count(
+          "SELECT count(*)::int n FROM coin_sandbox_openings WHERE user_id=$1 AND operation_id IS NULL",
+          [account.userId],
+        ),
+      welcomeGrants = () =>
+        count(
+          "SELECT count(*)::int n FROM coin_grant_lots WHERE user_id=$1 AND kind='welcome'",
+          [account.userId],
+        );
+    assert.equal((await sandbox.summary(accountContext)).opened, false);
     await page.goto(`${origin}/coins`);
     const root = page.locator("#coin-sandbox"),
-      notice = root.locator("[data-coin-notice]"),
-      opening = root.locator("[data-coin-opening]"),
-      confirmOpen = root.locator("[data-coin-confirm-open]");
+      notice = root.locator("[data-coin-notice]");
     await root.getByText(settled, { exact: true }).waitFor();
-    await confirmOpen.waitFor();
-    assert.equal(await confirmOpen.innerText(), "Confirm by signing in again");
-    assert.match(
-      await opening.innerText(),
-      /Confirm it's you to open the financial sandbox\. You'll sign in again once; withdrawals and recovery consents ask each time\./,
-    );
-    assert.equal(await root.locator("[data-coin-initialize]").isHidden(), true);
-    const unopened = await sandbox.summary(accountContext);
-    assert.equal(unopened.opened, false);
-    const refused = await context.request.post(
-      `${origin}/api/coin-sandbox/initialize`,
-      {
-        headers: { Origin: origin, "X-YapArena-Session": unopened.sessionId },
-        data: {},
-      },
-    );
-    assert.equal(refused.status(), 403);
-    assert.equal(
-      await errorOf(refused),
-      "confirm by signing in again to open the financial sandbox",
-    );
-    await automatedA11y(page);
-    await page.screenshot({
-      path: resolve(evidenceDirectory, `before-${name}.png`),
-      fullPage: true,
-    });
-    // Money-moving controls stay hidden until the sandbox is opened, and the
-    // server refuses them anyway.
-    assert.equal(await root.locator("[data-coin-daily]").isHidden(), true);
-    for (const form of [
-      "[data-coin-funding]",
-      "[data-coin-withdraw]",
-      "[data-coin-participate]",
-    ])
-      assert.equal(
-        await root.locator(`details:has(${form})`).isHidden(),
-        true,
-        form,
-      );
-    const refusedDaily = await context.request.post(
-      `${origin}/api/coin-sandbox/grants/daily`,
-      {
-        headers: { Origin: origin, "X-YapArena-Session": unopened.sessionId },
-        data: {},
-      },
-    );
-    assert.equal(refusedDaily.status(), 403);
-    assert.equal(
-      await errorOf(refusedDaily),
-      "confirm by signing in again to open the financial sandbox",
-    );
+    await root.getByText(/^Welcome grant:/).waitFor();
+    assert.equal(await root.locator("[data-coin-opening]").count(), 0);
+    assert.equal(await root.locator("[data-coin-initialize]").count(), 0);
+    assert.equal(await automaticOpenings(), 1);
+    assert.equal(await welcomeGrants(), 1);
     assert.equal(
       await count(
-        "SELECT count(*)::int n FROM coin_grant_lots WHERE user_id=$1",
+        "SELECT count(*)::int n FROM account_operations WHERE user_id=$1",
         [account.userId],
       ),
       0,
     );
-    checks.push(
-      `${name}: an unopened account sees "Confirm by signing in again" with its explanation and no grant, purchase, withdrawal or debate controls; the real API refuses the welcome and daily grants with 403 and no grant is created`,
-    );
-
-    phase = `${name}: a cancelled provider sign-in leaves the sandbox unopened`;
-    const cancelledOperation = expectConfirmation(
-      page,
-      "/api/coin-sandbox/opening/operations",
-    );
-    await confirmOpen.focus();
-    await page.keyboard.press("Enter");
-    await cancelledOperation;
-    await atProvider(page, account.identity.email);
+    assert.equal(await root.locator("[data-coin-daily]").isVisible(), true);
+    for (const form of [
+      "[data-coin-funding]",
+      "[data-coin-withdraw]",
+      "[data-coin-debate]",
+    ])
+      assert.equal(
+        await root.locator(`details:has(${form})`).isVisible(),
+        true,
+        form,
+      );
+    await page.reload();
+    await root.getByText(settled, { exact: true }).waitFor();
+    await root.getByText(/^Welcome grant:/).waitFor();
+    assert.equal(await automaticOpenings(), 1);
+    assert.equal(await welcomeGrants(), 1);
+    await automatedA11y(page);
     await page.screenshot({
-      path: resolve(evidenceDirectory, `opening-provider-${name}.png`),
+      path: resolve(evidenceDirectory, `opened-${name}.png`),
       fullPage: true,
     });
-    await page.getByRole("button", { name: "Cancel", exact: true }).click();
-    await explained(
-      page,
-      "Sign-in cancelled",
-      "Sign-in was cancelled. Nothing changed.",
-    );
-    await root.getByText(settled, { exact: true }).waitFor();
-    await confirmOpen.waitFor();
-    assert.equal(await openings(), 0);
-
-    phase = `${name}: signing in as another account confirms nothing`;
-    const foreignOperation = expectConfirmation(
-      page,
-      "/api/coin-sandbox/opening/operations",
-    );
-    await confirmOpen.click();
-    const foreign = await foreignOperation;
-    await signInAtProvider(page, account.identity, replacement.identity);
-    await explained(
-      page,
-      "Not confirmed",
-      "You signed in with a different account, so nothing changed. Sign in as the account that started this action.",
-      `opening-other-account-${name}.png`,
-    );
-    const stillSignedIn = await context.request.get(`${origin}/api/auth/me`);
-    assert.equal(stillSignedIn.status(), 200);
-    const me: unknown = await stillSignedIn.json();
-    assert.ok(
-      me !== null &&
-        typeof me === "object" &&
-        "user" in me &&
-        me.user !== null &&
-        typeof me.user === "object" &&
-        "id" in me.user,
-    );
-    assert.equal(String(me.user.id), account.userId);
-    assert.equal(
-      await count(
-        "SELECT count(*)::int n FROM account_operations WHERE id=$1 AND confirmed_at IS NULL AND consumed_at IS NULL",
-        [foreign.id],
-      ),
-      1,
-    );
-    await confirmOpen.waitFor();
-    assert.equal(await openings(), 0);
-
-    phase = `${name}: a forged return with an unconfirmed operation opens nothing`;
-    const forged = page.waitForResponse(posted("/api/coin-sandbox/opening"));
-    await page.goto(`${origin}/coins?confirmed=${foreign.id}#coin-sandbox`);
-    assert.equal((await forged).status(), 410);
-    await notice.filter({ hasText: spentConfirmation }).waitFor();
-    assert.equal(page.url(), `${origin}${accountReturn}`);
-    await confirmOpen.waitFor();
-    assert.equal(await openings(), 0);
-    assert.equal((await sandbox.summary(accountContext)).opened, false);
     checks.push(
-      `${name}: a cancelled provider sign-in and a sign-in as another account's subject each return to an accessible page that explains nothing changed (no retry link, the device keeps its own session); returning with ?confirmed= for that unconfirmed operation is refused with 410 and the sandbox stays unopened`,
-    );
-
-    phase = `${name}: confirming by signing in again opens the sandbox once`;
-    const openingOperation = expectConfirmation(
-      page,
-      "/api/coin-sandbox/opening/operations",
-    );
-    await confirmOpen.focus();
-    await page.keyboard.press("Enter");
-    const opened = await openingOperation;
-    await signInAtProvider(page, account.identity, account.identity);
-    await notice
-      .filter({
-        hasText:
-          "Sandbox opened. You can now claim grants and use simulated funds.",
-      })
-      .waitFor();
-    assert.equal(page.url(), `${origin}${accountReturn}`);
-    assert.equal(await opening.isHidden(), true);
-    await root.locator("[data-coin-initialize]").waitFor();
-    assert.equal(await openings(), 1);
-    assert.deepEqual(
-      (
-        await ownerPool.query<{
-          operationId: string;
-          subject: string;
-          consumed: boolean;
-        }>(
-          `SELECT c.operation_id::text AS "operationId",o.confirmed_subject AS subject,o.consumed_at IS NOT NULL AS consumed
-           FROM coin_sandbox_openings c JOIN account_operations o ON o.id=c.operation_id WHERE c.user_id=$1`,
-          [account.userId],
-        )
-      ).rows,
-      [
-        {
-          operationId: opened.id,
-          subject: account.identity.subject,
-          consumed: true,
-        },
-      ],
-    );
-    assert.equal(
-      (await context.cookies(origin)).find(
-        (cookie) => cookie.name === "session",
-      )?.value,
-      currentToken,
-    );
-    await automatedA11y(page);
-    checks.push(
-      `${name}: "Confirm by signing in again" reaches the provider with prompt=login, max_age=0 and the account's own address; signing in as the same account returns to /coins, opens the sandbox exactly once with that operation and subject, keeps the device's session and removes ?confirmed= from the address`,
+      `${name}: Yap Coins are always on (Decision 0013): the first visit to /coins records one automatic opening without any confirmation, claims the welcome grant exactly once, shows the daily grant, purchase, withdrawal and debate controls, and a reload claims nothing more`,
     );
 
     phase = `${name}: exactly-once grants and funded issuance`;
-    await root.locator("[data-coin-initialize]").focus();
-    await page.keyboard.press("Enter");
-    await root.locator("[data-coin-initialize]").waitFor({ state: "hidden" });
     await root.locator("[data-coin-daily]").click();
     await root.getByText(/Daily grant:/).waitFor();
     await root.locator("[data-coin-daily]").click();
@@ -1394,8 +1243,15 @@ try {
       "",
     );
     checkingReplacement.finish.release();
-    await confirmOpen.waitFor({ state: "visible" });
-    assert.equal(await root.locator("[data-coin-initialize]").isHidden(), true);
+    // The replacement's own first visit claims only its own welcome grant.
+    await root.getByText(/^Welcome grant:/).waitFor();
+    assert.equal(
+      await count(
+        "SELECT count(*)::int n FROM coin_grant_lots WHERE user_id=$1 AND kind='welcome'",
+        [replacement.userId],
+      ),
+      1,
+    );
     await root
       .locator("[data-coin-report-notice]")
       .filter({ hasText: "No deposit or payout errors reported." })
@@ -1410,9 +1266,8 @@ try {
       .filter({ hasText: "Purchased principal" })
       .getByText("500 YC", { exact: true })
       .waitFor();
-    assert.equal(await opening.isHidden(), true);
     checks.push(
-      `${name}: real cookie switch while the native confirmation blocks browser events is rejected by comparison-only session context; a held replacement summary leaves no old balances, receipts, round, report or destination in hidden DOM, the unopened replacement sees only its own opening control, and it receives no stake or funds`,
+      `${name}: real cookie switch while the native confirmation blocks browser events is rejected by comparison-only session context; a held replacement summary leaves no old balances, receipts, round, report or destination in hidden DOM, the replacement sees only its own automatic welcome grant, and it receives no stake or purchased funds`,
     );
 
     phase = `${name}: late old-account action cannot restore private balances or disabled controls`;
@@ -1422,7 +1277,11 @@ try {
     await gate.arrived.promise;
     await selectCookie(context, origin, replacement.token);
     await announceAccount(page);
-    await confirmOpen.waitFor({ state: "visible" });
+    await root
+      .locator("[data-coin-balances] div")
+      .filter({ hasText: "Purchased principal" })
+      .getByText("0 YC", { exact: true })
+      .waitFor();
     assert.equal(await root.locator("[data-coin-refresh]").isEnabled(), true);
     const delayed = page.waitForResponse(
       (response) =>
@@ -1622,7 +1481,7 @@ try {
       document.documentElement.style.zoom = "";
     });
     checks.push(
-      `${name}: keyboard activation of the opening, withdrawal and recovery confirmation controls, native-dialog review, automated WCAG2.2AA tags on the account and explanation pages and no horizontal overflow at normal and CSS200% layout zoom; not screen-reader or physical-device evidence`,
+      `${name}: keyboard activation of the withdrawal and recovery confirmation controls, native-dialog review, automated WCAG2.2AA tags on the account and explanation pages and no horizontal overflow at normal and CSS200% layout zoom; not screen-reader or physical-device evidence`,
     );
     await context.close();
   }
