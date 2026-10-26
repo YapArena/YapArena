@@ -7,6 +7,7 @@ import {
   createCoinDebateSandbox,
   COIN_DEBATE_FACE,
   COIN_DEBATE_TERMS,
+  lockLedger,
 } from "../dist/features/account-wallet/debate-sandbox.js";
 import {
   appendSandboxBookEvent,
@@ -175,6 +176,9 @@ describe(
           context.userId,
         ]);
         const buckets = await ensureSandboxBuckets(client, context.userId);
+        // Lock in the repository's global order first. Taking the treasury rows
+        // alone, then the rest inside submit, deadlocked with parallel suites.
+        await lockLedger(client, [buckets]);
         const accounts = (
           await client.query(
             "SELECT id,balance::text FROM coin_accounts WHERE id=ANY($1::uuid[]) ORDER BY id FOR UPDATE",

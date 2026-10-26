@@ -24,8 +24,11 @@
 
 FROM base AS production
 ARG MEDIA_WORKER_TOOLS=false
+# FFmpeg brings in libraries the base image lacks (libssl3 among them). Upgrading after the
+# install keeps every package at Debian's current security release when this layer builds.
 RUN if [ "$MEDIA_WORKER_TOOLS" = "true" ]; then \
       apt-get update && apt-get install --yes --no-install-recommends ffmpeg && \
+      apt-get upgrade --yes && \
       rm -rf /var/lib/apt/lists/*; \
     elif [ "$MEDIA_WORKER_TOOLS" != "false" ]; then exit 1; fi
 ENV NODE_ENV=production

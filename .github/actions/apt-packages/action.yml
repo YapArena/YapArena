@@ -48,11 +48,22 @@ runs:
         read -ra packages <<< "$PACKAGES"
 
         if [[ "$CACHE_HIT" == "true" ]]; then
-          # apt installs the saved files and checks their dependencies against the packages
-          # already on this runner image, so nothing is downloaded ("Need to get 0 B").
+          # Install the saved files against the packages already on this runner image, with
+          # every package source hidden. Given the runner's own sources, apt re-resolves the
+          # local paths and, on Ubuntu 26.04, downloads all of them again from the mirror
+          # ("Need to get 66.4 MB"). Without sources it can neither download nor pick a
+          # different build: a missing dependency fails before anything is installed.
           # --no-download cannot be used: apt then rejects local .deb paths.
-          if sudo apt-get install --yes --no-install-recommends "$DIRECTORY"/*.deb; then
-            echo "Installed ${packages[*]} from the package cache"
+          shopt -s nullglob
+          cached=("$DIRECTORY"/*.deb)
+          shopt -u nullglob
+          no_lists="$(mktemp -d)"
+          mkdir "$no_lists/partial"
+          if (( ${#cached[@]} > 0 )) && sudo timeout 3m apt-get install --yes \
+            --no-install-recommends -o Dir::Etc::SourceList=/dev/null \
+            -o Dir::Etc::SourceParts="$no_lists" -o Dir::State::Lists="$no_lists" \
+            "${cached[@]}"; then
+            echo "Installed ${packages[*]} from ${#cached[@]} cached files, without downloading"
             exit 0
           fi
           echo "::warning::Cached packages did not install; downloading them instead"
@@ -63,24 +74,33 @@ runs:
         # apt.postgresql.org.sh runs, which command-line options cannot reach.
         printf '%s\n' 'Acquire::Retries "5";' 'Acquire::http::Timeout "20";' \
           | sudo tee /etc/apt/apt.conf.d/80-ci-network-retries > /dev/null
-        sudo apt-get update
+        # azure.archive.ubuntu.com sometimes sends at 30-45 kB/s, which apt does not
+        # treat as a failure. Dropping it from the runner's mirror list makes apt use
+        # archive.ubuntu.com; files already downloaded are kept.
+        avoid_azure() {
+          echo "::warning::Ubuntu mirror too slow; switching to archive.ubuntu.com"
+          sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+        }
+        if ! sudo timeout 2m apt-get update; then
+          avoid_azure
+          sudo timeout 2m apt-get update
+        fi
         if [[ "$PGDG" == "true" ]]; then
           sudo apt-get install --yes --no-install-recommends postgresql-common
           sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
         fi
         # Start from an empty archive so the saved set holds only these packages.
         sudo apt-get clean
-        # azure.archive.ubuntu.com sometimes sends at 30-45 kB/s, which apt
-        # does not treat as a failure. Download first, so a slow download can
-        # be stopped without interrupting dpkg. If it is not done in 5
-        # minutes, drop that mirror from the runner's list and finish from
-        # archive.ubuntu.com; packages already downloaded are kept.
-        if ! sudo timeout 5m apt-get install --yes --no-install-recommends \
+        # Download first, so a slow download can be stopped without interrupting
+        # dpkg. If it isn't done in 4 minutes, finish from archive.ubuntu.com within
+        # 6 more. The limits keep the whole action inside the calling step's
+        # 15 minutes; the index refresh is optional because the lists already
+        # name both mirrors' files.
+        if ! sudo timeout 4m apt-get install --yes --no-install-recommends \
           --download-only "${packages[@]}"; then
-          echo "::warning::Ubuntu mirror too slow; downloading from archive.ubuntu.com"
-          sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends \
+          avoid_azure
+          sudo timeout 1m apt-get update || echo "::warning::Index refresh skipped"
+          sudo timeout 6m apt-get install --yes --no-install-recommends \
             --download-only "${packages[@]}"
         fi
 

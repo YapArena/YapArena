@@ -342,7 +342,7 @@ exports[`renders a debate 1`] = `
 </h2>
 <div data-shared-argument-list>
 </div>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
 <div class="stake-turn" data-stake-turn hidden>
 <div class="stake-turn-top">
 <strong data-stake-turn-title>
@@ -366,6 +366,32 @@ exports[`renders a debate 1`] = `
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
 <span aria-hidden="true">✕</span> No</button>
 </div>
+<button type="button" class="stake-repeat" data-stake-repeat hidden>
+</button>
+<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
+<h3 id="stake-ready-title">Get ready</h3>
+<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-ready-read-out>50%</output>
+</span>
+</label>
+<button type="submit" class="stake-ready-save">Save on this device</button>
+<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
+</p>
+</form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
 <legend>Size · each contract pays 0–1 YC</legend>
@@ -432,6 +458,12 @@ exports[`renders a debate 1`] = `
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
+<section class="stake-results" data-stake-results aria-labelledby="stake-results-title" hidden>
+<h3 id="stake-results-title" data-stake-results-title>
+</h3>
+<ul data-stake-results-list>
+</ul>
+</section>
 <details class="stake-positions" data-stake-positions-wrap hidden>
 <summary>Your positions <span data-stake-positions-count>
 </span>
@@ -852,7 +884,7 @@ exports[`renders a debate 10`] = `
 </h2>
 <div data-shared-argument-list>
 </div>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
 <div class="stake-turn" data-stake-turn hidden>
 <div class="stake-turn-top">
 <strong data-stake-turn-title>
@@ -876,6 +908,32 @@ exports[`renders a debate 10`] = `
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
 <span aria-hidden="true">✕</span> No</button>
 </div>
+<button type="button" class="stake-repeat" data-stake-repeat hidden>
+</button>
+<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
+<h3 id="stake-ready-title">Get ready</h3>
+<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-ready-read-out>50%</output>
+</span>
+</label>
+<button type="submit" class="stake-ready-save">Save on this device</button>
+<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
+</p>
+</form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
 <legend>Size · each contract pays 0–1 YC</legend>
@@ -942,6 +1000,12 @@ exports[`renders a debate 10`] = `
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
+<section class="stake-results" data-stake-results aria-labelledby="stake-results-title" hidden>
+<h3 id="stake-results-title" data-stake-results-title>
+</h3>
+<ul data-stake-results-list>
+</ul>
+</section>
 <details class="stake-positions" data-stake-positions-wrap hidden>
 <summary>Your positions <span data-stake-positions-count>
 </span>
@@ -1362,7 +1426,7 @@ exports[`renders a debate 2`] = `
 </h2>
 <div data-shared-argument-list>
 </div>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="live" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="live" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
 <div class="stake-turn" data-stake-turn hidden>
 <div class="stake-turn-top">
 <strong data-stake-turn-title>
@@ -1386,6 +1450,32 @@ exports[`renders a debate 2`] = `
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
 <span aria-hidden="true">✕</span> No</button>
 </div>
+<button type="button" class="stake-repeat" data-stake-repeat hidden>
+</button>
+<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
+<h3 id="stake-ready-title">Get ready</h3>
+<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-ready-read-out>50%</output>
+</span>
+</label>
+<button type="submit" class="stake-ready-save">Save on this device</button>
+<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
+</p>
+</form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
 <legend>Size · each contract pays 0–1 YC</legend>
@@ -1452,6 +1542,12 @@ exports[`renders a debate 2`] = `
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
+<section class="stake-results" data-stake-results aria-labelledby="stake-results-title" hidden>
+<h3 id="stake-results-title" data-stake-results-title>
+</h3>
+<ul data-stake-results-list>
+</ul>
+</section>
 <details class="stake-positions" data-stake-positions-wrap hidden>
 <summary>Your positions <span data-stake-positions-count>
 </span>
@@ -1870,7 +1966,7 @@ exports[`renders a debate 3`] = `
 </h2>
 <div data-shared-argument-list>
 </div>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="replay" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="replay" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
 <div class="stake-turn" data-stake-turn hidden>
 <div class="stake-turn-top">
 <strong data-stake-turn-title>
@@ -1894,6 +1990,32 @@ exports[`renders a debate 3`] = `
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
 <span aria-hidden="true">✕</span> No</button>
 </div>
+<button type="button" class="stake-repeat" data-stake-repeat hidden>
+</button>
+<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
+<h3 id="stake-ready-title">Get ready</h3>
+<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-ready-read-out>50%</output>
+</span>
+</label>
+<button type="submit" class="stake-ready-save">Save on this device</button>
+<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
+</p>
+</form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
 <legend>Size · each contract pays 0–1 YC</legend>
@@ -1960,6 +2082,12 @@ exports[`renders a debate 3`] = `
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
+<section class="stake-results" data-stake-results aria-labelledby="stake-results-title" hidden>
+<h3 id="stake-results-title" data-stake-results-title>
+</h3>
+<ul data-stake-results-list>
+</ul>
+</section>
 <details class="stake-positions" data-stake-positions-wrap hidden>
 <summary>Your positions <span data-stake-positions-count>
 </span>
@@ -2378,7 +2506,7 @@ exports[`renders a debate 4`] = `
 </h2>
 <div data-shared-argument-list>
 </div>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="finalized" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="finalized" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
 <div class="stake-turn" data-stake-turn hidden>
 <div class="stake-turn-top">
 <strong data-stake-turn-title>
@@ -2402,6 +2530,32 @@ exports[`renders a debate 4`] = `
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
 <span aria-hidden="true">✕</span> No</button>
 </div>
+<button type="button" class="stake-repeat" data-stake-repeat hidden>
+</button>
+<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
+<h3 id="stake-ready-title">Get ready</h3>
+<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-ready-read-out>50%</output>
+</span>
+</label>
+<button type="submit" class="stake-ready-save">Save on this device</button>
+<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
+</p>
+</form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
 <legend>Size · each contract pays 0–1 YC</legend>
@@ -2468,6 +2622,12 @@ exports[`renders a debate 4`] = `
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
+<section class="stake-results" data-stake-results aria-labelledby="stake-results-title" hidden>
+<h3 id="stake-results-title" data-stake-results-title>
+</h3>
+<ul data-stake-results-list>
+</ul>
+</section>
 <details class="stake-positions" data-stake-positions-wrap hidden>
 <summary>Your positions <span data-stake-positions-count>
 </span>
@@ -2886,7 +3046,7 @@ exports[`renders a debate 5`] = `
 </h2>
 <div data-shared-argument-list>
 </div>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="cancelled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="cancelled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
 <div class="stake-turn" data-stake-turn hidden>
 <div class="stake-turn-top">
 <strong data-stake-turn-title>
@@ -2910,6 +3070,32 @@ exports[`renders a debate 5`] = `
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
 <span aria-hidden="true">✕</span> No</button>
 </div>
+<button type="button" class="stake-repeat" data-stake-repeat hidden>
+</button>
+<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
+<h3 id="stake-ready-title">Get ready</h3>
+<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-ready-read-out>50%</output>
+</span>
+</label>
+<button type="submit" class="stake-ready-save">Save on this device</button>
+<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
+</p>
+</form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
 <legend>Size · each contract pays 0–1 YC</legend>
@@ -2976,6 +3162,12 @@ exports[`renders a debate 5`] = `
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
+<section class="stake-results" data-stake-results aria-labelledby="stake-results-title" hidden>
+<h3 id="stake-results-title" data-stake-results-title>
+</h3>
+<ul data-stake-results-list>
+</ul>
+</section>
 <details class="stake-positions" data-stake-positions-wrap hidden>
 <summary>Your positions <span data-stake-positions-count>
 </span>
@@ -3394,7 +3586,7 @@ exports[`renders a debate 6`] = `
 </h2>
 <div data-shared-argument-list>
 </div>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="void_review" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="void_review" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
 <div class="stake-turn" data-stake-turn hidden>
 <div class="stake-turn-top">
 <strong data-stake-turn-title>
@@ -3418,6 +3610,32 @@ exports[`renders a debate 6`] = `
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
 <span aria-hidden="true">✕</span> No</button>
 </div>
+<button type="button" class="stake-repeat" data-stake-repeat hidden>
+</button>
+<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
+<h3 id="stake-ready-title">Get ready</h3>
+<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-ready-read-out>50%</output>
+</span>
+</label>
+<button type="submit" class="stake-ready-save">Save on this device</button>
+<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
+</p>
+</form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
 <legend>Size · each contract pays 0–1 YC</legend>
@@ -3484,6 +3702,12 @@ exports[`renders a debate 6`] = `
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
+<section class="stake-results" data-stake-results aria-labelledby="stake-results-title" hidden>
+<h3 id="stake-results-title" data-stake-results-title>
+</h3>
+<ul data-stake-results-list>
+</ul>
+</section>
 <details class="stake-positions" data-stake-positions-wrap hidden>
 <summary>Your positions <span data-stake-positions-count>
 </span>
@@ -3903,7 +4127,7 @@ exports[`renders a debate 7`] = `
 </h2>
 <div data-shared-argument-list>
 </div>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Speaker A" data-speaker-b="Morgan Lee" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Speaker A" data-speaker-b="Morgan Lee" data-side-a="For" data-side-b="Against" data-scheduled-at="" aria-labelledby="stake-question">
 <div class="stake-turn" data-stake-turn hidden>
 <div class="stake-turn-top">
 <strong data-stake-turn-title>
@@ -3927,6 +4151,32 @@ exports[`renders a debate 7`] = `
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
 <span aria-hidden="true">✕</span> No</button>
 </div>
+<button type="button" class="stake-repeat" data-stake-repeat hidden>
+</button>
+<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
+<h3 id="stake-ready-title">Get ready</h3>
+<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-ready-read-out>50%</output>
+</span>
+</label>
+<button type="submit" class="stake-ready-save">Save on this device</button>
+<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
+</p>
+</form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
 <legend>Size · each contract pays 0–1 YC</legend>
@@ -3993,6 +4243,12 @@ exports[`renders a debate 7`] = `
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
+<section class="stake-results" data-stake-results aria-labelledby="stake-results-title" hidden>
+<h3 id="stake-results-title" data-stake-results-title>
+</h3>
+<ul data-stake-results-list>
+</ul>
+</section>
 <details class="stake-positions" data-stake-positions-wrap hidden>
 <summary>Your positions <span data-stake-positions-count>
 </span>
@@ -4416,7 +4672,7 @@ exports[`renders a debate 8`] = `
 </h2>
 <div data-shared-argument-list>
 </div>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="55555555-5555-4555-8555-555555555555" data-debate-slug="hostile-debate" data-debate-status="live" data-speaker-a="Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-speaker-b="Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-side-a="Side A &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-side-b="Side B &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" aria-labelledby="stake-question">
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="55555555-5555-4555-8555-555555555555" data-debate-slug="hostile-debate" data-debate-status="live" data-speaker-a="Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-speaker-b="Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-side-a="Side A &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-side-b="Side B &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
 <div class="stake-turn" data-stake-turn hidden>
 <div class="stake-turn-top">
 <strong data-stake-turn-title>
@@ -4440,6 +4696,32 @@ exports[`renders a debate 8`] = `
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
 <span aria-hidden="true">✕</span> No</button>
 </div>
+<button type="button" class="stake-repeat" data-stake-repeat hidden>
+</button>
+<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
+<h3 id="stake-ready-title">Get ready</h3>
+<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-ready-read-out>50%</output>
+</span>
+</label>
+<button type="submit" class="stake-ready-save">Save on this device</button>
+<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
+</p>
+</form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
 <legend>Size · each contract pays 0–1 YC</legend>
@@ -4506,6 +4788,12 @@ exports[`renders a debate 8`] = `
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fhostile-debate">Sign in to answer →</a>
 </p>
+<section class="stake-results" data-stake-results aria-labelledby="stake-results-title" hidden>
+<h3 id="stake-results-title" data-stake-results-title>
+</h3>
+<ul data-stake-results-list>
+</ul>
+</section>
 <details class="stake-positions" data-stake-positions-wrap hidden>
 <summary>Your positions <span data-stake-positions-count>
 </span>
@@ -4926,7 +5214,7 @@ exports[`renders a debate 9`] = `
 </h2>
 <div data-shared-argument-list>
 </div>
-</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" aria-labelledby="stake-question">
+</section>\\n    </div>\\n    <aside class="arena-right">\\n      <section class="arena-panel stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
 <div class="stake-turn" data-stake-turn hidden>
 <div class="stake-turn-top">
 <strong data-stake-turn-title>
@@ -4950,6 +5238,32 @@ exports[`renders a debate 9`] = `
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>
 <span aria-hidden="true">✕</span> No</button>
 </div>
+<button type="button" class="stake-repeat" data-stake-repeat hidden>
+</button>
+<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
+<h3 id="stake-ready-title">Get ready</h3>
+<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
+<fieldset class="stake-size">
+<legend>Size · each contract pays 0–1 YC</legend>
+<div class="stake-chips">
+<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
+<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
+<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
+</div>
+<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
+</label>
+</fieldset>
+<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
+<input type="range" name="read" min="1" max="99" step="1" value="50">
+<output data-stake-ready-read-out>50%</output>
+</span>
+</label>
+<button type="submit" class="stake-ready-save">Save on this device</button>
+<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
+</p>
+</form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
 <legend>Size · each contract pays 0–1 YC</legend>
@@ -5016,6 +5330,12 @@ exports[`renders a debate 9`] = `
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
+<section class="stake-results" data-stake-results aria-labelledby="stake-results-title" hidden>
+<h3 id="stake-results-title" data-stake-results-title>
+</h3>
+<ul data-stake-results-list>
+</ul>
+</section>
 <details class="stake-positions" data-stake-positions-wrap hidden>
 <summary>Your positions <span data-stake-positions-count>
 </span>

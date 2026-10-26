@@ -2076,6 +2076,46 @@ textarea::placeholder {
   color: #c9c9c9;
   font-size: 0.76rem;
 }
+.stake-repeat,
+.stake-ready-save {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid #3a3a3a;
+  border-radius: 9px;
+  background: transparent;
+  color: #f4f4f4;
+  font-size: 0.8rem;
+}
+.stake-ready,
+.stake-results {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #2a2a2a;
+  border-radius: 9px;
+}
+.stake-panel .stake-ready h3,
+.stake-panel .stake-results h3 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+.stake-panel .stake-ready p {
+  margin: 0;
+  color: #a9a9a9;
+  font-size: 0.74rem;
+}
+.stake-panel .stake-ready-note:empty {
+  display: none;
+}
+.stake-results ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+  color: #c9c9c9;
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+}
 .stake-panel .stake-signin {
   margin: 0;
   font-size: 0.82rem;
@@ -2094,8 +2134,10 @@ textarea::placeholder {
 }
 @media (max-width: 740px) {
   /* The compact question bar stays in view while the chat scrolls; an open
-     ticket scrolls normally. */
-  .stake-panel:has(> .stake-ticket[hidden]) {
+     ticket, the get-ready card and the results card scroll normally. */
+  .stake-panel:has(> .stake-ticket[hidden]):not(
+      :has(> .stake-ready:not([hidden]), > .stake-results:not([hidden]))
+    ) {
     position: sticky;
     top: 0;
     z-index: 20;

@@ -177,12 +177,13 @@ before deploying. Its secrets live in LiveKit Cloud and Render; never in the rep
 1. Generate a random ingest secret of at least 32 bytes (for example `openssl rand -hex 32`) and
    keep it in the password manager.
 2. Stage the agent's build context outside the repository and create the agent once, in the
-   region nearest the LiveKit project (the region cannot change later):
+   region nearest the web service and the debaters: `us-east` for Render's Ohio region (the region
+   cannot change later):
 
    ```sh
    node scripts/stage-transcriber.ts ../yaparena-transcriber-deploy
    cd ../yaparena-transcriber-deploy
-   lk agent create --region eu-central .
+   lk agent create --region us-east .
    ```
 
    `lk agent create` writes `livekit.toml` there; restaging keeps it. Later releases run
