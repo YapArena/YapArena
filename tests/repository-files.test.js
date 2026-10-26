@@ -26,6 +26,16 @@ describe("repository file policy", () => {
         { path: "docs/decision.md", size: 10 },
         { path: "fixtures/small.json", size: maximumBytes },
         { path: "docs/evidence/old.png", size: maximumBytes * 3 },
+        { path: "dist/app.js", size: 10 },
+        {
+          path: "dist-transcriber/features/transcription/protocol.js",
+          size: 10,
+        },
+        { path: "coverage/lcov.info", size: 10 },
+        { path: "public/live-outline.js", size: 10 },
+        { path: "public/vendor/chart.js", size: 10 },
+        { path: "public/arena.css", size: 10 },
+        { path: "frontend/live-outline.ts", size: 10 },
       ],
       new Set(["docs/evidence/old.png"]),
     );
@@ -34,6 +44,11 @@ describe("repository file policy", () => {
       "docs/trial/recording.webm: image, video or .raw file under docs/",
       "docs/trial/frame.raw: image, video or .raw file under docs/",
       `fixtures/dump.json: ${maximumBytes + 1} bytes exceeds 1 MiB`,
+      "dist/app.js: generated build output",
+      "dist-transcriber/features/transcription/protocol.js: generated build output",
+      "coverage/lcov.info: generated build output",
+      "public/live-outline.js: generated build output",
+      "public/vendor/chart.js: generated build output",
     ]);
   });
 

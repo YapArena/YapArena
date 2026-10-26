@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
 import { withTransaction } from "../../platform/transaction.ts";
+import { assertDebaterSettings } from "../transcription/debater-settings.ts";
 import {
   BOOKING_LEAD_SECONDS,
   CHALLENGE_PENDING_DAYS,
@@ -564,7 +565,17 @@ async function completeMatch(
   });
 }
 
-export function createMatchingRepository(database: Pool) {
+export function createMatchingRepository(
+  database: Pool,
+  {
+    // While the live outline is on, a player chooses a debate language and consents to
+    // transcription before sending, joining or accepting a debate (Decisions 0011 and 0012).
+    requireDebaterSettings = false,
+  }: { requireDebaterSettings?: boolean } = {},
+) {
+  const debaterReady = async (client: PoolClient, userId: string) => {
+    if (requireDebaterSettings) await assertDebaterSettings(client, userId);
+  };
   return Object.freeze({
     async createTopic(
       userId: string,
@@ -648,6 +659,7 @@ export function createMatchingRepository(database: Pool) {
       return withTransaction(database, async (client) => {
         await lockUsers(client, userId);
         await profileFor(client, userId);
+        await debaterReady(client, userId);
         const { rules } = await activeRules(client);
         if (mode === "now")
           await ensureAvailable(
@@ -933,6 +945,7 @@ export function createMatchingRepository(database: Pool) {
         const request = await requestById(client, requestId, true);
         if (!request || !participant(request))
           throw new MatchNotFoundError("request not found");
+        await debaterReady(client, userId);
         const target = request.targetUserId!;
         if (request.mode === "now" && !choice.proposalId) {
           if (userId !== target)
@@ -999,6 +1012,7 @@ export function createMatchingRepository(database: Pool) {
         const request = await requestById(client, requestId, true);
         if (!request || request.kind !== "queue")
           throw new MatchNotFoundError("queue entry not found");
+        await debaterReady(client, userId);
         return completeMatch(client, request, userId, userId);
       });
     },

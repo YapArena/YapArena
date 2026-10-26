@@ -7,6 +7,7 @@ import {
   MatchConflictError,
   MatchNotFoundError,
 } from "../dist/features/matching/repository.js";
+import { DebaterSettingsRequiredError } from "../dist/features/transcription/debater-settings.js";
 
 const offerId = "55555555-5555-4555-8555-555555555555";
 const state = {
@@ -164,6 +165,20 @@ describe("live topic queue API", () => {
       .post(`/api/matchmaking/offers/${offerId}/accept`)
       .set("x-user", "7");
     assert.deepEqual(f.actions, []);
+  });
+
+  it("asks for debater settings before queueing, with a code screens can act on", async () => {
+    const f = fixture({
+      failure: new DebaterSettingsRequiredError(["language", "consent"]),
+    });
+    const response = await request(f.app)
+      .post("/api/matchmaking/tickets")
+      .set("x-user", "7")
+      .send({ topicSlug: "nuclear-power", side: "A" });
+    assert.equal(response.status, 409);
+    assert.equal(response.body.code, "debater_settings_required");
+    assert.deepEqual(response.body.missing, ["language", "consent"]);
+    assert.match(response.body.error, /account settings/);
   });
 
   it("maps queue conflicts and missing matches to client errors", async () => {

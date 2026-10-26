@@ -1316,7 +1316,11 @@ describe(
       assert.equal(view.state, "settled");
       assert.ok(view.pricing, "the drawn price appears at the reveal");
       assert.ok(view.seed);
-      assert.ok(new Date(view.revealAt) <= new Date());
+      // The database's clock, not the host's: a container's clock can run
+      // ahead of the test process.
+      const databaseNow = (await owner.query("SELECT clock_timestamp() AS now"))
+        .rows[0].now;
+      assert.ok(new Date(view.revealAt) <= databaseNow);
       await reconcile();
     });
     it("records per-round reveal only by the owner and only before a debate's first round", async () => {

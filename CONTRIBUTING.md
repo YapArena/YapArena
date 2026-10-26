@@ -220,8 +220,10 @@ place instead of adding status prose; older status text lives under `docs/histor
 
 `npm run check:files` runs inside `npm run check` and fails when a tracked file is:
 
-- an image, video or `.raw` file under `docs/` (for example `.png`, `.jpg`, `.svg`, `.mp4`, `.webm`); or
-- larger than 1 MiB, unless it is under `public/` (served assets).
+- an image, video or `.raw` file under `docs/` (for example `.png`, `.jpg`, `.svg`, `.mp4`, `.webm`);
+- larger than 1 MiB, unless it is under `public/` (served assets); or
+- generated build output: anything under `dist/`, `dist-transcriber/` or `coverage/`, or any
+  JavaScript file under `public/` (served bundles, built from `frontend/`).
 
 Files that predate the policy are listed in `scripts/repository-files-baseline.txt`. Do not add
 entries; remove one when its file is deleted. Existing evidence on main stays in place.

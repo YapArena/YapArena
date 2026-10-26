@@ -48,12 +48,17 @@ export function createServices({
   metrics,
 }: ServiceOptions) {
   const identity = createIdentityRepository(database);
-  const matching = createMatchingRepository(database);
+  // Decision 0012: with the live outline on, debaters set a language and consent first.
+  const requireDebaterSettings = config.liveOutline.enabled;
+  const matching = createMatchingRepository(database, {
+    requireDebaterSettings,
+  });
   const matchmaking = config.matchmaking.enabled
     ? createMatchmaking(database, {
         liveDebateCapacity: config.matchmaking.liveDebateCapacity,
         // With media configured, players check camera and microphone before queueing.
         requireDeviceCheck: Boolean(config.media),
+        requireDebaterSettings,
       })
     : undefined;
   const community = createCommunityRepository(database);
