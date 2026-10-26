@@ -120,7 +120,7 @@ export function createApp({
   identity,
   matching,
   matchmaking,
-  matchmakingStreams,
+  userStreams,
   debateAutoStart,
   media,
   mediaProvider,
@@ -167,8 +167,8 @@ export function createApp({
   // Live topic queue (Decision 0011); present only when MATCHMAKING_ENABLED=true.
   matchmaking?: ReturnType<typeof createMatchmaking>;
   debateAutoStart?: { tryStart(debateId: string): Promise<boolean> };
-  // Per-user live queue updates; absent, clients poll (Decision 0011).
-  matchmakingStreams?: {
+  // Personal live updates at /api/me/stream (interface 10); absent, clients poll.
+  userStreams?: {
     subscribe(userId: string, response: SseResponse): void;
   };
   media?: ReturnType<typeof createMediaRepository>;
@@ -487,6 +487,16 @@ export function createApp({
     createRequireAuthentication({ sessions, environment }),
     createMessageRouter({ messages }),
   );
+  // Personal live updates for the signed-in player, one stream per tab (interface 10).
+  if (userStreams)
+    app.get(
+      "/api/me/stream",
+      createRequireAuthentication({ sessions, environment }),
+      (request, response) => {
+        response.set("Cache-Control", "no-store");
+        userStreams.subscribe(request.user!.id, response);
+      },
+    );
   if (debaterSettings)
     app.use(
       "/api/me/debater-settings",
@@ -528,7 +538,8 @@ export function createApp({
         matchmaking,
         identity,
         recordProductAction,
-        streams: matchmakingStreams,
+        // The queue's own stream address, kept as an alias of /api/me/stream.
+        streams: userStreams,
       }),
     );
   }

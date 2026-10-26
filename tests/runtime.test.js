@@ -604,7 +604,7 @@ describe("service runtime", () => {
     const runtime = createRuntime({
       database: { end: async () => events.push("database closed") },
       sessions: { deleteExpired: async () => 0 },
-      matchmakingStreams: {
+      userStreams: {
         start: async () => events.push("streams started"),
         stop: async () => events.push("streams stopped"),
       },

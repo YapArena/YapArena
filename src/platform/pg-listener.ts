@@ -2,22 +2,28 @@ import pg from "pg";
 import type { Logger } from "pino";
 import { verifyRuntimeIdentity } from "./database.ts";
 
-// One LISTEN connection per channel and process. `wake` receives each notification's payload,
-// and no payload after every (re)connect so callers resynchronize. The defaults are the
-// community room channel; the live queue listens on its own channel (Decision 0011).
+// One LISTEN connection per listener and process, on one or more channels. `wake` receives each
+// notification's payload and channel, and no payload after every (re)connect so callers
+// resynchronize. The defaults are the community room channel; the per-user live updates listen
+// on all of their channels through one connection (Decisions 0011 and interface 10).
 export function createPgListener(
   connectionString: string,
   logger: Pick<Logger, "warn">,
-  wake: (room?: string) => void,
+  wake: (payload?: string, channel?: string) => void,
   count: (kind: string) => void,
   {
     channel = "yaparena_community_v1",
+    channels = [channel],
     name = "community",
-  }: { channel?: string; name?: string } = {},
+  }: { channel?: string; channels?: readonly string[]; name?: string } = {},
 ) {
   // LISTEN takes an identifier, not a parameter, so only plain names are accepted.
-  if (!/^[a-z][a-z0-9_]{0,62}$/.test(channel))
+  if (
+    !channels.length ||
+    channels.some((entry) => !/^[a-z][a-z0-9_]{0,62}$/.test(entry))
+  )
     throw new Error("listener channel must be a plain identifier");
+  const listening = new Set(channels);
   let current: pg.Client | undefined;
   let stopped = false;
   let retry: NodeJS.Timeout | undefined;
@@ -60,14 +66,14 @@ export function createPgListener(
       client.on("error", lost);
       client.on("end", lost);
       client.on("notification", (notification) => {
-        if (!failed && notification.channel === channel)
-          wake(notification.payload);
+        if (!failed && listening.has(notification.channel))
+          wake(notification.payload, notification.channel);
       });
       try {
         await client.connect();
         await verifyRuntimeIdentity(client);
         // Autocommit LISTEN must finish before durable inspection (including reconnect).
-        await client.query(`LISTEN ${channel}`);
+        for (const entry of listening) await client.query(`LISTEN ${entry}`);
         if (stopped || failed) {
           await client.end();
           return;
