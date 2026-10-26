@@ -61,6 +61,12 @@ then participants see their own order and the participant count, not a price or 
 founder-created debate, before its first round, with `set-reveal-mode`; the first round locks the
 mode. Debaters cannot take a position in their own debate (F14).
 
+From a five-day debate's live end until its 120-hour close, replay viewers may join a turn
+window after its cutoff by giving the replay position they are watching (F10). The position must
+fall inside the window's span in the recording, measured from the recording file's start that
+LiveKit reports at completion (`recording_clocks`). A viewer who holds a position in a later
+turn's window cannot join an earlier one.
+
 ## Rail and credential separation
 
 `coin_sandbox_controls` pins the physical database to `simulation` or
