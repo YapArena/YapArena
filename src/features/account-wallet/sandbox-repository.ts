@@ -929,6 +929,9 @@ export function createCoinSandboxRepository(
               reserved: amount("USDC", "reserved"),
               pending: amount("USDC", "pending"),
               promotionalPrincipal: amount("YC_PROMO", "promotional"),
+              // Grant principal held by open stakes, so the header can show
+              // every reserved Yap Coin, not only reserved cash.
+              promotionalReserved: amount("YC_PROMO", "reserved"),
             },
             opened: Boolean(
               (

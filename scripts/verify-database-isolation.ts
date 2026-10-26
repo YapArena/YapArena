@@ -114,6 +114,9 @@ const applicationTables = [
   ...a4Tables,
   ...publicBotTables,
   "a4_play_closing_balances",
+  "matchmaking_tickets",
+  "match_offers",
+  "account_device_checks",
 ];
 const container = `yaparena-isolation-${randomUUID().slice(0, 8)}`;
 const evidenceDirectory = `/tmp/${container}-evidence`;

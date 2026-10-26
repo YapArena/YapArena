@@ -64,7 +64,7 @@ const eventFields = `id, slug, status, publication_state AS "publicationState",
   live_started_at AS "liveStartedAt", live_ended_at AS "liveEndedAt",
   ended_reason AS "endedReason", created_at AS "createdAt", updated_at AS "updatedAt"`;
 
-async function lockUsers(client: PoolClient, ...ids: string[]) {
+export async function lockUsers(client: PoolClient, ...ids: string[]) {
   for (const id of [...new Set(ids)].sort((a, b) =>
     BigInt(a) < BigInt(b) ? -1 : 1,
   )) {
@@ -74,7 +74,7 @@ async function lockUsers(client: PoolClient, ...ids: string[]) {
   }
 }
 
-async function profileFor(client: PoolClient, userId: string) {
+export async function profileFor(client: PoolClient, userId: string) {
   const result = await client.query<{ id: string }>(
     "SELECT id FROM public_profiles WHERE user_id = $1 AND publication_state = 'published' AND is_demo = false",
     [userId],
@@ -84,7 +84,7 @@ async function profileFor(client: PoolClient, userId: string) {
   return result.rows[0].id;
 }
 
-async function ensureAvailable(client: PoolClient, userId: string) {
+export async function ensureAvailable(client: PoolClient, userId: string) {
   const result = await client.query(
     "SELECT 1 FROM event_participants WHERE user_id = $1 AND active LIMIT 1",
     [userId],
@@ -151,42 +151,41 @@ async function requestById(
   return result.rows[0] ?? null;
 }
 
-async function completeMatch(
+// Creates a debate with both seats for an agreed pair, closes both players' other open requests
+// and notifies them. Request acceptance and the live queue both end here (Decision 0011). The
+// caller holds both players' locks (`lockUsers`).
+export async function createPairedEvent(
   client: PoolClient,
-  request: MatchRequest,
-  accepterId: string,
-  actorId: string,
+  pair: {
+    topicId: string;
+    proposition: string;
+    sideAUserId: string;
+    sideBUserId: string;
+    scheduledAt: Date;
+    actorId: string;
+    acceptedRequestId: string | null;
+    notice: string;
+  },
 ) {
-  if (
-    request.status !== "open" ||
-    new Date(request.expiresAt).getTime() <= Date.now()
-  )
-    throw new MatchConflictError("request is no longer open");
-  if (request.initiatorUserId === accepterId)
+  const aUser = pair.sideAUserId;
+  const bUser = pair.sideBUserId;
+  if (aUser === bUser)
     throw new MatchConflictError("participants must be distinct");
-  await ensureAvailable(client, request.initiatorUserId);
-  await ensureAvailable(client, accepterId);
-  const [initiatorProfile, accepterProfile] = await Promise.all([
-    profileFor(client, request.initiatorUserId),
-    profileFor(client, accepterId),
+  await ensureAvailable(client, aUser);
+  await ensureAvailable(client, bUser);
+  const [aProfile, bProfile] = await Promise.all([
+    profileFor(client, aUser),
+    profileFor(client, bUser),
   ]);
   const topic = await client.query(
     "SELECT 1 FROM topics WHERE id = $1 AND publication_state = 'published'",
-    [request.topicId],
+    [pair.topicId],
   );
   if (!topic.rows[0]) throw new MatchConflictError("topic is no longer public");
   const rule = await client.query<{ version: string; rules: object }>(
     "SELECT version, rules FROM event_rule_versions WHERE enabled ORDER BY created_at DESC LIMIT 1",
   );
   if (!rule.rows[0]) throw new MatchConflictError("no event rules are active");
-  const aUser =
-    request.requestedSide === "A" ? request.initiatorUserId : accepterId;
-  const bUser =
-    request.requestedSide === "B" ? request.initiatorUserId : accepterId;
-  const aProfile =
-    request.requestedSide === "A" ? initiatorProfile : accepterProfile;
-  const bProfile =
-    request.requestedSide === "B" ? initiatorProfile : accepterProfile;
   const created = await client.query<EventRecord>(
     `INSERT INTO debates (slug, topic_id, proposition, speaker_a_profile_id,
        speaker_b_profile_id, status, publication_state, rules_version, rules_snapshot, scheduled_at)
@@ -194,13 +193,13 @@ async function completeMatch(
      RETURNING ${eventFields}`,
     [
       `debate-${randomUUID()}`,
-      request.topicId,
-      request.proposition,
+      pair.topicId,
+      pair.proposition,
       aProfile,
       bProfile,
       rule.rows[0].version,
       rule.rows[0].rules,
-      request.scheduledAt,
+      pair.scheduledAt,
     ],
   );
   const event = created.rows[0];
@@ -209,26 +208,27 @@ async function completeMatch(
     "INSERT INTO event_participants (debate_id, user_id, side) VALUES ($1, $2, 'A'), ($1, $3, 'B')",
     [event.id, aUser, bUser],
   );
-  await client.query(
-    "UPDATE match_requests SET status = 'accepted', debate_id = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
-    [request.id, event.id],
-  );
+  if (pair.acceptedRequestId)
+    await client.query(
+      "UPDATE match_requests SET status = 'accepted', debate_id = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+      [pair.acceptedRequestId, event.id],
+    );
   const conflicted = await client.query<{
     id: string;
     initiatorUserId: string;
     targetUserId: string | null;
   }>(
     `UPDATE match_requests SET status = 'conflicted', updated_at = CURRENT_TIMESTAMP
-     WHERE status = 'open' AND id <> $1 AND
+     WHERE status = 'open' AND id IS DISTINCT FROM $1::uuid AND
        (initiator_user_id = ANY($2::bigint[]) OR target_user_id = ANY($2::bigint[]))
      RETURNING id, initiator_user_id AS "initiatorUserId", target_user_id AS "targetUserId"`,
-    [request.id, [aUser, bUser]],
+    [pair.acceptedRequestId, [aUser, bUser]],
   );
   for (const entry of conflicted.rows) {
     await record(
       client,
       { requestId: entry.id },
-      actorId,
+      pair.actorId,
       "conflicted",
       "open",
       "conflicted",
@@ -249,29 +249,123 @@ async function completeMatch(
         { requestId: entry.id },
       );
   }
-  await record(
-    client,
-    { requestId: request.id },
-    actorId,
-    "accepted",
-    "open",
-    "accepted",
-  );
+  if (pair.acceptedRequestId)
+    await record(
+      client,
+      { requestId: pair.acceptedRequestId },
+      pair.actorId,
+      "accepted",
+      "open",
+      "accepted",
+    );
   await record(
     client,
     { debateId: event.id },
-    actorId,
+    pair.actorId,
     "scheduled",
     null,
     "scheduled",
   );
-  await notify(client, aUser, "event.scheduled", "Your debate is scheduled.", {
+  await notify(client, aUser, "event.scheduled", pair.notice, {
     debateId: event.id,
   });
-  await notify(client, bUser, "event.scheduled", "Your debate is scheduled.", {
+  await notify(client, bUser, "event.scheduled", pair.notice, {
     debateId: event.id,
   });
   return event;
+}
+
+// Cancels a debate that never went live because a speaker did not join in time, releasing both
+// seats. Runs from the jobs worker with no actor (Decision 0011). Returns the speakers' user ids.
+export async function cancelUnstartedDebate(
+  client: PoolClient,
+  debateId: string,
+  fromStatus: string,
+) {
+  await client.query(
+    `UPDATE debates SET status = 'cancelled', ended_reason = 'automatic_no_show',
+       updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+    [debateId],
+  );
+  const speakers = await client.query<{ userId: string }>(
+    `UPDATE event_participants SET active = false WHERE debate_id = $1
+     RETURNING user_id AS "userId"`,
+    [debateId],
+  );
+  await record(
+    client,
+    { debateId },
+    null,
+    "no_show",
+    fromStatus,
+    "cancelled",
+    "A speaker did not join before the join window closed.",
+  );
+  for (const speaker of speakers.rows)
+    await notify(
+      client,
+      speaker.userId,
+      "event.no_show",
+      "Your debate was cancelled because a speaker didn't join in time.",
+      { debateId },
+    );
+  return speakers.rows.map((speaker) => speaker.userId);
+}
+
+// The open-request list is replaced by the live queue (Decision 0011): its open posts close with
+// a notice the first time the queue runs.
+export async function retireOpenQueueRequests(client: PoolClient) {
+  const retired = await client.query<{ id: string; initiatorUserId: string }>(
+    `UPDATE match_requests SET status = 'expired', updated_at = CURRENT_TIMESTAMP
+     WHERE kind = 'queue' AND status = 'open'
+     RETURNING id, initiator_user_id AS "initiatorUserId"`,
+  );
+  for (const entry of retired.rows) {
+    await record(
+      client,
+      { requestId: entry.id },
+      null,
+      "expired",
+      "open",
+      "expired",
+      "The open request list was replaced by the live queue.",
+    );
+    await notify(
+      client,
+      entry.initiatorUserId,
+      "challenge.expired",
+      "Open requests were replaced by the live queue. Open a topic to queue on a side.",
+      { requestId: entry.id },
+    );
+  }
+  return retired.rows.length;
+}
+
+async function completeMatch(
+  client: PoolClient,
+  request: MatchRequest,
+  accepterId: string,
+  actorId: string,
+) {
+  if (
+    request.status !== "open" ||
+    new Date(request.expiresAt).getTime() <= Date.now()
+  )
+    throw new MatchConflictError("request is no longer open");
+  if (request.initiatorUserId === accepterId)
+    throw new MatchConflictError("participants must be distinct");
+  return createPairedEvent(client, {
+    topicId: request.topicId,
+    proposition: request.proposition,
+    sideAUserId:
+      request.requestedSide === "A" ? request.initiatorUserId : accepterId,
+    sideBUserId:
+      request.requestedSide === "B" ? request.initiatorUserId : accepterId,
+    scheduledAt: request.scheduledAt,
+    actorId,
+    acceptedRequestId: request.id,
+    notice: "Your debate is scheduled.",
+  });
 }
 
 export function createMatchingRepository(database: Pool) {
@@ -654,8 +748,9 @@ export function createMatchingRepository(database: Pool) {
         return updated;
       });
     },
+    // A null actor is the system: automatic start (Decision 0011).
     async operatorTransition(
-      actorId: string,
+      actorId: string | null,
       id: string,
       action:
         | "start"

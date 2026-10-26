@@ -2,12 +2,22 @@ import pg from "pg";
 import type { Logger } from "pino";
 import { verifyRuntimeIdentity } from "./database.ts";
 
+// One LISTEN connection per channel and process. `wake` receives each notification's payload,
+// and no payload after every (re)connect so callers resynchronize. The defaults are the
+// community room channel; the live queue listens on its own channel (Decision 0011).
 export function createPgListener(
   connectionString: string,
   logger: Pick<Logger, "warn">,
   wake: (room?: string) => void,
   count: (kind: string) => void,
+  {
+    channel = "yaparena_community_v1",
+    name = "community",
+  }: { channel?: string; name?: string } = {},
 ) {
+  // LISTEN takes an identifier, not a parameter, so only plain names are accepted.
+  if (!/^[a-z][a-z0-9_]{0,62}$/.test(channel))
+    throw new Error("listener channel must be a plain identifier");
   let current: pg.Client | undefined;
   let stopped = false;
   let retry: NodeJS.Timeout | undefined;
@@ -34,7 +44,7 @@ export function createPgListener(
         keepAlive: true,
         keepAliveInitialDelayMillis: 10000,
         query_timeout: 5000,
-        application_name: "yaparena-community-listener",
+        application_name: `yaparena-${name}-listener`,
       });
       current = client;
       let failed = false;
@@ -42,7 +52,7 @@ export function createPgListener(
         if (failed || stopped) return;
         failed = true;
         count("listener_failure");
-        logger.warn("community listener connection lost");
+        logger.warn(`${name} listener connection lost`);
         if (current === client) current = undefined;
         void client.end().catch(() => {});
         reconnect();
@@ -50,14 +60,14 @@ export function createPgListener(
       client.on("error", lost);
       client.on("end", lost);
       client.on("notification", (notification) => {
-        if (!failed && notification.channel === "yaparena_community_v1")
+        if (!failed && notification.channel === channel)
           wake(notification.payload);
       });
       try {
         await client.connect();
         await verifyRuntimeIdentity(client);
         // Autocommit LISTEN must finish before durable inspection (including reconnect).
-        await client.query("LISTEN yaparena_community_v1");
+        await client.query(`LISTEN ${channel}`);
         if (stopped || failed) {
           await client.end();
           return;

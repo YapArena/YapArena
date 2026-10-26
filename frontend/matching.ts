@@ -114,10 +114,14 @@ topicSlugInput.addEventListener("change", () =>
 
 async function refresh() {
   const epoch = accountEpoch;
+  // With the live queue on, the page has no open-request list (Decision 0011).
+  const openQueue = document.querySelector("#open-queue");
   const [topics, requests, queue, events, notifications] = await Promise.all([
     api<{ topics: MatchingTopic[] }>("/api/matching/topics/mine"),
     api<{ requests: MatchingRequest[] }>("/api/matching/requests"),
-    api<{ requests: MatchingRequest[] }>("/api/matching/queue"),
+    openQueue
+      ? api<{ requests: MatchingRequest[] }>("/api/matching/queue")
+      : { requests: [] },
     api<{ events: MatchingEvent[] }>("/api/matching/events"),
     api<{ notifications: MatchingNotification[] }>(
       "/api/matching/notifications",
@@ -181,31 +185,32 @@ async function refresh() {
       });
     return item;
   });
-  fill(
-    "#open-queue",
-    queue.requests.filter(
-      (request) => request.initiatorUserId !== currentUser!.id,
-    ),
-    (request) => {
-      const opposite = request.requestedSide === "A" ? "B" : "A";
-      const oppositeLabel =
-        opposite === "A" ? request.sideALabel : request.sideBLabel;
-      const item = row(
-        `${request.proposition} · ${request.topicSlug} · take side ${opposite} (${oppositeLabel}) · ${date(request.scheduledAt)}`,
-      );
-      action(item, "Join", async () => {
-        if (
-          !window.confirm(
-            `Join on side ${opposite} (${oppositeLabel}) for “${request.proposition}” at ${date(request.scheduledAt)}?`,
+  if (openQueue)
+    fill(
+      "#open-queue",
+      queue.requests.filter(
+        (request) => request.initiatorUserId !== currentUser!.id,
+      ),
+      (request) => {
+        const opposite = request.requestedSide === "A" ? "B" : "A";
+        const oppositeLabel =
+          opposite === "A" ? request.sideALabel : request.sideBLabel;
+        const item = row(
+          `${request.proposition} · ${request.topicSlug} · take side ${opposite} (${oppositeLabel}) · ${date(request.scheduledAt)}`,
+        );
+        action(item, "Join", async () => {
+          if (
+            !window.confirm(
+              `Join on side ${opposite} (${oppositeLabel}) for “${request.proposition}” at ${date(request.scheduledAt)}?`,
+            )
           )
-        )
-          return;
-        await api(`/api/matching/queue/${request.id}/join`, "POST");
-        say("Joined. Your event is scheduled.");
-      });
-      return item;
-    },
-  );
+            return;
+          await api(`/api/matching/queue/${request.id}/join`, "POST");
+          say("Joined. Your event is scheduled.");
+        });
+        return item;
+      },
+    );
   fill("#my-events", events.events, (event) => {
     const item = row(
       `${event.proposition} · ${event.status} · ${date(event.scheduledAt)}`,
@@ -288,7 +293,7 @@ async function initialize() {
     "my-events",
     "match-notifications",
   ])
-    document.querySelector<HTMLElement>(`#${id}`)!.replaceChildren();
+    document.querySelector<HTMLElement>(`#${id}`)?.replaceChildren();
   say("Checking your account…");
   try {
     const user = (await api<{ user: { id: string } }>("/api/auth/me")).user;

@@ -531,6 +531,43 @@ describe("public discovery", () => {
   });
 });
 
+describe("live topic queue pages", () => {
+  const live = (matchmakingEnabled) =>
+    express().use(
+      createDiscoveryRouter({
+        discovery,
+        emailFirst: true,
+        matchmakingEnabled,
+        applicationOrigin: "https://arena.example",
+      }),
+    );
+
+  it("loads the queue and shows its controls only when the queue is on", async () => {
+    const on = live(true);
+    const topicPage = await request(on).get(`/topics/${topic.slug}`);
+    assert.match(
+      topicPage.text,
+      /<html lang="en" data-matchmaking data-email-first>/,
+    );
+    assert.match(topicPage.text, /data-queue-topic="public-topic"/);
+    assert.match(topicPage.text, /data-queue-side="A">Queue for /);
+    const debatePage = await request(on).get(`/debates/${debate.slug}`);
+    assert.match(
+      debatePage.text,
+      /data-queue-banner[^>]*hidden><\/div><section class="arena-watch"/,
+    );
+    const match = await request(on).get("/match");
+    assert.doesNotMatch(match.text, /id="open-queue"|value="queue"/);
+    assert.match(match.text, /queue on a side/);
+
+    const off = live(false);
+    const plain = await request(off).get(`/topics/${topic.slug}`);
+    assert.match(plain.text, /<html lang="en" data-email-first>/);
+    assert.doesNotMatch(plain.text, /data-matchmaking|data-queue-topic/);
+    assert.match((await request(off).get("/match")).text, /id="open-queue"/);
+  });
+});
+
 describe("discovery repository visibility", () => {
   it("queries only published debates and topics with bounded parameters", async () => {
     const queries = [];
