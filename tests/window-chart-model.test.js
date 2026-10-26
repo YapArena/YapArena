@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   pointsRevision,
+  tooFewState,
+  tooFewText,
   turnLabel,
   windowPoints,
 } from "../public/window-chart-model.js";
@@ -53,12 +55,19 @@ describe("chart from revealed Yap Coins windows (Decision 0013, item d)", () => 
         window(4, { state: "void", pricing: null }),
         window(5, { pricing: { share: null, price: null } }),
         window(6, { turnNumber: null }),
+        window(7, { pricing: undefined }),
       ],
       { turns: [turn(1, true, ["Costs fall"])] },
     );
+    // Open, voided and unnumbered windows never show, nor a settled window
+    // whose source has no pricing; an empty window breaks the line.
     assert.deepEqual(
-      points.map((point) => point.number),
-      [1, 3],
+      points.map((point) => [point.number, point.share]),
+      [
+        [1, f(58)],
+        [3, f(58)],
+        [5, null],
+      ],
     );
     assert.deepEqual(points[0], {
       id: "w1",
@@ -75,6 +84,28 @@ describe("chart from revealed Yap Coins windows (Decision 0013, item d)", () => 
       revealed: true,
     });
     assert.equal(points[1].argumentLabel, null);
+  });
+
+  it("shows a revealed window with too few positions without aggregates", () => {
+    // The public list sends null pricing below the minimum (5 positions).
+    const [point] = windowPoints([window(2, { pricing: null })], {
+      turns: [turn(2, true, ["Waste storage"])],
+    });
+    assert.deepEqual(point, {
+      id: "w2",
+      runId: null,
+      number: 2,
+      argumentLabel: "Waste storage",
+      share: null,
+      offer: null,
+      medianNo: null,
+      medianYes: null,
+      ownLimit: null,
+      branch: null,
+      state: tooFewState,
+      revealed: true,
+    });
+    assert.equal(tooFewText, "Too few positions to show results");
   });
 
   it("changes the revision when a share or label changes", () => {

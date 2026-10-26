@@ -146,7 +146,7 @@ export function createPriceInspector(
     el("next").disabled =
       select.selectedIndex < 0 || select.selectedIndex >= points.length - 1;
     el("context").textContent = point
-      ? `Round ${point.number} · ${point.argumentLabel || "Argument not labeled"}${point.state ? ` · ${point.state}` : " · settled"}`
+      ? `Round ${point.number} · ${point.argumentLabel || "Argument not labeled"}${point.state === "too_few" ? " · too few positions" : point.state ? ` · ${point.state}` : " · settled"}`
       : "Start or select a round to inspect its offered price.";
     el("yes").textContent = priceText(p.offer);
     el("no").textContent = priceText(p.noOffer);
@@ -193,7 +193,9 @@ export function createPriceInspector(
         : "Median interval unavailable · one side is missing";
     const description = !revealed
       ? "Medians and final endorsement rates remain sealed until final reveal."
-      : `${intervalDescription}${point!.branch ? ` · ${point!.branch} offer` : ""}.${p.ownLimit !== null ? ` Your YES-scale limit ${priceText(p.ownLimit)}.` : ""}`;
+      : point?.state === "too_few"
+        ? "Too few positions to show results."
+        : `${intervalDescription}${point!.branch ? ` · ${point!.branch} offer` : ""}.${p.ownLimit !== null ? ` Your YES-scale limit ${priceText(p.ownLimit)}.` : ""}`;
     el("explanation").textContent = description;
     root.querySelector("#arena-price-scale-title")!.textContent =
       `${el("context").textContent}. Shared YES offer ${priceText(p.offer)}. ${description}${p.share !== null ? ` Final YES ${p.share.toFixed(2)}%, NO ${(100 - p.share).toFixed(2)}%.` : ""} Prices are hundredths of one Yap Coin.`;
