@@ -30,7 +30,11 @@ if (card && form) {
     const response = await apiFetch("/api/me/debater-settings").catch(
       () => undefined,
     );
-    if (response?.ok) show((await response.json()) as DebaterSettings);
+    if (!response?.ok) return;
+    show((await response.json()) as DebaterSettings);
+    // The card appears only now, so a link to it (matchmaking's "set your
+    // debate language" prompt) scrolls once it is visible.
+    if (location.hash === "#debater-settings") card.scrollIntoView();
   })();
   form.addEventListener("submit", (event) => {
     event.preventDefault();

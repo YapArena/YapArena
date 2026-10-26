@@ -67,6 +67,19 @@ fall inside the window's span in the recording, measured from the recording file
 LiveKit reports at completion (`recording_clocks`). A viewer who holds a position in a later
 turn's window cannot join an earlier one.
 
+## Results notice
+
+When a round is revealed (settled) or voided, the settling transaction sends
+`pg_notify('yaparena_results_v1', <user id>)` for each participant. PostgreSQL delivers it only if
+the transaction commits, and once per user per transaction. The signed-in
+`GET /api/coin-sandbox/results?since=<ISO time>` returns the viewer's own revealed or voided rounds
+after that time, newest first, at most 50. Each has the debate, turn, speaking side, the viewer's
+side and quantity, the state (with the void reason), the outcome (status, premium, fee, payout and
+net in atomic units, as in the rounds view) and the reveal time. It is private (`no-store`) and
+reads only the viewer's own rows. Under interface 10, the per-user stream (matchmaking's
+`/api/me/stream`, once it lands) forwards the signal to the user's open pages, which then call
+this read.
+
 ## Rail and credential separation
 
 `coin_sandbox_controls` pins the physical database to `simulation` or
