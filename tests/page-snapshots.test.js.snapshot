@@ -21,6 +21,8 @@ exports[`renders a debate 1`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 </head>
 <body class="arena-page">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -558,6 +560,8 @@ exports[`renders a debate 10`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 </head>
 <body class="arena-page">
@@ -1099,6 +1103,8 @@ exports[`renders a debate 2`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 </head>
 <body class="arena-page">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -1639,6 +1645,8 @@ exports[`renders a debate 3`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 </head>
 <body class="arena-page">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -2176,6 +2184,8 @@ exports[`renders a debate 4`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 </head>
 <body class="arena-page">
@@ -2715,6 +2725,8 @@ exports[`renders a debate 5`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 </head>
 <body class="arena-page">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -3252,6 +3264,8 @@ exports[`renders a debate 6`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 </head>
 <body class="arena-page">
@@ -3791,6 +3805,8 @@ exports[`renders a debate 7`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 </head>
 <body class="arena-page">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -4329,6 +4345,8 @@ exports[`renders a debate 8`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 </head>
 <body class="arena-page">
@@ -4875,6 +4893,8 @@ exports[`renders a debate 9`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 </head>
 <body class="arena-page">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -5414,6 +5434,8 @@ exports[`renders a profile 1`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -5531,6 +5553,8 @@ exports[`renders a profile 2`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 </head>
 <body class="">
@@ -5675,6 +5699,8 @@ exports[`renders a profile 3`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -5792,6 +5818,8 @@ exports[`renders a topic 1`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 </head>
 <body class="">
@@ -5920,6 +5948,8 @@ exports[`renders a topic 2`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 </head>
 <body class="">
@@ -6091,6 +6121,8 @@ exports[`renders a topic 3`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 </head>
 <body class="">
@@ -6701,6 +6733,8 @@ exports[`renders the 404 and 500 pages 1`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -6806,6 +6840,8 @@ exports[`renders the 404 and 500 pages 2`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -6910,6 +6946,8 @@ exports[`renders the about and account pages 1`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 </head>
 <body class="">
@@ -7022,6 +7060,8 @@ exports[`renders the about and account pages 2`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 </head>
 <body class="account-page">
@@ -7274,6 +7314,8 @@ exports[`renders the coins and match pages 1`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 </head>
 <body class="">
@@ -7570,6 +7612,8 @@ exports[`renders the coins and match pages 2`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -7758,6 +7802,8 @@ exports[`renders the coins and match pages 3`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 </head>
 <body class="">
@@ -7957,6 +8003,8 @@ exports[`renders the debate list 1`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -8084,6 +8132,8 @@ exports[`renders the debate list 2`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 </head>
 <body class="">
@@ -8256,6 +8306,8 @@ exports[`renders the debate list 3`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -8407,6 +8459,8 @@ exports[`renders the debate list 4`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -8552,6 +8606,8 @@ exports[`renders the home page 1`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 <link rel="stylesheet" href="/assets/homepage.css?v=0123456789ab">
 <script defer src="/assets/homepage.bundle.js?v=0123456789ab">
@@ -8811,6 +8867,8 @@ exports[`renders the home page 2`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 <link rel="stylesheet" href="/assets/homepage.css?v=0123456789ab">
 <script defer src="/assets/homepage.bundle.js?v=0123456789ab">
 </script>
@@ -9069,6 +9127,8 @@ exports[`renders the home page 3`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 <link rel="stylesheet" href="/assets/homepage.css?v=0123456789ab">
 <script defer src="/assets/homepage.bundle.js?v=0123456789ab">
 </script>
@@ -9326,6 +9386,8 @@ exports[`renders the home page 4`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 <link rel="stylesheet" href="/assets/homepage.css?v=0123456789ab">
 <script defer src="/assets/homepage.bundle.js?v=0123456789ab">
@@ -9649,6 +9711,8 @@ exports[`renders the home page 5`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 <link rel="stylesheet" href="/assets/homepage.css?v=0123456789ab">
 <script defer src="/assets/homepage.bundle.js?v=0123456789ab">
@@ -10659,6 +10723,8 @@ exports[`renders the home page 7`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 <link rel="stylesheet" href="/assets/homepage.css?v=0123456789ab">
 <script defer src="/assets/homepage.bundle.js?v=0123456789ab">
 </script>
@@ -10982,6 +11048,8 @@ exports[`renders the live page 1`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -11123,6 +11191,8 @@ exports[`renders the live page 2`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 </head>
 <body class="">
@@ -11787,6 +11857,8 @@ exports[`renders the topic list 1`] = `
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -11903,6 +11975,8 @@ exports[`renders the topic list 2`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 </head>
 <body class="">
@@ -12035,6 +12109,8 @@ exports[`renders the topic list 3`] = `
 <script defer src="/assets/account-balance.js?v=0123456789ab">
 </script>
 <script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
 </head>
 <body class="">

@@ -63,6 +63,14 @@ is an A4 endorsement in one turn's 60-second window; there is no winner (F09).
   position in their own debate (F14). Replay viewers join only the window of the turn that's
   playing, sent with its recording position (F10). There is no staking before a scheduled debate
   starts. Results notices are in-app only.
+- Results notice (interface 10): every page except the reference homepage loads
+  `frontend/results-notice.ts`. For a signed-in viewer it reads
+  `GET /api/coin-sandbox/results?since=` on page load, on tab focus, and (spread over up to 3 s) on
+  the personal stream's `results` event, through `frontend/lib/user-stream.ts`. It subscribes only
+  after a successful read, so a site with Yap Coins off opens no stream for it. New results show as
+  a dismissible notice that groups them per debate and links to each one. Dismissing it or opening
+  a debate from it stores the newest reveal time on the device (`yaparena-results-seen:<account>`);
+  a device's first check looks back seven days.
 - Staged (founder, 2026-10-26): the YAP human-run and refill controls were removed first, with the
   Bots sandbox behind a tab next to Info. Bots mode then moved to `/coins` entirely: the debate
   page keeps the shared bot history chart and an info card linking to `/coins?debate=…`. On
