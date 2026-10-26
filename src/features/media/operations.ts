@@ -208,6 +208,7 @@ export function createMediaOperations<
                   recording.egressId,
                   result.success,
                   result.key,
+                  ("startedAt" in result && result.startedAt) || null,
                 );
             } catch {
               if (!stopping)

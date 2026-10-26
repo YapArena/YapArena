@@ -120,6 +120,30 @@ flag off wherever user-created debates exist.
   reveal once revealed, and `null` before a five-day debate ends. The public window list also gives
   the debate's own `revealMode` and `revealAt`. It still has no counts.
 
+## Pull request 1c: replay joining
+
+Migration `1792979219825_add-replay-joining` (F10).
+
+- **Recording clock.** When a recording completes, LiveKit reports the file's start. The webhook
+  and the missed-webhook reconciliation store it once per debate in `recording_clocks`, before
+  marking the recording ready, so a retried completion still records it.
+- **Window spans.** A turn window's span in the recording is its `[opensAt, closesAt]` minus the
+  file's start, in whole milliseconds and never below zero. Both views give each turn window
+  `recording: { startSeconds, endSeconds }`, or `null` before the recording is timed.
+- **Joining from the replay.** From a five-day debate's live end until its 120-hour close, a
+  viewer can join a turn window after its cutoff. `POST /api/coin-sandbox/rounds/:id/submit`
+  takes `replayPositionSeconds`, the position they are watching, which must lie inside that
+  window's span. A viewer who already holds a position in a later turn's window of the debate
+  cannot join an earlier one: replay viewers never return to earlier rounds. The order guard
+  enforces both, and the order records its position (`replay_position_ms`).
+- Per-round debates, manual rounds and live debates take live positions only.
+- The signed-in view's `eligibility` gains `via` (`live` or `replay` when the viewer can take a
+  position) and the reason `later_window`. Replay joiners count in `participants`, and their
+  orders settle with the window at the close.
+- The server cannot see what the viewer is watching. The position is the client's claim, checked
+  against the window's span and the viewer's later positions. Replay viewers can watch the end
+  before trading a window (accepted, F10).
+
 ## Later pull requests
 
 2. Transcriber agent, provider switch with shadow mode, dispatch, room metadata, ingest endpoint,
