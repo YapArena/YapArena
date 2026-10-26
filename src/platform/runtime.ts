@@ -21,8 +21,10 @@ export function createRuntime({
   mediaAccountRevocation,
   identity,
   matching,
+  matchmaking,
   community,
   communityStreams,
+  matchmakingStreams,
   measurement,
   media,
   mediaProvider,
@@ -50,11 +52,13 @@ export function createRuntime({
     ReturnType<typeof createMatchingRepository>,
     "expireRequests"
   >;
+  matchmaking?: { sweep(): Promise<unknown>; pruneExpired(): Promise<unknown> };
   community?: Pick<
     ReturnType<typeof createCommunityRepository>,
     "pruneExpired"
   >;
   communityStreams?: { start(): Promise<void>; stop(): Promise<void> };
+  matchmakingStreams?: { start(): Promise<void>; stop(): Promise<void> };
   measurement?: Pick<
     ReturnType<typeof createMeasurementRepository>,
     "pruneExpired"
@@ -87,6 +91,9 @@ export function createRuntime({
   let mediaTimer: NodeJS.Timeout | undefined;
   let mediaTicking = false;
   let mediaTask: Promise<void> | undefined;
+  let matchmakingTimer: NodeJS.Timeout | undefined;
+  let matchmakingTask: Promise<void> | undefined;
+  let matchmakingWorking = false;
   let stopping = false;
   const completedJobs = new Set<string>();
 
@@ -166,6 +173,13 @@ export function createRuntime({
         logger.error({ error }, "debate request expiry failed");
       }
     }
+    if (matchmaking) {
+      try {
+        await matchmaking.pruneExpired();
+      } catch (error) {
+        logger.error({ error }, "matchmaking retention cleanup failed");
+      }
+    }
     if (community) {
       try {
         await community.pruneExpired();
@@ -187,6 +201,7 @@ export function createRuntime({
     async start() {
       await verifyDatabase();
       await communityStreams?.start();
+      await matchmakingStreams?.start();
 
       if (app) {
         server = await new Promise<Server>((resolve, reject) => {
@@ -246,6 +261,25 @@ export function createRuntime({
           }, 1000);
           if (app) mediaTimer.unref();
         }
+        if (matchmaking) {
+          // Offer deadlines are 30 seconds, so the queue is swept every second.
+          matchmakingTimer = setIntervalFn(() => {
+            if (matchmakingWorking || stopping) return matchmakingTask;
+            matchmakingWorking = true;
+            matchmakingTask = matchmaking
+              .sweep()
+              .then(() => {})
+              .catch((error) =>
+                logger.error({ error }, "matchmaking sweep failed"),
+              )
+              .finally(() => {
+                matchmakingWorking = false;
+                completed("matchmaking");
+              });
+            return matchmakingTask;
+          }, 1000);
+          if (app) matchmakingTimer.unref();
+        }
       }
       return server;
     },
@@ -258,8 +292,10 @@ export function createRuntime({
       await a4Task;
       if (cleanupTimer) clearIntervalFn(cleanupTimer);
       if (mediaTimer) clearIntervalFn(mediaTimer);
-      await Promise.all([mediaTask, mediaOperations?.stop()]);
+      if (matchmakingTimer) clearIntervalFn(matchmakingTimer);
+      await Promise.all([mediaTask, matchmakingTask, mediaOperations?.stop()]);
       await communityStreams?.stop();
+      await matchmakingStreams?.stop();
 
       if (server) {
         const listeningServer = server;
