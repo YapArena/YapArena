@@ -34,6 +34,9 @@ encoder images for every `main` commit; [deploy the CI-published images](#deploy
 switches both services to those images, pinned by digest. After that switch, `render.yaml` only
 describes a source-built service.
 
+To roll out the matchmaking, Yap Coins turn window and live outline release (Decisions 0011 to
+0013), follow the step-by-step [staging rollout](staging-rollout.md).
+
 This is a small trial environment. Render Free sleeps after 15 minutes without inbound traffic and
 can take about a minute to wake. An open debate page still sends the app requests at least once a
 minute, but an instance restart can still interrupt the turn clock. The background jobs run in the paid jobs
@@ -174,12 +177,13 @@ before deploying. Its secrets live in LiveKit Cloud and Render; never in the rep
 1. Generate a random ingest secret of at least 32 bytes (for example `openssl rand -hex 32`) and
    keep it in the password manager.
 2. Stage the agent's build context outside the repository and create the agent once, in the
-   region nearest the LiveKit project (the region cannot change later):
+   region nearest the web service and the debaters: `us-east` for Render's Ohio region (the region
+   cannot change later):
 
    ```sh
    node scripts/stage-transcriber.ts ../yaparena-transcriber-deploy
    cd ../yaparena-transcriber-deploy
-   lk agent create --region eu-central .
+   lk agent create --region us-east .
    ```
 
    `lk agent create` writes `livekit.toml` there; restaging keeps it. Later releases run
