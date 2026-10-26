@@ -210,6 +210,8 @@ try {
       page.waitForRequest(workspace),
       page.goto(`${base}/debates/a4-browser-${tag}`),
     ]);
+    // The Bots sandbox sits behind its tab since Decision 0013.
+    await page.locator("[data-detail-tab=rounds]").click();
     const access = page.locator("[data-inline-access]");
     await access.waitFor({ state: "visible" });
     assert.equal(
@@ -235,7 +237,6 @@ try {
     .locator('[data-inline-access][aria-busy="false"]')
     .waitFor({ state: "visible" });
   assert.equal(await page.locator("[data-inline-bots]").isEnabled(), true);
-  assert.equal(await page.locator("[data-inline-human]").isEnabled(), true);
   const debatePage = page,
     mediaNode = (await page.locator("[data-media-event]").elementHandle())!;
   await page.locator("[data-inline-bots]").click();

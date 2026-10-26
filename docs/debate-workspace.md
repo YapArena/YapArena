@@ -40,6 +40,15 @@ order is: banner, video, panel, chat, debate line, outline and chart, then the r
 right column. The layout is in [`debate-web.ts`](../src/features/discovery/debate-web.ts)
 and the grid rules in `public/arena.css`.
 
+**Betting panel (Decision 0013):** the right column starts with the Yap Coins panel
+(`frontend/stake-panel.ts`, pure logic in `frontend/stake-model.ts`). It reads the anonymous
+turn-window list and, when signed in, the coin-sandbox summary and rounds view; it re-reads them
+on the `window` room signal (spread over up to 3 s) and every 15 s without the room stream. It
+joins the current window with `POST /api/coin-sandbox/debates/:id/rounds`, submits with an
+idempotency key, and on a five-day replay submits to the playing turn's window with the position
+from the replay player's `yap:playback` event. After a stake it dispatches `yap:coins-changed`
+for the header balance. The Bots sandbox moved behind a "Bots sandbox" tab next to Info.
+
 ## Data and interaction
 
 - Header search submits to the existing published-debate search. Navigation opens

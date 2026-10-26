@@ -384,6 +384,7 @@ export async function verifyPublicBotsBrowser({
     await anonymous.close();
     checks.signedOutSharedHistoryWithoutPrivateAccess = true;
     await watch.bringToFront();
+    await watch.locator("[data-detail-tab=rounds]").click();
     await watch.locator("[data-inline-publish]").uncheck();
     await watch.waitForFunction(
       (id) =>

@@ -37,11 +37,18 @@ interface CoinSummary {
   };
   requests: CoinRequest[];
 }
+// A debate round: a speaking turn's window during a live debate, otherwise a
+// manual round. Its eligibility says whether this account can still answer.
 interface CoinRound {
   id: string;
   proposition: string;
   state: string;
   closesAt: string;
+  kind: "turn" | "manual";
+  turnNumber: number | null;
+  revealAt: string | null;
+  participants: number;
+  eligibility: { canTakePosition: boolean; reason: string | null };
   own: { side: string; quantity: number; requestId: string } | null;
   outcome?: {
     premium: string;
@@ -189,7 +196,7 @@ if (container) {
     <button type="button" class="button-secondary" data-coin-daily>Claim daily 500 YC</button><ul class="account-list" data-coin-grants></ul>
     <details class="account-details"><summary>Simulate a purchase</summary><form class="stack-form" data-coin-funding><label>Test USDC amount<input name="amount" inputmode="decimal" value="10" required autocomplete="off"></label><p>Fixed simulation: 1 test USDC buys 100 YC. No crypto is sent and no provider conversion is performed.</p><button class="button" type="submit">Get simulated quote</button></form></details>
     <details class="account-details"><summary>Request a simulated withdrawal</summary><form class="stack-form" data-coin-withdraw><label>Total to deduct (USDC)<input name="gross" inputmode="decimal" value="5" required autocomplete="off"></label><label>External wallet destination<input name="destination" maxlength="200" required autocomplete="off" spellcheck="false"></label><p>Minimum deduction: 5 USDC. The displayed fee comes out of that amount. No daily cap. Purchased funds need no profit target; only grant profits have qualification rules.</p><p>Manual review target: two business days (Toronto weekdays, excluding Canadian federal holidays). Network confirmation time is additional. Pending funds stay reserved.</p><button class="button" type="submit">Review amount and network fee</button></form></details>
-    <details class="account-details"><summary>Join a YES/NO debate with sandbox coins</summary><label>Existing debate<select data-coin-debate></select></label><button type="button" class="button-secondary" data-coin-open>Open or join a 5-minute round</button><div data-coin-rounds></div><form class="stack-form" data-coin-participate hidden><label>Position<select name="side"><option value="YES">YES</option><option value="NO">NO</option></select></label><label>Maximum purchase price per YC (0–1)<input name="ceiling" inputmode="decimal" value="0.5" required></label><label>Quantity (1–100)<input name="quantity" type="number" min="1" max="100" value="1" required></label><p>The first commitment is final. Oldest grants are used first. A4 uses the existing YES/NO mechanism; participation is not a bet on an externally judged winner.</p><button class="button" type="submit">Review and commit participation</button></form></details>
+    <details class="account-details"><summary>Join a YES/NO debate with sandbox coins</summary><label>Existing debate<select data-coin-debate></select></label><button type="button" class="button-secondary" data-coin-open>Open or join the current round</button><div data-coin-rounds></div><form class="stack-form" data-coin-participate hidden><label>Position<select name="side"><option value="YES">YES</option><option value="NO">NO</option></select></label><label>Maximum purchase price per YC (0–1)<input name="ceiling" inputmode="decimal" value="0.5" required></label><label>Quantity (1–100)<input name="quantity" type="number" min="1" max="100" value="1" required></label><p>The first commitment is final. Oldest grants are used first. A4 uses the existing YES/NO mechanism; participation is not a bet on an externally judged winner.</p><button class="button" type="submit">Review and commit participation</button></form></details>
     <h4>Sandbox receipts</h4><ul class="account-list" data-coin-receipts></ul>
     <details class="account-details"><summary>Report a deposit or payout error</summary><p>Reports have no submission deadline. Include the receipt ID and explain what went wrong. Do not include passwords, verification codes or private keys. Ordinary trading losses are final.</p><form class="stack-form" data-coin-report><label>Receipt ID<input name="requestId" required maxlength="36" autocomplete="off" spellcheck="false"></label><label>What happened?<textarea name="description" required maxlength="2000" rows="4"></textarea></label><button class="button-secondary" type="submit">Submit error report</button></form><p data-coin-report-notice role="status" aria-live="polite" aria-atomic="true"></p><ul class="account-list" data-coin-reports></ul></details>`;
   container.append(root);
@@ -296,6 +303,7 @@ if (container) {
     if (!summary.initialized && !summary.financialReviewRequired) {
       try {
         await api("/initialize", "POST", {});
+        window.dispatchEvent(new Event("yap:coins-changed"));
         if (generation !== version) return;
         summary = await api<CoinSummary>("/summary");
       } catch {
@@ -459,13 +467,13 @@ if (container) {
       `/debates/${encodeURIComponent(debate.value)}/rounds`,
     );
     if (generation !== version) return;
-    roundId = rows.find((r) => r.state === "open" && !r.own)?.id ?? null;
+    roundId = rows.find((r) => r.eligibility.canTakePosition)?.id ?? null;
     participation.hidden = !roundId;
     const list = select<HTMLElement>("[data-coin-rounds]");
     list.replaceChildren();
     for (const round of rows) {
       const p = document.createElement("p");
-      p.textContent = `${round.proposition}: ${round.state}, cutoff ${new Date(round.closesAt).toLocaleString()}.${round.own ? ` Your ${round.own.side} ${round.own.quantity} YC commitment is final.` : ""}${round.outcome ? ` Paid ${yc(String(BigInt(round.outcome.premium) + BigInt(round.outcome.fee)))}, received ${yc(round.outcome.payout)}, net ${yc(round.outcome.net)}.` : ""}`;
+      p.textContent = `${round.kind === "turn" ? `Turn ${round.turnNumber}` : round.proposition}: ${round.eligibility.canTakePosition ? "taking answers" : round.state === "open" ? "locked" : round.state}, cutoff ${new Date(round.closesAt).toLocaleString()}, ${round.participants} answered.${round.own ? ` Your ${round.own.side} ${round.own.quantity} YC commitment is final.` : ""}${round.outcome ? ` Paid ${yc(String(BigInt(round.outcome.premium) + BigInt(round.outcome.fee)))}, received ${yc(round.outcome.payout)}, net ${yc(round.outcome.net)}.` : ""}`;
       list.append(p);
     }
   }
@@ -525,6 +533,7 @@ if (container) {
   select<HTMLButtonElement>("[data-coin-daily]").onclick = () =>
     void action(async (g) => {
       await api("/grants/daily", "POST", {});
+      window.dispatchEvent(new Event("yap:coins-changed"));
       await load(g);
     });
   funding.onsubmit = (event) => {
@@ -548,6 +557,7 @@ if (container) {
         return;
       }
       await api(`/funding/${quote.id}/confirm`, "POST", {});
+      window.dispatchEvent(new Event("yap:coins-changed"));
       if (g !== version) return;
       keys.delete(scope);
       await load(g);
@@ -638,11 +648,12 @@ if (container) {
         { side, ceiling, quantity },
         key(`stake:${selected}:${side}:${ceiling}:${quantity}`),
       );
+      window.dispatchEvent(new Event("yap:coins-changed"));
       if (g !== version) return;
       await load(g);
       await loadRounds(g);
       notice.textContent =
-        "Commitment recorded. Settlement occurs after the five-minute cutoff.";
+        "Commitment recorded. It settles when this round's results are revealed.";
     });
   };
   async function start() {
