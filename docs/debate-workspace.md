@@ -26,6 +26,20 @@ existing surface: it preserves media nodes, tracks, playback and chat. Hover,
 keyboard focus and touch expose the control; Restore or Escape returns its exact
 original bounds. Keyboard focus stays inside the enlarged video until restored.
 
+**Layout since 2026-10-25 (founder-approved; supersedes the column order above):**
+chat sits in the left column. The centre column is the widest: any status banner above
+the video, then the 16:9 video, the debate line and topic tags, then the outline and
+the chart. The right column holds the participation (later betting) panel, then debate
+info; the panel keeps its natural height instead of ending at the graph's boundary. The
+debate question appears in the video's top-left corner, and the broadcast state with the
+watch count in its top-right corner, left of the expand button, while the pointer is over
+the video or focus is inside it. On touch screens a tap shows them. They never
+take clicks, the question stays the page's `h1` for screen readers, and reduced motion
+removes the fade. From 1190 px down, chat moves below the video and panel. On phones the
+order is: banner, video, panel, chat, debate line, outline and chart, then the rest of the
+right column. The layout is in [`debate-web.ts`](../src/features/discovery/debate-web.ts)
+and the grid rules in `public/arena.css`.
+
 ## Data and interaction
 
 - Header search submits to the existing published-debate search. Navigation opens
