@@ -141,6 +141,7 @@ export function createMatchingRouter({
   media,
   recordProductAction,
   debateAutoStart,
+  liveQueue = false,
 }: {
   matching: Repository;
   identity: ReturnType<typeof createIdentityRepository>;
@@ -148,6 +149,8 @@ export function createMatchingRouter({
   recordProductAction?: ProductActionRecorder;
   // Present with the live queue (Decision 0011): the second ready speaker starts the debate.
   debateAutoStart?: { tryStart(debateId: string): Promise<boolean> };
+  // With the live queue on, the old open-request list is retired (Decision 0011).
+  liveQueue?: boolean;
 }) {
   const router = Router();
   const participant = createRequireRole(identity, ["participant"]);
@@ -193,12 +196,16 @@ export function createMatchingRouter({
     response.json({ requests: await matching.listRequests(request.user!.id) }),
   );
   router.get("/queue", async (_request, response) =>
-    response.json({ requests: await matching.listQueue() }),
+    response.json({ requests: liveQueue ? [] : await matching.listQueue() }),
   );
   router.post("/requests", participant, async (request, response) => {
     const input = requestInput(request.body);
     if (!input)
       return response.status(400).json({ error: "invalid debate request" });
+    if (liveQueue && input.kind === "queue")
+      return response.status(400).json({
+        error: "open a topic and queue on a side to be matched live",
+      });
     try {
       const created = await matching.createRequest(request.user!.id, input);
       await recordProductAction?.(request, {

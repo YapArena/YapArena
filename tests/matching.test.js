@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import request from "../scripts/test-http-request.ts";
 
+import express from "express";
 import { createApp } from "../dist/app.js";
+import { createMatchingRouter } from "../dist/features/matching/router.js";
 import {
   MatchConflictError,
   MatchNotFoundError,
@@ -485,5 +487,45 @@ describe("matching API", () => {
         .history[0].action,
       "scheduled",
     );
+  });
+});
+
+describe("matching API with the live queue on", () => {
+  it("retires the open-request list and refuses new open requests", async () => {
+    let listed = 0;
+    const created = [];
+    const app = express()
+      .use(express.json())
+      .use((req, _res, next) => {
+        req.user = { id: "7" };
+        next();
+      })
+      .use(
+        createMatchingRouter({
+          matching: {
+            listQueue: async () => {
+              listed += 1;
+              return [{ id }];
+            },
+            createRequest: async (_user, input) => {
+              created.push(input.kind);
+              return { id };
+            },
+          },
+          identity: { getRoles: async () => ["participant"] },
+          liveQueue: true,
+        }),
+      );
+    const queue = await request(app).get("/queue");
+    assert.deepEqual(queue.body, { requests: [] });
+    assert.equal(listed, 0);
+    const open = await request(app)
+      .post("/requests")
+      .send({ ...requestInput, kind: "queue", targetHandle: undefined });
+    assert.equal(open.status, 400);
+    assert.match(open.body.error, /queue on a side/);
+    const challenge = await request(app).post("/requests").send(requestInput);
+    assert.equal(challenge.status, 201);
+    assert.deepEqual(created, ["direct"]);
   });
 });

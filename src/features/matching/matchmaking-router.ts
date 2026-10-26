@@ -72,7 +72,10 @@ export function createMatchmakingRouter({
     return streams.subscribe(request.user!.id, response);
   });
   router.get("/me", async (request, response) =>
-    response.json({ state: await matchmaking.state(request.user!.id) }),
+    response.json({
+      state: await matchmaking.state(request.user!.id),
+      deviceCheckRequired: matchmaking.deviceCheckRequired,
+    }),
   );
   // Clients call this while queued; a waiting ticket without it leaves the queue.
   router.post("/presence", async (request, response) =>

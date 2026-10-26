@@ -510,3 +510,7 @@ if (header) {
         menu.open = false;
   });
 }
+
+// Live topic queue (Decision 0011): header pill, match dialog and queue buttons.
+if (document.documentElement.hasAttribute("data-matchmaking"))
+  void import("./matchmaking.js");
