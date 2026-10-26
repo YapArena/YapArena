@@ -47,8 +47,13 @@ on the `window` room signal (spread over up to 3 s) and every 15 s without the r
 joins the current window with `POST /api/coin-sandbox/debates/:id/rounds`, submits with an
 idempotency key, and on a five-day replay submits to the playing turn's window with the position
 from the replay player's `yap:playback` event. After a stake it dispatches `yap:coins-changed`
-for the header balance. Bots mode lives on `/coins`; the debate page keeps the shared bot
-history chart and an info card that links to the Bots sandbox there.
+for the header balance. A "Same as last turn" button pre-fills the next turn's ticket from the
+viewer's previous position in this debate. Before a scheduled debate starts, "Get ready" saves a
+default size and read in `localStorage` (`yaparena-stake-defaults`, JSON `{size, read}`), and
+tickets open with them; both still need the confirm tap. Revealed positions (settled or voided)
+move from "Your positions" into a results card with a total. Bots mode lives on `/coins`; the
+debate page keeps the shared bot history chart and an info card that links to the Bots sandbox
+there.
 
 ## Data and interaction
 
