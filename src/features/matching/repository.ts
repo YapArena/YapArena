@@ -312,6 +312,35 @@ export async function cancelUnstartedDebate(
   return speakers.rows.map((speaker) => speaker.userId);
 }
 
+// The open-request list is replaced by the live queue (Decision 0011): its open posts close with
+// a notice the first time the queue runs.
+export async function retireOpenQueueRequests(client: PoolClient) {
+  const retired = await client.query<{ id: string; initiatorUserId: string }>(
+    `UPDATE match_requests SET status = 'expired', updated_at = CURRENT_TIMESTAMP
+     WHERE kind = 'queue' AND status = 'open'
+     RETURNING id, initiator_user_id AS "initiatorUserId"`,
+  );
+  for (const entry of retired.rows) {
+    await record(
+      client,
+      { requestId: entry.id },
+      null,
+      "expired",
+      "open",
+      "expired",
+      "The open request list was replaced by the live queue.",
+    );
+    await notify(
+      client,
+      entry.initiatorUserId,
+      "challenge.expired",
+      "Open requests were replaced by the live queue. Open a topic to queue on a side.",
+      { requestId: entry.id },
+    );
+  }
+  return retired.rows.length;
+}
+
 async function completeMatch(
   client: PoolClient,
   request: MatchRequest,

@@ -387,6 +387,7 @@ export function createApp({
         mediaEnabled: Boolean(media && mediaProvider && matching && identity),
         applicationOrigin: applicationOrigin ?? "http://localhost:3000",
         emailFirst: true,
+        matchmakingEnabled: Boolean(matchmaking && identity),
       }),
     );
   }
@@ -472,6 +473,7 @@ export function createApp({
         media,
         recordProductAction,
         debateAutoStart,
+        liveQueue: Boolean(matchmaking),
       }),
     );
   }

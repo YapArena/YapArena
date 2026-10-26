@@ -566,5 +566,30 @@ describe(
         await listener.end();
       }
     });
+
+    it("closes the old open-request list with a notice when the queue runs", async () => {
+      const slug = await topic();
+      const a = await player();
+      const matching = createMatchingRepository(runtime);
+      const open = await matching.createRequest(a, {
+        kind: "queue",
+        topicSlug: slug,
+        proposition: "Canada should expand nuclear power",
+        requestedSide: "A",
+        scheduledAt: new Date(Date.now() + 2 * 60 * 60 * 1000),
+      });
+      await queue.sweep();
+      const after = (
+        await owner.query("SELECT status FROM match_requests WHERE id = $1", [
+          open.id,
+        ])
+      ).rows[0];
+      assert.equal(after.status, "expired");
+      const notice = await owner.query(
+        "SELECT message FROM account_notifications WHERE request_id = $1",
+        [open.id],
+      );
+      assert.match(notice.rows[0].message, /replaced by the live queue/);
+    });
   },
 );

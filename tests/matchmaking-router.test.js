@@ -34,6 +34,7 @@ function fixture({ failure, debateId = null, streams } = {}) {
     accept: run("accept", { state, debateId }),
     decline: run("decline"),
     waiting: run("waiting", { sideA: 2, sideB: 0 }),
+    deviceCheckRequired: true,
   };
   const identity = {
     async getRoles(user) {
@@ -120,7 +121,10 @@ describe("live topic queue API", () => {
     const f = fixture();
     const user = (method, path) =>
       request(f.app)[method](`/api/matchmaking${path}`).set("x-user", "7");
-    assert.deepEqual((await user("get", "/me")).body.state, state);
+    assert.deepEqual((await user("get", "/me")).body, {
+      state,
+      deviceCheckRequired: true,
+    });
     assert.equal((await user("post", "/presence")).status, 200);
     assert.equal((await user("delete", "/tickets/current")).status, 200);
     assert.deepEqual(

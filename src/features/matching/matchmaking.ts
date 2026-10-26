@@ -2,6 +2,7 @@ import type { Pool, PoolClient } from "pg";
 import { withTransaction } from "../../platform/transaction.ts";
 import { runExclusiveDatabaseJob } from "../../platform/database-jobs.ts";
 import {
+  retireOpenQueueRequests,
   cancelUnstartedDebate,
   createPairedEvent,
   ensureAvailable,
@@ -331,6 +332,9 @@ export function createMatchmaking(
   }
 
   const matchmaking = Object.freeze({
+    // Whether entering the queue needs a recent camera and microphone check.
+    deviceCheckRequired: requireDeviceCheck,
+
     async state(userId: string): Promise<MatchmakingState> {
       const result = await database.query<{
         id: string;
@@ -572,6 +576,7 @@ export function createMatchmaking(
            WHERE status = 'pending' AND deadline_at <= CURRENT_TIMESTAMP
            ORDER BY deadline_at LIMIT ${SWEEP_OFFERS} FOR UPDATE SKIP LOCKED`,
           );
+          await retireOpenQueueRequests(client);
           for (const offer of due.rows) await expireOffer(client, offer);
           const noShows = await resolveNoShows(client);
           const stale = await client.query(
