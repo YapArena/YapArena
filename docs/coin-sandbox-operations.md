@@ -115,10 +115,12 @@ not implement a holiday calendar, computed review deadline or automatic payout
 approval. Missing the target never releases a reserve, retries a payment or
 changes a customer's financial eligibility; reconcile the original operation.
 
-Since [Decision 0009](decisions/0009-auth0.md) an account opens the financial
-sandbox once, by confirming with a fresh Auth0 sign-in (email code or Google);
-the opening is recorded in `coin_sandbox_openings`. Every sandbox action, including
-the owner's operator paths for that account, requires that opening. Each withdrawal
+Yap Coins are always on ([Decision 0013](decisions/0013-yap-coins-always-on-and-debate-staking.md),
+amending [Decision 0009](decisions/0009-auth0.md)): an account's first own sandbox
+request records an automatic opening in `coin_sandbox_openings` (no operation), and
+the browser then claims the welcome grant. Openings confirmed by a fresh sign-in
+before that decision keep their operation. The owner's operator paths never open
+an account: owner funding and new payout authority require that opening. Each withdrawal
 and each recovery consent is confirmed by its own fresh sign-in, bound to the exact
 terms (see [the confirmation contract](security/account-session-revocation.md#confirmation-by-fresh-sign-in)).
 Retained passwords, wallets and passkeys no longer approve anything, and there is no

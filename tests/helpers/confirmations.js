@@ -18,13 +18,13 @@ export async function attachSubject(
   return subject;
 }
 
-// Opens the financial sandbox without a browser round trip, for tests that are
-// not about opening it.
+// Records the automatic opening that an account's first own sandbox request
+// creates (Decision 0013), for tests whose first step is owner authority.
 export async function openSandbox(owner, userId) {
   await owner.query(
-    `INSERT INTO coin_sandbox_openings(user_id,operation_id) VALUES($1,$2)
+    `INSERT INTO coin_sandbox_openings(user_id) VALUES($1)
      ON CONFLICT(user_id) DO NOTHING`,
-    [userId, randomUUID()],
+    [userId],
   );
 }
 

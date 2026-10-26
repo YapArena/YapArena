@@ -23,7 +23,7 @@ const ownerUrl = process.env.COIN_TREASURY_TEST_OWNER_DATABASE_URL,
 const custody = "0x1111111111111111111111111111111111111111",
   network = "base-sepolia:84532",
   config = { rail: "base-sepolia", depositDestination: custody },
-  unopened = /confirm by signing in again to open the financial sandbox/;
+  unopened = /this account has not used its coin sandbox/;
 describe(
   "receipt-backed system treasury funding in a dedicated disposable Base Sepolia ledger",
   { skip: !ownerUrl || !runtimeUrl },
