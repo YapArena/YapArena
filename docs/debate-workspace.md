@@ -33,9 +33,9 @@ the chart. The right column holds the participation (later betting) panel, then 
 info; the panel keeps its natural height instead of ending at the graph's boundary. The
 debate question appears in the video's top-left corner, and the broadcast state with the
 watch count in its top-right corner, left of the expand button, while the pointer is over
-the video or focus is inside it. On touch screens a tap shows them. They never
-take clicks, the question stays the page's `h1` for screen readers, and reduced motion
-removes the fade. From 1190 px down, chat moves below the video and panel. On phones the
+the video or focus is inside it. On touch screens a tap on the video shows them until the
+next tap elsewhere (the browser's hover emulation). They never take clicks, the question
+stays the page's `h1` for screen readers, and reduced motion removes the fade. From 1190 px down, chat moves below the video and panel. On phones the
 order is: banner, video, panel, chat, debate line, outline and chart, then the rest of the
 right column. The layout is in [`debate-web.ts`](../src/features/discovery/debate-web.ts)
 and the grid rules in `public/arena.css`.
