@@ -15,3 +15,15 @@ export const DEVICE_CHECK_MINUTES = 30;
 export const BOOKING_LEAD_SECONDS = 300;
 /** Used when the active rule version sets no maximum duration. */
 export const DEFAULT_MAXIMUM_DURATION_SECONDS = 600;
+/** An online target has this long to answer a "now" challenge before it waits as pending. */
+export const NOW_RESPONSE_SECONDS = 120;
+/** A player counts as online for "now" challenges when seen this recently. */
+export const ONLINE_SECONDS = 60;
+/** An unanswered challenge expires after this many days. */
+export const CHALLENGE_PENDING_DAYS = 7;
+/** Proposed times must be at least this far ahead (and at most 90 days). */
+export const PROPOSAL_MIN_LEAD_MINUTES = 60;
+/** At most this many open outgoing challenges per player. */
+export const OPEN_CHALLENGES_LIMIT = 10;
+/** Both speakers get an in-app reminder this long before a scheduled debate. */
+export const REMINDER_MINUTES = 5;

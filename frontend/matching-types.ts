@@ -15,7 +15,8 @@ export interface MatchingRequest {
   kind: string;
   proposition: string;
   status: string;
-  scheduledAt: string;
+  // Empty for a "now" challenge (Decision 0011).
+  scheduledAt: string | null;
   debateSlug: string | null;
   topicSlug: string;
 }
