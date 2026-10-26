@@ -4,12 +4,22 @@ import {
   withTransaction,
 } from "../../platform/transaction.ts";
 import { DEBATER_CONSENT_VERSION } from "./debater-settings.ts";
-import type { DebaterLanguage, Side, TranscriptUpdate } from "./protocol.ts";
+import {
+  applyProposal,
+  createOutlineRepository,
+} from "../outline/repository.ts";
+import type {
+  DebaterLanguage,
+  OutlineAnswer,
+  Side,
+  TranscriptUpdate,
+} from "./protocol.ts";
 
 // Decision 0012: the server is the authority for transcripts. One update is
 // one transaction: it checks the debate is live and the turn current, maps
-// each segment to the turn's trading window by spoken time, and appends the
-// segments with an idempotency receipt. No outbound calls happen here.
+// each segment to the turn's trading window by spoken time, appends the
+// segments, applies an outline proposal with the shared reducer, and records
+// an idempotency receipt. No outbound calls happen here.
 
 /** A flush for a turn that just ended is accepted this long after it. */
 export const TURN_FLUSH_GRACE_MS = 15_000;
@@ -25,6 +35,7 @@ export type IngestResult =
         turnNumber: number;
         stored: number;
         inWindow: number;
+        outline?: OutlineAnswer;
       };
     }
   | { status: 403 | 404 | 409 | 422; body: Record<string, unknown> };
@@ -60,6 +71,7 @@ function acceptsTurn(state: LiveState, turn: number) {
 }
 
 export function createTranscriptionRepository(database: Pool) {
+  const outlines = createOutlineRepository(database);
   async function liveState(client: PoolClient, debateId: string) {
     return (
       await client.query<LiveState>(
@@ -178,24 +190,13 @@ export function createTranscriptionRepository(database: Pool) {
             window && end <= window.closesAt.getTime() ? window.id : null,
         };
       });
-      const body = {
-        accepted: true as const,
+      const body: Extract<IngestResult, { status: 200 }>["body"] = {
+        accepted: true,
         sequence: update.sequence,
         turnNumber: update.turnNumber,
         stored: rows.length,
         inWindow: rows.filter((row) => row.windowId).length,
       };
-      await client.query(
-        `INSERT INTO transcription_updates(debate_id, job_id, sequence, turn_number, response)
-        VALUES ($1, $2, $3, $4, $5::jsonb)`,
-        [
-          debateId,
-          update.jobId,
-          update.sequence,
-          update.turnNumber,
-          JSON.stringify(body),
-        ],
-      );
       if (rows.length)
         await client.query(
           `INSERT INTO transcript_segments(debate_id, turn_number, window_id, side,
@@ -231,6 +232,27 @@ export function createTranscriptionRepository(database: Pool) {
             ),
           ],
         );
+      // The outline proposal last: its head row lock is held to commit.
+      if (update.outline)
+        body.outline = await applyProposal(client, {
+          debateId,
+          turnNumber: update.turnNumber,
+          side,
+          language: speaker.language ?? update.segments[0]?.language ?? "en",
+          window,
+          proposal: update.outline,
+        });
+      await client.query(
+        `INSERT INTO transcription_updates(debate_id, job_id, sequence, turn_number, response)
+        VALUES ($1, $2, $3, $4, $5::jsonb)`,
+        [
+          debateId,
+          update.jobId,
+          update.sequence,
+          update.turnNumber,
+          JSON.stringify(body),
+        ],
+      );
       return { status: 200, body };
     });
   }
@@ -252,6 +274,7 @@ export function createTranscriptionRepository(database: Pool) {
       const row = (
         await database.query<{
           debateStatus: string;
+          proposition: string;
           media: {
             state: string;
             turnNumber: number;
@@ -261,7 +284,7 @@ export function createTranscriptionRepository(database: Pool) {
           serverNow: Date;
           nextSequence: number;
         }>(
-          `SELECT d.status AS "debateStatus", clock_timestamp() AS "serverNow",
+          `SELECT d.status AS "debateStatus", d.proposition, clock_timestamp() AS "serverNow",
             CASE WHEN m.debate_id IS NULL THEN NULL ELSE json_build_object('state',m.state,
               'turnNumber',m.turn_number,'activeSide',m.active_side,
               'turnDeadlineAt',m.turn_deadline_at) END AS media,
@@ -284,7 +307,15 @@ export function createTranscriptionRepository(database: Pool) {
           [debateId, DEBATER_CONSENT_VERSION],
         )
       ).rows;
-      return { debateId, ...row, speakers };
+      return {
+        debateId,
+        ...row,
+        speakers,
+        outline: await outlines.agentState(
+          debateId,
+          row.media?.turnNumber ?? null,
+        ),
+      };
     },
     /**
      * Claims one dispatch attempt. A new debate, a failed attempt after its

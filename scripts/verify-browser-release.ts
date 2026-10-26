@@ -189,6 +189,11 @@ try {
     ["scripts/verify-hero-browser.ts"],
     { LIVE_ARTIFACT_DIR: join(directory, "live") },
   );
+  await run(
+    "Live AI outline panel with synthetic LiveKit messages",
+    process.execPath,
+    ["scripts/verify-outline-browser.ts"],
+  );
   assert.equal(interrupted, false, "verification interrupted");
   console.log(`Browser release gate PASS. Synthetic evidence: ${directory}`);
 } catch (error) {

@@ -6,7 +6,16 @@ import {
   type AudioFrame,
   type Participant,
 } from "@livekit/rtc-node";
-import type { Side, TurnHint } from "../protocol.ts";
+import Anthropic from "@anthropic-ai/sdk";
+import {
+  OUTLINE_TOPIC,
+  type OutlineAnswer,
+  type OutlineMessage,
+  type Side,
+  type TurnHint,
+} from "../protocol.ts";
+import { createLiveOutliner } from "./claude.ts";
+import { createOutlineLoop, type OutlineLoop } from "./outline-loop.ts";
 import { hintFromSession, parseTurnHint, turnFromHint } from "./turns.ts";
 import type { AgentConfig } from "./config.ts";
 import { createIngestClient } from "./ingest-client.ts";
@@ -122,6 +131,33 @@ export async function runDebateTranscriber(
     await writer.write(update.text);
     await writer.close();
   }
+  // The live AI outline: one model call at a time, through the same ordered
+  // sender as the transcript; accepted versions go to viewers over LiveKit.
+  async function publishOutline(message: OutlineMessage) {
+    const local = room.localParticipant;
+    if (!room.isConnected || !local) return;
+    await local.publishData(new TextEncoder().encode(JSON.stringify(message)), {
+      reliable: true,
+      topic: OUTLINE_TOPIC,
+    });
+  }
+  const outline: OutlineLoop | undefined = config.anthropicKey
+    ? createOutlineLoop({
+        debateId,
+        proposition: initial.proposition,
+        call: createLiveOutliner({
+          client: new Anthropic({ apiKey: config.anthropicKey }),
+          log,
+        }),
+        submit: (turnNumber, proposal): Promise<OutlineAnswer | null> =>
+          transcriber.proposeOutline(turnNumber, proposal),
+        publish: publishOutline,
+        minIntervalMs: config.outlineMinIntervalMs,
+        log,
+        resync: async () => (await ingest.session(jobId))?.outline ?? null,
+      })
+    : undefined;
+  outline?.resume(initial.outline);
   const transcriber = createTurnTranscriber<AudioFrame>({
     primary,
     shadow,
@@ -135,6 +171,7 @@ export async function runDebateTranscriber(
     },
     captionsPerSecond: config.captionsPerSecond,
     log,
+    outline,
   });
   transcriber.setSpeakers(initial.speakers);
 
