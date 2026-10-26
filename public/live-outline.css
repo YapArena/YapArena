@@ -40,3 +40,120 @@
   outline: 2px solid #f8f8f8;
   outline-offset: 2px;
 }
+
+/* The AI outline panel: a fixed-height body that scrolls inside itself, so
+   the video, chart and chat never move when the outline grows. */
+.live-outline {
+  margin: 14px 0 0;
+  padding: 14px 16px 12px;
+  border: 1px solid #2a2a2a;
+  border-radius: 14px;
+  background: #0b0b0b;
+  contain: layout paint;
+}
+.live-outline-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+.live-outline-head h2 {
+  margin: 0;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.live-outline-turn {
+  color: #bdbdbd;
+  font-size: 0.8rem;
+}
+.live-outline-note {
+  margin: 6px 0 10px;
+  color: #8f8f8f;
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+.live-outline-body {
+  height: 15rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.live-outline-body:focus-visible {
+  outline: 2px solid #f8f8f8;
+  outline-offset: 2px;
+}
+.live-outline-arguments {
+  margin: 0;
+  padding: 0 0 0 1.2rem;
+}
+.live-outline-argument {
+  margin: 0 0 10px;
+  border-radius: 6px;
+}
+.live-outline-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 0;
+  color: #f4f4f4;
+  font-weight: 650;
+  line-height: 1.4;
+}
+.live-outline-rebuts {
+  color: #c9c9c9;
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+.live-outline-points {
+  margin: 4px 0 0;
+  padding-left: 1.1rem;
+  color: #dcdcdc;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+.live-outline-points li {
+  border-radius: 4px;
+}
+.live-outline-flagged {
+  color: #ffb3bc;
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+.live-outline-flag {
+  padding: 2px 8px;
+  border: 1px solid #444;
+  border-radius: 999px;
+  background: transparent;
+  color: #cfcfcf;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 400;
+  cursor: pointer;
+}
+.live-outline-earlier {
+  margin-top: 8px;
+  color: #bdbdbd;
+  font-size: 0.84rem;
+}
+.live-outline-earlier-turn {
+  margin: 8px 0 2px;
+  color: #e6e6e6;
+}
+.live-outline .is-changed {
+  animation: live-outline-flash 1.2s ease-out;
+}
+@keyframes live-outline-flash {
+  from {
+    background: #ffffff24;
+  }
+  to {
+    background: transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-outline .is-changed {
+    animation: none;
+  }
+}

@@ -3,14 +3,8 @@ import { describe, it } from "node:test";
 import express from "express";
 import { RoomServiceClient } from "livekit-server-sdk";
 import request from "../scripts/test-http-request.ts";
-import {
-  INGEST_MAX_SKEW_MS,
-  ingestHeaders,
-  parseSessionRequest,
-  parseTranscriptUpdate,
-  signIngest,
-  verifyIngest,
-} from "../dist/features/transcription/protocol.js";
+import * as serverProtocol from "../dist/features/transcription/protocol.js";
+import * as agentProtocol from "../dist-transcriber/features/transcription/protocol.js";
 import {
   createDebateRateLimit,
   createTranscriptionIngestRouter,
@@ -19,6 +13,8 @@ import { createTranscriberDispatcher } from "../dist/features/transcription/disp
 import { createDebaterSettingsRouter } from "../dist/features/transcription/settings-router.js";
 import { parseDebaterSettings } from "../dist/features/transcription/debater-settings.js";
 import { createMediaProvider } from "../dist/features/media/provider.js";
+
+const { ingestHeaders, signIngest } = serverProtocol;
 
 const id = "33333333-3333-4333-8333-333333333333";
 const secret = "synthetic-transcription-ingest-secret-32b";
@@ -48,85 +44,100 @@ const update = (overrides = {}) => ({
   ...overrides,
 });
 
-describe("transcription ingest protocol", () => {
-  it("parses a valid update and trims segment text", () => {
-    const parsed = parseTranscriptUpdate(update());
-    assert.equal(parsed.segments[0].text, segment().text.trim());
-    assert.deepEqual(parsed.segments[0].words[1], {
-      w: "nucléaire",
-      s: 210,
-      e: 700,
+// The server and the transcriber agent compile their own copy of the protocol.
+for (const [build, protocol] of [
+  ["server", serverProtocol],
+  ["transcriber agent", agentProtocol],
+]) {
+  const {
+    INGEST_MAX_SKEW_MS,
+    parseSessionRequest,
+    parseTranscriptUpdate,
+    signIngest,
+    verifyIngest,
+  } = protocol;
+  describe(`transcription ingest protocol (${build} build)`, () => {
+    it("parses a valid update and trims segment text", () => {
+      const parsed = parseTranscriptUpdate(update());
+      assert.equal(parsed.segments[0].text, segment().text.trim());
+      assert.deepEqual(parsed.segments[0].words[1], {
+        w: "nucléaire",
+        s: 210,
+        e: 700,
+      });
+      assert.deepEqual(parseSessionRequest({ jobId: "AJ_1" }), {
+        jobId: "AJ_1",
+      });
     });
-    assert.deepEqual(parseSessionRequest({ jobId: "AJ_1" }), { jobId: "AJ_1" });
-  });
 
-  it("rejects unknown fields, bad values and exceeded limits", () => {
-    const invalid = [
-      null,
-      [],
-      { ...update(), extra: true },
-      update({ jobId: "bad id" }),
-      update({ sequence: -1 }),
-      update({ turnNumber: 0 }),
-      update({ sentAt: 12 }),
-      update({ segments: Array.from({ length: 21 }, () => segment()) }),
-      update({ segments: [segment({ provider: "whisper" })] }),
-      update({ segments: [segment({ role: "secondary" })] }),
-      update({ segments: [segment({ language: "de" })] }),
-      update({ segments: [segment({ side: "C" })] }),
-      update({ segments: [segment({ endAt: now - 4000 })] }),
-      update({ segments: [segment({ text: "   " })] }),
-      update({ segments: [segment({ text: "x".repeat(1001) })] }),
-      update({ segments: [segment({ latencyMs: -1 })] }),
-      update({ segments: [segment({ audioMs: 1.5 })] }),
-      update({ segments: [segment({ words: [{ w: "", s: 0, e: 1 }] })] }),
-      update({ segments: [segment({ words: [{ w: "a", s: 5, e: 1 }] })] }),
-      update({
-        segments: [segment({ words: [{ w: "a", s: 0, e: 1, c: 2 }] })],
-      }),
-      update({
-        segments: [segment({ words: [{ w: "a", s: 0, e: 1, x: 1 }] })],
-      }),
-      update({ segments: [{ ...segment(), extra: 1 }] }),
-    ];
-    for (const value of invalid)
-      assert.equal(parseTranscriptUpdate(value), null, JSON.stringify(value));
-    assert.equal(parseSessionRequest({ jobId: "AJ", other: 1 }), null);
-    assert.equal(parseSessionRequest("AJ"), null);
-  });
+    it("rejects unknown fields, bad values and exceeded limits", () => {
+      const invalid = [
+        null,
+        [],
+        { ...update(), extra: true },
+        update({ jobId: "bad id" }),
+        update({ sequence: -1 }),
+        update({ turnNumber: 0 }),
+        update({ sentAt: 12 }),
+        update({ segments: Array.from({ length: 21 }, () => segment()) }),
+        update({ segments: [segment({ provider: "whisper" })] }),
+        update({ segments: [segment({ role: "secondary" })] }),
+        update({ segments: [segment({ language: "de" })] }),
+        update({ segments: [segment({ side: "C" })] }),
+        update({ segments: [segment({ endAt: now - 4000 })] }),
+        update({ segments: [segment({ text: "   " })] }),
+        update({ segments: [segment({ text: "x".repeat(1001) })] }),
+        update({ segments: [segment({ latencyMs: -1 })] }),
+        update({ segments: [segment({ audioMs: 1.5 })] }),
+        update({ segments: [segment({ words: [{ w: "", s: 0, e: 1 }] })] }),
+        update({ segments: [segment({ words: [{ w: "a", s: 5, e: 1 }] })] }),
+        update({
+          segments: [segment({ words: [{ w: "a", s: 0, e: 1, c: 2 }] })],
+        }),
+        update({
+          segments: [segment({ words: [{ w: "a", s: 0, e: 1, x: 1 }] })],
+        }),
+        update({ segments: [{ ...segment(), extra: 1 }] }),
+      ];
+      for (const value of invalid)
+        assert.equal(parseTranscriptUpdate(value), null, JSON.stringify(value));
+      assert.equal(parseSessionRequest({ jobId: "AJ", other: 1 }), null);
+      assert.equal(parseSessionRequest("AJ"), null);
+    });
 
-  it("verifies HMAC signatures within the clock skew", () => {
-    const body = JSON.stringify(update()),
-      timestamp = String(now),
-      signature = signIngest(secret, timestamp, body);
-    assert.equal(verifyIngest(secret, timestamp, signature, body, now), true);
-    assert.equal(
-      verifyIngest(secret, timestamp, signature, `${body} `, now),
-      false,
-    );
-    assert.equal(
-      verifyIngest(`${secret}x`, timestamp, signature, body, now),
-      false,
-    );
-    assert.equal(
-      verifyIngest(
-        secret,
-        timestamp,
-        signature,
-        body,
-        now + INGEST_MAX_SKEW_MS + 1,
-      ),
-      false,
-    );
-    for (const [t, s] of [
-      [undefined, signature],
-      ["12", signature],
-      [timestamp, undefined],
-      [timestamp, "nothex"],
-    ])
-      assert.equal(verifyIngest(secret, t, s, body, now), false);
+    it("verifies HMAC signatures within the clock skew", () => {
+      const body = JSON.stringify(update()),
+        timestamp = String(now),
+        signature = signIngest(secret, timestamp, body);
+      assert.equal(verifyIngest(secret, timestamp, signature, body, now), true);
+      assert.equal(
+        verifyIngest(secret, timestamp, signature, `${body} `, now),
+        false,
+      );
+      assert.equal(
+        verifyIngest(`${secret}x`, timestamp, signature, body, now),
+        false,
+      );
+      assert.equal(
+        verifyIngest(
+          secret,
+          timestamp,
+          signature,
+          body,
+          now + INGEST_MAX_SKEW_MS + 1,
+        ),
+        false,
+      );
+      for (const [t, s] of [
+        [undefined, signature],
+        ["12", signature],
+        [timestamp, undefined],
+        [timestamp, "nothex"],
+      ])
+        assert.equal(verifyIngest(secret, t, s, body, now), false);
+    });
   });
-});
+}
 
 describe("transcription ingest routes", () => {
   function app({ allow = () => true, ingest, session } = {}) {
