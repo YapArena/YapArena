@@ -85,6 +85,41 @@ state, voidReason }] }`, the latest 100 windows in turn order. No orders, counts
   seeds. The signed-in view (`GET /api/coin-sandbox/debates/:id/rounds`) adds `kind`
   (`turn`/`manual`), `turnNumber`, `side` and `voidReason` to each round.
 
+## Pull request 1b: the founder's round rules
+
+Migration `1792978459788_add-turn-window-rules`. It applies to every Yap Coins debate round,
+windows and manual rounds, with or without `TURN_WINDOWS_ENABLED`. Until it is deployed, keep the
+flag off wherever user-created debates exist.
+
+- **Reveal mode (F11).** Each debate is `five_day` or `per_round`, and each round copies its
+  debate's mode when it is created.
+  - Five-day is the default and the only mode a user-created debate can have. A five-day round
+    takes orders until its cutoff and then stays open but locked. It prices and settles at the
+    debate's 120-hour close (`live_ended_at` plus 120 elapsed hours, once the debate is `ended`,
+    `replay` or `finalized`). Before that nobody sees a price, execution or seed.
+  - Per-round reveal is recorded only by the owner, for a founder-created debate, with the
+    `set-reveal-mode` command and a reason (`coin_debate_reveal_modes`, append-only). The debate's
+    first round locks the mode; the database refuses a later record and ignores any mode the
+    inserting code supplies.
+  - A cancelled or under-review debate's locked rounds are voided as before (F15: only unrevealed
+    rounds).
+  - Rounds created before this migration keep revealing at their cutoff.
+- **Manual rounds.** A locked five-day manual round no longer blocks the next one: asking for a
+  round returns the manual round still taking orders, or opens one. The one-open-manual-round index
+  now covers per-round rounds only; the coin transition lock serializes the rest.
+- **Participant count (F12).** The signed-in rounds view gives each round's `participants`, the
+  number of accounts that committed, at once. It never gives side totals. The drawn price appears
+  with the result, at the reveal.
+- **Debaters (F14).** Neither debater can take a position in their own debate: the server answers
+  403 and the database refuses the order. The signed-in view gives each round
+  `eligibility: { canTakePosition, reason }`, where `reason` is `debater`, `committed`,
+  `debate_unavailable`, `closed`, `paused` (financial activity paused for correction review), `full`
+  or `null`.
+- **Both views** give `revealMode` and `revealAt` for each round or window. `revealAt` is the
+  cutoff for a per-round round, the 120-hour close once a five-day debate has ended, the actual
+  reveal once revealed, and `null` before a five-day debate ends. The public window list also gives
+  the debate's own `revealMode` and `revealAt`. It still has no counts.
+
 ## Later pull requests
 
 2. Transcriber agent, provider switch with shadow mode, dispatch, room metadata, ingest endpoint,
