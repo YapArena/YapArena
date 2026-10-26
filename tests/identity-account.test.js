@@ -248,9 +248,10 @@ describe("account data download", () => {
     const response = await request(app).get("/api/me/export");
     assert.equal(response.status, 200);
     assert.match(response.headers["content-type"], /application\/json/);
-    assert.equal(
+    // Express 5.3 leaves a plain token filename unquoted; both forms name the same file.
+    assert.match(
       response.headers["content-disposition"],
-      'attachment; filename="yaparena-account-2026-10-24.json"',
+      /^attachment; filename="?yaparena-account-2026-10-24\.json"?$/,
     );
     assert.equal(response.headers["cache-control"], "no-store");
     const body = JSON.parse(response.text);
