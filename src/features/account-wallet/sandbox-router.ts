@@ -186,9 +186,24 @@ export function createCoinSandboxRouter(options: {
     );
   });
   router.post("/rounds/:id/submit", async (r, s) => {
-    const b = body(r.body, ["side", "ceiling", "quantity"]);
+    const b = body(r.body, [
+      "side",
+      "ceiling",
+      "quantity",
+      "replayPositionSeconds",
+    ]);
     if ((b.side !== "YES" && b.side !== "NO") || typeof b.quantity !== "number")
       throw new CoinOperationError("side and integer quantity required", 400);
+    // Decision 0012 (F10): a replay viewer's position in the recording.
+    const position = b.replayPositionSeconds;
+    if (
+      position !== undefined &&
+      (typeof position !== "number" ||
+        !Number.isFinite(position) ||
+        position < 0 ||
+        position > 86_400)
+    )
+      throw new CoinOperationError("invalid replay position", 400);
     const limit = purchaseLimit(b.side, text(b.ceiling)),
       micro = (BigInt(limit.n) * 1_000_000n) / BigInt(limit.d);
     s.status(201).json(
@@ -196,6 +211,9 @@ export function createCoinSandboxRouter(options: {
         side: b.side,
         quantity: b.quantity,
         limit: `${micro / 1_000_000n}.${String(micro % 1_000_000n).padStart(6, "0")}`,
+        ...(position === undefined
+          ? {}
+          : { replayPositionMs: Math.floor(position * 1000) }),
       }),
     );
   });

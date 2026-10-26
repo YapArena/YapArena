@@ -105,7 +105,40 @@ const revealAt = (round: string, debate: string) =>
       THEN ${debate}.live_ended_at+INTERVAL '${REVEAL_CLOSE_HOURS} hours' END`;
 /** F14 and the round's own limits: why this viewer cannot take a position. */
 export type Ineligibility =
-  "debater" | "committed" | "debate_unavailable" | "paused" | "closed" | "full";
+  | "debater"
+  | "committed"
+  | "debate_unavailable"
+  | "paused"
+  | "closed"
+  | "later_window"
+  | "full";
+// F10: a turn window's span in the recording (round and recording_clocks
+// aliases), in whole milliseconds, as the order guard computes it.
+const spanStartMs = (round: string, clock: string) =>
+  `greatest(0,floor(extract(epoch FROM ${round}.opens_at-${clock}.started_at)*1000))`;
+const spanEndMs = (round: string, clock: string) =>
+  `floor(extract(epoch FROM ${round}.closes_at-${clock}.started_at)*1000)`;
+const recordingSpan = (round: string, clock: string) =>
+  `CASE WHEN ${round}.turn_number IS NOT NULL AND ${clock}.started_at IS NOT NULL
+    THEN json_build_object('startSeconds',${spanStartMs(round, clock)}/1000.0,
+      'endSeconds',${spanEndMs(round, clock)}/1000.0) END`;
+// True when a round takes replay positions: a five-day turn window, from the
+// debate's live end until its 120-hour close, once the recording is timed.
+const replayable = (round: string, debate: string, clock: string) =>
+  `(${round}.state='open' AND ${round}.turn_number IS NOT NULL AND ${round}.reveal_mode='five_day'
+    AND clock_timestamp()>=${round}.closes_at AND ${debate}.status IN ${endedStatuses}
+    AND ${debate}.live_ended_at+INTERVAL '${REVEAL_CLOSE_HOURS} hours'>clock_timestamp()
+    AND ${clock}.started_at IS NOT NULL)`;
+// True when the user holds a position in a later turn's window of the debate.
+const laterWindowJoined = (round: string, user: string) =>
+  `EXISTS (SELECT 1 FROM coin_debate_orders lo JOIN coin_debate_rounds lr ON lr.id=lo.round_id
+    WHERE lr.debate_id=${round}.debate_id AND lo.user_id=${user}
+      AND lr.turn_number>${round}.turn_number)`;
+/** A turn window's start and end in the debate's recording, in seconds. */
+export interface RecordingSpan {
+  startSeconds: number;
+  endSeconds: number;
+}
 // A debate in one of these states takes no new commitments, and the coin loop
 // voids its open rounds instead of settling them (F15: only unopened rounds).
 const unavailableStatuses = "('cancelled','void_review')";
@@ -119,6 +152,7 @@ export interface TurnWindow {
   voidReason: VoidReason | null;
   revealMode: RevealMode;
   revealAt: Date | null;
+  recording: RecordingSpan | null;
 }
 interface StoredOrder {
   user_id: string;
@@ -129,6 +163,8 @@ interface StoredOrder {
   funding: StakeFunding;
   center_reservation: string;
   promotional_reservation: string;
+  // F10: the replay position of a replay viewer's order; null when live.
+  replay_position_ms: number | null;
 }
 const uuid = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 const reference = (userId: string, operation: string, key: string) =>
@@ -800,9 +836,21 @@ export function createCoinDebateSandbox(
       context: SandboxContext,
       roundId: string,
       idempotencyKey: string,
-      input: { side: Order["side"]; limit: string; quantity: number },
+      input: {
+        side: Order["side"];
+        limit: string;
+        quantity: number;
+        // F10: the replay position the viewer is watching, after a cutoff.
+        replayPositionMs?: number;
+      },
     ) {
       resource(roundId);
+      if (
+        input.replayPositionMs !== undefined &&
+        (!Number.isSafeInteger(input.replayPositionMs) ||
+          input.replayPositionMs < 0)
+      )
+        fail("invalid replay position", 400);
       const key = reference(context.userId, "debate.submit", idempotencyKey);
       return transaction(async (client) => {
         await authorize(client, context);
@@ -810,7 +858,9 @@ export function createCoinDebateSandbox(
         const order: Order = {
           participant: context.userId,
           kind: "human",
-          ...input,
+          side: input.side,
+          limit: input.limit,
+          quantity: input.quantity,
         };
         validateOrder(order, round.terms);
         const terms = {
@@ -823,6 +873,9 @@ export function createCoinDebateSandbox(
           asset: "USDC",
           precision: "6",
           face: String(COIN_DEBATE_FACE),
+          ...(input.replayPositionMs !== undefined
+            ? { replayPositionMs: String(input.replayPositionMs) }
+            : {}),
         };
         const termsDigest = digest(terms);
         const existing = (
@@ -838,15 +891,36 @@ export function createCoinDebateSandbox(
         }
         if (round.state !== "open") fail("sandbox round is closed");
         // A five-day round stays open after its cutoff, until its reveal.
-        if (
-          !(
-            await client.query<{ accepting: boolean }>(
-              "SELECT clock_timestamp()<closes_at AS accepting FROM coin_debate_rounds WHERE id=$1",
-              [round.id],
-            )
-          ).rows[0]!.accepting
-        )
-          fail("sandbox debate is past cutoff");
+        // Replay viewers then join the window playing at their position (F10).
+        const timing = (
+          await client.query<{
+            accepting: boolean;
+            replayable: boolean;
+            inSpan: boolean | null;
+            later: boolean;
+          }>(
+            `SELECT clock_timestamp()<r.closes_at AS accepting,
+              ${replayable("r", "d", "c")} AS replayable,
+              $2::integer BETWEEN ${spanStartMs("r", "c")} AND ${spanEndMs("r", "c")} AS "inSpan",
+              ${laterWindowJoined("r", "$3::bigint")} AS later
+            FROM coin_debate_rounds r JOIN debates d ON d.id=r.debate_id
+            LEFT JOIN recording_clocks c ON c.debate_id=r.debate_id WHERE r.id=$1`,
+            [round.id, input.replayPositionMs ?? null, context.userId],
+          )
+        ).rows[0]!;
+        let replayPositionMs: number | null = null;
+        if (!timing.accepting) {
+          if (input.replayPositionMs === undefined)
+            fail("sandbox debate is past cutoff");
+          if (!timing.replayable)
+            fail(
+              "replay positions are taken only by a five-day debate's turn windows, from its end until its 120-hour close",
+            );
+          if (!timing.inSpan)
+            fail("this window is not playing at that replay position");
+          if (timing.later) fail("you already joined a later turn's window");
+          replayPositionMs = input.replayPositionMs;
+        }
         // F14: debaters may not take a position in their own debate.
         if (
           (
@@ -946,8 +1020,8 @@ export function createCoinDebateSandbox(
         );
         // DB cutoff is checked AFTER ledger-lock waits and immediately at insert.
         await client.query(
-          `INSERT INTO coin_debate_orders(round_id,user_id,request_id,side,limit_value,quantity,funding,center_reservation,promotional_reservation)
-          VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9)`,
+          `INSERT INTO coin_debate_orders(round_id,user_id,request_id,side,limit_value,quantity,funding,center_reservation,promotional_reservation,replay_position_ms)
+          VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9,$10)`,
           [
             roundId,
             context.userId,
@@ -958,6 +1032,7 @@ export function createCoinDebateSandbox(
             JSON.stringify(plan.funding),
             String(collateral),
             String(promotional),
+            replayPositionMs,
           ],
         );
         await appendSandboxBookEvent(client, {
@@ -976,6 +1051,7 @@ export function createCoinDebateSandbox(
             centerReservation: String(collateral),
             promotionalReservation: String(promotional),
             rail,
+            ...(replayPositionMs === null ? {} : { replayPositionMs }),
           },
         });
         await assertActiveSession(
@@ -1002,14 +1078,20 @@ export function createCoinDebateSandbox(
               participants: number;
               accepting: boolean;
               reveal_at: Date | null;
+              recording: RecordingSpan | null;
+              replayable: boolean;
+              later: boolean;
             }
           >(
             `SELECT r.*, clock_timestamp()<r.closes_at AS accepting,
               (SELECT count(*)::int FROM coin_debate_orders o WHERE o.round_id=r.id) AS participants,
-              ${revealAt("r", "d")} AS reveal_at
+              ${revealAt("r", "d")} AS reveal_at, ${recordingSpan("r", "c")} AS recording,
+              ${replayable("r", "d", "c")} AS replayable,
+              ${laterWindowJoined("r", "$3::bigint")} AS later
             FROM coin_debate_rounds r JOIN debates d ON d.id=r.debate_id
+            LEFT JOIN recording_clocks c ON c.debate_id=r.debate_id
             WHERE r.debate_id=$1 AND r.rail=$2 ORDER BY r.opens_at DESC,r.id LIMIT 20`,
-            [debateId, rail],
+            [debateId, rail, context.userId],
           )
         ).rows;
         // The viewer's standing in this debate, for each round's eligibility.
@@ -1040,19 +1122,29 @@ export function createCoinDebateSandbox(
             const outcome = r.result?.outcomes.find(
               (o) => o.participant === context.userId,
             );
+            // Live until the cutoff; then, for a five-day turn window,
+            // replay viewers at its position until the 120-hour close (F10).
+            const via =
+              r.state === "open" && r.accepting
+                ? "live"
+                : r.replayable
+                  ? "replay"
+                  : null;
             const ineligible: Ineligibility | null = standing.debater
               ? "debater"
               : own
                 ? "committed"
                 : !standing.available
                   ? "debate_unavailable"
-                  : r.state !== "open" || !r.accepting
+                  : !via
                     ? "closed"
-                    : standing.paused
-                      ? "paused"
-                      : r.participants >= r.terms.capacity
-                        ? "full"
-                        : null;
+                    : via === "replay" && r.later
+                      ? "later_window"
+                      : standing.paused
+                        ? "paused"
+                        : r.participants >= r.terms.capacity
+                          ? "full"
+                          : null;
             return {
               id: r.id,
               debateId: r.debate_id,
@@ -1077,7 +1169,10 @@ export function createCoinDebateSandbox(
               eligibility: {
                 canTakePosition: ineligible === null,
                 reason: ineligible,
+                via: ineligible === null ? via : null,
               },
+              // F10: where this turn's window plays in the recording.
+              recording: r.recording,
               terms: r.terms,
               asset: "USDC",
               precision: 6,
@@ -1089,6 +1184,7 @@ export function createCoinDebateSandbox(
                     limit: own.limit_value,
                     quantity: own.quantity,
                     requestId: own.request_id,
+                    replayPositionMs: own.replay_position_ms,
                   }
                 : null,
               ...(r.state === "settled"
@@ -1256,13 +1352,15 @@ export function createCoinDebateSandbox(
             COALESCE((SELECT json_agg(json_build_object('id',w.id,'turnNumber',w.turn_number,
               'side',w.turn_side,'opensAt',w.opens_at,'closesAt',w.closes_at,'state',w.state,
               'voidReason',CASE WHEN w.state='void' THEN w.result->>'voidReason' END,
-              'revealMode',w.reveal_mode,'revealAt',${revealAt("w", "d")})
+              'revealMode',w.reveal_mode,'revealAt',${revealAt("w", "d")},
+              'recording',${recordingSpan("w", "c")})
               ORDER BY w.turn_number)
             FROM (SELECT * FROM coin_debate_rounds r WHERE r.debate_id=d.id AND r.rail=$2
               AND r.turn_number IS NOT NULL ORDER BY r.turn_number DESC LIMIT 100) w),
               '[]'::json) AS windows
           FROM debates d JOIN topics t ON t.id=d.topic_id
           LEFT JOIN coin_debate_reveal_modes m ON m.debate_id=d.id
+          LEFT JOIN recording_clocks c ON c.debate_id=d.id
           WHERE d.id=$1 AND d.publication_state='published' AND t.publication_state='published'`,
           [debateId, rail],
         )
