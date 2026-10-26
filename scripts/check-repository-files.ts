@@ -1,6 +1,7 @@
 // Fails when tracked files break the evidence policy in CONTRIBUTING.md:
-// no images, videos or .raw files under docs/, and no file over 1 MiB outside
-// public/. Files that predate the policy are listed in the baseline file.
+// no images, videos or .raw files under docs/, no file over 1 MiB outside
+// public/, and no generated build output. Files that predate the policy are
+// listed in the baseline file.
 import { execFileSync } from "node:child_process";
 import { readFileSync, statSync } from "node:fs";
 import path from "node:path";
@@ -10,6 +11,8 @@ export const maximumBytes = 1024 * 1024;
 const mediaExtension =
   /\.(png|jpe?g|gif|webp|avif|bmp|tiff?|ico|heic|heif|svg|mp4|webm|mov|mkv|avi|m4v|ogv|raw)$/i;
 const largeFileDirectories = ["public/"];
+// Build output, which `npm run build` generates and .gitignore lists.
+const generatedOutput = /^(dist|dist-transcriber|coverage)\/|^public\/.*\.js$/;
 
 export interface TrackedFile {
   path: string;
@@ -23,7 +26,12 @@ export function findViolations(
   const violations: string[] = [];
   for (const file of files) {
     if (baseline.has(file.path)) continue;
-    if (file.path.startsWith("docs/") && mediaExtension.test(file.path)) {
+    if (generatedOutput.test(file.path)) {
+      violations.push(`${file.path}: generated build output`);
+    } else if (
+      file.path.startsWith("docs/") &&
+      mediaExtension.test(file.path)
+    ) {
       violations.push(`${file.path}: image, video or .raw file under docs/`);
     } else if (
       file.size > maximumBytes &&
