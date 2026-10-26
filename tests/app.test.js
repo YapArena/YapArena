@@ -71,6 +71,49 @@ describe("yaparena API", () => {
     assert.deepEqual(response.body, { debateId: id, windows: [] });
   });
 
+  it("mounts transcriber ingest before JSON parsing and outside the API limit", async () => {
+    const id = "33333333-3333-4333-8333-333333333333";
+    const { signIngest, ingestHeaders } =
+      await import("../dist/features/transcription/protocol.js");
+    const secret = "synthetic-transcription-ingest-secret-32b";
+    const enabled = createApp({
+      messages,
+      database,
+      users,
+      sessions,
+      logger,
+      apiRateLimit: 1,
+      transcriptionIngest: {
+        secret,
+        repository: {
+          ingest: async () => ({ status: 409, body: { code: "stale_turn" } }),
+          session: async (debateId) => ({ debateId }),
+        },
+      },
+    });
+    const body = JSON.stringify({ jobId: "AJ_1" });
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const timestamp = String(Date.now());
+      const response = await request(enabled)
+        .post(`/api/internal/transcription/debates/${id}/session`)
+        .set("Content-Type", "application/json")
+        .set(ingestHeaders.timestamp, timestamp)
+        .set(ingestHeaders.signature, signIngest(secret, timestamp, body))
+        .send(body);
+      assert.equal(response.status, 200);
+      assert.deepEqual(response.body, { debateId: id });
+    }
+    assert.equal(
+      (
+        await request(app)
+          .post(`/api/internal/transcription/debates/${id}/session`)
+          .set("Content-Type", "application/json")
+          .send(body)
+      ).status,
+      404,
+    );
+  });
+
   it("does not require a shared staging password for public requests", async () => {
     const response = await request(app).get("/unknown");
     assert.equal(response.status, 404);

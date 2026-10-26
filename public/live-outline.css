@@ -1,0 +1,42 @@
+/* Decision 0012: live captions under the video. Fixed height and layout
+   containment keep the video, chart and chat from moving as text changes. */
+.live-captions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0 0;
+  padding: 10px 12px 10px 16px;
+  min-height: 3.9rem;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  background: #0b0b0b;
+  contain: layout paint;
+}
+.live-captions-text {
+  flex: 1;
+  margin: 0;
+  max-height: 3rem;
+  overflow: hidden;
+  color: #f4f4f4;
+  font-size: 0.95rem;
+  line-height: 1.5rem;
+}
+.live-captions[data-captions-off] .live-captions-text {
+  visibility: hidden;
+}
+.live-captions-toggle {
+  flex: none;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid #4a4a4a;
+  border-radius: 999px;
+  background: transparent;
+  color: #e8e8e8;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.live-captions-toggle:focus-visible {
+  outline: 2px solid #f8f8f8;
+  outline-offset: 2px;
+}
