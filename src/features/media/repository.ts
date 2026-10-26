@@ -197,6 +197,22 @@ export function createMediaRepository(
         return { cameraOk, microphoneOk };
       });
     },
+    // The check taken before entering the live queue; the queue requires one in the last
+    // 30 minutes (Decision 0011).
+    async checkAccountDevice(
+      userId: string,
+      cameraOk: boolean,
+      microphoneOk: boolean,
+    ) {
+      await db.query(
+        `INSERT INTO account_device_checks (user_id, camera_ok, microphone_ok)
+         VALUES ($1, $2, $3) ON CONFLICT (user_id) DO UPDATE SET
+         camera_ok = EXCLUDED.camera_ok, microphone_ok = EXCLUDED.microphone_ok,
+         checked_at = CURRENT_TIMESTAMP`,
+        [userId, cameraOk, microphoneOk],
+      );
+      return { cameraOk, microphoneOk };
+    },
     async assertDeviceReady(debateId: string, userId: string) {
       const result = await db.query(
         `SELECT 1 FROM media_device_checks WHERE debate_id = $1 AND user_id = $2

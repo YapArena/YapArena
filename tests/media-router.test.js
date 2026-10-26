@@ -50,6 +50,10 @@ function fixture(overrides = {}) {
       calls.push("checkDevice");
       return { cameraOk: camera, microphoneOk: microphone };
     },
+    async checkAccountDevice(user, camera, microphone) {
+      calls.push(`checkAccountDevice:${user}:${camera}:${microphone}`);
+      return { cameraOk: camera, microphoneOk: microphone };
+    },
     async start(_id, egress, key) {
       calls.push(`start:${egress}:${key}`);
       return state;
@@ -339,6 +343,28 @@ describe("media API", () => {
       ).status,
       404,
     );
+  });
+
+  it("records the queue screen's camera check for signed-in participants only", async () => {
+    const f = fixture();
+    const check = (user, body) =>
+      request(f.app)
+        .post("/api/media/device-check")
+        .set(user ? { "x-user": user } : {})
+        .send(body);
+    assert.equal(
+      (await check(null, { cameraOk: true, microphoneOk: true })).status,
+      401,
+    );
+    assert.equal(
+      (await check("9", { cameraOk: true, microphoneOk: true })).status,
+      403,
+    );
+    assert.equal((await check("1", { cameraOk: "yes" })).status, 400);
+    const saved = await check("1", { cameraOk: true, microphoneOk: false });
+    assert.equal(saved.status, 200);
+    assert.deepEqual(saved.body.check, { cameraOk: true, microphoneOk: false });
+    assert.deepEqual(f.calls, ["checkAccountDevice:1:true:false"]);
   });
 
   it("starts recording before live, then stops it on operator end", async () => {
