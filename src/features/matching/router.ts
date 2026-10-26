@@ -7,6 +7,7 @@ import type { ProductActionRecorder } from "../measurement/router.ts";
 import { MediaConflictError } from "../media/repository.ts";
 import { createRequireRole } from "../identity/router.ts";
 import { MatchConflictError, MatchNotFoundError } from "./repository.ts";
+import { DebaterSettingsRequiredError } from "../transcription/debater-settings.ts";
 import { PROPOSAL_MIN_LEAD_MINUTES } from "./timings.ts";
 
 type Repository = ReturnType<typeof createMatchingRepository>;
@@ -148,6 +149,11 @@ function requestInput(body: unknown) {
 }
 
 function errorResponse(response: Response, error: unknown) {
+  // Decision 0012: the code lets a screen point the player to their account settings.
+  if (error instanceof DebaterSettingsRequiredError)
+    return response
+      .status(error.status)
+      .json({ error: error.message, code: error.code, missing: error.missing });
   if (error instanceof MatchNotFoundError)
     return response.status(404).json({ error: error.message });
   if (error instanceof MatchConflictError)
