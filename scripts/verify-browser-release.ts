@@ -175,6 +175,9 @@ try {
       A4_BROWSER: "true",
       A4_QUALITY: integrationOnly ? "false" : "true",
       BROWSER_ARTIFACT_DIR: join(directory, "a4"),
+      // Two browsers through the live queue and a "now" challenge (Decision 0011).
+      MATCHMAKING_BROWSER: "true",
+      MATCHMAKING_ARTIFACT_DIR: join(directory, "matchmaking"),
     },
   );
   await run(

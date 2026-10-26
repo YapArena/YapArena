@@ -196,8 +196,8 @@ describe(
            reserved_until = CURRENT_TIMESTAMP + interval '30 minutes' WHERE debate_id = $1`,
         [debateId],
       );
-      const swept = await sweepOnce(queue);
-      assert.ok(swept.value.booked >= 1);
+      // A parallel suite's sweep may close the ticket first, so check the outcome, not the count.
+      await sweepOnce(queue);
       const left = await queue.state(a.id);
       assert.equal(left.ticket.closedReason, "booking");
       await assert.rejects(
