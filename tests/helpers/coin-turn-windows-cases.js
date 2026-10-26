@@ -9,6 +9,7 @@ import {
 } from "../../dist/features/account-wallet/sandbox-repository.js";
 import { createSessionRepository } from "../../dist/platform/auth/sessions.js";
 import { createSessionToken } from "../../dist/platform/auth/session-tokens.js";
+import { createMediaRepository } from "../../dist/features/media/repository.js";
 import { attachSubject, openSandbox } from "./confirmations.js";
 
 // Decision 0012: one Yap Coins trading window per live speaking turn. These
@@ -90,9 +91,11 @@ describe(
     }
     // Live fixtures are demos so they never compete for the featured slot
     // that featured-postgres checks in parallel.
+    // Recorded as per-round so windows settle at their cutoff (F11).
     async function liveDebate({
       status = "live",
       deadline = "60 seconds",
+      reveal = "per_round",
     } = {}) {
       const id = (
         await owner.query(
@@ -110,6 +113,11 @@ describe(
         VALUES($1,'running','A',1,clock_timestamp()+$2::interval,60000,0,clock_timestamp(),'recording')`,
         [id, deadline],
       );
+      if (reveal === "per_round")
+        await owner.query(
+          "INSERT INTO coin_debate_reveal_modes(debate_id,mode,reason) VALUES($1,'per_round','Founder-created test debate')",
+          [id],
+        );
       return id;
     }
     // The media clock's turn advance, as tick() writes it.
@@ -415,21 +423,280 @@ describe(
           [2, "B", "open", null],
         ],
       );
-      for (const window of view.windows)
+      assert.equal(view.revealMode, "per_round");
+      assert.equal(view.revealAt, null);
+      for (const window of view.windows) {
         assert.deepEqual(Object.keys(window).sort(), [
           "closesAt",
           "id",
           "opensAt",
+          "recording",
+          "revealAt",
+          "revealMode",
           "side",
           "state",
           "turnNumber",
           "voidReason",
         ]);
+        assert.equal(window.revealMode, "per_round");
+        assert.equal(window.revealAt, window.closesAt, "reveals at its cutoff");
+      }
+      // A user-created debate reveals at its 120-hour close (F11).
+      const fiveDay = await liveDebate({ reveal: "five_day" });
+      await windows.openTurnWindows(20, [fiveDay]);
+      const pending = await windows.publicWindows(fiveDay);
+      assert.equal(pending.revealMode, "five_day");
+      assert.equal(pending.revealAt, null, "unknown until the debate ends");
+      assert.equal(pending.windows[0].revealMode, "five_day");
+      assert.equal(pending.windows[0].revealAt, null);
+      await owner.query(
+        "UPDATE debates SET status='ended',live_ended_at=clock_timestamp() WHERE id=$1",
+        [fiveDay],
+      );
+      const ended = await windows.publicWindows(fiveDay);
+      assert.ok(
+        ended.revealAt instanceof Date || typeof ended.revealAt === "string",
+      );
+      assert.equal(
+        new Date(ended.windows[0].revealAt).getTime(),
+        new Date(ended.revealAt).getTime(),
+      );
       await owner.query(
         "UPDATE debates SET publication_state='draft' WHERE id=$1",
         [debateId],
       );
       assert.equal(await windows.publicWindows(debateId), null);
+    });
+
+    // Turn windows' places in time, seconds before one shared instant
+    // (guard bypassed): [roundId, opensAgo, closesAgo] each.
+    async function place(placements) {
+      const client = await owner.connect();
+      try {
+        await client.query("BEGIN");
+        await client.query(
+          "ALTER TABLE coin_debate_rounds DISABLE TRIGGER coin_debate_round_guard",
+        );
+        for (const [roundId, opensAgo, closesAgo] of placements)
+          await client.query(
+            `UPDATE coin_debate_rounds SET opens_at=now()-$2*INTERVAL '1 second',
+              closes_at=now()-$3*INTERVAL '1 second' WHERE id=$1`,
+            [roundId, opensAgo, closesAgo],
+          );
+        await client.query(
+          "ALTER TABLE coin_debate_rounds ENABLE TRIGGER coin_debate_round_guard",
+        );
+        await client.query("COMMIT");
+      } catch (e) {
+        await client.query("ROLLBACK");
+        throw e;
+      } finally {
+        client.release();
+      }
+    }
+    // Three one-minute turns that started an hour ago, a recording that
+    // started 2 s before the first turn, and a debate that ended after them.
+    async function replayedDebate({
+      reveal = "five_day",
+      endedAgo = 3000,
+    } = {}) {
+      const debateId = await liveDebate({ reveal });
+      for (let turn = 1; turn <= 3; turn++) {
+        if (turn > 1) await nextTurn(debateId);
+        await windows.openTurnWindows(20, [debateId]);
+      }
+      const list = await rounds(debateId);
+      await place(
+        list.map((round, index) => [
+          round.id,
+          3600 - 60 * index,
+          3540 - 60 * index,
+        ]),
+      );
+      const egress = `egress-${randomUUID()}`;
+      await owner.query(
+        `UPDATE debate_media SET state='ended',egress_id=$2,recording_key=$3,
+          recording_status='processing' WHERE debate_id=$1`,
+        [debateId, egress, `debates/${debateId}/recording.mp4`],
+      );
+      await owner.query(
+        `UPDATE debates SET status='ended',live_started_at=clock_timestamp()-$2*INTERVAL '1 second'-INTERVAL '1 hour',
+          live_ended_at=clock_timestamp()-$2*INTERVAL '1 second'
+        WHERE id=$1`,
+        [debateId, endedAgo],
+      );
+      const started = (
+        await owner.query(
+          "SELECT opens_at-INTERVAL '2 seconds' AS at FROM coin_debate_rounds WHERE id=$1",
+          [list[0].id],
+        )
+      ).rows[0].at;
+      const media = createMediaRepository(runtime);
+      const state = await media.recordingEnded(
+        egress,
+        true,
+        `debates/${debateId}/recording.mp4`,
+        started,
+      );
+      assert.equal(state.recordingStatus, "ready");
+      return {
+        debateId,
+        windows: list.map((round) => round.id),
+        media,
+        egress,
+      };
+    }
+    const order = (replayPositionSeconds) => ({
+      side: "YES",
+      limit: "1",
+      quantity: 1,
+      ...(replayPositionSeconds === undefined
+        ? {}
+        : { replayPositionMs: Math.floor(replayPositionSeconds * 1000) }),
+    });
+
+    it("lets replay viewers join the window playing at their position, never an earlier one", async () => {
+      const viewer = await funded();
+      const replay = await replayedDebate();
+      const [first, second, third] = replay.windows;
+      // The clock is written once, even when the completion is reported again.
+      await replay.media.recordingEnded(
+        replay.egress,
+        true,
+        `debates/${replay.debateId}/recording.mp4`,
+        new Date(),
+      );
+      const spans = (await windows.publicWindows(replay.debateId)).windows.map(
+        (w) => w.recording,
+      );
+      assert.deepEqual(spans, [
+        { startSeconds: 2, endSeconds: 62 },
+        { startSeconds: 62, endSeconds: 122 },
+        { startSeconds: 122, endSeconds: 182 },
+      ]);
+      await assert.rejects(
+        windows.submit(viewer, second, randomUUID(), order()),
+        /past cutoff/,
+      );
+      await assert.rejects(
+        windows.submit(viewer, second, randomUUID(), order(30)),
+        /not playing at that replay position/,
+      );
+      const joined = await windows.submit(
+        viewer,
+        second,
+        randomUUID(),
+        order(90.5),
+      );
+      assert.equal(
+        (
+          await owner.query(
+            "SELECT replay_position_ms FROM coin_debate_orders WHERE request_id=$1",
+            [joined.id],
+          )
+        ).rows[0].replay_position_ms,
+        90500,
+      );
+      await assert.rejects(
+        windows.submit(viewer, first, randomUUID(), order(30)),
+        /already joined a later turn's window/,
+      );
+      const view = await windows.view(viewer, replay.debateId);
+      const byId = new Map(view.map((round) => [round.id, round]));
+      assert.equal(byId.get(first).eligibility.reason, "later_window");
+      assert.equal(byId.get(second).eligibility.reason, "committed");
+      assert.equal(byId.get(second).own.replayPositionMs, 90500);
+      assert.deepEqual(byId.get(third).eligibility, {
+        canTakePosition: true,
+        reason: null,
+        via: "replay",
+      });
+      assert.deepEqual(byId.get(third).recording, {
+        startSeconds: 122,
+        endSeconds: 182,
+      });
+      assert.equal(byId.get(second).participants, 1, "replay joiners count");
+      // The database refuses an earlier window too.
+      await assert.rejects(
+        runtime.query(
+          `INSERT INTO coin_debate_orders(round_id,user_id,request_id,side,limit_value,quantity,
+            funding,center_reservation,promotional_reservation,replay_position_ms)
+          VALUES($1,$2,$3,'YES','1',1,'{}'::jsonb,1,0,30000)`,
+          [first, viewer.userId, randomUUID()],
+        ),
+        /later turn's window was already joined/,
+      );
+      await assert.rejects(
+        runtime.query(
+          `INSERT INTO coin_debate_orders(round_id,user_id,request_id,side,limit_value,quantity,
+            funding,center_reservation,promotional_reservation,replay_position_ms)
+          VALUES($1,$2,$3,'YES','1',1,'{}'::jsonb,1,0,30000)`,
+          [third, viewer.userId, randomUUID()],
+        ),
+        /not playing at that replay position/,
+      );
+      // Another viewer may start from the first window.
+      const other = await funded();
+      await windows.submit(other, first, randomUUID(), order(2));
+      await windows.submit(other, third, randomUUID(), order(182));
+    });
+
+    it("takes no replay positions from per-round, live or closed debates", async () => {
+      const viewer = await funded();
+      // These windows are due for settlement, which another suite's coin
+      // loop may do first: either refusal is right. They are voided after.
+      const refused =
+        /only by a five-day debate's turn windows|round is closed/;
+      const perRound = await replayedDebate({ reveal: "per_round" });
+      await assert.rejects(
+        windows.submit(viewer, perRound.windows[1], randomUUID(), order(90)),
+        refused,
+      );
+      const [perRoundView] = await windows.view(viewer, perRound.debateId);
+      assert.equal(perRoundView.eligibility.reason, "closed");
+      const closed = await replayedDebate({ endedAgo: 121 * 3600 });
+      await assert.rejects(
+        windows.submit(viewer, closed.windows[1], randomUUID(), order(90)),
+        refused,
+      );
+      for (const { debateId } of [perRound, closed]) {
+        await owner.query("UPDATE debates SET status='cancelled' WHERE id=$1", [
+          debateId,
+        ]);
+        await windows.voidUnavailable(20, [debateId]);
+      }
+      // A live debate's past window takes no replay position either.
+      const live = await liveDebate({ reveal: "five_day" });
+      await windows.openTurnWindows(20, [live]);
+      const [window] = await rounds(live);
+      await close(window.id);
+      await assert.rejects(
+        windows.submit(viewer, window.id, randomUUID(), order(1)),
+        /only by a five-day debate's turn windows/,
+      );
+      // Without a recording clock there is no span.
+      const untimed = await liveDebate({ reveal: "five_day" });
+      await windows.openTurnWindows(20, [untimed]);
+      const [untimedWindow] = await rounds(untimed);
+      await close(untimedWindow.id);
+      await owner.query(
+        "UPDATE debates SET status='ended',live_ended_at=clock_timestamp() WHERE id=$1",
+        [untimed],
+      );
+      const [untimedView] = await windows.view(viewer, untimed);
+      assert.equal(untimedView.recording, null);
+      assert.equal(untimedView.eligibility.reason, "closed");
+      await assert.rejects(
+        windows.submit(viewer, untimedWindow.id, randomUUID(), order(1)),
+        /only by a five-day debate's turn windows/,
+      );
+      await assert.rejects(
+        windows.submit(viewer, untimedWindow.id, randomUUID(), {
+          ...order(),
+          replayPositionMs: -1,
+        }),
+        /invalid replay position/,
+      );
     });
   },
 );
