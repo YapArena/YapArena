@@ -139,6 +139,13 @@ describe(
         client.release();
       }
     }
+    async function roundState(roundId) {
+      return (
+        await owner.query("SELECT state FROM coin_debate_rounds WHERE id=$1", [
+          roundId,
+        ])
+      ).rows[0].state;
+    }
     async function reconcile() {
       assert.equal(
         (
@@ -592,7 +599,9 @@ describe(
         await inFlight?.catch(() => {});
         await owner.query(`DROP FUNCTION yaparena.${expireFunction}(bigint)`);
       }
-      assert.equal((await a4.advance()).completed, 1);
+      // Other suites may have due rounds too; this one's due round settles.
+      assert.ok((await a4.advance()).completed >= 1);
+      assert.equal(await roundState(due.id), "settled");
       await reconcile();
     });
     it("locks every due account before shared ledger rows so unrelated payout reconciliation remains available", async () => {
@@ -686,7 +695,9 @@ describe(
         gate.release();
         await Promise.allSettled([advancing, payout]);
       }
-      assert.equal((await advancing).completed, 2);
+      assert.ok((await advancing).completed >= 2);
+      for (const round of rounds)
+        assert.equal(await roundState(round.id), "settled");
       assert.equal((await sandbox.summary(payee)).balances.pending, "0");
       await reconcile();
     });
@@ -967,7 +978,8 @@ describe(
       assert.equal(view.pricing, undefined);
       assert.equal(view.outcome, undefined);
       assert.equal(view.snapshotHash, undefined);
-      assert.equal((await a4.advance()).completed, 0);
+      await a4.advance();
+      assert.equal(await roundState(round.id), "open", "not before its cutoff");
       const summary = await sandbox.summary(context);
       assert.equal(summary.balances.cashAvailable, "0");
       assert.equal(summary.balances.promotionalPrincipal, "24000000");
@@ -1091,10 +1103,18 @@ describe(
         ),
         COIN_DEBATE_FACE,
       );
-      const advances = await Promise.all([a4.advance(), a4Other.advance()]);
+      // Concurrent advances settle the round once (other suites may add
+      // their own due rounds to the totals).
+      await Promise.all([a4.advance(), a4Other.advance()]);
+      assert.equal(await roundState(round.id), "settled");
       assert.equal(
-        advances.reduce((n, r) => n + r.completed, 0),
-        1,
+        (
+          await owner.query(
+            "SELECT count(*)::int n FROM coin_sandbox_events WHERE kind='debate.settled' AND metadata->>'roundId'=$1",
+            [round.id],
+          )
+        ).rows[0].n,
+        2,
       );
       const views = await a4.view(one, debateId);
       assert.deepEqual(
@@ -1143,7 +1163,8 @@ describe(
         historyBefore,
       );
       await reconcile();
-      assert.equal((await a4.advance()).completed, 0);
+      await a4.advance();
+      assert.equal(await roundState(round.id), "settled");
     });
     it("rejects late or revoked commitments and preserves fixed terms and closed receipts", async () => {
       const context = await actor(),
@@ -1236,6 +1257,7 @@ describe(
       assert.deepEqual(view.eligibility, {
         canTakePosition: false,
         reason: "committed",
+        via: null,
       });
       await close(round.id);
       await a4.advance();
@@ -1454,11 +1476,13 @@ describe(
       assert.deepEqual(own.eligibility, {
         canTakePosition: false,
         reason: "debater",
+        via: null,
       });
       let [other] = await a4.view(viewer, debateId);
       assert.deepEqual(other.eligibility, {
         canTakePosition: true,
         reason: null,
+        via: "live",
       });
       assert.equal(other.participants, 0);
       // The database refuses it too, before any other check.

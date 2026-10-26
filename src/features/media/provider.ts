@@ -37,6 +37,9 @@ export interface MediaProviderConfig {
   replayEdgeRooms?: readonly string[];
 }
 
+// LiveKit reports a recording file's start in Unix nanoseconds; 0 is unknown.
+export const recordingStart = (nanoseconds: bigint) =>
+  nanoseconds > 0n ? new Date(Number(nanoseconds / 1_000_000n)) : null;
 export function createMediaProvider(
   config: MediaProviderConfig,
   packagedReplay?: (
@@ -276,7 +279,13 @@ export function createMediaProvider(
         BigInt(head.ContentLength) !== file.size
       )
         throw new Error("recording object has not reached verified completion");
-      return { success: true, key: expectedKey };
+      // Decision 0012: when the file starts, for replay positions.
+      const startedAt = recordingStart(file.startedAt);
+      return {
+        success: true,
+        key: expectedKey,
+        ...(startedAt && { startedAt }),
+      };
     },
     async webhook(body: string, authorization?: string) {
       return receiver.receive(body, authorization);

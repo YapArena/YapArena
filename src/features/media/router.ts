@@ -9,6 +9,7 @@ import type { createMatchingRepository } from "../matching/repository.ts";
 import type { createIdentityRepository } from "../identity/repository.ts";
 import { MediaConflictError, MediaNotFoundError } from "./repository.ts";
 import { createDebateStart } from "./debate-start.ts";
+import { recordingStart } from "./provider.ts";
 import {
   MatchConflictError,
   MatchNotFoundError,
@@ -582,6 +583,7 @@ export function createMediaWebhookRouter({
           info.egressId,
           success,
           success ? file!.filename : null,
+          success ? recordingStart(file!.startedAt) : null,
         );
         if (state?.state === "running") {
           await media.pause(
