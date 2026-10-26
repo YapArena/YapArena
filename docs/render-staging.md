@@ -209,7 +209,10 @@ before deploying. Its secrets live in LiveKit Cloud and Render; never in the rep
    `SELECT count(*) FROM yaparena.transcript_segments WHERE debate_id=...` grows during each turn.
    With `ANTHROPIC_API_KEY` set, the "AI outline" panel fills within a few seconds of each
    sentence, and `lk agent logs` shows `live outline call` lines whose `cacheReadTokens` is above
-   zero after the first call of a turn.
+   zero after the first call of a turn. A few seconds after each turn, a `window cleanup call` line
+   (Claude Sonnet 5.5) appears and the turn's entry under "Earlier turns" changes to its final
+   outline; `SELECT final_source FROM yaparena.outline_windows WHERE debate_id=...` shows `cleanup`,
+   or `frozen` when no cleanup arrived within a minute.
    The agent leaves when the debate ends.
 
 Never run the agent locally with `start` against the staging project and the production agent name:

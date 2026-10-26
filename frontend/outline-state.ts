@@ -9,6 +9,7 @@ import {
 import type {
   OutlineCatchUp,
   OutlineSnapshot,
+  OutlineTimeline,
   TurnSummary,
 } from "../src/features/outline/public-types.ts";
 export { OUTLINE_TOPIC } from "../src/features/outline/public-types.ts";
@@ -59,6 +60,7 @@ const summarize = (outline: TurnOutline): TurnSummary => ({
     id,
     label,
     rebuts,
+    continues: null,
   })),
   final: false,
 });
@@ -143,4 +145,136 @@ export function parseOutlineMessage(
   } catch {
     return null;
   }
+}
+
+const argumentRef = /^t[1-9][0-9]{0,4}a[1-9][0-9]{0,2}$/;
+const reference = (value: unknown) =>
+  value === null || (typeof value === "string" && argumentRef.test(value));
+
+/** Validates a LiveKit final-outline message for this debate. */
+export function parseFinalMessage(
+  payload: Uint8Array,
+  debateId: string,
+): TurnSummary | null {
+  try {
+    const value = JSON.parse(new TextDecoder().decode(payload)) as Record<
+      string,
+      unknown
+    >;
+    const turn = value.turn as Record<string, unknown> | null;
+    if (
+      value.v !== 1 ||
+      value.type !== "final" ||
+      value.debateId !== debateId ||
+      !turn ||
+      typeof turn !== "object" ||
+      !Number.isSafeInteger(turn.turnNumber) ||
+      (turn.side !== "A" && turn.side !== "B") ||
+      (turn.language !== "fr" && turn.language !== "en") ||
+      !Array.isArray(turn.arguments) ||
+      turn.arguments.length > 4
+    )
+      return null;
+    const items = turn.arguments as unknown[];
+    if (
+      !items.every((item) => {
+        const entry = item as Record<string, unknown> | null;
+        return (
+          entry !== null &&
+          typeof entry === "object" &&
+          typeof entry.id === "string" &&
+          argumentRef.test(entry.id) &&
+          typeof entry.label === "string" &&
+          entry.label.length <= 80 &&
+          reference(entry.rebuts) &&
+          reference(entry.continues)
+        );
+      })
+    )
+      return null;
+    return {
+      turnNumber: turn.turnNumber as number,
+      side: turn.side,
+      language: turn.language,
+      arguments: (items as Record<string, string | null>[]).map((entry) => ({
+        id: entry.id!,
+        label: entry.label!,
+        rebuts: entry.rebuts ?? null,
+        continues: entry.continues ?? null,
+      })),
+      final: true,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Replaces an earlier turn's summary with its final outline. The current
+ * turn keeps its live outline; a turn this copy has not seen is ignored.
+ */
+export function applyFinal(view: OutlineView, turn: TurnSummary): OutlineView {
+  const index = view.turns.findIndex(
+    (item) => item.turnNumber === turn.turnNumber,
+  );
+  if (index < 0) return view;
+  const turns = [...view.turns];
+  turns[index] = turn;
+  return { ...view, turns };
+}
+
+/**
+ * Replay sync: the outline as it was at a position in the recording. Finds
+ * the last version shown by then with a binary search and replays versions
+ * from the previous answer when playback moves forward, so normal playback
+ * does constant work per update. Earlier turns show their final outline.
+ */
+export function createReplayIndex(timeline: OutlineTimeline) {
+  const versions = timeline.versions.filter(
+    (version): version is typeof version & { at: number } =>
+      version.at !== null,
+  );
+  let cached: { index: number; view: OutlineView } = {
+    index: -1,
+    view: emptyView,
+  };
+  function lastAt(positionMs: number) {
+    let low = 0,
+      high = versions.length - 1,
+      found = -1;
+    while (low <= high) {
+      const middle = (low + high) >> 1;
+      if (versions[middle]!.at <= positionMs) {
+        found = middle;
+        low = middle + 1;
+      } else high = middle - 1;
+    }
+    return found;
+  }
+  return Object.freeze({
+    /** Whether the recording is timed, so positions can be matched. */
+    timed: timeline.timed && versions.length > 0,
+    at(positionMs: number): OutlineView {
+      const index = lastAt(positionMs);
+      if (index < cached.index) cached = { index: -1, view: emptyView };
+      let view = cached.view;
+      for (let next = cached.index + 1; next <= index; next++) {
+        const result = applyVersion(view, {
+          ...versions[next]!,
+          version: view.version + 1,
+        });
+        if (result.kind === "applied") view = result.view;
+      }
+      cached = { index, view };
+      const current = view.current;
+      return {
+        ...view,
+        turns: current
+          ? timeline.turns.filter(
+              (turn) => turn.turnNumber < current.turnNumber,
+            )
+          : [],
+      };
+    },
+  });
 }

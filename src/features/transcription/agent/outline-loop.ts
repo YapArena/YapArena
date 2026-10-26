@@ -11,6 +11,9 @@ import type {
   OutlineMessage,
   OutlineProposal,
 } from "../protocol.ts";
+import type { CleanupArgument } from "../../outline/cleanup.ts";
+import type { FinalMessage, TurnSummary } from "../../outline/public-types.ts";
+import type { CleanupRequest, CleanupResult } from "./cleanup.ts";
 
 // Decision 0012: the live outline loop, independent of LiveKit and of where it
 // runs, so it can move to the server later. Inputs: final transcript chunks,
@@ -56,8 +59,25 @@ const realClock: Clock = {
   setTimeout: (callback, ms) => setTimeout(callback, ms),
   clearTimeout: (handle) => clearTimeout(handle as NodeJS.Timeout),
 };
+const isTurnSummary = (value: unknown): value is TurnSummary => {
+  if (!value || typeof value !== "object") return false;
+  const turn = value as Partial<TurnSummary>;
+  return (
+    Number.isSafeInteger(turn.turnNumber) &&
+    (turn.side === "A" || turn.side === "B") &&
+    Array.isArray(turn.arguments) &&
+    turn.arguments.every(
+      (item) => typeof item?.id === "string" && typeof item.label === "string",
+    )
+  );
+};
 /** Unsummarized text beyond this many characters keeps only its end. */
 export const PENDING_MAX_CHARS = 4000;
+/** The cleanup reads at most this much of the turn's transcript (its end). */
+export const TRANSCRIPT_MAX_CHARS = 8000;
+/** A window not frozen yet is retried this often, this many times. */
+export const CLEANUP_RETRY_MS = 3000;
+export const CLEANUP_ATTEMPTS = 8;
 
 export function createOutlineLoop({
   debateId,
@@ -70,6 +90,8 @@ export function createOutlineLoop({
   clock = realClock,
   log = () => {},
   resync,
+  clean,
+  submitCleanup,
 }: {
   debateId: string;
   proposition: string;
@@ -79,7 +101,7 @@ export function createOutlineLoop({
     turnNumber: number,
     proposal: OutlineProposal,
   ) => Promise<OutlineAnswer | null>;
-  publish: (message: OutlineMessage) => Promise<void>;
+  publish: (message: OutlineMessage | FinalMessage) => Promise<void>;
   minIntervalMs?: number;
   contextMs?: number;
   clock?: Clock;
@@ -90,6 +112,13 @@ export function createOutlineLoop({
     turn: TurnOutline | null;
     map: readonly MapEntry[];
   } | null>;
+  /** The window cleanup (Claude Sonnet 5.5), once each turn has ended. */
+  clean?: (request: CleanupRequest) => Promise<CleanupResult>;
+  submitCleanup?: (
+    turnNumber: number,
+    model: string,
+    items: CleanupArgument[],
+  ) => Promise<{ status: number; body: Record<string, unknown> }>;
 }) {
   let version = 0;
   let resumedTurn: TurnOutline | null = null;
@@ -102,7 +131,9 @@ export function createOutlineLoop({
     outline: TurnOutline;
     pending: Chunk[];
     context: Chunk[];
+    transcript: Chunk[];
   } | null = null;
+  const cleanups = new Set<Promise<void>>();
   let running: Promise<void> | null = null;
   let lastStarted = -Infinity;
   let timer: unknown;
@@ -216,10 +247,74 @@ export function createOutlineLoop({
       turn.outline = state.turn;
   }
 
-  function trim(chunks: Chunk[]) {
+  function trim(chunks: Chunk[], max = PENDING_MAX_CHARS) {
     let total = chunks.reduce((sum, chunk) => sum + chunk.text.length + 1, 0);
-    while (total > PENDING_MAX_CHARS && chunks.length > 1)
+    while (total > max && chunks.length > 1)
       total -= chunks.shift()!.text.length + 1;
+  }
+  const sleep = (ms: number) =>
+    new Promise<void>((resolve) => clock.setTimeout(resolve, ms));
+
+  // After a turn's last live call: the cleanup rewrites it and, once the
+  // server accepts it as the window's final outline, viewers get it too.
+  async function cleanUp(finished: NonNullable<typeof turn>) {
+    if (!clean || !submitCleanup || !finished.transcript.length) return;
+    const result = await clean({
+      proposition,
+      map: map.filter((entry) => entry.turnNumber < finished.number),
+      outline: finished.outline,
+      transcript: finished.transcript.map((chunk) => chunk.text).join(" "),
+    }).catch((error: unknown): CleanupResult => {
+      log("window cleanup failed", { error });
+      return { kind: "skip", reason: "error" };
+    });
+    if (result.kind === "skip") {
+      log("window cleanup skipped", { reason: result.reason });
+      return;
+    }
+    for (let attempt = 0; attempt < CLEANUP_ATTEMPTS; attempt++) {
+      const answer = await submitCleanup(
+        finished.number,
+        result.model,
+        result.arguments,
+      ).catch((error: unknown) => {
+        log("window cleanup submit failed", { error });
+        return null;
+      });
+      if (!answer) return;
+      if (answer.status === 201) {
+        const final = answer.body.turn;
+        if (!isTurnSummary(final)) return;
+        map = [
+          ...map.filter((entry) => entry.turnNumber !== final.turnNumber),
+          ...final.arguments.map((item) => ({
+            id: item.id,
+            turnNumber: final.turnNumber,
+            side: final.side,
+            label: item.label,
+          })),
+        ];
+        await publish({ v: 1, type: "final", debateId, turn: final }).catch(
+          (error: unknown) => log("final outline publish failed", { error }),
+        );
+        return;
+      }
+      // The jobs loop freezes the window within a second of its cutoff; a
+      // turn that ended early waits for its window's own cutoff.
+      if (answer.status !== 409 || answer.body.reason !== "not_frozen") {
+        log("window cleanup refused", {
+          status: answer.status,
+          reason: answer.body.reason,
+        });
+        return;
+      }
+      await sleep(CLEANUP_RETRY_MS);
+    }
+    log("window cleanup gave up", { turnNumber: finished.number });
+  }
+  function finish(finished: NonNullable<typeof turn>) {
+    const task = cleanUp(finished).finally(() => cleanups.delete(task));
+    cleanups.add(task);
   }
 
   function remember(outline: TurnOutline) {
@@ -260,7 +355,10 @@ export function createOutlineLoop({
     }) {
       if (turn?.number === next.turnNumber) return;
       await flush();
-      if (turn) remember(turn.outline);
+      if (turn) {
+        remember(turn.outline);
+        finish(turn);
+      }
       turn = {
         number: next.turnNumber,
         side: next.side,
@@ -273,6 +371,7 @@ export function createOutlineLoop({
             : emptyTurn(next.turnNumber, next.side, next.language)),
         pending: early.get(next.turnNumber) ?? [],
         context: [],
+        transcript: [...(early.get(next.turnNumber) ?? [])],
       };
       for (const number of [...early.keys()])
         if (number <= next.turnNumber) early.delete(number);
@@ -291,12 +390,21 @@ export function createOutlineLoop({
       if (turn.number !== turnNumber) return;
       turn.pending.push(chunk);
       trim(turn.pending);
+      turn.transcript.push(chunk);
+      trim(turn.transcript, TRANSCRIPT_MAX_CHARS);
       schedule();
     },
     flush,
+    /** Flushes the last turn and waits for every cleanup still running. */
     async stop() {
       await flush();
       stopped = true;
+      if (turn) {
+        remember(turn.outline);
+        finish(turn);
+        turn = null;
+      }
+      while (cleanups.size) await Promise.all([...cleanups]);
     },
     get version() {
       return version;

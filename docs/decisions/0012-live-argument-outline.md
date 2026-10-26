@@ -249,6 +249,42 @@ turnNumber, side, language, edits}` on the reliable LiveKit topic `yap.outline.v
   while the tab is hidden; a brief highlight on change (none under reduced motion); a fixed-height
   body that scrolls inside itself; screen readers hear new arguments only, at most every 10 s.
 
-## Later pull requests
+## Pull request 4: cleanup, replay sync and correlation
 
-4. Sonnet cleanup, correlation, chart integration, replay sync and timeline endpoint.
+No migration; it uses PR3's `outline_windows.final_*` columns and PR1c's `recording_clocks`. Still
+behind `LIVE_OUTLINE_ENABLED` and the agent's `ANTHROPIC_API_KEY`.
+
+- **Window cleanup (Claude Sonnet 5.5).** After a turn's last live call, the agent sends the whole
+  turn's transcript (at most its last 8,000 characters), the live outline and the debate's earlier
+  arguments to `claude-sonnet-5-5`. Adaptive thinking at low effort (the model rejects disabled
+  thinking), a strict JSON schema, a 20 s timeout and one retry, prompt caching of the stable
+  instructions. A policy decline is retried server-side on the default fallback
+  (`fallbacks: "default"`, beta `server-side-fallback-2026-07-01`); a refusal that remains is skipped.
+  The rewrite reuses live argument IDs, and links each argument to an earlier one it rebuts
+  (either side) or continues (same side).
+- **Final outline.** `POST /api/internal/transcription/debates/:id/cleanup` (signed like ingest)
+  accepts one cleanup per window, until 60 s after the window froze (`not_frozen` makes the agent
+  retry every 3 s, eight times). The server resolves it (`src/features/outline/cleanup.ts`): live
+  IDs, spans and unchanged points are kept; new items are numbered above every live one; links
+  must name earlier arguments; slurs drop their item; 8 KB at most. It becomes the window's final
+  outline (`final_source='cleanup'`), and the agent publishes `{v, type: "final", debateId, turn}` on
+  `yap.outline.v1`, which pages apply to that earlier turn. A window with no cleanup 60 s after its
+  freeze keeps its frozen outline as final (`final_source='frozen'`, jobs loop). Finalizing sends the
+  `outline` room signal, and the snapshot's ETag now includes the number of final windows.
+- **Replay timeline.** `GET /api/public/debates/:id/outline/timeline`: every live version with its
+  edits and its time in the recording (`at`, from the recording clock), and each turn's final
+  outline. Once the debate ended and every window is final it is immutable and cached for a day.
+  A replay page reads it once and, on the player's `yap:playback` event (`{debateId,
+positionSeconds, playing}`, dispatched by the replay player), shows the outline as it was: a
+  binary search for the last version shown by then, replayed forward incrementally; earlier turns
+  show their final outline. No request during playback.
+- **Correlation.** `GET /api/public/debates/:id/outline/correlation`, from revealed (settled)
+  windows with a final outline only, never unrevealed data. Per window: the quantity-weighted YES
+  share and its change from the previous reported window. Per argument: its thread (the first
+  argument of its `continues` chain), and the share of the window's commitments made while it was on
+  screen (live orders after it first appeared; replay orders at a later position). Nothing is
+  reported for a window with fewer than five commitments.
+- **Chart.** `windowArgumentLabel` in `frontend/arena-chart.ts` turns a window's final argument labels
+  into the heading slot's text, replacing the manual argument label for turn windows. Today's chart
+  shows A4 rounds, not turn windows; the betting panel's chart (B) passes it each settled window's
+  final labels from the timeline.

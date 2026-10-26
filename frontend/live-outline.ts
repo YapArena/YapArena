@@ -2,6 +2,7 @@ import type { Room } from "livekit-client";
 import type {
   OutlineCatchUp,
   OutlineSnapshot,
+  OutlineTimeline,
 } from "../src/features/outline/public-types.ts";
 import type { OutlineSide } from "../src/features/outline/reducer.ts";
 import { createCaptions } from "./live-captions.js";
@@ -9,9 +10,12 @@ import { createOutlinePanel, type SideLabel } from "./outline-panel.js";
 import {
   OUTLINE_TOPIC,
   applyCatchUp,
+  applyFinal,
   applyVersion,
+  createReplayIndex,
   emptyView,
   fromSnapshot,
+  parseFinalMessage,
   parseOutlineMessage,
   type OutlineView,
 } from "./outline-state.js";
@@ -27,6 +31,8 @@ import {
 interface Bootstrap {
   debateId: string;
   live: boolean;
+  /** A replay page follows the player's position instead of LiveKit. */
+  replay?: boolean;
   sides: Record<OutlineSide, SideLabel>;
   state: OutlineSnapshot | null;
 }
@@ -151,7 +157,14 @@ export function createLiveOutline(
   }
   function receive(payload: Uint8Array) {
     const next = parseOutlineMessage(payload, debateId);
-    if (!next) return;
+    if (!next) {
+      // A window's cleanup became its final outline.
+      const final = parseFinalMessage(payload, debateId);
+      if (!final) return;
+      view = applyFinal(view, final);
+      panel.show(view);
+      return;
+    }
     const result = applyVersion(view, next);
     if (result.kind === "gap") void catchUp();
     if (result.kind !== "applied") return;
@@ -196,6 +209,41 @@ export function createLiveOutline(
   });
   if (bootstrap.live)
     dependencies.setTimer(() => void openDataOnly(), DATA_ONLY_DELAY_MS);
+  if (bootstrap.replay) startReplaySync();
+
+  // Replay sync: one timeline read, then no requests while the video plays.
+  // The replay player reports its position with the yap:playback event.
+  function startReplaySync() {
+    let index: ReturnType<typeof createReplayIndex> | undefined;
+    let position: number | undefined;
+    const show = () => {
+      if (!index?.timed || position === undefined) return;
+      view = index.at(position * 1000);
+      panel.show(view);
+    };
+    void dependencies
+      .fetchJson(`/api/public/debates/${debateId}/outline/timeline`)
+      .then((answer) => {
+        index = createReplayIndex(answer as OutlineTimeline);
+        show();
+      })
+      .catch(() => {
+        // Without a timeline the page keeps the debate's final outline.
+      });
+    dependencies.events.addEventListener("yap:playback", (event: Event) => {
+      const value: unknown = event instanceof CustomEvent ? event.detail : null;
+      if (!value || typeof value !== "object") return;
+      const detail = value as Record<string, unknown>;
+      if (
+        detail.debateId !== debateId ||
+        typeof detail.positionSeconds !== "number" ||
+        !Number.isFinite(detail.positionSeconds)
+      )
+        return;
+      position = Math.max(0, detail.positionSeconds);
+      show();
+    });
+  }
 
   return Object.freeze({
     /** The page joined the debate's room (as viewer or speaker). */
