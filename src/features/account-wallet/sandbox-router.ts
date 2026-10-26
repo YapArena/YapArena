@@ -185,6 +185,21 @@ export function createCoinSandboxRouter(options: {
       await debates.create(context(r), id(r.params.id), key(r)),
     );
   });
+  // Interface 10: the viewer's revealed or voided rounds since a time, for
+  // the in-app results notice.
+  router.get("/results", async (r, s) => {
+    const since = r.query.since;
+    const after =
+      since === undefined
+        ? new Date(0)
+        : typeof since === "string" &&
+            /^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(since)
+          ? new Date(since)
+          : null;
+    if (!after || Number.isNaN(after.getTime()))
+      throw new CoinOperationError("since must be an ISO time", 400);
+    s.json(await debates.results(context(r), after));
+  });
   router.post("/rounds/:id/submit", async (r, s) => {
     const b = body(r.body, [
       "side",

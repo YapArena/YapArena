@@ -121,6 +121,35 @@ describe(
       assert.equal((await queue.state(b.id)).challenge, null);
     });
 
+    it("opens a just-accepted now debate even right after a queue match was cancelled", async () => {
+      const slug = await topic();
+      const [a, b] = await Promise.all([player(), player()]);
+      // A queue match from a minute ago whose debate was cancelled as a no-show.
+      const cancelled = (
+        await owner.query(
+          `INSERT INTO debates (slug, topic_id, proposition, status, publication_state,
+             rules_version, rules_snapshot, scheduled_at)
+           SELECT $1, t.id, 'Canada should expand nuclear power', 'cancelled', 'published',
+             r.version, r.rules, CURRENT_TIMESTAMP - interval '100 seconds'
+           FROM topics t, event_rule_versions r WHERE t.slug = $2 AND r.version = 'preview-1'
+           RETURNING id`,
+          [`${slug}-cancelled`, slug],
+        )
+      ).rows[0].id;
+      await owner.query(
+        `INSERT INTO matchmaking_tickets (user_id, topic_id, side, status, debate_id)
+         SELECT $1, id, 'A', 'matched', $2 FROM topics WHERE slug = $3`,
+        [a.id, cancelled, slug],
+      );
+      assert.equal((await queue.state(a.id)).debate.status, "cancelled");
+      await queue.touch(b.id);
+      const request = await challenge(a, b, slug, { mode: "now" });
+      const debate = await matching.acceptRequest(b.id, request.id);
+      const state = await queue.state(a.id);
+      assert.equal(state.debate.slug, debate.slug);
+      assert.equal(state.debate.status, "scheduled");
+    });
+
     it("keeps a challenge to an offline player pending, accepted later only while the challenger is online", async () => {
       const slug = await topic();
       const [a, b] = await Promise.all([player(), player()]);

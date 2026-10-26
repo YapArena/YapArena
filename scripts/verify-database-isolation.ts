@@ -1628,6 +1628,30 @@ async function scenario(database: string, upgrade: boolean) {
         },
       );
     }
+    // Decision 0011: two browsers through the live queue and a "now" challenge.
+    if (process.env.MATCHMAKING_BROWSER === "true" && !upgrade) {
+      const verification = exec(
+        process.execPath,
+        ["scripts/verify-matchmaking-browser.ts"],
+        {
+          env: {
+            ...process.env,
+            A4_TEST_DATABASE_URL: url(database, "yaparena_runtime"),
+            A4_TEST_OWNER_URL: url(database, "yaparena_owner"),
+          },
+          maxBuffer: 4 * 1024 * 1024,
+        },
+      );
+      verification.child.stdout!.on("data", (data) =>
+        process.stdout.write(data),
+      );
+      await verification.catch(
+        (error: ExecFileException & { stdout: string; stderr: string }) => {
+          console.log(error.stderr);
+          throw new Error("Matchmaking browser verification failed");
+        },
+      );
+    }
     await provisionDatabase(admin);
     await migrate(owner); // repeated operator steps preserve isolation and migration history
     console.log(

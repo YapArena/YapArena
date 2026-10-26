@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { before, after, describe, it } from "node:test";
 import pg from "pg";
 import {
+  RESULTS_CHANNEL,
   createCoinDebateSandbox,
   COIN_DEBATE_FACE,
   COIN_DEBATE_TERMS,
@@ -1515,6 +1516,100 @@ describe(
       assert.equal(unavailable.eligibility.reason, "debate_unavailable");
       await a4.voidUnavailable(20, [debateId]);
       await reconcile();
+    });
+    it("signals and lists each participant's revealed and voided rounds (interface 10)", async () => {
+      const listener = await owner.connect();
+      const heard = [];
+      listener.on("notification", (message) => {
+        if (message.channel === RESULTS_CHANNEL) heard.push(message.payload);
+      });
+      await listener.query(`LISTEN ${RESULTS_CHANNEL}`);
+      const settle = async (ids) => {
+        for (let attempt = 0; attempt < 100; attempt++) {
+          if (ids.every((id) => heard.includes(String(id)))) return;
+          await new Promise((resolve) => setTimeout(resolve, 20));
+        }
+      };
+      try {
+        const one = await actor(),
+          two = await actor(),
+          outsider = await actor();
+        for (const context of [one, two]) {
+          await sandbox.initialize(context);
+          await seed(context, "center", "1000000");
+          await seed(context, "promotional", "1000000");
+        }
+        const before = new Date(Date.now() - 1000);
+        const debateId = await debate();
+        const round = await a4.create(one, debateId, randomUUID());
+        await a4.submit(one, round.id, randomUUID(), {
+          side: "YES",
+          limit: "0.6",
+          quantity: 10,
+        });
+        await a4.submit(two, round.id, randomUUID(), {
+          side: "NO",
+          limit: "0.6",
+          quantity: 10,
+        });
+        await close(round.id);
+        await a4.advance();
+        await settle([one.userId, two.userId]);
+        assert.equal(
+          heard.filter((id) => id === String(one.userId)).length,
+          1,
+          "once per participant",
+        );
+        let { results } = await a4.results(one, before);
+        assert.equal(results.length, 1);
+        assert.equal(results[0].roundId, round.id);
+        assert.equal(results[0].debateId, debateId);
+        assert.equal(results[0].state, "settled");
+        assert.equal(results[0].side, "YES");
+        assert.equal(results[0].quantity, 10);
+        assert.equal(results[0].voidReason, null);
+        assert.match(results[0].outcome.net, /^-?\d+$/);
+        assert.deepEqual(Object.keys(results[0].outcome).sort(), [
+          "fee",
+          "net",
+          "payout",
+          "premium",
+          "status",
+        ]);
+        assert.equal(
+          (await a4.results(one, new Date(Date.now() + 60_000))).results.length,
+          0,
+        );
+        assert.equal((await a4.results(outsider, before)).results.length, 0);
+        // A voided round signals and lists too, as a refund.
+        const voided = await debate();
+        const refunded = await a4.create(one, voided, randomUUID());
+        await a4.submit(one, refunded.id, randomUUID(), {
+          side: "YES",
+          limit: "1",
+          quantity: 1,
+        });
+        heard.length = 0;
+        await owner.query("UPDATE debates SET status='cancelled' WHERE id=$1", [
+          voided,
+        ]);
+        await a4.voidUnavailable(20, [voided]);
+        await settle([one.userId]);
+        assert.ok(heard.includes(String(one.userId)));
+        ({ results } = await a4.results(one, before));
+        assert.equal(results[0].roundId, refunded.id);
+        assert.equal(results[0].state, "void");
+        assert.equal(results[0].voidReason, "debate_unavailable");
+        assert.equal(results[0].outcome, null);
+        await assert.rejects(
+          a4.results({ ...one, sessionTokenHash: "0".repeat(64) }, before),
+          /session/,
+        );
+        await reconcile();
+      } finally {
+        await listener.query(`UNLISTEN ${RESULTS_CHANNEL}`);
+        listener.release();
+      }
     });
   },
 );

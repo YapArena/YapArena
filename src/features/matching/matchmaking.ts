@@ -597,9 +597,16 @@ export function createMatchmaking(
         nowChallengeDebate(userId),
         upcomingDebate(userId),
       ]);
+      // A queue match stays in the state for two minutes after it ends, so a debate still open
+      // to join (a "now" challenge accepted meanwhile) comes first.
+      const joinable = (debate: MatchmakingState["debate"]) =>
+        debate?.status === "scheduled" || debate?.status === "ready";
       return {
         ...base,
-        debate: base.debate ?? challengeDebate,
+        debate:
+          joinable(challengeDebate) && !joinable(base.debate)
+            ? challengeDebate
+            : (base.debate ?? challengeDebate),
         challenge,
         upcoming,
       };
