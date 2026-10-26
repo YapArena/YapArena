@@ -82,7 +82,7 @@ exports[`renders a debate 1`] = `
 </noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
 </p>\\n    </div>\\n  </header>
 <main id="main">
-<div class="arena-workspace" data-arena data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="false">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="false">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
+<div class="arena-workspace" data-arena data-a4-inline="33333333-3333-4333-8333-333333333333" data-bot-history="false" data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="false">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="false">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
 <div class="live-chat-heading">
 <h2 id="community-chat-title">Live chat</h2>
 <span class="live-chat-connection" data-community-connection role="status" aria-live="polite">Connecting…</span>
@@ -279,7 +279,7 @@ exports[`renders a debate 1`] = `
 <g data-chart-cursor pointer-events="none">
 </g>
 </svg>
-<div class="arena-chart-empty" data-chart-empty>Bot history is currently unavailable.</div>
+<div class="arena-chart-empty" data-chart-empty>Results appear here once a turn&#39;s Yap Coins results are revealed.</div>
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
@@ -467,7 +467,7 @@ exports[`renders a debate 1`] = `
 <dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows revealed endorsement shares from labeled synthetic bot rounds.</p>
+<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
 <p class="arena-bots-link">
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
 </p>
@@ -483,7 +483,8 @@ exports[`renders a debate 1`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    \\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
@@ -588,7 +589,7 @@ exports[`renders a debate 10`] = `
 </noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
 </p>\\n    </div>\\n  </header>
 <main id="main">
-<div class="arena-workspace" data-arena data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="false">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="false">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
+<div class="arena-workspace" data-arena data-a4-inline="33333333-3333-4333-8333-333333333333" data-bot-history="false" data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="false">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="false">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
 <div class="live-chat-heading">
 <h2 id="community-chat-title">Live chat</h2>
 <span class="live-chat-connection" data-community-connection role="status" aria-live="polite">Connecting…</span>
@@ -787,7 +788,7 @@ exports[`renders a debate 10`] = `
 <g data-chart-cursor pointer-events="none">
 </g>
 </svg>
-<div class="arena-chart-empty" data-chart-empty>Bot history is currently unavailable.</div>
+<div class="arena-chart-empty" data-chart-empty>Results appear here once a turn&#39;s Yap Coins results are revealed.</div>
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
@@ -975,7 +976,7 @@ exports[`renders a debate 10`] = `
 <dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows revealed endorsement shares from labeled synthetic bot rounds.</p>
+<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
 <p class="arena-bots-link">
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
 </p>
@@ -991,7 +992,8 @@ exports[`renders a debate 10`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    \\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
@@ -1096,7 +1098,7 @@ exports[`renders a debate 2`] = `
 </noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
 </p>\\n    </div>\\n  </header>
 <main id="main">
-<div class="arena-workspace" data-arena data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="false">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="false">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
+<div class="arena-workspace" data-arena data-a4-inline="33333333-3333-4333-8333-333333333333" data-bot-history="false" data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="false">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="false">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
 <div class="live-chat-heading">
 <h2 id="community-chat-title">Live chat</h2>
 <span class="live-chat-connection" data-community-connection role="status" aria-live="polite">Connecting…</span>
@@ -1295,7 +1297,7 @@ exports[`renders a debate 2`] = `
 <g data-chart-cursor pointer-events="none">
 </g>
 </svg>
-<div class="arena-chart-empty" data-chart-empty>Bot history is currently unavailable.</div>
+<div class="arena-chart-empty" data-chart-empty>Results appear here once a turn&#39;s Yap Coins results are revealed.</div>
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
@@ -1483,7 +1485,7 @@ exports[`renders a debate 2`] = `
 <dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows revealed endorsement shares from labeled synthetic bot rounds.</p>
+<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
 <p class="arena-bots-link">
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
 </p>
@@ -1499,7 +1501,8 @@ exports[`renders a debate 2`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    \\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
@@ -1604,7 +1607,7 @@ exports[`renders a debate 3`] = `
 </noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
 </p>\\n    </div>\\n  </header>
 <main id="main">
-<div class="arena-workspace" data-arena data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="false">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="false">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
+<div class="arena-workspace" data-arena data-a4-inline="33333333-3333-4333-8333-333333333333" data-bot-history="false" data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="false">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="false">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
 <div class="live-chat-heading">
 <h2 id="community-chat-title">Live chat</h2>
 <span class="live-chat-connection" data-community-connection role="status" aria-live="polite">Connecting…</span>
@@ -1801,7 +1804,7 @@ exports[`renders a debate 3`] = `
 <g data-chart-cursor pointer-events="none">
 </g>
 </svg>
-<div class="arena-chart-empty" data-chart-empty>Bot history is currently unavailable.</div>
+<div class="arena-chart-empty" data-chart-empty>Results appear here once a turn&#39;s Yap Coins results are revealed.</div>
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
@@ -1989,7 +1992,7 @@ exports[`renders a debate 3`] = `
 <dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows revealed endorsement shares from labeled synthetic bot rounds.</p>
+<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
 <p class="arena-bots-link">
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
 </p>
@@ -2005,7 +2008,8 @@ exports[`renders a debate 3`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    \\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
@@ -2110,7 +2114,7 @@ exports[`renders a debate 4`] = `
 </noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
 </p>\\n    </div>\\n  </header>
 <main id="main">
-<div class="arena-workspace" data-arena data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="false">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="false">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
+<div class="arena-workspace" data-arena data-a4-inline="33333333-3333-4333-8333-333333333333" data-bot-history="false" data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="false">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="false">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
 <div class="live-chat-heading">
 <h2 id="community-chat-title">Live chat</h2>
 <span class="live-chat-connection" data-community-connection role="status" aria-live="polite">Connecting…</span>
@@ -2307,7 +2311,7 @@ exports[`renders a debate 4`] = `
 <g data-chart-cursor pointer-events="none">
 </g>
 </svg>
-<div class="arena-chart-empty" data-chart-empty>Bot history is currently unavailable.</div>
+<div class="arena-chart-empty" data-chart-empty>Results appear here once a turn&#39;s Yap Coins results are revealed.</div>
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
@@ -2495,7 +2499,7 @@ exports[`renders a debate 4`] = `
 <dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows revealed endorsement shares from labeled synthetic bot rounds.</p>
+<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
 <p class="arena-bots-link">
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
 </p>
@@ -2511,7 +2515,8 @@ exports[`renders a debate 4`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    \\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
@@ -2616,7 +2621,7 @@ exports[`renders a debate 5`] = `
 </noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
 </p>\\n    </div>\\n  </header>
 <main id="main">
-<div class="arena-workspace" data-arena data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="false">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="false">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
+<div class="arena-workspace" data-arena data-a4-inline="33333333-3333-4333-8333-333333333333" data-bot-history="false" data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="false">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="false">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
 <div class="live-chat-heading">
 <h2 id="community-chat-title">Live chat</h2>
 <span class="live-chat-connection" data-community-connection role="status" aria-live="polite">Connecting…</span>
@@ -2813,7 +2818,7 @@ exports[`renders a debate 5`] = `
 <g data-chart-cursor pointer-events="none">
 </g>
 </svg>
-<div class="arena-chart-empty" data-chart-empty>Bot history is currently unavailable.</div>
+<div class="arena-chart-empty" data-chart-empty>Results appear here once a turn&#39;s Yap Coins results are revealed.</div>
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
@@ -3001,7 +3006,7 @@ exports[`renders a debate 5`] = `
 <dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows revealed endorsement shares from labeled synthetic bot rounds.</p>
+<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
 <p class="arena-bots-link">
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
 </p>
@@ -3017,7 +3022,8 @@ exports[`renders a debate 5`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    \\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
@@ -3122,7 +3128,7 @@ exports[`renders a debate 6`] = `
 </noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
 </p>\\n    </div>\\n  </header>
 <main id="main">
-<div class="arena-workspace" data-arena data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="false">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="false">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
+<div class="arena-workspace" data-arena data-a4-inline="33333333-3333-4333-8333-333333333333" data-bot-history="false" data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="false">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="false">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
 <div class="live-chat-heading">
 <h2 id="community-chat-title">Live chat</h2>
 <span class="live-chat-connection" data-community-connection role="status" aria-live="polite">Connecting…</span>
@@ -3319,7 +3325,7 @@ exports[`renders a debate 6`] = `
 <g data-chart-cursor pointer-events="none">
 </g>
 </svg>
-<div class="arena-chart-empty" data-chart-empty>Bot history is currently unavailable.</div>
+<div class="arena-chart-empty" data-chart-empty>Results appear here once a turn&#39;s Yap Coins results are revealed.</div>
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
@@ -3507,7 +3513,7 @@ exports[`renders a debate 6`] = `
 <dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows revealed endorsement shares from labeled synthetic bot rounds.</p>
+<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
 <p class="arena-bots-link">
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
 </p>
@@ -3523,7 +3529,8 @@ exports[`renders a debate 6`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    \\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
@@ -3628,7 +3635,7 @@ exports[`renders a debate 7`] = `
 </noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
 </p>\\n    </div>\\n  </header>
 <main id="main">
-<div class="arena-workspace" data-arena data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="true">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="true">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
+<div class="arena-workspace" data-arena data-a4-inline="33333333-3333-4333-8333-333333333333" data-bot-history="false" data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="true">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="true">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
 <div class="live-chat-heading">
 <h2 id="community-chat-title">Live chat</h2>
 <span class="live-chat-connection" data-community-connection role="status" aria-live="polite">Connecting…</span>
@@ -3826,7 +3833,7 @@ exports[`renders a debate 7`] = `
 <g data-chart-cursor pointer-events="none">
 </g>
 </svg>
-<div class="arena-chart-empty" data-chart-empty>Bot history is currently unavailable.</div>
+<div class="arena-chart-empty" data-chart-empty>Results appear here once a turn&#39;s Yap Coins results are revealed.</div>
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
@@ -4014,7 +4021,7 @@ exports[`renders a debate 7`] = `
 <dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows revealed endorsement shares from labeled synthetic bot rounds.</p>
+<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
 <p class="arena-bots-link">
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
 </p>
@@ -4030,7 +4037,8 @@ exports[`renders a debate 7`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    \\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
 </script>
@@ -4135,7 +4143,7 @@ exports[`renders a debate 8`] = `
 </noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
 </p>\\n    </div>\\n  </header>
 <main id="main">
-<div class="arena-workspace" data-arena data-a4-inline="55555555-5555-4555-8555-555555555555" data-debate-id="55555555-5555-4555-8555-555555555555" data-demo="true">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="55555555-5555-4555-8555-555555555555" data-community-demo="true">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
+<div class="arena-workspace" data-arena data-a4-inline="55555555-5555-4555-8555-555555555555" data-bot-history="true" data-debate-id="55555555-5555-4555-8555-555555555555" data-demo="true">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="55555555-5555-4555-8555-555555555555" data-community-demo="true">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
 <div class="live-chat-heading">
 <h2 id="community-chat-title">Live chat</h2>
 <span class="live-chat-connection" data-community-connection role="status" aria-live="polite">Connecting…</span>
@@ -4337,7 +4345,7 @@ exports[`renders a debate 8`] = `
 <g data-chart-cursor pointer-events="none">
 </g>
 </svg>
-<div class="arena-chart-empty" data-chart-empty>No shared bot history for this debate yet.</div>
+<div class="arena-chart-empty" data-chart-empty>No revealed results or shared bot history for this debate yet.</div>
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
@@ -4525,7 +4533,7 @@ exports[`renders a debate 8`] = `
 <dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows revealed endorsement shares from labeled synthetic bot rounds.</p>
+<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
 <p class="arena-bots-link">
 <a href="/coins?debate=55555555-5555-4555-8555-555555555555">Bots sandbox on Yap Coins →</a>
 </p>
@@ -4648,7 +4656,7 @@ exports[`renders a debate 9`] = `
 </noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
 </p>\\n    </div>\\n  </header>
 <main id="main">
-<div class="arena-workspace" data-arena data-a4-inline="33333333-3333-4333-8333-333333333333" data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="false">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="false">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
+<div class="arena-workspace" data-arena data-a4-inline="33333333-3333-4333-8333-333333333333" data-bot-history="true" data-debate-id="33333333-3333-4333-8333-333333333333" data-demo="false">\\n    <div class="arena-left">\\n      <section class="arena-community" data-community-event="33333333-3333-4333-8333-333333333333" data-community-demo="false">\\n        <aside class="live-chat arena-panel" data-community-chat-panel aria-labelledby="community-chat-title">
 <div class="live-chat-heading">
 <h2 id="community-chat-title">Live chat</h2>
 <span class="live-chat-connection" data-community-connection role="status" aria-live="polite">Connecting…</span>
@@ -4845,7 +4853,7 @@ exports[`renders a debate 9`] = `
 <g data-chart-cursor pointer-events="none">
 </g>
 </svg>
-<div class="arena-chart-empty" data-chart-empty>No shared bot history for this debate yet.</div>
+<div class="arena-chart-empty" data-chart-empty>No revealed results or shared bot history for this debate yet.</div>
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
@@ -5033,7 +5041,7 @@ exports[`renders a debate 9`] = `
 <dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows revealed endorsement shares from labeled synthetic bot rounds.</p>
+<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
 <p class="arena-bots-link">
 <a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
 </p>

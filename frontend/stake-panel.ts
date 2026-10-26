@@ -191,6 +191,12 @@ if (root) {
     );
     if (current !== generation) return;
     rounds = view;
+    // Item d: the chart shows the revealed windows from this same read.
+    window.dispatchEvent(
+      new CustomEvent("yap:stake-windows", {
+        detail: { debateId, windows: view },
+      }),
+    );
   }
   async function refresh(full = false) {
     const current = generation;

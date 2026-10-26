@@ -69,7 +69,13 @@ export interface StakeRound {
     requestId: string;
     replayPositionMs?: number | null;
   } | null;
-  pricing?: { price: Fraction | null; share: Fraction | null };
+  pricing?: {
+    price: Fraction | null;
+    share: Fraction | null;
+    a?: Fraction | null;
+    b?: Fraction | null;
+    branch?: string;
+  };
   outcome?: {
     executed: boolean;
     premium: string;
