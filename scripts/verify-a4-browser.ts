@@ -3,7 +3,6 @@ import type {
   BrowserContext,
   BrowserContextOptions,
   Page,
-  Request,
 } from "playwright-core";
 import {
   createProfileForTest,
@@ -71,12 +70,12 @@ const errors: string[] = [],
     available: string;
     reserved: string;
   }[] = [];
-const initializationReadiness = {
-  pendingControlsDisabled: false,
-  creationRequests: 0,
-  createdRuns: 0,
-  openRounds: 0,
-  formVisible: false,
+// Decision 0013: Bots mode lives on /coins; the debate page only links to it.
+const debatePageBots = {
+  privateControlsRemoved: false,
+  sandboxLink: false,
+  coinsPreselectsDebate: false,
+  humanModeRemoved: false,
 };
 const repetitions = Number(process.env.A4_BROWSER_REPETITIONS ?? 2);
 assert.ok(
@@ -190,108 +189,53 @@ try {
     await page.locator("#signed-in").waitFor({ state: "visible" });
   }
   await register("inline");
-  const initialization = Promise.withResolvers<void>();
-  const workspace = `**/api/a4/debates/${debate}/workspace`;
-  let inlineCreations = 0;
-  const countInlineCreation = (request: Request) => {
-    if (
-      request.method() === "POST" &&
-      new URL(request.url()).pathname === "/api/a4/runs"
-    )
-      inlineCreations++;
-  };
-  page.on("request", countInlineCreation);
-  await page.route(workspace, async (route) => {
-    await initialization.promise;
-    await route.continue();
-  });
-  try {
-    await Promise.all([
-      page.waitForRequest(workspace),
-      page.goto(`${base}/debates/a4-browser-${tag}`),
-    ]);
-    // The Bots sandbox sits behind its tab since Decision 0013.
-    await page.locator("[data-detail-tab=rounds]").click();
-    const access = page.locator("[data-inline-access]");
-    await access.waitFor({ state: "visible" });
+  phase = "debate page links to the Bots sandbox on /coins";
+  await page.goto(`${base}/debates/a4-browser-${tag}`);
+  await page.locator("[data-a4-inline]").waitFor();
+  for (const selector of [
+    "[data-inline-access]",
+    "[data-inline-form]",
+    "[data-inline-review]",
+    ".arena-orders",
+    "[data-detail-tab]",
+    "[data-shared-view]",
+  ])
     assert.equal(
-      await access.getAttribute("aria-busy"),
-      "true",
-      "inline controls must stay busy until the initial workspace finishes",
+      await page.locator(selector).count(),
+      0,
+      `${selector} left the debate page`,
     );
-    for (const control of await access.locator("button, input, select").all())
-      assert.equal(await control.isDisabled(), true);
-    initializationReadiness.pendingControlsDisabled = true;
-    assert.equal(await page.locator("[data-inline-form]").isHidden(), true);
-    assert.equal(inlineCreations, 0);
-    await page.screenshot({
-      path: `${artifactDir}/inline-initializing.png`,
-      fullPage: true,
-    });
-    screenshots.push("inline-initializing.png");
-  } finally {
-    initialization.resolve();
-    await page.unrouteAll({ behavior: "wait" });
-  }
-  await page
-    .locator('[data-inline-access][aria-busy="false"]')
-    .waitFor({ state: "visible" });
-  assert.equal(await page.locator("[data-inline-bots]").isEnabled(), true);
-  const debatePage = page,
-    mediaNode = (await page.locator("[data-media-event]").elementHandle())!;
-  await page.locator("[data-inline-bots]").click();
-  await page.locator("[data-inline-form]").waitFor({ state: "visible" });
-  assert.equal(
-    inlineCreations,
-    1,
-    "one normal click sends one creation request",
-  );
-  const created = await owner.query<{ count: number }>(
-    "SELECT count(*)::integer AS count FROM a4_sessions WHERE debate_id=$1",
-    [debate],
-  );
-  assert.equal(created.rows[0]!.count, 1, "one normal click creates one round");
-  const openRounds = await owner.query<{ count: number }>(
-    "SELECT count(*)::integer AS count FROM a4_rounds r JOIN a4_sessions s ON s.id=r.session_id WHERE s.debate_id=$1 AND r.state='open'",
-    [debate],
-  );
-  assert.equal(openRounds.rows[0]!.count, 1, "one new round is open");
-  initializationReadiness.creationRequests = inlineCreations;
-  initializationReadiness.createdRuns = created.rows[0]!.count;
-  initializationReadiness.openRounds = openRounds.rows[0]!.count;
-  initializationReadiness.formVisible = true;
-  page.off("request", countInlineCreation);
-  console.log(
-    JSON.stringify({
-      trial: "a4-initialization-readiness",
-      result: "PASS",
-      ...initializationReadiness,
-    }),
-  );
-  await page.locator('[data-inline-form] input[name="quantity"]').fill("2");
-  await page.locator('[data-inline-form] input[name="ceiling"]').fill("1");
-  await page.locator('[data-inline-form] button[type="submit"]').click();
-  await page.locator("[data-inline-review]").waitFor({ state: "visible" });
-  await page.locator("[data-inline-commit]").click();
-  await page.locator("[data-inline-review]").waitFor({ state: "hidden" });
-  await page
-    .locator("[data-inline-receipt]")
-    .getByText("committed", { exact: false })
-    .waitFor();
-  assert.equal(await mediaNode.evaluate((node) => node.isConnected), true);
-  assert.equal(await page.locator("[data-community-chat-panel]").count(), 1);
+  debatePageBots.privateControlsRemoved = true;
+  const botsLink = page.getByRole("link", {
+    name: "Bots sandbox on Yap Coins →",
+  });
+  assert.equal(await botsLink.getAttribute("href"), `/coins?debate=${debate}`);
+  debatePageBots.sandboxLink = true;
   await page.screenshot({
-    path: `${artifactDir}/inline-debate-desktop.png`,
+    path: `${artifactDir}/debate-bots-link.png`,
     fullPage: true,
   });
-  screenshots.push("inline-debate-desktop.png");
-  [page] = await Promise.all([
-    context.waitForEvent("page"),
-    debatePage.getByRole("link", { name: "Full controls ↗" }).click(),
-  ]);
-  page.on("pageerror", (error) => errors.push(error.message));
+  screenshots.push("debate-bots-link.png");
+  await botsLink.click();
   await page.locator("[data-a4-content]").waitFor({ state: "visible" });
-  await debatePage.close();
+  assert.equal(
+    await page.locator('[data-a4-create] select[name="debateId"]').inputValue(),
+    debate,
+  );
+  debatePageBots.coinsPreselectsDebate = true;
+  assert.equal(
+    await page.locator('[data-a4-create] option[value="human"]').count(),
+    0,
+  );
+  assert.equal(await page.locator("[data-a4-refill]").isHidden(), true);
+  debatePageBots.humanModeRemoved = true;
+  console.log(
+    JSON.stringify({
+      trial: "a4-bots-sandbox-link",
+      result: "PASS",
+      ...debatePageBots,
+    }),
+  );
   async function commitmentScenario(fixture: Fixture, repetition: number) {
     phase = `${fixture.name} repetition ${repetition}`;
     // Each case is an independent real account. Keep production per-account A4
@@ -587,7 +531,7 @@ try {
   assert.deepEqual(errors, []);
   await writeFile(
     `${artifactDir}/browser-evidence.json`,
-    `${JSON.stringify({ base: "isolated loopback web runtime", viewport: [1440, 1000, 390, 844], account: "synthetic email registration", population: 500, humanParticipants: 1, repetitions, outcomes, initializationReadiness, checks: ["starter coins", "NO conversion review", "keyboard dialog focus", "binding submit", "reload receipt", "pause/run/step/speed", "sealed response", "worker settlement", "deterministic execution and exploratory no-trade", "exact balances and reservation release", "paginated revealed diagnostics", "bot-only observer", "archive/reset isolation", "mobile overflow", "axe WCAG A/AA"], accessibility, errors, screenshots }, null, 2)}\n`,
+    `${JSON.stringify({ base: "isolated loopback web runtime", viewport: [1440, 1000, 390, 844], account: "synthetic email registration", population: 500, humanParticipants: 1, repetitions, outcomes, debatePageBots, checks: ["starter coins", "NO conversion review", "keyboard dialog focus", "binding submit", "reload receipt", "pause/run/step/speed", "sealed response", "worker settlement", "deterministic execution and exploratory no-trade", "exact balances and reservation release", "paginated revealed diagnostics", "bot-only observer", "archive/reset isolation", "mobile overflow", "axe WCAG A/AA"], accessibility, errors, screenshots }, null, 2)}\n`,
   );
   await page.close();
   phase = "debate workspace";
@@ -633,7 +577,7 @@ try {
         phase,
         error: (error as Error).name,
         outcomes,
-        initializationReadiness,
+        debatePageBots,
         errors,
         screenshots,
       },

@@ -41,41 +41,6 @@ if (arena) {
       }
     }
   });
-  // Roving keyboard focus for both tab strips; panels retain their live DOM.
-  for (const kind of ["order", "detail"]) {
-    const buttons = [
-      ...arena.querySelectorAll<HTMLButtonElement>(`[data-${kind}-tab]`),
-    ];
-    function select(button: HTMLButtonElement) {
-      for (const item of buttons) {
-        const active = item === button;
-        item.setAttribute("aria-selected", String(active));
-        item.tabIndex = active ? 0 : -1;
-        arena.querySelector<HTMLElement>(
-          `[data-${kind}-panel="${item.dataset[kind + "Tab"]}"]`,
-        )!.hidden = !active;
-      }
-    }
-    for (const [index, button] of buttons.entries()) {
-      button.addEventListener("click", () => select(button));
-      button.addEventListener("keydown", (event) => {
-        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
-          return;
-        event.preventDefault();
-        const next =
-          event.key === "Home"
-            ? 0
-            : event.key === "End"
-              ? buttons.length - 1
-              : (index +
-                  (event.key === "ArrowRight" ? 1 : -1) +
-                  buttons.length) %
-                buttons.length;
-        select(buttons[next]!);
-        buttons[next]!.focus();
-      });
-    }
-  }
   const connection = crypto.randomUUID();
   const media = arena.querySelector<HTMLElement>("[data-media-event]")!;
   const viewers = arena.querySelector<HTMLElement>("[data-arena-viewers]")!;

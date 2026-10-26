@@ -89,6 +89,7 @@ if (root) {
     historyOffset = 0;
     el("runs").replaceChildren(new Option("Select a run", ""));
     el("submit").hidden = true;
+    el("refill").hidden = true;
     el("content").hidden = true;
     el("login").hidden = false;
     el("controls").hidden = true;
@@ -176,6 +177,9 @@ if (root) {
       html`<h3>${run!.mode === "human" ? "Human-only" : run!.observer ? "BOT-ONLY OBSERVER" : "BOTS + YOU"} · ${run!.state!}</h3><p>${run!.debate!.proposition}</p><p><a href="/debates/${run!.debate!.slug}">Watch debate / chat →</a></p><p>YES endorses this proposition; NO rejects it. ${run!.config!.population} synthetic bots. Beliefs: ${run!.config!.preset === "reference" ? "homogeneous reference" : "heterogeneous stress fixture"}. ${run!.config!.feeBps ? "Experimental 5% premium fee" : "No fee"}. Epsilon ${run!.config!.epsilon / 1000000}.</p><p>Final reveal: ${new Date(run!.revealAt!).toLocaleString()}. Each period settles against its own share. Maximum lockup ends at this boundary once processing completes.</p>`.toString();
     el("controls").hidden =
       run!.mode === "human" || ["complete", "archived"].includes(run!.state!);
+    // Decision 0010: only a Bots run's own balance can still be refilled;
+    // the account-wide refill and human rounds are retired.
+    el("refill").hidden = run!.mode === "human" || Boolean(run!.observer);
     el("speed").value = String(run!.speed);
     const open = run!.rounds!.find(
       (r) =>
@@ -374,9 +378,10 @@ if (root) {
   });
   el("refill").addEventListener("click", () =>
     perform(async () => {
+      if (!run) return;
       const result = await write<{ issued: boolean; amount: string }>(
         "a4/refill",
-        run ? { runId: run!.id } : {},
+        { runId: run.id },
       );
       await refresh();
       await history();
