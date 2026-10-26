@@ -155,6 +155,7 @@ describe("live queue screens", () => {
       ["stale", /closed or offline/],
       ["unavailable", /can't debate right now/],
       ["topic_closed", /no longer public/],
+      ["booking", /scheduled debate starts soon/],
     ])
       assert.match(
         transitionNotice(

@@ -2,6 +2,7 @@ import type { Pool, PoolClient } from "pg";
 import { withTransaction } from "../../platform/transaction.ts";
 import { runExclusiveDatabaseJob } from "../../platform/database-jobs.ts";
 import {
+  activeRules,
   retireOpenQueueRequests,
   cancelUnstartedDebate,
   createPairedEvent,
@@ -10,32 +11,44 @@ import {
   MatchConflictError,
   MatchNotFoundError,
   profileFor,
+  reservationFor,
 } from "./repository.ts";
+import {
+  DEVICE_CHECK_MINUTES,
+  OFFER_SECONDS,
+  PRESENCE_SECONDS,
+  QUEUE_JOIN_SECONDS,
+  SCHEDULED_JOIN_SECONDS,
+} from "./timings.ts";
+
+export {
+  OFFER_SECONDS,
+  PRESENCE_SECONDS,
+  QUEUE_JOIN_SECONDS,
+  SCHEDULED_JOIN_SECONDS,
+} from "./timings.ts";
 
 // Live topic queue (Decision 0011). A ticket waits on one topic and side; the oldest ticket on
 // each side is paired into an offer that both players accept within 30 seconds. Locks are always
 // taken in the same order: player locks (`lockUsers`), then the offer row, then ticket rows.
 
-// Founder decision: both players accept within 30 seconds.
-export const OFFER_SECONDS = 30;
-// A waiting ticket leaves the queue after this long without a presence update. Browsers can slow
-// timers in hidden tabs to once a minute, so this stays above 60 seconds while clients poll.
-export const PRESENCE_SECONDS = 90;
+// Timings live in ./timings.ts. Presence stays above 60 seconds because browsers can slow timers
+// in hidden tabs to once a minute while clients poll.
 const RETENTION_DAYS = 30;
 const SWEEP_TOPICS = 25;
 const SWEEP_OFFERS = 100;
 const SWEEP_NO_SHOWS = 50;
-// Proposed in Decision 0011, awaiting founder confirmation: time to join after a queue match,
-// and after a scheduled debate's start time.
-export const QUEUE_JOIN_SECONDS = 90;
-export const SCHEDULED_JOIN_SECONDS = 600;
-// The queue screen's camera and microphone check stays valid this long.
-const DEVICE_CHECK_MINUTES = 30;
 
 type Side = "A" | "B";
 type TicketStatus = "searching" | "offered" | "matched" | "closed";
 type ClosedReason =
-  "left" | "declined" | "missed" | "stale" | "unavailable" | "topic_closed";
+  | "left"
+  | "declined"
+  | "missed"
+  | "stale"
+  | "unavailable"
+  | "topic_closed"
+  | "booking";
 
 interface TicketRow {
   id: string;
@@ -176,12 +189,17 @@ async function pairOldest(
 // A player who no longer qualifies (already seated, profile unpublished) cannot be matched.
 async function unavailableSides(client: PoolClient, offer: OfferRow) {
   const sides: Side[] = [];
+  const now = reservationFor(
+    "now",
+    new Date(),
+    (await activeRules(client)).rules,
+  );
   for (const [side, userId] of [
     ["A", offer.userAId],
     ["B", offer.userBId],
   ] as const) {
     try {
-      await ensureAvailable(client, userId);
+      await ensureAvailable(client, userId, now);
       await profileFor(client, userId);
     } catch (error) {
       if (!(error instanceof MatchConflictError)) throw error;
@@ -220,6 +238,7 @@ async function finalize(client: PoolClient, offer: OfferRow, actorId: string) {
     sideAUserId: offer.userAId,
     sideBUserId: offer.userBId,
     scheduledAt: new Date(),
+    booking: "now",
     actorId,
     acceptedRequestId: null,
     notice: "Your debate is ready. Join now.",
@@ -432,7 +451,11 @@ export function createMatchmaking(
       await withTransaction(database, async (client) => {
         await lockUsers(client, userId);
         await profileFor(client, userId);
-        await ensureAvailable(client, userId);
+        await ensureAvailable(
+          client,
+          userId,
+          reservationFor("now", new Date(), (await activeRules(client)).rules),
+        );
         if (requireDeviceCheck) {
           const checked = await client.query(
             `SELECT 1 FROM account_device_checks WHERE user_id = $1 AND camera_ok
@@ -579,6 +602,21 @@ export function createMatchmaking(
           await retireOpenQueueRequests(client);
           for (const offer of due.rows) await expireOffer(client, offer);
           const noShows = await resolveNoShows(client);
+          // A queue match must end before the player's next booking begins.
+          const window = reservationFor(
+            "now",
+            new Date(),
+            (await activeRules(client)).rules,
+          );
+          const booked = await client.query(
+            `UPDATE matchmaking_tickets t SET status = 'closed', closed_reason = 'booking',
+               updated_at = CURRENT_TIMESTAMP
+             WHERE t.status = 'searching' AND EXISTS (
+               SELECT 1 FROM event_participants p WHERE p.user_id = t.user_id AND p.active
+                 AND tstzrange(COALESCE(p.reserved_from, '-infinity'),
+                   COALESCE(p.reserved_until, 'infinity')) && tstzrange($1, $2))`,
+            [window.from, window.until],
+          );
           const stale = await client.query(
             `UPDATE matchmaking_tickets SET status = 'closed', closed_reason = 'stale',
              updated_at = CURRENT_TIMESTAMP
@@ -596,6 +634,7 @@ export function createMatchmaking(
               paired += 1;
           return {
             noShows,
+            booked: booked.rowCount ?? 0,
             expired: due.rows.length,
             stale: stale.rowCount ?? 0,
             paired,

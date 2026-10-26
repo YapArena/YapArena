@@ -374,11 +374,11 @@ describe("matching repository transaction boundaries", () => {
       () => active.repository.acceptRequest("2", id),
       MatchConflictError,
     );
+    // A booking's time window comes from the active rules, so none means no request.
     const missingRule = fake({ ruleMissing: true });
-    await missingRule.repository.createRequest("1", direct);
     await assert.rejects(
-      () => missingRule.repository.acceptRequest("2", id),
-      MatchConflictError,
+      () => missingRule.repository.createRequest("1", direct),
+      /no event rules are active/,
     );
     const wrongOwner = fake();
     await wrongOwner.repository.createRequest("1", direct);
