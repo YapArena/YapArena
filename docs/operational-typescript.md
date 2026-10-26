@@ -86,7 +86,9 @@ project, copies only the agent's build context for `lk agent deploy`. In the ima
 their dependency tree, so the web app's and the build tools' packages stay out of it.
 `verify-outline-browser.ts`,
 checked in browser automation and run by `npm run verify:browser`, drives the outline panel in
-Chrome with synthetic LiveKit messages and an in-memory outline store.
+Chrome with synthetic LiveKit messages and an in-memory outline store. `transcription-trial.ts`, in the
+database-tools project, scores the providers for the
+[staging trial](transcription-provider-trial.md).
 
 These former JavaScript files retain their names with a `.ts` extension:
 
