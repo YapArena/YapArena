@@ -34,6 +34,11 @@ export interface OutlineArgument {
   lastPoint: number;
   /** An earlier argument (either side) this one rebuts, or null. */
   rebuts: string | null;
+  /**
+   * In a window's final outline only: the earlier argument of the same side
+   * this one continues, so they count as one argument across windows.
+   */
+  continues?: string | null;
 }
 export interface TurnOutline {
   turnNumber: number;

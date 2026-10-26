@@ -119,7 +119,11 @@ export function createWebServer(
     debaterSettings,
     transcriptionIngest:
       transcription && config.liveOutline.ingestSecret
-        ? { repository: transcription, secret: config.liveOutline.ingestSecret }
+        ? {
+            repository: transcription,
+            outlines,
+            secret: config.liveOutline.ingestSecret,
+          }
         : undefined,
     dispatchTranscriber: transcriber?.dispatch,
     outlines,

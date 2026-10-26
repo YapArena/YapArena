@@ -4,6 +4,7 @@ import {
   ingestHeaders,
   signIngest,
   type DebaterLanguage,
+  type OutlineCleanup,
   type Side,
   type TranscriptUpdate,
 } from "../protocol.ts";
@@ -106,6 +107,10 @@ export function createIngestClient({
     },
     update(update: TranscriptUpdate) {
       return post("updates", update);
+    },
+    /** The window cleanup; the server accepts one per window. */
+    cleanup(cleanup: OutlineCleanup) {
+      return post("cleanup", cleanup);
     },
   });
 }

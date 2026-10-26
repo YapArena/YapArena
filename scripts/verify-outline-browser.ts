@@ -136,12 +136,18 @@ const snapshot = (): OutlineSnapshot => ({
       side: "B",
       language: "en",
       arguments: [
-        { id: "t1a1", label: "Renewables are cheaper", rebuts: null },
+        {
+          id: "t1a1",
+          label: "Renewables are cheaper",
+          rebuts: null,
+          continues: null,
+        },
       ],
       final: true,
     },
   ],
   flags: [],
+  finals: 1,
 });
 const flags: string[] = [];
 const outlines = {
