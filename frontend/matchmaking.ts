@@ -5,6 +5,7 @@
 // challenges; polling takes over when the stream is unavailable. The server decides every outcome.
 import { api } from "./lib/api.js";
 import { sessionStore } from "./lib/session.js";
+import { userStream } from "./lib/user-stream.js";
 import {
   bannerText,
   bookedBannerText,
@@ -47,8 +48,9 @@ const pageTitle = document.title;
 let member = false;
 let state: QueueState | null = null;
 let offset = 0;
-let source: EventSource | null = null;
-let streamUnavailable = false;
+// The page's shared personal stream (frontend/lib/user-stream.ts) carries "state" events.
+const stream = userStream();
+let unsubscribe: (() => void) | null = null;
 let poll: number | undefined;
 let pollEvery = 0;
 let ticker: number | undefined;
@@ -266,29 +268,19 @@ function stopPolling() {
 // join window, whose debate status the stream does not carry.
 function connect() {
   if (!member) {
-    source?.close();
-    source = null;
+    unsubscribe?.();
+    unsubscribe = null;
     stopPolling();
     return;
   }
-  if (!source && !streamUnavailable && "EventSource" in window) {
-    const opened = new EventSource("/api/matchmaking/stream");
-    source = opened;
-    opened.addEventListener("state", (event) => {
-      if (source !== opened) return;
-      apply(JSON.parse((event as MessageEvent<string>).data) as QueueState);
+  if (!unsubscribe && stream.available)
+    unsubscribe = stream.on("state", (data) => {
+      apply(data as QueueState);
       window.dispatchEvent(new Event("yap:matching-changed"));
     });
-    opened.addEventListener("error", () => {
-      if (opened.readyState !== EventSource.CLOSED || source !== opened) return;
-      source = null;
-      streamUnavailable = true;
-      connect();
-    });
-  }
   const busy = needsLiveUpdates(state) || isAnswering(state, now());
   const every =
-    streamUnavailable || !source
+    !unsubscribe || !stream.available
       ? busy
         ? POLL_MS
         : IDLE_POLL_MS
@@ -301,6 +293,11 @@ function connect() {
     pollEvery = every;
   }
 }
+
+stream.onUnavailable(() => {
+  unsubscribe = null;
+  connect();
+});
 
 // ---- Drawing ------------------------------------------------------------------------------
 function render() {
@@ -650,9 +647,10 @@ async function loadWaiting() {
 // ---- Account ------------------------------------------------------------------------------
 async function initialize() {
   const current = ++generation;
-  source?.close();
-  source = null;
-  streamUnavailable = false;
+  unsubscribe?.();
+  unsubscribe = null;
+  // A new account needs a new stream with its own session.
+  stream.reset();
   stopPolling();
   state = null;
   member = false;

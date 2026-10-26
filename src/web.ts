@@ -21,7 +21,8 @@ import { createRuntime } from "./platform/runtime.ts";
 import { createMetrics } from "./platform/metrics.ts";
 import { createCommunityStreams } from "./features/community/streams.ts";
 import { createServices } from "./services.ts";
-import { createMatchmakingStreams } from "./features/matching/matchmaking-streams.ts";
+import { createUserStreams } from "./platform/user-streams.ts";
+import { RESULTS_CHANNEL } from "./features/account-wallet/debate-sandbox.ts";
 
 // Builds the web service. dist/server.js runs it for every deployment; the
 // local test identity entry under scripts/ wraps the same application.
@@ -88,12 +89,25 @@ export function createWebServer(
     transcriber,
     outlines,
   } = services;
-  // Web only: the jobs worker serves no streams.
-  const matchmakingStreams = matchmaking
-    ? createMatchmakingStreams({
+  // Web only: the jobs worker serves no streams. Personal live updates (interface 10): the live
+  // queue's state, and results notices that the round settlement signals (B reads the results).
+  const userStreams = config.userStream.enabled
+    ? createUserStreams({
         databaseUrl: config.databaseUrl,
-        matchmaking,
         logger,
+        kinds: {
+          ...(matchmaking
+            ? { state: { read: (userId) => matchmaking.state(userId) } }
+            : {}),
+          results: {},
+        },
+        channels: {
+          yaparena_user_v1: "state",
+          [RESULTS_CHANNEL]: "results",
+        },
+        presence: matchmaking
+          ? (userIds) => matchmaking.touchMany(userIds)
+          : undefined,
       })
     : undefined;
   const sharedLimits = abuseConfig && abuseStore;
@@ -135,7 +149,7 @@ export function createWebServer(
     identity,
     matching,
     matchmaking,
-    matchmakingStreams,
+    userStreams,
     debateAutoStart,
     media,
     mediaProvider,
@@ -207,7 +221,7 @@ export function createWebServer(
     ...services.background,
     app: wrap ? wrap(app, { ...services, config }) : app,
     communityStreams,
-    matchmakingStreams,
+    userStreams,
     backgroundJobs: config.backgroundJobs,
   });
 

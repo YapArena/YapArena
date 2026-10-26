@@ -68,6 +68,31 @@ describe("configuration", () => {
       assert.throws(() => loadConfig({ DATABASE_URL: databaseUrl, ...env }));
   });
 
+  it("runs personal live updates with the live queue, and otherwise only on request", () => {
+    const load = (env) => loadConfig({ DATABASE_URL: databaseUrl, ...env });
+    assert.deepEqual(load({}).userStream, { enabled: false });
+    assert.deepEqual(load({ MATCHMAKING_ENABLED: "true" }).userStream, {
+      enabled: true,
+    });
+    assert.deepEqual(
+      load({ MATCHMAKING_ENABLED: "true", USER_STREAM_ENABLED: "false" })
+        .userStream,
+      { enabled: true },
+    );
+    assert.deepEqual(load({ USER_STREAM_ENABLED: "true" }).userStream, {
+      enabled: true,
+    });
+    assert.throws(() => load({ USER_STREAM_ENABLED: "on" }), /true or false/);
+    assert.throws(
+      () =>
+        load({
+          USER_STREAM_ENABLED: "true",
+          DATABASE_URL: databaseUrl.replace("5432", "6543"),
+        }),
+      /live updates LISTEN/,
+    );
+  });
+
   it("provides safe development defaults", () => {
     assert.deepEqual(loadConfig({ DATABASE_URL: databaseUrl }), {
       environment: "development",
@@ -92,6 +117,7 @@ describe("configuration", () => {
       backgroundJobs: true,
       communityStream,
       matchmaking: { enabled: false, liveDebateCapacity: 2 },
+      userStream: { enabled: false },
       liveOutline: {
         enabled: false,
         agentName: "yaparena-transcriber",
@@ -142,6 +168,7 @@ describe("configuration", () => {
         backgroundJobs: true,
         communityStream,
         matchmaking: { enabled: false, liveDebateCapacity: 2 },
+        userStream: { enabled: false },
         liveOutline: {
           enabled: false,
           agentName: "yaparena-transcriber",

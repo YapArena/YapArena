@@ -335,6 +335,14 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
       { minimum: 1, maximum: 1000 },
     ),
   });
+  // Personal live updates at /api/me/stream (interface 10): always on with the live queue; with
+  // it off, only on request, so an always-open stream per signed-in tab stays a choice.
+  const userStreamEnabled = environment.USER_STREAM_ENABLED ?? "false";
+  if (!["true", "false"].includes(userStreamEnabled))
+    throw new Error("USER_STREAM_ENABLED must be true or false");
+  const userStream = Object.freeze({
+    enabled: matchmaking.enabled || userStreamEnabled === "true",
+  });
 
   if (!environments.has(nodeEnvironment)) {
     throw new Error("NODE_ENV must be development, test, or production");
@@ -357,6 +365,10 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
   if (matchmaking.enabled && new URL(databaseUrl).port === "6543")
     throw new Error(
       "live queue LISTEN requires a direct or session-pooler connection",
+    );
+  if (userStream.enabled && new URL(databaseUrl).port === "6543")
+    throw new Error(
+      "live updates LISTEN requires a direct or session-pooler connection",
     );
   if (
     environment.DATABASE_MIGRATION_URL ||
@@ -413,6 +425,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     backgroundJobs: backgroundJobs === "true",
     communityStream,
     matchmaking,
+    userStream,
     liveOutline,
     a4Funding,
     a4Mode: a4Mode as "disabled" | "yap-coins" | "bots",

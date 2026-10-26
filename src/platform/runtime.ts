@@ -25,7 +25,7 @@ export function createRuntime({
   matchmaking,
   community,
   communityStreams,
-  matchmakingStreams,
+  userStreams,
   measurement,
   media,
   mediaProvider,
@@ -64,7 +64,7 @@ export function createRuntime({
     "pruneExpired"
   >;
   communityStreams?: { start(): Promise<void>; stop(): Promise<void> };
-  matchmakingStreams?: { start(): Promise<void>; stop(): Promise<void> };
+  userStreams?: { start(): Promise<void>; stop(): Promise<void> };
   measurement?: Pick<
     ReturnType<typeof createMeasurementRepository>,
     "pruneExpired"
@@ -217,7 +217,7 @@ export function createRuntime({
     async start() {
       await verifyDatabase();
       await communityStreams?.start();
-      await matchmakingStreams?.start();
+      await userStreams?.start();
 
       if (app) {
         server = await new Promise<Server>((resolve, reject) => {
@@ -331,7 +331,7 @@ export function createRuntime({
       if (matchmakingTimer) clearIntervalFn(matchmakingTimer);
       await Promise.all([mediaTask, matchmakingTask, mediaOperations?.stop()]);
       await communityStreams?.stop();
-      await matchmakingStreams?.stop();
+      await userStreams?.stop();
 
       if (server) {
         const listeningServer = server;
