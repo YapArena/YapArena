@@ -278,8 +278,8 @@ describe(
         "UPDATE match_requests SET respond_by = CURRENT_TIMESTAMP - interval '1 second' WHERE id = $1",
         [request.id],
       );
-      const swept = await sweepOnce(queue);
-      assert.ok(swept.value.unanswered >= 1);
+      // A parallel suite's sweep may settle it first, so check the outcome, not the count.
+      await sweepOnce(queue);
       const after = await owner.query(
         "SELECT status, respond_by FROM match_requests WHERE id = $1",
         [request.id],
