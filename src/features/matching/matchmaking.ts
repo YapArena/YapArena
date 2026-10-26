@@ -3,6 +3,8 @@ import { withTransaction } from "../../platform/transaction.ts";
 import { runExclusiveDatabaseJob } from "../../platform/database-jobs.ts";
 import {
   activeRules,
+  remindScheduledDebate,
+  settleUnansweredNowChallenges,
   retireOpenQueueRequests,
   cancelUnstartedDebate,
   createPairedEvent,
@@ -16,6 +18,7 @@ import {
 import {
   DEVICE_CHECK_MINUTES,
   OFFER_SECONDS,
+  REMINDER_MINUTES,
   PRESENCE_SECONDS,
   QUEUE_JOIN_SECONDS,
   SCHEDULED_JOIN_SECONDS,
@@ -90,11 +93,32 @@ export interface MatchmakingState {
     acceptedByMe: boolean;
     acceptedByOpponent: boolean;
   } | null;
-  // The debate a matched ticket created; joinDeadlineAt is when an unstarted one is cancelled.
+  // The debate a matched ticket or an accepted "now" challenge created; joinDeadlineAt is when
+  // an unstarted one is cancelled.
   debate: {
     id: string;
     slug: string;
     status: string;
+    joinDeadlineAt: string;
+  } | null;
+  // A "now" challenge being answered: incoming for the target, outgoing for the challenger.
+  challenge: {
+    id: string;
+    direction: "incoming" | "outgoing";
+    handle: string;
+    displayName: string;
+    topicTitle: string;
+    sideLabel: string;
+    respondBy: string;
+  } | null;
+  // The player's next booked debate, from a day ahead until its join window closes, so every
+  // page can remind them shortly before it starts.
+  upcoming: {
+    id: string;
+    slug: string;
+    status: string;
+    proposition: string;
+    startsAt: string;
     joinDeadlineAt: string;
   } | null;
 }
@@ -288,7 +312,9 @@ async function resolveNoShows(client: PoolClient) {
      FROM debates d LEFT JOIN match_offers o ON o.debate_id = d.id AND o.status = 'accepted'
      WHERE d.status IN ('scheduled', 'ready') AND NOT d.is_demo
        AND d.scheduled_at <= CURRENT_TIMESTAMP - make_interval(secs =>
-         CASE WHEN o.id IS NULL THEN ${SCHEDULED_JOIN_SECONDS} ELSE ${QUEUE_JOIN_SECONDS} END)
+         CASE WHEN o.id IS NULL AND NOT EXISTS (SELECT 1 FROM match_requests r
+             WHERE r.debate_id = d.id AND r.mode = 'now')
+           THEN ${SCHEDULED_JOIN_SECONDS} ELSE ${QUEUE_JOIN_SECONDS} END)
      ORDER BY d.scheduled_at LIMIT ${SWEEP_NO_SHOWS} FOR UPDATE OF d SKIP LOCKED`,
   );
   for (const debate of due.rows) {
@@ -350,27 +376,25 @@ export function createMatchmaking(
     });
   }
 
-  const matchmaking = Object.freeze({
-    // Whether entering the queue needs a recent camera and microphone check.
-    deviceCheckRequired: requireDeviceCheck,
-
-    async state(userId: string): Promise<MatchmakingState> {
-      const result = await database.query<{
-        id: string;
-        side: Side;
-        status: TicketStatus;
-        closedReason: ClosedReason | null;
-        priorityAt: Date;
-        topicSlug: string;
-        topicTitle: string;
-        sideLabel: string;
-        debateId: string | null;
-        debateSlug: string | null;
-        debateStatus: string | null;
-        joinDeadlineAt: Date | null;
-        serverNow: Date;
-      }>(
-        `SELECT t.id, t.side, t.status, t.closed_reason AS "closedReason",
+  async function ticketState(
+    userId: string,
+  ): Promise<Omit<MatchmakingState, "challenge" | "upcoming">> {
+    const result = await database.query<{
+      id: string;
+      side: Side;
+      status: TicketStatus;
+      closedReason: ClosedReason | null;
+      priorityAt: Date;
+      topicSlug: string;
+      topicTitle: string;
+      sideLabel: string;
+      debateId: string | null;
+      debateSlug: string | null;
+      debateStatus: string | null;
+      joinDeadlineAt: Date | null;
+      serverNow: Date;
+    }>(
+      `SELECT t.id, t.side, t.status, t.closed_reason AS "closedReason",
            t.priority_at AS "priorityAt", tp.slug AS "topicSlug", tp.title AS "topicTitle",
            CASE WHEN t.side = 'A' THEN tp.side_a_label ELSE tp.side_b_label END AS "sideLabel",
            d.id AS "debateId", d.slug AS "debateSlug", d.status AS "debateStatus",
@@ -381,69 +405,195 @@ export function createMatchmaking(
          WHERE t.user_id = $1 AND (t.status IN ('searching', 'offered')
            OR t.updated_at > CURRENT_TIMESTAMP - interval '2 minutes')
          ORDER BY t.status IN ('searching', 'offered') DESC, t.updated_at DESC LIMIT 1`,
-        [userId],
+      [userId],
+    );
+    const row = result.rows[0];
+    if (!row) {
+      const now = await database.query<{ serverNow: Date }>(
+        'SELECT clock_timestamp() AS "serverNow"',
       );
-      const row = result.rows[0];
-      if (!row) {
-        const now = await database.query<{ serverNow: Date }>(
-          'SELECT clock_timestamp() AS "serverNow"',
-        );
-        return {
-          serverNow: new Date(now.rows[0]!.serverNow).toISOString(),
-          ticket: null,
-          offer: null,
-          debate: null,
-        };
-      }
-      let offer: MatchmakingState["offer"] = null;
-      if (row.status === "offered") {
-        const found = await database.query<{
-          id: string;
-          deadlineAt: Date;
-          mine: Date | null;
-          theirs: Date | null;
-        }>(
-          `SELECT id, deadline_at AS "deadlineAt",
+      return {
+        serverNow: new Date(now.rows[0]!.serverNow).toISOString(),
+        ticket: null,
+        offer: null,
+        debate: null,
+      };
+    }
+    let offer: MatchmakingState["offer"] = null;
+    if (row.status === "offered") {
+      const found = await database.query<{
+        id: string;
+        deadlineAt: Date;
+        mine: Date | null;
+        theirs: Date | null;
+      }>(
+        `SELECT id, deadline_at AS "deadlineAt",
              CASE WHEN ticket_a_id = $1 THEN accepted_a_at ELSE accepted_b_at END AS mine,
              CASE WHEN ticket_a_id = $1 THEN accepted_b_at ELSE accepted_a_at END AS theirs
            FROM match_offers WHERE (ticket_a_id = $1 OR ticket_b_id = $1) AND status = 'pending'`,
-          [row.id],
-        );
-        const entry = found.rows[0];
-        if (entry)
-          offer = {
-            id: entry.id,
-            deadlineAt: new Date(entry.deadlineAt).toISOString(),
-            acceptedByMe: Boolean(entry.mine),
-            acceptedByOpponent: Boolean(entry.theirs),
-          };
-      }
-      return {
-        serverNow: new Date(row.serverNow).toISOString(),
-        ticket: {
+        [row.id],
+      );
+      const entry = found.rows[0];
+      if (entry)
+        offer = {
+          id: entry.id,
+          deadlineAt: new Date(entry.deadlineAt).toISOString(),
+          acceptedByMe: Boolean(entry.mine),
+          acceptedByOpponent: Boolean(entry.theirs),
+        };
+    }
+    return {
+      serverNow: new Date(row.serverNow).toISOString(),
+      ticket: {
+        id: row.id,
+        topicSlug: row.topicSlug,
+        topicTitle: row.topicTitle,
+        side: row.side,
+        sideLabel: row.sideLabel,
+        status: row.status,
+        closedReason: row.closedReason,
+        queuedAt: new Date(row.priorityAt).toISOString(),
+      },
+      offer,
+      debate:
+        row.status === "matched" &&
+        row.debateId &&
+        row.debateSlug &&
+        row.debateStatus &&
+        row.joinDeadlineAt
+          ? {
+              id: row.debateId,
+              slug: row.debateSlug,
+              status: row.debateStatus,
+              joinDeadlineAt: new Date(row.joinDeadlineAt).toISOString(),
+            }
+          : null,
+    };
+  }
+
+  async function nowChallenge(
+    userId: string,
+  ): Promise<MatchmakingState["challenge"]> {
+    const result = await database.query<{
+      id: string;
+      outgoing: boolean;
+      handle: string;
+      displayName: string;
+      topicTitle: string;
+      sideLabel: string;
+      respondBy: Date;
+    }>(
+      `SELECT r.id, r.initiator_user_id = $1 AS outgoing, p.handle,
+         p.display_name AS "displayName", t.title AS "topicTitle",
+         CASE WHEN (r.initiator_user_id = $1) = (r.requested_side = 'A')
+           THEN t.side_a_label ELSE t.side_b_label END AS "sideLabel",
+         r.respond_by AS "respondBy"
+       FROM match_requests r JOIN topics t ON t.id = r.topic_id
+       JOIN public_profiles p ON p.user_id = CASE WHEN r.initiator_user_id = $1
+         THEN r.target_user_id ELSE r.initiator_user_id END
+       WHERE r.status = 'open' AND r.kind = 'direct' AND r.mode = 'now'
+         AND r.respond_by > CURRENT_TIMESTAMP
+         AND (r.initiator_user_id = $1 OR r.target_user_id = $1)
+       ORDER BY r.respond_by LIMIT 1`,
+      [userId],
+    );
+    const row = result.rows[0];
+    return row
+      ? {
           id: row.id,
-          topicSlug: row.topicSlug,
+          direction: row.outgoing ? "outgoing" : "incoming",
+          handle: row.handle,
+          displayName: row.displayName,
           topicTitle: row.topicTitle,
-          side: row.side,
           sideLabel: row.sideLabel,
+          respondBy: new Date(row.respondBy).toISOString(),
+        }
+      : null;
+  }
+
+  async function nowChallengeDebate(
+    userId: string,
+  ): Promise<MatchmakingState["debate"]> {
+    const result = await database.query<{
+      id: string;
+      slug: string;
+      status: string;
+      joinDeadlineAt: Date;
+    }>(
+      `SELECT d.id, d.slug, d.status,
+         d.scheduled_at + make_interval(secs => ${QUEUE_JOIN_SECONDS}) AS "joinDeadlineAt"
+       FROM match_requests r JOIN debates d ON d.id = r.debate_id
+       WHERE r.kind = 'direct' AND r.mode = 'now' AND r.status = 'accepted'
+         AND (r.initiator_user_id = $1 OR r.target_user_id = $1)
+         AND r.updated_at > CURRENT_TIMESTAMP - interval '2 minutes'
+       ORDER BY r.updated_at DESC LIMIT 1`,
+      [userId],
+    );
+    const row = result.rows[0];
+    return row
+      ? {
+          id: row.id,
+          slug: row.slug,
           status: row.status,
-          closedReason: row.closedReason,
-          queuedAt: new Date(row.priorityAt).toISOString(),
-        },
-        offer,
-        debate:
-          row.status === "matched" &&
-          row.debateId &&
-          row.debateSlug &&
-          row.debateStatus &&
-          row.joinDeadlineAt
-            ? {
-                id: row.debateId,
-                slug: row.debateSlug,
-                status: row.debateStatus,
-                joinDeadlineAt: new Date(row.joinDeadlineAt).toISOString(),
-              }
-            : null,
+          joinDeadlineAt: new Date(row.joinDeadlineAt).toISOString(),
+        }
+      : null;
+  }
+
+  async function upcomingDebate(
+    userId: string,
+  ): Promise<MatchmakingState["upcoming"]> {
+    const result = await database.query<{
+      id: string;
+      slug: string;
+      status: string;
+      proposition: string;
+      startsAt: Date;
+      joinDeadlineAt: Date;
+    }>(
+      `SELECT d.id, d.slug, d.status, d.proposition, d.scheduled_at AS "startsAt",
+         d.scheduled_at + make_interval(secs => ${SCHEDULED_JOIN_SECONDS}) AS "joinDeadlineAt"
+       FROM event_participants p JOIN debates d ON d.id = p.debate_id
+       WHERE p.user_id = $1 AND p.active AND d.status IN ('scheduled', 'ready')
+         AND NOT d.is_demo
+         AND d.scheduled_at < CURRENT_TIMESTAMP + interval '1 day'
+         AND d.scheduled_at > CURRENT_TIMESTAMP - make_interval(secs => ${SCHEDULED_JOIN_SECONDS})
+         -- Queue and "now" debates have their own 90-second join countdown.
+         AND NOT EXISTS (SELECT 1 FROM match_offers o WHERE o.debate_id = d.id)
+         AND NOT EXISTS (SELECT 1 FROM match_requests r
+           WHERE r.debate_id = d.id AND r.mode = 'now')
+       ORDER BY d.scheduled_at LIMIT 1`,
+      [userId],
+    );
+    const row = result.rows[0];
+    return row
+      ? {
+          id: row.id,
+          slug: row.slug,
+          status: row.status,
+          proposition: row.proposition,
+          startsAt: new Date(row.startsAt).toISOString(),
+          joinDeadlineAt: new Date(row.joinDeadlineAt).toISOString(),
+        }
+      : null;
+  }
+
+  const matchmaking = Object.freeze({
+    // Whether entering the queue needs a recent camera and microphone check.
+    deviceCheckRequired: requireDeviceCheck,
+
+    async state(userId: string): Promise<MatchmakingState> {
+      const [base, challenge, challengeDebate, upcoming] = await Promise.all([
+        ticketState(userId),
+        nowChallenge(userId),
+        nowChallengeDebate(userId),
+        upcomingDebate(userId),
+      ]);
+      return {
+        ...base,
+        debate: base.debate ?? challengeDebate,
+        challenge,
+        upcoming,
       };
     },
 
@@ -499,6 +649,11 @@ export function createMatchmaking(
     // Presence for every player with an open live stream, refreshed by the web process.
     async touchMany(userIds: readonly string[]) {
       if (!userIds.length) return 0;
+      await database.query(
+        `INSERT INTO matchmaking_presence (user_id) SELECT unnest($1::bigint[])
+         ON CONFLICT (user_id) DO UPDATE SET seen_at = CURRENT_TIMESTAMP`,
+        [userIds],
+      );
       const result = await database.query(
         `UPDATE matchmaking_tickets SET last_seen_at = CURRENT_TIMESTAMP
          WHERE user_id = ANY($1::bigint[]) AND status IN ('searching', 'offered')`,
@@ -507,7 +662,13 @@ export function createMatchmaking(
       return result.rowCount ?? 0;
     },
 
+    // Presence for the polling client: queue presence and "online" for "now" challenges.
     async touch(userId: string) {
+      await database.query(
+        `INSERT INTO matchmaking_presence (user_id) VALUES ($1)
+         ON CONFLICT (user_id) DO UPDATE SET seen_at = CURRENT_TIMESTAMP`,
+        [userId],
+      );
       await database.query(
         `UPDATE matchmaking_tickets SET last_seen_at = CURRENT_TIMESTAMP
          WHERE user_id = $1 AND status IN ('searching', 'offered')`,
@@ -600,6 +761,20 @@ export function createMatchmaking(
            ORDER BY deadline_at LIMIT ${SWEEP_OFFERS} FOR UPDATE SKIP LOCKED`,
           );
           await retireOpenQueueRequests(client);
+          const unanswered = await settleUnansweredNowChallenges(client);
+          // Booked well ahead, a scheduled debate reminds both speakers shortly before it starts.
+          const reminders = await client.query<{ id: string; status: string }>(
+            `SELECT d.id, d.status FROM debates d
+             WHERE d.status IN ('scheduled', 'ready') AND NOT d.is_demo
+               AND d.scheduled_at BETWEEN CURRENT_TIMESTAMP
+                 AND CURRENT_TIMESTAMP + make_interval(mins => ${REMINDER_MINUTES})
+               AND d.scheduled_at > d.created_at + make_interval(mins => ${REMINDER_MINUTES})
+               AND NOT EXISTS (SELECT 1 FROM event_history h
+                 WHERE h.debate_id = d.id AND h.action = 'reminded')
+             ORDER BY d.scheduled_at LIMIT 50 FOR UPDATE OF d SKIP LOCKED`,
+          );
+          for (const debate of reminders.rows)
+            await remindScheduledDebate(client, debate.id, debate.status);
           for (const offer of due.rows) await expireOffer(client, offer);
           const noShows = await resolveNoShows(client);
           // A queue match must end before the player's next booking begins.
@@ -633,6 +808,8 @@ export function createMatchmaking(
             while (await pairOldest(client, topicId, liveDebateCapacity))
               paired += 1;
           return {
+            unanswered,
+            reminded: reminders.rows.length,
             noShows,
             booked: booked.rowCount ?? 0,
             expired: due.rows.length,

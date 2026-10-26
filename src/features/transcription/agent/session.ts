@@ -14,7 +14,9 @@ import {
   type Side,
   type TurnHint,
 } from "../protocol.ts";
+import type { FinalMessage } from "../../outline/public-types.ts";
 import { createLiveOutliner } from "./claude.ts";
+import { createWindowCleaner } from "./cleanup.ts";
 import { createOutlineLoop, type OutlineLoop } from "./outline-loop.ts";
 import { hintFromSession, parseTurnHint, turnFromHint } from "./turns.ts";
 import type { AgentConfig } from "./config.ts";
@@ -133,7 +135,7 @@ export async function runDebateTranscriber(
   }
   // The live AI outline: one model call at a time, through the same ordered
   // sender as the transcript; accepted versions go to viewers over LiveKit.
-  async function publishOutline(message: OutlineMessage) {
+  async function publishOutline(message: OutlineMessage | FinalMessage) {
     const local = room.localParticipant;
     if (!room.isConnected || !local) return;
     await local.publishData(new TextEncoder().encode(JSON.stringify(message)), {
@@ -149,6 +151,12 @@ export async function runDebateTranscriber(
           client: new Anthropic({ apiKey: config.anthropicKey }),
           log,
         }),
+        clean: createWindowCleaner({
+          client: new Anthropic({ apiKey: config.anthropicKey }),
+          log,
+        }),
+        submitCleanup: (turnNumber, model, items) =>
+          ingest.cleanup({ jobId, turnNumber, model, arguments: items }),
         submit: (turnNumber, proposal): Promise<OutlineAnswer | null> =>
           transcriber.proposeOutline(turnNumber, proposal),
         publish: publishOutline,

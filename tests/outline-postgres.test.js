@@ -10,6 +10,13 @@ import {
 } from "../dist/features/outline/repository.js";
 import { createCoinDebateSandbox } from "../dist/features/account-wallet/debate-sandbox.js";
 import { applyEdits, emptyTurn } from "../dist/features/outline/reducer.js";
+import {
+  createCoinSandboxRepository,
+  createCoinSandboxOperatorRepository,
+} from "../dist/features/account-wallet/sandbox-repository.js";
+import { createSessionRepository } from "../dist/platform/auth/sessions.js";
+import { createSessionToken } from "../dist/platform/auth/session-tokens.js";
+import { attachSubject, openSandbox } from "./helpers/confirmations.js";
 
 // Decision 0012, pull request 3: the server's live outline. Fixtures are this
 // suite's own debates; window opening and freezing stay scoped to them.
@@ -438,5 +445,387 @@ describe("live AI outline storage", { skip: !ownerUrl || !runtimeUrl }, () => {
       { turnNumber: 1, itemId: "t1a1p1", side: "A" },
     ]);
     assert.equal(await signals(debateId), before + 1);
+  });
+
+  // Pull request 4: cleanup, final outlines, replay timeline, correlation.
+  async function withoutTrigger(table, trigger, work) {
+    const client = await owner.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query(`ALTER TABLE ${table} DISABLE TRIGGER ${trigger}`);
+      await work(client);
+      // Run the deferred room-signal triggers before re-enabling.
+      await client.query("SET CONSTRAINTS ALL IMMEDIATE");
+      await client.query(`ALTER TABLE ${table} ENABLE TRIGGER ${trigger}`);
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+  // Every window of the debate closed a moment ago.
+  const closeWindows = (debateId) =>
+    withoutTrigger("coin_debate_rounds", "coin_debate_round_guard", (c) =>
+      c.query(
+        `UPDATE coin_debate_rounds SET closes_at=clock_timestamp()-INTERVAL '1 millisecond',
+          opens_at=least(opens_at, clock_timestamp()-INTERVAL '2 seconds')
+        WHERE debate_id=$1`,
+        [debateId],
+      ),
+    );
+  // Their freeze happened this many seconds ago.
+  const frozeAgo = (debateId, seconds) =>
+    withoutTrigger("outline_windows", "outline_windows_append_only", (c) =>
+      c.query(
+        `UPDATE outline_windows SET frozen_at=clock_timestamp()-$2*INTERVAL '1 second'
+        WHERE debate_id=$1`,
+        [debateId, seconds],
+      ),
+    );
+  const cleanup = (turnNumber, items) => ({
+    jobId: "AJ_outline",
+    turnNumber,
+    model: "claude-sonnet-5-5",
+    arguments: items,
+  });
+  const item = (id, label, points = [], links = {}) => ({
+    id,
+    label,
+    points,
+    rebuts: null,
+    continues: null,
+    ...links,
+  });
+
+  it("accepts one cleanup per window within a minute of its freeze", async () => {
+    const { debateId } = await liveDebate();
+    await transcripts.ingest(
+      debateId,
+      update({
+        edits: [
+          proposal("add_argument", {
+            key: "k",
+            text: "Le nucléaire est pilotable",
+          }),
+          proposal("add_point", {
+            argument: "k",
+            text: "Il produit à la demande",
+          }),
+        ],
+      }),
+    );
+    const rewrite = cleanup(1, [
+      item("t1a1", "Le nucléaire est pilotable et sûr", [
+        "Il produit à la demande",
+        "Espèce d'idiot",
+        "Peu d'accidents graves",
+      ]),
+      item(null, "Les renouvelables ne suffisent pas", [], { rebuts: "t9a9" }),
+    ]);
+    assert.deepEqual((await outlines.applyCleanup(debateId, rewrite)).body, {
+      accepted: false,
+      reason: "not_frozen",
+    });
+    await closeWindows(debateId);
+    await outlines.freezeDue(500);
+    const before = await signals(debateId);
+    const accepted = await outlines.applyCleanup(debateId, rewrite);
+    assert.equal(accepted.status, 201);
+    assert.equal(accepted.body.dropped, 1, "the insult never becomes final");
+    assert.deepEqual(accepted.body.turn, {
+      turnNumber: 1,
+      side: "A",
+      language: "fr",
+      arguments: [
+        {
+          id: "t1a1",
+          label: "Le nucléaire est pilotable et sûr",
+          rebuts: null,
+          continues: null,
+        },
+        {
+          id: "t1a2",
+          label: "Les renouvelables ne suffisent pas",
+          rebuts: null,
+          continues: null,
+        },
+      ],
+      final: true,
+    });
+    const stored = (
+      await owner.query(
+        "SELECT final_outline, final_source, final_model FROM outline_windows WHERE debate_id=$1",
+        [debateId],
+      )
+    ).rows[0];
+    assert.equal(stored.final_source, "cleanup");
+    assert.equal(stored.final_model, "claude-sonnet-5-5");
+    assert.deepEqual(
+      stored.final_outline.arguments[0].points.map((point) => point.id),
+      ["t1a1p1", "t1a1p2"],
+      "the unchanged point keeps its live ID",
+    );
+    assert.equal(await signals(debateId), before + 1);
+    assert.equal(
+      (await outlines.applyCleanup(debateId, rewrite)).body.reason,
+      "final",
+    );
+    const snapshot = await outlines.snapshot(debateId);
+    assert.equal(snapshot.finals, 1);
+    assert.deepEqual(
+      (await outlines.applyCleanup(debateId, cleanup(2, [item(null, "Rien")])))
+        .body.reason,
+      "not_frozen",
+    );
+  });
+
+  it("keeps the frozen outline as final when no cleanup comes in time", async () => {
+    const { debateId } = await liveDebate();
+    await transcripts.ingest(
+      debateId,
+      update({ edits: [proposal("add_argument", { text: "Gelé tel quel" })] }),
+    );
+    await closeWindows(debateId);
+    await outlines.freezeDue(500);
+    assert.equal(
+      (
+        await outlines.applyCleanup(
+          debateId,
+          cleanup(1, [item("t1a1", "Hors d'atteinte ", ["idiot"])]),
+        )
+      ).status,
+      201,
+      "a cleanup whose points are all refused still keeps its label",
+    );
+    const other = await liveDebate();
+    await transcripts.ingest(
+      other.debateId,
+      update({ edits: [proposal("add_argument", { text: "Trop tard" })] }),
+    );
+    await closeWindows(other.debateId);
+    await outlines.freezeDue(500);
+    await frozeAgo(other.debateId, 61);
+    assert.equal(
+      (
+        await outlines.applyCleanup(
+          other.debateId,
+          cleanup(1, [item("t1a1", "Réécrit")]),
+        )
+      ).body.reason,
+      "late",
+    );
+    assert.ok((await outlines.finalizeDue(500)).finalized >= 1);
+    const final = (
+      await owner.query(
+        "SELECT final_outline, frozen_outline, final_source FROM outline_windows WHERE debate_id=$1",
+        [other.debateId],
+      )
+    ).rows[0];
+    assert.equal(final.final_source, "frozen");
+    assert.deepEqual(final.final_outline, final.frozen_outline);
+    assert.equal(
+      (await outlines.snapshot(other.debateId)).finals,
+      1,
+      "the ETag changes with it",
+    );
+    // Only labels the filter refuses drop a whole argument.
+    const empty = await liveDebate();
+    await transcripts.ingest(
+      empty.debateId,
+      update({ edits: [proposal("add_argument", { text: "Vide" })] }),
+    );
+    await closeWindows(empty.debateId);
+    await outlines.freezeDue(500);
+    assert.equal(
+      (
+        await outlines.applyCleanup(
+          empty.debateId,
+          cleanup(1, [item("t1a1", "idiot")]),
+        )
+      ).body.reason,
+      "empty",
+    );
+  });
+
+  it("serves the replay timeline in recording time", async () => {
+    const { debateId } = await liveDebate();
+    await transcripts.ingest(
+      debateId,
+      update({ edits: [proposal("add_argument", { text: "Premier" })] }),
+    );
+    await transcripts.ingest(
+      debateId,
+      update({
+        baseVersion: 1,
+        edits: [proposal("add_argument", { text: "Second" })],
+      }),
+    );
+    let timeline = await outlines.timeline(debateId);
+    assert.equal(timeline.timed, false);
+    assert.equal(timeline.complete, false);
+    assert.deepEqual(
+      timeline.versions.map((version) => [version.version, version.at]),
+      [
+        [1, null],
+        [2, null],
+      ],
+    );
+    await runtime.query(
+      `INSERT INTO recording_clocks(debate_id,egress_id,started_at)
+      SELECT $1,'egress-timeline',created_at-INTERVAL '5 seconds'
+      FROM outline_versions WHERE debate_id=$1 AND version=1`,
+      [debateId],
+    );
+    timeline = await outlines.timeline(debateId);
+    assert.equal(timeline.timed, true);
+    assert.equal(timeline.versions[0].at, 5000);
+    assert.ok(timeline.versions[1].at >= 5000);
+    assert.deepEqual(timeline.versions[1].edits[0].label, "Second");
+    assert.equal(timeline.turns[0].arguments.length, 2);
+    await closeWindows(debateId);
+    await outlines.freezeDue(500);
+    await frozeAgo(debateId, 61);
+    await outlines.finalizeDue(500);
+    await owner.query(
+      "UPDATE debates SET status='ended',live_ended_at=clock_timestamp() WHERE id=$1",
+      [debateId],
+    );
+    timeline = await outlines.timeline(debateId);
+    assert.equal(timeline.complete, true, "immutable from now on");
+    assert.equal(timeline.turns[0].final, true);
+  });
+
+  async function funded() {
+    const sandbox = createCoinSandboxRepository(runtime, {
+      rail: "simulation",
+    });
+    const operator = createCoinSandboxOperatorRepository(owner, {
+      rail: "simulation",
+    });
+    const id = await user();
+    const token = createSessionToken();
+    const generation = (
+      await owner.query("SELECT auth_generation FROM users WHERE id=$1", [id])
+    ).rows[0].auth_generation;
+    await createSessionRepository(runtime).create(
+      id,
+      token.tokenHash,
+      new Date(Date.now() + 600000),
+      { authGeneration: generation },
+    );
+    await attachSubject(owner, id);
+    await openSandbox(owner, id);
+    const context = { userId: id, sessionTokenHash: token.tokenHash };
+    await sandbox.initialize(context);
+    for (const purpose of ["center", "promotional"])
+      await operator.seedSandboxTreasury({
+        userId: id,
+        purpose,
+        amount: "1000000",
+        idempotencyKey: randomUUID(),
+      });
+    return context;
+  }
+  async function commit(windowId, side, { replayPositionMs } = {}) {
+    const context = await funded();
+    await windows.submit(context, windowId, randomUUID(), {
+      side,
+      limit: "1",
+      quantity: 10,
+      ...(replayPositionMs === undefined ? {} : { replayPositionMs }),
+    });
+  }
+  const windowOf = async (debateId, turnNumber) =>
+    (
+      await owner.query(
+        "SELECT id FROM coin_debate_rounds WHERE debate_id=$1 AND turn_number=$2",
+        [debateId, turnNumber],
+      )
+    ).rows[0].id;
+
+  it("correlates endorsement with each argument from revealed windows only", async () => {
+    const { debateId } = await liveDebate();
+    const first = await windowOf(debateId, 1);
+    // Two commitments before the argument appears, four after.
+    await commit(first, "YES");
+    await commit(first, "NO");
+    await transcripts.ingest(
+      debateId,
+      update({ edits: [proposal("add_argument", { text: "Pilotable" })] }),
+    );
+    for (const side of ["YES", "YES", "NO", "NO"]) await commit(first, side);
+    await nextTurn(debateId);
+    const second = await windowOf(debateId, 2);
+    await transcripts.ingest(
+      debateId,
+      update({
+        turnNumber: 2,
+        baseVersion: 1,
+        edits: [proposal("add_argument", { text: "Too expensive" })],
+      }),
+    );
+    await commit(second, "NO");
+    await closeWindows(debateId);
+    await outlines.freezeDue(500);
+    await frozeAgo(debateId, 61);
+    await outlines.finalizeDue(500);
+    // Unrevealed windows report nothing.
+    assert.deepEqual((await outlines.correlation(debateId)).windows, []);
+    // A replay viewer joins the first window after the argument appeared.
+    await owner.query(
+      "UPDATE debates SET status='ended',live_ended_at=clock_timestamp() WHERE id=$1",
+      [debateId],
+    );
+    const started = (
+      await owner.query("SELECT opens_at FROM coin_debate_rounds WHERE id=$1", [
+        first,
+      ])
+    ).rows[0].opens_at;
+    await runtime.query(
+      "INSERT INTO recording_clocks(debate_id,egress_id,started_at) VALUES($1,'egress-correlation',$2)",
+      [debateId, started],
+    );
+    const appearedMs = (
+      await owner.query(
+        `SELECT floor(extract(epoch FROM v.created_at-r.opens_at)*1000)::int AS ms
+        FROM outline_versions v, coin_debate_rounds r
+        WHERE v.debate_id=$1 AND v.version=1 AND r.id=$2`,
+        [debateId, first],
+      )
+    ).rows[0].ms;
+    await commit(first, "YES", { replayPositionMs: appearedMs + 10 });
+    await withoutTrigger("coin_debate_rounds", "coin_debate_round_guard", (c) =>
+      c.query(
+        `UPDATE coin_debate_rounds SET state='settled',result='{"snapshot":[]}'::jsonb,
+            revealed_at=clock_timestamp() WHERE debate_id=$1`,
+        [debateId],
+      ),
+    );
+    const correlation = await outlines.correlation(debateId);
+    assert.equal(correlation.minimumCount, 5);
+    assert.deepEqual(correlation.windows, [
+      { turnNumber: 1, side: "A", yesShare: 4 / 7, change: null },
+      { turnNumber: 2, side: "B", yesShare: null, change: null },
+    ]);
+    assert.deepEqual(correlation.arguments, [
+      {
+        id: "t1a1",
+        turnNumber: 1,
+        side: "A",
+        label: "Pilotable",
+        thread: "t1a1",
+        onScreenShare: 5 / 7,
+      },
+      {
+        id: "t2a1",
+        turnNumber: 2,
+        side: "B",
+        label: "Too expensive",
+        thread: "t2a1",
+        onScreenShare: null,
+      },
+    ]);
   });
 });

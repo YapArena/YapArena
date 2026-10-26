@@ -21,6 +21,16 @@ export function chartPoints(items: RoundPoint[]) {
   }));
 }
 
+/**
+ * Decision 0012: the chart heading's text for a settled turn window, from
+ * its final AI outline's argument labels. It replaces the manual argument
+ * label for turn windows; null when the window has no final outline.
+ */
+export function windowArgumentLabel(labels: readonly string[]) {
+  const clean = labels.map((label) => label.trim()).filter(Boolean);
+  return clean.length ? clean.join(" · ") : null;
+}
+
 export function nearestRound<T extends { x: number }>(points: T[], x: number) {
   if (!Number.isFinite(x) || !points.length) return null;
   return points.reduce((nearest, point) =>

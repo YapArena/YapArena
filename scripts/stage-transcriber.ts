@@ -30,7 +30,7 @@ const files: [string, string][] = [
     "src/features/transcription/protocol.ts",
   ],
   ["src/features/transcription/agent", "src/features/transcription/agent"],
-  ...["reducer.ts", "moderation.ts", "public-types.ts"].map(
+  ...["reducer.ts", "moderation.ts", "public-types.ts", "cleanup.ts"].map(
     (name): [string, string] => [
       `src/features/outline/${name}`,
       `src/features/outline/${name}`,

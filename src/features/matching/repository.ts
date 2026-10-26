@@ -3,7 +3,11 @@ import type { Pool, PoolClient } from "pg";
 import { withTransaction } from "../../platform/transaction.ts";
 import {
   BOOKING_LEAD_SECONDS,
+  CHALLENGE_PENDING_DAYS,
   DEFAULT_MAXIMUM_DURATION_SECONDS,
+  NOW_RESPONSE_SECONDS,
+  ONLINE_SECONDS,
+  OPEN_CHALLENGES_LIMIT,
   QUEUE_JOIN_SECONDS,
   SCHEDULED_JOIN_SECONDS,
 } from "./timings.ts";
@@ -28,11 +32,21 @@ export interface MatchRequest {
   sideBLabel: string;
   proposition: string;
   requestedSide: Side;
-  scheduledAt: Date;
+  // The agreed time, or the earliest proposed one; null for a "now" challenge.
+  scheduledAt: Date | null;
   expiresAt: Date;
   debateId: string | null;
   debateSlug: string | null;
   createdAt: Date;
+  mode?: "now" | "scheduled";
+  // While set and in the future, an online target is answering a "now" challenge.
+  respondBy?: Date | null;
+}
+
+export interface TimeProposal {
+  id: string;
+  proposedBy: string;
+  startsAt: Date;
 }
 
 export interface EventRecord {
@@ -61,7 +75,8 @@ const requestFields = `r.id, r.kind, r.status, r.initiator_user_id AS "initiator
   t.side_a_label AS "sideALabel", t.side_b_label AS "sideBLabel",
   r.proposition, r.requested_side AS "requestedSide", r.scheduled_at AS "scheduledAt",
   r.expires_at AS "expiresAt", r.debate_id AS "debateId",
-  d.slug AS "debateSlug", r.created_at AS "createdAt"`;
+  d.slug AS "debateSlug", r.created_at AS "createdAt", r.mode,
+  r.respond_by AS "respondBy"`;
 const eventFields = `id, slug, status, publication_state AS "publicationState",
   topic_id AS "topicId", proposition, speaker_a_profile_id AS "speakerAProfileId",
   speaker_b_profile_id AS "speakerBProfileId", rules_version AS "rulesVersion",
@@ -419,31 +434,133 @@ export async function retireOpenQueueRequests(client: PoolClient) {
   return retired.rows.length;
 }
 
+// Shortly before a scheduled debate, both speakers get an in-app reminder, once.
+export async function remindScheduledDebate(
+  client: PoolClient,
+  debateId: string,
+  status: string,
+) {
+  await record(client, { debateId }, null, "reminded", status, status);
+  const speakers = await client.query<{ userId: string }>(
+    `SELECT user_id AS "userId" FROM event_participants WHERE debate_id = $1 AND active`,
+    [debateId],
+  );
+  for (const speaker of speakers.rows)
+    await notify(
+      client,
+      speaker.userId,
+      "event.starting",
+      "Your debate starts in a few minutes. Join now.",
+      { debateId },
+    );
+}
+
+// A "now" challenge nobody answered in time stays open: it can still be accepted while the
+// challenger is online, or either player proposes a time.
+export async function settleUnansweredNowChallenges(client: PoolClient) {
+  const settled = await client.query<{
+    id: string;
+    initiatorUserId: string;
+    targetUserId: string;
+  }>(
+    `UPDATE match_requests SET respond_by = NULL, updated_at = CURRENT_TIMESTAMP
+     WHERE status = 'open' AND respond_by IS NOT NULL AND respond_by <= CURRENT_TIMESTAMP
+     RETURNING id, initiator_user_id AS "initiatorUserId", target_user_id AS "targetUserId"`,
+  );
+  for (const entry of settled.rows) {
+    await record(
+      client,
+      { requestId: entry.id },
+      null,
+      "unanswered",
+      "open",
+      "open",
+    );
+    await notify(
+      client,
+      entry.initiatorUserId,
+      "challenge.unanswered",
+      "Your challenge to debate now wasn't answered in time. It stays open so you can agree a time.",
+      { requestId: entry.id },
+    );
+    await notify(
+      client,
+      entry.targetUserId,
+      "challenge.unanswered",
+      "You missed a challenge to debate now. You can still accept it while they're online, or propose a time.",
+      { requestId: entry.id },
+    );
+  }
+  return settled.rows.length;
+}
+
+// A "now" challenge can reach a player seen on the site this recently.
+export async function isOnline(client: PoolClient, userId: string) {
+  const result = await client.query(
+    `SELECT 1 FROM matchmaking_presence WHERE user_id = $1
+       AND seen_at > CURRENT_TIMESTAMP - make_interval(secs => ${ONLINE_SECONDS})`,
+    [userId],
+  );
+  return Boolean(result.rows[0]);
+}
+
+async function openProposals(client: PoolClient, requestId: string) {
+  const result = await client.query<TimeProposal>(
+    `SELECT id, proposed_by AS "proposedBy", starts_at AS "startsAt"
+     FROM challenge_time_proposals WHERE request_id = $1 AND status = 'open'
+     ORDER BY starts_at FOR UPDATE`,
+    [requestId],
+  );
+  return result.rows;
+}
+
+async function addProposals(
+  client: PoolClient,
+  requestId: string,
+  proposerId: string,
+  times: readonly Date[],
+) {
+  for (const time of times)
+    await client.query(
+      `INSERT INTO challenge_time_proposals (request_id, proposed_by, starts_at, status)
+       VALUES ($1, $2, $3, 'open')`,
+      [requestId, proposerId, time],
+    );
+}
+
 async function completeMatch(
   client: PoolClient,
   request: MatchRequest,
-  accepterId: string,
+  secondUserId: string,
   actorId: string,
+  booking: { mode: "now" | "scheduled"; at: Date | null } = {
+    mode: "scheduled",
+    at: request.scheduledAt,
+  },
 ) {
   if (
     request.status !== "open" ||
     new Date(request.expiresAt).getTime() <= Date.now()
   )
     throw new MatchConflictError("request is no longer open");
-  if (request.initiatorUserId === accepterId)
+  if (request.initiatorUserId === secondUserId)
     throw new MatchConflictError("participants must be distinct");
+  if (!booking.at) throw new MatchConflictError("propose a time first");
   return createPairedEvent(client, {
     topicId: request.topicId,
     proposition: request.proposition,
     sideAUserId:
-      request.requestedSide === "A" ? request.initiatorUserId : accepterId,
+      request.requestedSide === "A" ? request.initiatorUserId : secondUserId,
     sideBUserId:
-      request.requestedSide === "B" ? request.initiatorUserId : accepterId,
-    scheduledAt: request.scheduledAt,
-    booking: "scheduled",
+      request.requestedSide === "B" ? request.initiatorUserId : secondUserId,
+    scheduledAt: booking.at,
+    booking: booking.mode,
     actorId,
     acceptedRequestId: request.id,
-    notice: "Your debate is scheduled.",
+    notice:
+      booking.mode === "now"
+        ? "Your debate is ready. Join now."
+        : "Your debate is scheduled.",
   });
 }
 
@@ -507,21 +624,43 @@ export function createMatchingRepository(database: Pool) {
         targetHandle?: string;
         proposition: string;
         requestedSide: Side;
-        scheduledAt: Date;
+        // The open list's single time, or a challenge's only proposed time.
+        scheduledAt?: Date;
+        // A direct challenge is either "now" or proposes one to three times (Decision 0011).
+        mode?: "now" | "scheduled";
+        proposedTimes?: readonly Date[];
       },
     ) {
+      const mode =
+        input.kind === "direct" ? (input.mode ?? "scheduled") : "scheduled";
+      const times =
+        mode === "now"
+          ? []
+          : [
+              ...(input.proposedTimes?.length
+                ? input.proposedTimes
+                : input.scheduledAt
+                  ? [input.scheduledAt]
+                  : []),
+            ].sort((a, b) => a.getTime() - b.getTime());
+      if (mode === "scheduled" && !times.length)
+        throw new MatchConflictError("propose at least one time");
       return withTransaction(database, async (client) => {
         await lockUsers(client, userId);
         await profileFor(client, userId);
-        await ensureAvailable(
-          client,
-          userId,
-          reservationFor(
-            "scheduled",
-            input.scheduledAt,
-            (await activeRules(client)).rules,
-          ),
-        );
+        const { rules } = await activeRules(client);
+        if (mode === "now")
+          await ensureAvailable(
+            client,
+            userId,
+            reservationFor("now", new Date(), rules),
+          );
+        for (const time of times)
+          await ensureAvailable(
+            client,
+            userId,
+            reservationFor("scheduled", time, rules),
+          );
         const expired = await client.query<{
           id: string;
           targetUserId: string | null;
@@ -549,12 +688,19 @@ export function createMatchingRepository(database: Pool) {
               { requestId: entry.id },
             );
         }
-        const outgoing = await client.query(
-          "SELECT 1 FROM match_requests WHERE initiator_user_id = $1 AND status = 'open' LIMIT 1",
-          [userId],
+        // One open post on the old list; several open challenges (Decision 0011).
+        const outgoing = await client.query<{ count: number }>(
+          `SELECT count(*)::int AS count FROM match_requests WHERE initiator_user_id = $1
+             AND status = 'open' AND kind = $2`,
+          [userId, input.kind],
         );
-        if (outgoing.rows[0])
+        const open = outgoing.rows[0]?.count ?? 0;
+        if (input.kind === "queue" && open > 0)
           throw new MatchConflictError("an outgoing request is already open");
+        if (open >= OPEN_CHALLENGES_LIMIT)
+          throw new MatchConflictError(
+            `you can have ${OPEN_CHALLENGES_LIMIT} open challenges at a time`,
+          );
         const topic = await client.query<{ id: string }>(
           "SELECT id FROM topics WHERE slug = $1 AND publication_state = 'published'",
           [input.topicSlug],
@@ -571,17 +717,40 @@ export function createMatchingRepository(database: Pool) {
           if (!targetId) throw new MatchNotFoundError("participant not found");
           if (targetId === userId)
             throw new MatchConflictError("participants must be distinct");
+          const already = await client.query(
+            `SELECT 1 FROM match_requests WHERE initiator_user_id = $1 AND target_user_id = $2
+               AND status = 'open' AND kind = 'direct'`,
+            [userId, targetId],
+          );
+          if (already.rows[0])
+            throw new MatchConflictError(
+              "you already have an open challenge with this player",
+            );
         }
-        const expiresAt = new Date(
-          Math.min(
-            Date.now() + 24 * 60 * 60 * 1000,
-            input.scheduledAt.getTime() - 30 * 60 * 1000,
-          ),
-        );
+        const scheduledAt = times[0] ?? null;
+        const expiresAt =
+          input.kind === "direct"
+            ? new Date(
+                Date.now() + CHALLENGE_PENDING_DAYS * 24 * 60 * 60 * 1000,
+              )
+            : new Date(
+                Math.min(
+                  Date.now() + 24 * 60 * 60 * 1000,
+                  scheduledAt!.getTime() - 30 * 60 * 1000,
+                ),
+              );
+        // A "now" challenge waits two minutes for an online target; otherwise it is pending.
+        const answering =
+          mode === "now" &&
+          targetId !== null &&
+          (await isOnline(client, targetId));
+        const respondBy = answering
+          ? new Date(Date.now() + NOW_RESPONSE_SECONDS * 1000)
+          : null;
         const created = await client.query<MatchRequest>(
           `INSERT INTO match_requests (kind, status, initiator_user_id, target_user_id,
-             topic_id, proposition, requested_side, scheduled_at, expires_at)
-           VALUES ($1, 'open', $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+             topic_id, proposition, requested_side, scheduled_at, expires_at, mode, respond_by)
+           VALUES ($1, 'open', $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
           [
             input.kind,
             userId,
@@ -589,12 +758,16 @@ export function createMatchingRepository(database: Pool) {
             topic.rows[0].id,
             input.proposition,
             input.requestedSide,
-            input.scheduledAt,
+            scheduledAt,
             expiresAt,
+            mode,
+            respondBy,
           ],
         );
         const request = await requestById(client, created.rows[0]!.id);
         if (!request) throw new Error("created request was not returned");
+        if (input.kind === "direct")
+          await addProposals(client, request.id, userId, times);
         await record(
           client,
           { requestId: request.id },
@@ -608,21 +781,129 @@ export function createMatchingRepository(database: Pool) {
             client,
             targetId,
             "challenge.received",
-            "You have a new debate challenge.",
+            answering
+              ? "You are challenged to debate now. Answer within two minutes."
+              : "You have a new debate challenge.",
             { requestId: request.id },
           );
         return request;
       });
     },
+    // Either player answers the other's latest times with one to three new ones.
+    async proposeTimes(
+      userId: string,
+      requestId: string,
+      times: readonly Date[],
+    ) {
+      return withTransaction(database, async (client) => {
+        const initial = await requestById(client, requestId);
+        if (
+          !initial ||
+          initial.kind !== "direct" ||
+          (initial.initiatorUserId !== userId &&
+            initial.targetUserId !== userId)
+        )
+          throw new MatchNotFoundError("request not found");
+        await lockUsers(client, initial.initiatorUserId, initial.targetUserId!);
+        const request = await requestById(client, requestId, true);
+        if (
+          !request ||
+          request.status !== "open" ||
+          new Date(request.expiresAt).getTime() <= Date.now()
+        )
+          throw new MatchConflictError("request is no longer open");
+        const { rules } = await activeRules(client);
+        const sorted = [...times].sort((a, b) => a.getTime() - b.getTime());
+        for (const time of sorted)
+          await ensureAvailable(
+            client,
+            userId,
+            reservationFor("scheduled", time, rules),
+          );
+        await client.query(
+          `UPDATE challenge_time_proposals SET status = 'superseded', updated_at = CURRENT_TIMESTAMP
+           WHERE request_id = $1 AND status = 'open'`,
+          [requestId],
+        );
+        await addProposals(client, requestId, userId, sorted);
+        await client.query(
+          `UPDATE match_requests SET scheduled_at = $2, mode = 'scheduled', respond_by = NULL,
+             updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+          [requestId, sorted[0]],
+        );
+        await record(client, { requestId }, userId, "proposed", "open", "open");
+        await notify(
+          client,
+          userId === request.initiatorUserId
+            ? request.targetUserId!
+            : request.initiatorUserId,
+          "challenge.proposed",
+          "New times were proposed for your debate challenge.",
+          { requestId },
+        );
+        return (await requestById(client, requestId))!;
+      });
+    },
+    // Published players matching a handle prefix or part of a display name.
+    async searchPeople(userId: string, query: string) {
+      const escaped = query.replace(/[\\%_]/g, (character) => `\\${character}`);
+      const result = await database.query<{
+        handle: string;
+        displayName: string;
+      }>(
+        `SELECT handle, display_name AS "displayName" FROM public_profiles
+         WHERE publication_state = 'published' AND is_demo = false AND user_id IS NOT NULL
+           AND user_id <> $1 AND (handle LIKE $2 OR display_name ILIKE $3)
+         ORDER BY handle = $4 DESC, handle LIMIT 8`,
+        [
+          userId,
+          `${escaped.toLowerCase()}%`,
+          `%${escaped}%`,
+          query.toLowerCase(),
+        ],
+      );
+      return result.rows;
+    },
+    // A player's requests, with both players' names and the debate's status for the challenge list.
     async listRequests(userId: string) {
-      const result = await database.query<MatchRequest>(
-        `SELECT ${requestFields} FROM match_requests r JOIN topics t ON t.id = r.topic_id
+      const result = await database.query<
+        MatchRequest & {
+          initiatorHandle: string | null;
+          initiatorName: string | null;
+          targetHandle: string | null;
+          targetName: string | null;
+          debateStatus: string | null;
+        }
+      >(
+        `SELECT ${requestFields}, d.status AS "debateStatus", pi.handle AS "initiatorHandle",
+           pi.display_name AS "initiatorName", pt.handle AS "targetHandle",
+           pt.display_name AS "targetName"
+         FROM match_requests r JOIN topics t ON t.id = r.topic_id
          LEFT JOIN debates d ON d.id = r.debate_id
+         LEFT JOIN public_profiles pi ON pi.user_id = r.initiator_user_id
+         LEFT JOIN public_profiles pt ON pt.user_id = r.target_user_id
          WHERE r.initiator_user_id = $1 OR r.target_user_id = $1
          ORDER BY r.created_at DESC LIMIT 50`,
         [userId],
       );
-      return result.rows;
+      const proposals = await database.query<
+        TimeProposal & { requestId: string }
+      >(
+        `SELECT id, request_id AS "requestId", proposed_by AS "proposedBy", starts_at AS "startsAt"
+         FROM challenge_time_proposals WHERE request_id = ANY($1::uuid[]) AND status = 'open'
+         ORDER BY starts_at`,
+        [result.rows.map((request) => request.id)],
+      );
+      return result.rows.map((request) => ({
+        ...request,
+        proposals: proposals.rows
+          .filter((proposal) => proposal.requestId === request.id)
+          .map(({ id, proposedBy, startsAt }) => ({
+            id,
+            proposedBy,
+            startsAt,
+          })),
+      }));
     },
     async listQueue() {
       const result = await database.query<MatchRequest>(
@@ -634,21 +915,79 @@ export function createMatchingRepository(database: Pool) {
       );
       return result.rows;
     },
-    async acceptRequest(userId: string, requestId: string) {
+    // The target accepts "now", or either player accepts one of the other's proposed times.
+    async acceptRequest(
+      userId: string,
+      requestId: string,
+      choice: { proposalId?: string } = {},
+    ) {
       return withTransaction(database, async (client) => {
         const initial = await requestById(client, requestId);
-        if (
-          !initial ||
-          initial.kind !== "direct" ||
-          initial.targetUserId !== userId
-        )
+        const participant = (request: MatchRequest | null) =>
+          request?.kind === "direct" &&
+          (request.targetUserId === userId ||
+            request.initiatorUserId === userId);
+        if (!initial || !participant(initial))
           throw new MatchNotFoundError("request not found");
-        await lockUsers(client, initial.initiatorUserId, userId);
+        await lockUsers(client, initial.initiatorUserId, initial.targetUserId!);
         const request = await requestById(client, requestId, true);
-        if (!request) throw new MatchNotFoundError("request not found");
-        if (request.kind !== "direct" || request.targetUserId !== userId)
+        if (!request || !participant(request))
           throw new MatchNotFoundError("request not found");
-        return completeMatch(client, request, userId, userId);
+        const target = request.targetUserId!;
+        if (request.mode === "now" && !choice.proposalId) {
+          if (userId !== target)
+            throw new MatchConflictError("wait for the other player to accept");
+          const answering =
+            request.respondBy &&
+            new Date(request.respondBy).getTime() > Date.now();
+          if (!answering && !(await isOnline(client, request.initiatorUserId)))
+            throw new MatchConflictError(
+              "the other player isn't online now; propose a time instead",
+            );
+          return completeMatch(client, request, target, userId, {
+            mode: "now",
+            at: new Date(),
+          });
+        }
+        const proposals = await openProposals(client, requestId);
+        if (!proposals.length) {
+          // Requests opened before time proposals: the target accepts the original time.
+          if (userId !== target)
+            throw new MatchConflictError("wait for the other player to accept");
+          return completeMatch(client, request, target, userId);
+        }
+        const chosen = choice.proposalId
+          ? proposals.find((proposal) => proposal.id === choice.proposalId)
+          : proposals.length === 1
+            ? proposals[0]
+            : undefined;
+        if (!chosen)
+          throw new MatchConflictError(
+            choice.proposalId
+              ? "that time is no longer proposed"
+              : "choose one of the proposed times",
+          );
+        if (chosen.proposedBy === userId)
+          throw new MatchConflictError(
+            "the other player has to accept the times you proposed",
+          );
+        if (new Date(chosen.startsAt).getTime() <= Date.now() + 5 * 60 * 1000)
+          throw new MatchConflictError("that time has passed; propose another");
+        const event = await completeMatch(client, request, target, userId, {
+          mode: "scheduled",
+          at: new Date(chosen.startsAt),
+        });
+        await client.query(
+          `UPDATE challenge_time_proposals SET status = CASE WHEN id = $2 THEN 'accepted'
+             ELSE 'closed' END, updated_at = CURRENT_TIMESTAMP
+           WHERE request_id = $1 AND status = 'open'`,
+          [requestId, chosen.id],
+        );
+        await client.query(
+          "UPDATE match_requests SET scheduled_at = $2 WHERE id = $1",
+          [requestId, chosen.startsAt],
+        );
+        return event;
       });
     },
     async joinQueue(userId: string, requestId: string) {

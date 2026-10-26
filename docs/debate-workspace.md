@@ -143,7 +143,10 @@ LiveKit room. It shows the active speaker's latest words from the transcriber ag
 height so nothing below moves, and a Captions button turns it off for this browser.
 Below the video, an "AI outline" panel shows the active turn's arguments and points in the
 speaker's language, earlier turns underneath, and the debater's own flags. It has a fixed height
-and scrolls inside itself; live changes arrive over LiveKit and are highlighted briefly.
+and scrolls inside itself; live changes arrive over LiveKit and are highlighted briefly. After
+each turn a cleanup replaces that turn's entry with its final outline. On a replay the panel
+follows the video: it shows the outline as it was at the playing position, with earlier turns'
+final outlines.
 
 ## Verification and operation
 
