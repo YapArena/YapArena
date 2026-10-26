@@ -40,6 +40,7 @@ to its verifiers. Application processes receive runtime credentials only.
 | `verify-public-bots-browser.ts` | Owner seed idempotency, real worker settlement, public homepage/expanded/debate refresh, consent, synthetic labels and private/unrevealed/hidden exclusions. Called by the A4 verifier.                                                                                                 |
 | `verify-homepage-browser.ts`    | Six responsive widths, carousel/argument/ticker controls, pointer/touch/keyboard charts, reduced motion, follows/auth states, canonical navigation, no-JS fallback, unavailable data, CSP and axe checks. Controlled component repositories/auth responses.                             |
 | `verify-hero-browser.ts`        | Real synthetic WebM playback, one-preview handoff, looping, hover/click/mobile navigation, reduced motion, Save-Data and authorization-denial behavior.                                                                                                                                 |
+| `verify-matchmaking-browser.ts` | Two accounts through the live queue (opposite sides, both accept in 30 seconds, both open the room), the automatic no-show and a "now" challenge accepted from its dialog. Run from the isolation harness on the fresh database, without LiveKit.                                       |
 
 The existing community, replay pipeline, packaging, backup/restore, container,
 monitoring and deployment-configuration gates remain separate and unchanged.
