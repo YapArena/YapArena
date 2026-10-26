@@ -81,9 +81,14 @@ web and worker processes alike.
   settles or is voided. It carries no content.
 - **Public window list**, `GET /api/public/debates/:id/windows` (only with the flag):
   `{ debateId, eventStatus, serverNow, windows: [{ id, turnNumber, side, opensAt, closesAt,
-state, voidReason }] }`, the latest 100 windows in turn order. No orders, counts, prices or
-  seeds. The signed-in view (`GET /api/coin-sandbox/debates/:id/rounds`) adds `kind`
-  (`turn`/`manual`), `turnNumber`, `side` and `voidReason` to each round.
+state, voidReason }] }`, the latest 100 windows in turn order. No orders, counts or seeds, and
+  no prices before the reveal. Each window also has `pricing`, for the betting chart: once the
+  window is settled (revealed), the signed-in view's aggregate `pricing` (`share`, `a`, `b`,
+  `price`, `branch`, `reason`), and `null` before. Founder decision, 2026-10-26: revealed
+  per-window results are public at any number of commitments, even when the medians are one
+  account's limits. The correlation (PR 4) keeps its own five-commitment minimum. The signed-in
+  view (`GET /api/coin-sandbox/debates/:id/rounds`) adds `kind` (`turn`/`manual`), `turnNumber`,
+  `side` and `voidReason` to each round.
 
 ## Pull request 1b: the founder's round rules
 

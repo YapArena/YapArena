@@ -52,6 +52,12 @@ is an A4 endorsement in one turn's 60-second window; there is no winner (F09).
   one-time explanation shows the first time the ticket opens on a device.
 - A window that closes before the viewer confirms reserves nothing; the ticket keeps its values
   and offers the next turn.
+- The next turn offers "Same as last turn", which pre-fills the ticket with the previous
+  position's side, size and read; it still needs the confirm tap. Before a scheduled debate
+  starts, "Get ready" saves a default size and read on the device, and every ticket opens with
+  them. Neither places anything by itself.
+- At reveal, a results card lists each revealed position (price from the position's side, final
+  yes share and result) under a total; positions still locked stay in "Your positions".
 - Five-day reveal stays for user-created debates (F11): live viewers see their receipt and the
   participant count (F12), never side totals, until the 120-hour close. Debaters can't take a
   position in their own debate (F14). Replay viewers join only the window of the turn that's

@@ -254,6 +254,135 @@ export function reasonText(reason: EligibilityReason | null) {
   }
 }
 
+/**
+ * The read (1–99 %) behind a position's yes-scale limit. A Yes ceiling is the
+ * read and a No ceiling is 100 minus it, so the limit is the read either way.
+ */
+export function readFromLimit(limit: string) {
+  return Math.min(99, Math.max(1, Math.round(Number(limit) * 100)));
+}
+
+/** The viewer's latest turn position before a turn, for "Same as last turn". */
+export function lastPosition(
+  rounds: readonly StakeRound[],
+  beforeTurn: number,
+) {
+  let last: StakeRound | null = null;
+  for (const round of rounds)
+    if (
+      round.kind === "turn" &&
+      round.own &&
+      round.turnNumber !== null &&
+      round.turnNumber < beforeTurn &&
+      (last === null || round.turnNumber > (last.turnNumber ?? 0))
+    )
+      last = round;
+  return last;
+}
+
+/** "Same as last turn · Yes · 10 · read 62%". */
+export function repeatLabel(own: NonNullable<StakeRound["own"]>) {
+  return `Same as last turn · ${own.side === "YES" ? "Yes" : "No"} · ${own.quantity} · read ${readFromLimit(own.limit)}%`;
+}
+
+/** A size and read saved on this device with "Get ready". */
+export interface StakeDefaults {
+  size: number;
+  read: number;
+}
+
+/** Saved "Get ready" defaults from device storage, or null when unusable. */
+export function parseDefaults(text: string | null): StakeDefaults | null {
+  if (!text) return null;
+  let value: unknown;
+  try {
+    value = JSON.parse(text);
+  } catch {
+    return null;
+  }
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    !("size" in value) ||
+    !("read" in value)
+  )
+    return null;
+  const { size, read } = value;
+  return typeof size === "number" &&
+    typeof read === "number" &&
+    Number.isInteger(size) &&
+    Number.isInteger(read) &&
+    size >= 1 &&
+    size <= maximumSize &&
+    read >= 1 &&
+    read <= 99
+    ? { size, read }
+    : null;
+}
+
+const byTurn = (a: StakeRound, b: StakeRound) =>
+  (a.turnNumber ?? 0) - (b.turnNumber ?? 0);
+
+/** The viewer's turn positions split into revealed and still locked. */
+export function resultsSummary(rounds: readonly StakeRound[]) {
+  const mine = rounds
+    .filter((round) => round.kind === "turn" && round.own)
+    .sort(byTurn);
+  const revealed = mine.filter(
+    (round) =>
+      round.state === "void" ||
+      (round.state === "settled" && round.outcome !== undefined),
+  );
+  const locked = mine.filter((round) => !revealed.includes(round));
+  const net = revealed.reduce(
+    (sum, round) =>
+      round.state === "settled" && round.outcome
+        ? sum + BigInt(round.outcome.net)
+        : sum,
+    0n,
+  );
+  return { revealed, locked, net };
+}
+
+/** "Results are in · +3.40 YC across 4 turns". */
+export function resultsHeading(
+  summary: Pick<
+    ReturnType<typeof resultsSummary>,
+    "revealed" | "locked" | "net"
+  >,
+) {
+  const count = summary.revealed.length;
+  return `${summary.locked.length ? "Results so far" : "Results are in"} · ${signedCoins(summary.net)} across ${count} ${count === 1 ? "turn" : "turns"}`;
+}
+
+/**
+ * One revealed position: "Turn 3 · Yes · 10 · paid 54¢ each · 58% said yes ·
+ * +0.40 YC". Prices are from the position's side: a No pays 100 minus the
+ * drawn yes price.
+ */
+export function resultLine(round: StakeRound) {
+  const own = round.own;
+  if (!own) return "";
+  const head = `Turn ${round.turnNumber} · ${own.side === "YES" ? "Yes" : "No"} · ${own.quantity}`;
+  if (round.state === "void") return `${head} · voided · refunded`;
+  const yes = percent(round.pricing?.price);
+  const sidePrice = yes === null ? null : own.side === "YES" ? yes : 100 - yes;
+  const share = percent(round.pricing?.share);
+  const executed = round.outcome?.executed === true;
+  const parts = [head];
+  if (executed) {
+    if (sidePrice !== null) parts.push(`paid ${sidePrice}¢ each`);
+  } else
+    parts.push(
+      sidePrice === null ? "not filled" : `not filled at ${sidePrice}¢`,
+    );
+  if (share !== null) parts.push(`${share}% said yes`);
+  parts.push(
+    executed && round.outcome ? signedCoins(round.outcome.net) : "refunded",
+  );
+  return parts.join(" · ");
+}
+
 /** A position's status line in the "Your positions" list. */
 export function positionStatus(
   round: StakeRound,

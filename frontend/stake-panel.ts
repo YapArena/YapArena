@@ -9,14 +9,21 @@ import {
   ceilingCents,
   ceilingText,
   clock,
+  lastPosition,
   liveWindow,
   parseCeiling,
+  parseDefaults,
   parseSize,
   percent,
   positionStatus,
+  readFromLimit,
   reasonText,
+  repeatLabel,
   replayRound,
   replayWindow,
+  resultLine,
+  resultsHeading,
+  resultsSummary,
   secondsLeft,
   signedCoins,
   speakerLine,
@@ -83,6 +90,19 @@ if (root) {
   const positionsWrap = one<HTMLDetailsElement>("[data-stake-positions-wrap]");
   const positionsList = one("[data-stake-positions]");
   const positionsCount = one("[data-stake-positions-count]");
+  const repeat = one<HTMLButtonElement>("[data-stake-repeat]");
+  const ready = one<HTMLFormElement>("[data-stake-ready]");
+  const readySize = one<HTMLInputElement>(
+    '[data-stake-ready] input[name="size"]',
+  );
+  const readyRead = one<HTMLInputElement>(
+    '[data-stake-ready] input[name="read"]',
+  );
+  const readyReadOut = one("[data-stake-ready-read-out]");
+  const readyNote = one("[data-stake-ready-note]");
+  const results = one("[data-stake-results]");
+  const resultsTitle = one("[data-stake-results-title]");
+  const resultsList = one("[data-stake-results-list]");
   const review = one<HTMLDialogElement>("[data-stake-review]");
   const reviewTerms = one("[data-stake-review-terms]");
   const term = (name: string) => one(`[data-stake-term="${name}"]`);
@@ -135,6 +155,38 @@ if (root) {
     }
   };
   reviewChoice.checked = stored("yaparena-stake-review") === "1";
+  // The ticket's size and its chips move together.
+  function applySize(value: number) {
+    size = value;
+    sizeInput.value = String(value);
+    for (const chip of root!.querySelectorAll<HTMLButtonElement>(
+      "[data-stake-size]",
+    ))
+      chip.setAttribute(
+        "aria-pressed",
+        String(Number(chip.dataset.stakeSize) === value),
+      );
+  }
+  function applyReadySize(value: number) {
+    readySize.value = String(value);
+    for (const chip of root!.querySelectorAll<HTMLButtonElement>(
+      "[data-stake-ready-size]",
+    ))
+      chip.setAttribute(
+        "aria-pressed",
+        String(Number(chip.dataset.stakeReadySize) === value),
+      );
+  }
+  // "Get ready" defaults saved on this device open every ticket.
+  const defaultsKey = "yaparena-stake-defaults";
+  const defaults = parseDefaults(stored(defaultsKey));
+  if (defaults) {
+    applySize(defaults.size);
+    readInput.value = String(defaults.read);
+    applyReadySize(defaults.size);
+    readyRead.value = String(defaults.read);
+    readyReadOut.textContent = `${defaults.read}%`;
+  }
 
   async function coinApi<T>(
     path: string,
@@ -336,8 +388,10 @@ if (root) {
     if (unavailable) return "Yap Coins rounds aren't open on this debate.";
     if (eventStatus === "cancelled" || eventStatus === "void_review")
       return "This debate isn't taking answers. Any Yap Coins you placed are refunded.";
-    if (eventStatus === "scheduled" || eventStatus === "ready")
-      return "Windows open when the debate starts: one per speaking turn, 60 seconds each.";
+    if (eventStatus === "scheduled" || eventStatus === "ready") {
+      const start = root!.dataset.scheduledAt;
+      return `Windows open when the debate starts${start ? `, ${when(start)}` : ""}: one per speaking turn, 60 seconds each.`;
+    }
     if (current) {
       if (signedIn && !summary)
         return "Yap Coins aren't available on this site right now.";
@@ -362,24 +416,28 @@ if (root) {
         : "Play the replay to answer the turn that's playing.";
     return "Answers for this debate are closed.";
   }
-  function renderTicket(current: Target | null) {
-    const joinable =
+  function joinable(current: Target | null): current is Target {
+    // (A replay window needs the signed-in view's eligibility before it
+    // takes an answer; the next refresh brings it.)
+    return (
       current !== null &&
       (signedIn === false ||
         (summary !== null &&
           (current.round
             ? current.round.eligibility.canTakePosition
-            : current.via === "live")));
-    // (A replay window needs the signed-in view's eligibility before it
-    // takes an answer; the next refresh brings it.)
+            : current.via === "live")))
+    );
+  }
+  function renderTicket(current: Target | null) {
+    const open = joinable(current);
     for (const button of sideButtons) {
-      button.disabled = busy || !joinable;
+      button.disabled = busy || !open;
       button.setAttribute(
         "aria-pressed",
         String(button.dataset.stakeSide === side),
       );
     }
-    const showTicket = Boolean(joinable && signedIn && side);
+    const showTicket = Boolean(open && signedIn && side);
     ticket.hidden = !showTicket;
     if (!showTicket || !side || !current) return;
     const value = cents();
@@ -424,10 +482,44 @@ if (root) {
       }),
     );
   }
+  // The next turn offers the last position again; it pre-fills the ticket
+  // and still needs the confirm tap.
+  function renderRepeat(current: Target | null) {
+    const last =
+      joinable(current) && signedIn && !side && !current.round?.own
+        ? lastPosition(rounds, current.turnNumber)
+        : null;
+    repeat.hidden = !last?.own;
+    repeat.disabled = busy;
+    if (last?.own) repeat.textContent = repeatLabel(last.own);
+  }
+  function renderReady() {
+    ready.hidden = !(
+      windows &&
+      (windows.eventStatus === "scheduled" || windows.eventStatus === "ready")
+    );
+  }
+  // Revealed positions move from "Your positions" to the results card.
+  function renderResults() {
+    const outcome = resultsSummary(rounds);
+    results.hidden = !outcome.revealed.length;
+    const lines = outcome.revealed.map(resultLine);
+    const signature = [resultsHeading(outcome), ...lines].join("\n");
+    if (results.dataset.signature === signature) return;
+    results.dataset.signature = signature;
+    resultsTitle.textContent = outcome.revealed.length
+      ? resultsHeading(outcome)
+      : "";
+    resultsList.replaceChildren(
+      ...lines.map((text) => {
+        const item = document.createElement("li");
+        item.textContent = text;
+        return item;
+      }),
+    );
+  }
   function renderPositions() {
-    const mine = rounds
-      .filter((round) => round.own && round.kind === "turn")
-      .sort((a, b) => (a.turnNumber ?? 0) - (b.turnNumber ?? 0));
+    const mine = resultsSummary(rounds).locked;
     positionsWrap.hidden = !mine.length;
     positionsCount.textContent = mine.length ? `(${mine.length})` : "";
     positionsList.replaceChildren(
@@ -444,7 +536,10 @@ if (root) {
     const text = statusText(current);
     if (status.textContent !== text) status.textContent = text;
     renderTicket(current);
+    renderRepeat(current);
+    renderReady();
     renderReceipt(current);
+    renderResults();
     renderPositions();
     if (summary) {
       const available =
@@ -532,14 +627,51 @@ if (root) {
     "[data-stake-size]",
   ))
     chip.addEventListener("click", () => {
-      size = Number(chip.dataset.stakeSize);
-      sizeInput.value = String(size);
-      for (const other of root.querySelectorAll<HTMLButtonElement>(
-        "[data-stake-size]",
-      ))
-        other.setAttribute("aria-pressed", String(other === chip));
+      applySize(Number(chip.dataset.stakeSize));
       render();
     });
+  repeat.addEventListener("click", () => {
+    const current = target();
+    const last = current ? lastPosition(rounds, current.turnNumber) : null;
+    if (!last?.own) return;
+    side = last.own.side;
+    applySize(last.own.quantity);
+    readInput.value = String(readFromLimit(last.own.limit));
+    advanced.open = false;
+    ceilingInput.value = "";
+    errorLine.textContent = "";
+    render();
+    confirm.focus();
+  });
+  for (const chip of root.querySelectorAll<HTMLButtonElement>(
+    "[data-stake-ready-size]",
+  ))
+    chip.addEventListener("click", () =>
+      applyReadySize(Number(chip.dataset.stakeReadySize)),
+    );
+  readyRead.addEventListener("input", () => {
+    readyReadOut.textContent = `${readyRead.value}%`;
+  });
+  ready.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const chosen = parseSize(readySize.value);
+    if (chosen === null) {
+      readyNote.textContent =
+        "Enter a whole number of contracts from 1 to 100.";
+      return;
+    }
+    const read = Number(readyRead.value);
+    const saved = JSON.stringify({ size: chosen, read });
+    remember(defaultsKey, saved);
+    applyReadySize(chosen);
+    applySize(chosen);
+    readInput.value = String(read);
+    readyNote.textContent =
+      stored(defaultsKey) === saved
+        ? `Saved on this device. Your ticket will open with ${chosen} contracts and a ${read}% read.`
+        : `This browser didn't save it, so the ticket uses ${chosen} contracts and a ${read}% read on this page only.`;
+    render();
+  });
   sizeInput.addEventListener("input", () => {
     const value = parseSize(sizeInput.value);
     errorLine.textContent = value
