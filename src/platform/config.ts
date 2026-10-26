@@ -292,6 +292,18 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     bufferBytes: 65536,
   });
 
+  const matchmakingEnabled = environment.MATCHMAKING_ENABLED ?? "false";
+  if (!["true", "false"].includes(matchmakingEnabled))
+    throw new Error("MATCHMAKING_ENABLED must be true or false");
+  const matchmaking = Object.freeze({
+    enabled: matchmakingEnabled === "true",
+    liveDebateCapacity: parseInteger(
+      environment.LIVE_DEBATE_CAPACITY ?? "2",
+      "LIVE_DEBATE_CAPACITY",
+      { minimum: 1, maximum: 1000 },
+    ),
+  });
+
   if (!environments.has(nodeEnvironment)) {
     throw new Error("NODE_ENV must be development, test, or production");
   }
@@ -364,6 +376,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     replayPackaging,
     backgroundJobs: backgroundJobs === "true",
     communityStream,
+    matchmaking,
     a4Funding,
     a4Mode: a4Mode as "disabled" | "yap-coins" | "bots",
   });

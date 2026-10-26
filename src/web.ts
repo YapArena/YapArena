@@ -68,6 +68,7 @@ export function createWebServer(
   const {
     identity,
     matching,
+    matchmaking,
     community,
     measurement,
     a4,
@@ -108,6 +109,7 @@ export function createWebServer(
     discovery: createDiscoveryRepository(database),
     identity,
     matching,
+    matchmaking,
     media,
     mediaProvider,
     mediaAccountRevocation,

@@ -3,6 +3,7 @@ import { createA4Repository } from "./features/a4/repository.ts";
 import { createCoinDebateSandbox } from "./features/account-wallet/debate-sandbox.ts";
 import { createIdentityRepository } from "./features/identity/repository.ts";
 import { createMatchingRepository } from "./features/matching/repository.ts";
+import { createMatchmaking } from "./features/matching/matchmaking.ts";
 import { createMediaRepository } from "./features/media/repository.ts";
 import { createMediaProvider } from "./features/media/provider.ts";
 import { createMediaOperations } from "./features/media/operations.ts";
@@ -41,6 +42,11 @@ export function createServices({
 }: ServiceOptions) {
   const identity = createIdentityRepository(database);
   const matching = createMatchingRepository(database);
+  const matchmaking = config.matchmaking.enabled
+    ? createMatchmaking(database, {
+        liveDebateCapacity: config.matchmaking.liveDebateCapacity,
+      })
+    : undefined;
   const community = createCommunityRepository(database);
   const measurement = createMeasurementRepository(database);
   const a4 = createA4Repository(database, config.a4Mode, config.a4Funding);
@@ -112,6 +118,7 @@ export function createServices({
   return Object.freeze({
     identity,
     matching,
+    matchmaking,
     community,
     measurement,
     a4,
@@ -140,6 +147,7 @@ export function createServices({
       mediaAccountRevocation,
       identity,
       matching,
+      matchmaking,
       community,
       measurement,
       media,

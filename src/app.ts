@@ -12,6 +12,7 @@ import type { createMessageRepository } from "./features/messages/repository.ts"
 import type { createDiscoveryRepository } from "./features/discovery/repository.ts";
 import type { createIdentityRepository } from "./features/identity/repository.ts";
 import type { createMatchingRepository } from "./features/matching/repository.ts";
+import type { createMatchmaking } from "./features/matching/matchmaking.ts";
 import { createMediaTelemetry } from "./features/media/telemetry.ts";
 import type { createMediaRepository } from "./features/media/repository.ts";
 import type { createMediaProvider } from "./features/media/provider.ts";
@@ -32,6 +33,7 @@ import { createMessageRouter } from "./features/messages/router.ts";
 import { createDiscoveryRouter } from "./features/discovery/router.ts";
 import { createIdentityRouter } from "./features/identity/router.ts";
 import { createMatchingRouter } from "./features/matching/router.ts";
+import { createMatchmakingRouter } from "./features/matching/matchmaking-router.ts";
 import { createCommunityRouter } from "./features/community/router.ts";
 import {
   createMeasurementRouter,
@@ -110,6 +112,7 @@ export function createApp({
   discovery,
   identity,
   matching,
+  matchmaking,
   media,
   mediaProvider,
   mediaAccountRevocation,
@@ -148,6 +151,8 @@ export function createApp({
   discovery?: ReturnType<typeof createDiscoveryRepository>;
   identity?: ReturnType<typeof createIdentityRepository>;
   matching?: ReturnType<typeof createMatchingRepository>;
+  // Live topic queue (Decision 0011); present only when MATCHMAKING_ENABLED=true.
+  matchmaking?: ReturnType<typeof createMatchmaking>;
   media?: ReturnType<typeof createMediaRepository>;
   mediaProvider?: ReturnType<typeof createMediaProvider>;
   mediaAccountRevocation?: ReturnType<typeof createMediaAccountRevocation>;
@@ -454,6 +459,13 @@ export function createApp({
       "/api/matching",
       createRequireAuthentication({ sessions, environment }),
       createMatchingRouter({ matching, identity, media, recordProductAction }),
+    );
+  }
+  if (matchmaking && identity) {
+    app.use(
+      "/api/matchmaking",
+      createRequireAuthentication({ sessions, environment }),
+      createMatchmakingRouter({ matchmaking, identity, recordProductAction }),
     );
   }
   if (media && mediaProvider && matching && identity) {

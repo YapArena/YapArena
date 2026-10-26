@@ -47,6 +47,23 @@ describe("configuration", () => {
       assert.throws(() => loadConfig({ DATABASE_URL: databaseUrl, ...env }));
   });
 
+  it("enables the live queue only on request and bounds its capacity", () => {
+    assert.deepEqual(
+      loadConfig({
+        DATABASE_URL: databaseUrl,
+        MATCHMAKING_ENABLED: "true",
+        LIVE_DEBATE_CAPACITY: "100",
+      }).matchmaking,
+      { enabled: true, liveDebateCapacity: 100 },
+    );
+    for (const env of [
+      { MATCHMAKING_ENABLED: "yes" },
+      { LIVE_DEBATE_CAPACITY: "0" },
+      { LIVE_DEBATE_CAPACITY: "1001" },
+    ])
+      assert.throws(() => loadConfig({ DATABASE_URL: databaseUrl, ...env }));
+  });
+
   it("provides safe development defaults", () => {
     assert.deepEqual(loadConfig({ DATABASE_URL: databaseUrl }), {
       environment: "development",
@@ -70,6 +87,7 @@ describe("configuration", () => {
       replayPackaging,
       backgroundJobs: true,
       communityStream,
+      matchmaking: { enabled: false, liveDebateCapacity: 2 },
       a4Mode: "disabled",
       a4Funding: { starterCoins: 1000, refillCoins: 1000, botCoins: 1000 },
     });
@@ -114,6 +132,7 @@ describe("configuration", () => {
         replayPackaging,
         backgroundJobs: true,
         communityStream,
+        matchmaking: { enabled: false, liveDebateCapacity: 2 },
         a4Mode: "disabled",
         a4Funding: { starterCoins: 1000, refillCoins: 1000, botCoins: 1000 },
       },
