@@ -261,6 +261,21 @@ async function post(
     })
   ).id;
 }
+/**
+ * Interface 10 (results notice): a round its participants joined was revealed
+ * (settled) or voided. The payload is the bare user id; Postgres delivers it
+ * only if the transaction commits, and once per user per transaction.
+ */
+export const RESULTS_CHANNEL = "yaparena_results_v1";
+async function notifyResults(client: PoolClient, userIds: readonly string[]) {
+  if (!userIds.length) return;
+  await client.query(
+    "SELECT pg_notify($1, user_id) FROM unnest($2::text[]) AS user_id",
+    [RESULTS_CHANNEL, [...new Set(userIds)]],
+  );
+}
+/** The newest results one read returns. */
+export const RESULTS_LIMIT = 50;
 async function serial(client: PoolClient) {
   // Low-volume sandbox only. Admissions and settlement serialize before account
   // locks; this prevents settlement taking a partial population while enrolling.
@@ -590,6 +605,10 @@ export function createCoinDebateSandbox(
       "UPDATE coin_debate_rounds SET state='settled',result=$2::jsonb,revealed_at=clock_timestamp() WHERE id=$1",
       [roundId, JSON.stringify(result)],
     );
+    await notifyResults(
+      client,
+      orders.map((order) => order.user_id),
+    );
     return true;
   }
   // Opens the current speaking turn's trading window of one live debate, at
@@ -739,6 +758,10 @@ export function createCoinDebateSandbox(
           outcomes: [],
         }),
       ],
+    );
+    await notifyResults(
+      client,
+      orders.map((order) => order.user_id),
     );
     return { created: true };
   }
@@ -1335,6 +1358,62 @@ export function createCoinDebateSandbox(
     },
     // Public window timing for every viewer: no orders, counts, prices or
     // seeds. Null when the debate or its topic is not published.
+    /**
+     * Interface 10: the viewer's own rounds revealed (settled) or voided
+     * after `since`, newest first, across debates. Private to the viewer.
+     */
+    async results(context: SandboxContext, since: Date) {
+      return withTransaction(database, async (client) => {
+        await assertCallerSession(client, context);
+        const rows = (
+          await client.query<{
+            roundId: string;
+            debateId: string;
+            slug: string;
+            proposition: string;
+            turnNumber: number | null;
+            turnSide: "A" | "B" | null;
+            state: "settled" | "void";
+            voidReason: VoidReason | null;
+            side: Order["side"];
+            quantity: number;
+            outcome: Record<string, unknown> | null;
+            revealedAt: Date;
+          }>(
+            `SELECT r.id AS "roundId", r.debate_id AS "debateId", d.slug, r.proposition,
+              r.turn_number AS "turnNumber", r.turn_side AS "turnSide", r.state,
+              CASE WHEN r.state='void' THEN r.result->>'voidReason' END AS "voidReason",
+              o.side, o.quantity,
+              (SELECT x FROM jsonb_array_elements(r.result->'outcomes') x
+                WHERE x->>'participant'=o.user_id::text LIMIT 1) AS outcome,
+              r.revealed_at AS "revealedAt"
+            FROM coin_sandbox_requests q
+            JOIN coin_debate_orders o ON o.request_id=q.id AND o.user_id=q.user_id
+            JOIN coin_debate_rounds r ON r.id=o.round_id
+            JOIN debates d ON d.id=r.debate_id
+            WHERE q.user_id=$1 AND q.kind='stake' AND r.rail=$2
+              AND r.state IN ('settled','void') AND r.revealed_at>$3
+            ORDER BY r.revealed_at DESC, r.id LIMIT $4`,
+            [context.userId, rail, since, RESULTS_LIMIT],
+          )
+        ).rows;
+        return {
+          serverNow: new Date(),
+          results: rows.map(({ outcome, ...row }) => ({
+            ...row,
+            outcome: outcome
+              ? {
+                  status: String(outcome.status),
+                  premium: String(outcome.premium),
+                  fee: String(outcome.fee),
+                  payout: String(outcome.payout),
+                  net: String(outcome.net),
+                }
+              : null,
+          })),
+        };
+      });
+    },
     async publicWindows(debateId: string) {
       resource(debateId);
       const row = (
