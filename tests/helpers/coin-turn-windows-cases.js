@@ -430,6 +430,7 @@ describe(
           "closesAt",
           "id",
           "opensAt",
+          "pricing",
           "recording",
           "revealAt",
           "revealMode",
@@ -438,6 +439,7 @@ describe(
           "turnNumber",
           "voidReason",
         ]);
+        assert.equal(window.pricing, null, "nothing priced before the reveal");
         assert.equal(window.revealMode, "per_round");
         assert.equal(window.revealAt, window.closesAt, "reveals at its cutoff");
       }
@@ -466,6 +468,84 @@ describe(
         [debateId],
       );
       assert.equal(await windows.publicWindows(debateId), null);
+    });
+
+    it("publishes a revealed window's pricing at any size, never before the reveal", async () => {
+      const traders = [];
+      for (let index = 0; index < 5; index++) traders.push(await funded());
+      const orders = [
+        ["YES", "0.7"],
+        ["YES", "0.6"],
+        ["YES", "0.55"],
+        ["NO", "0.4"],
+        ["NO", "0.5"],
+      ];
+      const commit = async (roundId, count) => {
+        for (let index = 0; index < count; index++)
+          await windows.submit(traders[index], roundId, randomUUID(), {
+            side: orders[index][0],
+            limit: orders[index][1],
+            quantity: 10,
+          });
+      };
+      const priced = (view) =>
+        Object.fromEntries(view.windows.map((w) => [w.turnNumber, w.pricing]));
+      // Per-round: turn 1 gets five commitments, turn 2 one.
+      const debateId = await liveDebate();
+      await windows.openTurnWindows(20, [debateId]);
+      const [first] = await rounds(debateId);
+      await commit(first.id, 5);
+      await nextTurn(debateId);
+      await windows.openTurnWindows(20, [debateId]);
+      const second = (await rounds(debateId)).find((r) => r.turn_number === 2);
+      await commit(second.id, 1);
+      assert.deepEqual(priced(await windows.publicWindows(debateId)), {
+        1: null,
+        2: null,
+      });
+      await close(first.id);
+      await close(second.id);
+      await windows.advance(20);
+      const stored = Object.fromEntries(
+        (await rounds(debateId)).map((r) => [r.turn_number, r]),
+      );
+      assert.equal(stored[1].state, "settled");
+      assert.equal(stored[2].state, "settled");
+      const view = await windows.publicWindows(debateId);
+      const [one, two] = view.windows;
+      // The signed-in view's aggregate pricing, and nothing about any order.
+      assert.deepEqual(one.pricing, stored[1].result.pricing);
+      assert.deepEqual(Object.keys(one.pricing).sort(), [
+        "a",
+        "b",
+        "branch",
+        "price",
+        "reason",
+        "share",
+      ]);
+      assert.deepEqual(one.pricing.share, { n: "3", d: "5" });
+      const signedIn = (await windows.view(traders[0], debateId)).find(
+        (r) => r.id === first.id,
+      );
+      assert.deepEqual(one.pricing, signedIn.pricing);
+      // Founder, 2026-10-26: revealed results are public at any size.
+      assert.equal(two.state, "settled");
+      assert.deepEqual(two.pricing, stored[2].result.pricing);
+      assert.deepEqual(two.pricing.share, { n: "1", d: "1" });
+      // Five-day: a locked window shows nothing until its 120-hour close.
+      const fiveDay = await liveDebate({ reveal: "five_day" });
+      await windows.openTurnWindows(20, [fiveDay]);
+      const [locked] = await rounds(fiveDay);
+      await commit(locked.id, 5);
+      await close(locked.id);
+      await owner.query(
+        "UPDATE debates SET status='ended',live_ended_at=clock_timestamp() WHERE id=$1",
+        [fiveDay],
+      );
+      await windows.advance(20);
+      const pending = (await windows.publicWindows(fiveDay)).windows[0];
+      assert.equal(pending.state, "open");
+      assert.equal(pending.pricing, null);
     });
 
     // Turn windows' places in time, seconds before one shared instant

@@ -153,6 +153,12 @@ export interface TurnWindow {
   revealMode: RevealMode;
   revealAt: Date | null;
   recording: RecordingSpan | null;
+  /**
+   * The signed-in view's aggregate pricing once the window is settled
+   * (revealed), at any number of commitments (founder, 2026-10-26); null
+   * before. Never per-user data.
+   */
+  pricing: ReturnType<typeof priceRound> | null;
 }
 interface StoredOrder {
   user_id: string;
@@ -1432,7 +1438,9 @@ export function createCoinDebateSandbox(
               'side',w.turn_side,'opensAt',w.opens_at,'closesAt',w.closes_at,'state',w.state,
               'voidReason',CASE WHEN w.state='void' THEN w.result->>'voidReason' END,
               'revealMode',w.reveal_mode,'revealAt',${revealAt("w", "d")},
-              'recording',${recordingSpan("w", "c")})
+              'recording',${recordingSpan("w", "c")},
+              'pricing',CASE WHEN w.state='settled' AND w.revealed_at<=clock_timestamp()
+                THEN w.result->'pricing' END)
               ORDER BY w.turn_number)
             FROM (SELECT * FROM coin_debate_rounds r WHERE r.debate_id=d.id AND r.rail=$2
               AND r.turn_number IS NOT NULL ORDER BY r.turn_number DESC LIMIT 100) w),
