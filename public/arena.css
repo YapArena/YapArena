@@ -118,13 +118,13 @@ textarea::placeholder {
   align-items: start;
 }
 .arena-left {
-  flex: 0.95 1 280px;
+  flex: 0.8 1 260px;
 }
 .arena-center {
-  flex: 1.72 1 470px;
+  flex: 1.9 1 520px;
 }
 .arena-right {
-  flex: 0.68 1 215px;
+  flex: 0.9 1 280px;
 }
 .arena-left,
 .arena-center,
@@ -154,7 +154,7 @@ textarea::placeholder {
   min-width: 0;
 }
 .arena-video-slot {
-  aspect-ratio: 1.08;
+  aspect-ratio: 16/9;
   width: 100%;
   border-radius: 15px;
   background: #02060b;
@@ -170,14 +170,67 @@ textarea::placeholder {
     radial-gradient(ellipse at 22% 50%, #37373755, transparent 60%),
     radial-gradient(ellipse at 80% 60%, #4c172e44, transparent 60%), #050505;
 }
-.arena-video-badges {
+/* Hover corners on the video: the question top left, the broadcast state and
+   watch count top right, clear of the expand button. They show while the
+   pointer is over the video, or focus is inside it, and never take clicks. */
+.arena-workspace .arena-video-overlay {
   position: absolute;
+  top: 12px;
+  z-index: 5;
+  display: grid;
+  gap: 5px;
+  max-width: calc(50% - 40px);
+  padding: 8px 10px;
+  border: 1px solid #ffffff14;
+  border-radius: 9px;
+  background: #0b0b0bd9;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.arena-workspace .arena-video-topic {
+  left: 12px;
+}
+.arena-workspace .arena-video-status {
+  right: 58px;
+  justify-items: end;
+  text-align: right;
+}
+.arena-workspace .arena-video-surface:hover .arena-video-overlay,
+.arena-workspace .arena-video-surface:focus-within .arena-video-overlay {
+  opacity: 1;
+}
+.arena-video-topic h1 {
+  margin: 0;
+  font-size: clamp(0.95rem, 1.2vw, 1.15rem);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+.arena-video-topic span {
+  color: #bdbdbd;
+  font-size: 0.72rem;
+}
+.arena-video-status-badges {
   display: flex;
   align-items: center;
   gap: 7px;
-  top: 13px;
-  left: 13px;
-  z-index: 4;
+}
+.arena-video-status .arena-watch-meta {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  color: #d0d0d0;
+}
+@media (hover: none) {
+  /* Touch browsers then show the corners on a tap. */
+  .arena-workspace .arena-video-surface {
+    cursor: pointer;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arena-workspace .arena-video-overlay {
+    transition: none;
+  }
 }
 .arena-broadcast-badge {
   display: inline-flex;
@@ -392,12 +445,6 @@ textarea::placeholder {
 .arena-debate-meta {
   padding: 1px 9px 3px;
 }
-.arena-debate-meta h1 {
-  font-size: clamp(1.1rem, 1.5vw, 1.6rem);
-  line-height: 1.32;
-  letter-spacing: -0.035em;
-  margin: 0 0 8px;
-}
 .arena-debate-meta p {
   color: #afafaf;
   margin-bottom: 11px;
@@ -545,11 +592,17 @@ textarea::placeholder {
   margin: 0 0 5px;
 }
 .arena-community-tools .community-toolbar button {
+  min-height: 24px;
   background: none;
   padding: 0;
   border: none;
   color: #c4c4c4;
   font-size: 0.66rem;
+}
+/* WCAG 2.2 target size: the narrower chat column wraps these small text
+   controls closer together, so each keeps a 24 px tall target. */
+.arena-community-tools > details > summary {
+  line-height: 24px;
 }
 .arena-community-tools select,
 .arena-community-tools textarea {
@@ -1256,19 +1309,25 @@ textarea::placeholder {
     opacity: 1;
   }
 }
+@media (min-width: 1191px) {
+  .arena-left .community-messages {
+    height: clamp(260px, calc(100vh - 430px), 640px);
+    max-height: 640px;
+  }
+}
 @media (min-width: 1550px) {
   .arena-workspace {
     gap: 18px;
     padding-inline: 24px;
   }
   .arena-left {
-    flex-basis: 330px;
+    flex-basis: 300px;
   }
   .arena-center {
-    flex-basis: 650px;
+    flex-basis: 720px;
   }
   .arena-right {
-    flex-basis: 245px;
+    flex-basis: 320px;
   }
   .arena-chart-panel {
     padding: 24px 25px 16px;
@@ -1279,18 +1338,14 @@ textarea::placeholder {
 }
 @media (max-width: 1190px) {
   .arena-left {
-    flex-basis: 270px;
+    order: 2;
+    flex-basis: 100%;
   }
   .arena-center {
     flex-basis: 450px;
   }
   .arena-right {
-    flex-basis: 100%;
-    grid-template-columns: 1fr 1fr;
-    align-items: start;
-  }
-  .arena-disclosure {
-    grid-column: 1 / -1;
+    flex-basis: 260px;
   }
   .arena-round-list {
     max-height: 240px;
@@ -1300,9 +1355,6 @@ textarea::placeholder {
   .arena-workspace {
     padding-inline: 10px;
     gap: 10px;
-  }
-  .arena-left {
-    flex-basis: 240px;
   }
   .arena-center {
     flex-basis: 390px;
@@ -1340,39 +1392,65 @@ textarea::placeholder {
     margin-top: 10px;
     padding: 0 10px;
   }
-  .arena-left {
+  .arena-left,
+  .arena-center,
+  .arena-right {
     display: contents;
   }
-  .arena-watch {
+  .arena-center > *,
+  .arena-right > *,
+  .arena-community {
+    width: 100%;
+  }
+  .arena-center > * {
+    order: 5;
+  }
+  .arena-right > * {
+    order: 6;
+  }
+  .arena-center > :has(~ .arena-watch) {
     order: 0;
-    width: 100%;
   }
-  .arena-debate-meta {
+  .arena-watch {
     order: 1;
-    width: 100%;
-    padding: 3px 5px 7px;
   }
-  .arena-center {
+  .arena-right > .arena-sidecar {
     order: 2;
-    flex-basis: auto;
-    width: 100%;
-  }
-  .arena-right {
-    order: 3;
-    flex-basis: auto;
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr;
   }
   .arena-community {
+    order: 3;
+  }
+  .arena-debate-meta {
     order: 4;
-    width: 100%;
+    padding: 3px 5px 7px;
   }
   .arena-video-slot {
     aspect-ratio: 16/10;
   }
-  .arena-debate-meta h1 {
-    font-size: 1.25rem;
+  .arena-workspace .arena-video-overlay {
+    top: 8px;
+    gap: 3px;
+    max-width: calc(50% - 32px);
+    padding: 6px 8px;
+  }
+  .arena-workspace .arena-video-topic {
+    left: 8px;
+  }
+  .arena-workspace .arena-video-status {
+    right: 54px;
+  }
+  .arena-video-topic h1 {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 0.82rem;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+  .arena-video-status .arena-watch-meta {
+    font-size: 0.65rem;
+  }
+  .arena-video-status .arena-watch-meta > span:last-child {
+    display: none;
   }
   .arena-chart-top {
     font-size: 0.69rem;
@@ -1731,11 +1809,6 @@ textarea::placeholder {
 .arena-sidecar .arena-play-note {
   font-size: 0.59rem;
   margin-top: 7px;
-}
-@media (min-width: 1191px) {
-  .arena-sidecar {
-    height: var(--arena-graph-height, auto);
-  }
 }
 .arena-chart-hover-line {
   stroke: #c6c6c6;

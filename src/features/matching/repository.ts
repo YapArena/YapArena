@@ -876,10 +876,24 @@ export function createMatchingRepository(
       );
       return result.rows;
     },
+    // A player's requests, with both players' names and the debate's status for the challenge list.
     async listRequests(userId: string) {
-      const result = await database.query<MatchRequest>(
-        `SELECT ${requestFields} FROM match_requests r JOIN topics t ON t.id = r.topic_id
+      const result = await database.query<
+        MatchRequest & {
+          initiatorHandle: string | null;
+          initiatorName: string | null;
+          targetHandle: string | null;
+          targetName: string | null;
+          debateStatus: string | null;
+        }
+      >(
+        `SELECT ${requestFields}, d.status AS "debateStatus", pi.handle AS "initiatorHandle",
+           pi.display_name AS "initiatorName", pt.handle AS "targetHandle",
+           pt.display_name AS "targetName"
+         FROM match_requests r JOIN topics t ON t.id = r.topic_id
          LEFT JOIN debates d ON d.id = r.debate_id
+         LEFT JOIN public_profiles pi ON pi.user_id = r.initiator_user_id
+         LEFT JOIN public_profiles pt ON pt.user_id = r.target_user_id
          WHERE r.initiator_user_id = $1 OR r.target_user_id = $1
          ORDER BY r.created_at DESC LIMIT 50`,
         [userId],
