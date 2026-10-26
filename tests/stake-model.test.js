@@ -5,14 +5,21 @@ import {
   ceilingText,
   clock,
   coins,
+  lastPosition,
   liveWindow,
   parseCeiling,
+  parseDefaults,
   parseSize,
   percent,
   positionStatus,
+  readFromLimit,
   reasonText,
+  repeatLabel,
   replayRound,
   replayWindow,
+  resultLine,
+  resultsHeading,
+  resultsSummary,
   secondsLeft,
   signedCoins,
   speakerLine,
@@ -216,5 +223,156 @@ describe("betting panel terms (Decision 0013)", () => {
       ),
       /^Voided · refunded/,
     );
+  });
+});
+
+describe("results, repeat and get-ready defaults (Decision 0013)", () => {
+  const own = (side, limit, quantity) => ({
+    side,
+    limit,
+    quantity,
+    requestId: "q",
+  });
+  const fraction = (n, d = 100) => ({ n: String(n), d: String(d) });
+  const settled = (turnNumber, side, executed, net, price = 54, share = 58) =>
+    round({
+      id: `r${turnNumber}`,
+      turnNumber,
+      state: "settled",
+      own: own(side, "0.62", 10),
+      pricing: { price: fraction(price), share: fraction(share) },
+      outcome: { executed, premium: "0", fee: "0", payout: "0", net },
+    });
+
+  it("recovers the read from a position's yes-scale limit on both sides", () => {
+    // A Yes at read 62 sends 0.62; a No at read 62 sends 0.38, limit 0.62.
+    assert.equal(readFromLimit("0.62"), 62);
+    assert.equal(readFromLimit("0.620000"), 62);
+    assert.equal(readFromLimit("0"), 1);
+    assert.equal(readFromLimit("1"), 99);
+  });
+
+  it("offers the latest earlier position as the next turn's repeat", () => {
+    const rounds = [
+      round({ id: "a", turnNumber: 1, own: own("YES", "0.40", 5) }),
+      round({ id: "b", turnNumber: 3, own: own("NO", "0.62", 25) }),
+      round({ id: "c", turnNumber: 2, own: null }),
+      round({ id: "d", turnNumber: 4, own: own("YES", "0.50", 10) }),
+      round({
+        id: "m",
+        kind: "manual",
+        turnNumber: null,
+        own: own("YES", "0.9", 1),
+      }),
+    ];
+    assert.equal(lastPosition(rounds, 4)?.id, "b");
+    assert.equal(lastPosition(rounds, 2)?.id, "a");
+    assert.equal(lastPosition(rounds, 1), null);
+    assert.equal(
+      repeatLabel(own("NO", "0.62", 25)),
+      "Same as last turn · No · 25 · read 62%",
+    );
+  });
+
+  it("accepts only whole saved defaults within the ticket's ranges", () => {
+    assert.deepEqual(parseDefaults('{"size":25,"read":60}'), {
+      size: 25,
+      read: 60,
+    });
+    for (const text of [
+      null,
+      "",
+      "not json",
+      "[]",
+      '{"size":25}',
+      '{"size":0,"read":60}',
+      '{"size":101,"read":60}',
+      '{"size":2.5,"read":60}',
+      '{"size":25,"read":100}',
+      '{"size":"25","read":60}',
+    ])
+      assert.equal(parseDefaults(text), null, String(text));
+  });
+
+  it("totals revealed positions and keeps locked ones apart", () => {
+    const summary = resultsSummary([
+      settled(3, "YES", true, "4000"),
+      round({ id: "r1", turnNumber: 1, own: own("YES", "0.5", 5) }),
+      settled(2, "NO", true, "-600"),
+      round({
+        id: "r4",
+        turnNumber: 4,
+        state: "void",
+        voidReason: "debate_unavailable",
+        own: own("YES", "0.5", 5),
+      }),
+      settled(5, "YES", false, "0"),
+      round({ id: "r6", turnNumber: 6, own: null, state: "settled" }),
+    ]);
+    assert.deepEqual(
+      summary.revealed.map((item) => item.turnNumber),
+      [2, 3, 4, 5],
+    );
+    assert.deepEqual(
+      summary.locked.map((item) => item.turnNumber),
+      [1],
+    );
+    assert.equal(summary.net, 3400n);
+    assert.equal(
+      resultsHeading(summary),
+      "Results so far · +0.34 YC across 4 turns",
+    );
+    assert.equal(
+      resultsHeading({ ...summary, locked: [] }),
+      "Results are in · +0.34 YC across 4 turns",
+    );
+    assert.equal(
+      resultsHeading({ revealed: [summary.revealed[0]], locked: [], net: 0n }),
+      "Results are in · 0.00 YC across 1 turn",
+    );
+  });
+
+  it("describes each revealed position from its own side", () => {
+    assert.equal(
+      resultLine(settled(3, "YES", true, "4000")),
+      "Turn 3 · Yes · 10 · paid 54¢ each · 58% said yes · +0.40 YC",
+    );
+    assert.equal(
+      resultLine(settled(2, "NO", true, "-600")),
+      "Turn 2 · No · 10 · paid 46¢ each · 58% said yes · −0.06 YC",
+    );
+    assert.equal(
+      resultLine(settled(5, "YES", false, "0", 70)),
+      "Turn 5 · Yes · 10 · not filled at 70¢ · 58% said yes · refunded",
+    );
+    assert.equal(
+      resultLine(
+        round({
+          turnNumber: 4,
+          state: "void",
+          own: own("NO", "0.5", 5),
+        }),
+      ),
+      "Turn 4 · No · 5 · voided · refunded",
+    );
+    assert.equal(
+      resultLine(
+        round({
+          turnNumber: 7,
+          state: "settled",
+          own: own("YES", "0.5", 5),
+          pricing: { price: null, share: null },
+          outcome: {
+            executed: false,
+            premium: "0",
+            fee: "0",
+            payout: "0",
+            net: "0",
+          },
+        }),
+      ),
+      "Turn 7 · Yes · 5 · not filled · refunded",
+    );
+    assert.equal(resultLine(round()), "");
   });
 });
