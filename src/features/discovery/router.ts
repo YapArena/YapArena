@@ -93,10 +93,13 @@ export function createDiscoveryRouter({
   applicationOrigin,
   emailFirst = false,
   matchmakingEnabled = false,
+  liveOutlineEnabled = false,
 }: {
   discovery: Repository;
   a4Enabled?: boolean;
   mediaEnabled?: boolean;
+  // Decision 0012: debate pages carry captions and the AI outline.
+  liveOutlineEnabled?: boolean;
   homepageReferenceEnabled?: boolean;
   publicBots?: ReturnType<typeof createPublicBotRepository>;
   applicationOrigin: string;
@@ -305,6 +308,7 @@ export function createDiscoveryRouter({
             a4Enabled,
             publicBots ? await publicBots.debate(debate.id) : undefined,
             matchmakingEnabled,
+            liveOutlineEnabled,
           ),
         )
       : html(response, renderNotFound(origin), 404);
@@ -326,7 +330,7 @@ export function createDiscoveryRouter({
     html(response, renderAbout(origin)),
   );
   router.get("/account", (_request, response) =>
-    html(response, renderAccount(origin)),
+    html(response, renderAccount(origin, liveOutlineEnabled)),
   );
   return router;
 }

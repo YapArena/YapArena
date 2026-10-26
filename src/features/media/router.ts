@@ -63,6 +63,7 @@ export function createMediaRouter({
   recordPlayback = () => {},
   accountRevocation,
   environment = "development",
+  dispatchTranscriber,
 }: {
   media: ReturnType<typeof createMediaRepository>;
   provider: ReturnType<typeof createMediaProvider>;
@@ -72,11 +73,19 @@ export function createMediaRouter({
   recordPlayback?: (rows: PlaybackReport[]) => void;
   accountRevocation?: ReturnType<typeof createMediaAccountRevocation>;
   environment?: string;
+  // Decision 0012: never throws and is not awaited, so it cannot delay or
+  // fail a start.
+  dispatchTranscriber?: (debateId: string) => Promise<unknown>;
 }) {
   const router = Router();
   const participant = createRequireRole(identity, ["participant"]);
   const operator = createRequireRole(identity, ["operator"]);
-  const startDebate = createDebateStart({ media, provider, matching });
+  const startDebate = createDebateStart({
+    media,
+    provider,
+    matching,
+    dispatchTranscriber,
+  });
   router.use((_request, response, next) => {
     response.set("Cache-Control", "no-store");
     next();

@@ -15,6 +15,7 @@ export function createRuntime({
   app,
   a4,
   coinDebates,
+  transcription,
   database,
   sessions,
   accountSecurityCleanup,
@@ -40,6 +41,11 @@ export function createRuntime({
   app?: Express;
   a4?: { tick(): Promise<void> };
   coinDebates?: { tick(): Promise<unknown> };
+  // Decision 0012: transcriber warm-up dispatch and transcript retention.
+  transcription?: {
+    tick(): Promise<unknown>;
+    pruneExpired(): Promise<unknown>;
+  };
   database: Pick<Pool, "end">;
   sessions: Pick<ReturnType<typeof createSessionRepository>, "deleteExpired">;
   accountSecurityCleanup?: () => Promise<void>;
@@ -87,6 +93,9 @@ export function createRuntime({
   let speakerTimer: NodeJS.Timeout | undefined;
   let speakerTask: Promise<void> | undefined;
   let speakerWorking = false;
+  let transcriptionTimer: NodeJS.Timeout | undefined;
+  let transcriptionTask: Promise<void> | undefined;
+  let transcriptionWorking = false;
   let cleanupTimer: NodeJS.Timeout | undefined;
   let mediaTimer: NodeJS.Timeout | undefined;
   let mediaTicking = false;
@@ -194,6 +203,13 @@ export function createRuntime({
         logger.error({ error }, "product measurement retention cleanup failed");
       }
     }
+    if (transcription) {
+      try {
+        await transcription.pruneExpired();
+      } catch (error) {
+        logger.error({ error }, "transcript retention cleanup failed");
+      }
+    }
     completed("cleanup");
   }
 
@@ -252,6 +268,24 @@ export function createRuntime({
           }, 1000);
           if (app) a4Timer.unref();
         }
+        if (transcription) {
+          transcriptionTimer = setIntervalFn(() => {
+            if (transcriptionWorking || stopping) return transcriptionTask;
+            transcriptionWorking = true;
+            transcriptionTask = transcription
+              .tick()
+              .then(() => {})
+              .catch((error) =>
+                logger.error({ error }, "transcriber dispatch failed"),
+              )
+              .finally(() => {
+                transcriptionWorking = false;
+                completed("transcriber-dispatch");
+              });
+            return transcriptionTask;
+          }, 1000);
+          if (app) transcriptionTimer.unref();
+        }
         cleanupTimer = setIntervalFn(cleanupSessions, cleanupIntervalMs);
         if (app) cleanupTimer.unref();
         if (media) {
@@ -288,7 +322,9 @@ export function createRuntime({
       stopping = true;
       if (a4Timer) clearIntervalFn(a4Timer);
       if (speakerTimer) clearIntervalFn(speakerTimer);
+      if (transcriptionTimer) clearIntervalFn(transcriptionTimer);
       await speakerTask;
+      await transcriptionTask;
       await a4Task;
       if (cleanupTimer) clearIntervalFn(cleanupTimer);
       if (mediaTimer) clearIntervalFn(mediaTimer);

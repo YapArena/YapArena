@@ -117,6 +117,11 @@ const applicationTables = [
   "matchmaking_tickets",
   "match_offers",
   "account_device_checks",
+  // Decision 0012: live transcription.
+  "debater_settings",
+  "transcription_dispatches",
+  "transcription_updates",
+  "transcript_segments",
 ];
 const container = `yaparena-isolation-${randomUUID().slice(0, 8)}`;
 const evidenceDirectory = `/tmp/${container}-evidence`;

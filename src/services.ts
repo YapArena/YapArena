@@ -5,7 +5,11 @@ import { createIdentityRepository } from "./features/identity/repository.ts";
 import { createMatchingRepository } from "./features/matching/repository.ts";
 import { createMatchmaking } from "./features/matching/matchmaking.ts";
 import { createMediaRepository } from "./features/media/repository.ts";
-import { createMediaProvider } from "./features/media/provider.ts";
+import { createMediaProvider, debateRoom } from "./features/media/provider.ts";
+import { AgentDispatchClient } from "livekit-server-sdk";
+import { createDebaterSettings } from "./features/transcription/debater-settings.ts";
+import { createTranscriberDispatcher } from "./features/transcription/dispatch.ts";
+import { createTranscriptionRepository } from "./features/transcription/repository.ts";
 import { createMediaOperations } from "./features/media/operations.ts";
 import { createMediaAccountRevocation } from "./features/media/account-revocation.ts";
 import { createDebateAutoStart } from "./features/media/auto-start.ts";
@@ -69,8 +73,33 @@ export function createServices({
         replayJobs
           ? (key) => replayJobs.ready(key.split("/")[1]!, key)
           : undefined,
+        { turnMetadata: config.liveOutline.enabled },
       )
     : undefined;
+  // Decision 0012: live transcription. The settings exist whenever the live
+  // outline is enabled; dispatch also needs LiveKit (required by config).
+  const debaterSettings = config.liveOutline.enabled
+    ? createDebaterSettings(database)
+    : undefined;
+  const transcription =
+    config.liveOutline.enabled && config.media
+      ? createTranscriptionRepository(database)
+      : undefined;
+  const transcriber =
+    transcription && config.media
+      ? createTranscriberDispatcher({
+          repository: transcription,
+          client: new AgentDispatchClient(
+            config.media.livekitUrl,
+            config.media.livekitKey,
+            config.media.livekitSecret,
+            { requestTimeout: 5 },
+          ),
+          agentName: config.liveOutline.agentName,
+          roomName: debateRoom,
+          logger,
+        })
+      : undefined;
   const mediaOperations =
     media && baseMediaProvider
       ? createMediaOperations({
@@ -105,6 +134,8 @@ export function createServices({
             media,
             provider: mediaProvider,
             matching,
+            // Decision 0012: automatic starts dispatch the transcriber too.
+            dispatchTranscriber: transcriber?.dispatch,
           }),
           logger,
         })
@@ -162,11 +193,21 @@ export function createServices({
     sessions,
     accountSecurity,
     coinDebates,
+    debaterSettings,
+    transcription,
+    transcriber,
     // Everything createRuntime needs except the web-only app and community
     // streams, and the per-process background-jobs switch.
     background: {
       a4,
       coinDebates,
+      transcription:
+        transcription && transcriber
+          ? {
+              tick: () => transcriber.tick(),
+              pruneExpired: () => transcription.pruneExpired(),
+            }
+          : undefined,
       database,
       sessions,
       accountSecurityCleanup: async () => {
