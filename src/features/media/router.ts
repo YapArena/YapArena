@@ -227,6 +227,26 @@ export function createMediaRouter({
       }
     },
   );
+  // Taken on the queue screen, before any debate exists (Decision 0011).
+  router.post(
+    "/device-check",
+    requireAuth,
+    participant,
+    async (request, response) => {
+      const { cameraOk, microphoneOk } = request.body ?? {};
+      if (typeof cameraOk !== "boolean" || typeof microphoneOk !== "boolean")
+        return response
+          .status(400)
+          .json({ error: "cameraOk and microphoneOk are required" });
+      return response.json({
+        check: await media.checkAccountDevice(
+          request.user!.id,
+          cameraOk,
+          microphoneOk,
+        ),
+      });
+    },
+  );
   router.post(
     "/events/:id/speaker-token",
     requireAuth,

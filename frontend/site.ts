@@ -17,6 +17,8 @@ declare global {
   }
   interface WindowEventMap {
     "yap:balance": CustomEvent<HeaderBalance | null>;
+    // A Yap Coins balance changed; the header reloads its balance.
+    "yap:coins-changed": Event;
     "yap:follow": CustomEvent<FollowDetail>;
   }
 }

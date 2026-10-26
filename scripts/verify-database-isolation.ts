@@ -113,6 +113,9 @@ const applicationTables = [
   ...a4Tables,
   ...publicBotTables,
   "a4_play_closing_balances",
+  "matchmaking_tickets",
+  "match_offers",
+  "account_device_checks",
   // Decision 0012: live transcription.
   "debater_settings",
   "transcription_dispatches",

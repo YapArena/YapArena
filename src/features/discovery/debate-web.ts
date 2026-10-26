@@ -16,6 +16,7 @@ export function renderDebateWorkspace(
   enabled: boolean,
   asset: (name: string) => string,
   activity?: PublicBotActivity | null,
+  matchmaking = false,
   // Decision 0012: live captions and the AI outline, when enabled.
   liveOutline = false,
 ) {
@@ -39,7 +40,7 @@ export function renderDebateWorkspace(
     html`<div><strong>${profile ? html`<a href="/people/${encodeURIComponent(profile.handle)}">${profile.displayName}</a>` : "Speaker to be announced"}</strong><span>${side}</span></div>`;
   return html`<div class="arena-workspace" data-arena${enabled ? html` data-a4-inline="${id}"` : ""} data-debate-id="${id}" data-demo="${String(debate.isDemo)}">
     <div class="arena-left">
-      <section class="arena-watch" aria-label="${replay ? "Debate replay" : "Debate broadcast"}" data-media-event="${id}" data-media-replay-player="${asset("replay.bundle.js")}"><span class="sr-only">LIVE DEBATE & REPLAY</span>
+      ${matchmaking ? html`<div class="queue-banner" data-queue-banner role="status" aria-live="polite" hidden></div>` : ""}<section class="arena-watch" aria-label="${replay ? "Debate replay" : "Debate broadcast"}" data-media-event="${id}" data-media-replay-player="${asset("replay.bundle.js")}"><span class="sr-only">LIVE DEBATE & REPLAY</span>
         <div class="arena-video-slot"><div class="arena-video-surface" data-arena-video>
           <div class="arena-video-badges"><span class="arena-broadcast-badge ${live ? "is-live" : ""}">${live ? html`<span class="arena-live-dot"></span>` : ""}${mode}</span>${debate.isDemo ? html`<span class="arena-demo">Demo</span>` : ""}</div>
           <div class="arena-video-empty"><span class="arena-video-symbol" aria-hidden="true">↗</span><strong>${replay ? "Watch the replay" : live ? "The debate is live" : "The stage is set"}</strong><span>${replay ? "Press Play replay to watch this conversation." : live ? "Join the broadcast when media is available." : "Video appears here when the debate begins."}</span></div>

@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import request from "../scripts/test-http-request.ts";
 
+import express from "express";
 import { createApp } from "../dist/app.js";
+import { createMatchingRouter } from "../dist/features/matching/router.js";
 import {
   MatchConflictError,
   MatchNotFoundError,
@@ -34,6 +36,7 @@ function fixture({
   failure,
   participant = true,
   publicationState = "published",
+  debateAutoStart,
 } = {}) {
   const calls = [];
   const event = {
@@ -96,6 +99,7 @@ function fixture({
   };
   const app = createApp({
     matching,
+    debateAutoStart,
     identity: { getRoles: async () => roles },
     sessions: {
       findUserByTokenHash: async () => (signedIn ? user : null),
@@ -113,6 +117,26 @@ function fixture({
 }
 
 describe("matching API", () => {
+  it("starts the debate when the second speaker is ready, and never fails readiness on a start error", async () => {
+    const starts = [];
+    let failure;
+    const { authenticated } = fixture({
+      debateAutoStart: {
+        async tryStart(debateId) {
+          starts.push(debateId);
+          if (failure) throw failure;
+          return true;
+        },
+      },
+    });
+    const ready = () =>
+      authenticated("post", `/api/matching/events/${id}/ready`);
+    assert.equal((await ready()).body.event.status, "ready");
+    failure = new Error("egress unavailable");
+    assert.equal((await ready()).status, 200);
+    assert.deepEqual(starts, [id, id]);
+  });
+
   it("requires a session and exposes no account data anonymously", async () => {
     const { app } = fixture({ signedIn: false });
     for (const path of [
@@ -463,5 +487,45 @@ describe("matching API", () => {
         .history[0].action,
       "scheduled",
     );
+  });
+});
+
+describe("matching API with the live queue on", () => {
+  it("retires the open-request list and refuses new open requests", async () => {
+    let listed = 0;
+    const created = [];
+    const app = express()
+      .use(express.json())
+      .use((req, _res, next) => {
+        req.user = { id: "7" };
+        next();
+      })
+      .use(
+        createMatchingRouter({
+          matching: {
+            listQueue: async () => {
+              listed += 1;
+              return [{ id }];
+            },
+            createRequest: async (_user, input) => {
+              created.push(input.kind);
+              return { id };
+            },
+          },
+          identity: { getRoles: async () => ["participant"] },
+          liveQueue: true,
+        }),
+      );
+    const queue = await request(app).get("/queue");
+    assert.deepEqual(queue.body, { requests: [] });
+    assert.equal(listed, 0);
+    const open = await request(app)
+      .post("/requests")
+      .send({ ...requestInput, kind: "queue", targetHandle: undefined });
+    assert.equal(open.status, 400);
+    assert.match(open.body.error, /queue on a side/);
+    const challenge = await request(app).post("/requests").send(requestInput);
+    assert.equal(challenge.status, 201);
+    assert.deepEqual(created, ["direct"]);
   });
 });
