@@ -66,6 +66,7 @@ writers, including older schema-compatible application images:
 | Media state signal                  | Media `start`, `pause`, `resume`, `stop`, `tick`, recording results, captions; readiness, operator transitions, replay publication           | Public-snapshot column change on `debate_media` or debate lifecycle, at COMMIT |
 | Human round signal                  | A4 `create`, `tick`, `control` and voiding for human-only runs; operator SQL                                                                 | Human run INSERT/state UPDATE and its round state UPDATE, at COMMIT            |
 | Shared activity signal              | Settlement of a consenting creator's sandbox; publication consent; synthetic seed rounds                                                     | Round `settled`, publisher INSERT/DELETE, synthetic round INSERT               |
+| Yap Coins window signal             | Coin loop window opening, settlement and automatic voiding; manual round creation; owner `void-round`                                        | `coin_debate_rounds` INSERT and state UPDATE, at COMMIT                        |
 
 Private reports, case reasons, evidence, restrictions, notifications, audit records and like-change
 allowance records do not enter this log. Restrictions and role changes remain server checks on
@@ -232,12 +233,19 @@ public projection that changed. The browser re-reads that projection over HTTP, 
 current state, never a historical value, and one signal covers a whole transaction (at most one per
 room and projection).
 
-| `refresh`  | Committed when                                                                                      | Re-read projection                      |
-| ---------- | --------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| `media`    | a media snapshot column changes, or the debate's status, publication or demo flag changes           | `GET /api/media/events/<id>`            |
-| `round`    | a human-only run is created or changes state, or one of its rounds changes state                    | the signed-in A4 workspace              |
-| `activity` | a consenting creator's sandbox round settles, publication consent changes, or a seed round is added | `GET /api/public/debates/<id>/activity` |
+| `refresh`  | Committed when                                                                                                          | Re-read projection                      |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `media`    | a media snapshot column changes, or the debate's status, publication or demo flag changes                               | `GET /api/media/events/<id>`            |
+| `round`    | a human-only run is created or changes state, or one of its rounds changes state                                        | the signed-in A4 workspace              |
+| `activity` | a consenting creator's sandbox round settles, publication consent changes, or a seed round is added                     | `GET /api/public/debates/<id>/activity` |
+| `window`   | a Yap Coins round or turn window opens, settles or is voided ([Decision 0012](decisions/0012-live-argument-outline.md)) | `GET /api/public/debates/<id>/windows`  |
 
+Migration `1792971645611_add-turn-trading-windows.js` adds `window`. Yap Coins rounds are shared
+by everyone on the debate, and turn windows follow the public turn clock, so the signal reveals
+only timing that viewers already see. The coin loop settles a batch of rounds in one transaction,
+so a batch spanning several rooms takes their counters at COMMIT in settlement order, not UUID
+order. A concurrent multi-room fanout (profile or topic edit) can then deadlock with it;
+PostgreSQL aborts one, the batch rolls back whole and the next one-second tick retries it.
 A private sandbox emits nothing while it opens, locks or prices; a signal appears only when a
 consenting creator's settled result enters the public activity. Private incident text, egress and
 recording keys, receipts, balances, orders, seeds and unrevealed pricing never enter the log or a

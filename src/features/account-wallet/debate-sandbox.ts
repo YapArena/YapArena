@@ -59,7 +59,10 @@ export const COIN_DEBATE_FACE = 10_000n;
 interface Round {
   id: string;
   debate_id: string;
-  creator_id: string;
+  // Null for a turn window, which the coin loop opens (Decision 0012).
+  creator_id: string | null;
+  turn_number: number | null;
+  turn_side: "A" | "B" | null;
   proposition: string;
   rail: SandboxRail;
   terms: Terms;
@@ -73,8 +76,22 @@ interface Round {
     snapshotHash: string;
     pricing: ReturnType<typeof priceRound>;
     outcomes: Outcome[];
+    voidReason?: VoidReason;
   } | null;
   revealed_at: Date | null;
+}
+type VoidReason = "debate_unavailable" | "operator_cancelled";
+// A debate in one of these states takes no new commitments, and the coin loop
+// voids its open rounds instead of settling them (F15: only unopened rounds).
+const unavailableStatuses = "('cancelled','void_review')";
+export interface TurnWindow {
+  id: string;
+  turnNumber: number;
+  side: "A" | "B";
+  opensAt: Date;
+  closesAt: Date;
+  state: Round["state"];
+  voidReason: VoidReason | null;
 }
 interface StoredOrder {
   user_id: string;
@@ -188,7 +205,12 @@ async function serial(client: PoolClient) {
     "SELECT pg_advisory_xact_lock(hashtextextended('coin-debate-transition',0))",
   );
 }
-export function createCoinDebateSandbox(database: Pool, rail: SandboxRail) {
+export function createCoinDebateSandbox(
+  database: Pool,
+  rail: SandboxRail,
+  options: { turnWindows?: boolean } = {},
+) {
+  const turnWindows = options.turnWindows === true;
   async function transaction<T>(mutation: (client: PoolClient) => Promise<T>) {
     return withTransaction(database, async (client) => {
       await serial(client);
@@ -239,10 +261,13 @@ export function createCoinDebateSandbox(database: Pool, rail: SandboxRail) {
     // Freeze the complete bounded batch before any account/book/ledger write.
     // Its union is essential: locking a later round's account after an earlier
     // round's shared ledger rows can deadlock funding or payout reconciliation.
+    // A cancelled or under-review debate's rounds are voided, never settled.
     const rounds = (
       await client.query<{ id: string }>(
-        `SELECT id FROM coin_debate_rounds WHERE state='open' AND rail=$1
-        AND closes_at<=clock_timestamp() ORDER BY closes_at,id LIMIT $2`,
+        `SELECT r.id FROM coin_debate_rounds r WHERE r.state='open' AND r.rail=$1
+        AND r.closes_at<=clock_timestamp() AND NOT EXISTS (SELECT 1 FROM debates d
+          WHERE d.id=r.debate_id AND d.status IN ${unavailableStatuses})
+        ORDER BY r.closes_at,r.id LIMIT $2`,
         [rail, limit],
       )
     ).rows;
@@ -503,7 +528,157 @@ export function createCoinDebateSandbox(database: Pool, rail: SandboxRail) {
     );
     return true;
   }
-  return Object.freeze({
+  // Opens the current speaking turn's trading window of one live debate, at
+  // most once per turn (Decision 0012). Its cutoff is the turn deadline copied
+  // from debate_media and never moves, even if the turn is paused later.
+  // Plain reads only: no debate or media row lock, so opening never waits
+  // behind the media clock or a lifecycle transition, and the room counter is
+  // still the last lock, at COMMIT (docs/community-delivery.md). A turn the
+  // clock already advanced inserts nothing.
+  async function openWindow(client: PoolClient, debateId: string) {
+    const live = `FROM debates d JOIN topics t ON t.id=d.topic_id
+      JOIN debate_media m ON m.debate_id=d.id
+      WHERE d.id=$1 AND d.status='live' AND d.publication_state='published'
+        AND t.publication_state='published' AND m.state='running'
+        AND m.active_side IS NOT NULL
+        AND m.turn_deadline_at>clock_timestamp()+INTERVAL '1 second'`;
+    const turn = (
+      await client.query<{ turnNumber: number }>(
+        `SELECT m.turn_number AS "turnNumber" ${live}`,
+        [debateId],
+      )
+    ).rows[0];
+    if (!turn) return null;
+    const seed = secureSeed(),
+      id = randomUUID();
+    const inserted = await client.query(
+      `INSERT INTO coin_debate_rounds(id,debate_id,creator_id,turn_number,turn_side,
+        proposition,rail,reference,terms,seed,seed_commitment,closes_at)
+      SELECT $2::uuid,d.id,NULL,m.turn_number,m.active_side,d.proposition,$3::text,$4::text,
+        $5::jsonb,$6::text,$7::text,m.turn_deadline_at ${live} AND m.turn_number=$8::integer
+      ON CONFLICT (debate_id,turn_number) WHERE turn_number IS NOT NULL DO NOTHING`,
+      [
+        debateId,
+        id,
+        rail,
+        digest(["turn-window", rail, debateId, turn.turnNumber]),
+        JSON.stringify(COIN_DEBATE_TERMS),
+        seed,
+        digest(seed),
+        turn.turnNumber,
+      ],
+    );
+    return inserted.rowCount ? { id, created: true } : null;
+  }
+  // Exact-source refund of an open round's reservations, without profit or
+  // qualification. The caller holds the transition lock (no new admissions).
+  async function voidOpen(
+    client: PoolClient,
+    roundId: string,
+    reason: VoidReason,
+    actorRole: string,
+  ) {
+    const orders = (
+      await client.query<StoredOrder>(
+        "SELECT * FROM coin_debate_orders WHERE round_id=$1 ORDER BY user_id",
+        [roundId],
+      )
+    ).rows;
+    await client.query(
+      "SELECT id FROM users WHERE id=ANY($1::bigint[]) ORDER BY id FOR UPDATE",
+      [orders.map((o) => o.user_id)],
+    );
+    const round = await stored(client, roundId);
+    if (round.state === "void") return { created: false };
+    if (round.state !== "open") fail("settled obligations cannot be voided");
+    const snapshots = [],
+      buckets = [];
+    for (const order of orders) {
+      snapshots.push(await lockSandboxBook(client, order.user_id));
+      buckets.push(await ensureSandboxBuckets(client, order.user_id));
+    }
+    await lockLedger(client, buckets);
+    for (let index = 0; index < orders.length; index++) {
+      const order = orders[index]!,
+        before = snapshots[index]!,
+        bucket = buckets[index]!,
+        totals = fundingTotals(order.funding);
+      const cash: CoinPosting[] = [],
+        promo: CoinPosting[] = [];
+      transfer(cash, bucket.cashReserved, bucket.cashAvailable, totals.cash);
+      transfer(
+        cash,
+        bucket.system.center_reserved,
+        bucket.system.center_available,
+        BigInt(order.center_reservation),
+      );
+      transfer(
+        cash,
+        bucket.system.promotional_reserved,
+        bucket.system.promotional_available,
+        BigInt(order.promotional_reservation),
+      );
+      transfer(
+        promo,
+        bucket.promoReserved,
+        bucket.promoAvailable,
+        totals.promo,
+      );
+      const cashJournalId = await post(
+        client,
+        order.user_id,
+        "payout",
+        `void:${order.request_id}`,
+        "USDC",
+        cash,
+      );
+      const promoJournalId = await post(
+        client,
+        order.user_id,
+        "payout",
+        `void:${order.request_id}`,
+        "YC_PROMO",
+        promo,
+      );
+      await appendSandboxBookEvent(client, {
+        userId: order.user_id,
+        snapshot: before,
+        book: refundStake(before.book, order.funding),
+        kind: "debate.voided",
+        reference: reference(order.user_id, "debate.void", order.request_id),
+        termsDigest: digest([roundId, reason, order.funding]),
+        requestId: order.request_id,
+        cashJournalId,
+        promoJournalId,
+        metadata: {
+          roundId,
+          reason,
+          funding: order.funding,
+          rail,
+          actorRole,
+        },
+      });
+      await client.query(
+        "UPDATE coin_sandbox_requests SET status='void' WHERE id=$1",
+        [order.request_id],
+      );
+    }
+    await client.query(
+      "UPDATE coin_debate_rounds SET state='void',result=$2::jsonb,revealed_at=clock_timestamp() WHERE id=$1",
+      [
+        roundId,
+        JSON.stringify({
+          voidReason: reason,
+          snapshot: [],
+          snapshotHash: digest([roundId, reason]),
+          pricing: priceRound([], round.terms, 0n, 0n),
+          outcomes: [],
+        }),
+      ],
+    );
+    return { created: true };
+  }
+  const api = Object.freeze({
     async create(
       context: SandboxContext,
       debateId: string,
@@ -526,8 +701,8 @@ export function createCoinDebateSandbox(database: Pool, rail: SandboxRail) {
           return { id: previous.id, created: false };
         }
         const debate = (
-          await client.query<{ proposition: string }>(
-            "SELECT d.proposition FROM debates d JOIN topics t ON t.id=d.topic_id WHERE d.id=$1 AND d.publication_state='published' AND t.publication_state='published' AND d.status NOT IN ('cancelled','void_review')",
+          await client.query<{ proposition: string; status: string }>(
+            "SELECT d.proposition,d.status FROM debates d JOIN topics t ON t.id=d.topic_id WHERE d.id=$1 AND d.publication_state='published' AND t.publication_state='published' AND d.status NOT IN ('cancelled','void_review')",
             [debateId],
           )
         ).rows[0];
@@ -536,9 +711,29 @@ export function createCoinDebateSandbox(database: Pool, rail: SandboxRail) {
         // closing order, with UUID as the fixed tie-breaker. API request timing
         // cannot settle a selected later round ahead of this bounded batch.
         for (const round of due) await settle(client, round.id);
+        if (turnWindows && debate.status === "live") {
+          // Decision 0012: during a live debate the current speaking turn's
+          // window is the only round to join; no five-minute round opens.
+          const window =
+            (
+              await client.query<{ id: string }>(
+                `SELECT id FROM coin_debate_rounds WHERE debate_id=$1 AND rail=$2
+                AND turn_number IS NOT NULL AND state='open' AND closes_at>clock_timestamp()
+                ORDER BY turn_number DESC LIMIT 1`,
+                [debateId, rail],
+              )
+            ).rows.map((row) => ({ id: row.id, created: false }))[0] ??
+            (await openWindow(client, debateId));
+          if (!window)
+            fail(
+              "no trading window is open; the next one opens with the next speaking turn",
+            );
+          await assertCallerSession(client, context);
+          return window;
+        }
         const current = (
           await client.query<{ id: string }>(
-            "SELECT id FROM coin_debate_rounds WHERE debate_id=$1 AND state='open'",
+            "SELECT id FROM coin_debate_rounds WHERE debate_id=$1 AND state='open' AND turn_number IS NULL",
             [debateId],
           )
         ).rows[0];
@@ -768,7 +963,14 @@ export function createCoinDebateSandbox(database: Pool, rail: SandboxRail) {
               id: r.id,
               debateId: r.debate_id,
               proposition: r.proposition,
+              // A turn window belongs to one speaking turn (Decision 0012);
+              // a manual round has no turn.
+              kind: r.turn_number === null ? "manual" : "turn",
+              turnNumber: r.turn_number,
+              side: r.turn_side,
               state: r.state,
+              voidReason:
+                r.state === "void" ? (r.result?.voidReason ?? null) : null,
               opensAt: r.opens_at,
               closesAt: r.closes_at,
               terms: r.terms,
@@ -827,116 +1029,112 @@ export function createCoinDebateSandbox(database: Pool, rail: SandboxRail) {
             .rows[0]?.role !== "yaparena_owner"
         )
           fail("sandbox operator ownership is required", 403);
-        const orders = (
-          await client.query<StoredOrder>(
-            "SELECT * FROM coin_debate_orders WHERE round_id=$1 ORDER BY user_id",
-            [roundId],
-          )
-        ).rows;
-        await client.query(
-          "SELECT id FROM users WHERE id=ANY($1::bigint[]) ORDER BY id FOR UPDATE",
-          [orders.map((o) => o.user_id)],
-        );
-        const round = await stored(client, roundId);
-        if (round.state === "void") return { created: false };
-        if (round.state !== "open")
-          fail("settled obligations cannot be voided");
-        const snapshots = [],
-          buckets = [];
-        for (const order of orders) {
-          snapshots.push(await lockSandboxBook(client, order.user_id));
-          buckets.push(await ensureSandboxBuckets(client, order.user_id));
-        }
-        await lockLedger(client, buckets);
-        for (let index = 0; index < orders.length; index++) {
-          const order = orders[index]!,
-            before = snapshots[index]!,
-            bucket = buckets[index]!,
-            totals = fundingTotals(order.funding);
-          const cash: CoinPosting[] = [],
-            promo: CoinPosting[] = [];
-          transfer(
-            cash,
-            bucket.cashReserved,
-            bucket.cashAvailable,
-            totals.cash,
-          );
-          transfer(
-            cash,
-            bucket.system.center_reserved,
-            bucket.system.center_available,
-            BigInt(order.center_reservation),
-          );
-          transfer(
-            cash,
-            bucket.system.promotional_reserved,
-            bucket.system.promotional_available,
-            BigInt(order.promotional_reservation),
-          );
-          transfer(
-            promo,
-            bucket.promoReserved,
-            bucket.promoAvailable,
-            totals.promo,
-          );
-          const cashJournalId = await post(
-            client,
-            order.user_id,
-            "payout",
-            `void:${order.request_id}`,
-            "USDC",
-            cash,
-          );
-          const promoJournalId = await post(
-            client,
-            order.user_id,
-            "payout",
-            `void:${order.request_id}`,
-            "YC_PROMO",
-            promo,
-          );
-          await appendSandboxBookEvent(client, {
-            userId: order.user_id,
-            snapshot: before,
-            book: refundStake(before.book, order.funding),
-            kind: "debate.voided",
-            reference: reference(
-              order.user_id,
-              "debate.void",
-              order.request_id,
-            ),
-            termsDigest: digest([roundId, reason, order.funding]),
-            requestId: order.request_id,
-            cashJournalId,
-            promoJournalId,
-            metadata: {
-              roundId,
-              reason,
-              funding: order.funding,
-              rail,
-              actorRole: "yaparena_owner",
-            },
-          });
-          await client.query(
-            "UPDATE coin_sandbox_requests SET status='void' WHERE id=$1",
-            [order.request_id],
-          );
-        }
-        await client.query(
-          "UPDATE coin_debate_rounds SET state='void',result=$2::jsonb,revealed_at=clock_timestamp() WHERE id=$1",
-          [
-            roundId,
-            JSON.stringify({
-              voidReason: reason,
-              snapshot: [],
-              snapshotHash: digest([roundId, reason]),
-              pricing: priceRound([], round.terms, 0n, 0n),
-              outcomes: [],
-            }),
-          ],
-        );
-        return { created: true };
+        return voidOpen(client, roundId, reason, "yaparena_owner");
       });
     },
+    // Coin loop: refund every open round of a cancelled or under-review debate
+    // (F15: only unopened rounds can be voided). The database lets the runtime
+    // void only these, with reason debate_unavailable. One transaction each.
+    async voidUnavailable(limit = 20, debateIds?: readonly string[]) {
+      const due = (
+        await database.query<{ id: string }>(
+          `SELECT r.id FROM coin_debate_rounds r JOIN debates d ON d.id=r.debate_id
+          WHERE r.state='open' AND r.rail=$1 AND d.status IN ${unavailableStatuses}
+            AND ($3::uuid[] IS NULL OR r.debate_id=ANY($3::uuid[]))
+          ORDER BY r.closes_at,r.id LIMIT $2`,
+          [rail, limit, debateIds ?? null],
+        )
+      ).rows;
+      let voided = 0;
+      for (const { id } of due) {
+        const result = await transaction(async (client) => {
+          const current = (
+            await client.query<{ role: string }>(
+              `SELECT current_user AS role FROM coin_debate_rounds r JOIN debates d ON d.id=r.debate_id
+              WHERE r.id=$1 AND r.state='open' AND d.status IN ${unavailableStatuses}`,
+              [id],
+            )
+          ).rows[0];
+          return current
+            ? voidOpen(client, id, "debate_unavailable", current.role)
+            : { created: false };
+        });
+        if (result.created) voided++;
+      }
+      return { voided };
+    },
+    // Coin loop: open the current turn's window of each live debate that has
+    // none yet, at most one second after the turn starts (Decision 0012).
+    async openTurnWindows(limit = 20, debateIds?: readonly string[]) {
+      if (!turnWindows) return { opened: 0 };
+      const due = (
+        await database.query<{ debateId: string }>(
+          `SELECT m.debate_id AS "debateId" FROM debate_media m JOIN debates d ON d.id=m.debate_id
+          WHERE m.state='running' AND d.status='live'
+            AND m.turn_deadline_at>clock_timestamp()+INTERVAL '1 second'
+            AND ($2::uuid[] IS NULL OR m.debate_id=ANY($2::uuid[]))
+            AND NOT EXISTS (SELECT 1 FROM coin_debate_rounds r
+              WHERE r.debate_id=m.debate_id AND r.turn_number=m.turn_number)
+          ORDER BY m.turn_deadline_at,m.debate_id LIMIT $1`,
+          [limit, debateIds ?? null],
+        )
+      ).rows;
+      let opened = 0;
+      for (const { debateId } of due)
+        if (await transaction((client) => openWindow(client, debateId)))
+          opened++;
+      return { opened };
+    },
+    // Public window timing for every viewer: no orders, counts, prices or
+    // seeds. Null when the debate or its topic is not published.
+    async publicWindows(debateId: string) {
+      resource(debateId);
+      const row = (
+        await database.query<{
+          eventStatus: string;
+          serverNow: Date;
+          windows: TurnWindow[];
+        }>(
+          `SELECT d.status AS "eventStatus", clock_timestamp() AS "serverNow",
+            COALESCE((SELECT json_agg(json_build_object('id',w.id,'turnNumber',w.turn_number,
+              'side',w.turn_side,'opensAt',w.opens_at,'closesAt',w.closes_at,'state',w.state,
+              'voidReason',CASE WHEN w.state='void' THEN w.result->>'voidReason' END)
+              ORDER BY w.turn_number)
+            FROM (SELECT * FROM coin_debate_rounds r WHERE r.debate_id=d.id AND r.rail=$2
+              AND r.turn_number IS NOT NULL ORDER BY r.turn_number DESC LIMIT 100) w),
+              '[]'::json) AS windows
+          FROM debates d JOIN topics t ON t.id=d.topic_id
+          WHERE d.id=$1 AND d.publication_state='published' AND t.publication_state='published'`,
+          [debateId, rail],
+        )
+      ).rows[0];
+      return row ? { debateId, ...row } : null;
+    },
+    // The coin loop's one-second step: void unavailable debates' rounds, settle
+    // due rounds, then open turn windows. Each step runs in its own
+    // transactions, so one failure does not hold back the others.
+    async tick() {
+      const failures: unknown[] = [];
+      async function step<T>(work: () => Promise<T>) {
+        try {
+          return await work();
+        } catch (error) {
+          failures.push(error);
+          return undefined;
+        }
+      }
+      const voided = await step(() => api.voidUnavailable());
+      const settled = await step(() => api.advance());
+      const opened = await step(() => api.openTurnWindows());
+      if (failures.length === 1) throw failures[0];
+      if (failures.length)
+        throw new AggregateError(failures, "coin debate tick failed");
+      return {
+        voided: voided?.voided ?? 0,
+        completed: settled?.completed ?? 0,
+        opened: opened?.opened ?? 0,
+      };
+    },
   });
+  return api;
 }

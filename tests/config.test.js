@@ -52,6 +52,7 @@ describe("configuration", () => {
       environment: "development",
       homepageReferenceEnabled: false,
       coinSandboxEnabled: false,
+      turnWindowsEnabled: false,
       coinSandboxWebhookSecret: undefined,
       host: "0.0.0.0",
       port: 3000,
@@ -95,6 +96,7 @@ describe("configuration", () => {
         environment: "production",
         homepageReferenceEnabled: false,
         coinSandboxEnabled: false,
+        turnWindowsEnabled: false,
         coinSandboxWebhookSecret: undefined,
         host: "127.0.0.1",
         port: 8080,
@@ -127,6 +129,36 @@ describe("configuration", () => {
       assert.throws(
         () => loadConfig({ DATABASE_URL: databaseUrl, METRICS_TOKEN: value }),
         /METRICS_TOKEN/,
+      );
+  });
+
+  it("enables turn windows only explicitly and only with the coin sandbox", () => {
+    assert.equal(
+      loadConfig({ DATABASE_URL: databaseUrl }).turnWindowsEnabled,
+      false,
+    );
+    assert.equal(
+      loadConfig({
+        DATABASE_URL: databaseUrl,
+        COIN_SANDBOX_ENABLED: "true",
+        TURN_WINDOWS_ENABLED: "true",
+      }).turnWindowsEnabled,
+      true,
+    );
+    assert.throws(
+      () =>
+        loadConfig({ DATABASE_URL: databaseUrl, TURN_WINDOWS_ENABLED: "true" }),
+      /requires COIN_SANDBOX_ENABLED/,
+    );
+    for (const value of ["1", "TRUE", "yes"])
+      assert.throws(
+        () =>
+          loadConfig({
+            DATABASE_URL: databaseUrl,
+            COIN_SANDBOX_ENABLED: "true",
+            TURN_WINDOWS_ENABLED: value,
+          }),
+        /TURN_WINDOWS_ENABLED must be true or false/,
       );
   });
 

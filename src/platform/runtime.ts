@@ -37,7 +37,7 @@ export function createRuntime({
 }: {
   app?: Express;
   a4?: { tick(): Promise<void> };
-  coinDebates?: { advance(): Promise<unknown> };
+  coinDebates?: { tick(): Promise<unknown> };
   database: Pick<Pool, "end">;
   sessions: Pick<ReturnType<typeof createSessionRepository>, "deleteExpired">;
   accountSecurityCleanup?: () => Promise<void>;
@@ -220,7 +220,7 @@ export function createRuntime({
           a4Timer = setIntervalFn(() => {
             if (a4Ticking || stopping) return a4Task;
             a4Ticking = true;
-            a4Task = Promise.allSettled([a4?.tick(), coinDebates?.advance()])
+            a4Task = Promise.allSettled([a4?.tick(), coinDebates?.tick()])
               .then((results) => {
                 for (const result of results)
                   if (result.status === "rejected")

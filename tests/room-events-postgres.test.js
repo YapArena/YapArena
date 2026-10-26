@@ -85,7 +85,7 @@ function assertPublic(value, path = "frame") {
   if ("refresh" in value) {
     assert.equal(value.type, "summary");
     assert.equal(value.message, null);
-    assert.ok(["media", "round", "activity"].includes(value.refresh));
+    assert.ok(["media", "round", "activity", "window"].includes(value.refresh));
   }
 }
 class Response extends EventEmitter {

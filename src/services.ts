@@ -104,7 +104,9 @@ export function createServices({
     operations: createAccountOperationRepository(database),
   };
   const coinDebates = config.coinSandboxEnabled
-    ? createCoinDebateSandbox(database, "simulation")
+    ? createCoinDebateSandbox(database, "simulation", {
+        turnWindows: config.turnWindowsEnabled,
+      })
     : undefined;
 
   return Object.freeze({

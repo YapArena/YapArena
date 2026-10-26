@@ -39,6 +39,18 @@ caller must have a current session at admission and again before commit, includi
 an idempotent or existing-round return; workers can settle existing obligations
 without a user session.
 
+## Turn windows and automatic voiding
+
+With `TURN_WINDOWS_ENABLED=true` (web and worker), each live speaking turn is one trading window
+whose cutoff is the turn deadline, fixed at opening ([Decision 0012](decisions/0012-live-argument-outline.md)).
+The coin loop opens it within about a second of the turn starting; asking for a round during a
+live debate returns it instead of a five-minute round. Windows settle like any round.
+
+Whenever the coin sandbox is enabled, the coin loop also voids every open round of a debate that
+became `cancelled` or `void_review`, with reason `debate_unavailable`, and settlement skips such
+rounds. The runtime may void only those; the database refuses any other runtime void, so
+`void-round` below remains the owner's command for everything else.
+
 ## Rail and credential separation
 
 `coin_sandbox_controls` pins the physical database to `simulation` or
