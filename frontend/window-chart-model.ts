@@ -7,10 +7,9 @@ import type { Fraction, RoundPoint } from "./arena-types.js";
 import { windowArgumentLabel } from "./arena-chart.js";
 
 /**
- * A turn window with the aggregate pricing its reveal made public: today from
- * the signed-in rounds view, later from the public window list, where it is
- * null until the window is revealed (founder: every revealed window shows its
- * results, whatever its size).
+ * A turn window from the public window list with the aggregate pricing its
+ * reveal made public. Pricing is null until the window is revealed (founder:
+ * every revealed window shows its results, whatever its size).
  */
 export interface RevealedWindow {
   id: string;

@@ -21,7 +21,24 @@ export interface RecordingSpan {
   endSeconds: number;
 }
 
-/** One turn window in the anonymous list (timing and state only). */
+/**
+ * A revealed window's aggregate pricing (the A4 engine's priceRound result):
+ * the count-based yes share, the median No and Yes limits (a, b), the drawn
+ * price and how it was drawn. Each fraction is null when its side is empty.
+ */
+export interface WindowPricing {
+  share: Fraction | null;
+  a: Fraction | null;
+  b: Fraction | null;
+  price: Fraction | null;
+  branch: "targeted" | "exploratory" | "fallback" | "empty";
+  reason: "missing_side" | "nonpositive_interval" | "empty" | null;
+}
+
+/**
+ * One turn window in the anonymous list: timing and state, and its pricing
+ * once revealed (null before; absent from servers that predate it).
+ */
 export interface PublicWindow {
   id: string;
   turnNumber: number;
@@ -33,6 +50,7 @@ export interface PublicWindow {
   revealMode: "five_day" | "per_round";
   revealAt: string | null;
   recording?: RecordingSpan | null;
+  pricing?: WindowPricing | null;
 }
 export interface PublicWindows {
   debateId: string;
@@ -69,13 +87,7 @@ export interface StakeRound {
     requestId: string;
     replayPositionMs?: number | null;
   } | null;
-  pricing?: {
-    price: Fraction | null;
-    share: Fraction | null;
-    a?: Fraction | null;
-    b?: Fraction | null;
-    branch?: string;
-  };
+  pricing?: WindowPricing;
   outcome?: {
     executed: boolean;
     premium: string;

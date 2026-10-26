@@ -85,6 +85,33 @@ describe("chart from revealed Yap Coins windows (Decision 0013, item d)", () => 
     assert.equal(points[1].argumentLabel, null);
   });
 
+  it("keeps a public window's empty sides as missing values", () => {
+    // S's public list: no No orders, so no No median; a fallback price.
+    const [point] = windowPoints(
+      [
+        {
+          id: "w9",
+          turnNumber: 9,
+          side: "A",
+          state: "settled",
+          pricing: {
+            share: f(100),
+            a: null,
+            b: f(70),
+            price: f(31),
+            branch: "fallback",
+            reason: "missing_side",
+          },
+        },
+      ],
+      null,
+    );
+    assert.equal(point.medianNo, null);
+    assert.deepEqual(point.medianYes, f(70));
+    assert.deepEqual(point.offer, f(31));
+    assert.equal(point.branch, "fallback");
+  });
+
   it("changes the revision when a share or label changes", () => {
     const base = windowPoints([window(1)], null);
     const labelled = windowPoints([window(1)], {

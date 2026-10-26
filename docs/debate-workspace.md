@@ -57,10 +57,12 @@ history chart and an info card that links to the Bots sandbox there.
   from authenticated runtime data.
 - Once a debate has revealed Yap Coins turn windows (Decision 0013, item d), the chart
   shows them instead of the bot history: one point per settled window with its share,
-  drawn price and medians. Locked, open and voided windows never appear. The windows
-  come from the betting panel's own read through a `yap:stake-windows` page event, so the
-  chart makes no second read; for now that is the signed-in rounds view, and it moves to
-  the public window list once S adds revealed pricing there. Labels follow S's contract:
+  drawn price and medians. Locked, open and voided windows never appear; every revealed
+  window shows its results, whatever its size (founder). The windows come from the betting
+  panel's read of the public `GET /api/public/debates/:id/windows` list, whose `pricing` is
+  null until a window is revealed (#128), through a `yap:stake-windows` page event, so the
+  chart makes no second read and signed-out viewers see the same results. Labels follow
+  S's contract:
   `GET /api/public/debates/:id/outline/timeline` is read once per page, and again only on
   the `outline` room signal while a revealed turn lacks its label; each window takes
   `windowArgumentLabel` of its turn's final outline labels (404: no labels). The chart
