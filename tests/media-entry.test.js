@@ -248,7 +248,7 @@ function fixture() {
     hidden: false,
     // Pages without the live outline (Decision 0012) have no captions line.
     querySelector: (selector) =>
-      selector === "[data-live-captions]" ? null : root,
+      selector === "[data-live-captions],[data-live-outline]" ? null : root,
     addEventListener: (event, fn) => listeners.set(event, fn),
   };
   const response = (body, status = 200) => ({

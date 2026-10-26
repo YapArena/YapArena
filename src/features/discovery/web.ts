@@ -188,7 +188,7 @@ export function renderDebate(
   debate: PublicDebate,
   a4Enabled = false,
   activity?: PublicBotActivity | null,
-  liveOutline = false,
+  liveOutline?: { state: unknown },
 ) {
   return layout(
     debate.proposition,

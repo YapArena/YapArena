@@ -83,6 +83,7 @@ export function createWebServer(
     debaterSettings,
     transcription,
     transcriber,
+    outlines,
   } = services;
   const sharedLimits = abuseConfig && abuseStore;
   const app = createApp({
@@ -110,6 +111,7 @@ export function createWebServer(
         ? { repository: transcription, secret: config.liveOutline.ingestSecret }
         : undefined,
     dispatchTranscriber: transcriber?.dispatch,
+    outlines,
     messages: createMessageRepository(database),
     database,
     a4,

@@ -18,6 +18,10 @@ export interface AgentConfig {
   elevenLabsKey: string | undefined;
   /** At most this many interim caption updates a second. */
   captionsPerSecond: number;
+  /** The live outline runs only with a Claude API key. */
+  anthropicKey: string | undefined;
+  /** At least this long between the starts of two outline calls. */
+  outlineMinIntervalMs: number;
 }
 
 function provider(value: string | undefined, name: string) {
@@ -83,6 +87,17 @@ export function loadAgentConfig(
     throw new Error(
       "CAPTION_UPDATES_PER_SECOND must be an integer from 1 to 10",
     );
+  const outlineMinIntervalMs = Number(
+    environment.OUTLINE_MIN_INTERVAL_MS ?? "3000",
+  );
+  if (
+    !Number.isInteger(outlineMinIntervalMs) ||
+    outlineMinIntervalMs < 1000 ||
+    outlineMinIntervalMs > 30_000
+  )
+    throw new Error(
+      "OUTLINE_MIN_INTERVAL_MS must be an integer from 1000 to 30000",
+    );
   return {
     agentName,
     ingestUrl,
@@ -91,5 +106,7 @@ export function loadAgentConfig(
     shadowProvider: shadow,
     elevenLabsKey,
     captionsPerSecond,
+    anthropicKey: environment.ANTHROPIC_API_KEY || undefined,
+    outlineMinIntervalMs,
   };
 }

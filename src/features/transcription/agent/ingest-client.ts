@@ -1,4 +1,5 @@
 import { setTimeout as delay } from "node:timers/promises";
+import type { TurnOutline } from "../../outline/reducer.ts";
 import {
   ingestHeaders,
   signIngest,
@@ -14,6 +15,7 @@ import {
 export interface SessionState {
   debateId: string;
   debateStatus: string;
+  proposition: string;
   media: {
     state: string;
     turnNumber: number;
@@ -27,6 +29,11 @@ export interface SessionState {
     language: DebaterLanguage | null;
     consented: boolean;
   }[];
+  outline: {
+    version: number;
+    turn: TurnOutline | null;
+    map: { id: string; turnNumber: number; side: Side; label: string }[];
+  };
 }
 export interface IngestAnswer {
   status: number;

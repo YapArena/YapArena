@@ -404,47 +404,40 @@ describe(
     });
 
     it("prunes old ingest receipts and shadow segments only", async () => {
-      const { debateId } = await liveDebate();
-      const value = await update();
-      value.segments.push({
-        ...value.segments[0],
-        role: "shadow",
-        provider: "elevenlabs",
-      });
-      await transcripts.ingest(debateId, value);
-      const client = await owner.connect();
-      try {
-        await client.query("BEGIN");
-        await client.query(
-          "ALTER TABLE transcription_updates DISABLE TRIGGER transcription_updates_append_only",
+      const { debateId, a } = await liveDebate();
+      await transcripts.ingest(debateId, await update());
+      // Aged rows are inserted directly: the history triggers block updates,
+      // and disabling them would lock tables other suites write in parallel.
+      await owner.query(
+        `INSERT INTO transcription_updates(debate_id,job_id,sequence,turn_number,response,accepted_at)
+        VALUES ($1,'AJ_aged',0,1,'{}'::jsonb,clock_timestamp()-INTERVAL '8 days')`,
+        [debateId],
+      );
+      for (const role of ["primary", "shadow"])
+        await owner.query(
+          `INSERT INTO transcript_segments(debate_id,turn_number,side,speaker_user_id,language,
+            provider,role,job_id,sequence,segment_index,spoken_start_at,spoken_end_at,text,words,
+            audio_ms,created_at)
+          VALUES ($1,1,'A',$2,'fr','elevenlabs',$3,'AJ_aged',0,$4,clock_timestamp(),
+            clock_timestamp(),'Ancien segment','[]'::jsonb,0,clock_timestamp()-INTERVAL '91 days')`,
+          [debateId, a, role, role === "primary" ? 0 : 1],
         );
-        await client.query(
-          "ALTER TABLE transcript_segments DISABLE TRIGGER transcript_segments_append_only",
-        );
-        await client.query(
-          "UPDATE transcription_updates SET accepted_at=clock_timestamp()-INTERVAL '8 days' WHERE debate_id=$1",
-          [debateId],
-        );
-        await client.query(
-          "UPDATE transcript_segments SET created_at=clock_timestamp()-INTERVAL '91 days' WHERE debate_id=$1",
-          [debateId],
-        );
-        await client.query(
-          "ALTER TABLE transcription_updates ENABLE TRIGGER transcription_updates_append_only",
-        );
-        await client.query(
-          "ALTER TABLE transcript_segments ENABLE TRIGGER transcript_segments_append_only",
-        );
-        await client.query("COMMIT");
-      } finally {
-        client.release();
-      }
       const pruned = await transcripts.pruneExpired();
       assert.ok(pruned.receipts >= 1);
       assert.ok(pruned.shadow >= 1);
       assert.deepEqual(
         (await segments(debateId)).map((row) => row.role),
-        ["primary"],
+        ["primary", "primary"],
+        "primary segments stay; the aged shadow one is gone",
+      );
+      assert.equal(
+        (
+          await owner.query(
+            "SELECT count(*)::int AS n FROM transcription_updates WHERE debate_id=$1",
+            [debateId],
+          )
+        ).rows[0].n,
+        1,
       );
     });
   },

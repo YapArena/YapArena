@@ -27,6 +27,10 @@ import { createCoinSandboxRouter } from "./features/account-wallet/sandbox-route
 import { createTurnWindowRouter } from "./features/account-wallet/window-router.ts";
 import { createDebaterSettingsRouter } from "./features/transcription/settings-router.ts";
 import { createTranscriptionIngestRouter } from "./features/transcription/ingest-router.ts";
+import {
+  createOutlineFlagRouter,
+  createOutlineRouter,
+} from "./features/outline/router.ts";
 import { createEmailAuthSecurity } from "./platform/auth/browser-security.ts";
 import { SessionUnavailableError } from "./platform/auth/sessions.ts";
 
@@ -141,6 +145,7 @@ export function createApp({
   debaterSettings,
   transcriptionIngest,
   dispatchTranscriber,
+  outlines,
   sharedAuthLimiter,
   sharedAccountLimiter,
   sharedRateLimits,
@@ -200,6 +205,7 @@ export function createApp({
   debaterSettings?: Parameters<typeof createDebaterSettingsRouter>[0];
   transcriptionIngest?: Parameters<typeof createTranscriptionIngestRouter>[0];
   dispatchTranscriber?: (debateId: string) => Promise<unknown>;
+  outlines?: Parameters<typeof createOutlineRouter>[0];
 }) {
   const app = express();
   const mediaUrl = mediaProvider ? new URL(mediaProvider.publicUrl) : undefined;
@@ -393,7 +399,9 @@ export function createApp({
         mediaEnabled: Boolean(media && mediaProvider && matching && identity),
         applicationOrigin: applicationOrigin ?? "http://localhost:3000",
         emailFirst: true,
-        liveOutlineEnabled: Boolean(transcriptionIngest),
+        liveOutline: outlines
+          ? { snapshot: (id: string) => outlines.snapshot(id) }
+          : undefined,
       }),
     );
   }
@@ -430,6 +438,15 @@ export function createApp({
       }),
     );
   if (turnWindows) app.use(createTurnWindowRouter(turnWindows));
+  if (outlines) {
+    app.use(createOutlineRouter(outlines));
+    app.use(
+      createOutlineFlagRouter(
+        outlines,
+        createRequireAuthentication({ sessions, environment }),
+      ),
+    );
+  }
   if (a4)
     app.use(
       "/api/a4",

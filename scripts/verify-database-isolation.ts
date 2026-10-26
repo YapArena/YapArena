@@ -118,6 +118,10 @@ const applicationTables = [
   "transcription_dispatches",
   "transcription_updates",
   "transcript_segments",
+  "outline_heads",
+  "outline_versions",
+  "outline_windows",
+  "outline_flags",
 ];
 const container = `yaparena-isolation-${randomUUID().slice(0, 8)}`;
 const evidenceDirectory = `/tmp/${container}-evidence`;
