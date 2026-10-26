@@ -1,8 +1,5 @@
 import { Router, type Request, type RequestHandler } from "express";
-import {
-  sandboxOpeningTerms,
-  type createCoinSandboxRepository,
-} from "./sandbox-repository.ts";
+import type { createCoinSandboxRepository } from "./sandbox-repository.ts";
 import type { createCoinDebateSandbox } from "./debate-sandbox.ts";
 import type { createSandboxErrorReports } from "./sandbox-reports.ts";
 import { CoinOperationError } from "./external-operations.ts";
@@ -106,34 +103,9 @@ export function createCoinSandboxRouter(options: {
   router.get("/summary", async (r, s) =>
     s.json(await sandbox.summary(context(r))),
   );
-  // Decision 0009, point 8: opening the financial sandbox is confirmed once
-  // by a fresh sign-in. The browser follows confirmPath, then returns.
-  router.post("/opening/operations", async (r, s) => {
-    body(r.body, []);
-    const actor = context(r);
-    const operation = await operations.create({
-      userId: actor.userId,
-      sessionTokenHash: actor.sessionTokenHash,
-      purpose: "sandbox.open",
-      terms: sandboxOpeningTerms(actor.userId),
-    });
-    s.status(201).json(operation);
-  });
-  router.post("/opening", async (r, s) => {
-    const b = body(r.body, ["approval"]),
-      actor = context(r),
-      confirmation = parseConfirmation(b.approval);
-    const approval = await operations.prepare({
-      ...actor,
-      id: confirmation.id,
-      purpose: "sandbox.open",
-      terms: sandboxOpeningTerms(actor.userId),
-      requestId: String(r.id),
-    });
-    s.json(
-      await sandbox.open(actor, { operationId: confirmation.id, approval }),
-    );
-  });
+  // Decision 0013: Yap Coins are always on. There is no opening
+  // confirmation; the first request opens the sandbox and this claims the
+  // welcome grant once. Withdrawals and recovery consents still confirm.
   router.post("/initialize", async (r, s) => {
     body(r.body, []);
     s.json(await sandbox.initialize(context(r)));

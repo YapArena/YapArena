@@ -58,7 +58,8 @@ describe(
     after(async () => {
       await Promise.all([owner?.end(), runtime?.end()]);
     });
-    // An Auth0 account that, unless told otherwise, has opened the sandbox.
+    // An Auth0 account that, unless told otherwise, already has the automatic
+    // opening its first own request records (Decision 0013).
     async function actor({ opened = true } = {}) {
       const user = (
         await owner.query(
@@ -246,25 +247,35 @@ describe(
         });
       return { quote, operation: { id }, approval };
     }
-    it("refuses debate participation until the account opened the sandbox", async () => {
+    it("opens the sandbox automatically on an account's first debate request (Decision 0013)", async () => {
       const newcomer = await actor({ opened: false }),
         host = await actor(),
         debateId = await debate(),
-        unopened = /confirm by signing in again to open the financial sandbox/;
-      await assert.rejects(
-        a4.create(newcomer, debateId, randomUUID()),
-        unopened,
-      );
+        openings = async () =>
+          (
+            await owner.query(
+              "SELECT operation_id FROM coin_sandbox_openings WHERE user_id=$1",
+              [newcomer.userId],
+            )
+          ).rows;
+      assert.equal((await sandbox.summary(newcomer)).opened, false);
+      assert.deepEqual(await openings(), []);
       const round = await a4.create(host, debateId, randomUUID());
-      await assert.rejects(
-        a4.submit(newcomer, round.id, randomUUID(), {
-          side: "YES",
-          limit: "1",
-          quantity: 1,
-        }),
-        unopened,
+      // Joining the open round is the newcomer's first request: no refusal and
+      // no confirmation, just an automatic opening.
+      assert.equal(
+        (await a4.create(newcomer, debateId, randomUUID())).id,
+        round.id,
       );
-      await assert.rejects(a4.advance(20, newcomer), unopened);
+      assert.deepEqual(await openings(), [{ operation_id: null }]);
+      await sandbox.initialize(newcomer);
+      await seed(newcomer, "center", "1000000");
+      await seed(newcomer, "promotional", "1000000");
+      await a4.submit(newcomer, round.id, randomUUID(), {
+        side: "YES",
+        limit: "1",
+        quantity: 1,
+      });
       assert.equal(
         (
           await owner.query(
@@ -272,13 +283,7 @@ describe(
             [newcomer.userId],
           )
         ).rows[0].n,
-        0,
-      );
-      assert.equal((await sandbox.summary(newcomer)).initialized, false);
-      await openSandbox(owner, newcomer.userId);
-      assert.equal(
-        (await a4.create(newcomer, debateId, randomUUID())).id,
-        round.id,
+        1,
       );
     });
     it("serializes purchased A4 stakes against fresh-authorized withdrawals without partial reservations in either lock order", async () => {

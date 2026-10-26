@@ -3,6 +3,9 @@
 Status: implemented for the nonfinancial preview, 2026-09-29. Policies below are preview
 defaults requiring product and operating review before a paid launch.
 
+The confirmed but unimplemented [live matchmaking decision](0011-live-matchmaking-and-challenges.md)
+will replace the open queue, the one-hour minimum and the one-active-event rule below.
+
 The later [media prototype decision](0004-live-debate-replay.md) adds recording and readiness
 gates to live and replay transitions. The `preview-1` timing gaps below remain true for events
 created under that historical rule snapshot.
