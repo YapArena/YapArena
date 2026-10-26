@@ -140,11 +140,14 @@ export function createMatchingRouter({
   identity,
   media,
   recordProductAction,
+  debateAutoStart,
 }: {
   matching: Repository;
   identity: ReturnType<typeof createIdentityRepository>;
   media?: ReturnType<typeof createMediaRepository>;
   recordProductAction?: ProductActionRecorder;
+  // Present with the live queue (Decision 0011): the second ready speaker starts the debate.
+  debateAutoStart?: { tryStart(debateId: string): Promise<boolean> };
 }) {
   const router = Router();
   const participant = createRequireRole(identity, ["participant"]);
@@ -285,9 +288,15 @@ export function createMatchingRouter({
     if (!id) return response.status(404).json({ error: "event not found" });
     try {
       if (media) await media.assertDeviceReady(id, request.user!.id);
-      return response.json({
-        event: await matching.markReady(request.user!.id, id),
-      });
+      const event = await matching.markReady(request.user!.id, id);
+      if (debateAutoStart && event.status === "ready")
+        try {
+          await debateAutoStart.tryStart(id);
+        } catch (error) {
+          // The jobs worker retries every second until the join window closes.
+          request.log.error({ error, id }, "automatic debate start failed");
+        }
+      return response.json({ event });
     } catch (error) {
       return errorResponse(response, error);
     }

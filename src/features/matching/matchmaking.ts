@@ -2,6 +2,7 @@ import type { Pool, PoolClient } from "pg";
 import { withTransaction } from "../../platform/transaction.ts";
 import { runExclusiveDatabaseJob } from "../../platform/database-jobs.ts";
 import {
+  cancelUnstartedDebate,
   createPairedEvent,
   ensureAvailable,
   lockUsers,
@@ -22,6 +23,13 @@ export const PRESENCE_SECONDS = 90;
 const RETENTION_DAYS = 30;
 const SWEEP_TOPICS = 25;
 const SWEEP_OFFERS = 100;
+const SWEEP_NO_SHOWS = 50;
+// Proposed in Decision 0011, awaiting founder confirmation: time to join after a queue match,
+// and after a scheduled debate's start time.
+export const QUEUE_JOIN_SECONDS = 90;
+export const SCHEDULED_JOIN_SECONDS = 600;
+// The queue screen's camera and microphone check stays valid this long.
+const DEVICE_CHECK_MINUTES = 30;
 
 type Side = "A" | "B";
 type TicketStatus = "searching" | "offered" | "matched" | "closed";
@@ -237,9 +245,49 @@ async function expireOffer(client: PoolClient, offer: OfferRow) {
   }
 }
 
+// Debates that never went live in their join window are cancelled. In a queue match, whoever had
+// joined goes back into the queue with their original queue time.
+async function resolveNoShows(client: PoolClient) {
+  const due = await client.query<{
+    id: string;
+    status: string;
+    readyA: boolean;
+    readyB: boolean;
+    ticketAId: string | null;
+    ticketBId: string | null;
+  }>(
+    `SELECT d.id, d.status, d.ready_a_at IS NOT NULL AS "readyA",
+       d.ready_b_at IS NOT NULL AS "readyB", o.ticket_a_id AS "ticketAId",
+       o.ticket_b_id AS "ticketBId"
+     FROM debates d LEFT JOIN match_offers o ON o.debate_id = d.id AND o.status = 'accepted'
+     WHERE d.status IN ('scheduled', 'ready') AND NOT d.is_demo
+       AND d.scheduled_at <= CURRENT_TIMESTAMP - make_interval(secs =>
+         CASE WHEN o.id IS NULL THEN ${SCHEDULED_JOIN_SECONDS} ELSE ${QUEUE_JOIN_SECONDS} END)
+     ORDER BY d.scheduled_at LIMIT ${SWEEP_NO_SHOWS} FOR UPDATE OF d SKIP LOCKED`,
+  );
+  for (const debate of due.rows) {
+    await cancelUnstartedDebate(client, debate.id, debate.status);
+    for (const [joined, ticketId] of [
+      [debate.readyA, debate.ticketAId],
+      [debate.readyB, debate.ticketBId],
+    ] as const)
+      if (joined && ticketId)
+        await client.query(
+          `INSERT INTO matchmaking_tickets (user_id, topic_id, side, status, priority_at)
+           SELECT user_id, topic_id, side, 'searching', priority_at
+           FROM matchmaking_tickets WHERE id = $1 ON CONFLICT DO NOTHING`,
+          [ticketId],
+        );
+  }
+  return due.rows.length;
+}
+
 export function createMatchmaking(
   database: Pool,
-  { liveDebateCapacity }: { liveDebateCapacity: number },
+  {
+    liveDebateCapacity,
+    requireDeviceCheck = false,
+  }: { liveDebateCapacity: number; requireDeviceCheck?: boolean },
 ) {
   async function participantOffer(userId: string, offerId: string) {
     const result = await database.query<OfferRow>(
@@ -362,6 +410,18 @@ export function createMatchmaking(
         await lockUsers(client, userId);
         await profileFor(client, userId);
         await ensureAvailable(client, userId);
+        if (requireDeviceCheck) {
+          const checked = await client.query(
+            `SELECT 1 FROM account_device_checks WHERE user_id = $1 AND camera_ok
+               AND microphone_ok AND checked_at > CURRENT_TIMESTAMP
+                 - make_interval(mins => ${DEVICE_CHECK_MINUTES})`,
+            [userId],
+          );
+          if (!checked.rows[0])
+            throw new MatchConflictError(
+              "check your camera and microphone before entering the queue",
+            );
+        }
         const topic = await client.query<{ id: string }>(
           `SELECT id FROM topics WHERE slug = $1 AND publication_state = 'published'
              AND is_demo = false`,
@@ -470,7 +530,8 @@ export function createMatchmaking(
       return { sideA: count("A"), sideB: count("B") };
     },
 
-    // One pass of the 1-second job: expire offers, drop absent players, then pair what remains.
+    // One pass of the 1-second job: expire offers, cancel no-shows, drop absent players, then pair
+    // what remains.
     async sweep() {
       return runExclusiveDatabaseJob(
         database,
@@ -482,6 +543,7 @@ export function createMatchmaking(
            ORDER BY deadline_at LIMIT ${SWEEP_OFFERS} FOR UPDATE SKIP LOCKED`,
           );
           for (const offer of due.rows) await expireOffer(client, offer);
+          const noShows = await resolveNoShows(client);
           const stale = await client.query(
             `UPDATE matchmaking_tickets SET status = 'closed', closed_reason = 'stale',
              updated_at = CURRENT_TIMESTAMP
@@ -498,6 +560,7 @@ export function createMatchmaking(
             while (await pairOldest(client, topicId, liveDebateCapacity))
               paired += 1;
           return {
+            noShows,
             expired: due.rows.length,
             stale: stale.rowCount ?? 0,
             paired,
