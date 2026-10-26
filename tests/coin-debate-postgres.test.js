@@ -957,6 +957,8 @@ describe(
       const summary = await sandbox.summary(context);
       assert.equal(summary.balances.cashAvailable, "0");
       assert.equal(summary.balances.promotionalPrincipal, "24000000");
+      // The 100 YC grant-funded reservation is visible as reserved principal.
+      assert.equal(summary.balances.promotionalReserved, "1000000");
       await assert.rejects(
         runtime.query(
           "UPDATE coin_debate_rounds SET closes_at=clock_timestamp() WHERE id=$1",
