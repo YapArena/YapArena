@@ -15,7 +15,7 @@ export const shorthands = undefined;
 // manual rounds and live debates take live positions only. A replay order
 // records its position (coin_debate_orders.replay_position_ms).
 //
-// coin_debate_order_guard() starts from 1792978459788_add-turn-window-rules.js.
+// coin_debate_order_guard() starts from 1792984532958_add-turn-window-rules.js.
 
 export const up = (pgm) => {
   pgm.sql(`

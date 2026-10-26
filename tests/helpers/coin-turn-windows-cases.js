@@ -2,19 +2,22 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { before, after, describe, it } from "node:test";
 import pg from "pg";
-import { createCoinDebateSandbox } from "../dist/features/account-wallet/debate-sandbox.js";
+import { createCoinDebateSandbox } from "../../dist/features/account-wallet/debate-sandbox.js";
 import {
   createCoinSandboxRepository,
   createCoinSandboxOperatorRepository,
-} from "../dist/features/account-wallet/sandbox-repository.js";
-import { createSessionRepository } from "../dist/platform/auth/sessions.js";
-import { createSessionToken } from "../dist/platform/auth/session-tokens.js";
-import { createMediaRepository } from "../dist/features/media/repository.js";
-import { attachSubject, openSandbox } from "./helpers/confirmations.js";
+} from "../../dist/features/account-wallet/sandbox-repository.js";
+import { createSessionRepository } from "../../dist/platform/auth/sessions.js";
+import { createSessionToken } from "../../dist/platform/auth/session-tokens.js";
+import { createMediaRepository } from "../../dist/features/media/repository.js";
+import { attachSubject, openSandbox } from "./confirmations.js";
 
-// Decision 0012: one Yap Coins trading window per live speaking turn. Other
-// PostgreSQL suites share this database in parallel, so every coin-loop call
-// here is scoped to this suite's own debates and never runs the global clocks.
+// Decision 0012: one Yap Coins trading window per live speaking turn. These
+// cases run inside coin-debate-postgres.test.js, so they never overlap its
+// fixtures: global settlement locks every due round's accounts, and those
+// fixtures hold account locks before waiting for the transition lock. Other
+// PostgreSQL suites share the database in parallel, so window opening and
+// voiding stay scoped to this file's own debates.
 const ownerUrl = process.env.A4_TEST_OWNER_URL,
   runtimeUrl = process.env.A4_TEST_DATABASE_URL;
 describe(

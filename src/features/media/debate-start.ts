@@ -11,10 +11,14 @@ export function createDebateStart({
   media,
   provider,
   matching,
+  dispatchTranscriber,
 }: {
   media: ReturnType<typeof createMediaRepository>;
   provider: ReturnType<typeof createMediaProvider>;
   matching: ReturnType<typeof createMatchingRepository>;
+  // Decision 0012: idempotent per debate, never throws and is not awaited, so
+  // it cannot delay or fail a start.
+  dispatchTranscriber?: (debateId: string) => Promise<unknown>;
 }) {
   return async function startDebate({
     debateId,
@@ -62,6 +66,7 @@ export function createDebateStart({
           );
         }
       }
+      void dispatchTranscriber?.(debateId);
       return { event, state: await media.get(debateId) };
     } catch (error) {
       if (recording) {

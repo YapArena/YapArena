@@ -16,6 +16,10 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { createReplayAccess, replayPrefix } from "./replay.ts";
 import { createReplayThumbnailStorage } from "./replay-thumbnail.ts";
+import type { TurnHint } from "../transcription/protocol.ts";
+
+/** LiveKit room of one debate. */
+export const debateRoom = (id: string) => `debate-${id}`;
 
 export interface MediaProviderConfig {
   livekitUrl: string;
@@ -41,6 +45,9 @@ export function createMediaProvider(
   packagedReplay?: (
     key: string,
   ) => Promise<{ packageKey: string; hasCaptions: boolean } | null>,
+  // Decision 0012: write each turn change to room metadata for the
+  // transcriber agent, which treats it as a hint.
+  options: { turnMetadata?: boolean } = {},
 ) {
   const controlUrl = new URL(config.livekitUrl);
   const supportsTokenRevocation =
@@ -82,7 +89,10 @@ export function createMediaProvider(
     { bucket: config.s3Bucket },
     storage,
   );
-  const roomName = (id: string) => `debate-${id}`;
+  const roomName = debateRoom;
+  // Last metadata written per room, so periodic permission repairs do not
+  // rewrite unchanged metadata (every write reaches every participant).
+  const turnMetadata = new Map<string, string>();
   const usesReplayEdge = (key: string) =>
     Boolean(
       config.replayEdgeUrl &&
@@ -162,7 +172,7 @@ export function createMediaProvider(
       return people.filter((person) => person.identity.startsWith("speaker-"))
         .length;
     },
-    async setTurn(id: string, side: "A" | "B" | null) {
+    async setTurn(id: string, side: "A" | "B" | null, hint?: TurnHint) {
       const people = await rooms.listParticipants(roomName(id));
       for (const person of people) {
         if (!person.identity.startsWith("speaker-")) continue;
@@ -192,6 +202,23 @@ export function createMediaProvider(
             canPublishSources: sources,
           },
         });
+      }
+      // After permissions, and best effort: the hint never fails a turn
+      // change. A failed write is retried by the next permission repair.
+      if (options.turnMetadata && hint) {
+        const metadata = JSON.stringify(hint);
+        if (turnMetadata.get(id) === metadata) return;
+        try {
+          await rooms.updateRoomMetadata(roomName(id), metadata);
+          turnMetadata.delete(id);
+          if (hint.mediaState !== "ended") {
+            if (turnMetadata.size >= 1000)
+              turnMetadata.delete(turnMetadata.keys().next().value!);
+            turnMetadata.set(id, metadata);
+          }
+        } catch {
+          turnMetadata.delete(id);
+        }
       }
     },
     async beginRecording(id: string) {

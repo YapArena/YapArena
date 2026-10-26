@@ -87,7 +87,7 @@ state, voidReason }] }`, the latest 100 windows in turn order. No orders, counts
 
 ## Pull request 1b: the founder's round rules
 
-Migration `1792978459788_add-turn-window-rules`. It applies to every Yap Coins debate round,
+Migration `1792984532958_add-turn-window-rules`. It applies to every Yap Coins debate round,
 windows and manual rounds, with or without `TURN_WINDOWS_ENABLED`. Until it is deployed, keep the
 flag off wherever user-created debates exist.
 
@@ -122,7 +122,7 @@ flag off wherever user-created debates exist.
 
 ## Pull request 1c: replay joining
 
-Migration `1792979219825_add-replay-joining` (F10).
+Migration `1792984636802_add-replay-joining` (F10).
 
 - **Recording clock.** When a recording completes, LiveKit reports the file's start. The webhook
   and the missed-webhook reconciliation store it once per debate in `recording_clocks`, before
@@ -144,10 +144,68 @@ Migration `1792979219825_add-replay-joining` (F10).
   against the window's span and the viewer's later positions. Replay viewers can watch the end
   before trading a window (accepted, F10).
 
+## Pull request 2: transcription and captions
+
+Behind `LIVE_OUTLINE_ENABLED` (default `false`; needs LiveKit media and a
+`TRANSCRIPTION_INGEST_SECRET` of at least 32 bytes). Migration `1792975000000_add-live-transcription`.
+
+- **Debater settings** (`debater_settings`, `GET/PUT /api/me/debater-settings`): language (`fr`/`en`)
+  and consent to transcription and the public AI outline, stored with the consent wording's version
+  (`DEBATER_CONSENT_VERSION`). A new wording asks again. `checkDebaterSettings` and
+  `assertDebaterSettings` (409, code `debater_settings_required`) in
+  `src/features/transcription/debater-settings.ts` are the check matchmaking calls at queue entry
+  and challenge acceptance. The form is a "Debating" card in the account's Profile tab, shown only
+  when the flag is on.
+- **Dispatch.** The agent joins only when dispatched explicitly (`agentName`). The jobs loop
+  dispatches each ready or live, non-demo debate with a consenting debater once, so the agent is
+  warm before the first word; the operator start route calls the same exported function with one
+  line. A database claim per debate prevents a second agent (LiveKit dispatch is not idempotent).
+  Failures retry with backoff, five times at most.
+- **Turn hint.** The media permission reconciliation (every turn change, pause, resume and end, and
+  its five-second repair) writes `{v, debateStatus, mediaState, turnNumber, activeSide,
+turnDeadlineAt}` to room metadata, after permissions and best effort. The agent treats it as a
+  hint; ingest re-validates. Speaker languages and consent come from the server's session state
+  (`POST /api/internal/transcription/debates/:id/session`) rather than participant metadata, so
+  speaker tokens are unchanged.
+- **Agent** (`src/features/transcription/agent/`, its own compiler project
+  `tsconfig.transcriber.json`, image `deploy/transcriber/Dockerfile`). Hidden; subscribes only to the
+  active side's microphone; one speech-to-text channel per provider for the active speaker; opens the
+  next speaker's channel 1.5 s before the deadline; flushes finals at turn end and on pause.
+  `TRANSCRIPTION_PROVIDER=deepgram|elevenlabs`, optional `TRANSCRIPTION_SHADOW_PROVIDER`. Each final
+  segment records provider, role, word timings, latency (speech end to final) and audio length. It
+  stops when the debate ends or is cancelled, and gives up on a debate that has not started within
+  15 minutes.
+- **Captions.** Interim (at most four a second) and final text on LiveKit's `lk.transcription` text
+  stream, one stream per update with the speaker as sender. Browsers show one line under the video,
+  toggleable; the choice is remembered per browser.
+- **Ingest** (`POST /api/internal/transcription/debates/:id/updates`): HMAC-SHA256 over
+  `timestamp.body`, at most 30 s of skew, 32 KB, ten updates per debate in a burst then five a second.
+  One transaction: the debate is live and the turn current (or the turn that ended in the last 15 s,
+  for its final flush), segment sides match the turn, the speaker consented. Each segment maps to
+  its turn's window by spoken end time; speech after the cutoff has no window. Agent clock drift
+  beyond one second is corrected. Idempotent by (debate, job, sequence).
+- **Storage.** `transcript_segments` is append-only. Retention is in `docs/data-ownership.md`.
+
+### Capacity per LiveKit plan
+
+A live debate uses one agent session, one LiveKit Inference speech-to-text connection when Deepgram
+is the primary (two for about 1.5 s at each turn change), and one recording. Limits read on
+2026-10-25 from livekit.com/pricing:
+
+| Plan  | Agent sessions | Inference STT connections | Recordings (egress) | Live debates at most |
+| ----- | -------------- | ------------------------- | ------------------- | -------------------- |
+| Build | 5              | 5                         | 2                   | 2                    |
+| Ship  | 20             | 20                        | 100                 | 10                   |
+| Scale | 50 (up to 600) | 50                        | 500                 | 25                   |
+
+Keep matchmaking's `LIVE_DEBATE_CAPACITY` at or below min(agent sessions, half the Inference
+connections, recordings). ElevenLabs as primary or shadow is limited by its own plan's realtime
+concurrency, also halved for the turn overlap (Free 6, Starter 9, Creator 15, Pro 30).
+Approximate costs per live debate hour: agent session $0.60 beyond included minutes, Nova-3
+monolingual $0.29, ElevenLabs Scribe v2 Realtime $0.39; a shadow provider adds its own cost.
+
 ## Later pull requests
 
-2. Transcriber agent, provider switch with shadow mode, dispatch, room metadata, ingest endpoint,
-   transcript storage, debater settings and live captions.
 3. Live outline: loop module, Haiku integration, shared reducer, outline versions, freeze, LiveKit
    delivery, initial page state, outline panel.
 4. Sonnet cleanup, correlation, chart integration, replay sync and timeline endpoint.

@@ -5,7 +5,13 @@ import { MediaConflictError } from "../dist/features/media/repository.js";
 
 const debateId = "44444444-4444-4444-8444-444444444444";
 
-function fixture({ connected = 2, transition, setTurn, stopRecording } = {}) {
+function fixture({
+  connected = 2,
+  transition,
+  setTurn,
+  stopRecording,
+  dispatchTranscriber,
+} = {}) {
   const calls = [];
   const errors = [];
   const media = {
@@ -51,7 +57,12 @@ function fixture({ connected = 2, transition, setTurn, stopRecording } = {}) {
       errors.push(message);
     },
   };
-  const startDebate = createDebateStart({ media, provider, matching });
+  const startDebate = createDebateStart({
+    media,
+    provider,
+    matching,
+    dispatchTranscriber,
+  });
   const start = () =>
     startDebate({ debateId, actorUserId: "9", reason: "both ready", logger });
   return { calls, errors, start };
@@ -71,6 +82,27 @@ describe("shared debate start", () => {
       event: { id: debateId, status: "live" },
       state: { debateId, state: "running" },
     });
+  });
+
+  it("asks for the transcriber agent once the debate is live", async () => {
+    const dispatched = [];
+    const f = fixture({
+      dispatchTranscriber: async (id) => dispatched.push(id),
+      setTurn: () => {
+        throw new Error("livekit unavailable");
+      },
+    });
+    await f.start();
+    assert.deepEqual(dispatched, [debateId], "even when the debate pauses");
+    const refused = [];
+    await assert.rejects(
+      fixture({
+        connected: 1,
+        dispatchTranscriber: async (id) => refused.push(id),
+      }).start(),
+      MediaConflictError,
+    );
+    assert.deepEqual(refused, [], "not for a start that fails");
   });
 
   it("refuses before recording unless both speakers are connected", async () => {

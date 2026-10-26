@@ -148,6 +148,37 @@ function parseMedia(environment: NodeJS.ProcessEnv, nodeEnvironment: string) {
   });
 }
 
+// Decision 0012: live transcription, captions and the AI outline. The
+// transcriber agent runs on LiveKit Cloud, so the server needs media
+// configured, and the agent authenticates to ingest with its own secret.
+function parseLiveOutline(environment: NodeJS.ProcessEnv, media: boolean) {
+  const enabled = environment.LIVE_OUTLINE_ENABLED ?? "false";
+  if (!["true", "false"].includes(enabled))
+    throw new Error("LIVE_OUTLINE_ENABLED must be true or false");
+  const agentName =
+    environment.TRANSCRIBER_AGENT_NAME ?? "yaparena-transcriber";
+  if (!/^[a-z0-9][a-z0-9-]{0,62}$/.test(agentName))
+    throw new Error(
+      "TRANSCRIBER_AGENT_NAME must be lowercase letters, digits and dashes",
+    );
+  const ingestSecret = environment.TRANSCRIPTION_INGEST_SECRET;
+  if (enabled === "true") {
+    if (!media)
+      throw new Error(
+        "LIVE_OUTLINE_ENABLED requires LiveKit media configuration",
+      );
+    if (!ingestSecret || Buffer.byteLength(ingestSecret) < 32)
+      throw new Error(
+        "LIVE_OUTLINE_ENABLED requires TRANSCRIPTION_INGEST_SECRET of at least 32 bytes",
+      );
+  }
+  return Object.freeze({
+    enabled: enabled === "true",
+    agentName,
+    ingestSecret: enabled === "true" ? ingestSecret! : undefined,
+  });
+}
+
 export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
   const nodeEnvironment = environment.NODE_ENV ?? "development";
   const homepageReference = environment.HOMEPAGE_REFERENCE_ENABLED ?? "false";
@@ -271,6 +302,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     }),
   });
   const backgroundJobs = environment.RUN_BACKGROUND_JOBS ?? "true";
+  const liveOutline = parseLiveOutline(environment, Boolean(media));
   const streamEnabled = environment.COMMUNITY_STREAM_ENABLED ?? "false";
   if (!["true", "false"].includes(streamEnabled))
     throw new Error("COMMUNITY_STREAM_ENABLED must be true or false");
@@ -381,6 +413,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     backgroundJobs: backgroundJobs === "true",
     communityStream,
     matchmaking,
+    liveOutline,
     a4Funding,
     a4Mode: a4Mode as "disabled" | "yap-coins" | "bots",
   });

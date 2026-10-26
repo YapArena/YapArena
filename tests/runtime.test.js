@@ -100,6 +100,54 @@ describe("service runtime", () => {
     assert.equal(closed, true);
     assert.equal(cleared, 2);
   });
+  it("warms transcribers without overlap, logs failures and prunes transcripts hourly", async () => {
+    const callbacks = new Map(),
+      errors = [];
+    let ticks = 0,
+      pruned = 0,
+      finish;
+    const runtime = createRuntime({
+      database: { end: async () => {} },
+      sessions: { deleteExpired: async () => 0 },
+      transcription: {
+        tick: async () => {
+          ticks++;
+          if (ticks === 1)
+            return new Promise((resolve) => {
+              finish = resolve;
+            });
+          throw new Error("dispatch unavailable");
+        },
+        pruneExpired: async () => {
+          pruned++;
+          if (pruned === 2) throw new Error("prune failed");
+        },
+      },
+      logger: { info() {}, error: (entry) => errors.push(entry.error.message) },
+      config: { port: 3000, host: "127.0.0.1" },
+      verifyDatabase: async () => {},
+      setIntervalFn: (callback, interval) => {
+        callbacks.set(interval, callback);
+        return { unref() {} };
+      },
+      clearIntervalFn() {},
+    });
+    await runtime.start();
+    const tick = callbacks.get(1000);
+    const first = tick();
+    tick();
+    assert.equal(ticks, 1, "a running dispatch pass is not overlapped");
+    finish();
+    await first;
+    await tick();
+    assert.deepEqual(errors, ["dispatch unavailable"]);
+    await callbacks.get(3600000)();
+    await callbacks.get(3600000)();
+    assert.equal(pruned, 2);
+    assert.deepEqual(errors, ["dispatch unavailable", "prune failed"]);
+    await runtime.stop();
+  });
+
   it("runs only maintenance when no web app is supplied", async () => {
     const callbacks = new Map();
     const events = [];
