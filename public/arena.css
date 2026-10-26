@@ -2143,3 +2143,52 @@ textarea::placeholder {
     z-index: 20;
   }
 }
+
+/* Yap Coins results notice (Decision 0013, interface 10), on every page. It
+   sits below the header and under the measurement choice banner. */
+.results-notice {
+  position: fixed;
+  z-index: 90;
+  top: 84px;
+  right: 16px;
+  display: grid;
+  gap: 8px;
+  width: min(360px, calc(100% - 32px));
+  padding: 14px;
+  border: 1px solid #2f2f2f;
+  border-radius: 10px;
+  background: #0f0f0f;
+  box-shadow: 0 10px 36px rgb(0 0 0 / 45%);
+  color: #f4f4f4;
+}
+.results-notice h2 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+.results-notice ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.82rem;
+}
+.results-notice a {
+  display: block;
+  min-height: 24px;
+  line-height: 1.45;
+  color: #f4f4f4;
+}
+.results-notice p {
+  margin: 0;
+  color: #a9a9a9;
+  font-size: 0.74rem;
+}
+.results-notice button {
+  justify-self: start;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  background: transparent;
+  color: #f4f4f4;
+}
