@@ -71,6 +71,11 @@ is an A4 endorsement in one turn's 60-second window; there is no winner (F09).
   a dismissible notice that groups them per debate and links to each one. Dismissing it or opening
   a debate from it stores the newest reveal time on the device (`yaparena-results-seen:<account>`);
   a device's first check looks back seven days.
+- The debate chart shows revealed Yap Coins turn windows instead of the bot history once a debate
+  has any, labelled from each turn's final AI outline through S's `windowArgumentLabel` contract
+  (Decision 0012). Revealed windows' aggregate pricing is public (coordinator, option A): the chart
+  reads it from the public window list, so every viewer sees the same results, and the founder
+  decided every revealed window shows its results, whatever its size.
 - Staged (founder, 2026-10-26): the YAP human-run and refill controls were removed first, with the
   Bots sandbox behind a tab next to Info. Bots mode then moved to `/coins` entirely: the debate
   page keeps the shared bot history chart and an info card linking to `/coins?debate=…`. On

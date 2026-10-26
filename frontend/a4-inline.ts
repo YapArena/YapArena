@@ -1,12 +1,20 @@
-// The debate page's public bot history (Decision 0013): the shared synthetic
-// activity chart, price inspector, sentiment and argument endorsements. Bots
-// mode itself (runs, commitments, receipts) lives on /coins; this module reads
-// only the public, already revealed aggregates.
-import type { RoundPoint, SharedActivity } from "./arena-types.js";
+// The debate page's chart (Decision 0013). It shows revealed Yap Coins turn
+// windows once a debate has any (item d), labelled from each turn's final AI
+// outline; otherwise the public bot history: the shared synthetic activity
+// chart, price inspector, sentiment and argument endorsements. Bots mode
+// itself (runs, commitments, receipts) lives on /coins; this module reads
+// only public, already revealed aggregates.
+import type { OutlineTimeline } from "../src/features/outline/public-types.ts";
+import type { RoundPoint, SharedActivity, Timeline } from "./arena-types.js";
 /* global document, window */
 import { createRoundChart, sharePercent } from "./arena-chart.js";
 import { createPriceInspector } from "./arena-price.js";
 import { watchRoom } from "./community-stream.js";
+import {
+  pointsRevision,
+  windowPoints,
+  type RevealedWindow,
+} from "./window-chart-model.js";
 // These selectors refer to the fixed arena server-rendered markup.
 const root = document.querySelector<HTMLElement>("[data-a4-inline]")!;
 if (root) {
@@ -20,6 +28,14 @@ if (root) {
       .slice(0, precision);
     return `${n < 0n ? "−" : ""}${a / 1000000n}${precision ? "." + fractional : ""} Yap Coins`;
   };
+  const debateId = root.dataset.a4Inline!;
+  // Bot history only when Bots mode is on; the Yap Coins mode always works.
+  const botHistory = root.dataset.botHistory === "true";
+  const volume = root.querySelector<HTMLElement>(".arena-volume");
+  let windows: RevealedWindow[] = [];
+  let timeline: OutlineTimeline | null = null;
+  let timelineState: "idle" | "loading" | "done" = "idle";
+  let timelineTimer: number | undefined;
   const sharedTemplate = root.querySelector<HTMLTemplateElement>(
     "[data-shared-bootstrap]",
   );
@@ -48,10 +64,49 @@ if (root) {
   const chart = createRoundChart(root, selectRound, (point) => {
     prices.show(point ?? defaultPrice);
   });
+  function renderSentiment(point: RoundPoint, caption: string, kind: string) {
+    const pct = sharePercent(point.share);
+    ui("yes").textContent = pct === null ? "—" : pct.toFixed(1) + "%";
+    ui("no").textContent = pct === null ? "—" : (100 - pct).toFixed(1) + "%";
+    ui("sentiment-caption").textContent = caption;
+    ui("sentiment-bar").dataset.empty = String(pct === null);
+    ui("sentiment-bar").setAttribute(
+      "aria-label",
+      pct === null
+        ? `No ${kind.toLowerCase()} endorsements`
+        : `${kind} YES ${pct.toFixed(1)}%, NO ${(100 - pct).toFixed(1)}%`,
+    );
+    ui("sentiment-bar").style.setProperty("--yes-share", (pct ?? 0) + "%");
+  }
+  // Item d: revealed turn windows replace the bot history on this chart.
+  function renderWindows(points: RoundPoint[]) {
+    const latest = points.at(-1)!;
+    const data: Timeline = {
+      revision: `windows:${pointsRevision(points)}`,
+      scope: "shared",
+      items: points,
+      totals: { premium: "0", humanCommitments: 0, botCommitments: 0 },
+    };
+    defaultPrice = latest;
+    root.querySelector<HTMLElement>("[data-shared-arguments]")!.hidden = true;
+    if (volume) volume.hidden = true;
+    prices.update(data);
+    chart.render(data, sharedSelected);
+    ui("scope").textContent = "Yap Coins · revealed turn windows";
+    ui("sync").textContent =
+      "● Revealed results · updates when a turn's results are revealed";
+    renderSentiment(latest, `Yap Coins · turn ${latest.number}`, "Revealed");
+    ui("round-label").textContent = `Turn ${latest.number}`;
+    ui("round-state").textContent = "revealed";
+    ui("countdown").textContent = "Revealed Yap Coins results";
+  }
   function renderShared() {
+    const revealed = windowPoints(windows, timeline);
+    if (revealed.length) return renderWindows(revealed);
     const args = root.querySelector<HTMLElement>("[data-shared-arguments]")!;
     args.hidden = !shared?.arguments.length;
     if (!shared?.items.length) return;
+    if (volume) volume.hidden = false;
     defaultPrice = shared.items.at(-1);
     prices.update(shared);
     chart.render(shared, sharedSelected);
@@ -61,19 +116,11 @@ if (root) {
     ui("scope").textContent =
       "Shared simulation · seeded bots + opted-in mixed and observer rounds";
     ui("sync").textContent = "● Synthetic activity · updates after settlement";
-    const pct = sharePercent(defaultPrice!.share);
-    ui("yes").textContent = pct === null ? "—" : pct.toFixed(1) + "%";
-    ui("no").textContent = pct === null ? "—" : (100 - pct).toFixed(1) + "%";
-    ui("sentiment-caption").textContent =
-      `Synthetic / shared round ${defaultPrice!.number}`;
-    ui("sentiment-bar").dataset.empty = String(pct === null);
-    ui("sentiment-bar").setAttribute(
-      "aria-label",
-      pct === null
-        ? "No synthetic endorsements"
-        : `Synthetic YES ${pct.toFixed(1)}%, NO ${(100 - pct).toFixed(1)}%`,
+    renderSentiment(
+      defaultPrice!,
+      `Synthetic / shared round ${defaultPrice!.number}`,
+      "Synthetic",
     );
-    ui("sentiment-bar").style.setProperty("--yes-share", (pct ?? 0) + "%");
     ui("round-label").textContent = `Round ${shared.items.at(-1)!.number}`;
     ui("round-state").textContent = "synthetic";
     ui("countdown").textContent = "Shared settled history";
@@ -102,8 +149,41 @@ if (root) {
       }
     }
   }
+  // S's contract: the outline timeline is read once per page, and again only
+  // on the `outline` room signal while a revealed turn still lacks its label.
+  async function loadTimeline() {
+    if (timelineState === "loading" || sharedAbort.signal.aborted) return;
+    timelineState = "loading";
+    try {
+      const response = await fetch(
+        `/api/public/debates/${debateId}/outline/timeline`,
+        { cache: "no-store", signal: sharedAbort.signal },
+      );
+      // 404: the outline is off, so windows stay unlabelled.
+      if (response.ok) timeline = await response.json();
+      else if (response.status === 404) timeline = null;
+    } catch {
+      // Keep the labels already shown; the next outline signal retries.
+    } finally {
+      timelineState = "done";
+    }
+    renderShared();
+  }
+  window.addEventListener("yap:stake-windows", (event) => {
+    if (event.detail.debateId !== debateId) return;
+    windows = event.detail.windows;
+    if (timelineState === "idle" && windowPoints(windows, null).length)
+      void loadTimeline();
+    renderShared();
+  });
   async function loadShared() {
-    if (sharedBusy || document.hidden || sharedAbort.signal.aborted) return;
+    if (
+      !botHistory ||
+      sharedBusy ||
+      document.hidden ||
+      sharedAbort.signal.aborted
+    )
+      return;
     sharedBusy = true;
     sharedDueAt = null;
     lastShared = Date.now();
@@ -141,6 +221,7 @@ if (root) {
     }
   }
   const sharedTimer = setInterval(() => {
+    if (!botHistory) return;
     const now = Date.now();
     if (
       (sharedDueAt !== null && now >= sharedDueAt) ||
@@ -149,11 +230,25 @@ if (root) {
       void loadShared();
   }, 1000);
   const stopWatching = watchRoom({
-    room: root.dataset.a4Inline!,
-    topics: ["activity"],
+    room: debateId,
+    topics: botHistory ? ["activity", "outline"] : ["outline"],
     events: window,
-    signal() {
-      sharedDueAt ??= spread();
+    signal(topic) {
+      if (topic === "activity") {
+        sharedDueAt ??= spread();
+        return;
+      }
+      // A final outline may label a revealed turn; viewers re-read spread.
+      if (
+        timelineState === "done" &&
+        windowPoints(windows, timeline).some((point) => !point.argumentLabel)
+      ) {
+        window.clearTimeout(timelineTimer);
+        timelineTimer = window.setTimeout(
+          () => void loadTimeline(),
+          Math.random() * 3000,
+        );
+      }
     },
     health(live) {
       roomLive = live;
@@ -163,6 +258,7 @@ if (root) {
     "pagehide",
     () => {
       clearInterval(sharedTimer);
+      window.clearTimeout(timelineTimer);
       stopWatching();
       sharedAbort.abort();
     },

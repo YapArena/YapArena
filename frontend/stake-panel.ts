@@ -223,6 +223,13 @@ if (root) {
     unavailable = false;
     windows = value;
     serverOffset = Date.parse(value.serverNow) - Date.now();
+    // Item d: the chart shows revealed windows from this same public read,
+    // for signed-in and signed-out viewers alike.
+    window.dispatchEvent(
+      new CustomEvent("yap:stake-windows", {
+        detail: { debateId, windows: value.windows },
+      }),
+    );
   }
   async function loadPrivate(current: number) {
     if (!signedIn) return;
