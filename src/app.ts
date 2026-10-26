@@ -24,6 +24,7 @@ import type { RequestHandler } from "express";
 import type { createAccountWallet } from "./features/account-wallet/repository.ts";
 import type { createMediaAccountRevocation } from "./features/media/account-revocation.ts";
 import { createCoinSandboxRouter } from "./features/account-wallet/sandbox-router.ts";
+import { createTurnWindowRouter } from "./features/account-wallet/window-router.ts";
 import { createEmailAuthSecurity } from "./platform/auth/browser-security.ts";
 import { SessionUnavailableError } from "./platform/auth/sessions.ts";
 
@@ -134,6 +135,7 @@ export function createApp({
   accountSecurity,
   coinSandbox,
   coinWebhook,
+  turnWindows,
   sharedAuthLimiter,
   sharedAccountLimiter,
   sharedRateLimits,
@@ -187,6 +189,8 @@ export function createApp({
     "sandbox" | "debates" | "operations" | "reports"
   >;
   coinWebhook?: RequestHandler;
+  // Decision 0012: public turn-window timing, mounted only when enabled.
+  turnWindows?: Parameters<typeof createTurnWindowRouter>[0];
 }) {
   const app = express();
   const mediaUrl = mediaProvider ? new URL(mediaProvider.publicUrl) : undefined;
@@ -405,6 +409,7 @@ export function createApp({
         sharedRateLimits,
       }),
     );
+  if (turnWindows) app.use(createTurnWindowRouter(turnWindows));
   if (a4)
     app.use(
       "/api/a4",

@@ -20,7 +20,7 @@ describe("service runtime", () => {
       };
       const runtime = createRuntime({
         a4: { tick: run("play") },
-        coinDebates: { advance: run("sandbox") },
+        coinDebates: { tick: run("sandbox") },
         database: {
           end: async () => {
             closed = true;

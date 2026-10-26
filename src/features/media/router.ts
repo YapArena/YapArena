@@ -8,6 +8,7 @@ import type { createMediaProvider } from "./provider.ts";
 import type { createMatchingRepository } from "../matching/repository.ts";
 import type { createIdentityRepository } from "../identity/repository.ts";
 import { MediaConflictError, MediaNotFoundError } from "./repository.ts";
+import { createDebateStart } from "./debate-start.ts";
 import {
   MatchConflictError,
   MatchNotFoundError,
@@ -75,6 +76,7 @@ export function createMediaRouter({
   const router = Router();
   const participant = createRequireRole(identity, ["participant"]);
   const operator = createRequireRole(identity, ["operator"]);
+  const startDebate = createDebateStart({ media, provider, matching });
   router.use((_request, response, next) => {
     response.set("Cache-Control", "no-store");
     next();
@@ -287,53 +289,16 @@ export function createMediaRouter({
         return response
           .status(400)
           .json({ error: "reason must be 5–500 characters" });
-      let recording: { egressId: string; key: string } | undefined;
       try {
-        if ((await provider.connectedSpeakers(id)) !== 2)
-          throw new MediaConflictError(
-            "both speakers must be connected before start",
-          );
-        recording = await provider.beginRecording(id);
-        await media.start(id, recording.egressId, recording.key);
-        const event = await matching.operatorTransition(
-          request.user!.id,
-          id,
-          "start",
-          reason,
+        return response.json(
+          await startDebate({
+            debateId: id,
+            actorUserId: request.user!.id,
+            reason,
+            logger: request.log,
+          }),
         );
-        try {
-          await provider.setTurn(id, "A");
-        } catch (permissionError) {
-          request.log.error(
-            { permissionError, id },
-            "failed to set initial speaker turn",
-          );
-          try {
-            await media.pause(
-              id,
-              null,
-              "Speaker permissions could not be applied.",
-            );
-          } catch (pauseError) {
-            request.log.error(
-              { pauseError, id },
-              "failed to pause after permission error",
-            );
-          }
-        }
-        return response.json({ event, state: await media.get(id) });
       } catch (error) {
-        if (recording) {
-          await media.undoFailedStart(id);
-          try {
-            await provider.stopRecording(recording.egressId);
-          } catch (stopError) {
-            request.log.error(
-              { stopError, id },
-              "failed to stop orphan recording",
-            );
-          }
-        }
         return problem(response, error);
       }
     },

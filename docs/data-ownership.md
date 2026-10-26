@@ -30,7 +30,7 @@ Module names are directories under `src/features/`, plus `platform/auth`.
 | `event_history`                              | matching      | media (live and replay transitions)                  | —                                                                      |
 | `match_requests`                             | matching      | —                                                    | measurement                                                            |
 | `account_notifications`                      | matching      | community, platform/auth                             | —                                                                      |
-| `debate_media`                               | media         | —                                                    | discovery, matching, measurement                                       |
+| `debate_media`                               | media         | —                                                    | account-wallet (turn windows), discovery, matching, measurement        |
 | `community_rooms`                            | community     | media (replay completion creates and locks the room) | media                                                                  |
 | `moderation_cases`                           | community     | —                                                    | measurement                                                            |
 | `a4_rounds`, `a4_sessions`, `a4_submissions` | a4            | —                                                    | discovery (homepage ordering by settled premium)                       |

@@ -52,6 +52,25 @@ describe("yaparena API", () => {
     assert.match(response.headers["x-request-id"], /^[0-9a-f-]{36}$/);
   });
 
+  it("serves public turn windows only when they are enabled", async () => {
+    const id = "33333333-3333-4333-8333-333333333333",
+      path = `/api/public/debates/${id}/windows`;
+    assert.equal((await request(app).get(path)).status, 404);
+    const enabled = createApp({
+      messages,
+      database,
+      users,
+      sessions,
+      logger,
+      turnWindows: {
+        publicWindows: async () => ({ debateId: id, windows: [] }),
+      },
+    });
+    const response = await request(enabled).get(path);
+    assert.equal(response.status, 200);
+    assert.deepEqual(response.body, { debateId: id, windows: [] });
+  });
+
   it("does not require a shared staging password for public requests", async () => {
     const response = await request(app).get("/unknown");
     assert.equal(response.status, 404);
