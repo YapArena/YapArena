@@ -11,7 +11,7 @@ import { promisify } from "node:util";
 import { mkdir, writeFile } from "node:fs/promises";
 import { setTimeout as delay } from "node:timers/promises";
 import axe from "axe-core";
-import { signInForTest } from "./browser-sign-in.ts";
+import { retryOnReset, signInForTest } from "./browser-sign-in.ts";
 
 export async function verifyPublicBotsBrowser({
   base,
@@ -47,9 +47,11 @@ export async function verifyPublicBotsBrowser({
     path: string,
     body?: Record<string, unknown>,
   ): Promise<T> {
-    const response = await isolated.request[body ? "post" : "get"](
-      base + "/api/" + path,
-      body ? { data: body, headers: { "Idempotency-Key": randomUUID() } } : {},
+    const options = body
+      ? { data: body, headers: { "Idempotency-Key": randomUUID() } }
+      : {};
+    const response = await retryOnReset(() =>
+      isolated.request[body ? "post" : "get"](base + "/api/" + path, options),
     );
     const data: T & { error?: string } = await response.json();
     assert.ok(

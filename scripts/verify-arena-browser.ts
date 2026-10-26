@@ -9,7 +9,7 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import axe from "axe-core";
-import { signInForTest } from "./browser-sign-in.ts";
+import { retryOnReset, signInForTest } from "./browser-sign-in.ts";
 export async function verifyArenaBrowser({
   base,
   context,
@@ -38,9 +38,11 @@ export async function verifyArenaBrowser({
     body?: Record<string, unknown>,
     method: "get" | "post" | "patch" = body ? "post" : "get",
   ): Promise<T> {
-    const r = await context.request[method](
-      base + "/api/" + path,
-      body ? { data: body, headers: { "Idempotency-Key": randomUUID() } } : {},
+    const options = body
+      ? { data: body, headers: { "Idempotency-Key": randomUUID() } }
+      : {};
+    const r = await retryOnReset(() =>
+      context.request[method](base + "/api/" + path, options),
     );
     const data: T & { error?: string } = await r.json();
     assert.ok(r.ok(), `${path}: ${r.status()} ${data.error ?? ""}`);
