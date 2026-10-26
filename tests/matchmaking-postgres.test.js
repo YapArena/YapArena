@@ -471,8 +471,8 @@ describe(
         "UPDATE debates SET scheduled_at = CURRENT_TIMESTAMP - interval '91 seconds' WHERE id = $1",
         [debateId],
       );
-      const swept = await sweepOnce(queue);
-      assert.ok(swept.value.noShows >= 1);
+      // A parallel suite's sweep may cancel it first, so check the outcome, not the count.
+      await sweepOnce(queue);
       const debate = (
         await owner.query(
           "SELECT status, ended_reason FROM debates WHERE id = $1",
