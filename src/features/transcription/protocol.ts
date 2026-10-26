@@ -1,5 +1,9 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import {
+  parseCleanupArguments,
+  type CleanupArgument,
+} from "../outline/cleanup.ts";
+import {
   OUTLINE_LIMITS,
   proposedOps,
   type ProposedEdit,
@@ -97,6 +101,18 @@ export interface OutlineMessage {
 export interface SessionRequest {
   jobId: string;
 }
+/**
+ * The window cleanup: Claude Sonnet 5.5's rewrite of a finished turn's
+ * outline, sent once after the turn ends. The server accepts at most one per
+ * window, until CLEANUP_ACCEPT_MS after the window froze.
+ */
+export interface OutlineCleanup {
+  jobId: string;
+  turnNumber: number;
+  model: string;
+  arguments: CleanupArgument[];
+}
+export const CLEANUP_ACCEPT_MS = 60_000;
 
 /** The room-metadata hint the server writes on every turn change. */
 export interface TurnHint {
@@ -276,6 +292,28 @@ export function parseTranscriptUpdate(value: unknown): TranscriptUpdate | null {
     segments: segments as TranscriptSegment[],
     ...(outline ? { outline } : {}),
   };
+}
+
+export function parseOutlineCleanup(value: unknown): OutlineCleanup | null {
+  if (
+    !isObject(value) ||
+    !exactKeys(value, ["jobId", "turnNumber", "model", "arguments"]) ||
+    !jobId(value.jobId) ||
+    !Number.isSafeInteger(value.turnNumber) ||
+    (value.turnNumber as number) < 1 ||
+    typeof value.model !== "string" ||
+    !/^[a-z0-9.-]{1,100}$/.test(value.model)
+  )
+    return null;
+  const items = parseCleanupArguments(value.arguments);
+  return items
+    ? {
+        jobId: value.jobId,
+        turnNumber: value.turnNumber as number,
+        model: value.model,
+        arguments: items,
+      }
+    : null;
 }
 
 export function parseSessionRequest(value: unknown): SessionRequest | null {

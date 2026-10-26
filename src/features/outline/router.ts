@@ -2,7 +2,9 @@ import { Router, type RequestHandler } from "express";
 import { createSharedRead } from "../../platform/shared-read.ts";
 import type {
   OutlineCatchUp,
+  OutlineCorrelation,
   OutlineSnapshot,
+  OutlineTimeline,
   createOutlineRepository,
 } from "./repository.ts";
 
@@ -11,7 +13,10 @@ const item = /^t[1-9][0-9]{0,4}a[1-9][0-9]{0,2}(p[1-9][0-9]{0,2})?$/;
 type Outlines = Pick<
   ReturnType<typeof createOutlineRepository>,
   "isPublic" | "snapshot" | "since" | "flag"
->;
+> &
+  Partial<
+    Pick<ReturnType<typeof createOutlineRepository>, "timeline" | "correlation">
+  >;
 
 // Decision 0012. GET /api/public/debates/:id/outline?after=<version> returns
 // the versions after `after` (at most 50) or a snapshot, with an ETag naming
@@ -39,12 +44,56 @@ export function createOutlineRouter(outlines: Outlines) {
     );
     if (!value)
       return response.status(404).json({ error: "outline not found" });
-    const etag = `"o${value.version}-${value.kind}"`;
+    // A snapshot also changes when a window's final outline lands.
+    const etag =
+      value.kind === "snapshot"
+        ? `"o${value.version}.${value.finals}-snapshot"`
+        : `"o${value.version}-edits"`;
     response.set("ETag", etag);
     if (request.get("If-None-Match") === etag)
       return response.status(304).end();
     return response.json(value);
   });
+  // Replay sync: one read per replay page. Once the debate ended and every
+  // window is final it never changes, so caches may keep it.
+  const timelines = createSharedRead<OutlineTimeline | null>();
+  router.get(
+    "/api/public/debates/:id/outline/timeline",
+    async (request, response) => {
+      const id = request.params.id;
+      if (!uuid.test(id) || !outlines.timeline)
+        return response.status(404).json({ error: "outline not found" });
+      const timeline = outlines.timeline;
+      const value = await timelines(id, async () =>
+        (await outlines.isPublic(id)) ? timeline(id) : null,
+      );
+      if (!value)
+        return response.status(404).json({ error: "outline not found" });
+      response.set(
+        "Cache-Control",
+        value.complete ? "public, max-age=86400, immutable" : "no-cache",
+      );
+      return response.json(value);
+    },
+  );
+  // Endorsement per argument, from revealed windows only.
+  const correlations = createSharedRead<OutlineCorrelation | null>();
+  router.get(
+    "/api/public/debates/:id/outline/correlation",
+    async (request, response) => {
+      const id = request.params.id;
+      if (!uuid.test(id) || !outlines.correlation)
+        return response.status(404).json({ error: "outline not found" });
+      const correlation = outlines.correlation;
+      const value = await correlations(id, async () =>
+        (await outlines.isPublic(id)) ? correlation(id) : null,
+      );
+      if (!value)
+        return response.status(404).json({ error: "outline not found" });
+      response.set("Cache-Control", "public, max-age=30");
+      return response.json(value);
+    },
+  );
   return router;
 }
 

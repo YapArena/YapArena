@@ -58,6 +58,7 @@ export function renderDebateWorkspace(
               {
                 debateId: id,
                 live,
+                replay,
                 sides: {
                   A: {
                     name: debate.speakerA?.displayName ?? null,

@@ -49,5 +49,9 @@ export function createIngestClient({ origin, secret, debateId, fetch: send = fet
         update(update) {
             return post("updates", update);
         },
+        /** The window cleanup; the server accepts one per window. */
+        cleanup(cleanup) {
+            return post("cleanup", cleanup);
+        },
     });
 }

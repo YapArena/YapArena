@@ -1,5 +1,10 @@
 import { AutoSubscribe } from "@livekit/agents";
 import { AudioStream, RoomEvent, TrackSource, } from "@livekit/rtc-node";
+import Anthropic from "@anthropic-ai/sdk";
+import { OUTLINE_TOPIC, } from "../protocol.js";
+import { createLiveOutliner } from "./claude.js";
+import { createWindowCleaner } from "./cleanup.js";
+import { createOutlineLoop } from "./outline-loop.js";
 import { hintFromSession, parseTurnHint, turnFromHint } from "./turns.js";
 import { createIngestClient } from "./ingest-client.js";
 import { createSpeechEngine } from "./providers.js";
@@ -106,6 +111,38 @@ export async function runDebateTranscriber(ctx, config) {
         await writer.write(update.text);
         await writer.close();
     }
+    // The live AI outline: one model call at a time, through the same ordered
+    // sender as the transcript; accepted versions go to viewers over LiveKit.
+    async function publishOutline(message) {
+        const local = room.localParticipant;
+        if (!room.isConnected || !local)
+            return;
+        await local.publishData(new TextEncoder().encode(JSON.stringify(message)), {
+            reliable: true,
+            topic: OUTLINE_TOPIC,
+        });
+    }
+    const outline = config.anthropicKey
+        ? createOutlineLoop({
+            debateId,
+            proposition: initial.proposition,
+            call: createLiveOutliner({
+                client: new Anthropic({ apiKey: config.anthropicKey }),
+                log,
+            }),
+            clean: createWindowCleaner({
+                client: new Anthropic({ apiKey: config.anthropicKey }),
+                log,
+            }),
+            submitCleanup: (turnNumber, model, items) => ingest.cleanup({ jobId, turnNumber, model, arguments: items }),
+            submit: (turnNumber, proposal) => transcriber.proposeOutline(turnNumber, proposal),
+            publish: publishOutline,
+            minIntervalMs: config.outlineMinIntervalMs,
+            log,
+            resync: async () => (await ingest.session(jobId))?.outline ?? null,
+        })
+        : undefined;
+    outline?.resume(initial.outline);
     const transcriber = createTurnTranscriber({
         primary,
         shadow,
@@ -119,6 +156,7 @@ export async function runDebateTranscriber(ctx, config) {
         },
         captionsPerSecond: config.captionsPerSecond,
         log,
+        outline,
     });
     transcriber.setSpeakers(initial.speakers);
     let ending;

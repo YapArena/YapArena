@@ -157,6 +157,7 @@ describe("public outline API", () => {
           kind: "snapshot",
           debateId,
           version: 4,
+          finals: 0,
           current: null,
           turns: [],
           flags: [],
@@ -195,7 +196,7 @@ describe("public outline API", () => {
     const snapshot = await request(server).get(path);
     assert.equal(snapshot.status, 200);
     assert.equal(snapshot.body.kind, "snapshot");
-    assert.equal(snapshot.headers.etag, '"o4-snapshot"');
+    assert.equal(snapshot.headers.etag, '"o4.0-snapshot"');
     assert.equal(snapshot.headers["cache-control"], "no-cache");
     const since = await request(server).get(`${path}?after=2`);
     assert.equal(since.body.kind, "edits");

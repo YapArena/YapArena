@@ -209,10 +209,12 @@ export function createServices({
       transcription:
         transcription && transcriber && outlines
           ? {
-              // Warm-up dispatch, then freeze windows past their cutoff.
+              // Warm-up dispatch, then freeze windows past their cutoff and
+              // keep the frozen outline as final when no cleanup came.
               tick: async () => {
                 await transcriber.tick();
                 await outlines.freezeDue();
+                await outlines.finalizeDue();
               },
               pruneExpired: () => transcription.pruneExpired(),
             }

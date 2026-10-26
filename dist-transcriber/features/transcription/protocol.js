@@ -1,4 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { parseCleanupArguments, } from "../outline/cleanup.js";
+import { OUTLINE_LIMITS, proposedOps, } from "../outline/reducer.js";
 // Decision 0012: the private protocol between the transcriber agent (LiveKit
 // Cloud) and the YapArena server, which stays the authority. Shared by both
 // sides, so neither can drift from the other's limits.
@@ -9,6 +11,8 @@ export const SEGMENTS_PER_UPDATE_MAX = 20;
 export const WORDS_PER_SEGMENT_MAX = 300;
 export const transcriptionProviders = ["deepgram", "elevenlabs"];
 export const debaterLanguages = ["fr", "en"];
+export { OUTLINE_TOPIC } from "../outline/public-types.js";
+export const CLEANUP_ACCEPT_MS = 60_000;
 const isObject = (value) => Boolean(value) && typeof value === "object" && !Array.isArray(value);
 const exactKeys = (value, required, optional = []) => required.every((key) => key in value) &&
     Object.keys(value).every((key) => required.includes(key) || optional.includes(key));
@@ -83,10 +87,46 @@ function segment(value) {
         audioMs: value.audioMs,
     };
 }
+const nullableText = (value) => value === null || (typeof value === "string" && value.length <= 500);
+function proposal(value) {
+    if (!isObject(value) ||
+        !exactKeys(value, ["baseVersion", "span", "edits", "model"]) ||
+        !integer(value.baseVersion, 0, 10_000_000) ||
+        !isObject(value.span) ||
+        !exactKeys(value.span, ["startMs", "endMs"]) ||
+        !integer(value.span.startMs, 0, 3_600_000) ||
+        !integer(value.span.endMs, value.span.startMs, 3_600_000) ||
+        typeof value.model !== "string" ||
+        !/^[a-z0-9.-]{1,100}$/.test(value.model) ||
+        !Array.isArray(value.edits) ||
+        value.edits.length > OUTLINE_LIMITS.edits)
+        return null;
+    const edits = [];
+    for (const edit of value.edits) {
+        if (!isObject(edit) ||
+            !exactKeys(edit, ["op", "argument", "point", "key", "text", "target"]) ||
+            !proposedOps.includes(edit.op) ||
+            !["argument", "point", "key", "text", "target"].every((field) => nullableText(edit[field])))
+            return null;
+        edits.push(edit);
+    }
+    return {
+        baseVersion: value.baseVersion,
+        span: {
+            startMs: value.span.startMs,
+            endMs: value.span.endMs,
+        },
+        edits,
+        model: value.model,
+    };
+}
 /** Strict parse: unknown fields, bad types or exceeded limits give null. */
 export function parseTranscriptUpdate(value) {
     if (!isObject(value) ||
-        !exactKeys(value, ["jobId", "sequence", "turnNumber", "sentAt", "segments"]))
+        !exactKeys(value, ["jobId", "sequence", "turnNumber", "sentAt", "segments"], ["outline"]))
+        return null;
+    const outline = value.outline === undefined ? undefined : proposal(value.outline);
+    if (outline === null)
         return null;
     if (!jobId(value.jobId) ||
         !integer(value.sequence, 0, 10_000_000) ||
@@ -104,7 +144,27 @@ export function parseTranscriptUpdate(value) {
         turnNumber: value.turnNumber,
         sentAt: value.sentAt,
         segments: segments,
+        ...(outline ? { outline } : {}),
     };
+}
+export function parseOutlineCleanup(value) {
+    if (!isObject(value) ||
+        !exactKeys(value, ["jobId", "turnNumber", "model", "arguments"]) ||
+        !jobId(value.jobId) ||
+        !Number.isSafeInteger(value.turnNumber) ||
+        value.turnNumber < 1 ||
+        typeof value.model !== "string" ||
+        !/^[a-z0-9.-]{1,100}$/.test(value.model))
+        return null;
+    const items = parseCleanupArguments(value.arguments);
+    return items
+        ? {
+            jobId: value.jobId,
+            turnNumber: value.turnNumber,
+            model: value.model,
+            arguments: items,
+        }
+        : null;
 }
 export function parseSessionRequest(value) {
     return isObject(value) && exactKeys(value, ["jobId"]) && jobId(value.jobId)

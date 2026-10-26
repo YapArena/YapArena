@@ -342,10 +342,17 @@ const edits = (version, turnNumber, list) => ({
 const add = (id, label) => ({ op: "add_argument", id, label, span });
 const settle = () => new Promise((resolve) => setImmediate(resolve));
 
-function page({ live = true, state, answers = [], connect } = {}) {
+function page({
+  live = true,
+  replay = false,
+  state,
+  answers = [],
+  connect,
+} = {}) {
   const bootstrap = {
     debateId,
     live,
+    replay,
     sides,
     state:
       state === undefined
@@ -364,7 +371,7 @@ function page({ live = true, state, answers = [], connect } = {}) {
   const reads = [];
   const posts = [];
   const rooms = [];
-  let signal;
+  const listeners = new Map();
   let visible = true;
   let postStatus = 201;
   const dependencies = {
@@ -386,7 +393,7 @@ function page({ live = true, state, answers = [], connect } = {}) {
       return room;
     },
     events: {
-      addEventListener: (type, listener) => (signal = [type, listener]),
+      addEventListener: (type, listener) => listeners.set(type, listener),
     },
     random: () => 0.5,
     setTimer: (callback, ms) => timers.push({ callback, ms }),
@@ -409,9 +416,12 @@ function page({ live = true, state, answers = [], connect } = {}) {
       while (frames.length) frames.shift()();
     },
     signal: (topics) => {
-      assert.equal(signal[0], "yap:room-signal");
-      signal[1]({ detail: { topics } });
+      listeners.get("yap:room-signal")({ detail: { topics } });
     },
+    playback: (detail) =>
+      listeners.get("yap:playback")(
+        new CustomEvent("yap:playback", { detail }),
+      ),
     hide: () => (visible = false),
     setPostStatus: (status) => (postStatus = status),
     runTimers: async () => {
@@ -595,6 +605,108 @@ describe("live outline page module", () => {
     release();
     await settle();
     assert.equal(late.disconnected, 1);
+  });
+
+  it("replaces an earlier turn with its final outline from LiveKit", async () => {
+    const p = page({
+      state: {
+        kind: "snapshot",
+        debateId,
+        version: 1,
+        finals: 0,
+        current: turn(2, [argument("t2a1", "Deux")], "B"),
+        turns: [
+          {
+            turnNumber: 1,
+            side: "A",
+            language: "fr",
+            arguments: [
+              { id: "t1a1", label: "Brouillon", rebuts: null, continues: null },
+            ],
+            final: false,
+          },
+        ],
+        flags: [],
+      },
+      answers: [edits0(1, 1)],
+    });
+    await p.runTimers();
+    const room = p.rooms[0];
+    room.send({
+      v: 1,
+      type: "final",
+      debateId,
+      turn: {
+        turnNumber: 1,
+        side: "A",
+        language: "fr",
+        arguments: [
+          {
+            id: "t1a1",
+            label: "Version finale",
+            rebuts: null,
+            continues: null,
+          },
+        ],
+        final: true,
+      },
+    });
+    room.send({ v: 1, type: "final", debateId: "other", turn: {} });
+    p.paint();
+    assert.equal(p.outline.view.turns[0].arguments[0].label, "Version finale");
+    assert.match(p.turns.children[0].textContent, /Version finale/);
+  });
+
+  it("follows the replay player's position with one timeline read", async () => {
+    const timeline = {
+      debateId,
+      complete: true,
+      timed: true,
+      versions: [
+        {
+          version: 1,
+          at: 1000,
+          turnNumber: 1,
+          side: "A",
+          language: "fr",
+          edits: [add("t1a1", "Premier")],
+        },
+        {
+          version: 2,
+          at: 4000,
+          turnNumber: 1,
+          side: "A",
+          language: "fr",
+          edits: [add("t1a2", "Deuxième")],
+        },
+      ],
+      turns: [],
+    };
+    const p = page({ live: false, replay: true, answers: [timeline] });
+    p.playback({ debateId, positionSeconds: 2, playing: true });
+    await settle();
+    assert.deepEqual(p.reads, [
+      `/api/public/debates/${debateId}/outline/timeline`,
+    ]);
+    p.paint();
+    assert.deepEqual(labels(p.list), ["Premier"]);
+    p.playback({ debateId, positionSeconds: 5, playing: true });
+    p.playback({ debateId: "other", positionSeconds: 0.1, playing: true });
+    p.playback({ debateId, positionSeconds: "x", playing: true });
+    p.playback(null);
+    p.paint();
+    assert.deepEqual(labels(p.list), ["Premier", "Deuxième"]);
+    assert.equal(p.reads.length, 1, "no request during playback");
+    // Without a timeline the page keeps the debate's final outline.
+    const offline = page({
+      live: false,
+      replay: true,
+      answers: [new Error("offline")],
+    });
+    await settle();
+    offline.playback({ debateId, positionSeconds: 5, playing: true });
+    offline.paint();
+    assert.deepEqual(labels(offline.list), ["Un"]);
   });
 
   it("starts nothing on a page without the outline", () => {

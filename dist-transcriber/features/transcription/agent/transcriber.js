@@ -9,7 +9,7 @@ export const PREOPEN_MS = 1500;
 /** Spacing between ingest requests, about one a second at most. */
 export const SEND_SPACING_MS = 750;
 export const QUEUE_MAX = 200;
-export function createTurnTranscriber({ primary, shadow, jobId, nextSequence, send, captions, follow, captionsPerSecond = 4, clock = realClock, log = () => { }, }) {
+export function createTurnTranscriber({ primary, shadow, jobId, nextSequence, send, captions, follow, captionsPerSecond = 4, clock = realClock, log = () => { }, outline, }) {
     const speakers = new Map();
     let turn = null;
     let active = null;
@@ -19,6 +19,8 @@ export function createTurnTranscriber({ primary, shadow, jobId, nextSequence, se
     const queue = [];
     let sending = null;
     let lastSent = -Infinity;
+    // A failed request is retried with exactly the same batch and sequence.
+    let retry = null;
     let stopped = false;
     const finishing = new Set();
     let opened = 0;
@@ -140,6 +142,7 @@ export function createTurnTranscriber({ primary, shadow, jobId, nextSequence, se
                 if (channel.role === "primary") {
                     caption(owner, text, true);
                     owner.segment++;
+                    outline?.addFinal(owner.turnNumber, { text, startAt, endAt });
                 }
             }
         }
@@ -167,7 +170,7 @@ export function createTurnTranscriber({ primary, shadow, jobId, nextSequence, se
     }
     function finish(owner) {
         if (!owner || owner.finished)
-            return;
+            return Promise.resolve();
         owner.finished = true;
         const work = (async () => {
             await Promise.allSettled(owner.channels.map((c) => c.speech.finish()));
@@ -180,6 +183,7 @@ export function createTurnTranscriber({ primary, shadow, jobId, nextSequence, se
             kick();
         })().finally(() => finishing.delete(work));
         finishing.add(work);
+        return work;
     }
     function schedulePreopen() {
         if (preopenTimer !== undefined)
@@ -198,12 +202,17 @@ export function createTurnTranscriber({ primary, shadow, jobId, nextSequence, se
             prepared = open(next.turnNumber, next.side);
         }, Math.max(0, turn.deadlineAt - PREOPEN_MS - clock.now()));
     }
-    function enqueue(turnNumber, segment) {
-        queue.push({ turnNumber, segment });
-        if (queue.length > QUEUE_MAX) {
-            queue.splice(0, queue.length - QUEUE_MAX);
-            log("transcript queue full; oldest segments dropped");
+    function trim() {
+        while (queue.length > QUEUE_MAX) {
+            const [removed] = queue.splice(retry ? retry.count : 0, 1);
+            if (removed?.kind === "outline")
+                removed.resolve(null);
+            log("transcript queue full; oldest entry dropped");
         }
+    }
+    function enqueue(turnNumber, segment) {
+        queue.push({ kind: "segment", turnNumber, segment });
+        trim();
         kick();
     }
     function kick() {
@@ -218,51 +227,82 @@ export function createTurnTranscriber({ primary, shadow, jobId, nextSequence, se
                 kick();
         });
     }
-    async function flushOnce() {
+    // One update holds the oldest entries of one turn: its segments (at most
+    // twenty) and at most one outline proposal, which then goes with every
+    // segment queued before it.
+    function nextBatch() {
         const first = queue[0];
         if (!first)
-            return;
+            return null;
+        const segments = [];
         let count = 0;
-        while (count < queue.length &&
-            count < SEGMENTS_PER_UPDATE_MAX &&
-            queue[count].turnNumber === first.turnNumber)
+        let proposal;
+        for (const item of queue) {
+            if (item.turnNumber !== first.turnNumber)
+                break;
+            if (item.kind === "outline") {
+                proposal = item;
+                count++;
+                break;
+            }
+            if (segments.length >= SEGMENTS_PER_UPDATE_MAX)
+                break;
+            segments.push(item.segment);
             count++;
-        const batch = queue.slice(0, count);
-        const update = {
-            jobId,
-            sequence,
-            turnNumber: first.turnNumber,
-            sentAt: clock.now(),
-            segments: batch.map((item) => item.segment),
+        }
+        return {
+            count,
+            outline: proposal,
+            update: {
+                jobId,
+                sequence,
+                turnNumber: first.turnNumber,
+                sentAt: clock.now(),
+                segments,
+                ...(proposal ? { outline: proposal.proposal } : {}),
+            },
         };
+    }
+    async function flushOnce() {
+        const batch = retry ?? nextBatch();
+        if (!batch)
+            return;
         lastSent = clock.now();
         let answer;
         try {
-            answer = await send(update);
+            answer = await send(batch.update);
         }
         catch (error) {
             // Network failure after retries: keep the batch and the sequence, so
             // the identical update is retried next time.
             log("transcript update failed; retrying", { error });
+            retry = batch;
             lastSent = clock.now() + 2000;
             return;
         }
         if (answer.status === 429) {
+            retry = batch;
             lastSent = clock.now() + 1000;
             return;
         }
+        retry = null;
         sequence++;
-        queue.splice(0, count);
+        queue.splice(0, batch.count);
+        batch.outline?.resolve(answer.status === 200
+            ? (answer.body.outline ?? null)
+            : null);
         if (answer.status === 403) {
-            const side = first.segment.side;
-            const speaker = speakers.get(side);
-            if (speaker)
+            const side = batch.update.segments[0]?.side ?? turn?.side;
+            const speaker = side ? speakers.get(side) : undefined;
+            if (side && speaker)
                 speakers.set(side, { ...speaker, consented: false });
-            for (let index = queue.length - 1; index >= 0; index--)
-                if (queue[index].segment.side === side)
+            for (let index = queue.length - 1; index >= 0; index--) {
+                const item = queue[index];
+                if (item.kind === "segment" && item.segment.side === side)
                     queue.splice(index, 1);
+            }
             if (active?.side === side) {
-                finish(active);
+                void finish(active);
                 active = null;
                 follow(null);
             }
@@ -289,9 +329,10 @@ export function createTurnTranscriber({ primary, shadow, jobId, nextSequence, se
                 next.turnNumber !== previous.turnNumber ||
                 next.running !== previous.running;
             if (changed) {
+                let ending = Promise.resolve();
                 if (active &&
                     (!next || !next.running || active.turnNumber !== next.turnNumber)) {
-                    finish(active);
+                    ending = finish(active);
                     active = null;
                 }
                 if (next?.running && !active) {
@@ -301,12 +342,24 @@ export function createTurnTranscriber({ primary, shadow, jobId, nextSequence, se
                         prepared = null;
                     }
                     else {
-                        finish(prepared);
+                        void finish(prepared);
                         prepared = null;
                         active = open(next.turnNumber, next.side);
                     }
                 }
                 follow(active ? active.side : null);
+                // The outline moves on once the ending turn's last finals are in.
+                const started = active, startedAt = clock.now();
+                void ending
+                    .then(() => started && outline
+                    ? outline.startTurn({
+                        turnNumber: started.turnNumber,
+                        side: started.side,
+                        language: started.language,
+                        startedAt,
+                    })
+                    : outline?.flush())
+                    .catch((error) => log("outline turn change failed", { error }));
             }
             schedulePreopen();
         },
@@ -324,8 +377,8 @@ export function createTurnTranscriber({ primary, shadow, jobId, nextSequence, se
         async stop(timeoutMs = 10_000) {
             if (stopped)
                 return;
-            finish(active);
-            finish(prepared);
+            void finish(active);
+            void finish(prepared);
             active = null;
             prepared = null;
             if (preopenTimer !== undefined)
@@ -333,11 +386,22 @@ export function createTurnTranscriber({ primary, shadow, jobId, nextSequence, se
             follow(null);
             const deadline = clock.now() + timeoutMs;
             await Promise.allSettled([...finishing]);
+            await outline?.flush().catch(() => { });
             while (queue.length && clock.now() < deadline) {
                 kick();
                 await sending;
             }
             stopped = true;
+        },
+        /** Sends an outline proposal in order with this turn's transcript. */
+        proposeOutline(turnNumber, proposal) {
+            return new Promise((resolve) => {
+                if (stopped)
+                    return resolve(null);
+                queue.push({ kind: "outline", turnNumber, proposal, resolve });
+                trim();
+                kick();
+            });
         },
         get sequence() {
             return sequence;
