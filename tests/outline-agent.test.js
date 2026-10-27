@@ -464,6 +464,9 @@ describe("outline proposals in the transcript sender", () => {
         async flush() {
           hooks.flushes++;
         },
+        async stop() {
+          hooks.stops = (hooks.stops ?? 0) + 1;
+        },
       },
     });
     transcriber.setSpeakers([
@@ -524,6 +527,7 @@ describe("outline proposals in the transcript sender", () => {
     assert.deepEqual(hooks.turns, [1, 2], "after the ending turn's finals");
     await transcriber.stop();
     assert.ok(hooks.flushes >= 1);
+    assert.equal(hooks.stops, 1, "the outline's last turn is finished");
     assert.equal(
       await transcriber.proposeOutline(2, {
         baseVersion: 1,
@@ -534,5 +538,79 @@ describe("outline proposals in the transcript sender", () => {
       null,
       "nothing is accepted after stop",
     );
+  });
+
+  it("cleans the debate's last turn when the transcriber stops", async () => {
+    const time = clock(),
+      cleaned = [],
+      submitted = [],
+      published = [];
+    const loop = createOutlineLoop({
+      debateId: "d",
+      proposition: "P",
+      call: async () => ({ kind: "skip", reason: "invalid" }),
+      submit: async () => null,
+      publish: async (message) => published.push(message.type),
+      clock: time,
+      clean: async (request) => {
+        cleaned.push(request.outline.turnNumber);
+        return { kind: "cleanup", arguments: [], model: "claude-sonnet-5-5" };
+      },
+      submitCleanup: async (turnNumber) => {
+        submitted.push(turnNumber);
+        return {
+          status: 201,
+          body: {
+            accepted: true,
+            turn: { turnNumber, side: "B", arguments: [] },
+          },
+        };
+      },
+    });
+    const primary = engine();
+    const transcriber = createTurnTranscriber({
+      primary,
+      jobId: "AJ",
+      nextSequence: 0,
+      send: async () => ({ status: 200, body: {} }),
+      async captions() {},
+      follow() {},
+      clock: time,
+      outline: loop,
+    });
+    transcriber.setSpeakers([{ side: "B", language: "en", consented: true }]);
+    transcriber.setTurn({
+      turnNumber: 10,
+      side: "B",
+      deadlineAt: time.now() + 60_000,
+      running: true,
+    });
+    await settle();
+    let fed = false;
+    const frames = {
+      [Symbol.asyncIterator]: () => ({
+        next: () =>
+          fed
+            ? new Promise(() => {})
+            : ((fed = true), Promise.resolve({ value: "f", done: false })),
+      }),
+    };
+    transcriber.setAudio("B", { frames, trackId: "TR", identity: "speaker-2" });
+    await settle();
+    primary.opened[0].emit({
+      kind: "final",
+      text: "Last words.",
+      startTime: 0,
+      endTime: 1,
+      words: [],
+    });
+    await settle();
+    assert.deepEqual(cleaned, [], "no next turn has finished it");
+    const stopping = transcriber.stop();
+    await time.advance(10_000);
+    await stopping;
+    assert.deepEqual(cleaned, [10]);
+    assert.deepEqual(submitted, [10]);
+    assert.deepEqual(published, ["final"]);
   });
 });

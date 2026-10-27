@@ -110,6 +110,42 @@ export function parseCleanup(text: string): CleanupArgument[] | null {
   }
 }
 
+/**
+ * Why parseCleanup refused a cleanup, for the log: a reason and counts, never
+ * text. The schema can't carry the limits (structured outputs accept no
+ * array bound beyond minItems 0 or 1), so the prompt states them.
+ */
+export function cleanupProblem(text: string | undefined): {
+  reason: string;
+  arguments?: number;
+  mostPoints?: number;
+} {
+  if (text === undefined) return { reason: "no_text" };
+  let value: unknown;
+  try {
+    value = JSON.parse(text);
+  } catch {
+    return { reason: "not_json" };
+  }
+  const items = (value as { arguments?: unknown } | null)?.arguments;
+  if (!Array.isArray(items)) return { reason: "no_arguments" };
+  const counts = {
+    arguments: items.length,
+    mostPoints: Math.max(
+      0,
+      ...items.map((item: unknown) => {
+        const points = (item as { points?: unknown } | null)?.points;
+        return Array.isArray(points) ? points.length : 0;
+      }),
+    ),
+  };
+  if (counts.arguments > OUTLINE_LIMITS.arguments)
+    return { reason: "too_many_arguments", ...counts };
+  if (counts.mostPoints > OUTLINE_LIMITS.points)
+    return { reason: "too_many_points", ...counts };
+  return { reason: "invalid_argument", ...counts };
+}
+
 export function createWindowCleaner({
   client = new Anthropic(),
   log = () => {},
@@ -178,10 +214,12 @@ export function createWindowCleaner({
       return { kind: "skip", reason: "refusal" };
     if (response.stop_reason !== "end_turn")
       return { kind: "skip", reason: "invalid" };
-    const text = response.content.find((block) => block.type === "text");
-    const items = text?.type === "text" ? parseCleanup(text.text) : null;
-    return items
-      ? { kind: "cleanup", arguments: items, model: response.model }
-      : { kind: "skip", reason: "invalid" };
+    const block = response.content.find((item) => item.type === "text");
+    const text = block?.type === "text" ? block.text : undefined;
+    const items = text === undefined ? null : parseCleanup(text);
+    if (items)
+      return { kind: "cleanup", arguments: items, model: response.model };
+    log("window cleanup invalid", cleanupProblem(text));
+    return { kind: "skip", reason: "invalid" };
   };
 }
