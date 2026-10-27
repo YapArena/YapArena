@@ -1398,9 +1398,9 @@ Time: 15 minutes. Let any trial debate end first (8.9).
   [trial page](transcription-provider-trial.md#results). Fixes that came out of it:
   - #132 (merged): Deepgram received no language and transcribed French as English. The agent runs
     `dee8a4c`.
-  - #133: ElevenLabs commits after short pauses, the last turn gets its cleanup, and a rejected
-    cleanup logs why. After it merges, redeploy the agent and retest ElevenLabs as primary with the
-    commands in that PR.
+  - #133 (merged): ElevenLabs commits after short pauses, the last turn gets its cleanup, and a
+    rejected cleanup logs why. Next: redeploy the agent from `8ea2197` and retest ElevenLabs as
+    primary with the commands in that PR.
   - On the server, with the next web and jobs deploy: a turn with no live outline version (every
     live call failed, or none returned a usable edit) now freezes with its cleanup instead of
     never getting a final outline.
