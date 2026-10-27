@@ -123,7 +123,8 @@ function fixture({ shadow = false, answers = [], list = speakers } = {}) {
     second = shadow ? engine("elevenlabs") : undefined,
     sent = [],
     captions = [],
-    follows = [];
+    follows = [],
+    logs = [];
   const transcriber = createTurnTranscriber({
     primary,
     shadow: second,
@@ -141,9 +142,10 @@ function fixture({ shadow = false, answers = [], list = speakers } = {}) {
     follow: (side) => follows.push(side),
     captionsPerSecond: 4,
     clock: time,
+    log: (message, detail) => logs.push([message, detail]),
   });
   transcriber.setSpeakers(list);
-  return { time, primary, second, sent, captions, follows, transcriber };
+  return { time, primary, second, sent, captions, follows, logs, transcriber };
 }
 const turn = (turnNumber, side, time, running = true) => ({
   turnNumber,
@@ -207,6 +209,27 @@ describe("transcriber agent core", () => {
       f.captions.map((c) => [c.speaker, c.trackId, c.final, c.text]),
       [["speaker-7", "TR_mic", true, "Le nucléaire reste indispensable."]],
     );
+  });
+
+  it("stores a long final's first 1,000 characters and logs the cut", async () => {
+    const f = fixture();
+    f.transcriber.setTurn(turn(1, "A", f.time));
+    const mic = audio();
+    f.transcriber.setAudio("A", mic);
+    mic.frames.push("frame-1");
+    await settle();
+    const long = "mot ".repeat(300).trim();
+    f.primary.opened[0].emit(final(long, 0, 30));
+    await settle();
+    await f.time.advance(1000);
+    assert.equal(f.sent[0].segments[0].text, long.slice(0, 1000));
+    assert.equal(f.captions.at(-1).text, long, "captions keep the whole text");
+    assert.deepEqual(f.logs, [
+      [
+        "segment text cut",
+        { provider: "deepgram", role: "primary", length: 1199 },
+      ],
+    ]);
   });
 
   it("throttles interim captions and lets the final replace them", async () => {

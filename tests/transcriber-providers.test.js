@@ -3,12 +3,18 @@ import { createHash } from "node:crypto";
 import { createServer } from "node:http";
 import { after, before, describe, it } from "node:test";
 import { initializeLogger } from "@livekit/agents";
-import { createSpeechEngine } from "../dist-transcriber/features/transcription/agent/providers.js";
+import { AudioFrame } from "@livekit/rtc-node";
+import {
+  ELEVENLABS_SILENCE_SECS,
+  createSpeechEngine,
+} from "../dist-transcriber/features/transcription/agent/providers.js";
 
 // Decision 0012: each speaker's audio reaches the provider with the speaker's
-// language. A local server stands in for LiveKit Inference and records the
-// session message that opens each Deepgram stream.
+// language. A local server stands in for LiveKit Inference and ElevenLabs: it
+// records each connection's URL and the session message that opens each
+// Deepgram stream.
 
+const urls = [];
 const sessions = [];
 const waiters = [];
 const sockets = new Set();
@@ -38,6 +44,8 @@ function firstFrame(data) {
 server.on("upgrade", (request, socket) => {
   sockets.add(socket);
   socket.on("error", () => {});
+  urls.push(request.url);
+  for (const waiter of waiters.splice(0)) waiter();
   const accept = createHash("sha1")
     .update(
       `${request.headers["sec-websocket-key"]}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`,
@@ -60,16 +68,16 @@ server.on("upgrade", (request, socket) => {
   });
 });
 
-async function sessionsReceived(count) {
+async function received(list, count, what) {
   const deadline = Date.now() + 5000;
-  while (sessions.length < count) {
-    assert.ok(Date.now() < deadline, `expected ${count} sessions`);
+  while (list.length < count) {
+    assert.ok(Date.now() < deadline, `expected ${count} ${what}`);
     await new Promise((resolve) => {
       waiters.push(resolve);
       setTimeout(resolve, 100);
     });
   }
-  return sessions;
+  return list;
 }
 
 describe("speech providers", () => {
@@ -94,7 +102,7 @@ describe("speech providers", () => {
     const french = engine.open("fr");
     const english = engine.open("en");
     try {
-      const opened = await sessionsReceived(2);
+      const opened = await received(sessions, 2, "sessions");
       assert.deepEqual(
         opened
           .map((session) => [
@@ -113,6 +121,36 @@ describe("speech providers", () => {
     } finally {
       french.close();
       english.close();
+    }
+  });
+
+  it("opens each ElevenLabs stream in the speaker's language, committing after short pauses", async () => {
+    const errors = [];
+    const engine = createSpeechEngine("elevenlabs", {
+      elevenLabsKey: "test-key",
+      elevenLabsUrl: `http://127.0.0.1:${server.address().port}/v1`,
+      log: (message, detail) => errors.push({ message, detail }),
+    });
+    const before = urls.length,
+      sent = sessions.length;
+    const french = engine.open("fr");
+    try {
+      await received(urls, before + 1, "connections");
+      // One second of silence: its first chunk proves the connection is open.
+      french.push(new AudioFrame(new Int16Array(16000), 16000, 1, 16000));
+      await received(sessions, sent + 1, "audio messages");
+      assert.equal(sessions.at(-1).message_type, "input_audio_chunk");
+      const url = new URL(urls[before], "http://127.0.0.1");
+      assert.equal(url.pathname, "/v1/speech-to-text/realtime");
+      assert.equal(url.searchParams.get("model_id"), "scribe_v2_realtime");
+      assert.equal(url.searchParams.get("language_code"), "fr");
+      assert.equal(url.searchParams.get("commit_strategy"), "vad");
+      assert.equal(ELEVENLABS_SILENCE_SECS, 0.5);
+      assert.equal(url.searchParams.get("vad_silence_threshold_secs"), "0.5");
+      assert.equal(url.searchParams.get("include_timestamps"), "true");
+      assert.deepEqual(errors, []);
+    } finally {
+      french.close();
     }
   });
 });

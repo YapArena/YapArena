@@ -8,7 +8,11 @@ import type {
   TranscriptUpdate,
   TranscriptWord,
 } from "../protocol.ts";
-import { SEGMENTS_PER_UPDATE_MAX } from "../protocol.ts";
+import {
+  SEGMENT_TEXT_MAX,
+  SEGMENTS_PER_UPDATE_MAX,
+  WORDS_PER_SEGMENT_MAX,
+} from "../protocol.ts";
 import type { IngestAnswer } from "./ingest-client.ts";
 
 // Decision 0012: the transcriber's core, independent of LiveKit so it can be
@@ -128,6 +132,8 @@ export interface OutlineHooks {
     chunk: { text: string; startAt: number; endAt: number },
   ): void;
   flush(): Promise<void>;
+  /** Flushes, then cleans the last turn and waits for every cleanup. */
+  stop(): Promise<void>;
 }
 
 export function createTurnTranscriber<F>({
@@ -291,6 +297,14 @@ export function createTurnTranscriber<F>({
               : { c: Math.min(1, Math.max(0, word.confidence)) }),
           });
         }
+        // The stored segment keeps its first SEGMENT_TEXT_MAX characters;
+        // captions and the outline get the whole text.
+        if (text.length > SEGMENT_TEXT_MAX)
+          log("segment text cut", {
+            provider: channel.engine.provider,
+            role: channel.role,
+            length: text.length,
+          });
         enqueue(owner.turnNumber, {
           provider: channel.engine.provider,
           role: channel.role,
@@ -298,8 +312,8 @@ export function createTurnTranscriber<F>({
           side: owner.side,
           startAt,
           endAt,
-          text: text.slice(0, 1000),
-          words: words.slice(0, 300),
+          text: text.slice(0, SEGMENT_TEXT_MAX),
+          words: words.slice(0, WORDS_PER_SEGMENT_MAX),
           latencyMs: Math.min(600_000, Math.max(0, clock.now() - endAt)),
           audioMs: Math.min(600_000, endAt - startAt),
         });
@@ -538,7 +552,10 @@ export function createTurnTranscriber<F>({
       active.audio = audio;
       if (audio) void pump(active, audio);
     },
-    /** Flushes the turn in progress and sends what is queued (bounded). */
+    /**
+     * Flushes the turn in progress, sends what is queued (bounded), and
+     * waits for the last turn's window cleanup.
+     */
     async stop(timeoutMs = 10_000) {
       if (stopped) return;
       void finish(active);
@@ -555,6 +572,9 @@ export function createTurnTranscriber<F>({
         await sending;
       }
       stopped = true;
+      // The last turn has no next turn to finish it: its cleanup starts here
+      // and goes to the server directly, not through the queue.
+      await outline?.stop().catch(() => {});
     },
     /** Sends an outline proposal in order with this turn's transcript. */
     proposeOutline(turnNumber: number, proposal: OutlineProposal) {

@@ -286,6 +286,50 @@ describe("window cleanup call", () => {
     assert.equal(parseCleanup('{"arguments":[]}').length, 0);
     assert.equal(parseCleanup("{"), null);
   });
+
+  it("logs why an invalid cleanup was refused, with counts and no text", async () => {
+    const problem = async (answer) => {
+      const logs = [];
+      const result = await createWindowCleaner({
+        client: client(answer),
+        log: (text, detail) => logs.push([text, detail]),
+      })(cleanupRequest);
+      assert.equal(result.reason, "invalid");
+      const invalid = logs.find(([text]) => text === "window cleanup invalid");
+      assert.ok(invalid, "the refusal is logged");
+      assert.ok(!JSON.stringify(logs).includes("Secret"), "no answer text");
+      return invalid[1];
+    };
+    const json = (value) => message(JSON.stringify(value));
+    assert.deepEqual(
+      await problem(
+        json({
+          arguments: [1, 2, 3, 4, 5].map((n) => item(`t3a${n}`, "Secret")),
+        }),
+      ),
+      { reason: "too_many_arguments", arguments: 5, mostPoints: 0 },
+    );
+    assert.deepEqual(
+      await problem(
+        json({ arguments: [item("t3a1", "Secret", Array(7).fill("Secret"))] }),
+      ),
+      { reason: "too_many_points", arguments: 1, mostPoints: 7 },
+    );
+    assert.deepEqual(
+      await problem(json({ arguments: [{ id: null, points: [] }] })),
+      { reason: "invalid_argument", arguments: 1, mostPoints: 0 },
+    );
+    assert.deepEqual(await problem(json({ arguments: "Secret" })), {
+      reason: "no_arguments",
+    });
+    assert.deepEqual(await problem(message("Secret {")), {
+      reason: "not_json",
+    });
+    assert.deepEqual(
+      await problem({ ...message("{}"), content: [{ type: "thinking" }] }),
+      { reason: "no_text" },
+    );
+  });
 });
 
 describe("cleanup in the agent's outline loop", () => {

@@ -15,6 +15,13 @@ import type {
 
 /** How long a finishing channel waits for its last final transcript. */
 export const FINISH_TIMEOUT_MS = 4000;
+/**
+ * ElevenLabs commits a final segment after this much silence (it accepts
+ * 0.192 to 3 s). With its default, read speech rarely paused long enough and
+ * Scribe committed only every ~36 s of audio, so the live outline, which reads
+ * finals, updated about twice per turn in the staging trial.
+ */
+export const ELEVENLABS_SILENCE_SECS = 0.5;
 
 type Log = (message: string, detail?: Record<string, unknown>) => void;
 
@@ -85,7 +92,16 @@ function channel(
 
 export function createSpeechEngine(
   provider: TranscriptionProvider,
-  { elevenLabsKey, log }: { elevenLabsKey: string | undefined; log: Log },
+  {
+    elevenLabsKey,
+    elevenLabsUrl,
+    log,
+  }: {
+    elevenLabsKey: string | undefined;
+    /** Another ElevenLabs API origin (tests); the plugin's default otherwise. */
+    elevenLabsUrl?: string;
+    log: Log;
+  },
 ): SpeechEngine<AudioFrame> {
   // A bare EventEmitter 'error' without a listener would crash the job.
   const onError = (error: unknown) =>
@@ -119,8 +135,9 @@ export function createSpeechEngine(
     const engine = new elevenlabs.STT({
       model: "scribe_v2_realtime",
       apiKey: elevenLabsKey,
+      ...(elevenLabsUrl ? { baseURL: elevenLabsUrl } : {}),
       includeTimestamps: true,
-      serverVad: {},
+      serverVad: { vadSilenceThresholdSecs: ELEVENLABS_SILENCE_SECS },
       sampleRate: 16000,
     });
     engine.on("error", onError);
