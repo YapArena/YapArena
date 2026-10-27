@@ -1,25 +1,120 @@
 # Staging rollout (Decisions 0011 to 0013)
 
-Prepared on 2026-10-26 and not run yet. This runbook takes staging from the last deployed release
+Prepared on 2026-10-26 and not run yet. This runbook takes staging from its last deployed release
 to current `main`: the migrations from #90 to #107, Yap Coins turn windows and their round rules
 ([Decision 0012](decisions/0012-live-argument-outline.md)), the transcriber agent, captions and the
 AI outline, the speech-to-text provider trial, and matchmaking
 ([Decision 0011](decisions/0011-live-matchmaking-and-challenges.md)). The founder performs each
-step; nothing here runs by itself. Each step says where to do it, gives every command and click,
-shows the output that proves it worked, and says what to do when it doesn't. Background is in the
+step; nothing here runs by itself. Each step says where to do it, how long it takes, every command
+and click, the output that proves it worked, and what to do when it doesn't. Background is in the
 [staging guide](render-staging.md), the [operations runbook](operations.md) and the
 [coin sandbox operations](coin-sandbox-operations.md).
 
 Secrets are named here, never written down. Their values live in your password manager, the
-private folder from step 0.3, Render's environment and LiveKit Cloud's agent secrets. Never paste
+private folder from step 0.4, Render's environment and LiveKit Cloud's agent secrets. Never paste
 them into a chat, an issue or the repository.
+
+## At a glance
+
+Plan two sittings of about four hours each: decisions and steps 0 to 6 in the first, steps 7 and 8
+in the second. Everything can be turned off again except two things: the migrations (step 1) and
+the agent's region (decision D1).
+
+| Step                                                          | What happens                                   | Where                                | Time       |
+| ------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------ | ---------- |
+| [Decide](#decide-before-you-start)                            | Eight choices, each with a recommendation      | This page                            | 15 min     |
+| [0](#0-before-you-start)                                      | Accounts, tools, commit, private files, backup | Browser, Terminal                    | 1–1½ h     |
+| [1](#1-apply-the-owner-migrations)                            | Database migrations                            | Terminal, Supabase                   | 10 min     |
+| [2](#2-deploy-web-the-jobs-worker-and-the-encoder)            | Deploy the three Render services               | Render, Terminal                     | 20–30 min  |
+| [3](#3-turn-on-yap-coins-turn-windows)                        | Turn windows on, first test debate             | Render, staging site, Terminal       | 40 min     |
+| [4](#4-per-round-reveal-for-founder-created-debates-optional) | Optional per-round reveal                      | Terminal, Supabase                   | 5 min      |
+| [5](#5-deploy-the-transcriber-agent-to-livekit-cloud)         | API keys and the transcriber agent             | ElevenLabs, Claude Console, Terminal | 45 min     |
+| [6](#6-turn-on-captions-and-the-ai-outline)                   | Captions and the AI outline                    | Render, staging site, Terminal       | 30 min     |
+| [7](#7-run-the-provider-trial)                                | Deepgram and ElevenLabs compared               | Staging site, phone, Terminal        | about 3 h  |
+| [8](#8-turn-on-matchmaking)                                   | The live queue and challenges                  | Render, staging site, Supabase       | about 1½ h |
+
+## Decide before you start
+
+Each choice has a recommendation. D1 can't be undone; the others can change later.
+
+- **D1. Transcriber agent region.** `us-east` (Ashburn, Virginia) or `eu-central` (Frankfurt). It
+  is fixed when the agent is created in step 5. **Recommended: `us-east`**, the nearest to Render's
+  Ohio web service and to North American debaters. Choose `eu-central` only if most debaters will
+  be in Europe.
+- **D2. LiveKit Cloud plan.** Build is free but hard-capped: once a monthly quota is used up, new
+  requests fail, with no overage charge. It allows 2 recordings at once and includes 60 recording
+  minutes a month, and this rollout records 7 or 8 test debates of up to 10 minutes (70 to 80
+  minutes). Ship costs $50 a month: 100 recordings at once, 600 included recording minutes and 20
+  agent sessions. On Build, the agent can also take 10 to 20 seconds to start.
+  **Recommended: Ship for the rollout month,** then back to Build if staging goes quiet. If you
+  stay on Build, end the test debates of steps 3, 6 and 8 after two or three minutes (operator
+  **End**) so the trial in step 7 keeps its 20 minutes
+  ([pricing](https://livekit.com/pricing) and
+  [quotas](https://docs.livekit.io/deploy/admin/quotas-and-limits/), read 2026-10-26).
+- **D3. `LIVE_DEBATE_CAPACITY`,** the number of debates that can start or run at once with
+  matchmaking (step 8). Keep it at or below your plan's limit:
+
+  | LiveKit plan | Outline off | Outline on |
+  | ------------ | ----------- | ---------- |
+  | Build        | 2           | 2          |
+  | Ship         | 100         | 10         |
+  | Scale        | 500         | 25         |
+
+  **Recommended: `2`** for staging (also the default). Call your number `<capacity>`.
+
+- **D4. ElevenLabs plan,** only for the provider trial (step 7). Realtime speech to text costs
+  $0.39 an hour of audio on every plan. Starter is $6 a month ($1 for the first month until
+  November 1), includes 15 realtime hours and allows 9 streams at once; the trial needs under two
+  hours, one stream at a time. Whether the Free plan includes API access isn't confirmed.
+  **Recommended: Starter,** cancelled after the trial if ElevenLabs isn't chosen
+  ([pricing](https://elevenlabs.io/pricing/api), read 2026-10-26).
+- **D5. Anthropic billing,** for the AI outline. The Claude Console bills prepaid credits, which
+  expire a year after purchase. A 10-minute debate costs an estimated $0.50: Claude Haiku 5.5 writes
+  the live outline ($0.10 per million input tokens, $0.01 when cached, $0.50 per million output) and
+  Claude Sonnet 5.5 writes each turn's final outline ($2 in, $10 out). **Recommended: $20 of
+  credits, auto-reload off, and a $50 monthly spend limit**
+  ([pricing](https://platform.claude.com/docs/en/about-claude/pricing), read 2026-10-26).
+- **D6. Transcript retention.** Today, the main provider's transcript is kept with its debate (it
+  backs the outline and the replay) until the speaker deletes their account. The trial's
+  second-provider transcripts are deleted after 90 days, and ingest receipts after 7 days
+  ([data ownership](data-ownership.md#transcript-retention)). **Recommended: keep this for
+  staging**, and set a fixed period for public debates before the public launch. Nothing to change
+  now.
+- **D7. Matchmaking timings.** The 30-second accept is decided. These are proposed and still
+  waiting for your confirmation: a "now" challenge waits 2 minutes for an answer; matched players
+  have 90 seconds to join; a scheduled debate waits 10 minutes for its speakers; an unanswered
+  challenge expires after 7 days; at most 10 open challenges per person; a booked seat is held from
+  5 minutes before the start. They're set in the code, so a change needs a small PR before step 8.
+  **Recommended: confirm them as they are** and revisit after the trial.
+- **D8. Debate format.** Today: 60-second turns, a 10-minute maximum. It sets each trading
+  window's length, how long a booking holds a seat, and the recording cost. **Recommended: keep it
+  for staging.**
+
+Note your answers. If you change D7 or D8, tell the hub before step 8: those need a small code
+change first.
+
+## Accounts you need
+
+| Account                                           | What it's for                                          | Plan for this rollout                                | Used in                                   |
+| ------------------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------- | ----------------------------------------- |
+| GitHub, with access to `YapArena/YapArena`        | Finding the release and its images                     | Any                                                  | 0.1, 0.2, 0.3, 0.5                        |
+| Render, the workspace with `yaparena-staging-web` | The three staging services                             | Web Free, jobs worker Starter, encoder as it is      | 0.1, 2, 3, 6, 8                           |
+| Supabase, the staging project                     | The database                                           | Free                                                 | 0.1, 0.4, 0.6, 1, checks                  |
+| LiveKit Cloud, the staging project                | Video, recording, the transcriber agent                | D2                                                   | 0.1, 0.2, 5, 7, 8                         |
+| ElevenLabs (new if you have none)                 | The second speech-to-text provider                     | D4                                                   | 5.2, 7                                    |
+| Claude Console (Anthropic)                        | The AI outline                                         | D5                                                   | 5.3                                       |
+| A password manager                                | Every secret below                                     | Any                                                  | Throughout                                |
+| Two email addresses you can read                  | Staging test accounts A and B (A is also the operator) | Free (Gmail's `yourname+a@gmail.com` addresses work) | [Test debate](#start-a-test-debate), 7, 8 |
+
+You also need a Mac with the Terminal app and Homebrew (step 0.2 checks it), Chrome, and a phone
+that can record its screen with sound (step 7).
 
 ## How to use this runbook
 
 **Where things are.** Each item names one of these places:
 
 - **Terminal:** the macOS Terminal app. Unless an item says otherwise, run commands in the release
-  checkout from step 0.4 (`cd ~/yaparena-release`). Paste a command block as it is and press
+  checkout from step 0.5 (`cd ~/yaparena-release`). Paste a command block as it is and press
   Return. Replace every `<PLACEHOLDER>` first, angle brackets included.
 - **Render:** [dashboard.render.com](https://dashboard.render.com), in the workspace that holds
   `yaparena-staging-web`. Staging has three services: the web service `yaparena-staging-web`, the
@@ -40,34 +135,37 @@ them into a chat, an issue or the repository.
   icon at the top right of Chrome, then **Add**) or their own device, because one profile shares its
   sign-in across tabs.
 
-Staging's address is `https://yaparena-staging-web.onrender.com` (step 8 calls its host
-`<staging-host>`). Render Free puts it to sleep after 15 idle minutes, so the first request after a
-pause can take about a minute.
+Staging's address is `https://yaparena-staging-web.onrender.com`. Render Free puts it to sleep
+after 15 idle minutes, so the first request after a pause can take about a minute.
 
 **Values you'll fill in:**
 
 | Placeholder                                                                | What it is                                                                      | Where you get it                            |
 | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------- |
-| `<COMMIT_SHA>`, `<RUN_ID>`                                                 | The release commit (40 characters) and its CI run                               | Step 0.1                                    |
-| `<WEB_IMAGE>`, `<ENCODER_IMAGE>`                                           | `ghcr.io/boufe/yaparena@sha256:…` and `ghcr.io/boufe/yaparena-encoder@sha256:…` | Step 0.1                                    |
+| `<COMMIT_SHA>`, `<RUN_ID>`                                                 | The release commit (40 characters) and its CI run                               | Step 0.3                                    |
+| `<WEB_IMAGE>`, `<ENCODER_IMAGE>`                                           | `ghcr.io/boufe/yaparena@sha256:…` and `ghcr.io/boufe/yaparena-encoder@sha256:…` | Step 0.3                                    |
 | `<MAC_HOME>`                                                               | Your home folder, for example `/Users/yourname`                                 | Terminal: `echo $HOME`                      |
-| `<PROJECT_REF>`, `<POOLER_HOST>`                                           | The Supabase project ID and its session pooler host                             | Step 0.3                                    |
-| `<OWNER_PASSWORD>`, `<RUNTIME_PASSWORD>`                                   | The `yaparena_owner` and `yaparena_runtime` database passwords                  | Step 0.3                                    |
+| `<PROJECT_REF>`, `<POOLER_HOST>`                                           | The Supabase project ID and its session pooler host                             | Step 0.4                                    |
+| `<OWNER_PASSWORD>`, `<RUNTIME_PASSWORD>`                                   | The `yaparena_owner` and `yaparena_runtime` database passwords                  | Step 0.4                                    |
 | `<INGEST_SECRET>`                                                          | The secret the agent and the app share                                          | Step 5.1                                    |
 | `<ELEVENLABS_KEY>`, `<ANTHROPIC_KEY>`                                      | API keys                                                                        | Steps 5.2 and 5.3                           |
+| `<capacity>`                                                               | Matchmaking's capacity                                                          | Decision D3                                 |
+| `<REGION>`                                                                 | The agent's region, `us-east` or `eu-central`                                   | Decision D1                                 |
 | `<handle-a>`, `<handle-b>`, `<topic-slug>`, `<debate-slug>`, `<debate-id>` | The test accounts' handles, the trial topic, and a debate's address and ID      | [Start a test debate](#start-a-test-debate) |
 
 ### Start a test debate
+
+Time: about 25 minutes the first time, 10 after that.
 
 Steps 3, 6 and 7 each need a live debate between test accounts A and B. Until matchmaking is on
 (step 8), an operator starts it. Afterwards, the topic queue (step 8, items 5 and 6) is quicker
 because the debate starts by itself.
 
-1. **Accounts (once).** In A's profile, open `https://yaparena-staging-web.onrender.com/account`
-   and sign in with test account A's email. If asked, pick a handle: `<handle-a>`. On the
-   **Profile** tab, if the banner shows **Make it public**, click it. Do the same for B in B's
-   profile, with `<handle-b>`. From step 6 on, both also fill in the **Debating** card (step 6,
-   item 4).
+1. **Accounts (once).** In A's profile, open `https://yaparena-staging-web.onrender.com/account`,
+   click **Continue with email**, enter test account A's address, and type the code from the email.
+   If asked, pick a handle: `<handle-a>`. On the **Profile** tab, if the banner shows **Make it
+   public**, click it. Do the same for B in B's profile, with `<handle-b>`. From step 6 on, both
+   also fill in the **Debating** card (step 6, item 4).
 2. **Operator (once).** One of your test accounts needs the `operator` role. In the SQL editor,
    list who has it:
 
@@ -125,9 +223,118 @@ shows it in seconds. To end it early: **Operator controls**, a **Reason for acti
 
 ## 0. Before you start
 
-### 0.1 Choose the commit and its images
+### 0.1 Log in to each account and set its plan
 
-Terminal, in any folder:
+Time: 30 minutes; 15 more for each account you create.
+
+1. **GitHub.** Sign in at [github.com](https://github.com) and open
+   [github.com/YapArena/YapArena](https://github.com/YapArena/YapArena).
+   - Check: the repository opens and its **Actions** tab lists CI runs.
+2. **Render.** Sign in at [dashboard.render.com](https://dashboard.render.com). If you have several
+   workspaces, pick the one with the staging services in the workspace menu at the top left.
+   - Check: the service list shows `yaparena-staging-web` (web service), `yaparena-staging-jobs`
+     and `yaparena-replay-worker` (background workers).
+   - Check: each service's **Compute** page (left pane) shows its plan: Free for the web service
+     and Starter for the jobs worker (newer dashboards show Starter as `0.5c-512mb`). Keep them;
+     this rollout doesn't need more. Background workers can't be Free.
+3. **Supabase.** Sign in at [supabase.com/dashboard](https://supabase.com/dashboard) and open the
+   staging project.
+   - Check: the organization's plan, under **Organization settings → Billing**
+     ([supabase.com/dashboard/org/_/billing](https://supabase.com/dashboard/org/_/billing)), is
+     Free or Pro; either works.
+   - Check: in the SQL editor, `show server_version;` returns a number starting `17` or lower.
+     If it starts with `18` or higher, install `postgresql@18` instead of `postgresql@17` in step
+     0.2; the backup in step 0.6 needs tools at least as new as the server.
+   - If the project shows as **Paused** (Supabase Free pauses after a week without activity), click
+     **Restore project** and wait until it's back; staging doesn't work until then.
+4. **LiveKit Cloud.** Sign in at [cloud.livekit.io](https://cloud.livekit.io) and pick the staging
+   project in the project menu at the top left: the one whose URL matches `LIVEKIT_PUBLIC_URL` in
+   the Render web service's **Environment**.
+   - Check: **Settings → Project** shows the plan's limits (for Build: 100 connections, 5 agent
+     sessions, 2 recordings at once).
+   - Set decision D2's plan on the project's billing page, **Settings → Billing**. LiveKit shows
+     the price before you confirm; the upgrade control's exact label wasn't confirmed when this was
+     written.
+5. **ElevenLabs** (decision D4). Sign in, or create an account, at
+   [elevenlabs.io/app](https://elevenlabs.io/app).
+   - Choose decision D4's plan at
+     [elevenlabs.io/app/subscription](https://elevenlabs.io/app/subscription) and pay.
+   - Check: the subscription page shows that plan's name.
+6. **Claude Console** (decision D5). Sign in, or create an account, at
+   [platform.claude.com](https://platform.claude.com).
+   1. Open **Settings → Billing**
+      ([platform.claude.com/settings/billing](https://platform.claude.com/settings/billing)) and
+      click **Buy credits**. Buy decision D5's amount; leave auto-reload off.
+   2. On the same page, under **Spend limits**, click **Set limit** (or **Adjust limit**) and enter
+      your monthly limit.
+   - Check: **Settings → Billing** shows the credit balance. A new organization starts in the
+     lowest rate-limit tier, which is enough for staging; the current limits are at
+     [platform.claude.com/usage/limits](https://platform.claude.com/usage/limits).
+7. **Password manager.** Make sure it holds the `yaparena_owner` and `yaparena_runtime` database
+   passwords (step 0.4 needs them). You'll add three new entries in step 5: the ingest secret, the
+   ElevenLabs key and the Anthropic key.
+
+### 0.2 Install the tools
+
+Time: 15 minutes; less if they're already installed.
+
+1. Check Homebrew. Terminal:
+
+   ```sh
+   brew --version
+   ```
+
+   It prints `Homebrew` and a version number. If it says `command not found: brew`, install it:
+   paste the command shown on [brew.sh](https://brew.sh) into the Terminal, enter your Mac
+   password when asked, then run the two lines it prints under **Next steps** and open a new
+   Terminal window.
+
+2. Install the GitHub CLI, the LiveKit CLI and the PostgreSQL tools:
+
+   ```sh
+   brew install gh livekit-cli postgresql@17
+   brew link --force postgresql@17
+   ```
+
+3. Sign the GitHub CLI in:
+
+   ```sh
+   gh auth login
+   ```
+
+   Answer its questions: **GitHub.com**, then **Login with a web browser**, then **HTTPS**, then
+   **Yes** to authenticate Git (the order can differ between versions). Copy the one-time code it
+   shows, press Return, paste the code in the browser page that opens, and click **Authorize**.
+
+4. Link the LiveKit CLI to the staging project:
+
+   ```sh
+   lk cloud auth
+   ```
+
+   The browser opens: sign in to LiveKit Cloud, select the staging project and confirm. If the
+   Terminal asks whether to make it the default project, answer yes.
+
+5. Check Node:
+
+   ```sh
+   node --version
+   ```
+
+- Check:
+  - `gh auth status` says `Logged in to github.com`.
+  - `lk project list` marks the staging project with `*`, and its URL matches `LIVEKIT_PUBLIC_URL`
+    in the Render web service's **Environment**.
+  - `psql --version` and `pg_dump --version` print `(PostgreSQL) 17.` and more digits.
+  - `node --version` prints `v24.` and more digits.
+- If:
+  - The `*` is on another project: `lk project set-default <name of the staging project>`.
+  - Node isn't version 24: install Node 24 from [nodejs.org](https://nodejs.org) (the macOS
+    installer), open a new Terminal window and check again.
+
+### 0.3 Choose the commit and its images
+
+Time: 5 minutes. Terminal, in any folder:
 
 ```sh
 gh run list --repo YapArena/YapArena --workflow CI --branch main --event push --limit 5 \
@@ -137,37 +344,23 @@ gh run list --repo YapArena/YapArena --workflow CI --branch main --event push --
 
 Each line reads `<status> <conclusion> <run id> <commit SHA> <title>`, newest first. Take the first
 line that starts with `completed success`: its third word is `<RUN_ID>` and its fourth is
-`<COMMIT_SHA>`. Open `https://github.com/YapArena/YapArena/actions/runs/<RUN_ID>` in the browser. On
-its **Summary** page, scroll down to **web image** and **encoder image**, and copy each
-`ghcr.io/…@sha256:…` line: they are `<WEB_IMAGE>` and `<ENCODER_IMAGE>`.
+`<COMMIT_SHA>`. Open `https://github.com/YapArena/YapArena/actions/runs/<RUN_ID>` in the browser.
+On its **Summary** page, scroll down to **web image** and **encoder image**, and copy each
+`ghcr.io/…@sha256:…` line into a note: they are `<WEB_IMAGE>` and `<ENCODER_IMAGE>`.
 
-- Check: the summary lists both images, and the commit's title is a merge of #119 or later.
+- Check: the summary lists both images, and the commit's title is a merge of #128 or later.
 - If:
-  - `gh` says you aren't logged in: run `gh auth login`, choose **GitHub.com**, **HTTPS** and
-    **Login with a web browser**, then rerun.
-  - None of the five lines is `completed success`: stop and ask for the failing job to be fixed
-    first. For example, the 2026-10-26 runs failed the encoder's OpenSSL scan until #123.
-  - The commit is a merge after #124: newer PRs may add migrations. Run
-    `ls ~/yaparena-release/migrations | tail -15` after step 0.4 and compare it with the table in
-    step 1; read the PR of any name that isn't there before continuing.
+  - The newest lines are `in_progress`: wait for them, or take the first `completed success`
+    below them.
+  - None of the five lines is `completed success`: stop and ask the hub for the failing job to be
+    fixed first.
+  - After step 0.5, `ls ~/yaparena-release/migrations | tail -3` shows a name newer than
+    `1792986588837_add-challenge-scheduling.js`: a newer PR added a migration that this runbook
+    doesn't cover. Ask the hub about it before step 1.
 
-### 0.2 Decide the accounts and plans
+### 0.4 Make your private folder
 
-- **LiveKit Cloud:** the plan sets how many debates can run at once. Build allows 100 connections,
-  5 agent sessions and 2 recordings at once; Ship 1,000, 20 and 100
-  ([pricing](https://livekit.com/pricing), read 2026-10-26). Step 8.1 turns that into
-  matchmaking's capacity. Deepgram speech-to-text runs on LiveKit Inference and is billed by
-  LiveKit: $0.0048 a minute on Build and Ship, after the plan's included credits.
-- **ElevenLabs:** only for the trial (step 7). Any plan with API access to speech to text works;
-  the trial uses one realtime stream at a time. Your plan is at
-  [elevenlabs.io/app/subscription](https://elevenlabs.io/app/subscription).
-- **Anthropic:** the AI outline calls Claude Haiku 5.5 live and Claude Sonnet 5.5 once per turn,
-  paid from prepaid API credits. In the [Claude Console](https://platform.claude.com), open
-  **Settings → Billing** and buy credits (for example $20 for the trial).
-- **Render and Supabase:** today's plans (web Free, jobs worker Starter, Supabase Free) are enough
-  for this rollout and the trial. The public-launch plan is a separate decision.
-
-### 0.3 Make your private folder
+Time: 15 minutes.
 
 The scripts read database URLs from files outside the repository. Terminal:
 
@@ -194,10 +387,11 @@ The second line prints `<MAC_HOME>`.
    pooler** (port 5432; never the transaction pooler on port 6543). The string reads
    `postgresql://postgres.<PROJECT_REF>:[YOUR-PASSWORD]@<POOLER_HOST>:5432/postgres`. Note the
    two values.
-3. **Passwords.** `<OWNER_PASSWORD>` and `<RUNTIME_PASSWORD>` are in your password manager from
-   when the roles were provisioned ([database isolation](security/database-isolation.md)). The
-   runtime one is also inside `DATABASE_URL` in the Render web service's **Environment**, between
-   the `:` and the `@`. If a password has characters other than letters, digits, `-`, `_`, `.` and
+3. **Passwords.** `<OWNER_PASSWORD>` and `<RUNTIME_PASSWORD>` are in your password manager from when
+   the roles were provisioned ([database isolation](security/database-isolation.md)). The runtime
+   one is also inside `DATABASE_URL` in the Render web service's **Environment**, between the `:`
+   and the `@`. If you can't find the owner password, stop and ask the hub: replacing it is a
+   separate procedure. If a password has characters other than letters, digits, `-`, `_`, `.` and
    `~`, encode it:
 
    ```sh
@@ -239,9 +433,12 @@ The second line prints `<MAC_HOME>`.
   - `Tenant or user not found`: the user part must be `yaparena_owner.<PROJECT_REF>` (or
     `yaparena_runtime.<PROJECT_REF>`).
   - `root certificate file … does not exist`: fix the `sslrootcert` path.
-  - `command not found: psql`: run `brew install postgresql@17`, then retry.
+  - `command not found: psql`: run `brew install postgresql@17` and
+    `brew link --force postgresql@17`, then retry.
 
-### 0.4 Prepare the release checkout
+### 0.5 Prepare the release checkout
+
+Time: 10 minutes, mostly `npm ci`.
 
 Terminal. The first line is your existing YapArena clone; change it if yours is elsewhere:
 
@@ -250,7 +447,6 @@ cd ~/Documents/Codex/YapArena
 git fetch origin
 git worktree add --detach ~/yaparena-release <COMMIT_SHA>
 cd ~/yaparena-release
-node --version
 npm ci
 npm run build
 ```
@@ -259,30 +455,15 @@ If `~/yaparena-release` already exists from an earlier release, replace the thir
 `git -C ~/yaparena-release checkout --detach <COMMIT_SHA>`. `npm ci` matters: #96 added the
 `@livekit/agents` packages.
 
-Then install the LiveKit CLI and link it to the staging project:
-
-```sh
-brew install livekit-cli
-lk cloud auth
-lk project list
-```
-
-`lk cloud auth` opens the browser: sign in to LiveKit Cloud, select the staging project and
-confirm. If the terminal asks whether to make it the default project, answer yes.
-
 - Check:
-  - `node --version` prints `v24.` followed by more digits.
   - `npm run build` ends without an `error` line.
   - `git -C ~/yaparena-release log -1 --format=%H` prints `<COMMIT_SHA>`.
-  - `lk project list` marks the staging project with `*`, and its URL matches Render's
-    `LIVEKIT_PUBLIC_URL`.
-  - `pg_dump --version` prints `pg_dump (PostgreSQL) 17.` and more digits.
-- If:
-  - Node isn't version 24: install Node 24 from [nodejs.org](https://nodejs.org), open a new
-    Terminal window and rerun from `cd ~/yaparena-release`.
-  - The `*` is on another project: `lk project set-default <name of the staging project>`.
+- If `cd ~/Documents/Codex/YapArena` says `no such file or directory`, clone the repository first:
+  `git clone https://github.com/YapArena/YapArena.git ~/Documents/Codex/YapArena`.
 
-### 0.5 Back up the database
+### 0.6 Back up the database
+
+Time: 5 minutes.
 
 Supabase Free makes no automatic backups, so take one now. Terminal:
 
@@ -296,10 +477,12 @@ pg_restore --list ~/yaparena-private/staging-before-rollout.dump | head -5
 - If:
   - It says `server version mismatch`: install the server's version
     (`brew install postgresql@<its major version>`) and use that `pg_dump`.
-  - It says `permission denied`: stop; `owner.env` doesn't sign in as the owner (step 0.3 check).
+  - It says `permission denied`: stop; `owner.env` doesn't sign in as the owner (step 0.4 check).
   - The project is on Supabase Pro: **Database → Backups** also lists today's daily backup.
 
 ## 1. Apply the owner migrations
+
+Time: 10 minutes.
 
 Web refuses to start while migrations are pending, so the owner applies them first. The release
 checkout holds the same migration files as the release images.
@@ -351,11 +534,14 @@ Staging may also be missing older ones; the runner applies every pending migrati
   - `Database migration failed (ENOTFOUND).`: wrong pooler host.
   - `ENOENT: no such file or directory` with the certificate's path: fix `sslrootcert`.
   - `Database migration failed (check provisioning and migration review).`: the URL doesn't sign
-    in as `yaparena_owner` (step 0.3 check).
+    in as `yaparena_owner` (step 0.4 check).
   - Any other `Database migration failed (…)`: a migration failed. Stop: keep the old release
-    running, copy the output, send it to S, and deploy nothing. Migrations are never rolled back.
+    running, copy the output, send it to the hub, and deploy nothing. Migrations are never rolled
+    back.
 
 ## 2. Deploy web, the jobs worker and the encoder
+
+Time: 20–30 minutes, mostly waiting for Render.
 
 Do this straight after step 1, without waiting between services: once #100's migration is in, the
 previous release can no longer settle five-day rounds, so its coin loop fails until the new release
@@ -413,6 +599,8 @@ minutes.
 
 ## 3. Turn on Yap Coins turn windows
 
+Time: 15 minutes, plus about 25 minutes for the first test debate.
+
 Each live turn becomes one Yap Coins trading window. It's safe for user-created debates: their
 rounds reveal five days after the debate (#100), and debaters can't take positions in their own
 debate.
@@ -433,11 +621,14 @@ debate.
   after the first turn change: `five_day 1A 2B`.
 
 - If:
-  - curl reports error 404: web doesn't have the switch; check its **Environment** and **Events**.
+  - curl prints `The requested URL returned error: 404`: web doesn't have the switch; check its
+    **Environment** and **Events**.
   - It prints `five_day` and nothing else: the worker doesn't have the switch.
   - To turn it off: set `TURN_WINDOWS_ENABLED` to `false` on both services and **Save and deploy**.
 
 ## 4. Per-round reveal for founder-created debates (optional)
+
+Time: 5 minutes per debate.
 
 Every debate is five-day unless the owner records per-round reveal before its first round opens,
 that is, before it goes live. Skip this step unless a founder-created debate should reveal each
@@ -473,11 +664,13 @@ round at its cutoff.
     `SELECT count(*) FROM yaparena.coin_debate_rounds WHERE debate_id = '<debate-id>';`. Above 0
     means a round already opened and the debate stays five-day; 0 means the debate ID is wrong.
   - `COIN_SANDBOX_RAIL must explicitly select simulation or base-sepolia` or
-    `dedicated owner connection required`: fix `owner.env` (step 0.3).
+    `dedicated owner connection required`: fix `owner.env` (step 0.4).
 
 ## 5. Deploy the transcriber agent to LiveKit Cloud
 
 ### 5.1 Make the ingest secret
+
+Time: 2 minutes.
 
 Terminal:
 
@@ -491,8 +684,10 @@ same value.
 
 ### 5.2 Create the ElevenLabs key (for the trial)
 
+Time: 5 minutes.
+
 1. Open [elevenlabs.io/app](https://elevenlabs.io/app) and sign in with the account whose plan you
-   chose in step 0.2.
+   chose in decision D4.
 2. In the left sidebar, click **Developers**, then the **API Keys** tab, then **Create API key**.
 3. Name it `yaparena-staging-transcriber`. Keep **Restrict key** on, set **Speech to Text** to
    **Access** and everything else to **No access**. Optionally set a credit limit.
@@ -501,14 +696,18 @@ same value.
 
 ### 5.3 Create the Anthropic key (for the AI outline)
 
+Time: 5 minutes.
+
 1. Open the [Claude Console](https://platform.claude.com) and sign in with the account that holds
-   the API credits from step 0.2.
-2. Click **Settings**, then **API keys**, then **Create Key**. Choose the **Default** workspace,
+   the API credits from decision D5.
+2. Click **Settings**, then **API keys**, then **Create key**. Choose the **Default** workspace,
    name it `yaparena-staging-outline`, and click **Add**.
 3. Copy the key, which starts with `sk-ant-` and is shown only once. This is `<ANTHROPIC_KEY>`;
    save it in your password manager.
 
 ### 5.4 Write the agent's secrets file
+
+Time: 5 minutes.
 
 Run `nano ~/yaparena-private/transcriber-secrets.env`, type these lines with your values (no
 quotes, no spaces around `=`), save and quit:
@@ -528,6 +727,8 @@ Inference and needs no key. LiveKit sets the agent's own URL and keys. The other
 
 ### 5.5 Stage and deploy the agent
 
+Time: 15–20 minutes, mostly waiting for LiveKit to build the agent.
+
 Terminal:
 
 ```sh
@@ -542,13 +743,12 @@ The first command prints `staged the transcriber build context in <MAC_HOME>/yap
 
 ```sh
 cd ~/yaparena-transcriber-deploy
-lk agent create --region us-east --secrets-file ~/yaparena-private/transcriber-secrets.env .
+lk agent create --region <REGION> --secrets-file ~/yaparena-private/transcriber-secrets.env .
 ```
 
 Answer `y` if it asks you to confirm. It writes `livekit.toml` into the folder (later restaging
-keeps it), then builds and deploys the agent. The region can't change later. `us-east` (Ashburn,
-Virginia) is the nearest to Render's Ohio web service and to North American debaters; choose
-`eu-central` (Frankfurt) only if most debaters will be in Europe.
+keeps it), then builds and deploys the agent. Replace `<REGION>` with
+your decision D1: `us-east` (recommended) or `eu-central`. The region can't change later.
 
 **If an agent already exists:**
 
@@ -574,6 +774,8 @@ lk agent deploy .
 
 ## 6. Turn on captions and the AI outline
 
+Time: 30 minutes, including a 10-minute test debate.
+
 1. Render → `yaparena-staging-web` → **Environment**. Add (or edit) `LIVE_OUTLINE_ENABLED` with
    value `true` and `TRANSCRIPTION_INGEST_SECRET` with value `<INGEST_SECRET>`, then choose **Save
    and deploy**.
@@ -594,7 +796,8 @@ lk agent deploy .
 
 - Check:
   - The **Debating** card appears at all; it stays hidden while web doesn't have the switch.
-  - Within a second of the debate becoming ready, the logs show
+  - Within a second of the debate becoming ready (10 to 20 seconds on LiveKit Build, where the
+    agent can cold-start), the logs show
     `{"message":"transcriber joined","debateId":"<debate-id>","provider":"deepgram","shadow":"elevenlabs"}`.
   - Captions appear under the video. The **AI outline** panel fills within a few seconds of each
     sentence, and the logs show `live outline call` lines; after a turn's first call, their
@@ -629,11 +832,14 @@ lk agent deploy .
   - `speech provider error` with `"provider":"elevenlabs"`: check the ElevenLabs key, its **Speech
     to Text** permission and the plan.
   - `live outline call failed` with `"status":401`: the Anthropic key is wrong; with `400`, the
-    credits have probably run out (step 0.2).
+    credits have probably run out (decision D5).
 - To turn it off: set `LIVE_OUTLINE_ENABLED` to `false` on web and the worker and **Save and
   deploy**. The agent then gets no debates.
 
 ## 7. Run the provider trial
+
+Time: about 3 hours: 30 minutes of scripts, two 15-minute debates, then about two hours of
+references, timing and the report.
 
 Two debates read from the same scripts. Session 1 uses Deepgram for captions and the outline and
 runs ElevenLabs in the shadow on the same audio; session 2 swaps them. What it measures and the
@@ -645,12 +851,16 @@ ideally a phone that can record its screen; and the operator account.
 
 ### 7.1 Write the scripts
 
+Time: 30 minutes.
+
 Write `~/yaparena-private/trial/script-fr.txt` for A and `~/yaparena-private/trial/script-en.txt`
 for B: five turns each, about 60 seconds of speech per turn (130 to 150 words), on the trial topic.
 Include numbers ("1,2 million", "2035"), proper names and technical terms, and in two turns, a
 sentence that ends right at the turn deadline. Speakers read naturally, at a normal pace.
 
 ### 7.2 Session 1: Deepgram primary, ElevenLabs shadow
+
+Time: 20 minutes.
 
 1. Check that `~/yaparena-private/transcriber-secrets.env` says `TRANSCRIPTION_PROVIDER=deepgram`
    and `TRANSCRIPTION_SHADOW_PROVIDER=elevenlabs`, as step 5 deployed it.
@@ -686,6 +896,8 @@ sentence that ends right at the turn deadline. Speakers read naturally, at a nor
 
 ### 7.3 Session 2: ElevenLabs primary, Deepgram shadow
 
+Time: 20 minutes.
+
 1. Swap the providers. Terminal:
 
    ```sh
@@ -705,6 +917,8 @@ sentence that ends right at the turn deadline. Speakers read naturally, at a nor
   and the 7.2 query for `<debate-id-2>` shows `primary` `elevenlabs` and `shadow` `deepgram` rows.
 
 ### 7.4 Write the reference transcripts
+
+Time: 45 minutes.
 
 A reference is what the speakers actually said, written by a person. Make one per session:
 
@@ -747,6 +961,8 @@ Scoring lowercases, removes punctuation and splits French elisions (`l'énergie`
 
 ### 7.5 Run the report
 
+Time: 10 minutes.
+
 Look up the current prices per hour of audio. Deepgram Nova-3 on LiveKit Inference is on
 [livekit.com/pricing](https://livekit.com/pricing): $0.0048 a minute ($0.288 an hour) on Build and
 Ship when read on 2026-10-26. ElevenLabs Scribe v2 Realtime is on
@@ -788,11 +1004,13 @@ node --env-file="$HOME/yaparena-private/runtime.env" scripts/transcription-trial
 - If it prints:
   - `"rows": []`: the debate ID is wrong, or the reference's turn numbers don't match the debate.
   - `trial report failed; check the database URL and the debate id`: check `runtime.env` with the
-    step 0.3 check, then the ID.
+    step 0.4 check, then the ID.
   - `the reference needs turns: [{ turnNumber, language, text }]`: fix the JSON's field names.
   - `Cannot find module` with `dist`: run `npm run build` in `~/yaparena-release`.
 
 ### 7.6 Measure the caption and outline delays
+
+Time: 30 minutes.
 
 Use the two screen recordings: session 1 shows Deepgram's captions, session 2 ElevenLabs'. On a
 Mac, open each in QuickTime Player. **Window → Show Movie Inspector** shows its frame rate (FPS).
@@ -813,6 +1031,8 @@ the result shows, and divide the number of presses by the frame rate.
 
 ### 7.7 Fan-out check (optional)
 
+Time: 15 minutes.
+
 Decision 0012 expects 500 viewers to receive the outline through LiveKit without extra work for the
 web service. The LiveKit CLI simulates at most 50 viewers, and LiveKit's acceptable use policy
 restricts load tests on LiveKit Cloud, so this is a small check; ask LiveKit before testing more.
@@ -832,6 +1052,8 @@ The simulated viewers don't run the page: the check covers LiveKit's delivery, n
   - The table that `lk load-test` prints at the end shows packet loss near 0%.
 
 ### 7.8 Record the results and choose the provider
+
+Time: 15 minutes.
 
 1. Copy the results table from the [trial](transcription-provider-trial.md#results) into
    `~/yaparena-private/trial/results.md` and fill in one row per report row. Give WER as a
@@ -855,242 +1077,244 @@ The simulated viewers don't run the page: the check covers LiveKit's delivery, n
 - If Deepgram won, you can delete the ElevenLabs key: **Developers** → **API Keys**, the key's
   menu, **Delete**.
 
-## 8. Matchmaking (M)
+## 8. Turn on matchmaking
 
-The live topic queue, direct challenges and personal live updates
+Time: about 1½ hours of clicks, plus about an hour of waiting in 8.8, which you can start early
+and run alongside the rest.
+
+This turns on the live topic queue, challenges between two people, and personal live updates
 ([Decision 0011](decisions/0011-live-matchmaking-and-challenges.md)). Step 1 applied their
-migrations (#91, #101 and #107). Everything stays off until `MATCHMAKING_ENABLED` is set, and
-turning it off again is the rollback. Automatic start and recording need live video configured;
-without it, the queue still matches players, but debates never start by themselves. Staging's web
-service is Render Free, which sleeps after 15 idle minutes. That's fine for this trial with a page
-open, but not for a public queue
+migrations (#91, #101 and #107). Everything stays off until `MATCHMAKING_ENABLED` is `true`, and
+setting it back to `false` turns it off again. Automatic start and recording need live video,
+which staging has. Staging's web service is Render Free, which sleeps after 15 idle minutes:
+fine for this trial with a page open, not for a public queue
 ([capacity and cost](decisions/0011-live-matchmaking-and-challenges.md#capacity-and-cost)).
 
-**Where things are.** Every item below uses these places:
+The switches:
 
-- **Render:** [dashboard.render.com](https://dashboard.render.com), then the staging web service
-  or the jobs worker `yaparena-staging-jobs`. Each service's left pane has:
-  - **Events:** deploys; a finished deploy reads "Deploy live".
-  - **Logs:** a search box at the top filters the lines.
-  - **Environment:** its variables.
-- **Supabase SQL editor:** [supabase.com/dashboard](https://supabase.com/dashboard), then the
-  staging project, **SQL Editor** in the left sidebar, then **+ New query**. Paste the query and
-  click **Run** (Cmd+Enter). The result grid appears under the editor.
-- **Terminal:** a local terminal in the checkout from step 0.4, with `lk` signed in to the staging
-  project.
-- **Chrome DevTools:** on a staging page, **View › Developer › Developer Tools** (Cmd+Option+I),
-  then the **Network** tab.
+| Variable               | Set on                  | Value                                                                                                 |
+| ---------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------- |
+| `MATCHMAKING_ENABLED`  | Web **and** jobs worker | `true`. The worker runs the one-second queue sweep and starts debates.                                |
+| `LIVE_DEBATE_CAPACITY` | Web **and** jobs worker | `<capacity>` from decision D3: debates starting or live at once, plus matches waiting to be accepted. |
+| `USER_STREAM_ENABLED`  | Web                     | Leave it unset or `false`: live updates are always on with matchmaking.                               |
 
-**Values you'll fill in:**
+### 8.1 Check both database URLs
 
-| Placeholder                | Where to find it                                                                                                      |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `<staging-host>`           | Render → web service → the address under its name at the top, without `https://`: `yaparena-staging-web.onrender.com` |
-| `<capacity>`               | The number you choose in 8.1                                                                                          |
-| `<handle-a>`, `<handle-b>` | The handles you give accounts A and B in 8.5                                                                          |
-| `<topic-slug>`             | The "URL slug" you type when creating the trial topic in 8.5, for example `staging-queue-trial`                       |
-| `<debate-slug>`            | The end of a debate page's address: `https://<staging-host>/debates/<debate-slug>`                                    |
-| `<debate-id>`              | The `id` returned by the first query in the 8.6 checks                                                                |
+Time: 2 minutes. The live queue needs the Session pooler (port 5432).
 
-**The switches:**
+1. Render → `yaparena-staging-jobs` → **Environment**. On the `DATABASE_URL` row, click the eye icon,
+   read the value without copying it, and hide it again.
+2. Do the same on `yaparena-staging-web`.
 
-| Variable               | Set on                  | Value                                                                   |
-| ---------------------- | ----------------------- | ----------------------------------------------------------------------- |
-| `MATCHMAKING_ENABLED`  | Web **and** jobs worker | `true`. The worker runs the one-second queue sweep and automatic start. |
-| `LIVE_DEBATE_CAPACITY` | Web **and** jobs worker | `<capacity>`: debates starting or live at once, plus pending matches.   |
-| `USER_STREAM_ENABLED`  | Web                     | Leave unset or `false`: live updates are always on with matchmaking.    |
+- Check: both values contain `:5432/`.
+- If one contains `:6543/` (the transaction pooler):
+  1. In Supabase, click **Connect** in the top bar, then **Session pooler**.
+  2. Build the runtime URL as in step 0.4, items 2 and 3, with `yaparena_runtime` and its password.
+     Keep the `sslmode` and `sslrootcert` parts that the current value has.
+  3. Paste it as that service's `DATABASE_URL` and choose **Save only**; 8.2 deploys it.
 
-1. **Choose the capacity.** Use the LiveKit plan you chose in step 0.2:
+  Otherwise that service won't start, and its **Logs** show
+  `live queue LISTEN requires a direct or session-pooler connection`.
 
-   | LiveKit plan | Outline off (`LIVE_OUTLINE_ENABLED=false`) | Outline on |
-   | ------------ | ------------------------------------------ | ---------- |
-   | Build        | 2                                          | 2          |
-   | Ship         | 100                                        | 10         |
-   | Scale        | 500                                        | 25         |
+### 8.2 Turn it on, jobs worker first
 
-   Write the number down as `<capacity>`.
-   - Check: `<capacity>` is at or below the table's number for your plan and outline setting.
-   - If you're unsure, use `2`.
+Time: 15 minutes, most of it waiting for deploys. The worker pairs players, so it goes first.
 
-2. **Check both database URLs.**
-   1. Render → `yaparena-staging-jobs` → **Environment**.
-   2. On the `DATABASE_URL` row, click the eye icon to reveal the value. Read it without copying it,
-      then hide it again.
-   3. Repeat on the web service.
-   - Check: both values contain `:5432/` (the Session pooler).
-   - If one contains `:6543/` (the transaction pooler):
-     1. In Supabase, open the project's **Connect** button (top bar), then **Session pooler**.
-     2. Build the runtime URL as in [create the database](render-staging.md#create-the-database).
-     3. Paste it into that service's `DATABASE_URL`, then choose **Save only**; 8.3 deploys.
+1. Render → `yaparena-staging-jobs` → **Environment** → **+ Add Environment Variable**. Key
+   `MATCHMAKING_ENABLED`, value `true`.
+2. **+ Add Environment Variable** again. Key `LIVE_DEBATE_CAPACITY`, value `<capacity>`. If either
+   key already exists, edit its value on its row instead.
+3. Choose **Save and deploy**, then open **Events** and wait until the new deploy reads "Deploy
+   live".
+4. Repeat items 1 to 3 on `yaparena-staging-web`.
 
-     Otherwise that service won't start, and its Logs show
-     `live queue LISTEN requires a direct or session-pooler connection`.
-3. **Turn it on, jobs worker first.** The worker pairs players, so it goes first.
-   1. Render → `yaparena-staging-jobs` → **Environment** → **+ Add Environment Variable**. Key
-      `MATCHMAKING_ENABLED`, value `true`.
-   2. **+ Add Environment Variable** again. Key `LIVE_DEBATE_CAPACITY`, value `<capacity>`.
-      If either key already exists, edit its value on its row instead.
-   3. Click **Save and deploy**.
-   4. Open **Events** and wait until the new deploy reads "Deploy live".
-   5. Repeat items 1–4 on the web service.
-   - Check, worker: Render → `yaparena-staging-jobs` → **Logs** → search `background job ran`.
-     Within a few seconds of the deploy, a line shows `"job":"matchmaking"`. Searching
-     `matchmaking sweep failed` shows nothing.
-   - Check, web: in the terminal, run
+- Check, worker: Render → `yaparena-staging-jobs` → **Logs**, search `background job ran`. Within
+  a few seconds of the deploy, a line shows `"job":"matchmaking"`. Searching
+  `matchmaking sweep failed` finds nothing.
+- Check, web: in the Terminal,
 
-     ```sh
-     curl -fsS https://<staging-host>/topics | grep -c data-matchmaking
-     ```
+  ```sh
+  curl -fsS https://yaparena-staging-web.onrender.com/topics | grep -c data-matchmaking
+  ```
 
-     It prints `1`.
+  prints `1`.
 
-   - If the worker line is missing, the variable isn't saved on the worker or its deploy isn't live
-     (check its **Events**). If `curl` prints `0`, the same applies to web.
-4. **Check live updates.**
-   1. In the Supabase SQL editor, run:
+- If the worker line is missing, the variable isn't saved on the worker or its deploy isn't live;
+  check its **Events**. If `curl` prints `0`, the same applies to web.
 
-      ```sql
-      SELECT count(*) FROM pg_stat_activity
-      WHERE application_name = 'yaparena-user-streams-listener'
-         OR query = 'LISTEN yaparena_results_v1';
-      ```
+### 8.3 Check live updates
 
-   2. Sign in to `https://<staging-host>` in Chrome, open DevTools → **Network**, type `stream` in
-      the **Filter** box, and reload (Cmd+R).
-   - Check:
-     - The query's grid shows one row with `count` = `1` (one per web process).
-     - DevTools shows a row named `stream`, with Status `200` and Type `eventsource`, that stays
-       pending.
-   - If `count` is `0`: Render → web service → **Logs** → search `listener connection lost`.
-     Repeating lines mean the database URL (8.2). The site still works by polling, but "now"
-     challenges and matches arrive up to 30 seconds late.
-5. **Prepare accounts A and B, and a topic.** Use two Chrome profiles (click the profile icon at
-   the top right of Chrome, then **Add**) or two devices, because one browser profile shares its
-   sign-in across tabs. In each profile:
-   1. Open `https://<staging-host>/account` and sign in with that account's email.
-   2. If asked, pick a handle: `<handle-a>` for A, `<handle-b>` for B.
-   3. On **Profile**, if the banner shows **Make it public**, click it.
-   4. If the outline is on, find the **Debating** card on the same tab. Choose **Language you
-      debate in**, tick the agreement box, and click **Save debating settings**.
+Time: 5 minutes.
 
-   Then, as A:
-   1. Open `https://<staging-host>/match`.
-   2. Under **01 / START A TOPIC**, fill in **URL slug** `<topic-slug>`, a **Title**, a
-      **Summary**, **Side A label** `For` and **Side B label** `Against`.
-   3. Click **Create private draft**, then **Publish** on its row below.
-   - Check:
-     - `https://<staging-host>/people/<handle-a>` and `/people/<handle-b>` open both profiles.
-     - `https://<staging-host>/topics/<topic-slug>` shows "Take a side and get matched", with
-       **Queue for For** and **Queue for Against**.
-   - If the queue later answers "Choose your debate language…", click its **Open your account
-     settings** link and do item 4.
+1. In the Supabase SQL editor, run:
 
-6. **Queue, accept and start automatically.**
-   1. A opens `https://<staging-host>/topics/<topic-slug>`, clicks **Queue for For**, and allows the
-      camera and microphone.
-   2. B opens the same address, clicks **Queue for Against**, and allows them.
-   3. Both click **Accept** in the "Match found" window.
-   4. On the debate page, both click **Check camera and join as speaker**.
-   - Check:
-     - After item 1, A's header shows "In queue · 0:01", counting up. B's page reads
-       "1 person waiting for For" under the buttons.
-     - Within about two seconds of item 2, both see "Match found" with a countdown from 30.
-     - After item 3, both are on the same `https://<staging-host>/debates/<debate-slug>`, showing
-       "Waiting for both speakers to join · 1:2x left" above the video.
-     - Within about two seconds of item 4, the debate is live. In the SQL editor:
+   ```sql
+   SELECT count(*) FROM pg_stat_activity
+   WHERE application_name = 'yaparena-user-streams-listener'
+      OR query = 'LISTEN yaparena_results_v1';
+   ```
 
-       ```sql
-       SELECT id, status FROM yaparena.debates WHERE slug = '<debate-slug>';
-       ```
+2. In A's Chrome profile, sign in at `https://yaparena-staging-web.onrender.com/account`. Open
+   **View › Developer › Developer Tools** (Cmd+Option+I), then the **Network** tab, type `stream`
+   in its **Filter** box, and reload the page (Cmd+R).
 
-       This returns `status` `live`. Keep its `id` as `<debate-id>`.
+- Check:
+  - The query returns one row with `count` = `1` (one per web process).
+  - DevTools shows a row named `stream`, Status `200`, Type `eventsource`, that stays pending.
+- If `count` is `0`: Render → `yaparena-staging-web` → **Logs**, search
+  `listener connection lost`. Repeating lines mean the database URL (8.1). The site still works by
+  polling, but "now" challenges and matches arrive up to 30 seconds late.
 
-       ```sql
-       SELECT reason FROM yaparena.event_history WHERE debate_id = '<debate-id>' AND action = 'start';
-       ```
+### 8.4 Prepare accounts A and B, and the topic
 
-       This returns `Automatic start: both speakers are ready and connected.`
+Time: 5 minutes if you already did [start a test debate](#start-a-test-debate), 20 otherwise.
 
-     - In the terminal:
+1. Do items 1 and 3 of [start a test debate](#start-a-test-debate) if you haven't: both accounts
+   signed in with public profiles, and a published topic `<topic-slug>`.
+2. If the outline is on (step 6), both accounts have saved the **Debating** card (step 6, item 4).
+   The queue refuses players who haven't.
 
-       ```sh
-       lk egress list --room debate-<debate-id> --active --json
-       ```
+- Check:
+  - `https://yaparena-staging-web.onrender.com/people/<handle-a>` and `/people/<handle-b>` open
+    both profiles.
+  - `https://yaparena-staging-web.onrender.com/topics/<topic-slug>` shows "Take a side and get
+    matched", with **Queue for For** and **Queue for Against**.
+- If the queue later answers "Choose your debate language…", click its **Open your account
+  settings** link and save the **Debating** card.
 
-       This lists one egress whose status is `EGRESS_ACTIVE`. With the outline on,
-       `lk agent logs` shows `transcriber joined`.
-   - If no "Match found" appears within 10 seconds:
-     - In the worker's **Logs**, search `matchmaking sweep failed`.
-     - Run the capacity query under "While it runs". If `used` is at `<capacity>`, wait for a
-       debate to end.
-     - Players on the same side are never matched.
-   - If it isn't live within 10 seconds of both joining:
-     - In the worker's **Logs**, search `automatic debate start failed`.
-     - Compare `lk egress list --active --json` with your plan's recording limit.
-7. **Automatic no-show.**
-   1. A and B each open the topic again and queue, A for For and B for Against.
-   2. Both accept.
-   3. Only A clicks **Check camera and join as speaker**.
-   - Check:
-     - 90 seconds after the match, A's banner reads "This debate was cancelled because a speaker
-       didn't join in time.".
-     - A's header shows "In queue" again; A keeps their place.
-     - `SELECT status FROM yaparena.debates WHERE slug = '<debate-slug>';` returns `cancelled`.
-   - If it still shows the countdown at 0:00 after two minutes, search the worker's **Logs** for
-     `matchmaking sweep failed`.
-8. **Challenge to debate now.** A stays on any signed-in page.
-   1. B opens `https://<staging-host>/match`.
-   2. Under **02 / CHALLENGE A PERSON**, B fills in **Opponent** `<handle-a>`, **Published topic
-      slug** `<topic-slug>`, a **Proposition** (at least 10 characters) and **Your side**
-      **Side B — Against**.
-   3. B picks **When: Now** and clicks **Send challenge**.
-   4. A clicks **Accept** in the "Debate now?" window.
-   - Check:
-     - B's page notice reads "Challenge sent. @<handle-a> has 2 minutes to answer.", and B's
-       header shows "Challenge sent · 1:5x".
-     - A sees "Debate now?" at once, naming B's display name and `@<handle-b>`, with a countdown.
-     - After item 4, both land on a new `/debates/<debate-slug>`. Continue with item 4 of 8.6.
-   - Try "Later" on a second "now" challenge: A clicks **Later**. It stays in A's **Your
-     challenges** list on `/match`. Two minutes later, B's **Updates** list on `/match` reads
-     "Your challenge to debate now wasn't answered in time. It stays open so you can agree a
-     time."
-   - If A sees no window, A wasn't online (check 8.4). The challenge then waits in A's **Your
-     challenges** list instead.
-9. **Challenge at an agreed time.** This takes an hour or more, so start it beside the others.
-   1. B fills in the same form as in 8.8, picks **When: Propose times**, enters two times at least
-      an hour ahead in **First choice** and **Second choice**, and clicks **Send challenge**.
-   2. A opens `/match`. Under **Your challenges**, A clicks **Propose times** on B's challenge,
-      enters another time, and clicks **Send times**.
-   3. B clicks **Accept <time>** on A's time.
-   4. At the start, both open the debate from **Your events** on `/match` and click **Check
-      camera and join as speaker**.
-   - Check:
-     - After item 1, A's entry reads "From @<handle-b> …" with one **Accept <time>** button per
-       time, in A's time zone.
-     - After item 2, B's entry updates by itself to show A's time.
-     - After item 3, both entries read "… · booked · <time>".
-     - Five minutes before the start:
-       - **Updates** on `/match` shows "Your debate starts in a few minutes. Join now.";
-       - the header shows "Debate in 4:5x";
-       - the debate page shows "Your debate starts in …".
-     - At the start time, it goes live by itself (same checks as 8.6).
-   - If a speaker doesn't join, the debate is cancelled 10 minutes after the start (same check as
-     8.7).
-10. **End the trial debates.** Each ends by itself at its rules' maximum length. In the SQL
-    editor,
-    `SELECT rules_snapshot->>'maximum_duration_seconds' FROM yaparena.debates WHERE slug = '<debate-slug>';`
-    shows that length in seconds. An account with the `operator` role can also end one early: the
-    debate page's **Operator controls**, a **Reason for action**, then **End**.
-    - Check: `lk egress list --room debate-<debate-id> --active --json` no longer lists an egress,
-      and `SELECT status FROM yaparena.debates WHERE slug = '<debate-slug>';` returns `ended`.
-    - If the egress stays active after the debate ended, stop it in the terminal with
-      `lk egress stop --id <egress-id>`, using the egress ID from that list.
+### 8.5 Queue, accept and start automatically
 
-**While it runs, watch** these (SQL in the Supabase SQL editor, the rest where it names):
+Time: 15 minutes, including the 10-minute debate (or end it early, 8.9).
 
-- **Recordings:** `lk egress list --active --json` in the terminal lists no more egresses than
-  `<capacity>`. With the outline on, `lk agent logs` shows no more sessions than the plan allows.
-- **Capacity in use**, the count the queue checks before offering a match. It stays at or below
+1. A opens `https://yaparena-staging-web.onrender.com/topics/<topic-slug>`, clicks **Queue for
+   For**, and allows the camera and microphone.
+2. B opens the same address, clicks **Queue for Against**, and allows them.
+3. Both click **Accept** in the "Match found" window.
+4. On the debate page, both click **Check camera and join as speaker**.
+
+- Check:
+  - After item 1, A's header shows "In queue · 0:01", counting up, and B's page reads "1 person
+    waiting for For" under the buttons.
+  - Within about two seconds of item 2, both see "Match found" with a countdown from 30.
+  - After item 3, both are on the same `https://yaparena-staging-web.onrender.com/debates/<debate-slug>`,
+    showing "Waiting for both speakers to join · 1:2x left" above the video.
+  - Within about two seconds of item 4, the debate is live. In the SQL editor,
+
+    ```sql
+    SELECT id, status FROM yaparena.debates WHERE slug = '<debate-slug>';
+    ```
+
+    returns `status` `live`. Keep its `id` as `<debate-id>`. Then
+
+    ```sql
+    SELECT reason FROM yaparena.event_history WHERE debate_id = '<debate-id>' AND action = 'start';
+    ```
+
+    returns `Automatic start: both speakers are ready and connected.`
+
+  - In the Terminal,
+
+    ```sh
+    lk egress list --room debate-<debate-id> --active --json
+    ```
+
+    lists one recording whose status is `EGRESS_ACTIVE`. With the outline on, `lk agent logs`
+    shows `transcriber joined`.
+
+- If no "Match found" appears within 10 seconds:
+  - Search the worker's **Logs** for `matchmaking sweep failed`.
+  - Run the capacity query in 8.10. If `used` equals `<capacity>`, wait for a debate to end.
+  - Two players on the same side are never matched.
+- If it isn't live within 10 seconds of both joining:
+  - Search the worker's **Logs** for `automatic debate start failed`.
+  - Compare `lk egress list --active --json` with your plan's recording limit (decision D2).
+
+### 8.6 Automatic no-show
+
+Time: 5 minutes.
+
+1. A and B each open the topic again and queue, A for For and B for Against.
+2. Both accept.
+3. Only A clicks **Check camera and join as speaker**.
+
+- Check:
+  - 90 seconds after the match, A's banner reads "This debate was cancelled because a speaker
+    didn't join in time.".
+  - A's header shows "In queue" again: A keeps their place.
+  - `SELECT status FROM yaparena.debates WHERE slug = '<debate-slug>';` returns `cancelled`.
+- If the countdown still shows 0:00 after two minutes, search the worker's **Logs** for
+  `matchmaking sweep failed`.
+
+### 8.7 Challenge to debate now
+
+Time: 15 minutes, including the debate.
+
+A stays signed in on any staging page.
+
+1. B opens `https://yaparena-staging-web.onrender.com/match`.
+2. Under **02 / CHALLENGE A PERSON**, B fills in **Opponent** `<handle-a>`, **Published topic slug**
+   `<topic-slug>`, a **Proposition** of at least 10 characters, and **Your side** `Side B — Against`.
+3. B picks **When: Now** and clicks **Send challenge**.
+4. A clicks **Accept** in the "Debate now?" window.
+
+- Check:
+  - B's notice reads "Challenge sent. @<handle-a> has 2 minutes to answer.", and B's header shows
+    "Challenge sent · 1:5x".
+  - A sees "Debate now?" at once, naming B's display name and `@<handle-b>`, with a countdown.
+  - After item 4, both land on a new `/debates/<debate-slug>`. Continue with item 4 of 8.5.
+- Then try **Later** on a second "now" challenge: A clicks **Later**. It stays in A's **Your
+  challenges** list on `/match`. Two minutes later, B's **Updates** list on `/match` reads "Your
+  challenge to debate now wasn't answered in time. It stays open so you can agree a time."
+- If A sees no window, A wasn't counted as online (check 8.3). The challenge then waits in A's
+  **Your challenges** list instead.
+
+### 8.8 Challenge at an agreed time
+
+Time: 15 minutes of clicks spread over at least an hour. Start it right after 8.4 so the wait
+overlaps the other items.
+
+1. B fills in the same form as in 8.7, picks **When: Propose times**, enters two times at least
+   an hour ahead in **First choice** and **Second choice**, and clicks **Send challenge**.
+2. A opens `/match`. Under **Your challenges**, A clicks **Propose times** on B's challenge, enters
+   another time at least an hour ahead, and clicks **Send times**.
+3. B clicks **Accept <time>** on A's time.
+4. At the start time, both open the debate from **Your events** on `/match` and click **Check
+   camera and join as speaker**.
+
+- Check:
+  - After item 1, A's entry reads "From @<handle-b> …" with one **Accept <time>** button per time,
+    in A's time zone.
+  - After item 2, B's entry updates by itself to show A's time.
+  - After item 3, both entries read "… · booked · <time>".
+  - Five minutes before the start, **Updates** on `/match` shows "Your debate starts in a few
+    minutes. Join now.", the header shows "Debate in 4:5x", and the debate page shows "Your debate
+    starts in …".
+  - At the start time it goes live by itself, with the same checks as 8.5.
+- If a speaker doesn't join, the debate is cancelled 10 minutes after the start, with the same
+  check as 8.6.
+
+### 8.9 End the trial debates
+
+Time: 2 minutes per debate.
+
+Each debate ends by itself at its rules' maximum length;
+`SELECT rules_snapshot->>'maximum_duration_seconds' FROM yaparena.debates WHERE slug = '<debate-slug>';`
+shows it in seconds. To end one early, the operator account opens the debate page's **Operator
+controls**, types a **Reason for action**, and clicks **End**.
+
+- Check: `lk egress list --room debate-<debate-id> --active --json` lists no recording, and
+  `SELECT status FROM yaparena.debates WHERE slug = '<debate-slug>';` returns `ended`.
+- If a recording stays active after the debate ended, stop it in the Terminal with
+  `lk egress stop --id <egress-id>`, using the `egress_id` from that list.
+
+### 8.10 Watch while it runs
+
+Run these whenever you want to see the state (SQL in the Supabase SQL editor):
+
+- **Recordings:** in the Terminal, `lk egress list --active --json` lists no more recordings than
+  `<capacity>`. With the outline on, `lk agent status` and `lk agent logs` show no more sessions
+  than your plan allows.
+- **Capacity in use,** the count the queue checks before offering a match. It stays at or below
   `<capacity>`; at capacity, queued players wait without a match:
 
   ```sql
@@ -1101,45 +1325,59 @@ open, but not for a public queue
   ```
 
 - **The queue:**
-  `SELECT status, count(*) FROM yaparena.matchmaking_tickets WHERE updated_at > now() - interval '1 hour' GROUP BY 1;`
-- **Players online** (who can receive "now" challenges):
-  `SELECT count(*) FROM yaparena.matchmaking_presence WHERE seen_at > now() - interval '60 seconds';`
-- **Database connections:** the 8.4 query stays at `1` per web process.
-- **Web service Logs** (search each): `live update failed`, `live update presence failed`,
-  `listener connection lost` and `live update stream fell behind`. One-off lines are fine;
-  repeating ones are not.
+
+  ```sql
+  SELECT status, count(*) FROM yaparena.matchmaking_tickets
+  WHERE updated_at > now() - interval '1 hour' GROUP BY 1;
+  ```
+
+- **Players online,** who can receive "now" challenges:
+
+  ```sql
+  SELECT count(*) FROM yaparena.matchmaking_presence WHERE seen_at > now() - interval '60 seconds';
+  ```
+
+- **Database connections:** the 8.3 query stays at `1` per web process.
+- **Web Logs** (search each): `live update failed`, `live update presence failed`,
+  `listener connection lost` and `live update stream fell behind`.
 - **Worker Logs** (search each): `matchmaking sweep failed`, `automatic debate start failed` and
   `matchmaking retention cleanup failed`.
 
-**Results notices with matchmaking off.** Live updates also carry the notice when a player's Yap
-Coins results are revealed. They are always on with matchmaking. To run them with matchmaking off:
+One-off lines are fine; repeating ones are not.
 
-1. Render → web service → **Environment** → **+ Add Environment Variable**. Key
+### 8.11 Results notices without matchmaking (optional)
+
+Live updates also carry the notice that a player's Yap Coins results are revealed. They are always
+on with matchmaking. Only if you turn matchmaking off and still want the notices:
+
+1. Render → `yaparena-staging-web` → **Environment** → **+ Add Environment Variable**. Key
    `USER_STREAM_ENABLED`, value `true`.
-2. Click **Save and deploy**.
-3. Run the 8.4 checks; the 8.2 port rule applies.
+2. Choose **Save and deploy**.
+3. Run the 8.3 checks; the 8.1 port rule applies.
 
-**Turning it off.** Let any trial debate end first (8.10).
+### 8.12 Turning it off
 
-1. Render → `yaparena-staging-jobs` → **Environment**. Set `MATCHMAKING_ENABLED` to `false`, then
+Time: 15 minutes. Let any trial debate end first (8.9).
+
+1. Render → `yaparena-staging-jobs` → **Environment**. Set `MATCHMAKING_ENABLED` to `false`, choose
    **Save and deploy**, and wait for "Deploy live" in **Events**.
-2. Repeat on the web service. Set `USER_STREAM_ENABLED` to `false` there too if you set it.
+2. Do the same on `yaparena-staging-web`. Set `USER_STREAM_ENABLED` to `false` there too if you
+   set it.
 
 - Check:
-  - `curl -fsS https://<staging-host>/topics | grep -c data-matchmaking` prints `0`.
-  - The 8.4 query returns `0`.
+  - `curl -fsS https://yaparena-staging-web.onrender.com/topics | grep -c data-matchmaking` prints
+    `0`.
+  - The 8.3 query returns `0`.
   - The worker's **Logs** show no `background job ran` line with `"job":"matchmaking"` after the
     deploy.
 - What stays:
-  - **Queue tickets:** they stay in the database unused, and close as stale if it's turned on
-    again.
-  - **Booked debates:** debates booked through challenges stay scheduled. Start them with
-    **Operator controls**.
-  - **Open challenges:** they can still be answered on `/match`.
+  - **Queue tickets** stay in the database unused, and close as stale if it's turned on again.
+  - **Booked debates** from challenges stay scheduled; start them with **Operator controls**.
+  - **Open challenges** can still be answered on `/match`.
 
 ## Rollback
 
-- **Migrations** are additive and stay; never roll back the schema. The step 0.5 backup is for a
+- **Migrations** are additive and stay; never roll back the schema. The step 0.6 backup is for a
   data accident, not for undoing a release.
 - **Feature switches:** in Render, open the service's **Environment**, set `TURN_WINDOWS_ENABLED` or
   `LIVE_OUTLINE_ENABLED` to `false`, and choose **Save and deploy**; do it on both
@@ -1149,7 +1387,7 @@ Coins results are revealed. They are always on with matchmaking. To run them wit
   `lk agent update-secrets --secrets-file ~/yaparena-private/transcriber-secrets.env --overwrite`.
 - **Code:** prefer fixing forward ([deploy a later commit](render-staging.md#deploy-a-later-commit)):
   after #100's migration, the previous release can't settle five-day rounds. To go back anyway, take
-  the previous release's images or commit from an older line of step 0.1's list. Image-backed
+  the previous release's images or commit from an older line of step 0.3's list. Image-backed
   services: **Settings** → **Image URL** → **Edit**, paste the previous image, **Save Changes**.
   Services built from GitHub: **Manual Deploy** → **Deploy a specific commit** → the previous
   commit.
@@ -1164,4 +1402,13 @@ Coins results are revealed. They are always on with matchmaking. To run them wit
   `lk agent versions` lists the deployed versions and their dates.
 
 - **Matchmaking:** set `MATCHMAKING_ENABLED=false` on web and the worker and deploy; see
-  [turning it off](#8-matchmaking-m) for what stays.
+  [turning it off](#812-turning-it-off) for what stays.
+
+## If you get stuck
+
+- Stop at the item that failed. Later steps assume the earlier checks passed.
+- Copy the step number, the command or click, and the exact output or log line. Leave out passwords,
+  keys and full database URLs.
+- Send that to the hub session; it routes the question to S (steps 0 to 7) or M (step 8).
+- To pause safely, set the feature switches back to `false` ([Rollback](#rollback)). Everything
+  except the migrations and the agent's region can be undone that way.
