@@ -19,6 +19,9 @@ per argument after settlement. Replays show the outline in sync with playback.
    No diarization: the server already lets only the active side publish a microphone.
 3. **Speech-to-text.** A provider switch comparing Deepgram Nova-3 through LiveKit Inference with
    ElevenLabs Scribe v2 Realtime (own key), with an optional shadow provider on the same audio.
+   Current state (2026-10-27): after the staging trial, Deepgram runs alone for now and ElevenLabs
+   is the long-term provider once a retest passes
+   ([provider decision](../transcription-provider-trial.md#provider-decision)).
 4. **Languages.** French and English. Each debater chooses their language; a turn's outline is
    written in its speaker's language.
 5. **Live loop.** Runs inside the agent: after each finished sentence, at most one Claude update

@@ -1,9 +1,10 @@
 # Staging rollout (Decisions 0011 to 0013)
 
-Prepared on 2026-10-26 and not run yet. This runbook takes staging from its last deployed release
-to current `main`: the migrations from #90 to #107, Yap Coins turn windows and their round rules
-([Decision 0012](decisions/0012-live-argument-outline.md)), the transcriber agent, captions and the
-AI outline, the speech-to-text provider trial, and matchmaking
+Prepared on 2026-10-26. The founder ran steps 0 to 8 on 2026-10-26 and 2026-10-27; see
+[the results of that run](#results-of-the-2026-10-27-run). This runbook takes staging from its last
+deployed release to current `main`: the migrations from #90 to #107, Yap Coins turn windows and
+their round rules ([Decision 0012](decisions/0012-live-argument-outline.md)), the transcriber agent,
+captions and the AI outline, the speech-to-text provider trial, and matchmaking
 ([Decision 0011](decisions/0011-live-matchmaking-and-challenges.md)). The founder performs each
 step; nothing here runs by itself. Each step says where to do it, how long it takes, every command
 and click, the output that proves it worked, and what to do when it doesn't. Background is in the
@@ -80,12 +81,11 @@ Each choice has a recommendation. D1 can't be undone; the others can change late
   ([data ownership](data-ownership.md#transcript-retention)). **Recommended: keep this for
   staging**, and set a fixed period for public debates before the public launch. Nothing to change
   now.
-- **D7. Matchmaking timings.** The 30-second accept is decided. These are proposed and still
-  waiting for your confirmation: a "now" challenge waits 2 minutes for an answer; matched players
-  have 90 seconds to join; a scheduled debate waits 10 minutes for its speakers; an unanswered
+- **D7. Matchmaking timings.** The 30-second accept is decided. The founder confirmed the others
+  as they are on 2026-10-26: a "now" challenge waits 2 minutes for an answer; matched players have
+  90 seconds to join; a scheduled debate waits 10 minutes for its speakers; an unanswered
   challenge expires after 7 days; at most 10 open challenges per person; a booked seat is held from
   5 minutes before the start. They're set in the code, so a change needs a small PR before step 8.
-  **Recommended: confirm them as they are** and revisit after the trial.
 - **D8. Debate format.** Today: 60-second turns, a 10-minute maximum. It sets each trading
   window's length, how long a booking holds a seat, and the recording cost. **Recommended: keep it
   for staging.**
@@ -611,7 +611,8 @@ debate.
 2. Do the same on `yaparena-staging-jobs`: it opens the windows.
 3. Wait for "Deploy live" in both services' **Events**.
 
-- Check: [start a test debate](#start-a-test-debate). Once it's live, Terminal:
+- Check: [start a test debate](#start-a-test-debate). Once it's live, Terminal, with the debate's
+  ID from its item 7 (not the `debate-…` slug in the page's address):
 
   ```sh
   curl -fsS https://yaparena-staging-web.onrender.com/api/public/debates/<debate-id>/windows | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const r=JSON.parse(s);console.log(r.revealMode,r.windows.map(w=>w.turnNumber+w.side).join(" "))})'
@@ -621,8 +622,9 @@ debate.
   after the first turn change: `five_day 1A 2B`.
 
 - If:
-  - curl prints `The requested URL returned error: 404`: web doesn't have the switch; check its
-    **Environment** and **Events**.
+  - curl prints `The requested URL returned error: 404`: check that the URL has the debate's ID,
+    not its slug. If it does, web doesn't have the switch; check its **Environment** and
+    **Events**.
   - It prints `five_day` and nothing else: the worker doesn't have the switch.
   - To turn it off: set `TURN_WINDOWS_ENABLED` to `false` on both services and **Save and deploy**.
 
@@ -704,6 +706,12 @@ Time: 5 minutes.
    name it `yaparena-staging-outline`, and click **Add**.
 3. Copy the key, which starts with `sk-ant-` and is shown only once. This is `<ANTHROPIC_KEY>`;
    save it in your password manager.
+
+- The key must belong to a workspace. A key that belongs to the organization rather than a
+  workspace is refused with a 400 error saying the request "must include the
+  anthropic-workspace-id header", and step 6 then shows `live outline call failed` in the agent's
+  logs. Create a new key inside the workspace and update `ANTHROPIC_API_KEY` in the secrets file
+  (5.4).
 
 ### 5.4 Write the agent's secrets file
 
@@ -870,6 +878,10 @@ Time: 20 minutes.
    cd ~/yaparena-transcriber-deploy
    lk agent logs | tee ~/yaparena-private/trial/agent-session-1.log
    ```
+
+   The stream can stop after `transcriber joined`. If the file ends there after the debate, run
+   `lk agent logs > ~/yaparena-private/trial/agent-session-1.log` in the same folder a minute
+   after the debate ends: it starts with the recent history. Press Ctrl+C after about 20 seconds.
 
 3. Start a test debate (A on side A, B on side B), items 4 to 8 of
    [start a test debate](#start-a-test-debate).
@@ -1064,7 +1076,8 @@ Time: 15 minutes.
 3. Choose the primary provider: the lower WER, at an acceptable latency and cost. Then run it alone
    (the shadow doubles speech-to-text cost). In `~/yaparena-private/transcriber-secrets.env`, set
    `TRANSCRIPTION_PROVIDER` to `deepgram` or `elevenlabs`, delete the
-   `TRANSCRIPTION_SHADOW_PROVIDER` line, and delete the `ELEVEN_API_KEY` line if Deepgram won. Then:
+   `TRANSCRIPTION_SHADOW_PROVIDER` line, and delete the `ELEVEN_API_KEY` line if Deepgram won and
+   ElevenLabs won't be retested. Then:
 
    ```sh
    cd ~/yaparena-transcriber-deploy
@@ -1074,8 +1087,10 @@ Time: 15 minutes.
    `--overwrite` replaces all the agent's secrets with the file's, which removes the shadow.
 
 - Check: at the next debate, the `transcriber joined` line shows `"shadow":"none"`.
-- If Deepgram won, you can delete the ElevenLabs key: **Developers** → **API Keys**, the key's
-  menu, **Delete**.
+- If Deepgram won and ElevenLabs won't be retested, you can delete the ElevenLabs key:
+  **Developers** → **API Keys**, the key's menu, **Delete**.
+- Decided on 2026-10-27: Deepgram alone for now, ElevenLabs once a retest passes; see the
+  [provider decision](transcription-provider-trial.md#provider-decision).
 
 ## 8. Turn on matchmaking
 
@@ -1374,6 +1389,25 @@ Time: 15 minutes. Let any trial debate end first (8.9).
   - **Queue tickets** stay in the database unused, and close as stale if it's turned on again.
   - **Booked debates** from challenges stay scheduled; start them with **Operator controls**.
   - **Open challenges** can still be answered on `/match`.
+
+## Results of the 2026-10-27 run
+
+- **Steps 0 to 6:** done. The run found two runbook gaps, fixed above: the Anthropic key must
+  belong to a workspace (5.3), and the step 3 check needs the debate's ID, not its slug.
+- **Step 7:** done. The results and the provider decision are on the
+  [trial page](transcription-provider-trial.md#results). Fixes that came out of it:
+  - #132 (merged): Deepgram received no language and transcribed French as English. The agent runs
+    `dee8a4c`.
+  - #133: ElevenLabs commits after short pauses, the last turn gets its cleanup, and a rejected
+    cleanup logs why. After it merges, redeploy the agent and retest ElevenLabs as primary with the
+    commands in that PR.
+  - On the server, with the next web and jobs deploy: a turn with no live outline version (every
+    live call failed, or none returned a usable edit) now freezes with its cleanup instead of
+    never getting a final outline.
+- **Seen and not changed:** side A's browser asked for the microphone again at each of A's turns.
+  The server withdraws a speaker's microphone permission between turns, so the browser may ask
+  again; setting the site's microphone permission to **Allow** is the likely workaround but wasn't
+  confirmed. Captions show the last two lines by design.
 
 ## Rollback
 
