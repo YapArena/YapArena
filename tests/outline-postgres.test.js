@@ -475,6 +475,35 @@ describe("live AI outline storage", { skip: !ownerUrl || !runtimeUrl }, () => {
         [debateId],
       ),
     );
+  // Every window of the debate closed this many seconds ago.
+  const closedAgo = (debateId, seconds) =>
+    withoutTrigger("coin_debate_rounds", "coin_debate_round_guard", (c) =>
+      c.query(
+        `UPDATE coin_debate_rounds SET closes_at=clock_timestamp()-$2*INTERVAL '1 second',
+          opens_at=least(opens_at, clock_timestamp()-($2+1)*INTERVAL '1 second')
+        WHERE debate_id=$1`,
+        [debateId, seconds],
+      ),
+    );
+  // The debate ended and its recording started two minutes ago.
+  async function ended(debateId) {
+    await owner.query(
+      "UPDATE debates SET status='ended',live_ended_at=clock_timestamp() WHERE id=$1",
+      [debateId],
+    );
+    await runtime.query(
+      `INSERT INTO recording_clocks(debate_id,egress_id,started_at)
+      VALUES ($1,$2,clock_timestamp()-INTERVAL '2 minutes')`,
+      [debateId, `egress-${randomUUID()}`],
+    );
+  }
+  const windowCount = async (debateId) =>
+    (
+      await owner.query(
+        "SELECT count(*)::int AS n FROM outline_windows WHERE debate_id=$1",
+        [debateId],
+      )
+    ).rows[0].n;
   // Their freeze happened this many seconds ago.
   const frozeAgo = (debateId, seconds) =>
     withoutTrigger("outline_windows", "outline_windows_append_only", (c) =>
@@ -647,6 +676,129 @@ describe("live AI outline storage", { skip: !ownerUrl || !runtimeUrl }, () => {
       ).body.reason,
       "empty",
     );
+  });
+
+  it("freezes a turn with its cleanup when all live calls failed", async () => {
+    const { debateId } = await liveDebate();
+    // No live outline call succeeded: the transcript arrives with no proposal.
+    const segments = update();
+    delete segments.outline;
+    assert.equal((await transcripts.ingest(debateId, segments)).status, 200);
+    const rewrite = cleanup(1, [
+      item(null, "Le nucléaire est pilotable", ["Il produit à la demande"]),
+    ]);
+    assert.equal(
+      (await outlines.applyCleanup(debateId, rewrite)).body.reason,
+      "not_frozen",
+      "before the window's cutoff",
+    );
+    await closeWindows(debateId);
+    await outlines.freezeDue(500);
+    assert.equal(await windowCount(debateId), 0, "no version to freeze");
+    const before = await signals(debateId);
+    const accepted = await outlines.applyCleanup(debateId, rewrite);
+    assert.equal(accepted.status, 201);
+    assert.deepEqual(accepted.body.turn, {
+      turnNumber: 1,
+      side: "A",
+      language: "fr",
+      arguments: [
+        {
+          id: "t1a1",
+          label: "Le nucléaire est pilotable",
+          rebuts: null,
+          continues: null,
+        },
+      ],
+      final: true,
+    });
+    const stored = (
+      await owner.query(
+        `SELECT frozen_version, frozen_outline, final_source, final_model,
+          finalized_at IS NOT NULL AS final FROM outline_windows WHERE debate_id=$1`,
+        [debateId],
+      )
+    ).rows[0];
+    assert.equal(stored.frozen_version, null);
+    assert.deepEqual(
+      stored.frozen_outline,
+      emptyTurn(1, "A", "fr"),
+      "traders saw an empty outline",
+    );
+    assert.equal(stored.final_source, "cleanup");
+    assert.equal(stored.final_model, "claude-sonnet-5-5");
+    assert.equal(stored.final, true);
+    assert.equal(await signals(debateId), before + 1);
+    assert.equal(
+      (await outlines.applyCleanup(debateId, rewrite)).body.reason,
+      "final",
+    );
+    const snapshot = await outlines.snapshot(debateId);
+    assert.equal(snapshot.current, null, "no live turn");
+    assert.equal(snapshot.finals, 1);
+    assert.deepEqual(
+      snapshot.turns.map((turn) => [turn.turnNumber, turn.final]),
+      [[1, true]],
+    );
+    const state = await outlines.agentState(debateId, 1);
+    assert.equal(state.turn, null);
+    assert.deepEqual(
+      state.map.map((entry) => entry.id),
+      ["t1a1"],
+    );
+  });
+
+  it("freezes a turn with its cleanup when Haiku returned no usable edit", async () => {
+    const { debateId } = await liveDebate();
+    const unusable = await transcripts.ingest(
+      debateId,
+      update({
+        edits: [proposal("update_point", { point: "t1a1p9", text: "x" })],
+      }),
+    );
+    assert.equal(unusable.body.outline.reason, "unchanged");
+    await closeWindows(debateId);
+    await outlines.freezeDue(500);
+    await ended(debateId);
+    assert.equal(
+      (await outlines.timeline(debateId)).complete,
+      false,
+      "its cleanup may still come",
+    );
+    const accepted = await outlines.applyCleanup(
+      debateId,
+      cleanup(1, [item(null, "Rien de neuf")]),
+    );
+    assert.equal(accepted.status, 201);
+    const timeline = await outlines.timeline(debateId);
+    assert.equal(timeline.complete, true);
+    assert.deepEqual(
+      timeline.turns.map((turn) => [turn.turnNumber, turn.final]),
+      [[1, true]],
+    );
+
+    // More than a minute after the cutoff, the cleanup is late, and the
+    // timeline no longer waits for it.
+    const late = await liveDebate();
+    await transcripts.ingest(
+      late.debateId,
+      update({
+        edits: [proposal("update_point", { point: "t1a1p9", text: "x" })],
+      }),
+    );
+    await closedAgo(late.debateId, 61);
+    assert.equal(
+      (
+        await outlines.applyCleanup(
+          late.debateId,
+          cleanup(1, [item(null, "Trop tard")]),
+        )
+      ).body.reason,
+      "late",
+    );
+    assert.equal(await windowCount(late.debateId), 0);
+    await ended(late.debateId);
+    assert.equal((await outlines.timeline(late.debateId)).complete, true);
   });
 
   it("serves the replay timeline in recording time", async () => {

@@ -61,7 +61,11 @@ const summary = (outline: TurnOutline, final: boolean): TurnSummary => ({
   final,
 });
 
-/** The latest stored outline of every turn of a debate, final ones first. */
+/**
+ * The latest stored outline of every turn of a debate, final ones first. A
+ * turn with no live version has one only once its cleanup froze its window
+ * (applyCleanup); its `live` is then null.
+ */
 async function turns(db: Queryable, debateId: string) {
   const rows = (
     await db.query<{
@@ -70,13 +74,14 @@ async function turns(db: Queryable, debateId: string) {
       settled: unknown;
       final: boolean;
     }>(
-      `SELECT v.turn_number AS "turnNumber", v.outline AS live,
+      `SELECT COALESCE(v.turn_number, w.turn_number) AS "turnNumber", v.outline AS live,
         COALESCE(w.final_outline, w.frozen_outline) AS settled,
         w.final_outline IS NOT NULL AS final
       FROM (SELECT DISTINCT ON (turn_number) turn_number, outline FROM outline_versions
         WHERE debate_id=$1 ORDER BY turn_number, version DESC) v
-      LEFT JOIN outline_windows w ON w.debate_id=$1 AND w.turn_number=v.turn_number
-      ORDER BY v.turn_number DESC LIMIT 100`,
+      FULL JOIN (SELECT turn_number, frozen_outline, final_outline FROM outline_windows
+        WHERE debate_id=$1) w ON w.turn_number=v.turn_number
+      ORDER BY 1 DESC LIMIT 100`,
       [debateId],
     )
   ).rows;
@@ -88,6 +93,57 @@ async function turns(db: Queryable, debateId: string) {
       final: row.final,
     }))
     .reverse();
+}
+
+/**
+ * The turn window a cleanup may freeze itself: one with no live version, so
+ * the jobs loop never freezes it, past its cutoff and still within
+ * CLEANUP_ACCEPT_MS of it. Its frozen outline is the empty one traders saw,
+ * in the speaker's language. `wait`: not yet, or the jobs loop will freeze it.
+ */
+async function unversionedTurn(
+  db: Queryable,
+  debateId: string,
+  turnNumber: number,
+): Promise<
+  | { kind: "wait" }
+  | { kind: "late" }
+  | { kind: "freeze"; windowId: string; frozen: TurnOutline }
+> {
+  const row = (
+    await db.query<{
+      windowId: string;
+      side: OutlineSide;
+      language: string | null;
+      versioned: boolean;
+      closed: boolean;
+      open: boolean;
+    }>(
+      `SELECT r.id AS "windowId", r.turn_side AS side,
+        (SELECT s.language FROM event_participants p
+          JOIN debater_settings s ON s.user_id=p.user_id
+          WHERE p.debate_id=r.debate_id AND p.side=r.turn_side LIMIT 1) AS language,
+        EXISTS (SELECT 1 FROM outline_versions v
+          WHERE v.debate_id=r.debate_id AND v.turn_number=r.turn_number) AS versioned,
+        r.closes_at <= clock_timestamp() AS closed,
+        r.closes_at > clock_timestamp() - $3 * INTERVAL '1 millisecond' AS open
+      FROM coin_debate_rounds r WHERE r.debate_id=$1 AND r.turn_number=$2`,
+      [debateId, turnNumber, CLEANUP_ACCEPT_MS],
+    )
+  ).rows[0];
+  if (
+    !row ||
+    row.versioned ||
+    !row.closed ||
+    (row.language !== "fr" && row.language !== "en")
+  )
+    return { kind: "wait" };
+  if (!row.open) return { kind: "late" };
+  return {
+    kind: "freeze",
+    windowId: row.windowId,
+    frozen: emptyTurn(turnNumber, row.side, row.language),
+  };
 }
 
 /**
@@ -236,7 +292,8 @@ export function createOutlineRepository(database: Pool) {
           )
         ).rows[0]?.version ?? 0;
       const all = await turns(database, debateId);
-      const latest = all.at(-1);
+      // The latest turn is the current one, unless only its window holds it.
+      const latest = all.at(-1)?.live ? all.at(-1) : undefined;
       const flags = (
         await database.query<{
           turnNumber: number;
@@ -261,13 +318,11 @@ export function createOutlineRepository(database: Pool) {
         version,
         finals,
         current: latest?.live ?? null,
-        turns: all
-          .slice(0, -1)
-          .flatMap((turn) =>
-            turn.settled || turn.live
-              ? [summary((turn.settled ?? turn.live)!, turn.final)]
-              : [],
-          ),
+        turns: (latest ? all.slice(0, -1) : all).flatMap((turn) =>
+          turn.settled || turn.live
+            ? [summary((turn.settled ?? turn.live)!, turn.final)]
+            : [],
+        ),
         flags,
       };
     },
@@ -313,7 +368,8 @@ export function createOutlineRepository(database: Pool) {
     /**
      * Jobs loop: records, for each window past its cutoff, the outline
      * version traders saw then (the latest version created before the cutoff,
-     * or an empty outline). Each window is frozen once.
+     * or an empty outline). Each window is frozen once. A turn with no live
+     * version is left to its cleanup, which freezes it (applyCleanup).
      */
     async freezeDue(limit = 20) {
       const due = (
@@ -375,6 +431,10 @@ export function createOutlineRepository(database: Pool) {
      * The window cleanup (Claude Sonnet 5.5): at most one per window, until
      * CLEANUP_ACCEPT_MS after it froze. Its rewrite becomes the window's
      * final outline; otherwise finalizeDue makes the frozen one final.
+     *
+     * A turn with no live version (every live call failed, or none returned
+     * an edit) never freezes on the jobs loop. Its cleanup freezes it, with
+     * the empty outline traders saw, until CLEANUP_ACCEPT_MS after its cutoff.
      */
     async applyCleanup(debateId: string, cleanup: OutlineCleanup) {
       return withTransaction(database, async (client) => {
@@ -390,14 +450,26 @@ export function createOutlineRepository(database: Pool) {
           status,
           body: { accepted: false as const, reason },
         });
-        // Not frozen yet: the jobs loop freezes within a second; retry.
-        if (!window) return refuse(409, "not_frozen");
-        if (window.final) return refuse(409, "final");
-        if (!window.open) return refuse(409, "late");
+        let unversioned: { windowId: string; frozen: TurnOutline } | undefined;
+        if (!window) {
+          const turn = await unversionedTurn(
+            client,
+            debateId,
+            cleanup.turnNumber,
+          );
+          if (turn.kind === "late") return refuse(409, "late");
+          // Not frozen yet: the jobs loop freezes a turn with a live version
+          // within a second, and an unversioned one waits for its cutoff.
+          if (turn.kind === "wait") return refuse(409, "not_frozen");
+          unversioned = turn;
+        } else {
+          if (window.final) return refuse(409, "final");
+          if (!window.open) return refuse(409, "late");
+        }
         const all = await turns(client, debateId);
-        const live = all.find(
-          (turn) => turn.turnNumber === cleanup.turnNumber,
-        )?.live;
+        const live =
+          unversioned?.frozen ??
+          all.find((turn) => turn.turnNumber === cleanup.turnNumber)?.live;
         if (!live) return refuse(409, "not_frozen");
         const earlier = all
           .filter((turn) => turn.turnNumber < cleanup.turnNumber)
@@ -418,17 +490,36 @@ export function createOutlineRepository(database: Pool) {
         if (!resolved) return refuse(422, "empty");
         if (outlineBytes(resolved.outline) > SNAPSHOT_MAX_BYTES)
           return refuse(422, "too_large");
-        await client.query(
-          `UPDATE outline_windows SET final_outline=$3::jsonb, final_source='cleanup',
-            final_model=$4, finalized_at=clock_timestamp()
-          WHERE debate_id=$1 AND turn_number=$2`,
-          [
-            debateId,
-            cleanup.turnNumber,
-            JSON.stringify(resolved.outline),
-            cleanup.model,
-          ],
-        );
+        if (unversioned) {
+          // Frozen and final at once, so a refused cleanup leaves nothing.
+          const inserted = await client.query(
+            `INSERT INTO outline_windows(debate_id, turn_number, window_id, frozen_version,
+              frozen_outline, final_outline, final_source, final_model, finalized_at)
+            VALUES ($1, $2, $3, NULL, $4::jsonb, $5::jsonb, 'cleanup', $6, clock_timestamp())
+            ON CONFLICT DO NOTHING`,
+            [
+              debateId,
+              cleanup.turnNumber,
+              unversioned.windowId,
+              JSON.stringify(unversioned.frozen),
+              JSON.stringify(resolved.outline),
+              cleanup.model,
+            ],
+          );
+          // A live version arrived and the jobs loop froze the window: retry.
+          if (!inserted.rowCount) return refuse(409, "not_frozen");
+        } else
+          await client.query(
+            `UPDATE outline_windows SET final_outline=$3::jsonb, final_source='cleanup',
+              final_model=$4, finalized_at=clock_timestamp()
+            WHERE debate_id=$1 AND turn_number=$2`,
+            [
+              debateId,
+              cleanup.turnNumber,
+              JSON.stringify(resolved.outline),
+              cleanup.model,
+            ],
+          );
         return {
           status: 201,
           body: {
@@ -462,6 +553,9 @@ export function createOutlineRepository(database: Pool) {
      * each turn's final (or frozen, or latest) outline.
      */
     async timeline(debateId: string): Promise<OutlineTimeline> {
+      // Complete once no window can still freeze or change: freezeDue
+      // freezes a turn with a live version, and applyCleanup an unversioned
+      // one until CLEANUP_ACCEPT_MS after its cutoff.
       const state = (
         await database.query<{ complete: boolean; timed: boolean }>(
           `SELECT d.status IN ('ended','replay','finalized')
@@ -471,11 +565,13 @@ export function createOutlineRepository(database: Pool) {
               AND NOT EXISTS (SELECT 1 FROM coin_debate_rounds r
                 WHERE r.debate_id=d.id AND r.turn_number IS NOT NULL
                   AND NOT EXISTS (SELECT 1 FROM outline_windows w WHERE w.window_id=r.id)
-                  AND EXISTS (SELECT 1 FROM outline_versions v
-                    WHERE v.debate_id=d.id AND v.turn_number=r.turn_number)) AS complete,
+                  AND (EXISTS (SELECT 1 FROM outline_versions v
+                      WHERE v.debate_id=d.id AND v.turn_number=r.turn_number)
+                    OR r.closes_at > clock_timestamp() - $2 * INTERVAL '1 millisecond'))
+              AS complete,
             c.started_at IS NOT NULL AS timed
           FROM debates d LEFT JOIN recording_clocks c ON c.debate_id=d.id WHERE d.id=$1`,
-          [debateId],
+          [debateId, CLEANUP_ACCEPT_MS],
         )
       ).rows[0] ?? { complete: false, timed: false };
       const versions = (
