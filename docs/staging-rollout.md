@@ -1404,6 +1404,8 @@ Time: 15 minutes. Let any trial debate end first (8.9).
   - On the server, with the next web and jobs deploy: a turn with no live outline version (every
     live call failed, or none returned a usable edit) now freezes with its cleanup instead of
     never getting a final outline.
+- **Step 8:** done. As the founder reported, 8.1 to 8.11 passed. 8.12, the off switch, was skipped
+  on purpose: matchmaking (`MATCHMAKING_ENABLED`) stays on in staging.
 - **Seen and not changed:** side A's browser asked for the microphone again at each of A's turns.
   The server withdraws a speaker's microphone permission between turns, so the browser may ask
   again; setting the site's microphone permission to **Allow** is the likely workaround but wasn't

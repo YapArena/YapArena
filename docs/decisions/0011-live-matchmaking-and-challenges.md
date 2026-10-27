@@ -196,6 +196,9 @@ with two accounts from queue to automatic start. A hosted LiveKit trial for conc
 
 ## Proposed values awaiting confirmation
 
+Current state (2026-10-26): the founder confirmed these values as they are
+([staging rollout decision D7](../staging-rollout.md#decide-before-you-start)).
+
 Now-challenge window 2 minutes; queue join window 90 seconds; scheduled join window 10 minutes;
 pending expiry 7 days; 10 outgoing pending challenges; reservation lead 5 minutes. The debate
 format (currently 60-second turns and a 10-minute maximum) sets reservation length and recording
