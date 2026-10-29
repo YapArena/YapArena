@@ -294,6 +294,48 @@ describe("landing page", () => {
     assert.match(rule(".landing-join"), /container-type: inline-size;/);
     assert.match(rule(".landing-emblem"), /grid-column: 8 \/ span 5;/);
     assert.match(rule(".pixel-logo"), /width: min\(100%, 560px, 70vh\);/);
+
+    // Tablets keep the header and the fixed one-column emblem size.
+    const phoneStart = css.indexOf("@media (max-width: 600px) {");
+    const phone = css.slice(phoneStart);
+    assert.match(
+      css.slice(css.indexOf("@media (max-width: 999px) {"), phoneStart),
+      /\.pixel-logo \{\s*width: min\(58vw, 20rem\);/,
+    );
+    // Phones: no header, and the first screen (the small viewport) ends 16px
+    // below Sign in, with the emblem filling the height the text leaves.
+    const phoneRule = (selector) =>
+      new RegExp(`\\n  ${selector.replace(/\./g, "\\.")} \\{([^}]*)\\}`).exec(
+        phone,
+      )[1];
+    assert.match(phoneRule(".landing-header"), /display: none;/);
+    const main = phoneRule(".landing-main");
+    assert.match(
+      main,
+      /--below-fold: calc\(var\(--space-5\) \+ 0\.9rem \* 1\.5\);/,
+    );
+    assert.match(main, /min-height: calc\(100vh \+ var\(--below-fold\)\);/);
+    assert.match(main, /min-height: calc\(100svh \+ var\(--below-fold\)\);/);
+    assert.match(main, /grid-template-rows: minmax\(7\.5rem, 1fr\) auto;/);
+    assert.match(
+      main,
+      /padding-top: max\(var\(--space-4\), env\(safe-area-inset-top\)\);/,
+    );
+    // The fold allowance is exactly the Explore link: its margin and one line.
+    const explore = rule(".landing-explore");
+    assert.match(explore, /margin-top: var\(--space-5\);/);
+    assert.match(explore, /font-size: 0\.9rem;/);
+    assert.match(rule("body.landing"), /line-height: 1\.5;/);
+    assert.match(phoneRule(".landing-emblem"), /container-type: size;/);
+    assert.match(phoneRule(".landing-emblem"), /align-self: stretch;/);
+    assert.match(
+      phoneRule(".pixel-logo"),
+      /width: min\(100cqw, 100cqh \* 2048 \/ 1715, 560px\);/,
+    );
+    assert.match(
+      phoneRule(".landing-sign-in"),
+      /margin-top: var\(--space-6\);/,
+    );
   });
 
   it("returns sign-in to /home unless the link names another page", async () => {

@@ -27,8 +27,8 @@ unavailable fallback and the development-only `?reference=1` view.
 
 The landing page stands alone: it loads only `landing.css` and the `landing.js`
 module, not the site header, homepage bundle or account scripts. The static logo
-sits in the header, the sign-up actions on the left and the animated emblem on the
-right.
+sits in the header (hidden on phones), the sign-up actions on the left and the
+animated emblem on the right.
 
 ### Spacing and layout
 
@@ -38,18 +38,39 @@ right.
   `clamp(1rem, 4.5vw, 4rem)`, never inside the phone safe areas). The logo,
   headline, buttons and Explore link start at the same left edge at every width.
 - From 1000px the main area is a 12-column grid with a 32px gap: text in columns
-  1–6, the emblem centered in columns 7–12 (at most 560px wide and 70vh tall). The
+  1–7, the emblem centered in columns 8–12 (at most 560px wide and 70vh tall). The
   bottom padding is 4vh larger than the top, lifting the content slightly above
   center.
 - Gaps in the text column group related items: headline → "Join the arena." 32px,
   → first button 24px, between the sign-up buttons 12px, → "Already have an
-  account?" 48px, → Sign in 12px, → Explore 24px.
-- Header padding is 24px (16px on phones) around a 32px logo (28px). The footer
-  has 24px padding and links at least 24px tall, 24px apart.
-- Below 1000px the page is one column: the emblem (`min(58vw, 20rem)`, sized so
-  the page fits a 390×844 phone without scrolling), a 32px gap, then the text.
-  The headline's phone size is `clamp(2.25rem, 10vw, 3.4rem)`, so its longest
-  line fits at 320px.
+  account?" 48px (32px on phones), → Sign in 12px, → Explore 24px.
+- Header padding is 24px (16px below 1000px) around a 32px logo (28px). The
+  footer has 24px padding and links at least 24px tall, 24px apart.
+- Below 1000px the page is one column: the emblem, a 32px gap, then the text.
+  From 601px to 999px the emblem is `min(58vw, 20rem)` wide. The headline's
+  one-column size is `clamp(2.25rem, 10vw, 3.4rem)`, so its longest line fits at
+  320px.
+- Phones (600px and narrower) have no header, so the emblem takes its space. The
+  first screen is the small viewport (`100svh`, the height with the browser's
+  toolbars showing), so Sign in is visible without scrolling and the emblem
+  never resizes when Safari's toolbar collapses. The first screen ends 16px below
+  the Sign in button; the Explore link and footer follow. The emblem fills
+  whatever height the text leaves, keeping its 2048:1715 shape, between 120px
+  tall and the container width (at most 560px). Every other size is unchanged.
+  Measured emblem and Sign in, at approximate visible heights with the toolbars
+  showing:
+
+  | Phone             | Viewport | Emblem before | Emblem now | Sign in bottom |
+  | ----------------- | -------- | ------------- | ---------- | -------------- |
+  | iPhone 12–14      | 390×664  | 226×189       | 252×211    | 648px          |
+  | iPhone 15/16      | 393×659  | 228×191       | 245×205    | 643px          |
+  | iPhone Pro Max    | 430×740  | 249×209       | 331×277    | 724px          |
+  | Android, 360 wide | 360×670  | 209×175       | 267×224    | 654px          |
+  | iPhone SE         | 375×550  | 218×182       | 143×120    | 554px          |
+
+  Before, Sign in ended 688–738px down: below the fold on every phone except
+  the Pro Max, where it just fit. On an iPhone SE the emblem stops at its 120px minimum and the bottom 4px of Sign in
+  sits below the fold; the text never shrinks to make room.
 
 ### Rotating headline
 

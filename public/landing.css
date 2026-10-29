@@ -408,7 +408,6 @@ a:focus-visible {
   .landing-emblem {
     order: -1;
   }
-  /* Sized so the whole page fits a 390×844 phone without scrolling. */
   .pixel-logo {
     width: min(58vw, 20rem);
   }
@@ -416,7 +415,36 @@ a:focus-visible {
     font-size: min(clamp(2.25rem, 10vw, 3.4rem), calc(100cqi / 10.1));
   }
 }
+/* Phones: no header. The first screen ends 16px below the Sign in button and
+   the emblem fills whatever height the text leaves, keeping its shape. The
+   first screen is the small viewport (100svh), so the emblem never resizes
+   when Safari's toolbar collapses during scroll. */
 @media (max-width: 600px) {
+  .landing-header {
+    display: none;
+  }
+  .landing-main {
+    /* The Explore link (its 24px margin and one 0.9rem line) sits just below
+       the first screen. */
+    --below-fold: calc(var(--space-5) + 0.9rem * 1.5);
+    min-height: calc(100vh + var(--below-fold));
+    min-height: calc(100svh + var(--below-fold));
+    grid-template-rows: minmax(7.5rem, 1fr) auto;
+    padding-top: max(var(--space-4), env(safe-area-inset-top));
+  }
+  /* A size container: its row's height, not the logo, sets its size. */
+  .landing-emblem {
+    container-type: size;
+    align-self: stretch;
+    align-items: center;
+  }
+  .pixel-logo {
+    width: min(100cqw, 100cqh * 2048 / 1715, 560px);
+  }
+  /* The phone's group gap, as between the emblem, headline and heading. */
+  .landing-sign-in {
+    margin-top: var(--space-6);
+  }
   .pixel-logo .aura {
     filter: blur(8px);
   }
