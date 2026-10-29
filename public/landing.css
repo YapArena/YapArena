@@ -22,6 +22,19 @@
   font-family: Arial, Helvetica, sans-serif;
   font-synthesis: none;
 }
+/* Forum Regular, self-hosted under the SIL Open Font License 1.1 (see
+   landing/fonts/OFL.txt). From @fontsource/forum 5.3.0, Latin subset. */
+@font-face {
+  font-family: "Forum";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("landing/fonts/forum-latin-400-normal.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
 * {
   box-sizing: border-box;
 }
@@ -114,7 +127,9 @@ a:focus-visible {
 /* Proximity: related items sit closer than separate groups. */
 .landing-headline {
   margin: 0 0 var(--space-6);
+  font-family: "Forum", Georgia, "Times New Roman", serif;
   font-size: clamp(3rem, 5.4vw, 4rem);
+  font-weight: 400;
   line-height: 1.05;
   letter-spacing: -0.04em;
 }
@@ -184,6 +199,7 @@ a:focus-visible {
 .headline-line {
   display: block;
   white-space: nowrap;
+  text-transform: uppercase;
 }
 .flip {
   position: relative;

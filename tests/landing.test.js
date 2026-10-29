@@ -201,6 +201,55 @@ describe("landing page", () => {
     }
   });
 
+  it("self-hosts Forum Regular for the headline, set in capitals", async () => {
+    const font = "/assets/landing/fonts/forum-latin-400-normal.woff2";
+    const page = await request(app).get("/");
+    // Preloaded at the exact URL landing.css resolves, so it downloads once.
+    assert.match(
+      page.text,
+      /<link rel="preload" href="\/assets\/landing\/fonts\/forum-latin-400-normal\.woff2" as="font" type="font\/woff2" crossorigin>/,
+    );
+    assert.doesNotMatch(page.text, /fonts\.googleapis|fonts\.gstatic/);
+    assert.doesNotMatch((await request(app).get("/home")).text, /forum-latin/);
+    const file = await request(app).get(font);
+    assert.equal(file.status, 200);
+    assert.equal(file.headers["content-type"], "font/woff2");
+    assert.equal(Number(file.headers["content-length"]), 23820);
+    const license = await request(app).get("/assets/landing/fonts/OFL.txt");
+    assert.equal(license.status, 200);
+    assert.match(license.text, /Denis Masharov/);
+    assert.match(license.text, /SIL Open Font License, Version 1\.1/);
+    const css = (await request(app).get("/assets/landing.css")).text;
+    assert.match(
+      css,
+      /@font-face \{\s*font-family: "Forum";\s*font-style: normal;\s*font-weight: 400;\s*font-display: swap;\s*src: url\("landing\/fonts\/forum-latin-400-normal\.woff2"\) format\("woff2"\);/,
+    );
+    assert.equal(
+      new URL(
+        "landing/fonts/forum-latin-400-normal.woff2",
+        "https://a/assets/landing.css?v=1",
+      ).pathname,
+      font,
+    );
+    const rule = (selector) =>
+      new RegExp(`\\n${selector.replace(".", "\\.")} \\{([^}]*)\\}`).exec(
+        css,
+      )[1];
+    const headline = rule(".landing-headline");
+    assert.match(
+      headline,
+      /font-family: "Forum", Georgia, "Times New Roman", serif;/,
+    );
+    assert.match(headline, /font-size: clamp\(3rem, 5\.4vw, 4rem\);/);
+    assert.match(headline, /font-weight: 400;/);
+    assert.match(headline, /line-height: 1\.05;/);
+    assert.match(headline, /letter-spacing: -0\.04em;/);
+    assert.match(rule(".headline-line"), /text-transform: uppercase;/);
+    // The layout is unchanged: Forum in capitals fits the half-width column.
+    assert.match(rule(".landing-join"), /grid-column: 1 \/ span 6;/);
+    assert.match(rule(".landing-emblem"), /grid-column: 7 \/ span 6;/);
+  });
+
   it("returns sign-in to /home unless the link names another page", async () => {
     const created = [];
     const auth0 = {

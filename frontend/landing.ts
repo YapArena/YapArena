@@ -138,13 +138,15 @@ function startHeadline() {
   }
   // The slot boundary breaks the font's kerning between "Y" and "our" or
   // "appers", so pull each word in by the pair's kerning, measured in the
-  // headline's own font.
+  // headline's own font and as displayed (the lines are set in capitals).
   function kern() {
     const context = document.createElement("canvas").getContext("2d");
     if (!context) return;
-    const style = getComputedStyle(headline!);
+    const style = getComputedStyle(slots.pronoun.element);
     context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-    const width = (text: string) => context.measureText(text).width;
+    const shown = (text: string) =>
+      style.textTransform === "uppercase" ? text.toUpperCase() : text;
+    const width = (text: string) => context.measureText(shown(text)).width;
     for (const word of slots.pronoun.words) {
       const text = word.textContent ?? "";
       word.style.marginLeft = `${width(`Y${text}`) - width("Y") - width(text)}px`;
@@ -210,6 +212,12 @@ function startHeadline() {
   paintWords();
   measure();
   void document.fonts.ready.then(measure).catch(() => {});
+  // Slot widths and kerning depend on the headline font, so measure again
+  // once Forum itself has loaded (it can arrive after fonts.ready).
+  void document.fonts
+    .load("400 1em Forum")
+    .then(measure)
+    .catch(() => {});
   window.addEventListener("resize", measure);
   motion.addEventListener("change", start);
   onPause((value) => {

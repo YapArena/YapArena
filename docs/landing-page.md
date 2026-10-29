@@ -87,6 +87,27 @@ headline shows "Yappers matter". Without JavaScript it shows "Your opinions
 matter". Screen readers hear one stable sentence, "Your opinions, debates, ideas
 and discussions matter. Yappers matter."; the animated lines are `aria-hidden`.
 
+### Headline font
+
+The rotating headline is set in Forum Regular (weight 400) in capitals, at the
+same size, line height and letter spacing as before. Only the animated lines are
+uppercased; the screen-reader sentence keeps its normal case.
+
+- Forum is by Denis Masharov, under the SIL Open Font License 1.1. The Latin
+  subset `public/landing/fonts/forum-latin-400-normal.woff2` (23,820 bytes) and
+  its license `OFL.txt` come from the `@fontsource/forum` 5.3.0 package.
+- It is self-hosted rather than loaded from Google Fonts, so the landing page
+  makes no third-party request and the existing `font-src 'self'` policy covers it.
+- The page preloads the file at the exact, unversioned URL `landing.css` resolves,
+  so it downloads once. `font-display: swap` shows a fallback serif until it loads.
+- Slot widths and the "Y" kerning are measured again once Forum has loaded. The
+  kerning is measured in capitals, as displayed ("YO" -5.8px and "YA" -7.5px at
+  64px).
+- "YOUR DISCUSSIONS", the longest line 1, measures 7.53em. It fits the existing
+  half-width column at every width: 482px of 560 at 1440px, 406 of 439 at
+  1000px, 294 of 355 at 390px and 271 of 288 at 320px. The layout is therefore
+  unchanged.
+
 ### Word colors
 
 "opinions", "debates", "ideas", "discussions" and "Yappers" each get their own
