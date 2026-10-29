@@ -19,6 +19,7 @@ import {
   renderTopic,
   renderTopics,
 } from "./web.ts";
+import { renderLanding } from "./landing-web.ts";
 
 type Repository = ReturnType<typeof createDiscoveryRepository>;
 const statuses = new Set<DebateStatus>([
@@ -94,6 +95,7 @@ export function createDiscoveryRouter({
   emailFirst = false,
   liveOutline,
   matchmakingEnabled = false,
+  signedIn = async () => false,
 }: {
   discovery: Repository;
   a4Enabled?: boolean;
@@ -107,6 +109,8 @@ export function createDiscoveryRouter({
   emailFirst?: boolean;
   // Live topic queue (Decision 0011): pages load the queue module and show its controls.
   matchmakingEnabled?: boolean;
+  // Whether the request carries a valid session; / sends those readers to /home.
+  signedIn?: (request: Request) => Promise<boolean>;
 }) {
   const router = Router();
   const origin = applicationOrigin.replace(/\/$/, "");
@@ -222,7 +226,15 @@ export function createDiscoveryRouter({
       ? response.json(data)
       : response.status(404).json({ error: "Debate not found" });
   });
+  // The landing page (docs/landing-page.md). Signed-in readers go to /home; a
+  // session lookup that fails leaves the reader on the landing page.
   router.get("/", async (request, response) => {
+    response.vary("Cookie");
+    const member = await signedIn(request).catch(() => false);
+    if (member) return response.redirect(303, "/home");
+    return html(response, renderLanding(origin));
+  });
+  router.get("/home", async (request, response) => {
     if (request.query.reference !== undefined) {
       if (!homepageReferenceEnabled || request.query.reference !== "1")
         return html(response, renderNotFound(origin), 404);

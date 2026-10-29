@@ -2,7 +2,8 @@
 
 The former homepage content now lives at `/live`, reached through the shared
 Live navigation link. The subsequent [wide homepage](wide-homepage.md) replaces
-the temporary centered logo at `/`; its Watch debates link reaches Live.
+the temporary centered logo at `/` (now at `/home`, after the
+[landing page](landing-page.md)); its Watch debates link reaches Live.
 The Live page retains the full-width navy video hero, Topics in play and preview
 note. Under Debates to watch, video cards replace the former text panels while
 keeping the three-column grid, 14px gutters and 320px minimum card height
@@ -108,7 +109,7 @@ policy, live subscription/cleanup and HLS preview limits. The disposable databas
 quality gate supplies the existing explicit A4 database URLs to the featured
 ranking test, which refuses hosted databases. It verifies volume beats likes,
 recency ties, live priority and hidden/private/pending exclusions.
-The CI integration smoke check verifies the wide homepage at `/` and seeded discovery
+The CI integration smoke check verifies the landing page at `/`, the wide homepage at `/home` and seeded discovery
 content at `/live`, alongside the existing public API checks.
 
 ```sh

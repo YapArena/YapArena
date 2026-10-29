@@ -26,7 +26,7 @@ try {
     const page = await context.newPage();
     pages.push(page);
     const started = performance.now();
-    await page.goto(base);
+    await page.goto(base + "/home");
     await page
       .getByRole("region", { name: "Usage measurement choice" })
       .waitFor();

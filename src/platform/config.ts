@@ -203,6 +203,11 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     throw new Error("HOMEPAGE_REFERENCE_ENABLED must be true or false");
   if (homepageReference === "true" && nodeEnvironment === "production")
     throw new Error("homepage reference data is development/test only");
+  // The licensed landing headline font, kept out of the public repository
+  // (docs/landing-page.md). On Render this is a secret file under /etc/secrets.
+  const landingFontFile = environment.LANDING_FONT_FILE || undefined;
+  if (landingFontFile !== undefined && !landingFontFile.startsWith("/"))
+    throw new Error("LANDING_FONT_FILE must be an absolute path");
   const host = environment.HOST ?? "0.0.0.0";
   const rawPort = environment.PORT ?? "3000";
   const port = parseInteger(rawPort, "PORT", { minimum: 1, maximum: 65535 });
@@ -405,6 +410,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
   return Object.freeze({
     environment: nodeEnvironment,
     homepageReferenceEnabled: homepageReference === "true",
+    landingFontFile,
     coinSandboxEnabled: coinSandbox === "true",
     turnWindowsEnabled: turnWindows === "true",
     coinSandboxWebhookSecret,

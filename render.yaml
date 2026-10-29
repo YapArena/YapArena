@@ -45,6 +45,11 @@ services:
         sync: false
       - key: AUTH0_CLIENT_SECRET
         sync: false
+      # Landing headline font (docs/landing-page.md). The repository is public,
+      # so the font is the secret file landing-headline-font.b64 (its base64
+      # text). Without that file the headline falls back to Forum.
+      - key: LANDING_FONT_FILE
+        value: /etc/secrets/landing-headline-font.b64
 
   # Dedicated background-jobs worker: A4 and coin-debate clocks, media clock and
   # recording stops, speaker revocation and hourly cleanup. Render has no free

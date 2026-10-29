@@ -44,7 +44,7 @@ function pageEvent() {
   const topic = document.querySelector<HTMLElement>("[data-measure-topic]");
   if (debate) return { surface: "debate", id: debate.dataset.mediaEvent };
   if (topic) return { surface: "topic", id: topic.dataset.measureTopic };
-  if (path === "/") return { surface: "home" };
+  if (path === "/home") return { surface: "home" };
   if (path === "/debates") return { surface: "debates" };
   if (path === "/topics") return { surface: "topics" };
   if (path === "/match") return { surface: "match" };

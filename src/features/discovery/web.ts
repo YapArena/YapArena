@@ -99,7 +99,7 @@ export function renderHome(
   return layout(
     "Where ideas move",
     "Follow an idea. Hear both sides. Take a position.",
-    `${origin}/`,
+    `${origin}/home`,
     homepageMarkup(data),
     "",
     `arena-market-home${data.reference ? " reference-home" : ""}`,

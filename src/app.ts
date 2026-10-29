@@ -53,8 +53,13 @@ import {
 import { renderUnavailable } from "./features/discovery/web.ts";
 import { assetRevision } from "./features/discovery/assets.ts";
 import {
+  LANDING_FONT_PATH,
+  serveLandingFont,
+} from "./features/discovery/landing-font.ts";
+import {
   createAuthRouter,
   createRequireAuthentication,
+  createSessionCheck,
   type Auth0SignIn,
 } from "./platform/auth/router.ts";
 import { pingDatabase } from "./platform/database.ts";
@@ -133,6 +138,7 @@ export function createApp({
   logger,
   environment = "development",
   homepageReferenceEnabled = false,
+  landingFont,
   publicBots,
   metrics = createMetrics(),
   metricsToken,
@@ -185,6 +191,8 @@ export function createApp({
   logger: Logger;
   environment?: string;
   homepageReferenceEnabled?: boolean;
+  // The licensed landing headline font, read from LANDING_FONT_FILE at startup.
+  landingFont?: Buffer;
   publicBots?: ReturnType<typeof createPublicBotRepository>;
   metrics?: ReturnType<typeof createMetrics>;
   metricsToken?: string;
@@ -396,6 +404,9 @@ export function createApp({
     // Shared ESM chunks are imported without ?v=; their names carry an esbuild
     // content hash, so a changed chunk always gets a new URL.
     const hashedChunk = /^\/chunks\/[\w-]+-[A-Z2-7]{8}\.js$/;
+    // The licensed font is not in the public repository; when the deployment
+    // supplies it, serve it at the URL the landing page already uses.
+    if (landingFont) app.get(LANDING_FONT_PATH, serveLandingFont(landingFont));
     app.use("/assets", (request, response, next) =>
       (request.query.v === assetRevision && request.path !== "/offline.html") ||
       hashedChunk.test(request.path)
@@ -413,6 +424,7 @@ export function createApp({
         applicationOrigin: applicationOrigin ?? "http://localhost:3000",
         emailFirst: true,
         matchmakingEnabled: Boolean(matchmaking && identity),
+        signedIn: createSessionCheck({ sessions, environment }),
         liveOutline: outlines
           ? { snapshot: (id: string) => outlines.snapshot(id) }
           : undefined,

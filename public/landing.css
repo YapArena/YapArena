@@ -1,0 +1,423 @@
+/* The landing page at / stands alone, so it carries the site's tokens itself. */
+:root {
+  color-scheme: dark;
+  --bg: #000;
+  --line: #4b4b4b;
+  --text: #f4f4f4;
+  --muted: #a9a9a9;
+  --acid: #f8f8f8;
+  --rest-opacity: 0.13;
+  /* 8-point spacing scale: every margin, padding and gap uses one of these. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --container: 80rem;
+  --gutter: clamp(1rem, 4.5vw, 4rem);
+  --ease-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  font-family: Arial, Helvetica, sans-serif;
+  font-synthesis: none;
+}
+/* Dydema Capitals, the headline font. The repository is public, so the file is
+   not committed: deployments supply it outside git (docs/landing-page.md). */
+@font-face {
+  font-family: "Dydema Capitals";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("landing/fonts/headline.woff2") format("woff2");
+}
+/* Forum Regular, the fallback wherever the licensed file is absent. Self-hosted
+   under the SIL Open Font License 1.1 (see landing/fonts/OFL.txt), from
+   @fontsource/forum 5.3.0, Latin subset. */
+@font-face {
+  font-family: "Forum";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("landing/fonts/forum-latin-400-normal.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+}
+body.landing {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+a:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
+}
+.skip-link {
+  position: absolute;
+  z-index: 10;
+  top: -60px;
+  left: 12px;
+  background: var(--acid);
+  color: #111;
+  padding: 10px;
+}
+.skip-link:focus {
+  top: 12px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Header, main and footer share one container, so the logo, the headline,
+   the buttons and the Explore link all start at the same left edge. */
+.landing-container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: max(var(--gutter), env(safe-area-inset-left))
+    max(var(--gutter), env(safe-area-inset-right));
+}
+
+.landing-header {
+  padding-block: max(var(--space-5), env(safe-area-inset-top)) var(--space-5);
+}
+.landing-brand {
+  display: inline-flex;
+  border-radius: 6px;
+}
+.landing-brand img {
+  display: block;
+  width: auto;
+  height: 32px;
+}
+
+/* Two equal halves of a 12-column grid. The extra bottom padding lifts the
+   content slightly above the true center (optical centering). */
+.landing-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--space-6);
+  align-items: center;
+  padding-block: var(--space-6) calc(var(--space-6) + 4vh);
+}
+/* Text takes columns 1-7 so the headline's longest line, "YOVR DISCVSSIONS",
+   keeps its full size on wide screens. The column is a size container: the
+   headline shrinks only where that line would not fit it. */
+.landing-join {
+  grid-column: 1 / span 7;
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+/* Proximity: related items sit closer than separate groups. */
+/* Dydema Capitals' spacing is calibrated in the font itself. These are the
+   settings from its webfont.css: kerning on, no extra letter or word spacing and
+   a 1.3 line height. */
+.landing-headline {
+  margin: 0 0 var(--space-6);
+  font-family: "Dydema Capitals", "Forum", Georgia, "Times New Roman", serif;
+  /* Today's size wherever it fits; otherwise just small enough for the column.
+     10.1em: "YOVR DISCVSSIONS" in Dydema Capitals (9.87em) plus a margin. */
+  font-size: min(clamp(3rem, 5.4vw, 4rem), calc(100cqi / 10.1));
+  font-weight: 400;
+  font-kerning: normal;
+  font-feature-settings: "kern" 1;
+  line-height: 1.3;
+  letter-spacing: 0;
+  word-spacing: 0;
+}
+.landing-join h2 {
+  margin: 0 0 var(--space-5);
+  font-size: clamp(1.5rem, 2.4vw, 1.95rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.landing-actions {
+  display: grid;
+  gap: var(--space-3);
+  width: min(380px, 100%);
+}
+.landing-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.landing-button-primary {
+  background: linear-gradient(180deg, #fcfcfc, #f7f7f7);
+  color: #0c0c0c;
+}
+.landing-button-primary:hover {
+  filter: brightness(0.88);
+}
+.landing-button-secondary {
+  border: 1px solid var(--line);
+  background: #161616;
+  color: #e2e2e2;
+}
+.landing-button-outline {
+  border: 1px solid var(--line);
+  color: var(--acid);
+}
+.landing-button-secondary:hover,
+.landing-button-outline:hover {
+  border-color: #f3f3f3;
+}
+.landing-sign-in {
+  width: min(380px, 100%);
+  margin-top: var(--space-7);
+}
+.landing-sign-in p {
+  margin: 0 0 var(--space-3);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.landing-explore {
+  display: inline-block;
+  margin-top: var(--space-5);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.landing-explore:hover {
+  color: var(--acid);
+}
+
+/* The rotating headline: "Y" then two flip slots, as on dydema.com. Each
+   slot clips its stacked track; a step moves the track up by 1.6em while the
+   slot's width follows the incoming word. */
+.landing-headline .sr-only {
+  font-family: Georgia, serif;
+}
+.headline-line {
+  display: block;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+.flip {
+  position: relative;
+  display: inline-block;
+  vertical-align: baseline;
+  white-space: nowrap;
+  clip-path: inset(-0.3em -0.18em -0.06em);
+  transition: width 0.7s var(--ease-expo);
+}
+.flip-track {
+  position: relative;
+  display: block;
+  transition: transform 0.7s var(--ease-expo);
+}
+/* "pre" keeps each noun's leading space: a real space, so the font's own
+   kerning between the space and the noun's first letter applies. */
+.flip-word {
+  display: block;
+  width: max-content;
+  white-space: pre;
+}
+.flip-word + .flip-word {
+  position: absolute;
+  left: 0;
+}
+.flip-word:nth-child(2) {
+  top: 1.6em;
+}
+.flip-word:nth-child(3) {
+  top: 3.2em;
+}
+.flip-word:nth-child(4) {
+  top: 4.8em;
+}
+.flip-word:nth-child(5) {
+  top: 6.4em;
+}
+.flip-word:nth-child(6) {
+  top: 8em;
+}
+/* The "Y" takes the "Yappers" color on 4→5 and returns to white on 5→1, in
+   step with the flip. */
+.headline-y {
+  transition: color 0.7s var(--ease-expo);
+}
+.flip-instant .flip,
+.flip-instant .flip-track,
+.flip-instant .headline-y {
+  transition: none;
+}
+
+/* Page-load reveal, as on dydema.com: each block wipes up into view. Pure
+   CSS, so the content still ends up visible without JavaScript. */
+@keyframes landing-wipe {
+  from {
+    clip-path: inset(100% -8% -8%);
+  }
+  to {
+    clip-path: inset(-8%);
+  }
+}
+@keyframes landing-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.reveal {
+  animation:
+    landing-wipe 1.05s var(--ease-expo) var(--reveal-delay, 0s) both,
+    landing-fade 0.525s var(--ease-expo) var(--reveal-delay, 0s) both;
+}
+.reveal-2 {
+  --reveal-delay: 0.08s;
+}
+.reveal-3 {
+  --reveal-delay: 0.16s;
+}
+.reveal-4 {
+  --reveal-delay: 0.25s;
+}
+.reveal-5 {
+  --reveal-delay: 0.35s;
+}
+
+/* The living emblem, from the supplied animation. */
+.landing-emblem {
+  grid-column: 8 / span 5;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+.pixel-logo {
+  position: relative;
+  width: min(100%, 560px, 70vh);
+  aspect-ratio: 2048 / 1715;
+  isolation: isolate;
+}
+.pixel-logo img,
+.pixel-logo canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.pixel-logo img {
+  display: block;
+  z-index: 1;
+  opacity: var(--rest-opacity);
+  filter: brightness(0) invert(1);
+}
+.pixel-logo canvas {
+  opacity: 0;
+  pointer-events: none;
+}
+.pixel-logo .aura {
+  z-index: 0;
+  filter: blur(10px);
+}
+.pixel-logo .bloom {
+  z-index: 2;
+  filter: blur(2.5px);
+}
+.pixel-logo .cores {
+  z-index: 3;
+}
+
+.landing-footer {
+  padding-block: var(--space-5) max(var(--space-5), env(safe-area-inset-bottom));
+}
+.landing-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: var(--space-5);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.landing-footer nav > * {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+.landing-footer a:hover {
+  color: var(--acid);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-logo canvas {
+    display: none;
+  }
+  .reveal {
+    animation: none;
+  }
+  .flip,
+  .flip-track,
+  .headline-y {
+    transition: none;
+  }
+}
+
+@media (max-width: 999px) {
+  .landing-header {
+    padding-block: max(var(--space-4), env(safe-area-inset-top)) var(--space-4);
+  }
+  .landing-brand img {
+    height: 28px;
+  }
+  .landing-main {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    row-gap: var(--space-6);
+    padding-block: var(--space-4);
+  }
+  .landing-join,
+  .landing-emblem {
+    grid-column: 1;
+  }
+  .landing-emblem {
+    order: -1;
+  }
+  /* Sized so the whole page fits a 390×844 phone without scrolling. */
+  .pixel-logo {
+    width: min(58vw, 20rem);
+  }
+  .landing-headline {
+    font-size: min(clamp(2.25rem, 10vw, 3.4rem), calc(100cqi / 10.1));
+  }
+}
+@media (max-width: 600px) {
+  .pixel-logo .aura {
+    filter: blur(8px);
+  }
+}
