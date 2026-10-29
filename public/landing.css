@@ -22,15 +22,14 @@
   font-family: Arial, Helvetica, sans-serif;
   font-synthesis: none;
 }
-/* Perpetua Titling MT Std Light, licensed by the founder (Monotype). The
-   repository is public, so the file is not committed: it is provided outside
-   git (docs/landing-page.md). Served exactly as supplied, without conversion. */
+/* Dydema Capitals, the headline font. The repository is public, so the file is
+   not committed: deployments supply it outside git (docs/landing-page.md). */
 @font-face {
-  font-family: "Perpetua Titling";
+  font-family: "Dydema Capitals";
   font-style: normal;
-  font-weight: 300;
+  font-weight: 400;
   font-display: swap;
-  src: url("landing/fonts/perpetua-titling-light.otf") format("opentype");
+  src: url("landing/fonts/headline.woff2") format("woff2");
 }
 /* Forum Regular, the fallback wherever the licensed file is absent. Self-hosted
    under the SIL Open Font License 1.1 (see landing/fonts/OFL.txt), from
@@ -127,10 +126,12 @@ a:focus-visible {
   align-items: center;
   padding-block: var(--space-6) calc(var(--space-6) + 4vh);
 }
-/* Text takes columns 1-7: Perpetua Titling's longest line, "YOVR DISCVSSIONS"
-   (8.74em), would not fit half the grid at the same size. */
+/* Text takes columns 1-7 so the headline's longest line, "YOVR DISCVSSIONS",
+   keeps its full size on wide screens. The column is a size container: the
+   headline shrinks only where that line would not fit it. */
 .landing-join {
   grid-column: 1 / span 7;
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -138,13 +139,21 @@ a:focus-visible {
 }
 
 /* Proximity: related items sit closer than separate groups. */
+/* Dydema Capitals' spacing is calibrated in the font itself. These are the
+   settings from its webfont.css: kerning on, no extra letter or word spacing and
+   a 1.3 line height. */
 .landing-headline {
   margin: 0 0 var(--space-6);
-  font-family: "Perpetua Titling", "Forum", Georgia, "Times New Roman", serif;
-  font-size: clamp(3rem, 5.4vw, 4rem);
-  font-weight: 300;
-  line-height: 1.05;
-  letter-spacing: -0.04em;
+  font-family: "Dydema Capitals", "Forum", Georgia, "Times New Roman", serif;
+  /* Today's size wherever it fits; otherwise just small enough for the column.
+     10.1em: "YOVR DISCVSSIONS" in Dydema Capitals (9.87em) plus a margin. */
+  font-size: min(clamp(3rem, 5.4vw, 4rem), calc(100cqi / 10.1));
+  font-weight: 400;
+  font-kerning: normal;
+  font-feature-settings: "kern" 1;
+  line-height: 1.3;
+  letter-spacing: 0;
+  word-spacing: 0;
 }
 .landing-join h2 {
   margin: 0 0 var(--space-5);
@@ -209,6 +218,9 @@ a:focus-visible {
 /* The rotating headline: "Y" then two flip slots, as on dydema.com. Each
    slot clips its stacked track; a step moves the track up by 1.6em while the
    slot's width follows the incoming word. */
+.landing-headline .sr-only {
+  font-family: Georgia, serif;
+}
 .headline-line {
   display: block;
   white-space: nowrap;
@@ -227,10 +239,12 @@ a:focus-visible {
   display: block;
   transition: transform 0.7s var(--ease-expo);
 }
+/* "pre" keeps each noun's leading space: a real space, so the font's own
+   kerning between the space and the noun's first letter applies. */
 .flip-word {
   display: block;
   width: max-content;
-  white-space: nowrap;
+  white-space: pre;
 }
 .flip-word + .flip-word {
   position: absolute;
@@ -396,16 +410,10 @@ a:focus-visible {
   }
   /* Sized so the whole page fits a 390×844 phone without scrolling. */
   .pixel-logo {
-    width: min(60vw, 20rem);
+    width: min(58vw, 20rem);
   }
-  /* Phones keep the same size wherever "YOVR DISCVSSIONS" fits (about 350px
-     and wider); narrower screens shrink only as much as that line needs.
-     8.95em: its 8.74em width in Perpetua Titling Light plus a margin. */
   .landing-headline {
-    font-size: min(
-      clamp(2.25rem, 10vw, 3.4rem),
-      calc((100vw - 2 * var(--gutter)) / 8.95)
-    );
+    font-size: min(clamp(2.25rem, 10vw, 3.4rem), calc(100cqi / 10.1));
   }
 }
 @media (max-width: 600px) {

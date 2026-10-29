@@ -46,7 +46,7 @@ right.
   account?" 48px, → Sign in 12px, → Explore 24px.
 - Header padding is 24px (16px on phones) around a 32px logo (28px). The footer
   has 24px padding and links at least 24px tall, 24px apart.
-- Below 1000px the page is one column: the emblem (`min(60vw, 20rem)`, sized so
+- Below 1000px the page is one column: the emblem (`min(58vw, 20rem)`, sized so
   the page fits a 390×844 phone without scrolling), a 32px gap, then the text.
   The headline's phone size is `clamp(2.25rem, 10vw, 3.4rem)`, so its longest
   line fits at 320px.
@@ -89,68 +89,79 @@ and discussions matter. Yappers matter."; the animated lines are `aria-hidden`.
 
 ### Headline font
 
-The rotating headline is set in Perpetua Titling MT Std Light (weight 300) in
-capitals, at the same size, line height and letter spacing as before. In the
+The rotating headline is set in Dydema Capitals Regular, in capitals. In the
 Roman inscriptional style every "u" is shown as "v" (YOVR, DISCVSSIONS). Only the
 visible, `aria-hidden` lines change: the screen-reader sentence keeps its normal
-case and spelling.
+case and spelling, and is set in Georgia because the headline font has no
+punctuation.
 
-- **License and file.** Perpetua Titling is a commercial Monotype font, licensed by
-  the founder on 2026-10-29. The repository is public, so the file must never be
-  committed: `public/landing/fonts/perpetua-titling-light.otf` (41,276 bytes) is in
-  `.gitignore` for local use, and deployments supply it as a secret file (below).
-  It is served exactly as supplied, without conversion.
+- **Origin.** Dydema Capitals 1.000 (2026-10-29) was produced with ChatGPT by
+  tracing screenshots of another typeface's capitals. Its spacing was calibrated
+  to the founder's sample lines, and the headline uses the settings from the
+  font's own `webfont.css`: kerning on, no extra letter or word spacing and a 1.3
+  line height. Each noun starts with a real space (kept with `white-space: pre`),
+  so the font's word-gap kerning applies. The rendered lines match the font's own
+  shaping of each phrase to within 0.01px. It covers A–Z, accented
+  capitals, space and no-break space. Lowercase input maps to the capitals; it has
+  no numbers or punctuation.
+- **Not committed.** The letterforms are traced from another typeface, and the
+  repository is public, so the file stays out of git. The local copy is
+  `public/landing/fonts/headline.woff2` (43,628 bytes, in `.gitignore`), and
+  deployments supply it as a secret file (below).
 - **Fallback.** Forum Regular (SIL OFL 1.1, from `@fontsource/forum` 5.3.0, with
   its `OFL.txt`) stays committed and comes second in the font stack. Wherever the
-  licensed file is missing, the headline shows Forum capitals, which fit the same
-  layout.
-- **Loading.** The page preloads the licensed file at the exact, unversioned URL
+  headline font is missing, the headline shows Forum capitals.
+- **Loading.** The page preloads the font at the exact, unversioned URL
   `landing.css` resolves, so it downloads once. `font-display: swap` shows the
   fallback until it loads. Slot widths and the "Y" kerning are measured again
-  once Perpetua Titling has loaded. The kerning is measured in capitals, as
-  displayed ("YO" -4.0px and "YA" -4.8px at 64px).
-- **Fit.** "YOVR DISCVSSIONS", the longest line 1, measures 8.74em, so:
-  - The text takes columns 1–7 of the desktop grid. The emblem is centered in
-    columns 8–12 and never outgrows them (about 460px at 1440px wide, 360px at
-    1000px).
-  - Measured line against column: 559px of 659 at 1440 and 1920px, 559 of 616 at
-    1185px, 472 of 518 at 1000px.
-  - Phones keep the same size wherever the line fits: 376 of 391px at 430, 341 of
-    355 at 390, 315 of 328 at 360. Narrower screens shrink only as much as that
-    line needs (`(100vw - 2 × gutter) / 8.95`): 34.4px at 340px and 32.2px at
-    320px.
+  once Dydema Capitals has loaded. The kerning is measured in capitals, as
+  displayed ("YO" -4.2px and "YA" -5.8px at 64px).
+- **Fit.** "YOVR DISCVSSIONS", the longest line 1, measures 9.87em. The text
+  takes columns 1–7 of the desktop grid; the emblem is centered in columns 8–12
+  and never outgrows them (about 460px at 1440px wide). The text column is a size
+  container. The headline keeps its earlier size wherever that line fits, and
+  otherwise shrinks just enough: `min(<earlier size>, 100cqi / 10.1)`. Measured
+  size, then line against column:
 
-### Deploying the licensed font
+  | Width | Size   | Line  | Column |
+  | ----- | ------ | ----- | ------ |
+  | 1440  | 64px   | 632px | 659px  |
+  | 1185  | 61px   | 602px | 616px  |
+  | 1000  | 51.2px | 506px | 518px  |
+  | 390   | 35.1px | 347px | 355px  |
+  | 320   | 28.5px | 281px | 288px  |
 
-The app serves the font at `/assets/landing/fonts/perpetua-titling-light.otf`
-from the file named by `LANDING_FONT_FILE` (an absolute path), read once at
-startup. Render secret files are plain text, so the file can hold the font's
-base64 text; a raw font file also works. If the file is missing or is not an
-OpenType font, the app logs a warning and keeps running, and the headline shows
-Forum. Without the setting, the app serves the local file in `public/` if present.
+### Deploying the headline font
 
-For each web service that should show Perpetua (not the jobs worker):
+The app serves the font at `/assets/landing/fonts/headline.woff2` from the file
+named by `LANDING_FONT_FILE` (an absolute path), read once at startup. Render
+secret files are plain text, so the file can hold the font's base64 text; a raw
+file also works. WOFF2, WOFF, OpenType and TrueType are recognised, and the
+response type follows the file. If the file is missing or is not a font, the app
+logs a warning and keeps running, and the headline shows Forum. Without the
+setting, the app serves the local file in `public/` if present.
 
-1. On the Mac, encode the licensed file:
+For each web service (not the jobs worker):
+
+1. On the Mac, copy the font's base64 text to the clipboard:
 
    ```sh
-   base64 -i perpetua-titling-light.otf -o perpetua-titling-light.otf.b64
+   base64 -i DydemaCapitals-Regular.woff2 | pbcopy
    ```
 
 2. In the Render Dashboard, open the web service, go to **Environment → Secret
-   Files** and add a file named `perpetua-titling-light.otf.b64` whose contents
-   are the whole text of that `.b64` file (about 55 KB, within Render's 1 MB
-   secret-file limit).
-3. Make sure the service has `LANDING_FONT_FILE=/etc/secrets/perpetua-titling-light.otf.b64`.
+   Files** and add a file named `landing-headline-font.b64`. Paste the clipboard as
+   its contents (about 58 KB, within Render's 1 MB secret-file limit).
+3. Make sure the service has `LANDING_FONT_FILE=/etc/secrets/landing-headline-font.b64`.
    `render.yaml` declares it for the staging web service. Add it by hand on a
    service that does not sync the Blueprint.
 4. Deploy, then check that the font is served:
 
    ```sh
-   curl -sI https://SITE/assets/landing/fonts/perpetua-titling-light.otf
+   curl -sI https://SITE/assets/landing/fonts/headline.woff2
    ```
 
-   Expect `200`, `Content-Type: font/otf` and `Content-Length: 41276`. The start
+   Expect `200`, `Content-Type: font/woff2` and `Content-Length: 43628`. The start
    log shows `landing font loaded`; a `landing font unavailable` warning means
    the secret file or path is wrong.
 

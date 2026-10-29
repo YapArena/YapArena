@@ -94,9 +94,9 @@ credentials or API settings. Verify those in the provider dashboards and keep th
    deployments are off in the **actual service**, including existing services whose settings may
    differ from the file. Set `DATABASE_URL` to the **runtime** Session pooler URL. The Blueprint
    generates `METRICS_TOKEN`; metrics collectors and hosted verifiers send it as a bearer token,
-   and `/metrics` returns 404 without it. For the licensed landing headline font, add the secret
-   file `perpetua-titling-light.otf.b64` that `LANDING_FONT_FILE` points to
-   ([landing page font](landing-page.md#deploying-the-licensed-font)). Remove all
+   and `/metrics` returns 404 without it. For the landing headline font, add the secret file
+   `landing-headline-font.b64` that `LANDING_FONT_FILE` points to
+   ([landing page font](landing-page.md#deploying-the-headline-font)). Remove all
    migration/admin secrets and combined operator files from web/worker environments. Replacing the
    URL does not rotate the old shared owner password; handle old credentials/deployment copies under
    separately authorized credential rotation.
