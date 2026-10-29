@@ -7,6 +7,18 @@
   --muted: #a9a9a9;
   --acid: #f8f8f8;
   --rest-opacity: 0.13;
+  /* 8-point spacing scale: every margin, padding and gap uses one of these. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --container: 80rem;
+  --gutter: clamp(1rem, 4.5vw, 4rem);
+  --ease-expo: cubic-bezier(0.19, 1, 0.22, 1);
   font-family: Arial, Helvetica, sans-serif;
   font-synthesis: none;
 }
@@ -58,8 +70,18 @@ a:focus-visible {
   border: 0;
 }
 
+/* Header, main and footer share one container, so the logo, the headline,
+   the buttons and the Explore link all start at the same left edge. */
+.landing-container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: max(var(--gutter), env(safe-area-inset-left))
+    max(var(--gutter), env(safe-area-inset-right));
+}
+
 .landing-header {
-  padding: 28px 40px 0;
+  padding-block: max(var(--space-5), env(safe-area-inset-top)) var(--space-5);
 }
 .landing-brand {
   display: inline-flex;
@@ -68,39 +90,43 @@ a:focus-visible {
 .landing-brand img {
   display: block;
   width: auto;
-  height: 30px;
+  height: 32px;
 }
 
+/* Two equal halves of a 12-column grid. The extra bottom padding lifts the
+   content slightly above the true center (optical centering). */
 .landing-main {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--space-6);
   align-items: center;
-  gap: 48px;
-  width: min(1280px, 100%);
-  margin: 0 auto;
-  padding: 24px 40px;
+  padding-block: var(--space-6) calc(var(--space-6) + 4vh);
 }
 .landing-join {
-  justify-self: start;
-  width: min(460px, 100%);
-  padding-left: clamp(0px, 4vw, 48px);
+  grid-column: 1 / span 6;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
 }
-.landing-join h1 {
-  margin: 0 0 40px;
+
+/* Proximity: related items sit closer than separate groups. */
+.landing-headline {
+  margin: 0 0 var(--space-6);
   font-size: clamp(3rem, 5.4vw, 4rem);
   line-height: 1.05;
   letter-spacing: -0.04em;
 }
 .landing-join h2 {
-  margin: 0 0 28px;
+  margin: 0 0 var(--space-5);
   font-size: clamp(1.5rem, 2.4vw, 1.95rem);
   line-height: 1.2;
   letter-spacing: -0.02em;
 }
 .landing-actions {
   display: grid;
-  gap: 12px;
+  gap: var(--space-3);
   width: min(380px, 100%);
 }
 .landing-button {
@@ -135,16 +161,16 @@ a:focus-visible {
 }
 .landing-sign-in {
   width: min(380px, 100%);
-  margin-top: 48px;
+  margin-top: var(--space-7);
 }
 .landing-sign-in p {
-  margin: 0 0 14px;
+  margin: 0 0 var(--space-3);
   font-size: 1.05rem;
   font-weight: 700;
 }
 .landing-explore {
   display: inline-block;
-  margin-top: 28px;
+  margin-top: var(--space-5);
   color: var(--muted);
   font-size: 0.9rem;
 }
@@ -152,8 +178,94 @@ a:focus-visible {
   color: var(--acid);
 }
 
+/* The rotating headline: "Y" then two flip slots, as on dydema.com. Each
+   slot clips its stacked track; a step moves the track up by 1.6em while the
+   slot's width follows the incoming word. */
+.headline-line {
+  display: block;
+  white-space: nowrap;
+}
+.flip {
+  position: relative;
+  display: inline-block;
+  vertical-align: baseline;
+  white-space: nowrap;
+  clip-path: inset(-0.3em -0.18em -0.06em);
+  transition: width 0.7s var(--ease-expo);
+}
+.flip-track {
+  position: relative;
+  display: block;
+  transition: transform 0.7s var(--ease-expo);
+}
+.flip-word {
+  display: block;
+  width: max-content;
+  white-space: nowrap;
+}
+.flip-word + .flip-word {
+  position: absolute;
+  left: 0;
+}
+.flip-word:nth-child(2) {
+  top: 1.6em;
+}
+.flip-word:nth-child(3) {
+  top: 3.2em;
+}
+.flip-word:nth-child(4) {
+  top: 4.8em;
+}
+.flip-word:nth-child(5) {
+  top: 6.4em;
+}
+.flip-word:nth-child(6) {
+  top: 8em;
+}
+.flip-instant .flip,
+.flip-instant .flip-track {
+  transition: none;
+}
+
+/* Page-load reveal, as on dydema.com: each block wipes up into view. Pure
+   CSS, so the content still ends up visible without JavaScript. */
+@keyframes landing-wipe {
+  from {
+    clip-path: inset(100% -8% -8%);
+  }
+  to {
+    clip-path: inset(-8%);
+  }
+}
+@keyframes landing-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.reveal {
+  animation:
+    landing-wipe 1.05s var(--ease-expo) var(--reveal-delay, 0s) both,
+    landing-fade 0.525s var(--ease-expo) var(--reveal-delay, 0s) both;
+}
+.reveal-2 {
+  --reveal-delay: 0.08s;
+}
+.reveal-3 {
+  --reveal-delay: 0.16s;
+}
+.reveal-4 {
+  --reveal-delay: 0.25s;
+}
+.reveal-5 {
+  --reveal-delay: 0.35s;
+}
+
 /* The living emblem, from the supplied animation. */
 .landing-emblem {
+  grid-column: 7 / span 6;
   justify-self: center;
 }
 .pixel-logo {
@@ -190,64 +302,66 @@ a:focus-visible {
 .pixel-logo .cores {
   z-index: 3;
 }
-@media (prefers-reduced-motion: reduce) {
-  .pixel-logo canvas {
-    display: none;
-  }
-}
 
 .landing-footer {
-  padding: 16px 40px 24px;
+  padding-block: var(--space-5) max(var(--space-5), env(safe-area-inset-bottom));
 }
 .landing-footer nav {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 6px 18px;
+  column-gap: var(--space-5);
   color: var(--muted);
   font-size: 0.8rem;
+}
+.landing-footer nav > * {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
 }
 .landing-footer a:hover {
   color: var(--acid);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .pixel-logo canvas {
+    display: none;
+  }
+  .reveal {
+    animation: none;
+  }
+  .flip,
+  .flip-track {
+    transition: none;
+  }
+}
+
 @media (max-width: 999px) {
   .landing-header {
-    padding: 20px 16px 0;
+    padding-block: max(var(--space-4), env(safe-area-inset-top)) var(--space-4);
   }
   .landing-brand img {
-    height: 26px;
+    height: 28px;
   }
   .landing-main {
     grid-template-columns: minmax(0, 1fr);
     align-content: start;
-    justify-items: center;
-    gap: 28px;
-    padding: 24px 16px 32px;
+    row-gap: var(--space-6);
+    padding-block: var(--space-4);
+  }
+  .landing-join,
+  .landing-emblem {
+    grid-column: 1;
   }
   .landing-emblem {
     order: -1;
   }
+  /* Sized so the whole page fits a 390×844 phone without scrolling. */
   .pixel-logo {
-    width: min(72vw, 360px);
+    width: min(60vw, 20rem);
   }
-  .landing-join {
-    justify-self: center;
-    width: min(380px, 100%);
-    padding-left: 0;
-  }
-  .landing-join h1 {
-    margin-bottom: 20px;
-    font-size: clamp(2.4rem, 10vw, 3.4rem);
-  }
-  .landing-join h2 {
-    margin-bottom: 20px;
-  }
-  .landing-sign-in {
-    margin-top: 32px;
-  }
-  .landing-footer {
-    padding: 16px;
+  .landing-headline {
+    font-size: clamp(2.25rem, 10vw, 3.4rem);
   }
 }
 @media (max-width: 600px) {

@@ -7,6 +7,20 @@ import { createApp } from "../dist/app.js";
 import { createLogger } from "../dist/platform/logger.js";
 import { createSessionCheck } from "../dist/platform/auth/router.js";
 import { POINTER_SETTINGS, PixelLife, SETTINGS } from "../public/pixel-life.js";
+import {
+  FINAL_STEP,
+  FLIP_EVERY_MS,
+  FLIP_MS,
+  HEADLINE_PHRASES,
+  NOUN_TRACK,
+  PRONOUN_TRACK,
+  REVEAL_END_MS,
+  canAdvance,
+  initialStep,
+  nextMove,
+  phraseAt,
+  restingPositions,
+} from "../public/landing-headline.js";
 
 const discovery = {
   listTopics: async () => ({
@@ -77,6 +91,59 @@ describe("landing page", () => {
     assert.doesNotMatch(
       page.text,
       /data-site-header|homepage\.bundle|measurement\.js|site\.css|account-balance/,
+    );
+  });
+
+  it("renders the rotating headline, the page-load reveal and one shared container", async () => {
+    const { text } = await request(app).get("/");
+    assert.doesNotMatch(text, /Where ideas move/);
+    const headline =
+      /<h1 id="landing-title" class="landing-headline" data-headline>([\s\S]*?)<\/h1>/.exec(
+        text,
+      )[1];
+    // Screen readers get one stable sentence; the animated lines are hidden.
+    assert.match(
+      headline,
+      /^<span class="sr-only">Your opinions, debates, ideas and discussions matter\. Yappers matter\.<\/span>/,
+    );
+    assert.match(
+      headline,
+      /<span class="headline-line reveal" aria-hidden="true">Y<span class="flip" data-flip="pronoun">/,
+    );
+    assert.match(
+      headline,
+      /<span class="headline-line reveal reveal-2" aria-hidden="true">matter<\/span>$/,
+    );
+    // The server's words match the script's tracks, trailing copies included.
+    const words = (slot) =>
+      [
+        ...new RegExp(
+          `data-flip="${slot}"><span class="flip-track">(.*?</span>)</span></span>`,
+        )
+          .exec(headline)[1]
+          .matchAll(/<span class="flip-word">(.*?)<\/span>/g),
+      ].map((match) => match[1].replace("\u00a0", ""));
+    assert.deepEqual(words("pronoun"), [...PRONOUN_TRACK]);
+    assert.deepEqual(words("noun"), [...NOUN_TRACK]);
+    assert.match(headline, /<span class="flip-word">\u00a0opinions<\/span>/);
+    // Reveal order: headline lines, then the heading, buttons and sign-in.
+    for (const pattern of [
+      /<h2 class="reveal reveal-3">Join the arena\.<\/h2>/,
+      /<div class="landing-actions reveal reveal-4">/,
+      /<div class="landing-sign-in reveal reveal-5">/,
+      /<a class="landing-explore reveal reveal-5" href="\/home">/,
+    ])
+      assert.match(text, pattern);
+    for (const pattern of [
+      /<header class="landing-header landing-container">/,
+      /<main id="main" class="landing-main landing-container">/,
+      /<footer class="landing-footer landing-container">/,
+    ])
+      assert.match(text, pattern);
+    assert.match(text, /viewport-fit=cover/);
+    assert.match(
+      text,
+      /Press Space to pause or resume the emblem and the headline\./,
     );
   });
 
@@ -392,5 +459,77 @@ describe("pixel life", () => {
       const value = PixelLife.random(250, 650);
       assert.ok(value >= 250 && value < 650);
     }
+  });
+});
+
+describe("rotating headline", () => {
+  it("shows the five phrases in order", () => {
+    assert.deepEqual(
+      HEADLINE_PHRASES.map((_, step) => phraseAt(step)),
+      [
+        "Your opinions matter",
+        "Your debates matter",
+        "Your ideas matter",
+        "Your discussions matter",
+        "Yappers matter",
+      ],
+    );
+    assert.equal(FINAL_STEP, 4);
+  });
+
+  it("moves only the noun on 1→2, 2→3 and 3→4", () => {
+    for (const from of [0, 1, 2]) {
+      const move = nextMove(from);
+      assert.equal(move.to, from + 1);
+      assert.deepEqual(move.moves, { pronoun: false, noun: true });
+      assert.deepEqual(move.positions, { pronoun: 0, noun: from + 1 });
+      assert.equal(move.wraps, false);
+    }
+  });
+
+  it("moves both slots into Yappers and back, always upward", () => {
+    const into = nextMove(3);
+    assert.equal(into.to, 4);
+    assert.deepEqual(into.moves, { pronoun: true, noun: true });
+    assert.deepEqual(into.positions, { pronoun: 1, noun: 4 });
+    assert.equal(NOUN_TRACK[into.positions.noun], "");
+    // 5→1 lands on the trailing copies, further up both tracks.
+    const back = nextMove(4);
+    assert.equal(back.to, 0);
+    assert.deepEqual(back.moves, { pronoun: true, noun: true });
+    assert.equal(back.wraps, true);
+    assert.deepEqual(back.positions, {
+      pronoun: PRONOUN_TRACK.length - 1,
+      noun: NOUN_TRACK.length - 1,
+    });
+    assert.ok(back.positions.pronoun > restingPositions(4).pronoun);
+    assert.ok(back.positions.noun > restingPositions(4).noun);
+    assert.equal(PRONOUN_TRACK.at(-1), PRONOUN_TRACK[0]);
+    assert.equal(NOUN_TRACK.at(-1), NOUN_TRACK[0]);
+    assert.deepEqual(restingPositions(0), { pronoun: 0, noun: 0 });
+  });
+
+  it("loops indefinitely", () => {
+    let step = 0;
+    const seen = [];
+    for (let i = 0; i < 12; i++) {
+      step = nextMove(step).to;
+      seen.push(step);
+    }
+    assert.deepEqual(seen, [1, 2, 3, 4, 0, 1, 2, 3, 4, 0, 1, 2]);
+  });
+
+  it("holds while hidden or paused and starts at Yappers under reduced motion", () => {
+    assert.equal(canAdvance({ hidden: false, paused: false }), true);
+    assert.equal(canAdvance({ hidden: true, paused: false }), false);
+    assert.equal(canAdvance({ hidden: false, paused: true }), false);
+    assert.equal(initialStep(true), FINAL_STEP);
+    assert.equal(initialStep(false), 0);
+  });
+
+  it("uses dydema.com's flip timings", () => {
+    assert.equal(FLIP_EVERY_MS, 2600);
+    assert.equal(FLIP_MS, 700);
+    assert.equal(REVEAL_END_MS, 80 + 1050);
   });
 });

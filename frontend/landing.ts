@@ -8,6 +8,16 @@ import {
   type PlannedEvent,
   type TileGraph,
 } from "./pixel-life.js";
+import {
+  FLIP_EVERY_MS,
+  FLIP_MS,
+  REVEAL_END_MS,
+  canAdvance,
+  initialStep,
+  nextMove,
+  restingPositions,
+  type SlotPositions,
+} from "./landing-headline.js";
 
 // The session cookie is SameSite=Strict, so a reader arriving from another
 // site reaches / as a guest. This same-origin request carries the cookie.
@@ -30,18 +40,165 @@ interface PointerSample {
   at: number;
 }
 
-// Space must still activate the focused control instead of pausing.
+// Space pauses and resumes both animations (WCAG 2.2.2: the headline loops
+// indefinitely). It must still activate the focused control instead.
 const interactive =
   "a[href], button, input, select, textarea, summary, [contenteditable]";
+const pauseListeners: ((paused: boolean) => void)[] = [];
+let animationsPaused = false;
+function onPause(listener: (paused: boolean) => void) {
+  pauseListeners.push(listener);
+}
+document.addEventListener("keydown", (event) => {
+  if (
+    event.code !== "Space" ||
+    event.repeat ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.altKey
+  )
+    return;
+  if (event.target instanceof Element && event.target.closest(interactive))
+    return;
+  event.preventDefault();
+  animationsPaused = !animationsPaused;
+  const status = document.querySelector<HTMLElement>("[data-pixel-status]");
+  if (status)
+    status.textContent = animationsPaused
+      ? "Animation paused."
+      : "Animation resumed.";
+  for (const listener of pauseListeners) listener(animationsPaused);
+});
+
+// The rotating headline: each step moves a slot's track up by 1.6em while the
+// slot's width follows the incoming word, as on dydema.com.
+function startHeadline() {
+  const headline = document.querySelector<HTMLElement>("[data-headline]");
+  const pronounSlot = document.querySelector<HTMLElement>(
+    '[data-flip="pronoun"]',
+  );
+  const nounSlot = document.querySelector<HTMLElement>('[data-flip="noun"]');
+  if (!headline || !pronounSlot || !nounSlot) return;
+  const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const slot = (element: HTMLElement) => {
+    const track = element.querySelector<HTMLElement>(".flip-track")!;
+    return {
+      element,
+      track,
+      words: [...track.querySelectorAll<HTMLElement>(".flip-word")],
+      widths: [] as number[],
+      position: 0,
+    };
+  };
+  type Slot = ReturnType<typeof slot>;
+  const slots = { pronoun: slot(pronounSlot), noun: slot(nounSlot) };
+  let step = 0,
+    paused = false,
+    timer: number | null = null,
+    wrapTimer: number | null = null;
+
+  function place(target: Slot, position: number) {
+    target.position = position;
+    target.track.style.transform = position
+      ? `translateY(${-1.6 * position}em)`
+      : "";
+    target.element.style.width = `${target.widths[position] ?? 0}px`;
+  }
+  // Apply positions without animating, e.g. after measuring or a loop reset.
+  function settle(positions: SlotPositions) {
+    headline!.classList.add("flip-instant");
+    place(slots.pronoun, positions.pronoun);
+    place(slots.noun, positions.noun);
+    void headline!.offsetWidth;
+    headline!.classList.remove("flip-instant");
+  }
+  // The slot boundary breaks the font's kerning between "Y" and "our" or
+  // "appers", so pull each word in by the pair's kerning, measured in the
+  // headline's own font.
+  function kern() {
+    const context = document.createElement("canvas").getContext("2d");
+    if (!context) return;
+    const style = getComputedStyle(headline!);
+    context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    const width = (text: string) => context.measureText(text).width;
+    for (const word of slots.pronoun.words) {
+      const text = word.textContent ?? "";
+      word.style.marginLeft = `${width(`Y${text}`) - width("Y") - width(text)}px`;
+    }
+  }
+  function measure() {
+    kern();
+    for (const target of [slots.pronoun, slots.noun])
+      target.widths = target.words.map(
+        (word) =>
+          word.getBoundingClientRect().width +
+          parseFloat(getComputedStyle(word).marginLeft),
+      );
+    settle({
+      pronoun: slots.pronoun.position,
+      noun: slots.noun.position,
+    });
+  }
+  function advance() {
+    if (!canAdvance({ hidden: document.hidden, paused })) return;
+    const move = nextMove(step);
+    if (move.moves.pronoun) place(slots.pronoun, move.positions.pronoun);
+    if (move.moves.noun) place(slots.noun, move.positions.noun);
+    step = move.to;
+    headline!.dataset.step = String(step);
+    // Landed on the trailing copies: jump back to the identical first items.
+    if (move.wraps)
+      wrapTimer = window.setTimeout(() => {
+        wrapTimer = null;
+        settle(restingPositions(step));
+      }, FLIP_MS);
+  }
+  function stop() {
+    if (timer !== null) clearTimeout(timer);
+    if (wrapTimer !== null) {
+      clearTimeout(wrapTimer);
+      wrapTimer = null;
+      settle(restingPositions(step));
+    }
+    timer = null;
+  }
+  function start() {
+    stop();
+    if (motion.matches) {
+      step = initialStep(true);
+      headline!.dataset.step = String(step);
+      settle(restingPositions(step));
+      return;
+    }
+    // The first flip comes one interval after the headline's reveal ends.
+    const tick = () => {
+      advance();
+      timer = window.setTimeout(tick, FLIP_EVERY_MS);
+    };
+    timer = window.setTimeout(
+      tick,
+      Math.max(0, REVEAL_END_MS + FLIP_EVERY_MS - performance.now()),
+    );
+  }
+
+  headline.dataset.step = String(step);
+  measure();
+  void document.fonts.ready.then(measure).catch(() => {});
+  window.addEventListener("resize", measure);
+  motion.addEventListener("change", start);
+  onPause((value) => {
+    paused = value;
+  });
+  start();
+}
 
 function startEmblem() {
   const logo = document.querySelector<HTMLImageElement>("#pixel-logo");
   const stage = document.querySelector<HTMLElement>("[data-pixel-logo]");
-  const status = document.querySelector<HTMLElement>("[data-pixel-status]");
   const cores = document.querySelector<HTMLCanvasElement>(".pixel-logo .cores");
   const bloom = document.querySelector<HTMLCanvasElement>(".pixel-logo .bloom");
   const aura = document.querySelector<HTMLCanvasElement>(".pixel-logo .aura");
-  if (!logo || !stage || !status || !cores || !bloom || !aura) return;
+  if (!logo || !stage || !cores || !bloom || !aura) return;
   const coreContext = cores.getContext("2d")!;
   const bloomContext = bloom.getContext("2d")!;
   const auraContext = aura.getContext("2d")!;
@@ -300,20 +457,8 @@ function startEmblem() {
   }
   document.addEventListener("visibilitychange", resume);
   motion.addEventListener("change", resume);
-  document.addEventListener("keydown", (event) => {
-    if (
-      event.code !== "Space" ||
-      event.repeat ||
-      event.metaKey ||
-      event.ctrlKey ||
-      event.altKey
-    )
-      return;
-    if (event.target instanceof Element && event.target.closest(interactive))
-      return;
-    event.preventDefault();
-    paused = !paused;
-    status.textContent = paused ? "Animation paused." : "Animation resumed.";
+  onPause((value) => {
+    paused = value;
     resume();
   });
 
@@ -364,4 +509,5 @@ function startEmblem() {
   void initialize();
 }
 
+startHeadline();
 startEmblem();
