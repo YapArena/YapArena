@@ -145,8 +145,14 @@ describe("licensed landing font", () => {
       path.join(directory, "absent.b64"),
     ]) {
       const fallback = await start(fontFile);
-      assert.notDeepEqual(Buffer.from(fallback.body ?? ""), font);
-      assert.notEqual(String(fallback.body), "not a font");
+      // Without a usable file the URL falls through to public/: a local copy
+      // of the licensed font where one exists, otherwise a 404 page (as in CI).
+      const served = Buffer.isBuffer(fallback.body)
+        ? fallback.body
+        : Buffer.from(fallback.text ?? "");
+      assert.ok([200, 404].includes(fallback.status));
+      assert.notDeepEqual(served, font);
+      assert.equal(served.includes("not a font"), false);
     }
   });
 });
