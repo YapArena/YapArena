@@ -27,8 +27,8 @@ unavailable fallback and the development-only `?reference=1` view.
 
 The landing page stands alone: it loads only `landing.css` and the `landing.js`
 module, not the site header, homepage bundle or account scripts. The static logo
-sits in the header, the sign-up actions on the left and the animated emblem on the
-right.
+sits in the header (hidden on phones), the sign-up actions on the left and the
+animated emblem on the right.
 
 ### Spacing and layout
 
@@ -38,25 +38,54 @@ right.
   `clamp(1rem, 4.5vw, 4rem)`, never inside the phone safe areas). The logo,
   headline, buttons and Explore link start at the same left edge at every width.
 - From 1000px the main area is a 12-column grid with a 32px gap: text in columns
-  1–6, the emblem centered in columns 7–12 (at most 560px wide and 70vh tall). The
+  1–7, the emblem centered in columns 8–12 (at most 560px wide and 70vh tall). The
   bottom padding is 4vh larger than the top, lifting the content slightly above
   center.
 - Gaps in the text column group related items: headline → "Join the arena." 32px,
   → first button 24px, between the sign-up buttons 12px, → "Already have an
-  account?" 48px, → Sign in 12px, → Explore 24px.
-- Header padding is 24px (16px on phones) around a 32px logo (28px). The footer
-  has 24px padding and links at least 24px tall, 24px apart.
-- Below 1000px the page is one column: the emblem (`min(58vw, 20rem)`, sized so
-  the page fits a 390×844 phone without scrolling), a 32px gap, then the text.
-  The headline's phone size is `clamp(2.25rem, 10vw, 3.4rem)`, so its longest
-  line fits at 320px.
+  account?" 48px, → Sign in 12px, → Explore 24px. Phones have no "Join the
+  arena." (headline → first button 32px) and 32px above "Already have an
+  account?".
+- Header padding is 24px (16px below 1000px) around a 32px logo (28px). The
+  footer has 24px padding and links at least 24px tall, 24px apart.
+- Below 1000px the page is one column: the emblem, a 32px gap, then the text.
+  From 601px to 999px the emblem is `min(58vw, 20rem)` wide. The headline's
+  one-column size is `clamp(2.25rem, 10vw, 3.4rem)`, so its longest line fits at
+  320px.
+- Phones (600px and narrower) drop the header and "Join the arena." and set the
+  headline on one line, after x.com's phone sign-up page (the founder's
+  screenshot on a 393×852 iPhone, 2026-10-29). The first screen is the small
+  viewport (`100svh`, the height with the browser's toolbars showing), so Sign in
+  is visible without scrolling and nothing resizes when Safari's toolbar
+  collapses. It ends 16px below the Sign in button.
+- On phones the main area is a flex column. The emblem sits at the top, 64vw
+  tall (300×252 on a 393px phone, keeping its 2048:1715 shape): its visible ring,
+  92.5% × 91% of its box, then covers the same area as x.com's X (250×255
+  there). Where the first screen has no room for that, the emblem shrinks to the
+  room the text leaves, down to 120px. Spare height goes after the content, so
+  the Explore link shows on most phones. The headline is `100cqi / 14.8` (see
+  Headline font); every other size is unchanged. Measured at approximate visible
+  heights with the toolbars showing:
+
+  | Phone             | Viewport | Emblem  | Headline | Sign in bottom | Explore bottom |
+  | ----------------- | -------- | ------- | -------- | -------------- | -------------- |
+  | iPhone 15/16      | 393×650  | 300×252 | 24.2px   | 576px          | 622px          |
+  | iPhone 12–14      | 390×664  | 298×250 | 24.0px   | 574px          | 620px          |
+  | iPhone Pro Max    | 430×740  | 329×275 | 26.4px   | 603px          | 648px          |
+  | Android, 360 wide | 360×670  | 275×230 | 22.1px   | 552px          | 598px          |
+  | iPhone SE         | 375×550  | 252×211 | 23.1px   | 534px          | 580px          |
+
+  Only on the iPhone SE does the emblem shrink, and only there is the Explore
+  link below the fold.
 
 ### Rotating headline
 
 The headline loops through "Your opinions matter", "Your debates matter", "Your
 ideas matter", "Your discussions matter" and "Yappers matter", 2.6s apart. Line 1
 is "Y", a slot for "our"/"appers" and a slot for the noun; line 2 is "matter".
-The block never changes height, so nothing below it moves.
+Phones set both on one line: a real space, the font's own, separates the noun
+slot from "MATTER", which glides as the slot's width animates. The block never
+changes height, so nothing below it moves.
 
 - Steps 1→2, 2→3 and 3→4 move only the noun.
 - 4→5 and 5→1 keep the "Y" in place and change the rest of line 1: "our" and
@@ -120,16 +149,21 @@ punctuation.
   takes columns 1–7 of the desktop grid; the emblem is centered in columns 8–12
   and never outgrows them (about 460px at 1440px wide). The text column is a size
   container. The headline keeps its earlier size wherever that line fits, and
-  otherwise shrinks just enough: `min(<earlier size>, 100cqi / 10.1)`. Measured
-  size, then line against column:
+  otherwise shrinks just enough: `min(<earlier size>, 100cqi / 10.1)`. On phones
+  the headline is one line, and "YOVR DISCVSSIONS MATTER", the longest, measures
+  14.41em, so its size is `100cqi / 14.8`. Measured size, then longest line
+  against column:
 
-  | Width | Size   | Line  | Column |
-  | ----- | ------ | ----- | ------ |
-  | 1440  | 64px   | 632px | 659px  |
-  | 1185  | 61px   | 602px | 616px  |
-  | 1000  | 51.2px | 506px | 518px  |
-  | 390   | 35.1px | 347px | 355px  |
-  | 320   | 28.5px | 281px | 288px  |
+  | Width | Lines | Size   | Line  | Column |
+  | ----- | ----- | ------ | ----- | ------ |
+  | 1440  | 2     | 64px   | 632px | 659px  |
+  | 1185  | 2     | 61px   | 602px | 616px  |
+  | 1000  | 2     | 51.2px | 506px | 518px  |
+  | 768   | 2     | 54.4px | 537px | 699px  |
+  | 601   | 2     | 54.2px | 534px | 547px  |
+  | 600   | 1     | 36.9px | 532px | 546px  |
+  | 393   | 1     | 24.2px | 348px | 358px  |
+  | 320   | 1     | 19.5px | 281px | 288px  |
 
 ### Deploying the headline font
 

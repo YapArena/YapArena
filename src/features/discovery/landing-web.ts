@@ -14,9 +14,11 @@ export const inscribe = (word: string) => word.replace(/u/g, "v");
 const track = (words: string[], space: string) =>
   html`<span class="flip-track">${words.map((word) => html`<span class="flip-word">${word && space + inscribe(word)}</span>`)}</span>`;
 
-// "Y" + "our"/"appers" + noun on line 1, "matter" on line 2. Screen readers
-// get one stable sentence; the animated lines are hidden from them.
-const headline = html`<h1 id="landing-title" class="landing-headline" data-headline><span class="sr-only">Your opinions, debates, ideas and discussions matter. Yappers matter.</span><span class="headline-line reveal" aria-hidden="true"><span class="headline-y">Y</span><span class="flip" data-flip="pronoun">${track(pronouns, "")}</span><span class="flip" data-flip="noun">${track(nouns, " ")}</span></span><span class="headline-line reveal reveal-2" aria-hidden="true">matter</span></h1>`;
+// "Y" + "our"/"appers" + noun on line 1, "matter" on line 2. Phones set both
+// on one line, so a real space separates them: the font's own word space.
+// Screen readers get one stable sentence; the animated lines are hidden from
+// them.
+const headline = html`<h1 id="landing-title" class="landing-headline" data-headline><span class="sr-only">Your opinions, debates, ideas and discussions matter. Yappers matter.</span><span class="headline-line reveal" aria-hidden="true"><span class="headline-y">Y</span><span class="flip" data-flip="pronoun">${track(pronouns, "")}</span><span class="flip" data-flip="noun">${track(nouns, " ")}</span></span> <span class="headline-line reveal reveal-2" aria-hidden="true">matter</span></h1>`;
 
 // The landing page at / for readers without a session (docs/landing-page.md).
 // It stands alone: no site header, homepage bundle or account scripts.
