@@ -415,33 +415,53 @@ a:focus-visible {
     font-size: min(clamp(2.25rem, 10vw, 3.4rem), calc(100cqi / 10.1));
   }
 }
-/* Phones: no header. The first screen ends 16px below the Sign in button and
-   the emblem fills whatever height the text leaves, keeping its shape. The
-   first screen is the small viewport (100svh), so the emblem never resizes
-   when Safari's toolbar collapses during scroll. */
+/* Phones: no header and no "Join the arena.", a one-line headline and an
+   emblem the size of x.com's X. The first screen is the small viewport
+   (100svh), so the emblem never resizes when Safari's toolbar collapses during
+   scroll, and it ends 16px below the Sign in button. */
 @media (max-width: 600px) {
-  .landing-header {
+  .landing-header,
+  .landing-join h2 {
     display: none;
   }
+  /* A flex column rather than grid rows: a capped flexible emblem shrinks to
+     the room the text leaves, and any height beyond its cap goes after the
+     content instead of around the emblem. */
   .landing-main {
     /* The Explore link (its 24px margin and one 0.9rem line) sits just below
        the first screen. */
     --below-fold: calc(var(--space-5) + 0.9rem * 1.5);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
     min-height: calc(100vh + var(--below-fold));
     min-height: calc(100svh + var(--below-fold));
-    grid-template-rows: minmax(7.5rem, 1fr) auto;
     padding-top: max(var(--space-4), env(safe-area-inset-top));
   }
-  /* A size container: its row's height, not the logo, sets its size. */
+  /* 64vw tall, so its visible ring covers the same area as x.com's X (250×255
+     on a 393px phone), or less where the first screen has no room, down to
+     7.5rem. A size container: the room it gets, not the logo, sets its size. */
   .landing-emblem {
+    flex: 1 1 0;
+    min-height: 7.5rem;
+    max-height: 64vw;
     container-type: size;
-    align-self: stretch;
     align-items: center;
   }
   .pixel-logo {
     width: min(100cqw, 100cqh * 2048 / 1715, 560px);
   }
-  /* The phone's group gap, as between the emblem, headline and heading. */
+  /* One line: only the size changes. "YOVR DISCVSSIONS MATTER", the longest,
+     is 14.41em; 14.8 adds the same margin as 10.1 does for two lines. The
+     space before "MATTER" is a real space in the markup, the font's own. */
+  .landing-headline {
+    font-size: calc(100cqi / 14.8);
+    white-space: nowrap;
+  }
+  .headline-line {
+    display: inline-block;
+  }
+  /* The phone's group gap, as between the emblem, headline and buttons. */
   .landing-sign-in {
     margin-top: var(--space-6);
   }

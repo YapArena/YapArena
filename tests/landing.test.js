@@ -113,7 +113,8 @@ describe("landing page", () => {
     );
     assert.match(
       headline,
-      /<span class="headline-line reveal reveal-2" aria-hidden="true">matter<\/span>$/,
+      // A real space before "matter": phones set both lines on one line.
+      /<\/span><\/span> <span class="headline-line reveal reveal-2" aria-hidden="true">matter<\/span>$/,
     );
     // The server's words match the script's tracks, trailing copies included.
     const words = (slot) =>
@@ -302,21 +303,28 @@ describe("landing page", () => {
       css.slice(css.indexOf("@media (max-width: 999px) {"), phoneStart),
       /\.pixel-logo \{\s*width: min\(58vw, 20rem\);/,
     );
-    // Phones: no header, and the first screen (the small viewport) ends 16px
-    // below Sign in, with the emblem filling the height the text leaves.
+    // Phones: no header or "Join the arena.", and the first screen (the small
+    // viewport) ends 16px below Sign in.
     const phoneRule = (selector) =>
       new RegExp(`\\n  ${selector.replace(/\./g, "\\.")} \\{([^}]*)\\}`).exec(
         phone,
       )[1];
-    assert.match(phoneRule(".landing-header"), /display: none;/);
+    assert.match(
+      phone,
+      /\n {2}\.landing-header,\n {2}\.landing-join h2 \{\s*display: none;\s*\}/,
+    );
     const main = phoneRule(".landing-main");
+    // A flex column, so the capped emblem shrinks to the room the text leaves
+    // and spare height goes after the content.
+    assert.match(main, /display: flex;/);
+    assert.match(main, /flex-direction: column;/);
+    assert.match(main, /align-items: stretch;/);
     assert.match(
       main,
       /--below-fold: calc\(var\(--space-5\) \+ 0\.9rem \* 1\.5\);/,
     );
     assert.match(main, /min-height: calc\(100vh \+ var\(--below-fold\)\);/);
     assert.match(main, /min-height: calc\(100svh \+ var\(--below-fold\)\);/);
-    assert.match(main, /grid-template-rows: minmax\(7\.5rem, 1fr\) auto;/);
     assert.match(
       main,
       /padding-top: max\(var\(--space-4\), env\(safe-area-inset-top\)\);/,
@@ -326,8 +334,13 @@ describe("landing page", () => {
     assert.match(explore, /margin-top: var\(--space-5\);/);
     assert.match(explore, /font-size: 0\.9rem;/);
     assert.match(rule("body.landing"), /line-height: 1\.5;/);
-    assert.match(phoneRule(".landing-emblem"), /container-type: size;/);
-    assert.match(phoneRule(".landing-emblem"), /align-self: stretch;/);
+    // The emblem is 64vw tall, the area of x.com's X, or the room left down
+    // to 7.5rem.
+    const emblem = phoneRule(".landing-emblem");
+    assert.match(emblem, /flex: 1 1 0;/);
+    assert.match(emblem, /min-height: 7\.5rem;/);
+    assert.match(emblem, /max-height: 64vw;/);
+    assert.match(emblem, /container-type: size;/);
     assert.match(
       phoneRule(".pixel-logo"),
       /width: min\(100cqw, 100cqh \* 2048 \/ 1715, 560px\);/,
@@ -336,6 +349,11 @@ describe("landing page", () => {
       phoneRule(".landing-sign-in"),
       /margin-top: var\(--space-6\);/,
     );
+    // One headline line: "YOVR DISCVSSIONS MATTER" (14.41em) plus a margin.
+    const phoneHeadline = phoneRule(".landing-headline");
+    assert.match(phoneHeadline, /font-size: calc\(100cqi \/ 14\.8\);/);
+    assert.match(phoneHeadline, /white-space: nowrap;/);
+    assert.match(phoneRule(".headline-line"), /display: inline-block;/);
   });
 
   it("returns sign-in to /home unless the link names another page", async () => {
