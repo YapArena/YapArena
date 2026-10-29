@@ -146,7 +146,7 @@ export async function verifyPublicBotsBrowser({
       "sharing this fixture must not publish the arena creator's other rounds",
     );
     checks.separateCreatorKeepsWorkspaceRoundsPrivate = true;
-    await home.goto(base + "/");
+    await home.goto(base + "/home");
     await watch.goto(base + "/debates/" + debateSlug);
     home.setDefaultTimeout(20000);
     watch.setDefaultTimeout(20000);

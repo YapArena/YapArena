@@ -203,7 +203,7 @@ The [wide homepage](docs/wide-homepage.md) connects published topics, playable
 debates, follows and the existing Yap Coins header to the supplied visual design.
 Unavailable topic-market figures stay explicitly unknown. For local reference
 comparisons only, enable `HOMEPAGE_REFERENCE_ENABLED=true` in the runtime-only
-environment and visit `/?reference=1`; this labeled sample mode is disabled by
+environment and visit `/home?reference=1`; this labeled sample mode is disabled by
 default and forbidden in production.
 
 [Shared bot discovery](docs/shared-bot-discovery.md) additionally supports stored,

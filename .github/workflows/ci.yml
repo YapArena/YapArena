@@ -339,6 +339,8 @@ jobs:
             migrate node scripts/verify-measurement.ts
 
           curl --fail --silent --show-error http://localhost:3000/ \
+            | grep --fixed-strings 'data-pixel-logo'
+          curl --fail --silent --show-error http://localhost:3000/home \
             | grep --fixed-strings 'id="ya-market-v4"'
           curl --fail --silent --show-error http://localhost:3000/live \
             | grep --fixed-strings '/topics/ai-and-human-creativity'

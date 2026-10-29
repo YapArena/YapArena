@@ -1,11 +1,12 @@
 # Wide homepage
 
-`/` renders the native Express homepage modeled on the supplied
+`/home` renders the native Express homepage modeled on the supplied
 `yaparena-wide-homepage.html` product rooted at `#ya-market-v4`. Its scoped styles
 retain the original typography, colors, full-width grids and responsive rules.
 The export shell, iframe, host bridge and visualization runtime are not shipped.
 `/live` retains its existing video discovery page; topic, debate, account and media
-routes retain their existing contracts.
+routes retain their existing contracts. The homepage moved from `/` to `/home`
+when the [landing page](landing-page.md) took over `/`.
 
 ## Data and actions
 
@@ -48,7 +49,7 @@ The existing measurement consent controls and security policy remain in effect.
 ## Explicit reference dataset
 
 For local visual acceptance, set `HOMEPAGE_REFERENCE_ENABLED=true` in the separate
-runtime-only environment and open `/?reference=1`. This is a deterministic copy
+runtime-only environment and open `/home?reference=1`. This is a deterministic copy
 of the reference's six ideas, series, arguments and debate previews, clearly
 marked Concept / Sample data. It does not write records, follows or orders;
 position review is a local preview with no coins spent. It does not emit product
@@ -57,7 +58,7 @@ measurement events. Reference/demo follows stay separate from authenticated ones
 The flag defaults to false, rejects invalid values and is forbidden in production.
 The route additionally checks the environment. Disabled reference requests return
 404; a failed real request never enables it. No configuration change is required
-for the actual `/` homepage.
+for the actual `/home` homepage.
 
 ## Interaction and resource contract
 
