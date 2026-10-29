@@ -97,6 +97,7 @@ describe("configuration", () => {
     assert.deepEqual(loadConfig({ DATABASE_URL: databaseUrl }), {
       environment: "development",
       homepageReferenceEnabled: false,
+      landingFontFile: undefined,
       coinSandboxEnabled: false,
       turnWindowsEnabled: false,
       coinSandboxWebhookSecret: undefined,
@@ -144,10 +145,12 @@ describe("configuration", () => {
         RATE_LIMIT_WINDOW_MS: "60000",
         SESSION_DURATION_MS: "3600000",
         METRICS_TOKEN: "scraper-token-0123456789abcdefghijkl",
+        LANDING_FONT_FILE: "/etc/secrets/perpetua-titling-light.otf.b64",
       }),
       {
         environment: "production",
         homepageReferenceEnabled: false,
+        landingFontFile: "/etc/secrets/perpetua-titling-light.otf.b64",
         coinSandboxEnabled: false,
         turnWindowsEnabled: false,
         coinSandboxWebhookSecret: undefined,

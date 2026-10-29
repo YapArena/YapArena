@@ -96,11 +96,10 @@ visible, `aria-hidden` lines change: the screen-reader sentence keeps its normal
 case and spelling.
 
 - **License and file.** Perpetua Titling is a commercial Monotype font, licensed by
-  the founder on 2026-10-29. The repository is public, so the file
-  (`public/landing/fonts/perpetua-titling-light.otf`, 41,276 bytes) is listed in
-  `.gitignore` and must never be committed. It is served exactly as supplied,
-  without conversion. Staging and production need it delivered outside git;
-  until then they show the fallback.
+  the founder on 2026-10-29. The repository is public, so the file must never be
+  committed: `public/landing/fonts/perpetua-titling-light.otf` (41,276 bytes) is in
+  `.gitignore` for local use, and deployments supply it as a secret file (below).
+  It is served exactly as supplied, without conversion.
 - **Fallback.** Forum Regular (SIL OFL 1.1, from `@fontsource/forum` 5.3.0, with
   its `OFL.txt`) stays committed and comes second in the font stack. Wherever the
   licensed file is missing, the headline shows Forum capitals, which fit the same
@@ -120,6 +119,40 @@ case and spelling.
     355 at 390, 315 of 328 at 360. Narrower screens shrink only as much as that
     line needs (`(100vw - 2 × gutter) / 8.95`): 34.4px at 340px and 32.2px at
     320px.
+
+### Deploying the licensed font
+
+The app serves the font at `/assets/landing/fonts/perpetua-titling-light.otf`
+from the file named by `LANDING_FONT_FILE` (an absolute path), read once at
+startup. Render secret files are plain text, so the file can hold the font's
+base64 text; a raw font file also works. If the file is missing or is not an
+OpenType font, the app logs a warning and keeps running, and the headline shows
+Forum. Without the setting, the app serves the local file in `public/` if present.
+
+For each web service that should show Perpetua (not the jobs worker):
+
+1. On the Mac, encode the licensed file:
+
+   ```sh
+   base64 -i perpetua-titling-light.otf -o perpetua-titling-light.otf.b64
+   ```
+
+2. In the Render Dashboard, open the web service, go to **Environment → Secret
+   Files** and add a file named `perpetua-titling-light.otf.b64` whose contents
+   are the whole text of that `.b64` file (about 55 KB, within Render's 1 MB
+   secret-file limit).
+3. Make sure the service has `LANDING_FONT_FILE=/etc/secrets/perpetua-titling-light.otf.b64`.
+   `render.yaml` declares it for the staging web service. Add it by hand on a
+   service that does not sync the Blueprint.
+4. Deploy, then check that the font is served:
+
+   ```sh
+   curl -sI https://SITE/assets/landing/fonts/perpetua-titling-light.otf
+   ```
+
+   Expect `200`, `Content-Type: font/otf` and `Content-Length: 41276`. The start
+   log shows `landing font loaded`; a `landing font unavailable` warning means
+   the secret file or path is wrong.
 
 ### Word colors
 

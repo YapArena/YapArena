@@ -17,6 +17,7 @@ import {
 import { loadConfig } from "./platform/config.ts";
 import { createDatabase } from "./platform/database.ts";
 import { createLogger } from "./platform/logger.ts";
+import { readLandingFont } from "./features/discovery/landing-font.ts";
 import { createRuntime } from "./platform/runtime.ts";
 import { createMetrics } from "./platform/metrics.ts";
 import { createCommunityStreams } from "./features/community/streams.ts";
@@ -111,7 +112,21 @@ export function createWebServer(
       })
     : undefined;
   const sharedLimits = abuseConfig && abuseStore;
+  // The licensed landing font comes from outside the public repository. If it
+  // is missing or invalid the site still runs and the headline uses Forum.
+  let landingFont: Buffer | undefined;
+  if (config.landingFontFile)
+    try {
+      landingFont = readLandingFont(config.landingFontFile);
+      logger.info({ bytes: landingFont.length }, "landing font loaded");
+    } catch (error) {
+      logger.warn(
+        { error },
+        "landing font unavailable; the headline falls back to Forum",
+      );
+    }
   const app = createApp({
+    landingFont,
     coinWebhook: config.coinSandboxWebhookSecret
       ? createSandboxWebhookRouter({
           database,
