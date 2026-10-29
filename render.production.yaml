@@ -1,0 +1,90 @@
+# Production at https://yaparena.com. Follow docs/production-rollout.md.
+#
+# This is a separate Blueprint from render.yaml (staging). Render syncs a
+# Blueprint only from the file it was created from, so syncing staging can
+# never change these services, and syncing production never changes staging.
+# The two environments share no service, secret or provider project.
+#
+# Both services run the CI-published web image that staging already ran,
+# pinned by digest, never a source build: the Dockerfile upgrades OS packages
+# at build time, so a rebuild of the same commit is a different image. The
+# image line below is the launch release. Later releases change each service's
+# Image URL in the dashboard ("Releasing from now on" in the runbook), so keep
+# this Blueprint's Auto Sync off: a manual sync would also apply this line.
+services:
+  - type: web
+    name: yaparena-web
+    runtime: image
+    image:
+      url: ghcr.io/yaparena/yaparena@sha256:04676a125a9619f95afc73edd5cae72c0fa0ff246389fa1ad6aa1fef2c5ccd11
+    region: ohio
+    plan: starter
+    # One instance: rate limits and abuse controls are per process.
+    numInstances: 1
+    # The script only checks media storage, then starts dist/server.js.
+    # Migrations run in a separate operator process before each deploy.
+    dockerCommand: /bin/sh /app/scripts/start-staging.sh
+    healthCheckPath: /ready
+    # The one canonical address. Render adds www.yaparena.com and redirects it
+    # here with the path and query kept. Never list www.yaparena.com: Render
+    # would then add yaparena.com and redirect it to www instead.
+    domains:
+      - yaparena.com
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # The only service search engines may index. It also refuses an
+      # *.auth0.com issuer (Decision 0009, point 11). Web service only.
+      - key: PRODUCTION_SERVICE
+        value: "true"
+      - key: NODE_OPTIONS
+        value: --max-semi-space-size=4
+      - key: PORT
+        value: "10000"
+      - key: TRUST_PROXY
+        value: "1"
+      # yaparena-jobs below runs every background job.
+      - key: RUN_BACKGROUND_JOBS
+        value: "false"
+      - key: COMMUNITY_STREAM_ENABLED
+        value: "false"
+      # Fixed, never fromService: the onrender.com address is not production's.
+      - key: APP_ORIGIN
+        value: https://yaparena.com
+      # Runtime identity only (yaparena_runtime), never the owner.
+      - key: DATABASE_URL
+        sync: false
+      # Bearer token for GET /metrics; generated here, separate from staging's.
+      - key: METRICS_TOKEN
+        generateValue: true
+      # Auth0 production tenant on its custom domain. Web service only.
+      - key: AUTH0_ISSUER_BASE_URL
+        value: https://auth.yaparena.com
+      - key: AUTH0_CLIENT_ID
+        sync: false
+      - key: AUTH0_CLIENT_SECRET
+        sync: false
+      # Secret file landing-headline-font.b64 (docs/landing-page.md).
+      - key: LANDING_FONT_FILE
+        value: /etc/secrets/landing-headline-font.b64
+
+  # Background jobs: clocks, recording stops, speaker revocation, matchmaking
+  # and cleanup. Serves no HTTP. Never give it AUTH0_* or PRODUCTION_SERVICE.
+  - type: worker
+    name: yaparena-jobs
+    runtime: image
+    image:
+      url: ghcr.io/yaparena/yaparena@sha256:04676a125a9619f95afc73edd5cae72c0fa0ff246389fa1ad6aa1fef2c5ccd11
+    region: ohio
+    plan: starter
+    numInstances: 1
+    dockerCommand: node dist/worker.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_OPTIONS
+        value: --max-semi-space-size=4
+      - key: APP_ORIGIN
+        value: https://yaparena.com
+      - key: DATABASE_URL
+        sync: false
