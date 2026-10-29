@@ -55,6 +55,7 @@ import { assetRevision } from "./features/discovery/assets.ts";
 import {
   createAuthRouter,
   createRequireAuthentication,
+  createSessionCheck,
   type Auth0SignIn,
 } from "./platform/auth/router.ts";
 import { pingDatabase } from "./platform/database.ts";
@@ -413,6 +414,7 @@ export function createApp({
         applicationOrigin: applicationOrigin ?? "http://localhost:3000",
         emailFirst: true,
         matchmakingEnabled: Boolean(matchmaking && identity),
+        signedIn: createSessionCheck({ sessions, environment }),
         liveOutline: outlines
           ? { snapshot: (id: string) => outlines.snapshot(id) }
           : undefined,

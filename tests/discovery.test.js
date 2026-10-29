@@ -150,7 +150,7 @@ describe("public discovery", () => {
   });
 
   it("serves the public journey and stable canonical links without login", async () => {
-    const home = await request(app).get("/");
+    const home = await request(app).get("/home");
     assert.equal(home.status, 200);
     assert.match(home.text, /id="ya-market-v4"/);
     assert.doesNotMatch(
@@ -191,7 +191,7 @@ describe("public discovery", () => {
         applicationOrigin: "https://arena.example",
       }),
     );
-    const home = await request(shell).get("/");
+    const home = await request(shell).get("/home");
     assert.equal(home.status, 503);
     assert.match(home.text, /id="ya-market-v4"/);
     assert.match(home.text, /Discovery temporarily unavailable/);
@@ -400,7 +400,7 @@ describe("public discovery", () => {
       (await request(app).get("/people/alex-public")).text,
       /data-follow-type="people"/,
     );
-    assert.match((await request(app).get("/")).text, /href="\/account"/);
+    assert.match((await request(app).get("/home")).text, /href="\/account"/);
     const matching = await request(app).get("/match");
     assert.equal(matching.status, 200);
     assert.match(matching.text, /DEBATE MATCHING/);

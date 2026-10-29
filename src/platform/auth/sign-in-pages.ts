@@ -22,7 +22,7 @@ const style = html`<style>
   @media (prefers-reduced-motion:reduce){.spinner{animation:none}}
 </style>`;
 
-const brand = html`<a class="brand" href="/" aria-label="YAP Arena home"><svg viewBox="0 0 40 40" aria-hidden="true"><ellipse cx="20" cy="20" rx="13" ry="16" transform="rotate(30 20 20)"/><path d="M9 35 31 5"/></svg><span>YAP ARENA</span></a>`;
+const brand = html`<a class="brand" href="/home" aria-label="YAP Arena home"><svg viewBox="0 0 40 40" aria-hidden="true"><ellipse cx="20" cy="20" rx="13" ry="16" transform="rotate(30 20 20)"/><path d="M9 35 31 5"/></svg><span>YAP ARENA</span></a>`;
 
 function page(title: string, body: SafeHtml, refresh?: string) {
   return html`<!doctype html>
