@@ -8,3 +8,7 @@ dist-transcriber/
 public/**/*.js
 .DS_Store
 npm-debug.log*
+
+# Licensed Monotype font for the landing headline. The repository is public,
+# so the file is provided outside git (see docs/landing-page.md).
+public/landing/fonts/perpetua-titling-light.otf

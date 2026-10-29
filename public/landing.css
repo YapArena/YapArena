@@ -22,8 +22,19 @@
   font-family: Arial, Helvetica, sans-serif;
   font-synthesis: none;
 }
-/* Forum Regular, self-hosted under the SIL Open Font License 1.1 (see
-   landing/fonts/OFL.txt). From @fontsource/forum 5.3.0, Latin subset. */
+/* Perpetua Titling MT Std Light, licensed by the founder (Monotype). The
+   repository is public, so the file is not committed: it is provided outside
+   git (docs/landing-page.md). Served exactly as supplied, without conversion. */
+@font-face {
+  font-family: "Perpetua Titling";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("landing/fonts/perpetua-titling-light.otf") format("opentype");
+}
+/* Forum Regular, the fallback wherever the licensed file is absent. Self-hosted
+   under the SIL Open Font License 1.1 (see landing/fonts/OFL.txt), from
+   @fontsource/forum 5.3.0, Latin subset. */
 @font-face {
   font-family: "Forum";
   font-style: normal;
@@ -116,8 +127,10 @@ a:focus-visible {
   align-items: center;
   padding-block: var(--space-6) calc(var(--space-6) + 4vh);
 }
+/* Text takes columns 1-7: Perpetua Titling's longest line, "YOVR DISCVSSIONS"
+   (8.74em), would not fit half the grid at the same size. */
 .landing-join {
-  grid-column: 1 / span 6;
+  grid-column: 1 / span 7;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -127,9 +140,9 @@ a:focus-visible {
 /* Proximity: related items sit closer than separate groups. */
 .landing-headline {
   margin: 0 0 var(--space-6);
-  font-family: "Forum", Georgia, "Times New Roman", serif;
+  font-family: "Perpetua Titling", "Forum", Georgia, "Times New Roman", serif;
   font-size: clamp(3rem, 5.4vw, 4rem);
-  font-weight: 400;
+  font-weight: 300;
   line-height: 1.05;
   letter-spacing: -0.04em;
 }
@@ -287,12 +300,14 @@ a:focus-visible {
 
 /* The living emblem, from the supplied animation. */
 .landing-emblem {
-  grid-column: 7 / span 6;
-  justify-self: center;
+  grid-column: 8 / span 5;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
 }
 .pixel-logo {
   position: relative;
-  width: min(42vw, 560px, 70vh);
+  width: min(100%, 560px, 70vh);
   aspect-ratio: 2048 / 1715;
   isolation: isolate;
 }
@@ -383,8 +398,14 @@ a:focus-visible {
   .pixel-logo {
     width: min(60vw, 20rem);
   }
+  /* Phones keep the same size wherever "YOVR DISCVSSIONS" fits (about 350px
+     and wider); narrower screens shrink only as much as that line needs.
+     8.95em: its 8.74em width in Perpetua Titling Light plus a margin. */
   .landing-headline {
-    font-size: clamp(2.25rem, 10vw, 3.4rem);
+    font-size: min(
+      clamp(2.25rem, 10vw, 3.4rem),
+      calc((100vw - 2 * var(--gutter)) / 8.95)
+    );
   }
 }
 @media (max-width: 600px) {

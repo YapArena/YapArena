@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 import request from "../scripts/test-http-request.ts";
 
@@ -123,9 +124,18 @@ describe("landing page", () => {
           .exec(headline)[1]
           .matchAll(/<span class="flip-word">(.*?)<\/span>/g),
       ].map((match) => match[1].replace("\u00a0", ""));
-    assert.deepEqual(words("pronoun"), [...PRONOUN_TRACK]);
-    assert.deepEqual(words("noun"), [...NOUN_TRACK]);
+    // Shown in the Roman inscriptional style: every "u" is a "v".
+    const inscribed = (track) => track.map((word) => word.replace(/u/g, "v"));
+    assert.deepEqual(words("pronoun"), inscribed(PRONOUN_TRACK));
+    assert.deepEqual(words("noun"), inscribed(NOUN_TRACK));
+    assert.deepEqual(words("pronoun"), ["ovr", "appers", "ovr"]);
+    assert.ok(words("noun").includes("discvssions"));
     assert.match(headline, /<span class="flip-word">\u00a0opinions<\/span>/);
+    // Screen readers keep the real spelling.
+    assert.match(
+      headline,
+      /Your opinions, debates, ideas and discussions matter\./,
+    );
     // Reveal order: headline lines, then the heading, buttons and sign-in.
     for (const pattern of [
       /<h2 class="reveal reveal-3">Join the arena\.<\/h2>/,
@@ -201,35 +211,47 @@ describe("landing page", () => {
     }
   });
 
-  it("self-hosts Forum Regular for the headline, set in capitals", async () => {
-    const font = "/assets/landing/fonts/forum-latin-400-normal.woff2";
+  it("sets the headline in Perpetua Titling Light capitals, falling back to Forum", async () => {
     const page = await request(app).get("/");
-    // Preloaded at the exact URL landing.css resolves, so it downloads once.
+    // The licensed font is preloaded at the exact URL landing.css resolves.
     assert.match(
       page.text,
-      /<link rel="preload" href="\/assets\/landing\/fonts\/forum-latin-400-normal\.woff2" as="font" type="font\/woff2" crossorigin>/,
+      /<link rel="preload" href="\/assets\/landing\/fonts\/perpetua-titling-light\.otf" as="font" type="font\/otf" crossorigin>/,
     );
     assert.doesNotMatch(page.text, /fonts\.googleapis|fonts\.gstatic/);
-    assert.doesNotMatch((await request(app).get("/home")).text, /forum-latin/);
-    const file = await request(app).get(font);
-    assert.equal(file.status, 200);
-    assert.equal(file.headers["content-type"], "font/woff2");
-    assert.equal(Number(file.headers["content-length"]), 23820);
+    assert.doesNotMatch((await request(app).get("/home")).text, /perpetua/i);
+    // The repository is public, so the licensed Monotype file stays out of git.
+    const ignored = await readFile(
+      new URL("../.gitignore", import.meta.url),
+      "utf8",
+    );
+    assert.match(
+      ignored,
+      /^public\/landing\/fonts\/perpetua-titling-light\.otf$/m,
+    );
+    // Forum (SIL OFL) stays committed as the fallback wherever that file is absent.
+    const forum = await request(app).get(
+      "/assets/landing/fonts/forum-latin-400-normal.woff2",
+    );
+    assert.equal(forum.status, 200);
+    assert.equal(forum.headers["content-type"], "font/woff2");
     const license = await request(app).get("/assets/landing/fonts/OFL.txt");
-    assert.equal(license.status, 200);
-    assert.match(license.text, /Denis Masharov/);
     assert.match(license.text, /SIL Open Font License, Version 1\.1/);
     const css = (await request(app).get("/assets/landing.css")).text;
+    assert.match(
+      css,
+      /@font-face \{\s*font-family: "Perpetua Titling";\s*font-style: normal;\s*font-weight: 300;\s*font-display: swap;\s*src: url\("landing\/fonts\/perpetua-titling-light\.otf"\) format\("opentype"\);/,
+    );
     assert.match(
       css,
       /@font-face \{\s*font-family: "Forum";\s*font-style: normal;\s*font-weight: 400;\s*font-display: swap;\s*src: url\("landing\/fonts\/forum-latin-400-normal\.woff2"\) format\("woff2"\);/,
     );
     assert.equal(
       new URL(
-        "landing/fonts/forum-latin-400-normal.woff2",
+        "landing/fonts/perpetua-titling-light.otf",
         "https://a/assets/landing.css?v=1",
       ).pathname,
-      font,
+      "/assets/landing/fonts/perpetua-titling-light.otf",
     );
     const rule = (selector) =>
       new RegExp(`\\n${selector.replace(".", "\\.")} \\{([^}]*)\\}`).exec(
@@ -238,16 +260,22 @@ describe("landing page", () => {
     const headline = rule(".landing-headline");
     assert.match(
       headline,
-      /font-family: "Forum", Georgia, "Times New Roman", serif;/,
+      /font-family:\s*"Perpetua Titling", "Forum", Georgia, "Times New Roman", serif;/,
     );
     assert.match(headline, /font-size: clamp\(3rem, 5\.4vw, 4rem\);/);
-    assert.match(headline, /font-weight: 400;/);
+    assert.match(headline, /font-weight: 300;/);
     assert.match(headline, /line-height: 1\.05;/);
     assert.match(headline, /letter-spacing: -0\.04em;/);
     assert.match(rule(".headline-line"), /text-transform: uppercase;/);
-    // The layout is unchanged: Forum in capitals fits the half-width column.
-    assert.match(rule(".landing-join"), /grid-column: 1 \/ span 6;/);
-    assert.match(rule(".landing-emblem"), /grid-column: 7 \/ span 6;/);
+    // "YOVR DISCVSSIONS" needs columns 1-7 at the same size; the emblem keeps
+    // to columns 8-12, and narrow phones shrink only as much as that line needs.
+    assert.match(rule(".landing-join"), /grid-column: 1 \/ span 7;/);
+    assert.match(rule(".landing-emblem"), /grid-column: 8 \/ span 5;/);
+    assert.match(rule(".pixel-logo"), /width: min\(100%, 560px, 70vh\);/);
+    assert.match(
+      css,
+      /font-size: min\(\s*clamp\(2\.25rem, 10vw, 3\.4rem\),\s*calc\(\(100vw - 2 \* var\(--gutter\)\) \/ 8\.95\)\s*\);/,
+    );
   });
 
   it("returns sign-in to /home unless the link names another page", async () => {

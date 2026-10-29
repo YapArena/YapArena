@@ -213,9 +213,9 @@ function startHeadline() {
   measure();
   void document.fonts.ready.then(measure).catch(() => {});
   // Slot widths and kerning depend on the headline font, so measure again
-  // once Forum itself has loaded (it can arrive after fonts.ready).
+  // once Perpetua Titling has loaded (it can arrive after fonts.ready).
   void document.fonts
-    .load("400 1em Forum")
+    .load('300 1em "Perpetua Titling"')
     .then(measure)
     .catch(() => {});
   window.addEventListener("resize", measure);

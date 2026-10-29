@@ -89,24 +89,37 @@ and discussions matter. Yappers matter."; the animated lines are `aria-hidden`.
 
 ### Headline font
 
-The rotating headline is set in Forum Regular (weight 400) in capitals, at the
-same size, line height and letter spacing as before. Only the animated lines are
-uppercased; the screen-reader sentence keeps its normal case.
+The rotating headline is set in Perpetua Titling MT Std Light (weight 300) in
+capitals, at the same size, line height and letter spacing as before. In the
+Roman inscriptional style every "u" is shown as "v" (YOVR, DISCVSSIONS). Only the
+visible, `aria-hidden` lines change: the screen-reader sentence keeps its normal
+case and spelling.
 
-- Forum is by Denis Masharov, under the SIL Open Font License 1.1. The Latin
-  subset `public/landing/fonts/forum-latin-400-normal.woff2` (23,820 bytes) and
-  its license `OFL.txt` come from the `@fontsource/forum` 5.3.0 package.
-- It is self-hosted rather than loaded from Google Fonts, so the landing page
-  makes no third-party request and the existing `font-src 'self'` policy covers it.
-- The page preloads the file at the exact, unversioned URL `landing.css` resolves,
-  so it downloads once. `font-display: swap` shows a fallback serif until it loads.
-- Slot widths and the "Y" kerning are measured again once Forum has loaded. The
-  kerning is measured in capitals, as displayed ("YO" -5.8px and "YA" -7.5px at
-  64px).
-- "YOUR DISCUSSIONS", the longest line 1, measures 7.53em. It fits the existing
-  half-width column at every width: 482px of 560 at 1440px, 406 of 439 at
-  1000px, 294 of 355 at 390px and 271 of 288 at 320px. The layout is therefore
-  unchanged.
+- **License and file.** Perpetua Titling is a commercial Monotype font, licensed by
+  the founder on 2026-10-29. The repository is public, so the file
+  (`public/landing/fonts/perpetua-titling-light.otf`, 41,276 bytes) is listed in
+  `.gitignore` and must never be committed. It is served exactly as supplied,
+  without conversion. Staging and production need it delivered outside git;
+  until then they show the fallback.
+- **Fallback.** Forum Regular (SIL OFL 1.1, from `@fontsource/forum` 5.3.0, with
+  its `OFL.txt`) stays committed and comes second in the font stack. Wherever the
+  licensed file is missing, the headline shows Forum capitals, which fit the same
+  layout.
+- **Loading.** The page preloads the licensed file at the exact, unversioned URL
+  `landing.css` resolves, so it downloads once. `font-display: swap` shows the
+  fallback until it loads. Slot widths and the "Y" kerning are measured again
+  once Perpetua Titling has loaded. The kerning is measured in capitals, as
+  displayed ("YO" -4.0px and "YA" -4.8px at 64px).
+- **Fit.** "YOVR DISCVSSIONS", the longest line 1, measures 8.74em, so:
+  - The text takes columns 1–7 of the desktop grid. The emblem is centered in
+    columns 8–12 and never outgrows them (about 460px at 1440px wide, 360px at
+    1000px).
+  - Measured line against column: 559px of 659 at 1440 and 1920px, 559 of 616 at
+    1185px, 472 of 518 at 1000px.
+  - Phones keep the same size wherever the line fits: 376 of 391px at 430, 341 of
+    355 at 390, 315 of 328 at 360. Narrower screens shrink only as much as that
+    line needs (`(100vw - 2 × gutter) / 8.95`): 34.4px at 340px and 32.2px at
+    320px.
 
 ### Word colors
 
