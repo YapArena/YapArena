@@ -222,8 +222,14 @@ a:focus-visible {
 .flip-word:nth-child(6) {
   top: 8em;
 }
+/* The "Y" takes the "Yappers" color on 4→5 and returns to white on 5→1, in
+   step with the flip. */
+.headline-y {
+  transition: color 0.7s var(--ease-expo);
+}
 .flip-instant .flip,
-.flip-instant .flip-track {
+.flip-instant .flip-track,
+.flip-instant .headline-y {
   transition: none;
 }
 
@@ -331,7 +337,8 @@ a:focus-visible {
     animation: none;
   }
   .flip,
-  .flip-track {
+  .flip-track,
+  .headline-y {
     transition: none;
   }
 }

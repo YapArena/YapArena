@@ -11,7 +11,7 @@ const track = (words: string[], space: string) =>
 
 // "Y" + "our"/"appers" + noun on line 1, "matter" on line 2. Screen readers
 // get one stable sentence; the animated lines are hidden from them.
-const headline = html`<h1 id="landing-title" class="landing-headline" data-headline><span class="sr-only">Your opinions, debates, ideas and discussions matter. Yappers matter.</span><span class="headline-line reveal" aria-hidden="true">Y<span class="flip" data-flip="pronoun">${track(pronouns, "")}</span><span class="flip" data-flip="noun">${track(nouns, "\u00a0")}</span></span><span class="headline-line reveal reveal-2" aria-hidden="true">matter</span></h1>`;
+const headline = html`<h1 id="landing-title" class="landing-headline" data-headline><span class="sr-only">Your opinions, debates, ideas and discussions matter. Yappers matter.</span><span class="headline-line reveal" aria-hidden="true"><span class="headline-y">Y</span><span class="flip" data-flip="pronoun">${track(pronouns, "")}</span><span class="flip" data-flip="noun">${track(nouns, "\u00a0")}</span></span><span class="headline-line reveal reveal-2" aria-hidden="true">matter</span></h1>`;
 
 // The landing page at / for readers without a session (docs/landing-page.md).
 // It stands alone: no site header, homepage bundle or account scripts.

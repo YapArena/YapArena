@@ -87,6 +87,30 @@ headline shows "Yappers matter". Without JavaScript it shows "Your opinions
 matter". Screen readers hear one stable sentence, "Your opinions, debates, ideas
 and discussions matter. Yappers matter."; the animated lines are `aria-hidden`.
 
+### Word colors
+
+"opinions", "debates", "ideas", "discussions" and "Yappers" each get their own
+color; "Your" and "matter" stay white. `frontend/landing-colors.ts` picks a new
+set with `Math.random()` on every visit and keeps it for the whole visit.
+
+- Five OKLCH hues sit 72° apart from a random start, each moved by up to ±13.5°,
+  so any two are at least 45° apart. That is wider than one color family, so a
+  lavender rules out every other purple and a burgundy every other red.
+- Lightness is 0.74–0.86 (0.86–0.92 for hues 80–130°, so yellows do not turn
+  olive) and chroma 0.12–0.16.
+- A color outside sRGB is first darkened, down to lightness 0.70, and only then
+  loses chroma. Light blues, purples and reds would otherwise fade to grey; this
+  keeps every color at chroma 0.115 or more, with at least 7.5:1 contrast on
+  black.
+- The colors are converted to `rgb()` in code and checked: each must have 4.5:1
+  contrast on black, and every pair must stay 45° apart, or the set is drawn
+  again. A shuffle then decides which word gets which color.
+- On 4→5 the "Y" fades to the "Yappers" color with the flip (0.7s, same easing)
+  and fades back to white on 5→1. The trailing copy of "opinions" shares the
+  first one's color, so the loop reset shows no change.
+- Without JavaScript every word stays white. Reduced motion shows "Yappers"
+  colored, without the fade.
+
 ## Logo assets
 
 The founder supplied both images on 2026-10-28:

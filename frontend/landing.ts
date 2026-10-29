@@ -8,9 +8,13 @@ import {
   type PlannedEvent,
   type TileGraph,
 } from "./pixel-life.js";
+import { pickHeadlineColors } from "./landing-colors.js";
 import {
+  FINAL_STEP,
   FLIP_EVERY_MS,
   FLIP_MS,
+  NOUN_TRACK,
+  PRONOUN_TRACK,
   REVEAL_END_MS,
   canAdvance,
   initialStep,
@@ -78,8 +82,11 @@ function startHeadline() {
     '[data-flip="pronoun"]',
   );
   const nounSlot = document.querySelector<HTMLElement>('[data-flip="noun"]');
-  if (!headline || !pronounSlot || !nounSlot) return;
+  const initial = headline?.querySelector<HTMLElement>(".headline-y");
+  if (!headline || !pronounSlot || !nounSlot || !initial) return;
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  // A new set of five distinct colors on every visit.
+  const colors = pickHeadlineColors();
   const slot = (element: HTMLElement) => {
     const track = element.querySelector<HTMLElement>(".flip-track")!;
     return {
@@ -104,11 +111,28 @@ function startHeadline() {
       : "";
     target.element.style.width = `${target.widths[position] ?? 0}px`;
   }
+  // Each word keeps its color; the trailing copy of "opinions" matches the
+  // first, so the 5→1 reset shows no color jump. "Your" and "matter" stay white.
+  function paintWords() {
+    slots.noun.words.forEach((element, index) => {
+      const word = NOUN_TRACK[index];
+      if (word) element.style.color = colors[word].css;
+    });
+    slots.pronoun.words.forEach((element, index) => {
+      if (PRONOUN_TRACK[index] === "appers")
+        element.style.color = colors.yappers.css;
+    });
+  }
+  // The "Y" joins "Yappers" in its color and is white for every other phrase.
+  function paintInitial() {
+    initial!.style.color = step === FINAL_STEP ? colors.yappers.css : "";
+  }
   // Apply positions without animating, e.g. after measuring or a loop reset.
   function settle(positions: SlotPositions) {
     headline!.classList.add("flip-instant");
     place(slots.pronoun, positions.pronoun);
     place(slots.noun, positions.noun);
+    paintInitial();
     void headline!.offsetWidth;
     headline!.classList.remove("flip-instant");
   }
@@ -146,6 +170,7 @@ function startHeadline() {
     if (move.moves.noun) place(slots.noun, move.positions.noun);
     step = move.to;
     headline!.dataset.step = String(step);
+    paintInitial();
     // Landed on the trailing copies: jump back to the identical first items.
     if (move.wraps)
       wrapTimer = window.setTimeout(() => {
@@ -182,6 +207,7 @@ function startHeadline() {
   }
 
   headline.dataset.step = String(step);
+  paintWords();
   measure();
   void document.fonts.ready.then(measure).catch(() => {});
   window.addEventListener("resize", measure);

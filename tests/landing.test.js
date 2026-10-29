@@ -108,7 +108,7 @@ describe("landing page", () => {
     );
     assert.match(
       headline,
-      /<span class="headline-line reveal" aria-hidden="true">Y<span class="flip" data-flip="pronoun">/,
+      /<span class="headline-line reveal" aria-hidden="true"><span class="headline-y">Y<\/span><span class="flip" data-flip="pronoun">/,
     );
     assert.match(
       headline,
