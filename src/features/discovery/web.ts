@@ -7,6 +7,11 @@ import { renderVideoDebateCard } from "./video-card-web.ts";
 import { renderFeaturedDebate } from "./featured-web.ts";
 import { renderDebateWorkspace } from "./debate-web.ts";
 import { asset, assetRevision } from "./assets.ts";
+import {
+  iconLinks,
+  shareMetadata,
+  siteFooterMarkup,
+} from "./page-chrome-web.ts";
 import { html, raw, type SafeHtml } from "../../platform/html.ts";
 import type {
   PublicDebate,
@@ -52,9 +57,9 @@ function layout(
   const page = html`${siteHeaderMarkup()}${
     home
       ? content
-      : html`<main id="main">${content}</main><footer class="site-footer"><div class="container footer-inner"><span>YAP ARENA <span class="muted">/ Ideas under pressure.</span></span><span><a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span></div></footer>`
+      : html`<main id="main">${content}</main>${siteFooterMarkup()}`
   }`;
-  return html`<!doctype html><html lang="en"${emailFirst ? " data-email-first" : ""}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark"><title>${title} · YAP Arena</title><meta name="description" content="${description}"><link rel="canonical" href="${canonical}">${metadata}<link rel="stylesheet" href="${asset("site.css")}"><link rel="stylesheet" href="${asset("arena.css")}"><link rel="stylesheet" href="${asset("site-header.css")}"><script defer src="${asset("session-coordination.js")}"></script><script type="module" src="${asset("site-header.js")}"></script><script defer src="${asset("site.js")}"></script><script defer src="${asset("account-balance.js")}"></script>${reference ? "" : html`<script defer src="${asset("measurement.js")}"></script><script type="module" src="${asset("results-notice.js")}"></script>`}${home ? html`<link rel="stylesheet" href="${asset("homepage.css")}"><script defer src="${asset("homepage.bundle.js")}"></script>` : ""}</head><body class="${bodyClass}"><a class="skip-link" href="#main">Skip to content</a>${page}</body></html>`.toString();
+  return html`<!doctype html><html lang="en"${emailFirst ? " data-email-first" : ""}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark"><title>${title} · YAP Arena</title><meta name="description" content="${description}"><link rel="canonical" href="${canonical}">${metadata}${iconLinks()}<link rel="stylesheet" href="${asset("site.css")}"><link rel="stylesheet" href="${asset("arena.css")}"><link rel="stylesheet" href="${asset("site-header.css")}"><script defer src="${asset("session-coordination.js")}"></script><script type="module" src="${asset("site-header.js")}"></script><script defer src="${asset("site.js")}"></script><script defer src="${asset("account-balance.js")}"></script>${reference ? "" : html`<script defer src="${asset("measurement.js")}"></script><script type="module" src="${asset("results-notice.js")}"></script>`}${home ? html`<link rel="stylesheet" href="${asset("homepage.css")}"><script defer src="${asset("homepage.bundle.js")}"></script>` : ""}</head><body class="${bodyClass}"><a class="skip-link" href="#main">Skip to content</a>${page}</body></html>`.toString();
 }
 
 function badge(debate: PublicDebate) {
@@ -101,7 +106,12 @@ export function renderHome(
     "Follow an idea. Hear both sides. Take a position.",
     `${origin}/home`,
     homepageMarkup(data),
-    "",
+    shareMetadata({
+      origin,
+      title: "YAP Arena",
+      description: "Follow an idea. Hear both sides. Take a position.",
+      url: `${origin}/home`,
+    }),
     `arena-market-home${data.reference ? " reference-home" : ""}`,
     emailFirst,
   );
@@ -112,12 +122,18 @@ export function renderLive(
   debates: PublicDebate[],
   topics: PublicList<PublicTopic>,
 ) {
-  const content = html`${renderFeaturedDebate(debates[0] ?? null, assetRevision)}<section class="container section"><div class="section-heading"><div><span class="eyebrow">01 / THE CONVERSATION</span><h2>Debates to watch</h2></div><a class="text-link" href="/debates">All debates <span aria-hidden="true">↗</span></a></div>${debates.length ? html`<div class="card-grid arena-video-grid">${debates.map((debate) => renderVideoDebateCard(debate, assetRevision))}</div>` : html`<div class="empty-state"><h3>No watchable debates yet.</h3><p>Live debates and ready replays will appear here.</p></div>`}</section><section class="container section"><div class="section-heading"><div><span class="eyebrow">02 / EXPLORE IDEAS</span><h2>Topics in play</h2></div><a class="text-link" href="/topics">All topics <span aria-hidden="true">↗</span></a></div>${topics.items.length ? html`<div class="card-grid">${topics.items.map(topicCard)}</div>` : html`<div class="empty-state"><h3>No public topics yet.</h3><p>Published topics will appear here when they are ready.</p></div>`}</section><section class="container note-band"><span class="eyebrow">ABOUT THIS PREVIEW</span><p>YAP Arena is under development. Demo listings are examples, not real events. Profiles, wallet sign-in, and follows are available. Live debate and replay require configured media. Yap Coins and labeled bot rounds are available when enabled; real funds are unavailable.</p></section>${debates.length ? html`<script type="module" src="${asset("hero-preview.js")}"></script>` : ""}`;
+  const content = html`${renderFeaturedDebate(debates[0] ?? null, assetRevision)}<section class="container section"><div class="section-heading"><div><span class="eyebrow">01 / THE CONVERSATION</span><h2>Debates to watch</h2></div><a class="text-link" href="/debates">All debates <span aria-hidden="true">↗</span></a></div>${debates.length ? html`<div class="card-grid arena-video-grid">${debates.map((debate) => renderVideoDebateCard(debate, assetRevision))}</div>` : html`<div class="empty-state"><h3>No watchable debates yet.</h3><p>Live debates and ready replays will appear here.</p></div>`}</section><section class="container section"><div class="section-heading"><div><span class="eyebrow">02 / EXPLORE IDEAS</span><h2>Topics in play</h2></div><a class="text-link" href="/topics">All topics <span aria-hidden="true">↗</span></a></div>${topics.items.length ? html`<div class="card-grid">${topics.items.map(topicCard)}</div>` : html`<div class="empty-state"><h3>No public topics yet.</h3><p>Published topics will appear here when they are ready.</p></div>`}</section><section class="container note-band"><span class="eyebrow">ABOUT YAP ARENA</span><p>YAP Arena hosts live video debates you can watch, replay or join. Yap Coins are play money with no cash value, and real funds are unavailable. Listings marked Demo are examples, not real events.</p></section>${debates.length ? html`<script type="module" src="${asset("hero-preview.js")}"></script>` : ""}`;
   return layout(
     "Live",
     "Discover public debates and topics on YAP Arena.",
     `${origin}/live`,
     content,
+    shareMetadata({
+      origin,
+      title: "Live debates",
+      description: "Discover public debates and topics on YAP Arena.",
+      url: `${origin}/live`,
+    }),
   );
 }
 
@@ -146,11 +162,18 @@ export function renderDebates(
   );
   const base = `/debates${query || status !== "all" ? `?${new URLSearchParams({ ...(query ? { q: query } : {}), ...(status !== "all" ? { status } : {}) })}` : ""}`;
   const content = html`<section class="container page-intro"><span class="eyebrow accent">THE DEBATE FLOOR</span><h1>Find your next<br><em>good argument.</em></h1><p>Upcoming conversations and public debate archives, all in one place.</p></section><section class="container section compact"><form class="search-form" action="/debates" method="get" role="search"><label for="debate-search">Search debates</label><div><input id="debate-search" name="q" maxlength="80" value="${query}" placeholder="Search propositions or topics"><button type="submit">Search ↗</button></div></form><nav class="filters" aria-label="Debate status">${filters}</nav>${list.items.length ? html`<div class="card-grid">${list.items.map(debateCard)}</div>` : html`<div class="empty-state"><h2>No debates found.</h2><p>Try another search or status filter. Only published debates appear here.</p></div>`}${pagination(base, list)}</section>`;
+  const canonical = `${origin}${listPath(base, list)}`;
   return layout(
     "Debates",
     "Browse public debates by status and search term.",
-    `${origin}${listPath(base, list)}`,
+    canonical,
     content,
+    shareMetadata({
+      origin,
+      title: "Debates",
+      description: "Browse public debates by status and search term.",
+      url: canonical,
+    }),
   );
 }
 
@@ -161,11 +184,18 @@ export function renderTopics(
 ) {
   const base = `/topics${query ? `?q=${encodeURIComponent(query)}` : ""}`;
   const content = html`<section class="container page-intro"><span class="eyebrow accent">THE IDEA INDEX</span><h1>Find the question<br><em>worth asking.</em></h1><p>Each topic frames two sides of an ongoing conversation.</p></section><section class="container section compact"><form class="search-form" action="/topics" method="get" role="search"><label for="topic-search">Search topics</label><div><input id="topic-search" name="q" maxlength="80" value="${query}" placeholder="Search an idea"><button type="submit">Search ↗</button></div></form>${list.items.length ? html`<div class="card-grid">${list.items.map(topicCard)}</div>` : html`<div class="empty-state"><h2>No topics found.</h2><p>Try another search. Published topics will appear here.</p></div>`}${pagination(base, list)}</section>`;
+  const canonical = `${origin}${listPath(base, list)}`;
   return layout(
     "Topics",
     "Explore public topics on YAP Arena.",
-    `${origin}${listPath(base, list)}`,
+    canonical,
     content,
+    shareMetadata({
+      origin,
+      title: "Topics",
+      description: "Explore public topics on YAP Arena.",
+      url: canonical,
+    }),
   );
 }
 
@@ -181,11 +211,18 @@ export function renderTopic(
   matchmaking = false,
 ) {
   const content = html`<section class="container detail-intro" data-measure-topic="${topic.id}"><a class="back-link" href="/topics">← All topics</a><span class="eyebrow accent">TOPIC ${topic.isDemo ? "· DEMO" : ""}</span><h1>${topic.title}</h1><button class="follow-button" type="button" data-follow-type="topics" data-follow-slug="${topic.slug}" aria-pressed="false">Follow topic</button><span class="follow-message" role="status" aria-live="polite"></span><p class="lead">${topic.summary}</p><div class="side-panel"><div><span class="eyebrow">SIDE A</span><strong>${topic.sideALabel}</strong></div><span class="versus">VS</span><div><span class="eyebrow">SIDE B</span><strong>${topic.sideBLabel}</strong></div></div></section>${matchmaking ? queuePanel(topic) : ""}<section class="container section"><div class="section-heading"><div><span class="eyebrow">ON THIS TOPIC</span><h2>Debates</h2></div></div>${debates.items.length ? html`<div class="card-grid">${debates.items.map(debateCard)}</div>` : html`<div class="empty-state"><h3>No public debates on this topic yet.</h3></div>`}${pagination(`/topics/${path(topic.slug)}`, debates)}</section>`;
+  const canonical = `${origin}${listPath(`/topics/${path(topic.slug)}`, debates)}`;
   return layout(
     topic.title,
     topic.summary,
-    `${origin}${listPath(`/topics/${path(topic.slug)}`, debates)}`,
+    canonical,
     content,
+    shareMetadata({
+      origin,
+      title: topic.title,
+      description: topic.summary,
+      url: canonical,
+    }),
   );
 }
 
@@ -197,10 +234,11 @@ export function renderDebate(
   matchmaking = false,
   liveOutline?: { state: unknown },
 ) {
+  const canonical = `${origin}/debates/${path(debate.slug)}`;
   return layout(
     debate.proposition,
     `Watch and participate in the debate: ${debate.proposition}`,
-    `${origin}/debates/${path(debate.slug)}`,
+    canonical,
     renderDebateWorkspace(
       debate,
       a4Enabled,
@@ -209,7 +247,12 @@ export function renderDebate(
       matchmaking,
       liveOutline,
     ),
-    "",
+    shareMetadata({
+      origin,
+      title: debate.proposition,
+      description: `${debate.topic.title}: ${debate.topic.sideALabel} vs ${debate.topic.sideBLabel}. Watch the video debate on YAP Arena.`,
+      url: canonical,
+    }),
     "arena-page",
   );
 }
@@ -220,21 +263,36 @@ export function renderProfile(
   debates: PublicList<PublicDebate>,
 ) {
   const content = html`<section class="container detail-intro"><a class="back-link" href="/debates">← All debates</a><span class="eyebrow accent">PARTICIPANT ${profile.isDemo ? "· DEMO" : ""}</span><h1>${profile.displayName}</h1><p class="handle">@${profile.handle}</p><button class="follow-button" type="button" data-follow-type="people" data-follow-slug="${profile.handle}" aria-pressed="false">Follow person</button><span class="follow-message" role="status" aria-live="polite"></span><p class="lead">${profile.bio ? profile.bio : "No public bio yet."}</p></section><section class="container section"><div class="section-heading"><div><span class="eyebrow">PUBLIC APPEARANCES</span><h2>Debates</h2></div></div>${debates.items.length ? html`<div class="card-grid">${debates.items.map(debateCard)}</div>` : html`<div class="empty-state"><h3>No public debates yet.</h3></div>`}${pagination(`/people/${path(profile.handle)}`, debates)}</section>`;
+  const description =
+    profile.bio ?? `Public profile for ${profile.displayName}.`;
+  const canonical = `${origin}${listPath(`/people/${path(profile.handle)}`, debates)}`;
   return layout(
     profile.displayName,
-    profile.bio ?? `Public profile for ${profile.displayName}.`,
-    `${origin}${listPath(`/people/${path(profile.handle)}`, debates)}`,
+    description,
+    canonical,
     content,
+    shareMetadata({
+      origin,
+      title: `${profile.displayName} (@${profile.handle})`,
+      description,
+      url: canonical,
+    }),
   );
 }
 
 export function renderAbout(origin: string) {
-  const content = html`<section class="container page-intro"><span class="eyebrow accent">ABOUT YAP ARENA</span><h1>Make room for<br><em>the other side.</em></h1><p>YAP Arena is building a home for live debates and the ideas that connect them.</p></section><section class="container about-copy"><h2>What you can explore now</h2><p>This public preview shows published topics, debate listings, and participant profiles. Sign in to pick your handle and follow people or topics. Listings marked Demo are fictional examples used to develop and test the product.</p><p>Live video and replay are available in a configured local prototype. A listing’s status does not prove that video is available or that a result has been determined. Yap Coins and labeled bot rounds are available when enabled. Real funds remain unavailable.</p><h2 id="measurement">Optional usage measurement</h2><p>We ask before recording discovery pages, watch time, replay starts, matching, follows, reports, or return visits. If you allow it, we use a random browser cookie, not your wallet address, and may associate events with your signed-in account to separate founder-affiliated activity. We do not store search text, chat text, IP addresses, or wallet addresses in product events. Use Measurement settings in the footer to turn it off and delete your measurements. Raw events and watch sessions are retained for up to 90 days; an unused consent expires after 180 days. Debate completion is counted from public event state without a browser identifier.</p><a class="button" href="/debates">Explore debates ↗</a></section>`;
+  const content = html`<section class="container page-intro"><span class="eyebrow accent">ABOUT YAP ARENA</span><h1>Make room for<br><em>the other side.</em></h1><p>YAP Arena is a home for live debates and the ideas that connect them.</p></section><section class="container about-copy"><h2>What you can do</h2><p>Browse topics, watch live video debates and replays, and see who is debating. Sign in to pick your handle, follow people and topics, and queue on a side to debate someone live. Listings marked Demo are fictional examples.</p><p>A listing’s status does not guarantee that video is available or that a result has been decided. Yap Coins are play money with no cash value. Bot activity is synthetic and labeled. Real funds are unavailable.</p><h2 id="measurement">Optional usage measurement</h2><p>We ask before recording discovery pages, watch time, replay starts, matching, follows, reports, or return visits. If you allow it, we use a random browser cookie and may associate events with your signed-in account to separate founder-affiliated activity. We do not store search text, chat text or IP addresses in product events. Use Measurement settings in the footer to turn it off and delete your measurements. Raw events and watch sessions are retained for up to 90 days; an unused consent expires after 180 days. Debate completion is counted from public event state without a browser identifier.</p><a class="button" href="/debates">Explore debates ↗</a></section>`;
   return layout(
     "About",
-    "About YAP Arena's public preview.",
+    "What YAP Arena is and how it works.",
     `${origin}/about`,
     content,
+    shareMetadata({
+      origin,
+      title: "About YAP Arena",
+      description: "What YAP Arena is and how it works.",
+      url: `${origin}/about`,
+    }),
   );
 }
 
@@ -269,6 +327,16 @@ export function renderNotFound(origin: string) {
     "This page could not be found.",
     `${origin}/`,
     html`<section class="container page-intro"><span class="eyebrow accent">404 / NO SUCH PAGE</span><h1>Nothing here<br><em>yet.</em></h1><p>The page may have moved or is not public.</p><a class="button" href="/debates">Browse debates ↗</a></section>`,
+  );
+}
+
+// A search, filter or page number in the link could not be read.
+export function renderInvalidRequest(origin: string) {
+  return layout(
+    "Invalid link",
+    "This link has a search, filter or page number that is not valid.",
+    `${origin}/debates`,
+    html`<section class="container page-intro"><span class="eyebrow accent">400 / INVALID LINK</span><h1>Check the<br><em>link.</em></h1><p>Its search, filter or page number is not valid.</p><a class="button" href="/debates">Browse debates ↗</a></section>`,
   );
 }
 

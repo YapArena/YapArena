@@ -568,6 +568,149 @@ describe("live topic queue pages", () => {
   });
 });
 
+describe("launch pages, share previews and sitemap", () => {
+  const app = appWith(discovery);
+
+  it("serves the styled not-found page to browsers and JSON to API clients", async () => {
+    const page = await request(app)
+      .get("/no-such-page")
+      .set("Accept", "text/html,application/xhtml+xml,*/*;q=0.8");
+    assert.equal(page.status, 404);
+    assert.match(page.headers["content-type"], /^text\/html/);
+    assert.match(page.text, /<html lang="en" data-email-first>/);
+    assert.match(page.text, /404 \/ NO SUCH PAGE/);
+    assert.equal(page.headers["cache-control"], "no-store");
+    for (const [path, accept] of [
+      ["/no-such-page", "application/json"],
+      ["/no-such-page", undefined],
+      ["/api/no-such-route", "text/html"],
+      ["/assets/no-such-file.css", "text/css,*/*;q=0.1"],
+    ]) {
+      const call = request(app).get(path);
+      if (accept) call.set("Accept", accept);
+      const response = await call;
+      assert.equal(response.status, 404, path);
+      assert.deepEqual(response.body, { error: "resource not found" }, path);
+    }
+  });
+
+  it("styles an invalid list link and keeps JSON errors for the API", async () => {
+    for (const path of ["/topics?offset=-1", "/debates?status=bogus"]) {
+      const page = await request(app).get(path);
+      assert.equal(page.status, 400, path);
+      assert.match(page.headers["content-type"], /^text\/html/);
+      assert.match(page.text, /<html lang="en" data-email-first>/);
+      assert.match(page.text, /400 \/ INVALID LINK/);
+      assert.match(page.text, /href="\/assets\/site\.css\?v=/);
+    }
+    const api = await request(app).get("/api/public/debates?status=bogus");
+    assert.equal(api.status, 400);
+    assert.deepEqual(api.body, { error: "invalid debate status" });
+  });
+
+  it("serves the favicon, touch icon and web manifest", async () => {
+    const favicon = await request(app).get("/favicon.ico");
+    assert.equal(favicon.status, 200);
+    assert.match(favicon.headers["content-type"], /^image\//);
+    assert.equal(favicon.headers["cache-control"], "public, max-age=86400");
+    const page = await request(app).get("/topics");
+    assert.match(page.text, /<link rel="icon" href="\/favicon\.ico"/);
+    const touch = /<link rel="apple-touch-icon" href="([^"]+)">/.exec(
+      page.text,
+    )[1];
+    assert.equal((await request(app).get(touch)).status, 200);
+    const link = /<link rel="manifest" href="([^"]+)">/.exec(page.text)[1];
+    const manifest = await request(app).get(link);
+    assert.equal(manifest.status, 200);
+    assert.match(manifest.headers["content-type"], /manifest\+json/);
+    const { name, start_url, icons } = JSON.parse(manifest.text);
+    assert.equal(name, "YAP Arena");
+    assert.equal(start_url, "/");
+    for (const icon of icons) {
+      const response = await request(app).get(icon.src);
+      assert.equal(response.status, 200, icon.src);
+      assert.match(response.headers["content-type"], /^image\/png/);
+    }
+  });
+
+  it("gives shared links an absolute Open Graph preview", async () => {
+    const meta = (text, key) =>
+      new RegExp(`<meta (?:property|name)="${key}" content="([^"]*)">`).exec(
+        text,
+      )?.[1];
+    const debatePage = (await request(app).get("/debates/public-debate")).text;
+    assert.equal(meta(debatePage, "og:title"), debate.proposition);
+    assert.equal(
+      meta(debatePage, "og:description"),
+      "Public topic: For vs Against. Watch the video debate on YAP Arena.",
+    );
+    assert.equal(
+      meta(debatePage, "og:url"),
+      "https://arena.example/debates/public-debate",
+    );
+    assert.match(
+      meta(debatePage, "og:image"),
+      /^https:\/\/arena\.example\/assets\/icons\/share\.png\?v=[0-9a-f]{12}$/,
+    );
+    assert.equal(meta(debatePage, "twitter:card"), "summary_large_image");
+    const topicPage = (await request(app).get("/topics/public-topic")).text;
+    assert.equal(meta(topicPage, "og:title"), topic.title);
+    assert.equal(meta(topicPage, "og:description"), topic.summary);
+    const profilePage = (await request(app).get("/people/alex-public")).text;
+    assert.equal(meta(profilePage, "og:title"), "Alex Public (@alex-public)");
+    assert.equal(
+      meta(profilePage, "og:url"),
+      "https://arena.example/people/alex-public",
+    );
+    const landing = (await request(app).get("/")).text;
+    assert.equal(meta(landing, "og:url"), "https://arena.example/");
+    assert.match(landing, /<link rel="icon" href="\/favicon\.ico"/);
+    const image = await request(app).get(
+      new URL(meta(debatePage, "og:image")).pathname,
+    );
+    assert.equal(image.status, 200);
+    // Pages people do not share carry no preview.
+    assert.equal(
+      meta((await request(app).get("/account")).text, "og:url"),
+      undefined,
+    );
+  });
+
+  it("lists public pages in the sitemap", async () => {
+    const sitemap = appWith({
+      ...discovery,
+      listSitemap: async () => ({
+        topics: [topic.slug],
+        debates: [debate.slug, "odd&slug"],
+        profiles: [profile.handle],
+      }),
+    });
+    const response = await request(sitemap).get("/sitemap.xml");
+    assert.equal(response.status, 200);
+    assert.match(response.headers["content-type"], /^application\/xml/);
+    assert.equal(response.headers["cache-control"], "public, max-age=3600");
+    assert.match(
+      response.text,
+      /^<\?xml version="1\.0" encoding="UTF-8"\?>\n<urlset /,
+    );
+    const locations = [...response.text.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
+      (match) => match[1],
+    );
+    assert.deepEqual(locations, [
+      "https://arena.example/",
+      "https://arena.example/home",
+      "https://arena.example/live",
+      "https://arena.example/debates",
+      "https://arena.example/topics",
+      "https://arena.example/about",
+      "https://arena.example/topics/public-topic",
+      "https://arena.example/debates/public-debate",
+      "https://arena.example/debates/odd%26slug",
+      "https://arena.example/people/alex-public",
+    ]);
+  });
+});
+
 describe("discovery repository visibility", () => {
   it("queries only published debates and topics with bounded parameters", async () => {
     const queries = [];
@@ -676,5 +819,37 @@ describe("discovery repository visibility", () => {
       displayName: "Morgan Lee",
     });
     assert.equal(anonymous.sponsor, null);
+  });
+
+  it("lists only published, non-demo pages and debating profiles for the sitemap", async () => {
+    const queries = [];
+    const repository = createDiscoveryRepository({
+      query: async (sql) => {
+        queries.push(sql);
+        return {
+          rows: sql.includes("FROM public_profiles")
+            ? [{ handle: profile.handle }]
+            : sql.includes("SELECT d.slug")
+              ? [{ slug: debate.slug }]
+              : [{ slug: topic.slug }],
+        };
+      },
+    });
+    assert.deepEqual(await repository.listSitemap(), {
+      topics: [topic.slug],
+      debates: [debate.slug],
+      profiles: [profile.handle],
+    });
+    assert.equal(queries.length, 3);
+    for (const sql of queries) {
+      assert.match(sql, /publication_state = 'published'/);
+      assert.match(sql, /NOT (?:\w+\.)?is_demo/);
+      assert.match(sql, /LIMIT \d+/);
+    }
+    assert.match(queries[1], /t\.publication_state = 'published'/);
+    assert.match(
+      queries[2],
+      /EXISTS \(SELECT 1 FROM debates d[\s\S]*d\.speaker_a_profile_id, d\.speaker_b_profile_id/,
+    );
   });
 });
