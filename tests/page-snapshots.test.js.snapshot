@@ -248,8 +248,8 @@ exports[`renders a debate 1`] = `
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -788,8 +788,8 @@ exports[`renders a debate 10`] = `
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -1328,8 +1328,8 @@ exports[`renders a debate 2`] = `
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -1866,8 +1866,8 @@ exports[`renders a debate 3`] = `
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -2404,8 +2404,8 @@ exports[`renders a debate 4`] = `
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -2942,8 +2942,8 @@ exports[`renders a debate 5`] = `
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -3480,8 +3480,8 @@ exports[`renders a debate 6`] = `
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -4019,8 +4019,8 @@ exports[`renders a debate 7`] = `
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -4562,8 +4562,8 @@ exports[`renders a debate 8`] = `
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -5104,8 +5104,8 @@ exports[`renders a debate 9`] = `
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
