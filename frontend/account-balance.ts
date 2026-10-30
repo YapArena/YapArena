@@ -1,35 +1,57 @@
 import type { AccountWalletSummary } from "../src/features/account-wallet/types.js";
 import { apiFetch } from "./lib/api.js";
+import { formatCoins } from "./lib/coin-format.js";
+import { held, readCoins, spendable, type CoinSummary } from "./lib/coins.js";
 import { sessionStore } from "./lib/session.js";
 
 type WalletView = AccountWalletSummary & {
   enabled: boolean;
   withdrawalsEnabled: boolean;
 };
+// Yap Coins are always on (Decision 0013): while the coin sandbox runs, its
+// summary is the account's balance everywhere. The live wallet is the
+// fallback for a site without it (404); it holds nothing in phase 1.
+type Balance =
+  | { kind: "coins"; summary: CoinSummary }
+  | { kind: "wallet"; value: WalletView };
 // The page's session store turns other tabs' account changes into
 // yap:account-changed, which clears the wallet below.
 sessionStore();
-let walletRead: Promise<WalletView | null> | undefined;
+let walletRead: Promise<Balance | null> | undefined;
 let walletEpoch = 0;
 window.addEventListener("yap:account-changed", () => {
   walletEpoch++;
   walletRead = undefined;
 });
+async function liveWallet(epoch: number): Promise<Balance | null> {
+  const response = await apiFetch("/api/account-wallet", { cache: "no-store" });
+  if (response.status === 401) return null;
+  if (!response.ok) throw new Error("Balance unavailable. Try again shortly.");
+  const value: WalletView = await response.json();
+  return value.enabled && epoch === walletEpoch
+    ? { kind: "wallet", value }
+    : null;
+}
 function readWallet() {
   const epoch = walletEpoch;
-  walletRead ??= apiFetch("/api/account-wallet", { cache: "no-store" })
-    .then(async (response) => {
-      if (response.status === 401) return null;
-      if (!response.ok)
-        throw new Error("Balance unavailable. Try again shortly.");
-      const value: WalletView = await response.json();
-      return value.enabled && epoch === walletEpoch ? value : null;
-    })
+  walletRead ??= readCoins()
+    .then((read): Promise<Balance | null> | Balance | null =>
+      read.state === "ready"
+        ? epoch === walletEpoch
+          ? { kind: "coins", summary: read.summary }
+          : null
+        : read.state === "absent"
+          ? liveWallet(epoch)
+          : null,
+    )
     .finally(() => {
       if (epoch === walletEpoch) walletRead = undefined;
     });
   return walletRead;
 }
+// The live wallet's withdrawal balance and grant progress. Shown only once
+// real withdrawals open (founder D3); until then the header shows the
+// balance alone.
 function showWalletSummary(target: HTMLElement, value: WalletView) {
   const heading = document.createElement("strong"),
     headingLabel = document.createElement("span"),
@@ -44,9 +66,8 @@ function showWalletSummary(target: HTMLElement, value: WalletView) {
   heading.append(headingLabel, document.createTextNode(" "), amount);
   const note = document.createElement("p");
   note.className = "wallet-availability-note";
-  note.textContent = value.withdrawalsEnabled
-    ? "Coins you buy can be withdrawn. Grant coins can only be spent; their profits unlock once the grant qualifies."
-    : "Withdrawals aren’t open yet.";
+  note.textContent =
+    "Coins you buy can be withdrawn. Grant coins can only be spent; their profits unlock once the grant qualifies.";
   const list = document.createElement("div");
   list.className = "wallet-grant-progress";
   if (!value.grants.length) {
@@ -84,26 +105,23 @@ function showWalletSummary(target: HTMLElement, value: WalletView) {
     row.append(label, bar, detail);
     list.append(row);
   }
-  const content: HTMLElement[] = [heading, note];
-  if (target !== moneyCard) {
-    const breakdown = document.createElement("dl");
-    breakdown.className = "wallet-balance-breakdown";
-    for (const [label, amount] of [
-      ["Available", value.available],
-      ["Reserved", value.reserved],
-      ["Pending", value.pending],
-      ["Promotional", value.promotional],
-    ] as const) {
-      const item = document.createElement("div"),
-        term = document.createElement("dt"),
-        balance = document.createElement("dd");
-      term.textContent = label;
-      balance.textContent = `${amount} YC`;
-      item.append(term, balance);
-      breakdown.append(item);
-    }
-    content.push(breakdown);
+  const breakdown = document.createElement("dl");
+  breakdown.className = "wallet-balance-breakdown";
+  for (const [label, amount] of [
+    ["Available", value.available],
+    ["Reserved", value.reserved],
+    ["Pending", value.pending],
+    ["Promotional", value.promotional],
+  ] as const) {
+    const item = document.createElement("div"),
+      term = document.createElement("dt"),
+      balance = document.createElement("dd");
+    term.textContent = label;
+    balance.textContent = `${amount} YC`;
+    item.append(term, balance);
+    breakdown.append(item);
   }
+  const content: HTMLElement[] = [heading, note, breakdown];
   if (value.grants.length) {
     const title = document.createElement("h3");
     title.className = "wallet-grants-title";
@@ -113,12 +131,10 @@ function showWalletSummary(target: HTMLElement, value: WalletView) {
   target.replaceChildren(...content, list);
   target.hidden = false;
 }
-const moneyCard = document.querySelector<HTMLElement>(
-  "#account-wallet-progress",
-);
-// The /coins wallet: balances for members, a sign-in prompt for visitors.
+// The /coins card: the balance and what open positions hold, from the same
+// summary as the header and the debate panel; a sign-in prompt for visitors.
 const coinWallet = document.querySelector<HTMLElement>("#account-wallet");
-function showCoinWallet(value: WalletView | null, problem = "") {
+function showCoinWallet(value: Balance | null, problem = "") {
   if (!coinWallet) return;
   const status = coinWallet.querySelector<HTMLElement>(
     "[data-coin-wallet-status]",
@@ -135,41 +151,43 @@ function showCoinWallet(value: WalletView | null, problem = "") {
   }
   if (signedOut) signedOut.hidden = Boolean(value) || Boolean(problem);
   if (balances) balances.hidden = !value;
+  const figures =
+    value?.kind === "coins"
+      ? {
+          available: formatCoins(spendable(value.summary.balances)),
+          held: formatCoins(held(value.summary.balances)),
+        }
+      : value?.kind === "wallet"
+        ? {
+            available: `${value.value.available} YC`,
+            held: `${value.value.reserved} YC`,
+          }
+        : null;
   for (const target of coinWallet.querySelectorAll<HTMLElement>(
     "[data-funds]",
   )) {
     const kind = target.dataset.funds;
-    const amount =
-      kind === "available" ||
-      kind === "reserved" ||
-      kind === "pending" ||
-      kind === "promotional"
-        ? value?.[kind]
-        : undefined;
-    target.textContent = amount ? `${amount} YC` : "—";
+    target.textContent =
+      figures && (kind === "available" || kind === "held")
+        ? figures[kind]
+        : "—";
   }
 }
-async function refreshMoneyCard() {
-  if (!moneyCard) return;
-  const epoch = walletEpoch;
+let cardVersion = 0;
+async function refreshCard() {
+  if (!coinWallet) return;
+  const epoch = walletEpoch,
+    current = ++cardVersion;
   try {
     const value = await readWallet();
-    if (epoch !== walletEpoch) return;
+    if (epoch !== walletEpoch || current !== cardVersion) return;
     showCoinWallet(value);
-    if (value) showWalletSummary(moneyCard, value);
-    else {
-      moneyCard.replaceChildren();
-      moneyCard.hidden = true;
-    }
   } catch {
-    if (epoch !== walletEpoch) return;
+    if (epoch !== walletEpoch || current !== cardVersion) return;
     showCoinWallet(
       null,
       "Your balance is temporarily unavailable. Refresh to try again.",
     );
-    moneyCard.textContent =
-      "Withdrawal progress is temporarily unavailable. Try your balance menu again shortly.";
-    moneyCard.hidden = false;
   }
 }
 for (const [index, menu] of document
@@ -188,7 +206,6 @@ for (const [index, menu] of document
   summary.hidden = true;
   const status = document.createElement("p");
   status.role = "status";
-  popover.classList.add("wallet-progress-enabled");
   popover.prepend(summary);
   popover.append(status);
   let version = 0;
@@ -202,18 +219,19 @@ for (const [index, menu] of document
   menu.addEventListener("toggle", async () => {
     const current = ++version;
     if (!menu.open) return;
-    status.textContent = "Checking withdrawal balance…";
     // Remove stale values while refreshing; never keep another account's data.
     summary.hidden = true;
     try {
       const value = await readWallet();
       if (current !== version || !menu.open) return;
       status.textContent = "";
-      if (value) showWalletSummary(summary, value);
+      const withdrawals =
+        value?.kind === "wallet" && value.value.withdrawalsEnabled;
+      popover.classList.toggle("wallet-progress-enabled", Boolean(withdrawals));
+      if (withdrawals) showWalletSummary(summary, value.value);
     } catch {
       if (current === version)
-        status.textContent =
-          "Withdrawal balance unavailable. Close and reopen to retry.";
+        status.textContent = "Balance unavailable. Close and reopen to retry.";
     }
   });
   window.addEventListener("yap:account-changed", () => {
@@ -221,78 +239,20 @@ for (const [index, menu] of document
     summary.replaceChildren();
     summary.hidden = true;
     status.textContent = "";
+    popover.classList.remove("wallet-progress-enabled");
     if (menu.open) {
       menu.open = false;
     }
   });
 }
 window.addEventListener("yap:account-changed", () => {
-  void refreshMoneyCard();
+  void refreshCard();
+});
+// A stake, a daily claim or a reveal changed the balance.
+window.addEventListener("yap:coins-changed", () => {
+  void refreshCard();
 });
 window.addEventListener("pageshow", (event) => {
-  if (event.persisted) void refreshMoneyCard();
+  if (event.persisted) void refreshCard();
 });
-for (const opener of document.querySelectorAll<HTMLAnchorElement>(
-  "[data-wallet-progress-open]",
-)) {
-  const dialog = document.createElement("dialog"),
-    header = document.createElement("div"),
-    heading = document.createElement("div"),
-    eyebrow = document.createElement("span"),
-    title = document.createElement("h2"),
-    body = document.createElement("section"),
-    close = document.createElement("button"),
-    status = document.createElement("p"),
-    account = document.createElement("a");
-  dialog.className = "wallet-balance-dialog information-card";
-  header.className = "wallet-dialog-header";
-  eyebrow.className = "eyebrow";
-  eyebrow.textContent = "YOUR ACCOUNT WALLET";
-  title.id = "wallet-progress-title";
-  title.textContent = "Your Yap Coins";
-  dialog.setAttribute("aria-labelledby", title.id);
-  body.id = "homepage-withdrawal-summary";
-  body.className = "wallet-money-summary";
-  close.type = "button";
-  close.className = "wallet-dialog-close";
-  close.setAttribute("aria-label", "Close");
-  close.textContent = "×";
-  status.role = "status";
-  status.className = "wallet-dialog-status";
-  account.href = "/coins";
-  account.textContent = "Balances and Yap Coins →";
-  account.className = "wallet-dialog-account-link";
-  heading.append(eyebrow, title);
-  header.append(heading, close);
-  dialog.append(header, status, body, account);
-  document.body.append(dialog);
-  let version = 0;
-  close.addEventListener("click", () => dialog.close());
-  dialog.addEventListener("close", () => {
-    version++;
-    body.replaceChildren();
-    opener.focus();
-  });
-  window.addEventListener("yap:account-changed", () => dialog.close());
-  opener.addEventListener("click", async (event) => {
-    event.preventDefault();
-    if (dialog.open) return;
-    const current = ++version;
-    status.textContent = "Checking your withdrawal balance…";
-    body.replaceChildren();
-    dialog.showModal();
-    try {
-      const value = await readWallet();
-      if (!dialog.open || current !== version) return;
-      status.textContent = value
-        ? ""
-        : "Sign in to view your balance and withdrawal progress.";
-      if (value) showWalletSummary(body, value);
-    } catch {
-      if (dialog.open && current === version)
-        status.textContent =
-          "Withdrawal balance is temporarily unavailable. Close and try again.";
-    }
-  });
-}
-void refreshMoneyCard();
+void refreshCard();

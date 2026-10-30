@@ -217,7 +217,12 @@ export function createApp({
   accountWallet?: ReturnType<typeof createAccountWallet>;
   coinSandbox?: Pick<
     Parameters<typeof createCoinSandboxRouter>[0],
-    "sandbox" | "debates" | "operations" | "reports"
+    | "sandbox"
+    | "debates"
+    | "operations"
+    | "reports"
+    | "transfersEnabled"
+    | "manualRounds"
   >;
   coinWebhook?: RequestHandler;
   // Decision 0012: public turn-window timing, mounted only when enabled.
@@ -487,8 +492,11 @@ export function createApp({
         response
           .set("Cache-Control", "private, no-store")
           .set("Vary", "Cookie");
+        // While Yap Coins run on the coin sandbox, the live ledger holds
+        // nothing in phase 1 (founder D2); browsers read the sandbox summary
+        // instead, so this reports itself off rather than showing zeros.
         return response.json({
-          enabled: Boolean(auth0),
+          enabled: Boolean(auth0) && !coinSandbox,
           withdrawalsEnabled: false,
           ...(await accountWallet.balances(request.user!.id)),
         });

@@ -926,19 +926,9 @@
   font-style: italic;
   font-weight: 700;
 }
-.coin-wallet-rate {
-  margin-left: auto;
-  padding: 6px 10px;
-  border: 1px solid #4f4f4f;
-  border-radius: 999px;
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 650;
-  white-space: nowrap;
-}
 .coin-wallet .account-balances {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin: 20px 0 0;
 }
@@ -1018,6 +1008,26 @@
 #coin-sandbox [data-coin-receipts] > li > button {
   display: block;
   margin-top: 8px;
+}
+.coin-claim {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+.coin-claim .form-note {
+  margin: 0;
+}
+.coin-section-title {
+  margin: 22px 0 6px;
+  font-size: 0.9rem;
+}
+#coin-sandbox [data-coin-history] > li {
+  display: block;
+  overflow-wrap: anywhere;
+}
+#coin-sandbox [data-coin-history] a {
+  color: inherit;
 }
 @media (max-width: 760px) {
   .coin-wallet {

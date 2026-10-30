@@ -238,12 +238,12 @@ exports[`renders a debate 1`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
@@ -285,23 +285,23 @@ exports[`renders a debate 1`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -311,21 +311,21 @@ exports[`renders a debate 1`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -334,9 +334,9 @@ exports[`renders a debate 1`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -414,7 +414,7 @@ exports[`renders a debate 1`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -449,7 +449,7 @@ exports[`renders a debate 1`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -497,16 +497,13 @@ exports[`renders a debate 1`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
-<p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
-</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed.</p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -517,7 +514,7 @@ exports[`renders a debate 1`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -781,12 +778,12 @@ exports[`renders a debate 10`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
@@ -828,23 +825,23 @@ exports[`renders a debate 10`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -854,21 +851,21 @@ exports[`renders a debate 10`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -877,9 +874,9 @@ exports[`renders a debate 10`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -957,7 +954,7 @@ exports[`renders a debate 10`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -992,7 +989,7 @@ exports[`renders a debate 10`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -1040,16 +1037,13 @@ exports[`renders a debate 10`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
-<p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
-</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed.</p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -1060,7 +1054,7 @@ exports[`renders a debate 10`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -1324,12 +1318,12 @@ exports[`renders a debate 2`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
@@ -1371,23 +1365,23 @@ exports[`renders a debate 2`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -1397,21 +1391,21 @@ exports[`renders a debate 2`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -1420,9 +1414,9 @@ exports[`renders a debate 2`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -1500,7 +1494,7 @@ exports[`renders a debate 2`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -1535,7 +1529,7 @@ exports[`renders a debate 2`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -1583,16 +1577,13 @@ exports[`renders a debate 2`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
-<p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
-</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed.</p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -1603,7 +1594,7 @@ exports[`renders a debate 2`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -1865,12 +1856,12 @@ exports[`renders a debate 3`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
@@ -1912,23 +1903,23 @@ exports[`renders a debate 3`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -1938,21 +1929,21 @@ exports[`renders a debate 3`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -1961,9 +1952,9 @@ exports[`renders a debate 3`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -2041,7 +2032,7 @@ exports[`renders a debate 3`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -2076,7 +2067,7 @@ exports[`renders a debate 3`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -2124,16 +2115,13 @@ exports[`renders a debate 3`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
-<p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
-</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed.</p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -2144,7 +2132,7 @@ exports[`renders a debate 3`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -2406,12 +2394,12 @@ exports[`renders a debate 4`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
@@ -2453,23 +2441,23 @@ exports[`renders a debate 4`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -2479,21 +2467,21 @@ exports[`renders a debate 4`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -2502,9 +2490,9 @@ exports[`renders a debate 4`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -2582,7 +2570,7 @@ exports[`renders a debate 4`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -2617,7 +2605,7 @@ exports[`renders a debate 4`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -2665,16 +2653,13 @@ exports[`renders a debate 4`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
-<p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
-</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed.</p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -2685,7 +2670,7 @@ exports[`renders a debate 4`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -2947,12 +2932,12 @@ exports[`renders a debate 5`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
@@ -2994,23 +2979,23 @@ exports[`renders a debate 5`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -3020,21 +3005,21 @@ exports[`renders a debate 5`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -3043,9 +3028,9 @@ exports[`renders a debate 5`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -3123,7 +3108,7 @@ exports[`renders a debate 5`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -3158,7 +3143,7 @@ exports[`renders a debate 5`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -3206,16 +3191,13 @@ exports[`renders a debate 5`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
-<p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
-</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed.</p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -3226,7 +3208,7 @@ exports[`renders a debate 5`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -3488,12 +3470,12 @@ exports[`renders a debate 6`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
@@ -3535,23 +3517,23 @@ exports[`renders a debate 6`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -3561,21 +3543,21 @@ exports[`renders a debate 6`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -3584,9 +3566,9 @@ exports[`renders a debate 6`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -3664,7 +3646,7 @@ exports[`renders a debate 6`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -3699,7 +3681,7 @@ exports[`renders a debate 6`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -3747,16 +3729,13 @@ exports[`renders a debate 6`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
-<p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
-</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed.</p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -3767,7 +3746,7 @@ exports[`renders a debate 6`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -4030,12 +4009,12 @@ exports[`renders a debate 7`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
@@ -4077,23 +4056,23 @@ exports[`renders a debate 7`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -4103,21 +4082,21 @@ exports[`renders a debate 7`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -4126,9 +4105,9 @@ exports[`renders a debate 7`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -4206,7 +4185,7 @@ exports[`renders a debate 7`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -4241,7 +4220,7 @@ exports[`renders a debate 7`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -4289,16 +4268,13 @@ exports[`renders a debate 7`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
-<p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
-</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed.</p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -4309,7 +4285,7 @@ exports[`renders a debate 7`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -4576,12 +4552,12 @@ exports[`renders a debate 8`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
@@ -4623,23 +4599,23 @@ exports[`renders a debate 8`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -4649,21 +4625,21 @@ exports[`renders a debate 8`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -4672,9 +4648,9 @@ exports[`renders a debate 8`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -4752,7 +4728,7 @@ exports[`renders a debate 8`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -4787,7 +4763,7 @@ exports[`renders a debate 8`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -4835,16 +4811,16 @@ exports[`renders a debate 8`] = `
 <dd>Rules &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed. Before that, it shows labeled practice rounds played by bots.</p>
 <p class="arena-bots-link">
-<a href="/coins?debate=55555555-5555-4555-8555-555555555555">Bots sandbox on Yap Coins →</a>
+<a href="/coins?debate=55555555-5555-4555-8555-555555555555">Practice with bots →</a>
 </p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -4855,7 +4831,7 @@ exports[`renders a debate 8`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <template data-shared-bootstrap>{&quot;scope&quot;:&quot;shared&quot;,&quot;synthetic&quot;:true,&quot;revision&quot;:&quot;fixture-revision&quot;,&quot;hasMore&quot;:false,&quot;window&quot;:30,&quot;items&quot;:[{&quot;id&quot;:&quot;round-1&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:1,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;52&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:{&quot;n&quot;:&quot;40&quot;,&quot;d&quot;:&quot;100&quot;},&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;},{&quot;id&quot;:&quot;round-2&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:2,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;47&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:null,&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;}],&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:61,&quot;endorsed&quot;:305,&quot;population&quot;:500},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:39,&quot;endorsed&quot;:195,&quot;population&quot;:500}],&quot;category&quot;:&quot;Category &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;totals&quot;:{&quot;premium&quot;:&quot;5000000000&quot;,&quot;humanCommitments&quot;:4,&quot;botCommitments&quot;:996,&quot;executed&quot;:240}}</template>
 <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
@@ -5118,12 +5094,12 @@ exports[`renders a debate 9`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
@@ -5165,23 +5141,23 @@ exports[`renders a debate 9`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -5191,21 +5167,21 @@ exports[`renders a debate 9`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -5214,9 +5190,9 @@ exports[`renders a debate 9`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -5294,7 +5270,7 @@ exports[`renders a debate 9`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -5329,7 +5305,7 @@ exports[`renders a debate 9`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -5377,16 +5353,16 @@ exports[`renders a debate 9`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed. Before that, it shows labeled practice rounds played by bots.</p>
 <p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
+<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Practice with bots →</a>
 </p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -5397,7 +5373,7 @@ exports[`renders a debate 9`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -7308,7 +7284,7 @@ exports[`renders the coins and match pages 1`] = `
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
 <title>Yap Coins · YAP Arena</title>
-<meta name="description" content="Your Yap Coins balance, plus play-money Bots mode rounds.">
+<meta name="description" content="Your Yap Coins balance, positions and history.">
 <link rel="canonical" href="https://arena.example/coins">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
@@ -7392,196 +7368,30 @@ exports[`renders the coins and match pages 1`] = `
 <span class="eyebrow accent">YOUR WALLET</span>
 <h1>Yap <em>Coins.</em>
 </h1>
-<p>The coins you use in debates. Buying and withdrawing aren’t open yet.</p>
+<p>The coins you use to answer “Do you agree?” in each speaking turn of a live debate. Play money · no cash value.</p>
 </div>
 <section id="account-wallet" class="coin-wallet" aria-labelledby="coin-wallet-title">
 <div class="coin-wallet-head">
 <span class="coin-wallet-symbol" aria-hidden="true">Y</span>
 <h2 id="coin-wallet-title">Your balance</h2>
-<span class="coin-wallet-rate">100 YC = 1 USDC</span>
 </div>
 <p data-coin-wallet-status role="status" aria-live="polite">Checking your balance…</p>
 <div class="coin-wallet-signed-out" data-coin-wallet-signed-out hidden>
 <p>Sign in to see your balance.</p>
 <a class="button" href="/account?next=%2Fcoins">Sign in</a>
 </div>
-<section id="account-wallet-progress" class="wallet-money-summary" aria-label="Withdrawal balance and grant progress" hidden>
-</section>
 <dl class="account-balances" data-coin-wallet-balances hidden>
 <div>
 <dt>Available</dt>
 <dd data-funds="available">—</dd>
 </div>
 <div>
-<dt>Reserved</dt>
-<dd data-funds="reserved">—</dd>
-</div>
-<div>
-<dt>Pending</dt>
-<dd data-funds="pending">—</dd>
-</div>
-<div>
-<dt>Promotional</dt>
-<dd data-funds="promotional">—</dd>
+<dt>In open positions</dt>
+<dd data-funds="held">—</dd>
 </div>
 </dl>
 </section>
 </section>
-<section class="container page-intro a4-intro">
-<span class="eyebrow accent">BOTS MODE · PLAY MONEY</span>
-<h2>Your position.<br>
-<em>Your limit.</em>
-</h2>
-<p>Endorse an idea and choose a binding purchase ceiling. A shared offer is drawn after commitment. Settlement follows the unweighted YES endorsement share, including orders that never execute.</p>
-<p>Bots mode uses separate play coins with no cash value. They never convert to Yap Coins.</p>
-</section>
-<section class="container section compact" data-a4>
-<p data-a4-notice class="notice" role="status" aria-live="polite">Checking your account…</p>
-<div data-a4-login hidden>
-<a class="button" href="/account?next=%2Fcoins">Sign in to use Bots mode →</a>
-</div>
-<div data-a4-content hidden>
-<div class="a4-grid">
-<section class="information-card">
-<span class="eyebrow">START OR JOIN</span>
-<h2>Choose your round</h2>
-<form data-a4-create class="stack-form">
-<label>Debate<select name="debateId" required>
-</select>
-</label>
-<label>
-<input type="checkbox" data-a4-publish> Share my settled Bots + you and Bots-only aggregate results on public charts</label>
-<label>Mode<select name="mode">
-<option value="mixed">Bots mode + you</option>
-<option value="observer">Bots only · observer</option>
-</select>
-</label>
-<p>Bot runs are private sandboxes with their own play balances. Observer runs cannot accept people. YES endorses the displayed proposition; NO rejects it.</p>
-<details>
-<summary>Round settings</summary>
-<div class="stack-form">
-<label>Bot population<input name="population" type="number" min="1" max="1000" value="500">
-</label>
-<label>Belief preset<select name="preset">
-<option value="heterogeneous">Heterogeneous · behavioral stress fixture</option>
-<option value="reference">Homogeneous · reference fixture</option>
-</select>
-</label>
-<label>Exploration epsilon<select name="epsilon">
-<option value="50000">0.05</option>
-<option value="0">0</option>
-<option value="1000000">1 · full exploration</option>
-</select>
-</label>
-<label>Premium fee<select name="feeBps">
-<option value="0">No fee</option>
-<option value="500">Experimental 5%</option>
-</select>
-</label>
-<label>Bot contracts<input name="quantity" type="number" min="1" max="100" value="1">
-</label>
-<label>Periods<select name="periods">
-<option value="1">Single round</option>
-<option value="3">3 · delayed reveal</option>
-<option value="10">10 · delayed reveal</option>
-</select>
-</label>
-<label>Round duration in seconds<input name="roundSeconds" type="number" min="10" max="3600" value="60">
-</label>
-<label>Initial bot acceleration<select name="speed">
-<option value="1">1×</option>
-<option value="5">5×</option>
-<option value="20">20×</option>
-</select>
-</label>
-<label>Replay seed · bot-only observer runs<input name="seed" maxlength="80" pattern="[a-zA-Z0-9_-]{1,80}" placeholder="Random if empty">
-</label>
-</div>
-</details>
-<button class="button" type="submit">Start a new run →</button>
-</form>
-<label>Existing runs<select data-a4-runs>
-<option value="">Select a run</option>
-</select>
-</label>
-<button type="button" data-a4-list>Refresh runs</button>
-</section>
-<section class="information-card">
-<span class="eyebrow">YOUR PLAY COINS</span>
-<h2 data-a4-balance>Balance</h2>
-<p data-a4-reserved>
-</p>
-<button type="button" data-a4-refill hidden>Get daily play coins for this run</button>
-<p data-a4-funding-policy>Play credits follow the current issuance policy. Multiple wallets share one account allowance.</p>
-<div data-a4-run-summary>
-</div>
-<div data-a4-controls hidden class="a4-controls">
-<button type="button" data-a4-control="run">Run</button>
-<button type="button" data-a4-control="pause">Pause</button>
-<button type="button" data-a4-control="step">Step / lock next</button>
-<label>Processing speed<select data-a4-speed>
-<option value="1">1×</option>
-<option value="5">5×</option>
-<option value="20">20×</option>
-</select>
-</label>
-<button type="button" data-a4-control="archive">Archive / new run</button>
-<p>Step locks the next open round immediately. Pause stops opening future windows; existing cutoffs and final reveal time still apply. Speed changes processing, not locked terms.</p>
-</div>
-<form data-a4-submit class="stack-form" hidden>
-<h3>Make a binding submission</h3>
-<label>Your position<select name="side">
-<option value="YES">YES · endorse the proposition</option>
-<option value="NO">NO · reject the proposition</option>
-</select>
-</label>
-<label>Maximum purchase price in Yap Coins<input name="ceiling" type="text" inputmode="decimal" value="0.50" pattern="(0([.][0-9]{1,6})?|1([.]0{1,6})?)" required>
-</label>
-<label>Number of contracts<input name="quantity" type="number" min="1" max="100" value="10" required>
-</label>
-<p>For NO, a ceiling of 0.78 means a YES-scale floor of 0.22. Quantity determines exposure, not voting weight. No revisions or cancellations after commitment.</p>
-<button class="button" type="submit">Review exact commitment →</button>
-</form>
-</section>
-</div>
-<section class="information-card a4-history">
-<div class="section-heading">
-<h2>Rounds and receipts</h2>
-<button type="button" data-a4-refresh>Refresh</button>
-</div>
-<p>Shared prices are random offers, not sentiment or probability of truth. Pending payouts and sealed diagnostics remain hidden until reveal.</p>
-<div data-a4-rounds>
-</div>
-<div class="a4-controls">
-<button type="button" data-a4-book-prev>Previous orders</button>
-<button type="button" data-a4-book-next>Next orders</button>
-</div>
-<details>
-<summary>Private balance history</summary>
-<div data-a4-history>
-</div>
-<button type="button" data-a4-history-more>More history</button>
-</details>
-<details>
-<summary>Research assumptions and diagnostics</summary>
-<p>Heterogeneous bots use fresh broad private beliefs each period. This is a behavioral UX stress test, not a coherent Bayesian proof. The homogeneous preset preserves the 0.22 / 0.34 analytical reference. Finite populations can reward deviations. No guaranteed truthfulness, Sybil resistance or event winner is claimed.</p>
-<p>
-<a href="/assets/a4-research.json?v=0123456789ab">Read reproducible finite counterfactual results</a>. The audit recomputes medians, acceptance and settlement with fixed quantity, paired random draws and independent confirmation.</p>
-</details>
-</section>
-</div>
-</section>
-<dialog data-a4-review class="information-card" aria-labelledby="a4-review-title">
-<h2 id="a4-review-title">Review Yap Coins commitment</h2>
-<div data-a4-terms>
-</div>
-<p data-a4-review-notice role="status" aria-live="polite">
-</p>
-<button type="button" data-a4-commit class="button">Commit these exact terms</button>
-<button type="button" data-a4-cancel>Back</button>
-</dialog>
-<script type="module" src="/assets/a4.js?v=0123456789ab">
-</script>
 <script type="module" src="/assets/account-coins.js?v=0123456789ab">
 </script>
 </main>

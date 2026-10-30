@@ -51,9 +51,20 @@ export function createCoinSandboxRouter(options: {
   applicationOrigin: string;
   sharedWriteLimiter?: RequestHandler;
   sharedRateLimits?: SharedRateLimits;
+  // COIN_SANDBOX_TRANSFERS_ENABLED: the simulated purchase, withdrawal and
+  // deposit/payout error-report flows. Off unless a deployment asks for them;
+  // production refuses them (financial brief F06, founder D2/D3).
+  transfersEnabled?: boolean;
+  // The /coins manual round form. Off with turn windows, which are then the
+  // only way to take a position (Decision 0013, founder D5).
+  manualRounds?: boolean;
 }) {
   const router = Router(),
     { sandbox, debates, operations } = options;
+  const features = Object.freeze({
+    transfers: options.transfersEnabled === true,
+    manualRounds: options.manualRounds !== false,
+  });
   const context = (r: Request) => ({
     userId: r.user!.id,
     sessionTokenHash: hashSessionToken(
@@ -84,6 +95,7 @@ export function createCoinSandboxRouter(options: {
     )
       return s.status(409).json({
         error: "account context changed; refresh balances and review again",
+        code: "session_changed",
       });
     next();
   });
@@ -100,9 +112,17 @@ export function createCoinSandboxRouter(options: {
       return options.sharedWriteLimiter(r, s, next);
     next();
   });
+  // The browser hides the flows this deployment doesn't offer.
   router.get("/summary", async (r, s) =>
-    s.json(await sandbox.summary(context(r))),
+    s.json({ ...(await sandbox.summary(context(r))), features }),
   );
+  if (!features.transfers)
+    router.use(["/funding", "/withdrawals", "/reports"], (_r, s) =>
+      s.status(404).json({
+        error: "Yap Coins can't be bought or withdrawn",
+        code: "unavailable",
+      }),
+    );
   // Decision 0013: Yap Coins are always on. There is no opening
   // confirmation; the first request opens the sandbox and this claims the
   // welcome grant once. Withdrawals and recovery consents still confirm.
@@ -311,14 +331,18 @@ export function createCoinSandboxRouter(options: {
       s: import("express").Response,
       next: import("express").NextFunction,
     ) => {
-      if (
-        error instanceof CoinOperationError ||
-        error instanceof AccountOperationError ||
-        error instanceof A4Error
-      )
+      if (error instanceof CoinOperationError)
+        return s.status(error.status).json({
+          ...error.details,
+          error: error.message,
+          ...(error.code ? { code: error.code } : {}),
+        });
+      if (error instanceof AccountOperationError || error instanceof A4Error)
         return s.status(error.status).json({ error: error.message });
       if (error instanceof SessionUnavailableError)
-        return s.status(401).json({ error: "sign in again" });
+        return s
+          .status(401)
+          .json({ error: "sign in again", code: "signed_out" });
       return next(error);
     },
   );

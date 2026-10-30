@@ -261,8 +261,9 @@ export function createDiscoveryRouter({
     ]);
     return html(response, renderLive(origin, debates, topics));
   });
+  // Founder D4: Bots mode appears on /coins only while A4 is enabled.
   router.get("/coins", (_request, response) =>
-    html(response, renderCoins(origin)),
+    html(response, renderCoins(origin, a4Enabled)),
   );
   router.get("/match", (_request, response) =>
     html(response, renderMatchmaking(origin, matchmakingEnabled)),

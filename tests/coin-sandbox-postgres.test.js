@@ -173,6 +173,9 @@ describe(
           operations: createAccountOperationRepository(a),
           environment: "test",
           applicationOrigin: origin,
+          // These cases exercise the simulated money flows, which a
+          // deployment enables explicitly (COIN_SANDBOX_TRANSFERS_ENABLED).
+          transfersEnabled: true,
         }),
       );
       return server;
@@ -1080,6 +1083,20 @@ describe(
         (await repo.summary(context)).balances.cashAvailable,
         "12345678",
       );
+    });
+    it("caps one simulated purchase at 1,000 USDC, far below numeric(36,0)", async () => {
+      const context = await fixture();
+      for (const amount of ["1000000001", "9".repeat(36)])
+        await assert.rejects(
+          repo.quoteFunding(context, { amount, idempotencyKey: randomUUID() }),
+          (error) =>
+            error.status === 400 && /limited to 1,000 USDC/.test(error.message),
+        );
+      const quote = await repo.quoteFunding(context, {
+        amount: "1000000000",
+        idempotencyKey: randomUUID(),
+      });
+      assert.equal(quote.terms.amount, "1000000000");
     });
     it("rejects expired quote use without trusting application clocks or issuing balances", async () => {
       const context = await fixture(),
