@@ -10,6 +10,10 @@ import type { createMediaProvider } from "../features/media/provider.ts";
 import type { createCommunityRepository } from "../features/community/repository.ts";
 import type { createMeasurementRepository } from "../features/measurement/repository.ts";
 import type { loadConfig } from "./config.ts";
+import { heartbeatIntervalMs as defaultHeartbeatIntervalMs } from "./job-heartbeat.ts";
+
+// The heartbeat stops once any one-second job has finished no tick for this long.
+const stalledAfterMs = 60_000;
 
 export function createRuntime({
   app,
@@ -33,10 +37,13 @@ export function createRuntime({
   logger,
   config,
   verifyDatabase,
+  heartbeat,
   backgroundJobs = true,
   cleanupIntervalMs = 60 * 60 * 1_000,
+  heartbeatIntervalMs = defaultHeartbeatIntervalMs,
   setIntervalFn = setInterval,
   clearIntervalFn = clearInterval,
+  now = Date.now,
 }: {
   app?: Express;
   a4?: { tick(): Promise<void> };
@@ -81,10 +88,14 @@ export function createRuntime({
   logger: Pick<Logger, "info" | "error">;
   config: Pick<ReturnType<typeof loadConfig>, "port" | "host">;
   verifyDatabase: () => Promise<void>;
+  // Liveness for the uptime alert: see job-heartbeat.ts.
+  heartbeat?: { beat(): Promise<void> };
   backgroundJobs?: boolean;
   cleanupIntervalMs?: number;
+  heartbeatIntervalMs?: number;
   setIntervalFn?: typeof setInterval;
   clearIntervalFn?: typeof clearInterval;
+  now?: () => number;
 }) {
   let server: Server | undefined;
   let a4Timer: NodeJS.Timeout | undefined;
@@ -103,12 +114,19 @@ export function createRuntime({
   let matchmakingTimer: NodeJS.Timeout | undefined;
   let matchmakingTask: Promise<void> | undefined;
   let matchmakingWorking = false;
+  let heartbeatTimer: NodeJS.Timeout | undefined;
+  let heartbeatTask: Promise<void> | undefined;
+  let beating = false;
   let stopping = false;
   const completedJobs = new Set<string>();
+  // The one-second jobs this process runs, and when each last finished a tick.
+  const tickingJobs: string[] = [];
+  const lastTick = new Map<string, number>();
 
   // One line per job after its first completed run lets operators confirm that
   // this process runs the job; failures are logged separately as errors.
   function completed(job: string) {
+    lastTick.set(job, now());
     if (completedJobs.has(job)) return;
     completedJobs.add(job);
     logger.info({ job }, "background job ran");
@@ -213,6 +231,27 @@ export function createRuntime({
     completed("cleanup");
   }
 
+  // Beats only while every one-second job keeps finishing ticks, so a tick
+  // that never returns makes the heartbeat go stale as a stopped worker does.
+  function beat(startedAt: number) {
+    if (!heartbeat || beating || stopping) return heartbeatTask;
+    const stalled = tickingJobs.filter(
+      (job) => now() - (lastTick.get(job) ?? startedAt) > stalledAfterMs,
+    );
+    if (stalled.length) {
+      logger.error({ jobs: stalled }, "background jobs stopped ticking");
+      return heartbeatTask;
+    }
+    beating = true;
+    heartbeatTask = heartbeat
+      .beat()
+      .catch((error) => logger.error({ error }, "jobs heartbeat failed"))
+      .finally(() => {
+        beating = false;
+      });
+    return heartbeatTask;
+  }
+
   return Object.freeze({
     async start() {
       await verifyDatabase();
@@ -230,6 +269,7 @@ export function createRuntime({
 
       if (backgroundJobs) {
         if (mediaAccountRevocation) {
+          tickingJobs.push("speaker-revocation");
           speakerTimer = setIntervalFn(() => {
             if (speakerWorking || stopping) return speakerTask;
             speakerWorking = true;
@@ -248,6 +288,7 @@ export function createRuntime({
           if (app) speakerTimer.unref();
         }
         if (a4 || coinDebates) {
+          tickingJobs.push("a4-recovery");
           a4Timer = setIntervalFn(() => {
             if (a4Ticking || stopping) return a4Task;
             a4Ticking = true;
@@ -269,6 +310,7 @@ export function createRuntime({
           if (app) a4Timer.unref();
         }
         if (transcription) {
+          tickingJobs.push("transcriber-dispatch");
           transcriptionTimer = setIntervalFn(() => {
             if (transcriptionWorking || stopping) return transcriptionTask;
             transcriptionWorking = true;
@@ -289,6 +331,7 @@ export function createRuntime({
         cleanupTimer = setIntervalFn(cleanupSessions, cleanupIntervalMs);
         if (app) cleanupTimer.unref();
         if (media) {
+          tickingJobs.push("media-clock");
           mediaTimer = setIntervalFn(() => {
             if (!mediaTicking) mediaTask = tickMedia();
             return mediaTask;
@@ -297,6 +340,7 @@ export function createRuntime({
         }
         if (matchmaking) {
           // Offer deadlines are 30 seconds, so the queue is swept every second.
+          tickingJobs.push("matchmaking");
           matchmakingTimer = setIntervalFn(() => {
             if (matchmakingWorking || stopping) return matchmakingTask;
             matchmakingWorking = true;
@@ -314,6 +358,15 @@ export function createRuntime({
           }, 1000);
           if (app) matchmakingTimer.unref();
         }
+        if (heartbeat) {
+          const startedAt = now();
+          heartbeatTimer = setIntervalFn(
+            () => beat(startedAt),
+            heartbeatIntervalMs,
+          );
+          if (app) heartbeatTimer.unref();
+          void beat(startedAt);
+        }
       }
       return server;
     },
@@ -323,13 +376,19 @@ export function createRuntime({
       if (a4Timer) clearIntervalFn(a4Timer);
       if (speakerTimer) clearIntervalFn(speakerTimer);
       if (transcriptionTimer) clearIntervalFn(transcriptionTimer);
+      if (heartbeatTimer) clearIntervalFn(heartbeatTimer);
       await speakerTask;
       await transcriptionTask;
       await a4Task;
       if (cleanupTimer) clearIntervalFn(cleanupTimer);
       if (mediaTimer) clearIntervalFn(mediaTimer);
       if (matchmakingTimer) clearIntervalFn(matchmakingTimer);
-      await Promise.all([mediaTask, matchmakingTask, mediaOperations?.stop()]);
+      await Promise.all([
+        mediaTask,
+        matchmakingTask,
+        heartbeatTask,
+        mediaOperations?.stop(),
+      ]);
       await communityStreams?.stop();
       await userStreams?.stop();
 

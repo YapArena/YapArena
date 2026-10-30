@@ -1,21 +1,37 @@
 import pg from "pg";
 import type { Logger } from "pino";
 
+import { OperatorError } from "./operator-error.ts";
+
 const { Pool } = pg;
+
+// The server cancels any web or jobs statement still running after 15 seconds
+// (SQLSTATE 57014), so a runaway query or lock wait cannot hold a pool
+// connection indefinitely. Transactions that need longer raise it with SET
+// LOCAL statement_timeout (A4 uses 30 seconds), which wins for that
+// transaction. There is no client-side query_timeout: pg cannot raise it per
+// transaction, and it abandons the query without cancelling it.
+export const defaultStatementTimeoutMs = 15_000;
 
 export function createDatabase(
   connectionString: string,
   logger: Logger,
   observeWait?: (seconds: number) => void,
-  limits: { max?: number; timeoutMs?: number } = {},
+  limits: {
+    max?: number;
+    timeoutMs?: number;
+    statementTimeoutMs?: number;
+  } = {},
 ) {
+  const statementTimeoutMs =
+    limits.statementTimeoutMs ?? limits.timeoutMs ?? defaultStatementTimeoutMs;
   const database = new Pool({
     connectionString,
     max: limits.max ?? 10,
     connectionTimeoutMillis: limits.timeoutMs ?? 5_000,
     query_timeout: limits.timeoutMs,
     idleTimeoutMillis: 30_000,
-    options: `-c search_path=pg_catalog,yaparena,pg_temp${limits.timeoutMs ? ` -c statement_timeout=${limits.timeoutMs}` : ""}`,
+    options: `-c search_path=pg_catalog,yaparena,pg_temp -c statement_timeout=${statementTimeoutMs}`,
   });
 
   database.on("error", (error) => {
@@ -71,7 +87,7 @@ export async function verifyRuntimeIdentity(database: Pick<pg.Pool, "query">) {
       AS safe FROM pg_roles r WHERE rolname = current_user
   `);
   if (!result.rows[0]?.safe) {
-    throw new Error(
+    throw new OperatorError(
       "database runtime identity violates the server-only boundary",
     );
   }

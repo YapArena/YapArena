@@ -87,10 +87,13 @@ describe("background worker", () => {
     const { worker, events, errors, ran, timers, cleared, metrics } =
       startWorker(base);
     await worker.start();
+    // The 15-second timer is the heartbeat; it beats once at start too.
     assert.deepEqual(
       timers.map(({ interval }) => interval),
-      [1000, 3600000],
+      [1000, 3600000, 15000],
     );
+    await new Promise(setImmediate);
+    assert.ok(errors.includes("jobs heartbeat failed"));
     await timers.find(({ interval }) => interval === 3600000).callback();
     assert.ok(errors.includes("community retention cleanup failed"));
     assert.ok(errors.includes("product measurement retention cleanup failed"));
@@ -99,7 +102,7 @@ describe("background worker", () => {
     assert.deepEqual(ran, ["cleanup", "a4-recovery"]);
     await worker.stop();
     assert.deepEqual(events, ["verified", "database closed"]);
-    assert.deepEqual(cleared.sort(), [1000, 3600000]);
+    assert.deepEqual(cleared.sort(), [1000, 15000, 3600000]);
     assert.deepEqual(await authJourney(metrics), {});
   });
 
@@ -114,7 +117,7 @@ describe("background worker", () => {
     await worker.start();
     assert.deepEqual(
       timers.map(({ interval }) => interval).sort((a, b) => a - b),
-      [1000, 1000, 1000, 3600000],
+      [1000, 1000, 1000, 15000, 3600000],
     );
     await new Promise(setImmediate);
     assert.deepEqual(await authJourney(metrics), {});

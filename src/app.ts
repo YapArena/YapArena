@@ -63,6 +63,7 @@ import {
   type Auth0SignIn,
 } from "./platform/auth/router.ts";
 import { pingDatabase } from "./platform/database.ts";
+import { heartbeatStaleSeconds } from "./platform/job-heartbeat.ts";
 import { createHttpLogger } from "./platform/logger.ts";
 import {
   createMetrics,
@@ -120,6 +121,7 @@ export const handleError: ErrorRequestHandler = (
 export function createApp({
   messages,
   database,
+  jobHeartbeat,
   a4,
   discovery,
   identity,
@@ -166,6 +168,8 @@ export function createApp({
   messages: ReturnType<typeof createMessageRepository>;
   // Readiness pings this pool. Without it the service reports not ready.
   database?: Pick<Pool, "query">;
+  // Mounts /ready/jobs, which reports whether the jobs worker is beating.
+  jobHeartbeat?: { age(): Promise<number | null> };
   a4?: ReturnType<typeof createA4Repository>;
   discovery?: ReturnType<typeof createDiscoveryRepository>;
   identity?: ReturnType<typeof createIdentityRepository>;
@@ -376,6 +380,24 @@ export function createApp({
       return response.status(503).json({ status: "not ready" });
     }
   });
+
+  // For the uptime alert on the jobs worker. Kept apart from /ready, the web
+  // health check, so a stopped worker never takes web out of service. Like
+  // /ready it is public and says only whether jobs run.
+  if (jobHeartbeat)
+    app.get("/ready/jobs", async (request, response) => {
+      response.set("Cache-Control", "no-store");
+      try {
+        const age = await jobHeartbeat.age();
+        const ageSeconds = age === null ? null : Math.max(0, Math.round(age));
+        if (ageSeconds !== null && ageSeconds <= heartbeatStaleSeconds)
+          return response.json({ status: "ok", ageSeconds });
+        return response.status(503).json({ status: "stale", ageSeconds });
+      } catch (error) {
+        request.log.error({ error }, "jobs heartbeat check failed");
+        return response.status(503).json({ status: "unknown" });
+      }
+    });
 
   app.get(
     "/metrics",
