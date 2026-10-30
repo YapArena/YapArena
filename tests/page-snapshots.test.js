@@ -230,9 +230,10 @@ it("renders the measurement dashboard", (t) => {
   );
 });
 
-it("renders the privacy and terms pages", (t) => {
+it("renders the privacy, terms and cookie pages", (t) => {
   snapshot(t, legal.renderPrivacy(origin));
   snapshot(t, legal.renderTerms(origin));
+  snapshot(t, legal.renderCookies(origin));
 });
 
 it("renders the 404 and 500 pages", (t) => {

@@ -304,7 +304,10 @@ export async function verifyChatClient({
   try {
     await page.goto(`${base}/debates/${eventSlug}`);
     await page.getByText("Polling updates on", { exact: false }).waitFor();
-    const consent = page.getByRole("button", { name: "Not now", exact: true });
+    const consent = page.getByRole("button", {
+      name: "Reject all",
+      exact: true,
+    });
     if (await consent.isVisible()) await consent.click();
     assert.equal(await rows.count(), 10);
     await page.locator("[data-community-older]").click();

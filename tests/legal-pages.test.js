@@ -24,6 +24,7 @@ describe("privacy and terms pages", () => {
     for (const [path, title] of [
       ["/privacy", "Privacy policy"],
       ["/terms", "Terms of use"],
+      ["/cookies", "Cookie policy"],
     ]) {
       const page = await request(app).get(path);
       assert.equal(page.status, 200);
@@ -51,10 +52,10 @@ describe("privacy and terms pages", () => {
       );
       assert.match(page.text, new RegExp(`<dd>${TERMS_VERSION}</dd>`));
       // Every contents link reaches a section on the page.
-      const targets = [...page.text.matchAll(/<li><a href="#([a-z]+)">/g)].map(
+      const targets = [...page.text.matchAll(/<li><a href="#([a-z-]+)">/g)].map(
         ([, id]) => id,
       );
-      assert.ok(targets.length >= 10);
+      assert.ok(targets.length >= 8);
       for (const id of targets)
         assert.match(page.text, new RegExp(`<section id="${id}"`));
     }
@@ -118,9 +119,29 @@ describe("privacy and terms pages", () => {
     assert.match(text, /<span class="sr-only">Terms of use<\/span>/);
   });
 
-  it("links both pages from every page footer", async () => {
+  it("lists every cookie and keeps analytics off until accepted", async () => {
+    const { text } = await request(app).get("/cookies");
+    for (const name of [
+      "__Host-session",
+      "__Host-sign-in",
+      "yap_media_guard",
+      "__Host-measurement",
+    ])
+      assert.match(text, new RegExp(`<th scope="row">${name}</th>`));
+    assert.match(text, /Off until you accept/);
+    assert.match(
+      text,
+      /We don’t use advertising or cross-site tracking cookies/,
+    );
+    assert.match(text, /href="\/home#cookie-settings"/);
+    // The privacy policy points to it instead of repeating the list.
+    const privacy = await request(app).get("/privacy");
+    assert.match(privacy.text, /<a href="\/cookies">Cookie Policy<\/a>/);
+  });
+
+  it("links the legal pages from every page footer", async () => {
     const links =
-      /<a href="\/privacy"[^>]*>Privacy<\/a>[^<]*<a href="\/terms"[^>]*>Terms<\/a>/;
+      /<a href="\/privacy"[^>]*>Privacy<\/a>[^<]*<a href="\/terms"[^>]*>Terms<\/a>[^<]*<a href="\/cookies"[^>]*>Cookies<\/a>/;
     for (const path of [
       "/",
       "/home",
@@ -128,6 +149,7 @@ describe("privacy and terms pages", () => {
       "/topics",
       "/privacy",
       "/terms",
+      "/cookies",
     ]) {
       const page = await request(app).get(path);
       assert.equal(page.status, 200, path);

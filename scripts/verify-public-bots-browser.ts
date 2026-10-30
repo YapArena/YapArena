@@ -152,7 +152,10 @@ export async function verifyPublicBotsBrowser({
     home.setDefaultTimeout(20000);
     watch.setDefaultTimeout(20000);
     await home.bringToFront();
-    const dismiss = home.getByRole("button", { name: "Not now", exact: true });
+    const dismiss = home.getByRole("button", {
+      name: "Reject all",
+      exact: true,
+    });
     if (await dismiss.isVisible()) await dismiss.click();
     await home.locator(`[data-trending="${topic}"]`).click();
     await watch

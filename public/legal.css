@@ -323,7 +323,15 @@
     padding-block: max(var(--space-4), env(safe-area-inset-top)) var(--space-4);
   }
   .legal-header .landing-brand img {
-    height: 24px;
+    height: 22px;
+  }
+  .legal-switch {
+    gap: var(--space-1);
+  }
+  .legal-switch a {
+    min-height: 32px;
+    padding: 0 var(--space-3);
+    font-size: 0.8rem;
   }
   .legal-table thead {
     position: absolute;

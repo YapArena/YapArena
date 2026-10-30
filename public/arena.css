@@ -2145,7 +2145,7 @@ textarea::placeholder {
 }
 
 /* Yap Coins results notice (Decision 0013, interface 10), on every page. It
-   sits below the header and under the measurement choice banner. */
+   sits below the header and under the cookie banner. */
 .results-notice {
   position: fixed;
   z-index: 90;

@@ -66,7 +66,7 @@ async function newPage(viewport = { width: 1440, height: 1000 }) {
   return page;
 }
 async function dismissConsent(page: Page) {
-  const dismiss = page.getByRole("button", { name: "Not now", exact: true });
+  const dismiss = page.getByRole("button", { name: "Reject all", exact: true });
   if (await dismiss.isVisible()) await dismiss.click();
 }
 async function account(page: Page) {

@@ -88,8 +88,8 @@ const notificationsPanel = html`<section class="settings-panel" role="tabpanel" 
 const privacyPanel = html`<section class="settings-panel" role="tabpanel" id="panel-privacy" aria-labelledby="tab-privacy" tabindex="-1" hidden>
           <div class="settings-card settings-row-card">
             <span class="settings-card-icon">${icon("chart")}</span>
-            <div><h2>Usage measurement</h2><p>We only count page views and watch time if you allow it, and you can turn it off and delete that data anytime.</p></div>
-            <button class="button-secondary" type="button" data-open-measurement>Measurement settings</button>
+            <div><h2>Cookies</h2><p>Essential cookies keep you signed in. The analytics cookie stays off until you accept it, and turning it off deletes its data.</p></div>
+            <button class="button-secondary" type="button" data-open-measurement>Cookie settings</button>
           </div>
           <div class="settings-card settings-row-card">
             <span class="settings-card-icon">${icon("download")}</span>

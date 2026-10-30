@@ -20,7 +20,7 @@ import {
   renderTopics,
 } from "./web.ts";
 import { renderLanding } from "./landing-web.ts";
-import { renderPrivacy, renderTerms } from "./legal-web.ts";
+import { renderCookies, renderPrivacy, renderTerms } from "./legal-web.ts";
 
 type Repository = ReturnType<typeof createDiscoveryRepository>;
 const statuses = new Set<DebateStatus>([
@@ -351,6 +351,9 @@ export function createDiscoveryRouter({
   );
   router.get("/terms", (_request, response) =>
     html(response, renderTerms(origin)),
+  );
+  router.get("/cookies", (_request, response) =>
+    html(response, renderCookies(origin)),
   );
   router.get("/account", (_request, response) =>
     html(response, renderAccount(origin, Boolean(liveOutline))),

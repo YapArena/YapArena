@@ -85,17 +85,36 @@ const measurement = {
 };
 window.yapMeasurement = measurement;
 
-function choicePanel() {
+// The cookie banner (founder, 2026-10-30). Essential cookies are always on.
+// The analytics cookie is product measurement: it stays off until the visitor
+// accepts it, as Québec's privacy-by-default rule requires, and turning it
+// off deletes this browser's measurements. Reject and Accept weigh the same.
+function cookiePanel() {
   const panel = document.createElement("section");
-  panel.className = "measurement-choice";
-  panel.setAttribute("aria-label", "Usage measurement choice");
+  panel.className = "cookie-choice";
+  panel.setAttribute("aria-label", "Cookie choices");
   panel.hidden = true;
-  panel.innerHTML = `<p><strong>Help improve YAP Arena?</strong> With your permission, we count which pages people discover and how long they watch. We do not count wallets as people. You can change this choice anytime. <a href="/about#measurement">How measurement works</a></p><div><button type="button" data-measurement-allow>Allow measurement</button><button type="button" data-measurement-decline>Not now</button></div><p role="status" aria-live="polite" data-measurement-status></p>`;
+  panel.innerHTML = `<div class="cookie-copy"><p class="cookie-title">We use cookies</p><p>Essential cookies keep you signed in and YAP Arena secure. With your OK, we also use an analytics cookie to count which debates people find and how long they watch. We don't use advertising cookies. <a href="/cookies">Cookie Policy</a></p></div><fieldset class="cookie-options" data-cookie-options hidden><legend>Cookie settings</legend><div class="cookie-option"><span class="cookie-option-text"><strong>Essential</strong><span>Sign-in, security and your choices on this device.</span></span><span class="cookie-always">Always on</span></div><label class="cookie-option"><span class="cookie-option-text"><strong>Analytics</strong><span>Which debates people find, watch time and return visits. Turning it off deletes this browser's analytics data.</span></span><input type="checkbox" role="switch" data-cookie-analytics></label></fieldset><div class="cookie-actions"><button type="button" class="cookie-link" data-cookie-customize>Customize</button><button type="button" data-cookie-save hidden>Save choices</button><button type="button" data-cookie-reject>Reject all</button><button type="button" data-cookie-accept>Accept all</button></div><p role="status" aria-live="polite" data-cookie-status></p>`;
   document.body.append(panel);
-  const status = panel.querySelector<HTMLElement>("[data-measurement-status]")!;
-  panel
-    .querySelector<HTMLElement>("[data-measurement-allow]")!
-    .addEventListener("click", async () => {
+  const q = <T extends HTMLElement>(selector: string) =>
+    panel.querySelector<T>(selector)!;
+  const status = q("[data-cookie-status]");
+  const options = q("[data-cookie-options]");
+  const analytics = q<HTMLInputElement>("[data-cookie-analytics]");
+  const customize = q("[data-cookie-customize]");
+  const save = q("[data-cookie-save]");
+
+  function show(settings: boolean) {
+    panel.hidden = false;
+    status.textContent = "";
+    options.hidden = !settings;
+    customize.hidden = settings;
+    save.hidden = !settings;
+    analytics.checked = consented;
+  }
+
+  async function choose(allow: boolean) {
+    if (allow && !consented) {
       status.textContent = "Saving your choice…";
       try {
         const response = await fetch("/api/measurement/consent", {
@@ -105,20 +124,16 @@ function choicePanel() {
           body: JSON.stringify({ consent: true }),
         });
         if (!response.ok) throw new Error();
-        consented = true;
-        rememberDecline(false);
-        panel.hidden = true;
-        recordPage();
-        window.dispatchEvent(new Event("yap-measurement-changed"));
       } catch {
         status.textContent = "Could not save your choice. Try again.";
+        return;
       }
-    });
-  panel
-    .querySelector<HTMLElement>("[data-measurement-decline]")!
-    .addEventListener("click", async () => {
+      consented = true;
+      rememberDecline(false);
+      recordPage();
+    } else if (!allow) {
       if (consented) {
-        status.textContent = "Removing measurement data…";
+        status.textContent = "Turning off analytics and deleting its data…";
         try {
           const response = await fetch("/api/measurement/consent", {
             method: "DELETE",
@@ -126,43 +141,53 @@ function choicePanel() {
           });
           if (!response.ok) throw new Error();
         } catch {
-          status.textContent = "Could not remove measurement data. Try again.";
+          status.textContent = "Could not delete analytics data. Try again.";
           return;
         }
       }
       consented = false;
       rememberDecline(true);
-      panel.hidden = true;
-      window.dispatchEvent(new Event("yap-measurement-changed"));
-    });
-  return panel;
+    }
+    panel.hidden = true;
+    window.dispatchEvent(new Event("yap-measurement-changed"));
+  }
+
+  q("[data-cookie-accept]").addEventListener("click", () => void choose(true));
+  q("[data-cookie-reject]").addEventListener("click", () => void choose(false));
+  save.addEventListener("click", () => void choose(analytics.checked));
+  customize.addEventListener("click", () => {
+    show(true);
+    analytics.focus();
+  });
+  return {
+    banner: () => show(false),
+    settings: () => {
+      show(true);
+      analytics.focus();
+    },
+  };
 }
 
-const panel = choicePanel();
+const cookies = cookiePanel();
 const settings = document.createElement("button");
 settings.type = "button";
-settings.className = "measurement-settings";
-settings.textContent = "Measurement settings";
-settings.addEventListener("click", () => {
-  panel.hidden = false;
-  panel.querySelector<HTMLElement>("[data-measurement-allow]")!.textContent =
-    consented ? "Keep measurement on" : "Allow measurement";
-  panel.querySelector<HTMLElement>("[data-measurement-decline]")!.textContent =
-    consented ? "Turn off and delete data" : "Not now";
-  panel.querySelector<HTMLElement>("[data-measurement-status]")!.textContent =
-    "";
-  panel.querySelector<HTMLElement>("button")!.focus();
-});
+settings.className = "cookie-settings";
+settings.textContent = "Cookie settings";
+settings.addEventListener("click", cookies.settings);
 document.querySelector(".footer-inner")?.append(settings);
 
+// /cookies links here with #cookie-settings to open the settings directly.
+const openSettings = () => window.location.hash === "#cookie-settings";
 fetch("/api/measurement/consent", { credentials: "same-origin" })
   .then((response) => (response.ok ? response.json() : { consented: false }))
   .then((data: { consented: boolean }) => {
     consented = Boolean(data.consented);
     if (consented) recordPage();
-    else if (!declined()) panel.hidden = false;
+    if (openSettings()) cookies.settings();
+    else if (!consented && !declined()) cookies.banner();
     window.dispatchEvent(new Event("yap-measurement-changed"));
   })
   .catch(() => {
-    if (!declined()) panel.hidden = false;
+    if (openSettings()) cookies.settings();
+    else if (!declined()) cookies.banner();
   });

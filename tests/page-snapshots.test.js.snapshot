@@ -532,7 +532,7 @@ exports[`renders a debate 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -1075,7 +1075,7 @@ exports[`renders a debate 10`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -1618,7 +1618,7 @@ exports[`renders a debate 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -2159,7 +2159,7 @@ exports[`renders a debate 3`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -2700,7 +2700,7 @@ exports[`renders a debate 4`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -3241,7 +3241,7 @@ exports[`renders a debate 5`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -3782,7 +3782,7 @@ exports[`renders a debate 6`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -4324,7 +4324,7 @@ exports[`renders a debate 7`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -4871,7 +4871,7 @@ exports[`renders a debate 8`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -5412,7 +5412,7 @@ exports[`renders a debate 9`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -5532,7 +5532,7 @@ exports[`renders a profile 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -5677,7 +5677,7 @@ exports[`renders a profile 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -5797,7 +5797,7 @@ exports[`renders a profile 3`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -5927,7 +5927,7 @@ exports[`renders a topic 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -6100,7 +6100,7 @@ exports[`renders a topic 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -6245,7 +6245,7 @@ exports[`renders a topic 3`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -6343,7 +6343,7 @@ exports[`renders community moderation and the broadcast overlay 1`] = `
 </main>
 <footer class="site-footer">
 <div class="container footer-inner">
-<span>Community preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
+<span>Community preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </div>
 </footer>
@@ -6458,7 +6458,7 @@ exports[`renders community moderation and the broadcast overlay 2`] = `
 </main>
 <footer class="site-footer">
 <div class="container footer-inner">
-<span>Community preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
+<span>Community preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </div>
 </footer>
@@ -6557,7 +6557,7 @@ exports[`renders community moderation and the broadcast overlay 3`] = `
 </main>
 <footer class="site-footer">
 <div class="container footer-inner">
-<span>Community preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
+<span>Community preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </div>
 </footer>
@@ -6672,7 +6672,7 @@ exports[`renders community moderation and the broadcast overlay 4`] = `
 </main>
 <footer class="site-footer">
 <div class="container footer-inner">
-<span>Community preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
+<span>Community preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </div>
 </footer>
@@ -6830,7 +6830,7 @@ exports[`renders the 404 and 500 pages 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -6937,7 +6937,7 @@ exports[`renders the 404 and 500 pages 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -7041,8 +7041,8 @@ exports[`renders the about and account pages 1`] = `
 <h2>What you can explore now</h2>
 <p>This public preview shows published topics, debate listings, and participant profiles. Sign in to pick your handle and follow people or topics. Listings marked Demo are fictional examples used to develop and test the product.</p>
 <p>Live video and replay are available in a configured local prototype. A listing’s status does not prove that video is available or that a result has been determined. Yap Coins and labeled bot rounds are available when enabled. Real funds remain unavailable.</p>
-<h2 id="measurement">Optional usage measurement</h2>
-<p>We ask before recording discovery pages, watch time, replay starts, matching, follows, reports, or return visits. If you allow it, we use a random browser cookie, not your wallet address, and may associate events with your signed-in account to separate founder-affiliated activity. We do not store search text, chat text, IP addresses, or wallet addresses in product events. Use Measurement settings in the footer to turn it off and delete your measurements. Raw events and watch sessions are retained for up to 90 days; an unused consent expires after 180 days. Debate completion is counted from public event state without a browser identifier.</p>
+<h2 id="measurement">Cookies and usage measurement</h2>
+<p>We set an analytics cookie only if you accept it in the cookie banner. It counts discovery pages, watch time, replay starts, matching, follows, reports and return visits, and may be linked to your signed-in account to separate founder-affiliated activity. We don't store search text, chat text or IP addresses in these measurements. Use Cookie settings in the footer to turn it off and delete your measurements. Raw events and watch sessions are kept for up to 90 days; an unused consent expires after 180 days. Debate completion is counted from public event state without a browser identifier. See the <a href="/cookies">Cookie Policy</a>.</p>
 <a class="button" href="/debates">Explore debates ↗</a>
 </section>
 </main>
@@ -7051,7 +7051,7 @@ exports[`renders the about and account pages 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -7288,9 +7288,9 @@ exports[`renders the about and account pages 2`] = `
 <path d="M4 19h16M7 16v-4m5 4V8m5 8v-6"/>
 </svg>
 </span>\\n            <div>
-<h2>Usage measurement</h2>
-<p>We only count page views and watch time if you allow it, and you can turn it off and delete that data anytime.</p>
-</div>\\n            <button class="button-secondary" type="button" data-open-measurement>Measurement settings</button>\\n          </div>\\n          <div class="settings-card settings-row-card">\\n            <span class="settings-card-icon">
+<h2>Cookies</h2>
+<p>Essential cookies keep you signed in. The analytics cookie stays off until you accept it, and turning it off deletes its data.</p>
+</div>\\n            <button class="button-secondary" type="button" data-open-measurement>Cookie settings</button>\\n          </div>\\n          <div class="settings-card settings-row-card">\\n            <span class="settings-card-icon">
 <svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 <path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/>
 </svg>
@@ -7305,7 +7305,7 @@ exports[`renders the about and account pages 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -7560,9 +7560,9 @@ exports[`renders the about and account pages 3`] = `
 <path d="M4 19h16M7 16v-4m5 4V8m5 8v-6"/>
 </svg>
 </span>\\n            <div>
-<h2>Usage measurement</h2>
-<p>We only count page views and watch time if you allow it, and you can turn it off and delete that data anytime.</p>
-</div>\\n            <button class="button-secondary" type="button" data-open-measurement>Measurement settings</button>\\n          </div>\\n          <div class="settings-card settings-row-card">\\n            <span class="settings-card-icon">
+<h2>Cookies</h2>
+<p>Essential cookies keep you signed in. The analytics cookie stays off until you accept it, and turning it off deletes its data.</p>
+</div>\\n            <button class="button-secondary" type="button" data-open-measurement>Cookie settings</button>\\n          </div>\\n          <div class="settings-card settings-row-card">\\n            <span class="settings-card-icon">
 <svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 <path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/>
 </svg>
@@ -7578,7 +7578,7 @@ exports[`renders the about and account pages 3`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -7875,7 +7875,7 @@ exports[`renders the coins and match pages 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -8066,7 +8066,7 @@ exports[`renders the coins and match pages 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -8266,7 +8266,7 @@ exports[`renders the coins and match pages 3`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -8396,7 +8396,7 @@ exports[`renders the debate list 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -8569,7 +8569,7 @@ exports[`renders the debate list 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -8722,7 +8722,7 @@ exports[`renders the debate list 3`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -8870,7 +8870,7 @@ exports[`renders the debate list 4`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -9123,7 +9123,7 @@ exports[`renders the home page 1`] = `
 </div>
 </section>\\n    <footer class="ya-footer footer-inner">
 <span>Endorsement = share of participants choosing YES in the latest closed round.</span>
-<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
+<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </footer>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
 <strong>
@@ -9383,7 +9383,7 @@ exports[`renders the home page 2`] = `
 </div>
 </section>\\n    <footer class="ya-footer footer-inner">
 <span>Endorsement = share of participants choosing YES in the latest closed round.</span>
-<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
+<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </footer>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
 <strong>
@@ -9643,7 +9643,7 @@ exports[`renders the home page 3`] = `
 </div>
 </section>\\n    <footer class="ya-footer footer-inner">
 <span>Endorsement = share of participants choosing YES in the latest closed round.</span>
-<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
+<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </footer>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
 <strong>
@@ -9968,7 +9968,7 @@ exports[`renders the home page 4`] = `
 </div>
 </section>\\n    <footer class="ya-footer footer-inner">
 <span>Endorsement = share of participants choosing YES in the latest closed round.</span>
-<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
+<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </footer>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
 <strong>
@@ -10357,7 +10357,7 @@ exports[`renders the home page 5`] = `
 </div>
 </section>\\n    <footer class="ya-footer footer-inner">
 <span>Endorsement = share of participants choosing YES in the latest closed round.</span>
-<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
+<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </footer>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
 <strong>
@@ -11304,7 +11304,7 @@ exports[`renders the home page 7`] = `
 </div>
 </section>\\n    <footer class="ya-footer footer-inner">
 <span>Endorsement = share of participants choosing YES in the latest closed round.</span>
-<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
+<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </footer>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
 <strong>
@@ -11455,7 +11455,7 @@ exports[`renders the live page 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -11685,7 +11685,7 @@ exports[`renders the live page 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -11903,7 +11903,7 @@ exports[`renders the measurement dashboard 1`] = `
 </main>
 <footer class="site-footer">
 <div class="container footer-inner">
-<span>Measurement preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
+<span>Measurement preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </div>
 </footer>
@@ -12125,7 +12125,7 @@ exports[`renders the measurement dashboard 2`] = `
 </main>
 <footer class="site-footer">
 <div class="container footer-inner">
-<span>Measurement preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
+<span>Measurement preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </div>
 </footer>
@@ -12133,7 +12133,7 @@ exports[`renders the measurement dashboard 2`] = `
 </html>
 `;
 
-exports[`renders the privacy and terms pages 1`] = `
+exports[`renders the privacy, terms and cookie pages 1`] = `
 <!doctype html>
 <html lang="en">
 <head>
@@ -12157,6 +12157,7 @@ exports[`renders the privacy and terms pages 1`] = `
 <nav class="legal-switch" aria-label="Legal">
 <a href="/privacy" aria-current="page">Privacy</a>
 <a href="/terms">Terms</a>
+<a href="/cookies">Cookies</a>
 </nav>
 </header>
 <main id="main" class="legal-main landing-container">
@@ -12193,8 +12194,8 @@ exports[`renders the privacy and terms pages 1`] = `
 <span>We don’t sell personal information or use it for advertising.</span>
 </li>
 <li>
-<strong>Measurement is your choice</strong>
-<span>Usage measurement stays off until you allow it, and you can delete it anytime.</span>
+<strong>Analytics cookies are your choice</strong>
+<span>They stay off until you accept them, and you can turn them off and delete their data anytime.</span>
 </li>
 </ul>
 </header>
@@ -12224,7 +12225,7 @@ exports[`renders the privacy and terms pages 1`] = `
 <a href="#retention">How long we keep it</a>
 </li>
 <li>
-<a href="#cookies">Cookies and device storage</a>
+<a href="#cookies">Cookies</a>
 </li>
 <li>
 <a href="#rights">Your rights and choices</a>
@@ -12277,7 +12278,7 @@ exports[`renders the privacy and terms pages 1`] = `
 <li>
 <strong>Yap Coins</strong>: your balance, grants and the positions you take in each turn of a debate, and their results.</li>
 </ul>
-<h3>Only if you allow measurement</h3>
+<h3>Only if you accept analytics cookies</h3>
 <ul>
 <li>Which public pages you open, live and replay watch time, replay starts, matches, follows, reports and return visits. We don’t record your email, handle, IP address, search text, chat or report text in measurement.</li>
 </ul>
@@ -12301,7 +12302,7 @@ exports[`renders the privacy and terms pages 1`] = `
 <li>
 <strong>To keep the community safe</strong>: chat, reports, moderation, appeals, rate limits and abuse prevention.</li>
 <li>
-<strong>To improve YAP Arena</strong>, with measurement only if you allow it.</li>
+<strong>To improve YAP Arena</strong>, with analytics cookies only if you accept them.</li>
 <li>
 <strong>To meet legal obligations</strong> and answer lawful requests.</li>
 </ul>
@@ -12484,8 +12485,8 @@ exports[`renders the privacy and terms pages 1`] = `
 </td>
 </tr>
 <tr>
-<th scope="row">Usage measurement (only if you allow it)</th>
-<td data-label="How long">Events and watch sessions 90 days; an unused consent 180 days; staff reviews that classify accounts in measurement 365 days. Turning measurement off deletes that browser’s measurements at once.</td>
+<th scope="row">Analytics (only if you accept analytics cookies)</th>
+<td data-label="How long">Events and watch sessions 90 days; an unused consent 180 days; staff reviews that classify accounts in measurement 365 days. Turning analytics off deletes that browser’s measurements at once.</td>
 </tr>
 <tr>
 <th scope="row">Database backups</th>
@@ -12501,46 +12502,9 @@ exports[`renders the privacy and terms pages 1`] = `
 <p>Daily cleanup jobs delete information when its period ends. Deleted information can remain in database backups until they expire.</p>
 </section>
 <section id="cookies" aria-labelledby="cookies-title">
-<h2 id="cookies-title">Cookies and device storage</h2>
-<p>We use only the cookies and device storage YAP Arena needs to work, plus the measurement cookie if you allow it. We don’t use advertising or third-party analytics cookies.</p>
-<table class="legal-table">
-<caption>Cookies and device storage</caption>
-<thead>
-<tr>
-<th scope="col">Name</th>
-<th scope="col">Why</th>
-<th scope="col">How long</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th scope="row">__Host-session</th>
-<td data-label="Why">Keeps you signed in.</td>
-<td data-label="How long">7 days, or until you sign out.</td>
-</tr>
-<tr>
-<th scope="row">__Host-sign-in</th>
-<td data-label="Why">Ties a sign-in in progress to your browser, for security.</td>
-<td data-label="How long">10 minutes.</td>
-</tr>
-<tr>
-<th scope="row">yap_media_guard</th>
-<td data-label="Why">A signed random value that limits how fast one browser can load pages and video, to prevent abuse.</td>
-<td data-label="How long">15 minutes.</td>
-</tr>
-<tr>
-<th scope="row">__Host-measurement</th>
-<td data-label="Why">Only if you choose Allow measurement: a random value that groups your browser’s measurements. We store only a fingerprint of it.</td>
-<td data-label="How long">Until you turn measurement off, or 180 days unused.</td>
-</tr>
-<tr>
-<th scope="row">Device storage</th>
-<td data-label="Why">Your choices on this device: measurement declined, captions on or off, Yap Coins ticket defaults, which results you have seen, and while you debate your chosen camera, microphone and mute state.</td>
-<td data-label="How long">Until you clear your browser’s site data; debate choices until you close the tab.</td>
-</tr>
-</tbody>
-</table>
-<p>To change your measurement choice, use <strong>Measurement settings</strong> at the bottom of YAP Arena’s pages, for example <a href="/home">the home page</a>.</p>
+<h2 id="cookies-title">Cookies</h2>
+<p>We use strictly necessary cookies to sign you in, keep YAP Arena secure and remember your choices. We use one analytics cookie, only if you accept it in the cookie banner. We don’t use advertising or third-party tracking cookies.</p>
+<p>The <a href="/cookies">Cookie Policy</a> lists every cookie and how long it lasts. Change your choice anytime with <strong>Cookie settings</strong> at the bottom of any page.</p>
 </section>
 <section id="rights" aria-labelledby="rights-title">
 <h2 id="rights-title">Your rights and choices</h2>
@@ -12551,7 +12515,7 @@ exports[`renders the privacy and terms pages 1`] = `
 <li>
 <strong>Correct your profile</strong> in your account settings. Your handle is permanent; ask us if it must change.</li>
 <li>
-<strong>Turn measurement off</strong> with Measurement settings; it deletes that browser’s measurements.</li>
+<strong>Turn analytics cookies off</strong> with Cookie settings; it deletes that browser’s measurements.</li>
 <li>
 <strong>Withdraw debating consent</strong> in the Debating card in your account settings.</li>
 <li>
@@ -12590,6 +12554,7 @@ exports[`renders the privacy and terms pages 1`] = `
 <a href="/about">About</a>
 <a href="/privacy" aria-current="page">Privacy</a>
 <a href="/terms">Terms</a>
+<a href="/cookies">Cookies</a>
 <span>Play money</span>
 </nav>
 </footer>
@@ -12597,7 +12562,7 @@ exports[`renders the privacy and terms pages 1`] = `
 </html>
 `;
 
-exports[`renders the privacy and terms pages 2`] = `
+exports[`renders the privacy, terms and cookie pages 2`] = `
 <!doctype html>
 <html lang="en">
 <head>
@@ -12621,6 +12586,7 @@ exports[`renders the privacy and terms pages 2`] = `
 <nav class="legal-switch" aria-label="Legal">
 <a href="/privacy">Privacy</a>
 <a href="/terms" aria-current="page">Terms</a>
+<a href="/cookies">Cookies</a>
 </nav>
 </header>
 <main id="main" class="legal-main landing-container">
@@ -12806,6 +12772,290 @@ exports[`renders the privacy and terms pages 2`] = `
 <a href="/about">About</a>
 <a href="/privacy">Privacy</a>
 <a href="/terms" aria-current="page">Terms</a>
+<a href="/cookies">Cookies</a>
+<span>Play money</span>
+</nav>
+</footer>
+</body>
+</html>
+`;
+
+exports[`renders the privacy, terms and cookie pages 3`] = `
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<title>Cookie policy · YAP Arena</title>
+<meta name="description" content="The cookies and similar technologies YAP Arena uses, why, and how to change your choice.">
+<link rel="canonical" href="https://arena.example/cookies">
+<link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/landing.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/legal.css?v=0123456789ab">
+</head>
+<body class="landing legal">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="landing-header landing-container legal-header">
+<a class="landing-brand" href="/">
+<img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena">
+</a>
+<nav class="legal-switch" aria-label="Legal">
+<a href="/privacy">Privacy</a>
+<a href="/terms">Terms</a>
+<a href="/cookies" aria-current="page">Cookies</a>
+</nav>
+</header>
+<main id="main" class="legal-main landing-container">
+<header class="legal-hero">
+<p class="legal-eyebrow reveal">YAP ARENA · LEGAL</p>
+<h1 class="legal-title reveal reveal-2">
+<span class="sr-only">Cookie policy</span>
+<span aria-hidden="true">Cookie policy</span>
+</h1>
+<p class="legal-lede reveal reveal-3">This policy explains the cookies and similar technologies YAP Arena uses, why we use them and how you control them. It is part of our <a href="/privacy">Privacy Policy</a>.</p>
+<dl class="legal-meta reveal reveal-4">
+<div>
+<dt>Updated</dt>
+<dd>
+<time datetime="2026-10-30">October 30, 2026</time>
+</dd>
+</div>
+<div>
+<dt>Version</dt>
+<dd>2026-10-30</dd>
+</div>
+</dl>
+<ul class="legal-glance reveal reveal-5">
+<li>
+<strong>Essential by default</strong>
+<span>Only the cookies YAP Arena needs to work are on until you choose.</span>
+</li>
+<li>
+<strong>Analytics is your choice</strong>
+<span>Accept or reject it in the banner; both buttons weigh the same.</span>
+</li>
+<li>
+<strong>No advertising cookies</strong>
+<span>No ad networks, no cross-site tracking, no third-party analytics.</span>
+</li>
+<li>
+<strong>Change it anytime</strong>
+<span>Cookie settings is at the bottom of every page and in your account.</span>
+</li>
+</ul>
+</header>
+<div class="legal-layout">
+<nav class="legal-toc" aria-labelledby="legal-toc-title">
+<h2 id="legal-toc-title">ON THIS PAGE</h2>
+<ol>
+<li>
+<a href="#what">What cookies are</a>
+</li>
+<li>
+<a href="#categories">How we use cookies</a>
+</li>
+<li>
+<a href="#list">The cookies we set</a>
+</li>
+<li>
+<a href="#storage">Similar technologies</a>
+</li>
+<li>
+<a href="#third-parties">Other services</a>
+</li>
+<li>
+<a href="#choices">Your choices</a>
+</li>
+<li>
+<a href="#changes">Changes to this policy</a>
+</li>
+<li>
+<a href="#contact">Contact</a>
+</li>
+</ol>
+</nav>
+<article class="legal-body">
+<section id="what" aria-labelledby="what-title">
+<h2 id="what-title">What cookies are</h2>
+<p>Cookies are small text files a website stores in your browser. They let the site recognize your browser between pages, for example to keep you signed in. Some last only for a visit; others stay for a set time.</p>
+<p>Websites also use similar technologies, such as your browser’s local and session storage, which keep small values on your device. This policy covers both, and calls them all “cookies” where the difference doesn’t matter.</p>
+</section>
+<section id="categories" aria-labelledby="categories-title">
+<h2 id="categories-title">How we use cookies</h2>
+<table class="legal-table">
+<caption>Cookie categories</caption>
+<thead>
+<tr>
+<th scope="col">Category</th>
+<th scope="col">What it does</th>
+<th scope="col">Your choice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">Strictly necessary</th>
+<td data-label="What it does">Signs you in, keeps your session secure, limits abuse and remembers the choices you make on this page.</td>
+<td data-label="Your choice">Always on. YAP Arena can’t work without them.</td>
+</tr>
+<tr>
+<th scope="row">Analytics</th>
+<td data-label="What it does">Counts which debates and pages people find, watch time, replay starts and return visits, so we can see what works and improve YAP Arena.</td>
+<td data-label="Your choice">Off until you accept. You can turn it off anytime.</td>
+</tr>
+<tr>
+<th scope="row">Advertising</th>
+<td data-label="What it does">None. We don’t use advertising or cross-site tracking cookies.</td>
+<td data-label="Your choice">Not used.</td>
+</tr>
+</tbody>
+</table>
+<p>All our cookies are first-party: yaparena.com sets them, and they are sent only to yaparena.com.</p>
+</section>
+<section id="list" aria-labelledby="list-title">
+<h2 id="list-title">The cookies we set</h2>
+<table class="legal-table">
+<caption>Cookies set by yaparena.com</caption>
+<thead>
+<tr>
+<th scope="col">Cookie</th>
+<th scope="col">Category</th>
+<th scope="col">Purpose</th>
+<th scope="col">Duration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">__Host-session</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">Keeps you signed in. It holds a random value, never your email.</td>
+<td data-label="Duration">7 days, or until you sign out</td>
+</tr>
+<tr>
+<th scope="row">__Host-sign-in</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">Ties a sign-in in progress to your browser, for security.</td>
+<td data-label="Duration">10 minutes</td>
+</tr>
+<tr>
+<th scope="row">yap_media_guard</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">A signed random value that limits how fast one browser can load pages and video, to prevent abuse.</td>
+<td data-label="Duration">15 minutes</td>
+</tr>
+<tr>
+<th scope="row">__Host-measurement</th>
+<td data-label="Category">Analytics</td>
+<td data-label="Purpose">Set only after you accept analytics. A random value that groups this browser’s measurements; we store only a fingerprint of it.</td>
+<td data-label="Duration">180 days, or until you turn analytics off</td>
+</tr>
+</tbody>
+</table>
+<p>Our cookies are marked HttpOnly and Secure, so page scripts can’t read them and they are only sent over HTTPS.</p>
+</section>
+<section id="storage" aria-labelledby="storage-title">
+<h2 id="storage-title">Similar technologies</h2>
+<p>These values stay on your device. We don’t send them to our servers except where the purpose says so, and none of them is used for analytics or advertising.</p>
+<table class="legal-table">
+<caption>Similar technologies on your device</caption>
+<thead>
+<tr>
+<th scope="col">Name</th>
+<th scope="col">Category</th>
+<th scope="col">Purpose</th>
+<th scope="col">Duration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">yaparena-measurement-declined</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">Remembers that you rejected analytics, so we don’t ask again.</td>
+<td data-label="Duration">Until you clear site data</td>
+</tr>
+<tr>
+<th scope="row">yap:live-captions</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">Remembers whether you turned captions on or off.</td>
+<td data-label="Duration">Until you clear site data</td>
+</tr>
+<tr>
+<th scope="row">yaparena-stake-defaults, -review, -explained</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">Your Yap Coins ticket defaults, whether to show the review step, and that you’ve seen the explanation.</td>
+<td data-label="Duration">Until you clear site data</td>
+</tr>
+<tr>
+<th scope="row">yaparena-results-seen</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">Which Yap Coins results you’ve already seen.</td>
+<td data-label="Duration">Until you clear site data</td>
+</tr>
+<tr>
+<th scope="row">yaparena-auth-return, yaparena-coin-confirmation</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">The page to return to after signing in, and a Yap Coins confirmation in progress.</td>
+<td data-label="Duration">Until you close the tab</td>
+</tr>
+<tr>
+<th scope="row">media-speaker</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">While you debate: your chosen camera, microphone and mute state.</td>
+<td data-label="Duration">Until you close the tab</td>
+</tr>
+<tr>
+<th scope="row">Offline page</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">Our service worker keeps a copy of the offline page and its stylesheet, shown if you lose your connection.</td>
+<td data-label="Duration">Until we update it or you clear site data</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="third-parties" aria-labelledby="third-parties-title">
+<h2 id="third-parties-title">Other services</h2>
+<p>We don’t load third-party scripts, analytics or advertising on yaparena.com.</p>
+<ul>
+<li>
+<strong>Sign-in.</strong> When you sign in, you go to our sign-in provider, Auth0, at auth.yaparena.com. Auth0 sets its own cookies there to run sign-in. If you choose Google, Google may set cookies on its own sites. Their policies apply: <a href="https://www.okta.com/privacy-policy/">Okta (Auth0)</a> and <a href="https://policies.google.com/technologies/cookies">Google</a>.</li>
+<li>
+<strong>Video and replays.</strong> Live video comes from LiveKit and replays from Cloudflare. Your browser connects to them directly, so they receive your IP address, but they don’t set cookies on yaparena.com.</li>
+</ul>
+</section>
+<section id="choices" aria-labelledby="choices-title">
+<h2 id="choices-title">Your choices</h2>
+<ul>
+<li>
+<strong>The banner.</strong> On your first visit, choose <strong>Accept all</strong>, <strong>Reject all</strong> or <strong>Customize</strong>. Until you choose, analytics stays off.</li>
+<li>
+<strong>Cookie settings.</strong> Change your choice anytime with <strong>Cookie settings</strong> at the bottom of any page, in your account’s Privacy tab, or <a href="/home#cookie-settings">here</a>. Turning analytics off deletes the measurements collected through that browser.</li>
+<li>
+<strong>Your browser.</strong> You can block or delete cookies in your browser’s settings. If you block strictly necessary cookies, you won’t be able to sign in.</li>
+</ul>
+<p>Your choice is saved for each browser. If you use another browser or device, or clear your cookies, we ask again.</p>
+</section>
+<section id="changes" aria-labelledby="changes-title">
+<h2 id="changes-title">Changes to this policy</h2>
+<p>When we change how we use cookies, we update this page and its date. If we add a new kind of optional cookie, we ask for your choice again.</p>
+</section>
+<section id="contact" aria-labelledby="contact-title">
+<h2 id="contact-title">Contact</h2>
+<p>Questions about cookies go to <mark class="legal-todo">[Privacy email]</mark>.</p>
+</section>
+<a class="legal-top" href="#main">Back to top <span aria-hidden="true">↑</span>
+</a>
+</article>
+</div>
+</main>
+<footer class="landing-footer landing-container">
+<nav aria-label="Site">
+<a href="/topics">Topics</a>
+<a href="/coins">Yap Coins</a>
+<a href="/about">About</a>
+<a href="/privacy">Privacy</a>
+<a href="/terms">Terms</a>
+<a href="/cookies" aria-current="page">Cookies</a>
 <span>Play money</span>
 </nav>
 </footer>
@@ -12925,7 +13175,7 @@ exports[`renders the topic list 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -13059,7 +13309,7 @@ exports[`renders the topic list 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -13193,7 +13443,7 @@ exports[`renders the topic list 3`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>

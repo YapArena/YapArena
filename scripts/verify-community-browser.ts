@@ -247,7 +247,7 @@ try {
     "Too soon",
   );
   const desktopConsent = author.page.getByRole("button", {
-    name: "Not now",
+    name: "Reject all",
     exact: true,
   });
   if (await desktopConsent.isVisible()) await desktopConsent.click();
@@ -456,7 +456,7 @@ try {
     "mobile emulation uses 44px message actions",
   );
   const mobileConsent = mobilePage.getByRole("button", {
-    name: "Not now",
+    name: "Reject all",
     exact: true,
   });
   if (await mobileConsent.isVisible()) await mobileConsent.click();

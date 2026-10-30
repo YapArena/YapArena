@@ -23,7 +23,7 @@ interface Section {
   body: SafeHtml;
 }
 interface LegalPage {
-  path: "/privacy" | "/terms";
+  path: "/privacy" | "/terms" | "/cookies";
   title: string;
   description: string;
   lede: SafeHtml;
@@ -43,6 +43,7 @@ const cell = (text: string) => html`${text}`;
 const pageLinks = [
   ["/privacy", "Privacy"],
   ["/terms", "Terms"],
+  ["/cookies", "Cookies"],
 ] as const;
 
 function render(origin: string, page: LegalPage) {
@@ -207,55 +208,15 @@ const retention = table(
       html`Kept in a ledger that can’t be edited, so balances stay correct. ${todo("Founder decision: what happens to Yap Coins records after account deletion")}`,
     ],
     [
-      cell("Usage measurement (only if you allow it)"),
+      cell("Analytics (only if you accept analytics cookies)"),
       cell(
-        "Events and watch sessions 90 days; an unused consent 180 days; staff reviews that classify accounts in measurement 365 days. Turning measurement off deletes that browser’s measurements at once.",
+        "Events and watch sessions 90 days; an unused consent 180 days; staff reviews that classify accounts in measurement 365 days. Turning analytics off deletes that browser’s measurements at once.",
       ),
     ],
     [cell("Database backups"), cell("7 days, then overwritten.")],
     [
       cell("Hosting and provider logs"),
       html`As set by each provider. ${todo("Confirm Render, LiveKit and Cloudflare log retention")}`,
-    ],
-  ],
-);
-
-const cookies = table(
-  "Cookies and device storage",
-  ["Name", "Why", "How long"],
-  [
-    [
-      cell("__Host-session"),
-      cell("Keeps you signed in."),
-      cell("7 days, or until you sign out."),
-    ],
-    [
-      cell("__Host-sign-in"),
-      cell("Ties a sign-in in progress to your browser, for security."),
-      cell("10 minutes."),
-    ],
-    [
-      cell("yap_media_guard"),
-      cell(
-        "A signed random value that limits how fast one browser can load pages and video, to prevent abuse.",
-      ),
-      cell("15 minutes."),
-    ],
-    [
-      cell("__Host-measurement"),
-      cell(
-        "Only if you choose Allow measurement: a random value that groups your browser’s measurements. We store only a fingerprint of it.",
-      ),
-      cell("Until you turn measurement off, or 180 days unused."),
-    ],
-    [
-      cell("Device storage"),
-      cell(
-        "Your choices on this device: measurement declined, captions on or off, Yap Coins ticket defaults, which results you have seen, and while you debate your chosen camera, microphone and mute state.",
-      ),
-      cell(
-        "Until you clear your browser’s site data; debate choices until you close the tab.",
-      ),
     ],
   ],
 );
@@ -280,8 +241,8 @@ const privacy: LegalPage = {
       "We don’t sell personal information or use it for advertising.",
     ],
     [
-      "Measurement is your choice",
-      "Usage measurement stays off until you allow it, and you can delete it anytime.",
+      "Analytics cookies are your choice",
+      "They stay off until you accept them, and you can turn them off and delete their data anytime.",
     ],
   ],
   sections: [
@@ -293,12 +254,12 @@ const privacy: LegalPage = {
     {
       id: "collect",
       title: "What we collect",
-      body: html`<h3>When you sign in</h3><ul><li>Your <strong>email address</strong>, confirmed by a one-time code or by Google, and which sign-in methods your account uses. From Google we take only your email address.</li><li>The identifier Auth0 gives your sign-in, so the same person reaches the same account.</li><li>A random <strong>session</strong> identifier stored in a cookie. We never ask for or store a password.</li></ul><h3>Your profile</h3><ul><li>Your <strong>username</strong>, your permanent <strong>handle</strong> and an optional <strong>bio</strong>. Profiles are public.</li><li>Your confirmation that you are ${MINIMUM_AGE} or older and that you accept the Terms of Use, with the version and time.</li></ul><h3>When you debate</h3><ul><li>The <strong>video and audio</strong> of your debates, and the result of the camera and microphone check before you go live.</li><li>The <strong>transcript</strong> of your turns, with the time of each word, and the <strong>AI outline</strong> of your arguments, including any flags you add to it.</li><li>The language you debate in and your consent to recording and transcription, with its version and time.</li><li>Challenges, queue entries, proposed times and whether you are on the site to receive a challenge.</li></ul><h3>When you take part</h3><ul><li><strong>Chat messages</strong>, shown publicly with your username; <strong>likes</strong>; <strong>reports</strong> and <strong>appeals</strong>, which stay private to moderators; and moderation decisions about your account.</li><li>The topics and people you <strong>follow</strong>, and the <strong>notifications</strong> we show you.</li><li><strong>Yap Coins</strong>: your balance, grants and the positions you take in each turn of a debate, and their results.</li></ul><h3>Only if you allow measurement</h3><ul><li>Which public pages you open, live and replay watch time, replay starts, matches, follows, reports and return visits. We don’t record your email, handle, IP address, search text, chat or report text in measurement.</li></ul><h3>Technical information</h3><ul><li>Our hosting and video providers receive your <strong>IP address</strong> and browser details with each request and keep them in their logs for security and troubleshooting.</li></ul><p>We don’t ask for your date of birth, a payment card, government ID, your contacts or your precise location.</p>`,
+      body: html`<h3>When you sign in</h3><ul><li>Your <strong>email address</strong>, confirmed by a one-time code or by Google, and which sign-in methods your account uses. From Google we take only your email address.</li><li>The identifier Auth0 gives your sign-in, so the same person reaches the same account.</li><li>A random <strong>session</strong> identifier stored in a cookie. We never ask for or store a password.</li></ul><h3>Your profile</h3><ul><li>Your <strong>username</strong>, your permanent <strong>handle</strong> and an optional <strong>bio</strong>. Profiles are public.</li><li>Your confirmation that you are ${MINIMUM_AGE} or older and that you accept the Terms of Use, with the version and time.</li></ul><h3>When you debate</h3><ul><li>The <strong>video and audio</strong> of your debates, and the result of the camera and microphone check before you go live.</li><li>The <strong>transcript</strong> of your turns, with the time of each word, and the <strong>AI outline</strong> of your arguments, including any flags you add to it.</li><li>The language you debate in and your consent to recording and transcription, with its version and time.</li><li>Challenges, queue entries, proposed times and whether you are on the site to receive a challenge.</li></ul><h3>When you take part</h3><ul><li><strong>Chat messages</strong>, shown publicly with your username; <strong>likes</strong>; <strong>reports</strong> and <strong>appeals</strong>, which stay private to moderators; and moderation decisions about your account.</li><li>The topics and people you <strong>follow</strong>, and the <strong>notifications</strong> we show you.</li><li><strong>Yap Coins</strong>: your balance, grants and the positions you take in each turn of a debate, and their results.</li></ul><h3>Only if you accept analytics cookies</h3><ul><li>Which public pages you open, live and replay watch time, replay starts, matches, follows, reports and return visits. We don’t record your email, handle, IP address, search text, chat or report text in measurement.</li></ul><h3>Technical information</h3><ul><li>Our hosting and video providers receive your <strong>IP address</strong> and browser details with each request and keep them in their logs for security and troubleshooting.</li></ul><p>We don’t ask for your date of birth, a payment card, government ID, your contacts or your precise location.</p>`,
     },
     {
       id: "use",
       title: "Why we use it",
-      body: html`<ul><li><strong>To run your account</strong>: sign-in, your profile, follows and notifications.</li><li><strong>To run debates</strong>: matching debaters, carrying live video, recording it and publishing the replay.</li><li><strong>To caption and outline debates</strong>: speech-to-text for captions, and an AI outline that summarizes each side’s arguments.</li><li><strong>To run Yap Coins</strong>, the play-money game on each debate.</li><li><strong>To keep the community safe</strong>: chat, reports, moderation, appeals, rate limits and abuse prevention.</li><li><strong>To improve YAP Arena</strong>, with measurement only if you allow it.</li><li><strong>To meet legal obligations</strong> and answer lawful requests.</li></ul><p>We don’t sell personal information, share it for advertising or use it to build advertising profiles. The AI outline summarizes what was said; it doesn’t pick a winner or make decisions about you or your account.</p>`,
+      body: html`<ul><li><strong>To run your account</strong>: sign-in, your profile, follows and notifications.</li><li><strong>To run debates</strong>: matching debaters, carrying live video, recording it and publishing the replay.</li><li><strong>To caption and outline debates</strong>: speech-to-text for captions, and an AI outline that summarizes each side’s arguments.</li><li><strong>To run Yap Coins</strong>, the play-money game on each debate.</li><li><strong>To keep the community safe</strong>: chat, reports, moderation, appeals, rate limits and abuse prevention.</li><li><strong>To improve YAP Arena</strong>, with analytics cookies only if you accept them.</li><li><strong>To meet legal obligations</strong> and answer lawful requests.</li></ul><p>We don’t sell personal information, share it for advertising or use it to build advertising profiles. The AI outline summarizes what was said; it doesn’t pick a winner or make decisions about you or your account.</p>`,
     },
     {
       id: "debates",
@@ -322,13 +283,13 @@ const privacy: LegalPage = {
     },
     {
       id: "cookies",
-      title: "Cookies and device storage",
-      body: html`<p>We use only the cookies and device storage YAP Arena needs to work, plus the measurement cookie if you allow it. We don’t use advertising or third-party analytics cookies.</p>${cookies}<p>To change your measurement choice, use <strong>Measurement settings</strong> at the bottom of YAP Arena’s pages, for example ${link("/home", "the home page")}.</p>`,
+      title: "Cookies",
+      body: html`<p>We use strictly necessary cookies to sign you in, keep YAP Arena secure and remember your choices. We use one analytics cookie, only if you accept it in the cookie banner. We don’t use advertising or third-party tracking cookies.</p><p>The ${link("/cookies", "Cookie Policy")} lists every cookie and how long it lasts. Change your choice anytime with <strong>Cookie settings</strong> at the bottom of any page.</p>`,
     },
     {
       id: "rights",
       title: "Your rights and choices",
-      body: html`<p>You can ask to access the personal information we hold about you, to correct it, to receive it in a structured, commonly used format, to stop its use or have it deleted, and to have links to it de-indexed where the law allows. You can also withdraw a consent you gave.</p><ul><li><strong>Download your data</strong> from your account’s Privacy settings: a file with your profile, sign-in methods, follows, notifications, terms acceptance and account activity. Chat, reports, debate participation and Yap Coins records aren’t in the file yet; ask us for them.</li><li><strong>Correct your profile</strong> in your account settings. Your handle is permanent; ask us if it must change.</li><li><strong>Turn measurement off</strong> with Measurement settings; it deletes that browser’s measurements.</li><li><strong>Withdraw debating consent</strong> in the Debating card in your account settings.</li><li><strong>Delete your account</strong> by emailing ${privacyEmail} from the address you sign in with. Deletion is done by hand for now: we confirm the request, end your sessions, delete your profile and sign-in details, and delete or de-identify the other information tied to your account, except what the periods above say we keep. ${todo("Founder decision: account deletion rules (prompt 12c)")}</li></ul><p>We answer requests within 30 days. We may ask you to confirm your identity first.</p>`,
+      body: html`<p>You can ask to access the personal information we hold about you, to correct it, to receive it in a structured, commonly used format, to stop its use or have it deleted, and to have links to it de-indexed where the law allows. You can also withdraw a consent you gave.</p><ul><li><strong>Download your data</strong> from your account’s Privacy settings: a file with your profile, sign-in methods, follows, notifications, terms acceptance and account activity. Chat, reports, debate participation and Yap Coins records aren’t in the file yet; ask us for them.</li><li><strong>Correct your profile</strong> in your account settings. Your handle is permanent; ask us if it must change.</li><li><strong>Turn analytics cookies off</strong> with Cookie settings; it deletes that browser’s measurements.</li><li><strong>Withdraw debating consent</strong> in the Debating card in your account settings.</li><li><strong>Delete your account</strong> by emailing ${privacyEmail} from the address you sign in with. Deletion is done by hand for now: we confirm the request, end your sessions, delete your profile and sign-in details, and delete or de-identify the other information tied to your account, except what the periods above say we keep. ${todo("Founder decision: account deletion rules (prompt 12c)")}</li></ul><p>We answer requests within 30 days. We may ask you to confirm your identity first.</p>`,
     },
     {
       id: "security",
@@ -444,5 +405,193 @@ const terms: LegalPage = {
   ],
 };
 
+// ---------------------------------------------------------------------------
+// Cookie policy
+
+const cookieCategories = table(
+  "Cookie categories",
+  ["Category", "What it does", "Your choice"],
+  [
+    [
+      cell("Strictly necessary"),
+      cell(
+        "Signs you in, keeps your session secure, limits abuse and remembers the choices you make on this page.",
+      ),
+      cell("Always on. YAP Arena can’t work without them."),
+    ],
+    [
+      cell("Analytics"),
+      cell(
+        "Counts which debates and pages people find, watch time, replay starts and return visits, so we can see what works and improve YAP Arena.",
+      ),
+      cell("Off until you accept. You can turn it off anytime."),
+    ],
+    [
+      cell("Advertising"),
+      cell("None. We don’t use advertising or cross-site tracking cookies."),
+      cell("Not used."),
+    ],
+  ],
+);
+
+const cookieList = table(
+  "Cookies set by yaparena.com",
+  ["Cookie", "Category", "Purpose", "Duration"],
+  [
+    [
+      cell("__Host-session"),
+      cell("Strictly necessary"),
+      cell("Keeps you signed in. It holds a random value, never your email."),
+      cell("7 days, or until you sign out"),
+    ],
+    [
+      cell("__Host-sign-in"),
+      cell("Strictly necessary"),
+      cell("Ties a sign-in in progress to your browser, for security."),
+      cell("10 minutes"),
+    ],
+    [
+      cell("yap_media_guard"),
+      cell("Strictly necessary"),
+      cell(
+        "A signed random value that limits how fast one browser can load pages and video, to prevent abuse.",
+      ),
+      cell("15 minutes"),
+    ],
+    [
+      cell("__Host-measurement"),
+      cell("Analytics"),
+      cell(
+        "Set only after you accept analytics. A random value that groups this browser’s measurements; we store only a fingerprint of it.",
+      ),
+      cell("180 days, or until you turn analytics off"),
+    ],
+  ],
+);
+
+const storageList = table(
+  "Similar technologies on your device",
+  ["Name", "Category", "Purpose", "Duration"],
+  [
+    [
+      cell("yaparena-measurement-declined"),
+      cell("Strictly necessary"),
+      cell("Remembers that you rejected analytics, so we don’t ask again."),
+      cell("Until you clear site data"),
+    ],
+    [
+      cell("yap:live-captions"),
+      cell("Strictly necessary"),
+      cell("Remembers whether you turned captions on or off."),
+      cell("Until you clear site data"),
+    ],
+    [
+      cell("yaparena-stake-defaults, -review, -explained"),
+      cell("Strictly necessary"),
+      cell(
+        "Your Yap Coins ticket defaults, whether to show the review step, and that you’ve seen the explanation.",
+      ),
+      cell("Until you clear site data"),
+    ],
+    [
+      cell("yaparena-results-seen"),
+      cell("Strictly necessary"),
+      cell("Which Yap Coins results you’ve already seen."),
+      cell("Until you clear site data"),
+    ],
+    [
+      cell("yaparena-auth-return, yaparena-coin-confirmation"),
+      cell("Strictly necessary"),
+      cell(
+        "The page to return to after signing in, and a Yap Coins confirmation in progress.",
+      ),
+      cell("Until you close the tab"),
+    ],
+    [
+      cell("media-speaker"),
+      cell("Strictly necessary"),
+      cell("While you debate: your chosen camera, microphone and mute state."),
+      cell("Until you close the tab"),
+    ],
+    [
+      cell("Offline page"),
+      cell("Strictly necessary"),
+      cell(
+        "Our service worker keeps a copy of the offline page and its stylesheet, shown if you lose your connection.",
+      ),
+      cell("Until we update it or you clear site data"),
+    ],
+  ],
+);
+
+const cookiePolicy: LegalPage = {
+  path: "/cookies",
+  title: "Cookie policy",
+  description:
+    "The cookies and similar technologies YAP Arena uses, why, and how to change your choice.",
+  lede: html`This policy explains the cookies and similar technologies YAP Arena uses, why we use them and how you control them. It is part of our ${link("/privacy", "Privacy Policy")}.`,
+  glance: [
+    [
+      "Essential by default",
+      "Only the cookies YAP Arena needs to work are on until you choose.",
+    ],
+    [
+      "Analytics is your choice",
+      "Accept or reject it in the banner; both buttons weigh the same.",
+    ],
+    [
+      "No advertising cookies",
+      "No ad networks, no cross-site tracking, no third-party analytics.",
+    ],
+    [
+      "Change it anytime",
+      "Cookie settings is at the bottom of every page and in your account.",
+    ],
+  ],
+  sections: [
+    {
+      id: "what",
+      title: "What cookies are",
+      body: html`<p>Cookies are small text files a website stores in your browser. They let the site recognize your browser between pages, for example to keep you signed in. Some last only for a visit; others stay for a set time.</p><p>Websites also use similar technologies, such as your browser’s local and session storage, which keep small values on your device. This policy covers both, and calls them all “cookies” where the difference doesn’t matter.</p>`,
+    },
+    {
+      id: "categories",
+      title: "How we use cookies",
+      body: html`${cookieCategories}<p>All our cookies are first-party: yaparena.com sets them, and they are sent only to yaparena.com.</p>`,
+    },
+    {
+      id: "list",
+      title: "The cookies we set",
+      body: html`${cookieList}<p>Our cookies are marked HttpOnly and Secure, so page scripts can’t read them and they are only sent over HTTPS.</p>`,
+    },
+    {
+      id: "storage",
+      title: "Similar technologies",
+      body: html`<p>These values stay on your device. We don’t send them to our servers except where the purpose says so, and none of them is used for analytics or advertising.</p>${storageList}`,
+    },
+    {
+      id: "third-parties",
+      title: "Other services",
+      body: html`<p>We don’t load third-party scripts, analytics or advertising on yaparena.com.</p><ul><li><strong>Sign-in.</strong> When you sign in, you go to our sign-in provider, Auth0, at auth.yaparena.com. Auth0 sets its own cookies there to run sign-in. If you choose Google, Google may set cookies on its own sites. Their policies apply: ${link("https://www.okta.com/privacy-policy/", "Okta (Auth0)")} and ${link("https://policies.google.com/technologies/cookies", "Google")}.</li><li><strong>Video and replays.</strong> Live video comes from LiveKit and replays from Cloudflare. Your browser connects to them directly, so they receive your IP address, but they don’t set cookies on yaparena.com.</li></ul>`,
+    },
+    {
+      id: "choices",
+      title: "Your choices",
+      body: html`<ul><li><strong>The banner.</strong> On your first visit, choose <strong>Accept all</strong>, <strong>Reject all</strong> or <strong>Customize</strong>. Until you choose, analytics stays off.</li><li><strong>Cookie settings.</strong> Change your choice anytime with <strong>Cookie settings</strong> at the bottom of any page, in your account’s Privacy tab, or ${link("/home#cookie-settings", "here")}. Turning analytics off deletes the measurements collected through that browser.</li><li><strong>Your browser.</strong> You can block or delete cookies in your browser’s settings. If you block strictly necessary cookies, you won’t be able to sign in.</li></ul><p>Your choice is saved for each browser. If you use another browser or device, or clear your cookies, we ask again.</p>`,
+    },
+    {
+      id: "changes",
+      title: "Changes to this policy",
+      body: html`<p>When we change how we use cookies, we update this page and its date. If we add a new kind of optional cookie, we ask for your choice again.</p>`,
+    },
+    {
+      id: "contact",
+      title: "Contact",
+      body: html`<p>Questions about cookies go to ${privacyEmail}.</p>`,
+    },
+  ],
+};
+
 export const renderPrivacy = (origin: string) => render(origin, privacy);
 export const renderTerms = (origin: string) => render(origin, terms);
+export const renderCookies = (origin: string) => render(origin, cookiePolicy);
