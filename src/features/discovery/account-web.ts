@@ -98,10 +98,11 @@ const privacyPanel = html`<section class="settings-panel" role="tabpanel" id="pa
           </div>
         </section>`;
 
-// Decision 0012: debate language and transcription consent, shown only while
-// the live outline is enabled.
+// Decision 0012: debate language and consent to recording, public replay,
+// transcription and the public AI outline, shown only while the live outline
+// is enabled. Changing the consent wording needs a new DEBATER_CONSENT_VERSION.
 const debaterCard = html`<div class="settings-card debater-settings" id="debater-settings" hidden>
-            <div class="settings-card-head"><div><h2>Debating</h2><p>Used when you debate live. Each of your turns is transcribed and summarized in a public AI outline.</p></div></div>
+            <div class="settings-card-head"><div><h2>Debating</h2><p>Used when you debate live. Debates are recorded and replayed publicly, and each of your turns is transcribed and summarized in a public AI outline.</p></div></div>
             <form id="debater-settings-form" class="settings-form" novalidate>
               <div class="settings-field">
                 <div class="settings-label-row"><label for="debater-language">Language you debate in</label></div>
@@ -109,8 +110,8 @@ const debaterCard = html`<div class="settings-card debater-settings" id="debater
                 <p class="settings-help" id="debater-language-help">Transcription and the AI outline of your turns use this language.</p>
               </div>
               <div class="settings-field">
-                <label class="debater-consent"><input type="checkbox" id="debater-consent" name="consent" aria-describedby="debater-consent-help"><span>I agree that my speech in live debates is transcribed, stored with word timings, and summarized in a public AI outline shown with the debate and its replay.</span></label>
-                <p class="settings-help" id="debater-consent-help">Required to debate while transcription is on. You can withdraw anytime for future debates; debates already held keep their transcript.</p>
+                <label class="debater-consent"><input type="checkbox" id="debater-consent" name="consent" aria-describedby="debater-consent-help"><span>I agree that my live debates are recorded on video and audio and shown publicly, live and as a replay; that my speech is transcribed by Deepgram or ElevenLabs and stored with word timings; and that Anthropic's Claude summarizes it in a public AI outline shown with the debate and its replay.</span></label>
+                <p class="settings-help" id="debater-consent-help">Required to debate. You can withdraw anytime for future debates; debates already held keep their recording, transcript and outline. See the <a href="/privacy#debates">Privacy Policy</a>.</p>
               </div>
               <div class="settings-save"><p id="debater-save-status" role="status" aria-live="polite"></p><button class="button" type="submit">Save debating settings</button></div>
             </form>
