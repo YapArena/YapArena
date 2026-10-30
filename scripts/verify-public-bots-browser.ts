@@ -97,6 +97,7 @@ export async function verifyPublicBotsBrowser({
       handle: "shared-ui-" + randomUUID().slice(0, 8),
       displayName: "UI Test Participant",
       bio: "Synthetic local interface trial.",
+      acceptTerms: true,
     });
     const profile = await isolated.request.patch(base + "/api/me/profile", {
       data: { publicationState: "published" },
