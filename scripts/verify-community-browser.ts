@@ -53,6 +53,13 @@ async function openChatMenu(page: Page) {
   if (!(await menu.evaluate((node: HTMLDetailsElement) => node.open)))
     await menu.locator("summary").click();
 }
+async function closeChatMenu(page: Page) {
+  await page
+    .locator("[data-chat-more]")
+    .evaluate((node: HTMLDetailsElement) => {
+      node.open = false;
+    });
+}
 async function axeViolations(page: Page, selector: string) {
   await page.evaluate((source) => {
     window.eval(source);
@@ -290,6 +297,7 @@ try {
   await reporter.page
     .getByText("Report submitted privately", { exact: false })
     .waitFor();
+  await closeChatMenu(reporter.page);
 
   const moderatorA = await register("moderator-a");
   await grantModerator(moderatorA.userId);
