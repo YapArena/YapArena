@@ -529,6 +529,34 @@ describe("public discovery", () => {
       /Sponsored listing/,
     );
   });
+
+  // Decision 0012: the outline shows on live and replay pages, captions only live.
+  it("links the outline stylesheet once wherever the AI outline renders", () => {
+    const origin = "https://arena.example";
+    const outline = { state: null };
+    const stylesheet =
+      /<link rel="stylesheet" href="\/assets\/live-outline\.css\?v=[0-9a-f]{12}">/g;
+    const page = (status, liveOutline) =>
+      renderDebate(
+        origin,
+        { ...debate, status },
+        false,
+        null,
+        false,
+        liveOutline,
+      );
+    for (const status of ["replay", "finalized"]) {
+      const replay = page(status, outline);
+      assert.match(replay, /<section class="live-outline" data-live-outline /);
+      assert.equal(replay.match(stylesheet)?.length, 1, status);
+      assert.doesNotMatch(replay, /data-live-captions/);
+    }
+    const live = page("live", outline);
+    assert.equal(live.match(stylesheet)?.length, 1);
+    assert.match(live, /<div class="live-captions" data-live-captions hidden>/);
+    for (const status of ["live", "replay"])
+      assert.doesNotMatch(page(status), /live-outline/);
+  });
 });
 
 describe("live topic queue pages", () => {
