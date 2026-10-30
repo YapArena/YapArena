@@ -1966,11 +1966,24 @@ textarea::placeholder {
 
 /* Chat, filling the rail under the panel. Author names take the visit's
    five landing colours, set by frontend/debate-layout.ts. */
+/* The feed's height depends only on the card's: the status lines keep fixed
+   heights, "Load earlier" sits at the end of the state line and "Jump to
+   latest" has a slot of its own under the feed, so new messages, loading and
+   text changes around it don't resize it (the chat keeps a reader's place
+   through resizes, frontend/community.ts). */
 .arena-page .arena-chat {
   position: relative;
   flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 36px minmax(0, 1fr) 44px auto auto;
+  grid-template-areas:
+    "heading heading"
+    "state older"
+    "feed feed"
+    "new new"
+    "form form"
+    "status status";
   min-height: 360px;
   padding: var(--space-2) var(--space-4) var(--space-4);
   border: 0;
@@ -1978,6 +1991,7 @@ textarea::placeholder {
   background: var(--panel);
 }
 .arena-page .arena-chat .live-chat-heading {
+  grid-area: heading;
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -1989,6 +2003,10 @@ textarea::placeholder {
   font-size: var(--text-16);
 }
 .arena-page .arena-chat .live-chat-connection {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   padding: 2px var(--space-2);
   border: 1px solid var(--line);
   border-radius: var(--radius-pill);
@@ -2055,10 +2073,15 @@ textarea::placeholder {
   text-underline-offset: 3px;
 }
 .arena-page .arena-chat .chat-status {
+  grid-area: status;
+  height: 16px;
   margin: var(--space-1) 0 0;
+  overflow: hidden;
   color: var(--muted);
   font-size: var(--text-12);
   line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .arena-page .chat-more .community-toolbar {
   display: flex;
@@ -2089,15 +2112,19 @@ textarea::placeholder {
   justify-self: start;
 }
 .arena-page .arena-chat .live-chat-state {
-  margin: 0 0 var(--space-1);
+  grid-area: state;
+  align-self: center;
+  height: 16px;
+  margin: 0;
+  overflow: hidden;
   color: var(--muted);
   font-size: var(--text-12);
-}
-.arena-page .arena-chat .live-chat-state:empty {
-  display: none;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .arena-page .arena-workspace :is(.chat-older, .chat-new) {
-  align-self: center;
+  justify-self: center;
   min-height: 36px;
   margin: var(--space-1) 0;
   padding: 0 var(--space-4);
@@ -2106,8 +2133,19 @@ textarea::placeholder {
   color: var(--text);
   font-size: var(--text-12);
 }
+.arena-page .arena-workspace .chat-older {
+  grid-area: older;
+  align-self: center;
+  justify-self: end;
+  margin: 0 0 0 var(--space-2);
+}
+.arena-page .arena-workspace .chat-new {
+  grid-area: new;
+  align-self: end;
+  margin-bottom: 0;
+}
 .arena-page .arena-chat .community-messages {
-  flex: 1 1 auto;
+  grid-area: feed;
   min-height: 0;
   height: auto;
   max-height: none;
@@ -2202,8 +2240,9 @@ textarea::placeholder {
   }
 }
 .arena-page .arena-chat form {
+  grid-area: form;
   display: block;
-  margin: var(--space-3) 0 0;
+  margin: var(--space-1) 0 0;
   padding: 0;
   border: 0;
 }

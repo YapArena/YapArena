@@ -393,6 +393,13 @@ export async function verifyArenaBrowser({
     );
     checks.botsSandboxLink = true;
     phase = "a11y";
+    // The video's hover corners fade over 0.15s; scan them hidden or shown,
+    // not mid-fade, when their text is still partly transparent.
+    await page.waitForFunction(() =>
+      [...document.querySelectorAll(".arena-video-overlay")].every((node) =>
+        ["0", "1"].includes(getComputedStyle(node).opacity),
+      ),
+    );
     await page.addScriptTag({ content: axe.source });
     const a11y = await page.evaluate(async () => {
       const r = await window.axe.run(document, {
