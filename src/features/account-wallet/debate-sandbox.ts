@@ -1,6 +1,10 @@
 import { randomUUID } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
-import { withTransaction } from "../../platform/transaction.ts";
+import {
+  databaseFailure,
+  withTransaction,
+  type TransactionOptions,
+} from "../../platform/transaction.ts";
 import {
   RULE,
   digest,
@@ -130,6 +134,15 @@ const replayable = (round: string, debate: string, clock: string) =>
     AND clock_timestamp()>=${round}.closes_at AND ${debate}.status IN ${endedStatuses}
     AND ${debate}.live_ended_at+INTERVAL '${REVEAL_CLOSE_HOURS} hours'>clock_timestamp()
     AND ${clock}.started_at IS NOT NULL)`;
+// True when a round takes live orders: before its cutoff and, for a turn
+// window, while its debate is still live.
+const liveAccepting = (round: string, debate: string) =>
+  `(clock_timestamp()<${round}.closes_at AND (${round}.turn_number IS NULL OR ${debate}.status='live'))`;
+// The replayable() conditions without the recording clock.
+const replayableUntimed = (round: string, debate: string) =>
+  `(${round}.state='open' AND ${round}.turn_number IS NOT NULL AND ${round}.reveal_mode='five_day'
+    AND clock_timestamp()>=${round}.closes_at AND ${debate}.status IN ${endedStatuses}
+    AND ${debate}.live_ended_at+INTERVAL '${REVEAL_CLOSE_HOURS} hours'>clock_timestamp())`;
 // True when the user holds a position in a later turn's window of the debate.
 const laterWindowJoined = (round: string, user: string) =>
   `EXISTS (SELECT 1 FROM coin_debate_orders lo JOIN coin_debate_rounds lr ON lr.id=lo.round_id
@@ -331,24 +344,111 @@ async function notifyResults(client: PoolClient, userIds: readonly string[]) {
 }
 /** The newest results one read returns. */
 export const RESULTS_LIMIT = 50;
-async function serial(client: PoolClient) {
-  // Low-volume sandbox only. Admissions and settlement serialize before account
-  // locks; this prevents settlement taking a partial population while enrolling.
+/**
+ * Per-round locks. The invariant they protect: settlement and voiding read a
+ * round's complete population of orders. A submit holds its round's lock
+ * shared for its whole transaction, so submits run side by side; settling or
+ * voiding takes it exclusively before reading the orders, so it waits for
+ * every in-flight submit to commit and no new one can join until it commits
+ * (the order guard then refuses the closed round). Reads take no lock.
+ *
+ * Every transaction takes round locks first, in one global order (by lock
+ * key), before any account, book or ledger row, so they cannot deadlock.
+ */
+async function lockRounds(
+  client: PoolClient,
+  roundIds: readonly string[],
+  mode: "shared" | "exclusive",
+) {
+  if (!roundIds.length) return;
+  const keys = (
+    await client.query<{ key: string }>(
+      `SELECT DISTINCT hashtextextended('coin-debate-round:'||id::text,0)::text AS key
+      FROM unnest($1::uuid[]) id ORDER BY 1`,
+      [roundIds],
+    )
+  ).rows;
+  for (const { key } of keys)
+    await client.query(
+      mode === "shared"
+        ? "SELECT pg_advisory_xact_lock_shared($1::bigint)"
+        : "SELECT pg_advisory_xact_lock($1::bigint)",
+      [key],
+    );
+}
+// Opening a debate's rounds, and recording its reveal mode, one at a time.
+async function lockDebateOpening(client: PoolClient, debateId: string) {
   await client.query(
-    "SELECT pg_advisory_xact_lock(hashtextextended('coin-debate-transition',0))",
+    "SELECT pg_advisory_xact_lock(hashtextextended('coin-debate-open:'||$1::text,0))",
+    [debateId],
   );
 }
+/**
+ * Request paths fail fast; the worker may wait longer behind a large reveal.
+ * Each is SET LOCAL, so it wins over a pool-wide default.
+ */
+export const COIN_REQUEST_LIMITS = Object.freeze({
+  lockTimeoutMs: 3_000,
+  statementTimeoutMs: 5_000,
+});
+export const COIN_WORKER_LIMITS = Object.freeze({
+  lockTimeoutMs: 5_000,
+  statementTimeoutMs: 30_000,
+});
+/**
+ * One settlement batch: at most this many rounds, and at most this many
+ * orders unless a single round alone is larger. Settlement locks every
+ * participant and the shared treasury rows, which each submit also needs, so
+ * a batch must finish well inside a submit's lock timeout.
+ */
+export const SETTLEMENT_BATCH = Object.freeze({ rounds: 20, orders: 300 });
+// A round whose settlement throws waits this long before its next attempt,
+// doubling up to an hour; the rest keep settling meanwhile.
+const setAsideBaseMs = 60_000,
+  setAsideMaxMs = 3_600_000;
+// A lock or statement timeout, a deadlock, or no free connection in the
+// pool: nothing was written.
+const busyError = () =>
+  new CoinOperationError(
+    "Yap Coins are busy; try again. Nothing was reserved.",
+    503,
+    "busy",
+  );
+function busy(error: unknown) {
+  return databaseFailure(error) === "busy" ? busyError() : error;
+}
+const poolExhausted = (error: unknown) =>
+  error instanceof Error &&
+  error.message === "timeout exceeded when trying to connect";
 export function createCoinDebateSandbox(
   database: Pool,
   rail: SandboxRail,
-  options: { turnWindows?: boolean } = {},
+  options: {
+    turnWindows?: boolean;
+    logger?: { error(details: object, message: string): void };
+    // Tests that hold locks on purpose may relax these.
+    limits?: { request?: TransactionOptions; worker?: TransactionOptions };
+  } = {},
 ) {
   const turnWindows = options.turnWindows === true;
-  async function transaction<T>(mutation: (client: PoolClient) => Promise<T>) {
-    return withTransaction(database, async (client) => {
-      await serial(client);
-      await assertSandboxRail(client, rail);
-      return mutation(client);
+  const requestLimits = options.limits?.request ?? COIN_REQUEST_LIMITS,
+    workerLimits = options.limits?.worker ?? COIN_WORKER_LIMITS;
+  // Rounds whose settlement threw, kept by this process (founder audit item
+  // 7): skipped until their retry time and logged each time they fail.
+  const setAside = new Map<string, { failures: number; retryAt: number }>();
+  async function transaction<T>(
+    mutation: (client: PoolClient) => Promise<T>,
+    limits: TransactionOptions = requestLimits,
+  ) {
+    return withTransaction(
+      database,
+      async (client) => {
+        await assertSandboxRail(client, rail);
+        return mutation(client);
+      },
+      { ...limits, mapError: busy },
+    ).catch((error: unknown) => {
+      throw poolExhausted(error) ? busyError() : error;
     });
   }
   async function assertCallerSession(
@@ -377,11 +477,13 @@ export function createCoinDebateSandbox(
     await assertSandboxOpened(client, context.userId);
     await assertSandboxFinancialOpen(client, context.userId);
   }
-  async function stored(client: PoolClient, roundId: string) {
+  // Settling and voiding update the round, so they lock its row; a submit
+  // only reads it under its shared round lock.
+  async function stored(client: PoolClient, roundId: string, forUpdate = true) {
     resource(roundId);
     const round = (
       await client.query<Round>(
-        "SELECT * FROM coin_debate_rounds WHERE id=$1 AND rail=$2 FOR UPDATE",
+        `SELECT * FROM coin_debate_rounds WHERE id=$1 AND rail=$2${forUpdate ? " FOR UPDATE" : ""}`,
         [roundId, rail],
       )
     ).rows[0];
@@ -399,15 +501,34 @@ export function createCoinDebateSandbox(
     // Its union is essential: locking a later round's account after an earlier
     // round's shared ledger rows can deadlock funding or payout reconciliation.
     // A cancelled or under-review debate's rounds are voided, never settled.
+    // The batch stops at SETTLEMENT_BATCH.orders orders (a larger round goes
+    // alone), and skips rounds set aside until their retry time.
+    const now = Date.now();
+    const skipped = [...setAside]
+      .filter(([, entry]) => entry.retryAt > now)
+      .map(([id]) => id);
     const rounds = (
       await client.query<{ id: string }>(
-        `SELECT r.id FROM coin_debate_rounds r WHERE r.state='open' AND r.rail=$1
-        AND r.closes_at<=clock_timestamp() AND ${revealDue("r")} AND NOT EXISTS (SELECT 1 FROM debates d
-          WHERE d.id=r.debate_id AND d.status IN ${unavailableStatuses})
-        ORDER BY r.closes_at,r.id LIMIT $2`,
-        [rail, limit],
+        `WITH due AS (SELECT r.id,r.closes_at,
+            (SELECT count(*) FROM coin_debate_orders o WHERE o.round_id=r.id) AS orders
+          FROM coin_debate_rounds r WHERE r.state='open' AND r.rail=$1
+          AND r.closes_at<=clock_timestamp() AND ${revealDue("r")} AND NOT EXISTS (SELECT 1 FROM debates d
+            WHERE d.id=r.debate_id AND d.status IN ${unavailableStatuses})
+          AND NOT r.id=ANY($4::uuid[])
+          ORDER BY r.closes_at,r.id LIMIT $2),
+        running AS (SELECT id,closes_at,orders,
+          sum(orders) OVER (ORDER BY closes_at,id)-orders AS before FROM due)
+        SELECT id FROM running WHERE before=0 OR before+orders<=$3
+        ORDER BY closes_at,id`,
+        [rail, limit, SETTLEMENT_BATCH.orders, skipped],
       )
     ).rows;
+    // Wait for in-flight submits to these rounds, and keep new ones out.
+    await lockRounds(
+      client,
+      rounds.map((r) => r.id),
+      "exclusive",
+    );
     const participants = (
       await client.query<{ user_id: string }>(
         "SELECT DISTINCT user_id FROM coin_debate_orders WHERE round_id=ANY($1::uuid[]) ORDER BY user_id",
@@ -438,7 +559,7 @@ export function createCoinDebateSandbox(
     return rounds;
   }
   async function settle(client: PoolClient, roundId: string) {
-    // The transition lock prevents new admissions while collecting account locks.
+    // The batch holds this round's lock exclusively: no new admissions.
     const orders = (
       await client.query<StoredOrder>(
         "SELECT * FROM coin_debate_orders WHERE round_id=$1 ORDER BY user_id",
@@ -678,6 +799,7 @@ export function createCoinDebateSandbox(
   // still the last lock, at COMMIT (docs/community-delivery.md). A turn the
   // clock already advanced inserts nothing.
   async function openWindow(client: PoolClient, debateId: string) {
+    await lockDebateOpening(client, debateId);
     const live = `FROM debates d JOIN topics t ON t.id=d.topic_id
       JOIN debate_media m ON m.debate_id=d.id
       WHERE d.id=$1 AND d.status='live' AND d.publication_state='published'
@@ -713,13 +835,14 @@ export function createCoinDebateSandbox(
     return inserted.rowCount ? { id, created: true } : null;
   }
   // Exact-source refund of an open round's reservations, without profit or
-  // qualification. The caller holds the transition lock (no new admissions).
+  // qualification. It takes the round's lock exclusively (no new admissions).
   async function voidOpen(
     client: PoolClient,
     roundId: string,
     reason: VoidReason,
     actorRole: string,
   ) {
+    await lockRounds(client, [roundId], "exclusive");
     const orders = (
       await client.query<StoredOrder>(
         "SELECT * FROM coin_debate_orders WHERE round_id=$1 ORDER BY user_id",
@@ -832,8 +955,10 @@ export function createCoinDebateSandbox(
     ) {
       resource(debateId);
       const key = reference(context.userId, "debate.open", idempotencyKey);
+      // Only the worker settles (advance); a viewer's request never runs
+      // anybody's settlement.
       return transaction(async (client) => {
-        const due = await dueBatch(client, 20, { context });
+        await authorize(client, context);
         const previous = (
           await client.query<Round>(
             "SELECT * FROM coin_debate_rounds WHERE reference=$1",
@@ -853,10 +978,6 @@ export function createCoinDebateSandbox(
           )
         ).rows[0];
         if (!debate) fail("debate not found", 404);
-        // Posted net profit and its permanent qualification peak follow round
-        // closing order, with UUID as the fixed tie-breaker. API request timing
-        // cannot settle a selected later round ahead of this bounded batch.
-        for (const round of due) await settle(client, round.id);
         if (turnWindows && debate.status === "live") {
           // Decision 0012: during a live debate the current speaking turn's
           // window is the only round to join; no five-minute round opens.
@@ -890,6 +1011,9 @@ export function createCoinDebateSandbox(
           );
         // A five-day manual round stays open after its cutoff until the
         // debate's 120-hour close; only one still taking orders is current.
+        // A per-round one stays current until the worker settles it, which
+        // keeps one open per-round round per debate (index coin_debate_open).
+        await lockDebateOpening(client, debateId);
         const current = (
           await client.query<{ id: string }>(
             `SELECT id FROM coin_debate_rounds WHERE debate_id=$1 AND state='open' AND turn_number IS NULL
@@ -899,8 +1023,6 @@ export function createCoinDebateSandbox(
           )
         ).rows[0];
         if (current) {
-          // If a due target was beyond this batch, leave it open for the next
-          // ordered advance. Never jump older obligations to open its successor.
           await assertCallerSession(client, context);
           return { id: current.id, created: false };
         }
@@ -946,8 +1068,9 @@ export function createCoinDebateSandbox(
         fail("invalid replay position", 400);
       const key = reference(context.userId, "debate.submit", idempotencyKey);
       return transaction(async (client) => {
+        await lockRounds(client, [roundId], "shared");
         await authorize(client, context);
-        const round = await stored(client, roundId);
+        const round = await stored(client, roundId, false);
         const order: Order = {
           participant: context.userId,
           kind: "human",
@@ -990,15 +1113,19 @@ export function createCoinDebateSandbox(
           fail("sandbox round is closed", 409, "window_closed");
         // A five-day round stays open after its cutoff, until its reveal.
         // Replay viewers then join the window playing at their position (F10).
+        // A turn window takes live orders only while its debate is live: an
+        // operator who ends a debate early closes its open window too.
         const timing = (
           await client.query<{
             accepting: boolean;
             replayable: boolean;
+            untimed: boolean;
             inSpan: boolean | null;
             later: boolean;
           }>(
-            `SELECT clock_timestamp()<r.closes_at AS accepting,
+            `SELECT ${liveAccepting("r", "d")} AS accepting,
               ${replayable("r", "d", "c")} AS replayable,
+              (${replayableUntimed("r", "d")} AND c.started_at IS NULL) AS untimed,
               $2::integer BETWEEN ${spanStartMs("r", "c")} AND ${spanEndMs("r", "c")} AS "inSpan",
               ${laterWindowJoined("r", "$3::bigint")} AS later
             FROM coin_debate_rounds r JOIN debates d ON d.id=r.debate_id
@@ -1010,6 +1137,14 @@ export function createCoinDebateSandbox(
         if (!timing.accepting) {
           if (input.replayPositionMs === undefined)
             fail("sandbox debate is past cutoff", 409, "window_closed");
+          // F10 needs the recording's start, which LiveKit reports when the
+          // recording completes; until then the replay takes no answers.
+          if (timing.untimed)
+            fail(
+              "this replay can't take answers until its recording is ready",
+              409,
+              "replay_untimed",
+            );
           if (!timing.replayable)
             fail(
               "replay positions are taken only by a five-day debate's turn windows, from its end until its 120-hour close",
@@ -1178,6 +1313,19 @@ export function createCoinDebateSandbox(
           `INSERT INTO coin_sandbox_requests(id,user_id,kind,reference,terms_digest,terms,status) VALUES($1,$2,'stake',$3,$4,$5::jsonb,'reserved')`,
           [requestId, context.userId, key, termsDigest, JSON.stringify(terms)],
         );
+        // A live order's turn window must still belong to a live debate after
+        // every lock wait; the order guard checks only the cutoff.
+        if (
+          replayPositionMs === null &&
+          !(
+            await client.query<{ accepting: boolean }>(
+              `SELECT ${liveAccepting("r", "d")} AS accepting
+              FROM coin_debate_rounds r JOIN debates d ON d.id=r.debate_id WHERE r.id=$1`,
+              [round.id],
+            )
+          ).rows[0]!.accepting
+        )
+          fail("this turn's window closed", 409, "window_closed");
         // DB cutoff is checked AFTER ledger-lock waits and immediately at
         // insert. A submit that loses that race reserves nothing: the guard's
         // refusal rolls the whole transaction back.
@@ -1230,16 +1378,12 @@ export function createCoinDebateSandbox(
         return { id: requestId, created: true };
       });
     },
+    // A read: no round, account or ledger lock, so viewers refreshing at a
+    // window boundary never wait behind admissions or settlement.
     async view(context: SandboxContext, debateId: string) {
       resource(debateId);
       return transaction(async (client) => {
-        if (!(await lockAccount(client, context.userId)))
-          throw new SessionUnavailableError("account unavailable");
-        await assertActiveSession(
-          client,
-          context.userId,
-          context.sessionTokenHash,
-        );
+        await assertCallerSession(client, context);
         const rounds = (
           await client.query<
             Round & {
@@ -1251,7 +1395,7 @@ export function createCoinDebateSandbox(
               later: boolean;
             }
           >(
-            `SELECT r.*, clock_timestamp()<r.closes_at AS accepting,
+            `SELECT r.*, ${liveAccepting("r", "d")} AS accepting,
               (SELECT count(*)::int FROM coin_debate_orders o WHERE o.round_id=r.id) AS participants,
               ${revealAt("r", "d")} AS reveal_at, ${recordingSpan("r", "c")} AS recording,
               ${replayable("r", "d", "c")} AS replayable,
@@ -1368,20 +1512,74 @@ export function createCoinDebateSandbox(
         );
       });
     },
-    async advance(limit = 20, context?: SandboxContext) {
+    // The worker's settlement step (and the sandbox's explicit
+    // POST /settlements). Each round settles in its own savepoint: one that
+    // throws is rolled back, set aside with a growing retry delay and logged,
+    // and the rest of the batch still settles. A timeout fails the batch,
+    // which the next tick retries.
+    async advance(limit = SETTLEMENT_BATCH.rounds, context?: SandboxContext) {
       if (!Number.isInteger(limit) || limit < 1 || limit > 100)
         fail("invalid transition batch", 400);
-      return transaction(async (client) => {
-        const due = await dueBatch(
-          client,
-          limit,
-          context ? { context } : undefined,
+      const failed: { roundId: string; error: unknown }[] = [];
+      const result = await transaction(
+        async (client) => {
+          const due = await dueBatch(
+            client,
+            limit,
+            context ? { context } : undefined,
+          );
+          let completed = 0;
+          for (const r of due) {
+            await client.query("SAVEPOINT coin_round");
+            try {
+              if (await settle(client, r.id)) completed++;
+              await client.query("RELEASE SAVEPOINT coin_round");
+            } catch (error) {
+              if (databaseFailure(error) === "busy") throw error;
+              await client.query("ROLLBACK TO SAVEPOINT coin_round");
+              await client.query("RELEASE SAVEPOINT coin_round");
+              failed.push({ roundId: r.id, error });
+            }
+          }
+          if (context) await assertCallerSession(client, context);
+          return { completed };
+        },
+        context ? requestLimits : workerLimits,
+      );
+      const now = Date.now();
+      for (const { roundId, error } of failed) {
+        const failures = (setAside.get(roundId)?.failures ?? 0) + 1;
+        const delay = Math.min(
+          setAsideMaxMs,
+          setAsideBaseMs * 2 ** (failures - 1),
         );
-        let completed = 0;
-        for (const r of due) if (await settle(client, r.id)) completed++;
-        if (context) await assertCallerSession(client, context);
-        return { completed };
-      });
+        setAside.set(roundId, { failures, retryAt: now + delay });
+        options.logger?.error(
+          { roundId, failures, retryInSeconds: delay / 1000, error },
+          "coin round settlement failed; round set aside",
+        );
+      }
+      return { ...result, setAside: failed.map(({ roundId }) => roundId) };
+    },
+    // Debates still live well past their maximum duration (rules snapshot,
+    // default 2 hours) plus 30 minutes of pauses: their windows never reveal
+    // and keep every reservation until someone ends them.
+    async overdueLive() {
+      return (
+        await database.query<{
+          debateId: string;
+          liveStartedAt: Date;
+          maximumSeconds: number;
+        }>(
+          `SELECT id AS "debateId", live_started_at AS "liveStartedAt", maximum AS "maximumSeconds"
+          FROM (SELECT d.id,d.live_started_at,
+              CASE WHEN d.rules_snapshot->>'maximum_duration_seconds' ~ '^[0-9]{1,6}$'
+                THEN (d.rules_snapshot->>'maximum_duration_seconds')::int ELSE 7200 END AS maximum
+            FROM debates d WHERE d.status='live' AND d.live_started_at IS NOT NULL) live
+          WHERE live_started_at+make_interval(secs=>maximum)+INTERVAL '30 minutes'<clock_timestamp()
+          ORDER BY live_started_at,id LIMIT 20`,
+        )
+      ).rows;
     },
     // Explicit operator command only, never startup/reset behavior or a public
     // cancellation API. Exact sources return without profit or qualification.
@@ -1399,7 +1597,7 @@ export function createCoinDebateSandbox(
         )
           fail("sandbox operator ownership is required", 403);
         return voidOpen(client, roundId, reason, "yaparena_owner");
-      });
+      }, workerLimits);
     },
     // F11: the owner records per-round reveal for a founder-created debate,
     // before its first round. User-created debates keep the five-day default.
@@ -1416,6 +1614,7 @@ export function createCoinDebateSandbox(
             .rows[0]?.role !== "yaparena_owner"
         )
           fail("sandbox operator ownership is required", 403);
+        await lockDebateOpening(client, debateId);
         const recorded = (
           await client.query<{ mode: RevealMode }>(
             "SELECT mode FROM coin_debate_reveal_modes WHERE debate_id=$1",
@@ -1446,7 +1645,7 @@ export function createCoinDebateSandbox(
           [debateId, mode, why],
         );
         return { created: true };
-      });
+      }, workerLimits);
     },
     // Coin loop: refund every open round of a cancelled or under-review debate
     // (F15: only unopened rounds can be voided). The database lets the runtime
@@ -1474,7 +1673,7 @@ export function createCoinDebateSandbox(
           return current
             ? voidOpen(client, id, "debate_unavailable", current.role)
             : { created: false };
-        });
+        }, workerLimits);
         if (result.created) voided++;
       }
       return { voided };
@@ -1515,7 +1714,12 @@ export function createCoinDebateSandbox(
       ).rows;
       let opened = 0;
       for (const { debateId } of due)
-        if (await transaction((client) => openWindow(client, debateId)))
+        if (
+          await transaction(
+            (client) => openWindow(client, debateId),
+            workerLimits,
+          )
+        )
           opened++;
       return { opened };
     },
@@ -1526,7 +1730,7 @@ export function createCoinDebateSandbox(
      * after `since`, newest first, across debates. Private to the viewer.
      */
     async results(context: SandboxContext, since: Date) {
-      return withTransaction(database, async (client) => {
+      return transaction(async (client) => {
         await assertCallerSession(client, context);
         const rows = (
           await client.query<{
@@ -1625,14 +1829,23 @@ export function createCoinDebateSandbox(
         }
       }
       const voided = await step(() => api.voidUnavailable());
-      const settled = await step(() => api.advance());
+      // Open the new turn's window before settling, so a large reveal never
+      // delays it; then settle batch after batch for up to 3 seconds. Each
+      // batch commits on its own, so submits get in between.
       const opened = await step(() => api.openTurnWindows());
+      const started = Date.now();
+      let completed = 0;
+      for (;;) {
+        const batch = await step(() => api.advance());
+        completed += batch?.completed ?? 0;
+        if (!batch?.completed || Date.now() - started > 3000) break;
+      }
       if (failures.length === 1) throw failures[0];
       if (failures.length)
         throw new AggregateError(failures, "coin debate tick failed");
       return {
         voided: voided?.voided ?? 0,
-        completed: settled?.completed ?? 0,
+        completed,
         opened: opened?.opened ?? 0,
       };
     },

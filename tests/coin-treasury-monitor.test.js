@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { createMetrics } from "../dist/platform/metrics.js";
 import {
+  createLiveDebateMonitor,
   createTreasuryMonitor,
   treasuryStatus,
 } from "../dist/features/account-wallet/treasury-monitor.js";
@@ -90,5 +91,31 @@ describe("Yap Coins treasury monitoring", () => {
       throw new Error("database unavailable");
     });
     assert.doesNotMatch(await scrape(), /account="center"/);
+  });
+
+  it("warns about each debate stuck in live past its maximum duration", async () => {
+    const warnings = [];
+    const liveStartedAt = new Date("2026-10-30T12:00:00Z");
+    const monitor = createLiveDebateMonitor({
+      read: async () => [
+        {
+          debateId: "33333333-3333-4333-8333-333333333333",
+          liveStartedAt,
+          maximumSeconds: 600,
+        },
+      ],
+      logger: { warn: (details, message) => warnings.push([details, message]) },
+    });
+    assert.equal((await monitor.check()).length, 1);
+    assert.deepEqual(warnings, [
+      [
+        {
+          debateId: "33333333-3333-4333-8333-333333333333",
+          liveStartedAt,
+          maximumSeconds: 600,
+        },
+        "debate live past maximum duration",
+      ],
+    ]);
   });
 });

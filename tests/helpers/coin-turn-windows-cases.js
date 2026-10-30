@@ -18,6 +18,15 @@ import { attachSubject, openSandbox } from "./confirmations.js";
 // fixtures hold account locks before waiting for the transition lock. Other
 // PostgreSQL suites share the database in parallel, so window opening and
 // voiding stay scoped to this file's own debates.
+// Behaviour cases hold locks on purpose, sometimes for seconds, while other
+// PostgreSQL suites run in parallel; they relax the sandbox's lock and
+// statement timeouts. Dedicated cases check the real limits.
+const relaxed = {
+  limits: {
+    request: { lockTimeoutMs: 60_000, statementTimeoutMs: 120_000 },
+    worker: { lockTimeoutMs: 60_000, statementTimeoutMs: 120_000 },
+  },
+};
 const ownerUrl = process.env.A4_TEST_OWNER_URL,
   runtimeUrl = process.env.A4_TEST_DATABASE_URL;
 describe(
@@ -42,9 +51,10 @@ describe(
         rail: "simulation",
       });
       windows = createCoinDebateSandbox(runtime, "simulation", {
+        ...relaxed,
         turnWindows: true,
       });
-      manual = createCoinDebateSandbox(runtime, "simulation");
+      manual = createCoinDebateSandbox(runtime, "simulation", relaxed);
       topicId = (
         await owner.query(
           "INSERT INTO topics(slug,title,summary,side_a_label,side_b_label,publication_state) VALUES($1,'Turn windows','Synthetic turn window fixture','Support','Oppose','published') RETURNING id",
@@ -773,9 +783,10 @@ describe(
       const [untimedView] = await windows.view(viewer, untimed);
       assert.equal(untimedView.recording, null);
       assert.equal(untimedView.eligibility.reason, "closed");
+      // Its own refusal, not the five-day rule (audit item 9).
       await assert.rejects(
         windows.submit(viewer, untimedWindow.id, randomUUID(), order(1)),
-        /only by a five-day debate's turn windows/,
+        (error) => error.code === "replay_untimed" && error.status === 409,
       );
       await assert.rejects(
         windows.submit(viewer, untimedWindow.id, randomUUID(), {
@@ -784,6 +795,59 @@ describe(
         }),
         /invalid replay position/,
       );
+    });
+
+    // PR 2 (audit item 9): an operator who ends a debate early closes its
+    // open window to live orders, before the turn's own cutoff.
+    it("refuses live orders once the debate is no longer live", async () => {
+      const viewer = await funded(),
+        debateId = await liveDebate();
+      await windows.openTurnWindows(20, [debateId]);
+      const [window] = await rounds(debateId);
+      await owner.query(
+        "UPDATE debates SET status='ended',live_ended_at=clock_timestamp() WHERE id=$1",
+        [debateId],
+      );
+      await assert.rejects(
+        windows.submit(viewer, window.id, randomUUID(), order(1)),
+        (error) => error.code === "window_closed" && error.status === 409,
+      );
+      const [view] = await windows.view(viewer, debateId);
+      assert.equal(view.eligibility.reason, "closed");
+      assert.equal(
+        (
+          await owner.query(
+            "SELECT count(*)::int n FROM coin_debate_orders WHERE round_id=$1",
+            [window.id],
+          )
+        ).rows[0].n,
+        0,
+      );
+      await owner.query("UPDATE debates SET status='cancelled' WHERE id=$1", [
+        debateId,
+      ]);
+      await windows.voidUnavailable(20, [debateId]);
+    });
+
+    it("names debates stuck in live past their maximum duration", async () => {
+      const stuck = await liveDebate(),
+        recent = await liveDebate();
+      // The fixture's maximum is 600 seconds; 30 minutes of grace follow.
+      await owner.query(
+        "UPDATE debates SET live_started_at=clock_timestamp()-INTERVAL '41 minutes' WHERE id=$1",
+        [stuck],
+      );
+      const overdue = (await windows.overdueLive()).map((row) => row.debateId);
+      assert.ok(overdue.includes(stuck));
+      assert.ok(!overdue.includes(recent));
+      const row = (await windows.overdueLive()).find(
+        (entry) => entry.debateId === stuck,
+      );
+      assert.equal(row.maximumSeconds, 600);
+      for (const id of [stuck, recent])
+        await owner.query("UPDATE debates SET status='cancelled' WHERE id=$1", [
+          id,
+        ]);
     });
   },
 );
