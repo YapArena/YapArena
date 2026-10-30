@@ -2,6 +2,11 @@ declare global {
   interface Window {
     yapMeasurement?: typeof measurement;
   }
+  // Global Privacy Control (https://globalprivacycontrol.org); not yet in the
+  // DOM library types.
+  interface Navigator {
+    readonly globalPrivacyControl?: boolean;
+  }
 }
 /* global document, window */
 const choiceKey = "yaparena-measurement-declined";
@@ -178,16 +183,19 @@ document.querySelector(".footer-inner")?.append(settings);
 
 // /cookies links here with #cookie-settings to open the settings directly.
 const openSettings = () => window.location.hash === "#cookie-settings";
+// A browser that sends Global Privacy Control has already refused: no banner,
+// analytics stays off, and Cookie settings can still turn it on.
+const refused = () => declined() || navigator.globalPrivacyControl === true;
 fetch("/api/measurement/consent", { credentials: "same-origin" })
   .then((response) => (response.ok ? response.json() : { consented: false }))
   .then((data: { consented: boolean }) => {
     consented = Boolean(data.consented);
     if (consented) recordPage();
     if (openSettings()) cookies.settings();
-    else if (!consented && !declined()) cookies.banner();
+    else if (!consented && !refused()) cookies.banner();
     window.dispatchEvent(new Event("yap-measurement-changed"));
   })
   .catch(() => {
     if (openSettings()) cookies.settings();
-    else if (!declined()) cookies.banner();
+    else if (!refused()) cookies.banner();
   });

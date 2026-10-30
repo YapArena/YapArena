@@ -260,19 +260,32 @@ const privacy: LegalPage = {
   glance: [
     [
       "Debates are public",
-      "Debaters’ video, voice, transcript and AI outline are shown live and in public replays.",
+      "Debaters’ video, voice and username are shown live and in public replays.",
     ],
     [
-      "Stored in the United States",
-      "Our database, servers, video and sign-in providers keep information outside Québec and Canada.",
+      "So is the AI outline",
+      "Captions and an AI summary of each turn are shown with the debate.",
+    ],
+    [
+      "Chat is public",
+      "Messages show with your username. Reports stay private.",
     ],
     [
       "No ads, no selling",
       "We don’t sell personal information or use it for advertising.",
     ],
     [
-      "Analytics cookies are your choice",
-      "They stay off until you accept them, and you can turn them off and delete their data anytime.",
+      "Analytics only if you accept",
+      "The analytics cookie stays off until you choose Accept all.",
+    ],
+    [
+      "Stored in the United States",
+      "Our database, servers and main providers are outside Québec and Canada.",
+    ],
+    [`${MINIMUM_AGE} and older`, "YAP Arena is only for adults."],
+    [
+      "You stay in control",
+      "Download your data, change your choices, or ask us to delete it.",
     ],
   ],
   sections: [
@@ -294,7 +307,7 @@ const privacy: LegalPage = {
     {
       id: "public",
       title: "What others can see",
-      body: html`<div class="legal-note"><p>Debates are public. When you debate, anyone can watch you live and in the replay afterwards: your video, your voice, your username and handle, the captions of what you say and the AI outline of your arguments. Debates can be shared by link and QR code.</p></div>${visibility}<p>Before your first debate, the Debating card in your account settings asks for your consent to recording and public replay. You can withdraw it anytime for future debates. Debates already held keep their recording, transcript and outline for the periods in ${link("#retention", "How long we keep it")}. Viewers can make their own copies of what they watch, for example by recording their screen, and we can’t control those copies.</p>`,
+      body: html`<div class="legal-note"><p>Debates are public. When you debate, anyone can watch you live and in the replay afterwards: your video, your voice, your username and handle, the captions of what you say and the AI outline of your arguments. Debates can be shared by link and QR code.</p></div>${visibility}<p>Before your first debate, the Debating card in your account settings asks for your consent to recording and public replay. You can withdraw it anytime for future debates. Debates already held keep their recording, transcript and outline for the periods in ${link("#retention", "How long we keep it")}. Viewers can make their own copies of what they watch, for example by recording their screen, and we can’t control those copies.</p><p>A debate belongs to both debaters, so deleting your account may not delete a debate you took part in. ${todo("Founder decision: remove, or remove your name from, a deleted account’s debates and chat")}</p>`,
     },
     {
       id: "ai",
@@ -307,6 +320,11 @@ const privacy: LegalPage = {
       body: html`<p><strong>We don’t sell or rent personal information, and we don’t share it for advertising.</strong> We share it only in these cases:</p><ul><li><strong>Service providers</strong> that run YAP Arena for us, listed below. Each receives only what it needs to provide its service.</li><li><strong>Everyone, for public content</strong>: the profile, debates and chat described in ${link("#public", "What others can see")}.</li><li><strong>The law and safety</strong>: when the law requires it, or to protect people’s safety, investigate abuse or defend our rights.</li><li><strong>A business change</strong>: if YAP Arena is merged, sold or reorganized, under the same protections.</li></ul>${processors}<p>${todo("Confirm each provider’s data processing terms and that none may use our data for its own purposes")}</p>`,
     },
     {
+      id: "coins",
+      title: "Yap Coins",
+      body: html`<p>Yap Coins are play money with no cash value. They can’t be bought or withdrawn, so we collect no payment information. We keep a record of each account’s balance, grants and positions so the game stays fair. The combined results of each turn are public once revealed, without names.</p>`,
+    },
+    {
       id: "transfers",
       title: "Where it is stored",
       body: html`<p>Your information is stored and processed <strong>outside Québec and Canada</strong>. Our database and servers are in Ohio, in the United States, and our sign-in, email and video providers keep information in the United States. Our speech-to-text, AI and replay storage providers may process it in the United States or other countries ${todo("Confirm Deepgram, Anthropic and Cloudflare R2 locations")}. Information held abroad is subject to the laws of that country and may be accessed by its courts and authorities.</p><p>Before sending personal information outside Québec, we assess whether it will be adequately protected, taking into account its sensitivity, the purpose, the safeguards in place and the laws that apply, and we rely on written agreements with our providers. ${todo("Founder: complete the privacy impact assessment for transfers outside Québec")}</p>`,
@@ -314,12 +332,12 @@ const privacy: LegalPage = {
     {
       id: "retention",
       title: "How long we keep it",
-      body: html`${retention}<p>Daily cleanup jobs delete information when its period ends. Deleted information can remain in database backups until they expire.</p>`,
+      body: html`${retention}<p>Cleanup jobs run every hour and delete information when its period ends. Deleted information can remain in database backups until they expire.</p>`,
     },
     {
       id: "cookies",
       title: "Cookies",
-      body: html`<p>We use strictly necessary cookies to sign you in, keep YAP Arena secure and remember your choices. We use one analytics cookie, only if you accept it in the cookie banner. We don’t use advertising or third-party tracking cookies.</p><p>The ${link("/cookies", "Cookie Policy")} lists every cookie and how long it lasts. Change your choice anytime with <strong>Cookie settings</strong> at the bottom of any page.</p>`,
+      body: html`<p>We use strictly necessary cookies to sign you in, keep YAP Arena secure and remember your choices. We don’t use advertising or third-party tracking cookies.</p><p>Our one analytics cookie recognizes your browser across visits so we can count return visits and watch time. It is off by default: it is set only if you choose <strong>Accept all</strong> or turn on Analytics, and we treat your browser’s Global Privacy Control signal as a refusal.</p><p>The ${link("/cookies", "Cookie Policy")} lists every cookie and how long it lasts. Change your choice anytime with <strong>Cookie settings</strong> at the bottom of any page.</p>`,
     },
     {
       id: "rights",
@@ -335,6 +353,11 @@ const privacy: LegalPage = {
       id: "age",
       title: "Age",
       body: html`<p>YAP Arena is for people ${MINIMUM_AGE} and older. We don’t knowingly collect information from anyone younger. If we learn that an account belongs to someone under ${MINIMUM_AGE}, we close it and delete its information. Contact us at ${privacyEmail} if you believe this has happened.</p>`,
+    },
+    {
+      id: "governance",
+      title: "How we manage personal information",
+      body: html`<ul><li><strong>Who is responsible.</strong> The person in charge of the protection of personal information (see ${link("#who", "Who we are")}) approves how we collect, use, keep and destroy personal information, and handles requests and complaints.</li><li><strong>Access.</strong> Staff and contractors see personal information only when their role needs it. Moderation and operator tools need a role we grant on purpose.</li><li><strong>Keeping and destroying.</strong> We keep information only for the periods in ${link("#retention", "How long we keep it")}, then delete it or remove what identifies you.</li><li><strong>New projects.</strong> We assess privacy risks before a new project involving personal information, and before sending it outside Québec.</li><li><strong>Complaints.</strong> Write to ${privacyEmail}. We acknowledge your complaint, look into it and answer in writing within 30 days.</li></ul>`,
     },
     {
       id: "changes",
@@ -612,7 +635,7 @@ const cookiePolicy: LegalPage = {
     {
       id: "choices",
       title: "Your choices",
-      body: html`<ul><li><strong>The banner.</strong> On your first visit, choose <strong>Accept all</strong>, <strong>Reject all</strong> or <strong>Customize</strong>. Until you choose, analytics stays off.</li><li><strong>Cookie settings.</strong> Change your choice anytime with <strong>Cookie settings</strong> at the bottom of any page, in your account’s Privacy tab, or ${link("/home#cookie-settings", "here")}. Turning analytics off deletes the measurements collected through that browser.</li><li><strong>Your browser.</strong> You can block or delete cookies in your browser’s settings. If you block strictly necessary cookies, you won’t be able to sign in.</li></ul><p>Your choice is saved for each browser. If you use another browser or device, or clear your cookies, we ask again.</p>`,
+      body: html`<ul><li><strong>The banner.</strong> On your first visit, choose <strong>Accept all</strong>, <strong>Reject all</strong> or <strong>Customize</strong>. Both buttons weigh the same, and until you choose, analytics stays off. If your browser sends a Global Privacy Control signal, we treat it as Reject all and don’t show the banner.</li><li><strong>Cookie settings.</strong> Change your choice anytime with <strong>Cookie settings</strong> at the bottom of any page, in your account’s Privacy tab, or ${link("/home#cookie-settings", "here")}. Turning analytics off deletes the measurements collected through that browser.</li><li><strong>Your browser.</strong> You can block or delete cookies in your browser’s settings. If you block strictly necessary cookies, you won’t be able to sign in.</li></ul><p>Your choice is saved for each browser. If you use another browser or device, or clear your cookies, we ask again.</p>`,
     },
     {
       id: "changes",

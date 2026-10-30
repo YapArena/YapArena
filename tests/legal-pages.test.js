@@ -97,6 +97,15 @@ describe("privacy and terms pages", () => {
       "Events and watch sessions 90 days; an unused consent 180 days",
     ])
       assert.ok(text.includes(period), period);
+    // Québec's governance summary, the tracking-technology notice and the
+    // play-money statement.
+    assert.match(text, /<section id="governance"/);
+    assert.match(text, /answer in writing within 30 days/);
+    assert.match(text, /off by default/);
+    assert.match(text, /Global Privacy Control signal as a refusal/);
+    assert.match(text, /<section id="coins"/);
+    assert.match(text, /we collect no payment information/);
+    assert.equal(text.match(/<li><strong>/g).length > 8, true);
     // Decisions only the founder can make stay visible until they are made.
     assert.match(
       text,
