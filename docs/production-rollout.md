@@ -19,9 +19,9 @@ own value of every secret, and shares no project, tenant, bucket or key with sta
   and every `http://` address only redirect there, keeping the path and query.
 - **Full launch.** Video debates, Yap Coins turn windows, the AI outline and matchmaking are on from
   the first day, so all video setup (step 7) happens before the DNS switch.
-- **Gates.** The DNS switch waits for privacy policy and terms pages, the F04 database check on
-  production, and one tried restore plus uptime alerts ([step 9](#9-gates-before-the-dns-switch)). Account
-  deletion follows after launch.
+- **Nothing blocks the DNS switch.** The privacy policy and terms pages, the F04 database check on
+  production, a tried restore, uptime alerts and account deletion all follow after launch
+  ([step 9](#9-open-items-at-launch)).
 - **One image per release.** Staging and production both run CI-published image digests, and
   production only ever runs a digest staging ran first. Step 1 switches staging's services to CI
   images once.
@@ -42,13 +42,14 @@ Plan four sittings. Start step 2 a day early: moving the nameservers can take up
 | [6](#6-production-database)                                | Supabase project, identities, migrations, first backup      | Supabase, Terminal            | 1 h                |
 | [7](#7-video-livekit-r2-replay-edge-and-transcriber)       | LiveKit, R2, the replay edge, the transcriber agent         | LiveKit, Cloudflare, Terminal | 1½ h               |
 | [8](#8-render-services)                                    | `yaparena-web`, `yaparena-jobs` and `yaparena-encoder`      | Render, Terminal              | 1 h                |
-| [9](#9-gates-before-the-dns-switch)                        | Privacy page, F04 check, restore test and alerts            | Separate tasks                | —                  |
+| [9](#9-open-items-at-launch)                               | What follows after launch                                   | Separate tasks                | —                  |
 | [10](#10-connect-yaparenacom)                              | yaparena.com points at production; certificates             | Render, Cloudflare            | 30 min–1 h         |
 | [11](#11-launch-checks)                                    | Redirects, sign-up, sign-out, a two-account debate, staging | Browsers, phone, Terminal     | 1–1½ h             |
 | [Releasing](#releasing-from-now-on), [Rollback](#rollback) | Every later release, and going back                         | GitHub, Render, Terminal      | 45 min per release |
 
-Everything can be undone except the migrations, the Auth0 tenant's region and the transcriber
-agent's region. Nobody can reach production until step 10, so steps 0 to 9 are safe to pause.
+Everything can be undone except the migrations and what's fixed when it's created: the Auth0
+tenant's name and region, the LiveKit project's region, the transcriber agent's region and the
+Google project's ID. Nobody can reach production until step 10, so steps 0 to 8 are safe to pause.
 
 ## Accounts and monthly costs
 
@@ -207,9 +208,8 @@ they are `<WEB_IMAGE>` and `<ENCODER_IMAGE>`.
 
 - Check: both lines start with `ghcr.io/yaparena/` (older pages say `ghcr.io/boufe/`; the images
   moved with the repository).
-- The launch release must contain the privacy page ([gate 9.1](#91-privacy-policy-page)). If that
-  isn't merged yet, do steps 1 to 8 with today's release, then run the release that contains it
-  through [Releasing from now on](#releasing-from-now-on) before step 10.
+- The privacy and terms pages ([9.1](#91-privacy-and-terms-pages)) come in a later release, through
+  [Releasing from now on](#releasing-from-now-on).
 
 ### 1.2 Prepare the release checkout
 
@@ -287,29 +287,32 @@ accept, captions, the AI outline, a turn window, and the replay after it ends.
 
 Time: 30 minutes of clicks, then up to a day for the nameservers.
 
-1. Cloudflare → **Account home** → **+ Add** → **Connect a domain** (older dashboards: **Add a
-   site**). Enter `yaparena.com`, keep **Quick scan for DNS records**, and click **Continue**. Choose
-   the **Free** plan.
-2. Cloudflare lists the records it found at your registrar. Delete the registrar's **parking**
-   records: an `A` record for `yaparena.com` or `www` pointing at the registrar's parking address,
-   any `CNAME` for `www` to a parking host, and any `AAAA` records (Render serves IPv4 only). Keep
-   `MX` and `TXT` records only if you already receive email at yaparena.com. Click **Continue to
-   activation**.
-3. Cloudflare shows two nameservers, such as `ada.ns.cloudflare.com`. At your registrar, open
-   yaparena.com's DNS or nameserver settings, choose **custom nameservers**, replace the existing
-   ones with those two, and save. If the registrar has **DNSSEC** on, turn it off first.
-4. Back in Cloudflare, click **Check nameservers now**. Cloudflare emails you when the site is
-   active.
-5. Under the yaparena.com site, **SSL/TLS** → **Overview** → **Configure**, choose **Full**, and
-   save. Never choose **Flexible**: a proxied record would then loop between HTTP and HTTPS.
+1. Cloudflare → **Domains** → **Onboard a domain**. Enter `yaparena.com`, keep the quick scan of
+   existing DNS records, and click **Continue**. Choose the **Free** plan.
+2. Cloudflare lists the records its scan found. The scan can miss some, so compare with the list at
+   your registrar. Delete the registrar's **parking** records: an `A` record for `yaparena.com` or
+   `www` pointing at the registrar's parking or forwarding address, any `CNAME` for `www` to a
+   parking host, and any `AAAA` records (Render serves IPv4 only): the record's **Edit** →
+   **Delete**. Keep `MX` and `TXT` records only if you already receive email at yaparena.com.
+   **Continue**.
+3. Cloudflare shows two nameservers, such as `ada.ns.cloudflare.com`. At your registrar, turn
+   **DNSSEC** off first if it's on. Then open yaparena.com's nameserver settings, choose **custom
+   nameservers**, remove all the existing ones, enter exactly those two, and save.
+4. Back in Cloudflare, the site shows **Pending Nameserver Update** until the change is seen. Its
+   **Overview** page has a button to check again. Cloudflare emails you when the site is active.
+5. Under the yaparena.com site, **SSL/TLS** → **Overview**. The default is **Automatic SSL/TLS**;
+   choose **Custom SSL/TLS** → **Full** and save. Never choose **Flexible**: a proxied record would
+   then loop between HTTP and HTTPS.
+6. Optional, once active: **DNS** → **Settings** → **DNSSEC** → **Enable**, then add the `DS` record
+   it shows at your registrar.
 
 - Check, Terminal:
 
   ```sh
-  dig +short NS yaparena.com
+  dig +short NS yaparena.com @1.1.1.1
   ```
 
-  prints the two Cloudflare nameservers, and the site's **Overview** page says **Active**.
+  prints the two Cloudflare nameservers, and **Domains** shows yaparena.com as **Active**.
 
 - If after a day it still shows the old nameservers, check the spelling at the registrar.
 - From now on, add records in Cloudflare only; the registrar's DNS no longer applies.
@@ -328,14 +331,16 @@ Auth0 sends sign-in codes. Production's tenant sends them through Resend from
    Otherwise, for each record: Cloudflare → yaparena.com → **DNS** → **Records** → **+ Add record**,
    copy the type, name, content and (for MX) priority exactly, and save.
 3. Add the DMARC record, which Resend doesn't create: **+ Add record**, type `TXT`, name `_dmarc`,
-   content `v=DMARC1; p=none; rua=mailto:<YOUR_EMAIL>`. `p=none` only reports; after two clean weeks
-   of reports, change it to `p=quarantine`.
-4. Resend → the domain → **Verify DNS records**.
+   content `v=DMARC1; p=none; rua=mailto:<YOUR_EMAIL>;`. `p=none` only reports; after two clean
+   weeks of reports, change it to `p=quarantine`.
+4. Resend → the domain → **Verify DNS Records**.
 5. Resend → **API Keys** → **+ Create API key**. Name `auth0-production`, permission **Sending
    access**, domain `yaparena.com`. Click **Add** and copy the key (shown once, starts with `re_`)
    into the password manager as "Resend production SMTP".
 
-- Check: the domain's status reads **Verified** (it can take a few minutes; up to an hour).
+- Check: the domain's status reads **Verified**. It often takes about 15 minutes and can take up to
+  72 hours.
+- The region can't change later without deleting and re-adding the domain.
 - If a record stays **Pending**: in Cloudflare, check that its name is exactly `send` or
   `resend._domainkey` (Cloudflare adds `.yaparena.com` itself) and that the content has no extra
   quotes.
@@ -348,21 +353,25 @@ Production gets its own Google OAuth client, so its consent screen names yaparen
 client stays separate.
 
 1. [console.cloud.google.com](https://console.cloud.google.com) → the project menu at the top →
-   **New project**. Name `yaparena-production`, then **Create**, and select it.
-2. Open **Google Auth Platform** (search for it in the top bar) → **Get started**. App name
-   `YAP Arena`, user support email `<YOUR_EMAIL>`, audience **External**, contact email
-   `<YOUR_EMAIL>`, agree, **Create**.
+   **New project**. Name `yaparena-production` (the project ID under it can't change later), then
+   **Create**, and select it.
+2. Menu → **Google Auth Platform** → **Branding** → **Get started**. **App Information**: app name
+   `YAP Arena`, user support email `<YOUR_EMAIL>`, **Next**. **Audience**: **External**, **Next**.
+   **Contact Information**: `<YOUR_EMAIL>`, **Next**. Tick the agreement, **Continue**, **Create**.
 3. **Branding**: application home page `https://yaparena.com`, privacy policy
    `https://yaparena.com/privacy`, terms of service `https://yaparena.com/terms`. Google requires all
-   three links for a public app, which is why gate 9.1 includes a terms page. Under **Authorized
-   domains**, add `yaparena.com`. **Save**.
+   three links for a public app; the pages come in a later release ([9.1](#91-privacy-and-terms-pages)),
+   so the links don't open until then. Under **Authorized domains**, add `yaparena.com`. Leave the
+   logo empty: uploading one starts Google's brand verification. **Save**; if the page then offers
+   **Publish branding**, click it.
 4. **Audience** → **Publish app** → **Confirm**. Publishing status reads **In production**. While
    it says **Testing**, only listed test users can sign in with Google.
 5. **Clients** → **+ Create client**. Type **Web application**, name `auth0-production`. Under
-   **Authorized redirect URIs**, add exactly `https://auth.yaparena.com/login/callback`. Leave
-   **Authorized JavaScript origins** empty. **Create**.
+   **Authorized JavaScript origins**, add `https://auth.yaparena.com`. Under **Authorized redirect
+   URIs**, add exactly `https://auth.yaparena.com/login/callback` (no trailing slash). **Create**.
 6. Copy the **Client ID** and the **Client secret** into the password manager as "Google OAuth
-   production". Download the JSON if the secret won't be shown again.
+   production" straight away: Google shows the secret only once. If you lose it, open the client,
+   **Add Secret**, and delete the old one.
 
 - Check: **Clients** lists `auth0-production` with the redirect URI above, and **Audience** reads
   **In production**.
@@ -379,28 +388,33 @@ client stays separate.
 
 Time: 10 minutes.
 
-1. Auth0 → the tenant menu at the top left → **Create tenant**.
-2. Tenant domain `yaparena-production`, region **US**, environment tag **Production**. **Create**.
+1. Auth0 → the tenant menu at the top left → **Create Tenant**.
+2. **Tenant Domain** `yaparena-production`, **Region** **US**. **Create**.
+3. In the new tenant: **Settings** → **General** → **Environment Tag** → **Production** → **Save**.
+   Production rate limits apply only to tenants tagged Production.
 
 - Check: the tenant menu shows `yaparena-production` with a Production tag. Its default domain is
   `yaparena-production.us.auth0.com`; the app never uses it, because production refuses
   `*.auth0.com`.
 - The region and the tenant name can't change later. Auth0 also offers Canada (CA), but Render,
   Supabase and LiveKit keep data in the US either way, so US keeps everything in one country. The
-  privacy page (gate 9.1) names the region you pick.
+  privacy page (9.1) names the region you pick.
 
 ### 5.2 Custom domain `auth.yaparena.com`
 
 Time: 20 minutes, mostly waiting.
 
 1. Auth0 needs a card on file for a custom domain, even on the Free plan; it isn't charged.
-   **Settings** (bottom of the sidebar) → **Billing** → add a card.
+   **Settings** → **Payment & Billing** → **Add Payment Details** → enter the card → **Update**.
 2. **Branding** → **Custom Domains**. Domain `auth.yaparena.com`, certificate type **Auth0-managed
-   certificates**, **Add domain**.
+   certificates**, **Add Domain**.
 3. Auth0 shows a `CNAME` record. Its content is `<AUTH0_CNAME_TARGET>`. In Cloudflare → **DNS** →
    **+ Add record**: type `CNAME`, name `auth`, target `<AUTH0_CNAME_TARGET>`, **Proxy status: DNS
-   only** (grey cloud), **Save**. Auth0 can't issue its certificate behind Cloudflare's proxy.
-4. Back in Auth0, click **Verify**. Wait until the status reads **Ready**.
+   only** (grey cloud), **Save**. Auth0 can't issue its certificate behind Cloudflare's proxy. Keep
+   the record for good: Auth0 renews the certificate through it every three months.
+4. Back in Auth0, click **Verify**. It usually takes a few minutes; wait until the status reads
+   **Ready**.
+5. On the same page, turn on **Use Custom Domain in Emails**.
 
 - Check, Terminal:
 
@@ -410,8 +424,8 @@ Time: 20 minutes, mostly waiting.
 
   prints `https://auth.yaparena.com/`.
 
-- If verification fails: check the record is grey (DNS only) and named `auth`, wait 10 minutes and
-  click **Verify** again.
+- If verification fails: check the record is grey (DNS only) and named `auth`. Auth0 asks you to
+  wait at least four hours before trying again; don't delete and re-add the domain.
 
 ### 5.3 Send emails through Resend
 
@@ -419,35 +433,42 @@ Time: 10 minutes. Set the provider before the email connection, so no code is ev
 Auth0's test provider.
 
 1. **Branding** → **Email Provider** → turn on **Use my own email provider** → **SMTP Provider**.
-2. **From**: `no-reply@yaparena.com`. **Host**: `smtp.resend.com`. **Port**: `465`. **Username**:
+2. **From**: `no-reply@yaparena.com`. **Host**: `smtp.resend.com`. **Port**: `587`. **Username**:
    `resend`. **Password**: the Resend key from step 3. **Save**.
-3. **Send test email** to `<YOUR_EMAIL>`.
+3. **Send Test Email** to `<YOUR_EMAIL>`.
 
 - Check: the email arrives from `no-reply@yaparena.com`. In Gmail, **⋮** → **Show original** shows
   `SPF: PASS`, `DKIM: PASS` and `DMARC: PASS`. Resend → **Emails** lists it as **Delivered**.
 - If Auth0 reports an SMTP error: check the key has **Sending access** for yaparena.com, and try
-  port `587`.
+  port `465`. Auth0 → **Monitoring** → **Logs** shows the failure.
+- Never rely on Auth0's built-in provider here: Auth0 doesn't support it for production, and it
+  sends at most 10 emails a minute.
 
 ### 5.4 Identifier First
 
-Time: 2 minutes. **Authentication** → **Authentication Profile** → **Identifier First** → **Save**.
+Time: 2 minutes. **Authentication** → **Authentication Profile** → **Identifier First**, then
+**Save** if the page shows it. Universal Login offers email codes only with Identifier First.
 
 ### 5.5 The email code connection
 
 Time: 5 minutes.
 
-1. **Authentication** → **Passwordless** → **Email** → turn it on.
-2. On its **Settings** tab, keep the connection name `email` (the app asks for it by that name).
-   Compare **OTP Expiry** and **OTP Length** with the staging tenant (step 5.8) and use the same
-   values. **Save**.
+1. **Authentication** → **Passwordless** → turn **Email** on, then click **Email**.
+2. On its **Settings** tab, the connection name is `email` (the app asks for it by that name).
+   **From**: `no-reply@yaparena.com`, the same address as the email provider. Take **Subject**,
+   **Message**, **OTP Expiry** and **OTP Length** from the staging tenant (step 5.8). Leave
+   **Disable Sign Ups** off. **Save**.
 
 ### 5.6 The Google connection
 
 Time: 5 minutes.
 
-1. **Authentication** → **Social** → **+ Create Connection** → **Google / Gmail** → **Continue**.
-2. Paste the **Client ID** and **Client Secret** from step 4. Under **Attributes**, keep **Basic
-   Profile** and **Email**. Keep the connection name `google-oauth2`. **Create**.
+1. **Authentication** → **Social**. A new tenant usually already lists `google-oauth2` on Auth0's
+   shared developer keys, which don't work with a custom domain. Click it. If it isn't there:
+   **Create Connection** → **Google / Gmail** → **Continue**, and keep the name `google-oauth2`.
+2. Paste the **Client ID** and **Client Secret** from step 4. Keep **Basic Profile** (the email and
+   whether Google verified it) and set the other permissions as in the staging tenant. **Save
+   Changes**.
 
 ### 5.7 The application
 
@@ -460,13 +481,14 @@ Time: 10 minutes.
    - **Allowed Logout URLs**: `https://yaparena.com/`
    - **Allowed Web Origins**: `https://yaparena.com`
 
-   Leave the other URL fields empty and click **Save** at the bottom.
+   Leave the other URL fields empty and click **Save Changes** at the bottom.
 
-3. **Credentials** tab: **Authentication Method** reads **Client Secret (Post)**; keep it.
+3. **Credentials** tab: **Authentication Method** must be **Client Secret (Post)**, which the app
+   uses. Choose it if it isn't, and save.
 4. **Connections** tab: turn **on** only `email` and `google-oauth2`. Turn **off**
    `Username-Password-Authentication` and anything else.
-5. Copy **Client ID** and **Client Secret** from **Settings** into the password manager as "Auth0
-   production application".
+5. Copy **Client ID** and **Client Secret** (tick **Reveal Client Secret**) from **Settings** into
+   the password manager as "Auth0 production application".
 
 - Check: **Connections** shows exactly two on. A new tenant's **Default App** can stay; it has no
   callback URLs.
@@ -484,6 +506,7 @@ Time: 15 minutes. Open the staging tenant in a second tab and compare, page by p
 | **Applications → YAP Arena → Connections**         | Only `email` and `google-oauth2`                      | —                                            |
 | **Settings → General**                             | Friendly name, logo, support email                    | Environment tag (Production)                 |
 | **Settings → Advanced → Login Session Management** | Inactivity timeout, require log in after              | —                                            |
+| **Settings → Advanced**                            | **Enable Application Connections** off                | —                                            |
 | **Branding → Universal Login**                     | Colors, logo, text                                    | —                                            |
 | **Branding → Email Templates**                     | Every enabled template's text                         | —                                            |
 | **Branding → Custom Domains**, **Email Provider**  | —                                                     | Production only: `auth.yaparena.com`, Resend |
@@ -503,10 +526,11 @@ Time: 15 minutes.
    click **Generate a password** and save it in the password manager as "Supabase production
    postgres" (`<ADMIN_PASSWORD>`). Region **East US (Ohio)**. Compute **Micro**. **Create new
    project**, and wait until it's ready.
-3. **Project Settings** → **Data API** (or **Integrations** → **Data API**): turn **Enable Data
-   API** off and save. The app uses its own API, never Supabase's.
+3. **Integrations** → **Data API**: turn **Enable Data API** off and save. The app uses its own
+   API, never Supabase's; with it off, none of Supabase's generated REST endpoints answer.
 4. **Project Settings** → **Database** → **SSL Configuration**: turn **Enforce SSL on incoming
-   connections** on, then click **Download certificate**.
+   connections** on (the database restarts for a moment), then download the certificate in the same
+   section.
 5. Terminal:
 
    ```sh
@@ -655,13 +679,15 @@ Never give Render the owner or admin URL; the app refuses to start with either.
 
 Time: 10 minutes.
 
-1. LiveKit Cloud → the project menu → **New project**. Name `yaparena-production`.
+1. LiveKit Cloud → the project menu → **New project**. Name `yaparena-production`, data region
+   **United States** (the default; it can't change later).
 2. **Settings** → **Billing**: choose **Ship**.
-3. **Settings** → **Keys** → **Create key**. Name `yaparena-production-app`. Copy the **API key**,
-   the **API secret** and the project URL (`wss://<LIVEKIT_HOST>`) into the password manager as
-   "LiveKit production".
-4. **Settings** → **Webhooks** → **Add webhook**. URL `https://yaparena.com/api/media/webhook`,
-   signing key `yaparena-production-app`. Until step 10 it can't reach the app; that's expected.
+3. **Settings** → **API keys** → **Create key**. Name `yaparena-production-app`. Copy the **API
+   key**, the **API secret** and the project URL (`wss://<LIVEKIT_HOST>`) into the password manager
+   as "LiveKit production".
+4. **Settings** → **Webhooks** → **Create new webhook**. Name `yaparena`, URL
+   `https://yaparena.com/api/media/webhook`, **Signing API key** `yaparena-production-app`,
+   **Create**. Until step 10 it can't reach the app; that's expected.
 
 - Check: **Settings → Project** shows the Ship plan's limits.
 
@@ -670,10 +696,11 @@ Time: 10 minutes.
 Time: 15 minutes.
 
 1. Cloudflare → **R2 Object Storage** → **Create bucket**. Name `yaparena-production-media` (the
-   replay edge's configuration uses this name), location **Automatic**, storage class **Standard**.
-   **Create bucket**.
-2. The bucket → **Settings**: **Public access** stays off (no `r2.dev` URL, no custom domain).
-3. Same page, **CORS Policy** → **Add CORS policy** (or **Edit**), paste and save:
+   replay edge's configuration uses this name). Leave **Location** automatic and the storage class
+   **Standard**. **Create bucket**.
+2. The bucket → **Settings**: **Public Development URL** reads disabled, and there is no custom
+   domain. Buckets are private unless you turn these on.
+3. Same page, **CORS Policy** → **Add CORS policy** → **JSON** tab, paste and **Save**:
 
    ```json
    [
@@ -687,9 +714,10 @@ Time: 15 minutes.
    ]
    ```
 
-4. **R2 Object Storage** → **Manage API tokens** → **Create API token**. Name
-   `yaparena-production-media`, permission **Object Read & Write**, **Apply to specific buckets
-   only** → `yaparena-production-media`, TTL **Forever**. **Create API Token**.
+4. **R2 Object Storage** → **Overview** → **Account Details** → **API Tokens** → **Manage** →
+   **Create Account API token**. Name `yaparena-production-media`, permission **Object Read &
+   Write**, applied to the bucket `yaparena-production-media` only, TTL **Forever**. **Create
+   Account API token**.
 5. Copy the **Access Key ID**, the **Secret Access Key** and the S3 endpoint
    (`https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com`) into the password manager as "R2 production
    media". The secret is shown once.
@@ -711,7 +739,8 @@ npx wrangler@4.151.1 deploy --config edge/wrangler.production.toml
 ```
 
 `login` opens the browser: sign in to Cloudflare and click **Allow**. `deploy` creates the worker and
-the `replay.yaparena.com` record with its certificate.
+the `replay.yaparena.com` record with its certificate. It refuses if a `CNAME` named `replay` already
+exists in Cloudflare; delete that record first.
 
 Make the signing secret and give it to the worker:
 
@@ -968,24 +997,26 @@ Secret files: `supabase-ca.crt` on all three; `landing-headline-font.b64` on web
   `MEDIA_WORKER_TOOLS` (image builds only), `A4_MODE` (unset is `disabled`), `REDIS_*` (one
   instance keeps its limits in memory).
 
-## 9. Gates before the DNS switch
+## 9. Open items at launch
 
-Each gate is a separate task. Step 10 waits until all four are done.
+The founder decided on 2026-10-29 that none of these blocks the DNS switch. Each follows after launch
+as a separate task; until it's done, its risk stays open.
 
-### 9.1 Privacy policy page
+### 9.1 Privacy and terms pages
 
 A separate pull request adds `/privacy` and `/terms`, with text you approve. Decision 0009 point 11
 requires the policy to name Auth0, Google and the data region; it also names Supabase and Render
-(Ohio), LiveKit, Cloudflare, Resend, Deepgram and Anthropic, and what each receives. Google requires
-both links for a public sign-in app (step 4).
+(Ohio), LiveKit, Cloudflare, Resend, Deepgram and Anthropic, and what each receives. Until then,
+people sign up without a published policy, and the links on Google's sign-in setup (step 4) lead
+nowhere.
 
-- Done when: the release running on production serves both pages at `https://<RENDER_HOST>/privacy`
-  and `/terms`, and staging ran that release first.
+- Done when: production serves both pages, after staging ran that release first.
 
 ### 9.2 F04 database check on production
 
 The [hosted operator checklist](security/database-isolation.md#hosted-operator-checklist--required-to-close-f04)
-runs on `yaparena-production` while it still holds no user data. Ask the hub to run it with you.
+on `yaparena-production`. It's simplest before step 10, while the database holds no user data. Ask
+the hub to run it with you.
 
 - Done when: the checklist's evidence for this project is recorded (Data API disabled and no private
   schema exposed, the read-only SQL inventory, Render's runtime-only credentials, and the probes),
@@ -994,18 +1025,24 @@ runs on `yaparena-production` while it still holds no user data. Ask the hub to 
 
 ### 9.3 Restore test
 
-Restore one daily backup of `yaparena-production` into a new scratch project (Supabase Pro offers
-**Restore to a new project** under **Database → Backups**), compare its table counts with production,
-then delete the scratch project. Ask the hub for the exact procedure.
+Restore one daily backup of `yaparena-production` into a new scratch project (**Database →
+Backups** → **Restore to a New Project**, available on Pro), compare its table counts with
+production, then delete the scratch project. Ask the hub for the exact procedure.
 
 - Done when: you've restored once and written down how long it took.
 
 ### 9.4 Uptime alerts
 
-A separate task sets up an outside check that alerts your phone.
+An outside check that alerts your phone. Until it exists, nothing tells you when the site or the
+jobs worker stops; check `https://yaparena.com/ready` and Render's **Events** yourself.
 
 - Done when: stopping a test target sends an alert within five minutes, and alerts cover
   `https://yaparena.com/ready` and the jobs worker stopping.
+
+### 9.5 Account deletion
+
+Prompt 12c ([Decision 0009](decisions/0009-auth0.md) point 13). Until then, a user who wants their
+account deleted asks you, and you remove it by hand.
 
 ## 10. Connect yaparena.com
 
