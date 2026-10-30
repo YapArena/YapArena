@@ -221,6 +221,36 @@ const retention = table(
   ],
 );
 
+const visibility = table(
+  "Public and private information",
+  ["Information", "Who can see it"],
+  [
+    [
+      cell("Username, handle and bio"),
+      cell("Everyone, including people who aren’t signed in."),
+    ],
+    [
+      cell("Debates you take part in"),
+      cell(
+        "Everyone: video, voice, captions, the AI outline and your flags on it, live and in the replay.",
+      ),
+    ],
+    [cell("Chat messages"), cell("Everyone, with your username.")],
+    [cell("Likes"), cell("Everyone sees the count, not who liked.")],
+    [
+      cell("Yap Coins positions"),
+      cell(
+        "Only you. Each turn’s combined results are public once revealed, without names.",
+      ),
+    ],
+    [cell("Reports and appeals"), cell("You and our moderators.")],
+    [
+      cell("Email, sign-in methods, notifications and analytics"),
+      cell("Only you and the staff who run YAP Arena."),
+    ],
+  ],
+);
+
 const privacy: LegalPage = {
   path: "/privacy",
   title: "Privacy policy",
@@ -253,23 +283,28 @@ const privacy: LegalPage = {
     },
     {
       id: "collect",
-      title: "What we collect",
-      body: html`<h3>When you sign in</h3><ul><li>Your <strong>email address</strong>, confirmed by a one-time code or by Google, and which sign-in methods your account uses. From Google we take only your email address.</li><li>The identifier Auth0 gives your sign-in, so the same person reaches the same account.</li><li>A random <strong>session</strong> identifier stored in a cookie. We never ask for or store a password.</li></ul><h3>Your profile</h3><ul><li>Your <strong>username</strong>, your permanent <strong>handle</strong> and an optional <strong>bio</strong>. Profiles are public.</li><li>Your confirmation that you are ${MINIMUM_AGE} or older and that you accept the Terms of Use, with the version and time.</li></ul><h3>When you debate</h3><ul><li>The <strong>video and audio</strong> of your debates, and the result of the camera and microphone check before you go live.</li><li>The <strong>transcript</strong> of your turns, with the time of each word, and the <strong>AI outline</strong> of your arguments, including any flags you add to it.</li><li>The language you debate in and your consent to recording and transcription, with its version and time.</li><li>Challenges, queue entries, proposed times and whether you are on the site to receive a challenge.</li></ul><h3>When you take part</h3><ul><li><strong>Chat messages</strong>, shown publicly with your username; <strong>likes</strong>; <strong>reports</strong> and <strong>appeals</strong>, which stay private to moderators; and moderation decisions about your account.</li><li>The topics and people you <strong>follow</strong>, and the <strong>notifications</strong> we show you.</li><li><strong>Yap Coins</strong>: your balance, grants and the positions you take in each turn of a debate, and their results.</li></ul><h3>Only if you accept analytics cookies</h3><ul><li>Which public pages you open, live and replay watch time, replay starts, matches, follows, reports and return visits. We don’t record your email, handle, IP address, search text, chat or report text in measurement.</li></ul><h3>Technical information</h3><ul><li>Our hosting and video providers receive your <strong>IP address</strong> and browser details with each request and keep them in their logs for security and troubleshooting.</li></ul><p>We don’t ask for your date of birth, a payment card, government ID, your contacts or your precise location.</p>`,
+      title: "Information we collect",
+      body: html`<h3>Information you give us</h3><ul><li><strong>Account.</strong> Your email address, confirmed by a one-time code or by Google. From Google we take only your email address. We never ask for or store a password.</li><li><strong>Profile.</strong> Your username, your permanent handle and an optional bio, and your confirmation that you are ${MINIMUM_AGE} or older and accept the Terms of Use, with its version and time.</li><li><strong>Debates.</strong> The video and audio of your debates; the transcript of your turns with the time of each word; the AI outline of your arguments and any flags you add to it; the language you debate in and your consent to recording and transcription.</li><li><strong>Taking part.</strong> Chat messages, likes, reports and appeals, the topics and people you follow, and the challenges, queue entries and times you propose.</li><li><strong>Yap Coins.</strong> The positions you take in each turn of a debate and their results.</li><li><strong>Messages to us.</strong> What you write when you contact us.</li></ul><h3>Information we collect automatically</h3><ul><li><strong>Sign-in and security.</strong> A random session identifier in a cookie, and the sign-in methods and activity on your account (shown in your account settings).</li><li><strong>Device and connection.</strong> Your IP address and browser details reach our hosting and video providers with each request, and they keep them in their logs for security and troubleshooting. We don’t store your IP address in our database.</li><li><strong>Debating readiness.</strong> Whether your camera and microphone check passed, and whether you are on the site to receive a challenge.</li><li><strong>Analytics, only if you accept analytics cookies.</strong> Which public pages you open, live and replay watch time, replay starts, matches, follows, reports and return visits. We don’t record your email, handle, IP address, search text, chat or report text in analytics.</li></ul><h3>Information from others</h3><ul><li><strong>Sign-in providers.</strong> Auth0, and Google if you use it, confirm your email address.</li><li><strong>Other people on YAP Arena.</strong> Reports that name your messages or debates, and moderators’ decisions about them.</li><li><strong>Our AI providers.</strong> The captions and AI outline made from what you say in a debate.</li></ul><p>We don’t ask for your date of birth, a payment card, government ID, your contacts or your precise location.</p>`,
     },
     {
       id: "use",
-      title: "Why we use it",
-      body: html`<ul><li><strong>To run your account</strong>: sign-in, your profile, follows and notifications.</li><li><strong>To run debates</strong>: matching debaters, carrying live video, recording it and publishing the replay.</li><li><strong>To caption and outline debates</strong>: speech-to-text for captions, and an AI outline that summarizes each side’s arguments.</li><li><strong>To run Yap Coins</strong>, the play-money game on each debate.</li><li><strong>To keep the community safe</strong>: chat, reports, moderation, appeals, rate limits and abuse prevention.</li><li><strong>To improve YAP Arena</strong>, with analytics cookies only if you accept them.</li><li><strong>To meet legal obligations</strong> and answer lawful requests.</li></ul><p>We don’t sell personal information, share it for advertising or use it to build advertising profiles. The AI outline summarizes what was said; it doesn’t pick a winner or make decisions about you or your account.</p>`,
+      title: "How we use it",
+      body: html`<ul><li><strong>To run your account</strong>: sign-in, your profile, follows and notifications.</li><li><strong>To run debates</strong>: matching debaters, carrying live video, recording it and publishing the replay.</li><li><strong>To caption and outline debates</strong>: speech-to-text for captions, and an AI outline that summarizes each side’s arguments.</li><li><strong>To run Yap Coins</strong>, the play-money game on each debate.</li><li><strong>To keep the community safe</strong>: chat, reports, moderation, appeals, rate limits and abuse prevention.</li><li><strong>To improve YAP Arena</strong>, with analytics cookies only if you accept them.</li><li><strong>To meet legal obligations</strong> and answer lawful requests.</li></ul><p>We use your information only for these purposes, or for another purpose you consent to or the law allows.</p>`,
     },
     {
-      id: "debates",
-      title: "Debates are public",
-      body: html`<div class="legal-note"><p>When you debate, anyone can watch you live and in the replay afterwards: your video, your voice, your username and handle, the captions of what you say and the AI outline of your arguments. Debates can be shared by link and QR code.</p></div><p>Before your first debate, the Debating card in your account settings asks for your consent to this. You can withdraw it anytime for future debates. Debates already held keep their recording, transcript and outline for the periods in ${link("#retention", "How long we keep it")}.</p><p>Captions come from Deepgram (or ElevenLabs, if we switch) and the outline from Anthropic’s Claude models. Both are automatic and can contain mistakes; debaters can flag mistakes in the outline. Viewers can make their own copies of what they watch, for example by recording their screen, and we can’t control those copies.</p>`,
+      id: "public",
+      title: "What others can see",
+      body: html`<div class="legal-note"><p>Debates are public. When you debate, anyone can watch you live and in the replay afterwards: your video, your voice, your username and handle, the captions of what you say and the AI outline of your arguments. Debates can be shared by link and QR code.</p></div>${visibility}<p>Before your first debate, the Debating card in your account settings asks for your consent to recording and public replay. You can withdraw it anytime for future debates. Debates already held keep their recording, transcript and outline for the periods in ${link("#retention", "How long we keep it")}. Viewers can make their own copies of what they watch, for example by recording their screen, and we can’t control those copies.</p>`,
     },
     {
-      id: "processors",
-      title: "Who processes it for us",
-      body: html`<p>We use these service providers to run YAP Arena. Each receives only what it needs to provide its service to us.</p>${processors}<p>${todo("Confirm each provider’s data processing terms and that none may use our data for its own purposes")}</p><p>We may also disclose information when the law requires it, to protect people’s safety or our rights, or as part of a sale or reorganization of the business, under the same protections.</p>`,
+      id: "ai",
+      title: "AI features",
+      body: html`<ul><li><strong>Captions.</strong> A speech-to-text provider, Deepgram (or ElevenLabs, if we switch), turns the active speaker’s audio into text.</li><li><strong>AI outline.</strong> Anthropic’s Claude models summarize each turn into the arguments shown beside the debate. They receive the transcript, the debate’s question and the arguments already made, not your name, handle or email.</li><li><strong>Mistakes.</strong> Captions and outlines are automatic and can be wrong. Debaters can flag mistakes in the outline, and the flag is shown publicly.</li><li><strong>No decisions about you.</strong> The outline summarizes what was said. It doesn’t pick a winner, and it isn’t used to make decisions about you or your account.</li><li><strong>Training.</strong> We don’t use your content to train AI models. ${todo("Confirm that Deepgram, ElevenLabs and Anthropic don’t train on our data under their API terms")}</li></ul>`,
+    },
+    {
+      id: "sharing",
+      title: "How we share it",
+      body: html`<p><strong>We don’t sell or rent personal information, and we don’t share it for advertising.</strong> We share it only in these cases:</p><ul><li><strong>Service providers</strong> that run YAP Arena for us, listed below. Each receives only what it needs to provide its service.</li><li><strong>Everyone, for public content</strong>: the profile, debates and chat described in ${link("#public", "What others can see")}.</li><li><strong>The law and safety</strong>: when the law requires it, or to protect people’s safety, investigate abuse or defend our rights.</li><li><strong>A business change</strong>: if YAP Arena is merged, sold or reorganized, under the same protections.</li></ul>${processors}<p>${todo("Confirm each provider’s data processing terms and that none may use our data for its own purposes")}</p>`,
     },
     {
       id: "transfers",
@@ -415,7 +450,7 @@ const cookieCategories = table(
     [
       cell("Strictly necessary"),
       cell(
-        "Signs you in, keeps your session secure, limits abuse and remembers the choices you make on this page.",
+        "Signs you in, keeps your session secure, limits abuse and remembers your choices, such as your cookie choice and captions setting.",
       ),
       cell("Always on. YAP Arena can’t work without them."),
     ],

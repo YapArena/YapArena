@@ -12207,16 +12207,19 @@ exports[`renders the privacy, terms and cookie pages 1`] = `
 <a href="#who">Who we are</a>
 </li>
 <li>
-<a href="#collect">What we collect</a>
+<a href="#collect">Information we collect</a>
 </li>
 <li>
-<a href="#use">Why we use it</a>
+<a href="#use">How we use it</a>
 </li>
 <li>
-<a href="#debates">Debates are public</a>
+<a href="#public">What others can see</a>
 </li>
 <li>
-<a href="#processors">Who processes it for us</a>
+<a href="#ai">AI features</a>
+</li>
+<li>
+<a href="#sharing">How we share it</a>
 </li>
 <li>
 <a href="#transfers">Where it is stored</a>
@@ -12251,45 +12254,46 @@ exports[`renders the privacy, terms and cookie pages 1`] = `
 <p>The person in charge of the protection of personal information at YAP Arena is <mark class="legal-todo">[Name and title of the person in charge]</mark>. You can reach them at <mark class="legal-todo">[Privacy email]</mark>. Under Québec law, this is the person with the highest authority in the business unless that role is delegated in writing.</p>
 </section>
 <section id="collect" aria-labelledby="collect-title">
-<h2 id="collect-title">What we collect</h2>
-<h3>When you sign in</h3>
-<ul>
-<li>Your <strong>email address</strong>, confirmed by a one-time code or by Google, and which sign-in methods your account uses. From Google we take only your email address.</li>
-<li>The identifier Auth0 gives your sign-in, so the same person reaches the same account.</li>
-<li>A random <strong>session</strong> identifier stored in a cookie. We never ask for or store a password.</li>
-</ul>
-<h3>Your profile</h3>
-<ul>
-<li>Your <strong>username</strong>, your permanent <strong>handle</strong> and an optional <strong>bio</strong>. Profiles are public.</li>
-<li>Your confirmation that you are 18 or older and that you accept the Terms of Use, with the version and time.</li>
-</ul>
-<h3>When you debate</h3>
-<ul>
-<li>The <strong>video and audio</strong> of your debates, and the result of the camera and microphone check before you go live.</li>
-<li>The <strong>transcript</strong> of your turns, with the time of each word, and the <strong>AI outline</strong> of your arguments, including any flags you add to it.</li>
-<li>The language you debate in and your consent to recording and transcription, with its version and time.</li>
-<li>Challenges, queue entries, proposed times and whether you are on the site to receive a challenge.</li>
-</ul>
-<h3>When you take part</h3>
+<h2 id="collect-title">Information we collect</h2>
+<h3>Information you give us</h3>
 <ul>
 <li>
-<strong>Chat messages</strong>, shown publicly with your username; <strong>likes</strong>; <strong>reports</strong> and <strong>appeals</strong>, which stay private to moderators; and moderation decisions about your account.</li>
-<li>The topics and people you <strong>follow</strong>, and the <strong>notifications</strong> we show you.</li>
+<strong>Account.</strong> Your email address, confirmed by a one-time code or by Google. From Google we take only your email address. We never ask for or store a password.</li>
 <li>
-<strong>Yap Coins</strong>: your balance, grants and the positions you take in each turn of a debate, and their results.</li>
+<strong>Profile.</strong> Your username, your permanent handle and an optional bio, and your confirmation that you are 18 or older and accept the Terms of Use, with its version and time.</li>
+<li>
+<strong>Debates.</strong> The video and audio of your debates; the transcript of your turns with the time of each word; the AI outline of your arguments and any flags you add to it; the language you debate in and your consent to recording and transcription.</li>
+<li>
+<strong>Taking part.</strong> Chat messages, likes, reports and appeals, the topics and people you follow, and the challenges, queue entries and times you propose.</li>
+<li>
+<strong>Yap Coins.</strong> The positions you take in each turn of a debate and their results.</li>
+<li>
+<strong>Messages to us.</strong> What you write when you contact us.</li>
 </ul>
-<h3>Only if you accept analytics cookies</h3>
+<h3>Information we collect automatically</h3>
 <ul>
-<li>Which public pages you open, live and replay watch time, replay starts, matches, follows, reports and return visits. We don’t record your email, handle, IP address, search text, chat or report text in measurement.</li>
+<li>
+<strong>Sign-in and security.</strong> A random session identifier in a cookie, and the sign-in methods and activity on your account (shown in your account settings).</li>
+<li>
+<strong>Device and connection.</strong> Your IP address and browser details reach our hosting and video providers with each request, and they keep them in their logs for security and troubleshooting. We don’t store your IP address in our database.</li>
+<li>
+<strong>Debating readiness.</strong> Whether your camera and microphone check passed, and whether you are on the site to receive a challenge.</li>
+<li>
+<strong>Analytics, only if you accept analytics cookies.</strong> Which public pages you open, live and replay watch time, replay starts, matches, follows, reports and return visits. We don’t record your email, handle, IP address, search text, chat or report text in analytics.</li>
 </ul>
-<h3>Technical information</h3>
+<h3>Information from others</h3>
 <ul>
-<li>Our hosting and video providers receive your <strong>IP address</strong> and browser details with each request and keep them in their logs for security and troubleshooting.</li>
+<li>
+<strong>Sign-in providers.</strong> Auth0, and Google if you use it, confirm your email address.</li>
+<li>
+<strong>Other people on YAP Arena.</strong> Reports that name your messages or debates, and moderators’ decisions about them.</li>
+<li>
+<strong>Our AI providers.</strong> The captions and AI outline made from what you say in a debate.</li>
 </ul>
 <p>We don’t ask for your date of birth, a payment card, government ID, your contacts or your precise location.</p>
 </section>
 <section id="use" aria-labelledby="use-title">
-<h2 id="use-title">Why we use it</h2>
+<h2 id="use-title">How we use it</h2>
 <ul>
 <li>
 <strong>To run your account</strong>: sign-in, your profile, follows and notifications.</li>
@@ -12306,19 +12310,84 @@ exports[`renders the privacy, terms and cookie pages 1`] = `
 <li>
 <strong>To meet legal obligations</strong> and answer lawful requests.</li>
 </ul>
-<p>We don’t sell personal information, share it for advertising or use it to build advertising profiles. The AI outline summarizes what was said; it doesn’t pick a winner or make decisions about you or your account.</p>
+<p>We use your information only for these purposes, or for another purpose you consent to or the law allows.</p>
 </section>
-<section id="debates" aria-labelledby="debates-title">
-<h2 id="debates-title">Debates are public</h2>
+<section id="public" aria-labelledby="public-title">
+<h2 id="public-title">What others can see</h2>
 <div class="legal-note">
-<p>When you debate, anyone can watch you live and in the replay afterwards: your video, your voice, your username and handle, the captions of what you say and the AI outline of your arguments. Debates can be shared by link and QR code.</p>
+<p>Debates are public. When you debate, anyone can watch you live and in the replay afterwards: your video, your voice, your username and handle, the captions of what you say and the AI outline of your arguments. Debates can be shared by link and QR code.</p>
 </div>
-<p>Before your first debate, the Debating card in your account settings asks for your consent to this. You can withdraw it anytime for future debates. Debates already held keep their recording, transcript and outline for the periods in <a href="#retention">How long we keep it</a>.</p>
-<p>Captions come from Deepgram (or ElevenLabs, if we switch) and the outline from Anthropic’s Claude models. Both are automatic and can contain mistakes; debaters can flag mistakes in the outline. Viewers can make their own copies of what they watch, for example by recording their screen, and we can’t control those copies.</p>
+<table class="legal-table">
+<caption>Public and private information</caption>
+<thead>
+<tr>
+<th scope="col">Information</th>
+<th scope="col">Who can see it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">Username, handle and bio</th>
+<td data-label="Who can see it">Everyone, including people who aren’t signed in.</td>
+</tr>
+<tr>
+<th scope="row">Debates you take part in</th>
+<td data-label="Who can see it">Everyone: video, voice, captions, the AI outline and your flags on it, live and in the replay.</td>
+</tr>
+<tr>
+<th scope="row">Chat messages</th>
+<td data-label="Who can see it">Everyone, with your username.</td>
+</tr>
+<tr>
+<th scope="row">Likes</th>
+<td data-label="Who can see it">Everyone sees the count, not who liked.</td>
+</tr>
+<tr>
+<th scope="row">Yap Coins positions</th>
+<td data-label="Who can see it">Only you. Each turn’s combined results are public once revealed, without names.</td>
+</tr>
+<tr>
+<th scope="row">Reports and appeals</th>
+<td data-label="Who can see it">You and our moderators.</td>
+</tr>
+<tr>
+<th scope="row">Email, sign-in methods, notifications and analytics</th>
+<td data-label="Who can see it">Only you and the staff who run YAP Arena.</td>
+</tr>
+</tbody>
+</table>
+<p>Before your first debate, the Debating card in your account settings asks for your consent to recording and public replay. You can withdraw it anytime for future debates. Debates already held keep their recording, transcript and outline for the periods in <a href="#retention">How long we keep it</a>. Viewers can make their own copies of what they watch, for example by recording their screen, and we can’t control those copies.</p>
 </section>
-<section id="processors" aria-labelledby="processors-title">
-<h2 id="processors-title">Who processes it for us</h2>
-<p>We use these service providers to run YAP Arena. Each receives only what it needs to provide its service to us.</p>
+<section id="ai" aria-labelledby="ai-title">
+<h2 id="ai-title">AI features</h2>
+<ul>
+<li>
+<strong>Captions.</strong> A speech-to-text provider, Deepgram (or ElevenLabs, if we switch), turns the active speaker’s audio into text.</li>
+<li>
+<strong>AI outline.</strong> Anthropic’s Claude models summarize each turn into the arguments shown beside the debate. They receive the transcript, the debate’s question and the arguments already made, not your name, handle or email.</li>
+<li>
+<strong>Mistakes.</strong> Captions and outlines are automatic and can be wrong. Debaters can flag mistakes in the outline, and the flag is shown publicly.</li>
+<li>
+<strong>No decisions about you.</strong> The outline summarizes what was said. It doesn’t pick a winner, and it isn’t used to make decisions about you or your account.</li>
+<li>
+<strong>Training.</strong> We don’t use your content to train AI models. <mark class="legal-todo">[Confirm that Deepgram, ElevenLabs and Anthropic don’t train on our data under their API terms]</mark>
+</li>
+</ul>
+</section>
+<section id="sharing" aria-labelledby="sharing-title">
+<h2 id="sharing-title">How we share it</h2>
+<p>
+<strong>We don’t sell or rent personal information, and we don’t share it for advertising.</strong> We share it only in these cases:</p>
+<ul>
+<li>
+<strong>Service providers</strong> that run YAP Arena for us, listed below. Each receives only what it needs to provide its service.</li>
+<li>
+<strong>Everyone, for public content</strong>: the profile, debates and chat described in <a href="#public">What others can see</a>.</li>
+<li>
+<strong>The law and safety</strong>: when the law requires it, or to protect people’s safety, investigate abuse or defend our rights.</li>
+<li>
+<strong>A business change</strong>: if YAP Arena is merged, sold or reorganized, under the same protections.</li>
+</ul>
 <table class="legal-table">
 <caption>Service providers and what each receives</caption>
 <thead>
@@ -12401,7 +12470,6 @@ exports[`renders the privacy, terms and cookie pages 1`] = `
 <p>
 <mark class="legal-todo">[Confirm each provider’s data processing terms and that none may use our data for its own purposes]</mark>
 </p>
-<p>We may also disclose information when the law requires it, to protect people’s safety or our rights, or as part of a sale or reorganization of the business, under the same protections.</p>
 </section>
 <section id="transfers" aria-labelledby="transfers-title">
 <h2 id="transfers-title">Where it is stored</h2>
@@ -12896,7 +12964,7 @@ exports[`renders the privacy, terms and cookie pages 3`] = `
 <tbody>
 <tr>
 <th scope="row">Strictly necessary</th>
-<td data-label="What it does">Signs you in, keeps your session secure, limits abuse and remembers the choices you make on this page.</td>
+<td data-label="What it does">Signs you in, keeps your session secure, limits abuse and remembers your choices, such as your cookie choice and captions setting.</td>
 <td data-label="Your choice">Always on. YAP Arena can’t work without them.</td>
 </tr>
 <tr>
