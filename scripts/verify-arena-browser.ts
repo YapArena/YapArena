@@ -313,21 +313,27 @@ export async function verifyArenaBrowser({
     );
     await page.emulateMedia({ reducedMotion: "no-preference" });
     checks.rapidScrubbingAndReducedMotion = true;
-    // Layout since 2026-10-25: chat left, video centre, the betting panel
-    // right (Decision 0013), all three starting level.
+    // Layout since 2026-10-30 (direction BC1, amending Decision 0013): the
+    // stage on the left; the rail on the right holds the answer panel and,
+    // below it, chat. The video and the panel start level.
+    await page.evaluate(() => window.scrollTo(0, 0));
     const sidebar = (await page.locator("[data-stake-panel]").boundingBox())!,
       video = (await page.locator("[data-arena-video]").boundingBox())!,
       chatPanel = (await page
         .locator("[data-community-chat-panel]")
         .boundingBox())!;
     assert.ok(
-      Math.abs(sidebar.y - video.y) <= 2 &&
-        Math.abs(chatPanel.y - video.y) <= 2,
-      "chat, video and betting panel start level",
+      Math.abs(sidebar.y - video.y) <= 2,
+      "video and answer panel start level",
     );
     assert.ok(
-      chatPanel.x < video.x && video.x < sidebar.x,
-      "chat is left of the video and the betting panel right of it",
+      video.x + video.width < sidebar.x,
+      "the video is left of the rail",
+    );
+    assert.ok(
+      Math.abs(chatPanel.x - sidebar.x) <= 1 &&
+        chatPanel.y >= sidebar.y + sidebar.height,
+      "chat is in the rail, below the answer panel",
     );
     checks.hoverPricesArgumentsAndCompactSidebar = true;
     const media = (await page.locator("[data-media-event]").elementHandle())!,
@@ -345,7 +351,11 @@ export async function verifyArenaBrowser({
       "true",
     );
     const enlarged = (await page.locator("[data-arena-video]").boundingBox())!;
-    assert.ok(enlarged.width > original.width * 2);
+    // The enlarged video fills the window, 24px in from each edge.
+    assert.ok(
+      enlarged.width > original.width &&
+        enlarged.width >= page.viewportSize()!.width - 2 * 24 - 2,
+    );
     await page.keyboard.press("Escape");
     assert.equal(
       await page.locator("[data-video-expand]").getAttribute("aria-expanded"),
@@ -410,8 +420,40 @@ export async function verifyArenaBrowser({
         () => document.documentElement.scrollWidth <= window.innerWidth,
       ),
     );
+    // The answer bar is pinned to the bottom of the first screen.
+    const bar = (await page.locator("[data-stake-panel]").boundingBox())!;
+    assert.ok(
+      bar.y >= 0 && bar.y + bar.height <= 844 + 1 && bar.y > 844 / 2,
+      "the answer bar shows at the bottom of the first screen",
+    );
+    // Outline | Chat tabs follow the WAI pattern when the outline is on.
+    const tabs = page.locator("[data-arena-tabs]");
+    if (await tabs.isVisible()) {
+      await tabs.getByRole("tab", { name: "AI outline" }).focus();
+      await page.keyboard.press("ArrowRight");
+      const chatTab = tabs.getByRole("tab", { name: /^Chat/ });
+      assert.equal(await chatTab.getAttribute("aria-selected"), "true");
+      assert.equal(
+        await chatTab.evaluate((node) => document.activeElement === node),
+        true,
+      );
+      assert.ok(await page.locator("[data-community-chat-panel]").isVisible());
+      await page.keyboard.press("Home");
+      checks.mobileTabsKeyboard = true;
+    }
     await page.screenshot({ path: directory + "/mobile.png", fullPage: true });
     checks.mobileNoOverflow = true;
+    // Reduced motion removes the hover fades.
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    assert.equal(
+      await page
+        .locator(".arena-video-overlay")
+        .first()
+        .evaluate((node) => getComputedStyle(node).transitionDuration),
+      "0s",
+    );
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    checks.reducedMotionHoverCorners = true;
     phase = "search";
     await page.locator("#header-search").fill("walkability");
     await page.locator("#header-search").press("Enter");

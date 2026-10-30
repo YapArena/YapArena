@@ -1,25 +1,37 @@
-/* Decision 0012: live captions under the video. Fixed height and layout
-   containment keep the video, chart and chat from moving as text changes. */
+/* Decision 0012 on the debate page (direction BC1, docs/debate-page-design.md).
+   Live captions: one line under the video at a fixed 44px height. Layout
+   containment keeps the video, chart and chat from moving as text changes. */
 .live-captions {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 10px 0 0;
-  padding: 10px 12px 10px 16px;
-  min-height: 3.9rem;
-  border: 1px solid #2a2a2a;
-  border-radius: 12px;
-  background: #0b0b0b;
+  gap: var(--space-2);
+  height: 44px;
+  margin: var(--space-2) 0 0;
+  padding: 0 4px 0 var(--space-5);
+  border-radius: var(--radius-pill);
+  background: var(--panel);
   contain: layout paint;
 }
+/* The newest words stay visible: the line is cut at its start with an
+   ellipsis. The isolate keeps the text's own direction and punctuation. */
 .live-captions-text {
   flex: 1;
+  min-width: 0;
   margin: 0;
-  max-height: 3rem;
   overflow: hidden;
-  color: #f4f4f4;
-  font-size: 0.95rem;
-  line-height: 1.5rem;
+  color: var(--text);
+  font-size: var(--text-16);
+  line-height: 44px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  direction: rtl;
+  text-align: left;
+}
+.live-captions-text::before {
+  content: "\2068";
+}
+.live-captions-text::after {
+  content: "\2069";
 }
 .live-captions[data-captions-off] .live-captions-text {
   visibility: hidden;
@@ -27,119 +39,158 @@
 .live-captions-toggle {
   flex: none;
   min-height: 36px;
-  padding: 6px 12px;
-  border: 1px solid #4a4a4a;
-  border-radius: 999px;
-  background: transparent;
-  color: #e8e8e8;
-  font: inherit;
-  font-size: 0.78rem;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: var(--raised);
+  color: var(--button-text);
+  font:
+    700 var(--text-12) / 1 Arial,
+    Helvetica,
+    sans-serif;
   cursor: pointer;
 }
 .live-captions-toggle:focus-visible {
-  outline: 2px solid #f8f8f8;
-  outline-offset: 2px;
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
 }
 
-/* The AI outline panel: a fixed-height body that scrolls inside itself, so
-   the video, chart and chat never move when the outline grows. */
+/* The AI outline: argument cards in a fixed-height box that scrolls inside
+   itself, so nothing around it moves when the outline grows. */
 .live-outline {
-  margin: 14px 0 0;
-  padding: 14px 16px 12px;
-  border: 1px solid #2a2a2a;
-  border-radius: 14px;
-  background: #0b0b0b;
+  margin: var(--space-5) 0 0;
   contain: layout paint;
 }
 .live-outline-head {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
   align-items: baseline;
-  gap: 4px 12px;
+  gap: var(--space-1) var(--space-3);
 }
 .live-outline-head h2 {
   margin: 0;
-  font-size: 0.82rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: var(--text-16);
+  line-height: 1.3;
+  letter-spacing: 0;
 }
 .live-outline-turn {
-  color: #bdbdbd;
-  font-size: 0.8rem;
+  color: var(--button-text);
+  font-size: var(--text-12);
 }
 .live-outline-note {
-  margin: 6px 0 10px;
-  color: #8f8f8f;
-  font-size: 0.74rem;
-  line-height: 1.45;
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-12);
+  line-height: 1.5;
 }
 .live-outline-body {
-  height: 15rem;
+  height: 12.5rem;
+  margin-top: var(--space-3);
   overflow-y: auto;
   overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--control-border) transparent;
 }
 .live-outline-body:focus-visible {
-  outline: 2px solid #f8f8f8;
-  outline-offset: 2px;
+  outline: 2px solid var(--acid);
+  outline-offset: -2px;
 }
 .live-outline-arguments {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--space-4);
   margin: 0;
-  padding: 0 0 0 1.2rem;
+  padding: 0;
+  list-style: none;
 }
 .live-outline-argument {
-  margin: 0 0 10px;
-  border-radius: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+}
+/* The empty slot after the last argument, while the debate is live. */
+.live-outline[data-outline-live] .live-outline-arguments::after {
+  content: "Listening for the next argument…";
+  content: "Listening for the next argument…" / "";
+  padding: var(--space-4);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-card);
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 20px;
 }
 .live-outline-label {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 10px;
+  flex-direction: column;
+  gap: var(--space-1);
   margin: 0;
-  color: #f4f4f4;
-  font-weight: 650;
-  line-height: 1.4;
+  color: var(--text);
+  font-size: var(--text-14);
+  font-weight: 700;
+  line-height: 20px;
+  overflow-wrap: anywhere;
 }
 .live-outline-rebuts {
-  color: #c9c9c9;
-  font-size: 0.8rem;
+  color: var(--muted);
+  font-size: var(--text-12);
   font-weight: 400;
+  line-height: 16px;
 }
 .live-outline-points {
-  margin: 4px 0 0;
-  padding-left: 1.1rem;
-  color: #dcdcdc;
-  font-size: 0.88rem;
-  line-height: 1.45;
+  margin: var(--space-1) 0 0;
+  padding-left: var(--space-4);
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 20px;
+  overflow-wrap: anywhere;
 }
 .live-outline-points li {
   border-radius: 4px;
 }
+.live-outline-points li::marker {
+  color: var(--control-border);
+}
 .live-outline-flagged {
   color: #ffb3bc;
-  font-size: 0.72rem;
+  font-size: var(--text-12);
   font-weight: 400;
 }
 .live-outline-flag {
-  padding: 2px 8px;
-  border: 1px solid #444;
-  border-radius: 999px;
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
   background: transparent;
-  color: #cfcfcf;
+  color: var(--button-text);
   font: inherit;
-  font-size: 0.72rem;
+  font-size: var(--text-12);
   font-weight: 400;
   cursor: pointer;
 }
+.live-outline-flag:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
+}
 .live-outline-earlier {
-  margin-top: 8px;
-  color: #bdbdbd;
-  font-size: 0.84rem;
+  margin-top: var(--space-4);
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+.live-outline-earlier summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--button-text);
+  cursor: pointer;
 }
 .live-outline-earlier-turn {
-  margin: 8px 0 2px;
-  color: #e6e6e6;
+  margin: var(--space-2) 0 2px;
+  color: var(--button-text);
 }
 .live-outline .is-changed {
   animation: live-outline-flash 1.2s ease-out;
@@ -150,6 +201,19 @@
   }
   to {
     background: transparent;
+  }
+}
+@media (max-width: 1199px) {
+  .live-outline-arguments {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 599px) {
+  .live-outline-arguments {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .live-outline-body {
+    height: 22rem;
   }
 }
 @media (prefers-reduced-motion: reduce) {

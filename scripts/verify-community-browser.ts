@@ -46,6 +46,13 @@ const chatReportDetail = `Synthetic chat case ${suffix}`;
 const eventReportDetail = `Synthetic event case ${suffix}`;
 const oldReportDetail = `Synthetic old chat case ${suffix}`;
 
+// The like, share, refresh and report controls sit in the chat's "⋯" menu
+// (debate page direction BC1).
+async function openChatMenu(page: Page) {
+  const menu = page.locator("[data-chat-more]");
+  if (!(await menu.evaluate((node: HTMLDetailsElement) => node.open)))
+    await menu.locator("summary").click();
+}
 async function axeViolations(page: Page, selector: string) {
   await page.evaluate((source) => {
     window.eval(source);
@@ -159,6 +166,7 @@ try {
   const mobilePage = await mobile.newPage();
   await mobilePage.goto(`${base}/debates/${eventSlug}`);
   await mobilePage.getByText(connectionReady).waitFor();
+  await openChatMenu(author.page);
   await author.page.locator("[data-community-like]").click();
   try {
     await author.page
@@ -271,7 +279,7 @@ try {
   await reporter.page
     .getByText("Report submitted privately", { exact: false })
     .waitFor();
-  await reporter.page.getByText("Share & report", { exact: true }).click();
+  await openChatMenu(reporter.page);
   await reporter.page
     .locator("[data-community-report-form] select")
     .selectOption("other");

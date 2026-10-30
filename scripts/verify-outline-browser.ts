@@ -498,7 +498,11 @@ window.harness = {
       document.querySelectorAll(".live-outline-arguments > li").length === 1,
   );
   assert.equal(await tab.locator("[data-live-captions]").count(), 1);
-  assert.equal(await tab.textContent("#live-outline-title"), "AI outline");
+  // The heading is set in Dydema Capitals; its accessible name stays.
+  assert.equal(
+    await tab.getByRole("heading", { name: "AI outline" }).count(),
+    1,
+  );
   await context.close();
 
   console.log(JSON.stringify({ outlineBrowser: "PASS", ...results }));

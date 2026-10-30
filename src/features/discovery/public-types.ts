@@ -44,6 +44,12 @@ export interface PublicDebate {
   speakerA: Pick<PublicProfile, "handle" | "displayName"> | null;
   speakerB: Pick<PublicProfile, "handle" | "displayName"> | null;
   sponsor: { name: string; disclosure: string } | null;
+  /**
+   * The debate's turn timing from its rules version, read with a single
+   * debate only (absent from lists): turns of `turnSeconds` each, `turnCount`
+   * of them at most. Null when the rules don't specify usable timings.
+   */
+  timing?: { turnCount: number; turnSeconds: number } | null;
 }
 
 export interface PublicList<T> {

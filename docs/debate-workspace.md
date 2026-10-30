@@ -10,12 +10,6 @@ The [homepage preview](homepage-preview.md) can open this workspace on click or
 continuous mouse hover. Its automatic muted preview is separate from the full
 watching controls and does not change speaker capture or settlement behavior.
 
-The October 15 visual reference selects a navy interface, blue-gray panel borders,
-green YES/red NO accents, and a shared header with Live, Explore, Create, debate
-search, a Yap Coins balance menu and account avatar. The same workspace renders
-live, upcoming, ended and replay events. Existing discovery/account/matching pages
-use the shared header and palette; `/coins` retains advanced experiment controls.
-
 Desktop has three columns: broadcast/replay and community, settlement chart with
 its price/median inspector and commitment history, and compact participation/info
 plus settled sentiment. The participation card retains the old round column's
@@ -26,19 +20,22 @@ existing surface: it preserves media nodes, tracks, playback and chat. Hover,
 keyboard focus and touch expose the control; Restore or Escape returns its exact
 original bounds. Keyboard focus stays inside the enlarged video until restored.
 
-**Layout since 2026-10-25 (founder-approved; supersedes the column order above):**
-chat sits in the left column. The centre column is the widest: any status banner above
-the video, then the 16:9 video, the debate line and topic tags, then the outline and
-the chart. The right column holds the participation (later betting) panel, then debate
-info; the panel keeps its natural height instead of ending at the graph's boundary. The
-debate question appears in the video's top-left corner, and the broadcast state with the
-watch count in its top-right corner, left of the expand button, while the pointer is over
-the video or focus is inside it. On touch screens a tap on the video shows them until the
-next tap elsewhere (the browser's hover emulation). They never take clicks, the question
-stays the page's `h1` for screen readers, and reduced motion removes the fade. From 1190 px down, chat moves below the video and panel. On phones the
-order is: banner, video, panel, chat, debate line, outline and chart, then the rest of the
-right column. The layout is in [`debate-web.ts`](../src/features/discovery/debate-web.ts)
-and the grid rules in `public/arena.css`.
+**Layout since 2026-10-30 (direction BC1; amends Decision 0013 and supersedes the column order
+above):** two columns on wide screens. The stage holds any status banner, the 16:9 video, the
+live captions line, the media status, the scoreboard (the two debaters' cards with the turn clock
+between them), then the AI outline as argument cards, the chart ("Results by turn") and "About
+this debate". The right rail holds the answer panel and, filling the rest of the screen, chat; it
+stays in view while the stage scrolls. From 960 to 1199 px the rail narrows to 340 px. From 600 to
+959 px the page is one column: stage, panel, Outline | Chat tabs, then the rest. On phones the video
+is full-bleed, the tabs follow the scoreboard, and the answer panel is a bar pinned to the bottom of
+the screen that opens into a sheet when Yes or No is picked. The question appears in the video's
+top-left corner and "Live · N watching" in its top-right corner, left of the expand button, while
+the pointer is over the video or focus is inside it. On touch screens a tap on the video shows them
+until the next tap elsewhere. They never take clicks, the question stays the page's `h1` for screen
+readers, and reduced motion removes the fade. The markup is in
+[`debate-web.ts`](../src/features/discovery/debate-web.ts), the rules in `public/arena.css` and
+`public/live-outline.css`, and the behaviour (speaking state, tabs, phone sheet, chat colours) in
+`frontend/debate-layout.ts`. Sizes, tokens and states: [the debate page design](debate-page-design.md).
 
 **Betting panel (Decision 0013):** the right column starts with the Yap Coins panel
 (`frontend/stake-panel.ts`, pure logic in `frontend/stake-model.ts`). It reads the anonymous

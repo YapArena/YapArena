@@ -209,7 +209,9 @@ export function renderDebate(
       matchmaking,
       liveOutline,
     ),
-    "",
+    // The headline font, preloaded exactly as the landing does, at the
+    // unversioned URL site.css resolves, so it downloads once.
+    html`<link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>`,
     "arena-page",
   );
 }

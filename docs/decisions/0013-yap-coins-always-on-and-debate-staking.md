@@ -38,7 +38,7 @@ Built on the turn windows and round rules of Decision 0012 (pull requests 1, 1b 
 is an A4 endorsement in one turn's 60-second window; there is no winner (F09).
 
 - Layout: chat on the left, a large video in the centre, the betting panel at the top of the
-  right column. The debate question appears in the video's top-left corner and "Live · N
+  right column. Amended 2026-10-30 (below): chat moves into the right column, under the panel. The debate question appears in the video's top-left corner and "Live · N
   watching" in its top-right corner while the pointer is over the video.
 - The panel asks "Do you agree?" about the debate's proposition, with a green Yes and a red No
   button, each with a text label and icon. The word "bet" is not used.
@@ -81,3 +81,11 @@ is an A4 endorsement in one turn's 60-second window; there is no winner (F09).
   page keeps the shared bot history chart and an info card linking to `/coins?debate=…`. On
   `/coins` the human mode option is gone and the run-scoped daily play-coin refill stays for Bots
   runs; only the account-wide refill is retired (410).
+
+## Amendment, 2026-10-30 (founder, canvas round 2)
+
+The founder chose direction BC1 for the debate page: a large stage with the answer panel and chat in
+a right rail. Chat moves from the left column into the right rail, below the betting panel. The
+rest of the Layout bullet stands: the large video, the panel at the top of the right column, and
+the question and "Live · N watching" in the video's corners on hover. The layout, breakpoints and
+look are in [the debate page design](../debate-page-design.md).

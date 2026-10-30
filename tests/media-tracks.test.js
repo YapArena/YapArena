@@ -1,14 +1,20 @@
 import assert from "node:assert/strict";
 import { it } from "node:test";
 
-import { createMediaTracks } from "../public/media-tracks.js";
+import { createMediaTracks, sideFromMetadata } from "../public/media-tracks.js";
 
 function fakeContainer() {
   const nodes = [];
   return {
     nodes,
+    get children() {
+      return [...nodes];
+    },
     append(node) {
       nodes.push(node);
+    },
+    insertBefore(node, before) {
+      nodes.splice(nodes.indexOf(before), 0, node);
     },
     replaceChildren() {
       nodes.length = 0;
@@ -24,7 +30,11 @@ function fakeTrack(container, kind = "video") {
     attach() {
       attachCount += 1;
       return {
+        tagName: kind.toUpperCase(),
         dataset: {},
+        getAttribute(name) {
+          return name === "data-side" ? (this.dataset.side ?? null) : null;
+        },
         setAttribute() {},
         remove() {
           const index = container.nodes.indexOf(this);
@@ -91,4 +101,37 @@ it("replaces a speaker's stale camera tile when a new track arrives", () => {
   assert.equal(container.nodes.length, 1);
   assert.deepEqual(oldCamera.counts(), { attachCount: 1, detachCount: 1 });
   assert.deepEqual(newCamera.counts(), { attachCount: 1, detachCount: 0 });
+});
+
+it("orders videos by side, A left of B, whatever order they arrive in", () => {
+  const container = fakeContainer();
+  const tracks = createMediaTracks(container);
+  const sides = (kind = "VIDEO") =>
+    container.nodes
+      .filter((node) => node.tagName === kind)
+      .map((node) => node.dataset.side ?? "-");
+
+  tracks.attach(fakeTrack(container), "speaker-b", "B");
+  tracks.attach(fakeTrack(container, "audio"), "speaker-b", "B");
+  tracks.attach(fakeTrack(container), "speaker-a", "A");
+  assert.deepEqual(sides(), ["A", "B"]);
+  tracks.attach(fakeTrack(container), "viewer-1");
+  assert.deepEqual(sides(), ["A", "B", "-"]);
+  // A replacement camera keeps its side's place.
+  tracks.attach(fakeTrack(container), "speaker-a", "A");
+  assert.deepEqual(sides(), ["A", "B", "-"]);
+  assert.equal(
+    container.nodes.find((n) => n.dataset.side === "A").dataset.participant,
+    "speaker-a",
+  );
+});
+
+it("reads a speaker's side from its token metadata", () => {
+  assert.equal(sideFromMetadata('{"side":"A"}'), "A");
+  assert.equal(sideFromMetadata('{"side":"B"}'), "B");
+  assert.equal(sideFromMetadata('{"side":"C"}'), null);
+  assert.equal(sideFromMetadata("not json"), null);
+  assert.equal(sideFromMetadata(""), null);
+  assert.equal(sideFromMetadata(undefined), null);
+  assert.equal(sideFromMetadata("null"), null);
 });

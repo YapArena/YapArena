@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { setTimeout as delay } from "node:timers/promises";
 import axe from "axe-core";
-import type { Browser, ViewportSize } from "playwright-core";
+import type { Browser, Page, ViewportSize } from "playwright-core";
 import type { publicFrame } from "../dist/features/community/delivery.js";
 
 declare global {
@@ -40,6 +40,15 @@ interface PendingPost {
 }
 
 // Deterministic real-browser transport races. All content and responses are synthetic.
+
+// The like, share and refresh controls sit in the chat's "⋯" menu (debate
+// page direction BC1).
+async function openChatMenu(page: Page) {
+  const menu = page.locator("[data-chat-more]");
+  if (!(await menu.evaluate((node: HTMLDetailsElement) => node.open)))
+    await menu.locator("summary").click();
+}
+
 export async function verifyChatClient({
   browser,
   base,
@@ -270,8 +279,15 @@ export async function verifyChatClient({
       (response) =>
         response.url().includes("/updates") && response.status() === 200,
     );
+    await openChatMenu(page);
     await page.locator("[data-community-refresh]").click();
     await response;
+    // Close the menu so it doesn't cover the messages.
+    await page
+      .locator("[data-chat-more]")
+      .evaluate((node: HTMLDetailsElement) => {
+        node.open = false;
+      });
   };
   const waitPost = async (count: number) => {
     for (let n = 0; n < 100 && posts.length < count; n++) await delay(20);
@@ -349,6 +365,7 @@ export async function verifyChatClient({
       await composer.inputValue(),
       "Text typed during the request\n",
     );
+    await openChatMenu(page);
     await page.locator("[data-community-like]").focus();
     feed.push(gap, responseFirst.post.item);
     responseFirst.post.release({});
@@ -493,6 +510,7 @@ export async function verifyChatClient({
     await rejected.row.getByText("Rejected", { exact: false }).waitFor();
     const postCount = posts.length;
     disconnected = true;
+    await openChatMenu(page);
     await page.locator("[data-community-refresh]").click();
     await page.getByText("Connection interrupted", { exact: false }).waitFor();
     disconnected = false;
