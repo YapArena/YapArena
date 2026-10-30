@@ -10,11 +10,12 @@
 //   COIN_LOAD_RUNTIME_URL=postgresql://yaparena_runtime:…@127.0.0.1:PORT/DB \
 //   node scripts/measure-coin-load.ts 50 200 500
 //
-// Optional: COIN_LOAD_REVEAL_ROUNDS (default 20), COIN_LOAD_REVEAL_ORDERS
-// (default 1001, a full round), COIN_LOAD_POOL (default 10). It creates
-// synthetic accounts, debates and valueless treasury seeds, so use a migrated
-// database you will delete; it refuses any host but loopback. Results are
-// local measurements, not hosted capacity evidence.
+// Optional: COIN_LOAD_REVEAL_ROUNDS (default 20; 0 measures the submits
+// alone), COIN_LOAD_REVEAL_ORDERS (default 1001, a full round),
+// COIN_LOAD_BURST_SECONDS (default 10) and COIN_LOAD_POOL (default 10). It
+// creates synthetic accounts, debates and valueless treasury seeds, so use a
+// migrated database you will delete; it refuses any host but loopback.
+// Results are local measurements, not hosted capacity evidence.
 import { randomUUID } from "node:crypto";
 import pg from "pg";
 import {
@@ -35,10 +36,10 @@ function loopback(name: string) {
     throw new Error(`${name} must point at a local disposable database`);
   return value;
 }
-function count(name: string, fallback: number, maximum: number) {
+function count(name: string, fallback: number, maximum: number, minimum = 1) {
   const value = Number(process.env[name] ?? fallback);
-  if (!Number.isInteger(value) || value < 1 || value > maximum)
-    throw new Error(`${name} must be an integer from 1 to ${maximum}`);
+  if (!Number.isInteger(value) || value < minimum || value > maximum)
+    throw new Error(`${name} must be an integer from ${minimum} to ${maximum}`);
   return value;
 }
 const viewerCounts = (
@@ -49,9 +50,14 @@ const viewerCounts = (
     throw new Error("viewer counts must be integers from 1 to 1000");
   return viewers;
 });
-const revealRounds = count("COIN_LOAD_REVEAL_ROUNDS", 20, 100);
+// 0 measures the submits alone.
+const revealRounds = count("COIN_LOAD_REVEAL_ROUNDS", 20, 100, 0);
 const revealOrders = count("COIN_LOAD_REVEAL_ORDERS", 1001, 1001);
 const poolSize = count("COIN_LOAD_POOL", 10, 100);
+// How long before the cutoff the answers start arriving. The default is the
+// last 10 seconds; 45 spreads them over most of a minute, when a reveal
+// settles at full pace.
+const burstSeconds = count("COIN_LOAD_BURST_SECONDS", 10, 50);
 const options = { options: "-c search_path=pg_catalog,yaparena,pg_temp" };
 const owner = new pg.Pool({
   ...options,
@@ -163,6 +169,7 @@ const order = (quantity: number) => {
 async function reveal(topicId: string, viewers: readonly Viewer[]) {
   const started = performance.now();
   const rounds: string[] = [];
+  if (!revealRounds) return rounds;
   for (let index = 0; index < revealRounds; index++) {
     const debateId = await debate(topicId, "live");
     const round = await setup.create(viewers[0]!, debateId, randomUUID());
@@ -227,11 +234,11 @@ async function trial(viewerCount: number, viewers: readonly Viewer[]) {
   console.log(`N = ${viewerCount}`);
   const topicId = await topic();
   const rounds = await reveal(topicId, viewers);
-  const window = await liveWindow(topicId, 25);
+  const window = await liveWindow(topicId, burstSeconds + 15);
   // The worker's loop: one tick a second, never overlapping.
   let working = true;
   const settledAt: number[] = [];
-  const burstStart = window.closesAt - 10_000;
+  const burstStart = window.closesAt - burstSeconds * 1000;
   const workerLoop = (async () => {
     while (working) {
       const tick = performance.now();
@@ -259,7 +266,7 @@ async function trial(viewerCount: number, viewers: readonly Viewer[]) {
   const participants = viewers.slice(0, viewerCount);
   await Promise.all(
     participants.map(async (viewer) => {
-      const at = burstStart + Math.random() * 9_800;
+      const at = burstStart + Math.random() * (burstSeconds * 1000 - 200);
       await new Promise((resolve) =>
         setTimeout(resolve, Math.max(0, at - Date.now())),
       );
@@ -284,14 +291,15 @@ async function trial(viewerCount: number, viewers: readonly Viewer[]) {
       outcomes.set(outcome, (outcomes.get(outcome) ?? 0) + 1);
     }),
   );
-  // Let the reveal finish, up to a minute after the burst.
-  const deadline = Date.now() + 60_000;
+  // Let the reveal finish, up to three minutes after the burst, so the next
+  // trial starts without a backlog.
+  const deadline = Date.now() + 180_000;
   while (Date.now() < deadline && (settledAt.at(-1) ?? 0) < rounds.length)
     await new Promise((resolve) => setTimeout(resolve, 500));
   working = false;
   await workerLoop;
   const sorted = [...latencies].sort((a, b) => a - b);
-  const duringBurst = settledAt.slice(0, 10).at(-1) ?? 0;
+  const duringBurst = settledAt.slice(0, burstSeconds).at(-1) ?? 0;
   console.log(
     `  submits: ${latencies.length}; ${[...outcomes]
       .map(([outcome, total]) => `${outcome} ${total}`)
@@ -301,7 +309,7 @@ async function trial(viewerCount: number, viewers: readonly Viewer[]) {
     `  latency ms: p50 ${percentile(sorted, 0.5)}, p95 ${percentile(sorted, 0.95)}, max ${sorted.at(-1) ?? 0}`,
   );
   console.log(
-    `  reveal: ${duringBurst}/${rounds.length} rounds settled during the burst, ${settledAt.at(-1) ?? 0}/${rounds.length} after ${settledAt.length} worker ticks`,
+    `  reveal: ${duringBurst}/${rounds.length} rounds revealed during the answers, ${settledAt.at(-1) ?? 0}/${rounds.length} after ${settledAt.length} worker ticks (seconds)`,
   );
   return {
     viewers: viewerCount,
@@ -316,7 +324,7 @@ async function trial(viewerCount: number, viewers: readonly Viewer[]) {
 
 try {
   console.log(
-    `Pool ${poolSize}; reveal ${revealRounds} x ${revealOrders} orders; settlement batches of ${SETTLEMENT_BATCH.rounds} rounds / ${SETTLEMENT_BATCH.orders} orders`,
+    `Pool ${poolSize}; answers over the last ${burstSeconds} s; reveal ${revealRounds} x ${revealOrders} orders; settlement batches of ${SETTLEMENT_BATCH.rounds} rounds / ${SETTLEMENT_BATCH.orders} orders (${SETTLEMENT_BATCH.quietOrders} in a window's last ${SETTLEMENT_BATCH.quietSeconds} s)`,
   );
   const started = performance.now();
   const viewers = await accounts(Math.max(revealOrders, ...viewerCounts));

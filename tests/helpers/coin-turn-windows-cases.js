@@ -849,5 +849,70 @@ describe(
           id,
         ]);
     });
+
+    // PR 2: a round larger than a batch settles over several batches, in
+    // smaller ones while a live window is in its final seconds, and is
+    // revealed only by the last one.
+    it("settles a large round over several batches and reveals it with the last", async () => {
+      const quiet = createCoinDebateSandbox(runtime, "simulation", {
+        ...relaxed,
+        settlement: { orders: 300, quietOrders: 1, quietSeconds: 15 },
+      });
+      const one = await funded(),
+        two = await funded();
+      const debateId = await liveDebate();
+      await windows.openTurnWindows(20, [debateId]);
+      const [window] = await rounds(debateId);
+      for (const viewer of [one, two])
+        await windows.submit(viewer, window.id, randomUUID(), order());
+      // A second live debate's window closes within 15 seconds: quiet.
+      const closing = await liveDebate({ deadline: "10 seconds" });
+      await windows.openTurnWindows(20, [closing]);
+      await close(window.id);
+      const progress = async () =>
+        (
+          await owner.query(
+            `SELECT r.state,count(*) FILTER (WHERE q.status='settled')::int AS settled
+            FROM coin_debate_rounds r JOIN coin_debate_orders o ON o.round_id=r.id
+            JOIN coin_sandbox_requests q ON q.id=o.request_id WHERE r.id=$1 GROUP BY r.state`,
+            [window.id],
+          )
+        ).rows[0];
+      // Batches of one order: other suites' due rounds may come first.
+      for (
+        let attempt = 0;
+        attempt < 20 && (await progress()).settled === 0;
+        attempt++
+      )
+        await quiet.advance(20);
+      assert.deepEqual(await progress(), { state: "open", settled: 1 });
+      // Part-way through settlement, it can no longer be voided.
+      await assert.rejects(
+        createCoinDebateSandbox(owner, "simulation").voidRound(
+          window.id,
+          "operator_cancelled",
+        ),
+        /settlement has started/,
+      );
+      // Once no window of ours is closing, the last batch reveals it.
+      for (const id of [closing, debateId])
+        await owner.query(
+          "UPDATE debates SET status='ended',live_ended_at=clock_timestamp() WHERE id=$1",
+          [id],
+        );
+      for (
+        let attempt = 0;
+        attempt < 20 && (await progress()).state === "open";
+        attempt++
+      ) {
+        // Other suites' live windows can make it quiet for a few seconds.
+        await quiet.advance(20);
+        await owner.query("SELECT pg_sleep(0.5)");
+      }
+      assert.deepEqual(await progress(), { state: "settled", settled: 2 });
+      const [view] = await windows.view(one, debateId);
+      assert.equal(view.state, "settled");
+      assert.ok(view.outcome);
+    });
   },
 );

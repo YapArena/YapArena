@@ -29,22 +29,29 @@ cash liabilities. Historical A4/YAP remains isolated and nonredeemable.
 
 Sandbox debate results affect each grant's net profit and permanent qualification
 peak in round-closing order, with round UUID as the fixed tie-breaker. Only the
-worker settles: its coin loop runs ordered batches of at most 20 rounds and at most
-300 orders (a larger round goes alone), batch after batch for up to 3 seconds a
-tick, and a viewer's request never settles anybody's round. A target outside the
-current batch stays open until earlier obligations are processed. The batch locks
-every participating account and prepares all books, buckets and cash/promotional
-ledger rows before posting any result. This prevents a later account lock from
-deadlocking funding or payout reconciliation. An API caller must have a current
-session at admission and again before commit, including an idempotent or
-existing-round return; workers settle existing obligations without a user session.
+worker settles, and a viewer's request never settles anybody's round. Its coin loop
+runs one ordered batch a second, of at most 20 rounds and 200 orders, sized from the
+measured cost per order to fit 250 ms and cut off at 250 ms whatever the database's
+speed; while any live turn window is in its final 15 seconds, when most answers
+arrive, at most 50 orders and 100 ms.
+A larger round settles over several batches: each prices the whole round the same
+way, from its complete and fixed set of orders, and settles the next orders by
+account; the last one reveals the round and sends the results notice. A later round
+waits until the earlier one is revealed. A round part-way through settlement
+finishes settling even if its debate is cancelled, and can no longer be voided. The
+batch locks every participating account and prepares all books, buckets and
+cash/promotional ledger rows before posting any result. This prevents a later
+account lock from deadlocking funding or payout reconciliation. An API caller must
+have a current session at admission and again before commit, including an
+idempotent or existing-round return; workers settle existing obligations without a
+user session.
 
-Each round settles in its own savepoint. A round whose settlement throws is rolled
-back and set aside by the worker, which logs `coin round settlement failed; round
+Each round's part of a batch settles in its own savepoint. A round whose settlement
+throws is rolled back and set aside by the worker, which logs `coin round settlement failed; round
 set aside` (error level, with `roundId`, `failures` and `retryInSeconds`) and keeps
 settling the rest. It retries the round after 1 minute, then 2, 4 and so on up to an
 hour; a restarted worker retries at once. Investigate the logged error, then fix it
-or refund the round with `void-round`.
+or, if none of the round's orders has settled yet, refund it with `void-round`.
 
 **Locks and timeouts.** Settlement and voiding read a round's complete population
 of orders. A submit holds its round's advisory lock shared for its whole

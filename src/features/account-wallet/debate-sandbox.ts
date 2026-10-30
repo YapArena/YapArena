@@ -42,6 +42,8 @@ import {
   appendSandboxBookEvent,
   ensureSandboxBuckets,
   lockSandboxBook,
+  lockSandboxBooks,
+  sandboxBucketsFor,
   assertSandboxRail,
   assertSandboxFinancialOpen,
   assertSandboxOpened,
@@ -156,6 +158,11 @@ export interface RecordingSpan {
 // A debate in one of these states takes no new commitments, and the coin loop
 // voids its open rounds instead of settling them (F15: only unopened rounds).
 const unavailableStatuses = "('cancelled','void_review')";
+// True once some of a round's orders have settled: it then finishes settling,
+// even if its debate becomes unavailable, and can no longer be voided.
+const settlementStarted = (round: string) =>
+  `EXISTS (SELECT 1 FROM coin_debate_orders so JOIN coin_sandbox_requests sq ON sq.id=so.request_id
+    WHERE so.round_id=${round}.id AND sq.status='settled')`;
 export interface TurnWindow {
   id: string;
   turnNumber: number;
@@ -186,6 +193,12 @@ interface StoredOrder {
   // F10: the replay position of a replay viewer's order; null when live.
   replay_position_ms: number | null;
 }
+// An order with its request's status: "reserved" until its round settles it.
+interface PendingOrder extends StoredOrder {
+  request_status: string;
+}
+const ordersWithStatus = `SELECT o.*,q.status AS request_status FROM coin_debate_orders o
+  JOIN coin_sandbox_requests q ON q.id=o.request_id WHERE o.round_id=$1 ORDER BY o.user_id`;
 const uuid = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 const reference = (userId: string, operation: string, key: string) =>
   coinJournalReference({
@@ -396,12 +409,26 @@ export const COIN_WORKER_LIMITS = Object.freeze({
   statementTimeoutMs: 30_000,
 });
 /**
- * One settlement batch: at most this many rounds, and at most this many
- * orders unless a single round alone is larger. Settlement locks every
- * participant and the shared treasury rows, which each submit also needs, so
- * a batch must finish well inside a submit's lock timeout.
+ * One settlement batch: at most this many rounds and this many orders. A
+ * larger round settles over several batches: each prices the whole round the
+ * same way and settles the next orders, and the last one reveals it.
+ * Settlement locks every participant and the shared treasury rows, which each
+ * submit also needs, so a batch must finish well inside a submit's lock
+ * timeout. Rounds still settle in closing order: a later round waits until
+ * the earlier one is revealed.
  */
-export const SETTLEMENT_BATCH = Object.freeze({ rounds: 20, orders: 300 });
+export const SETTLEMENT_BATCH = Object.freeze({
+  rounds: 20,
+  orders: 200,
+  // A batch also stops settling once it has run this long, whatever the
+  // database's speed, leaving the rest for the next tick.
+  budgetMs: 250,
+  // While any live turn window is in its final seconds, when most answers
+  // arrive, batches are smaller still.
+  quietOrders: 50,
+  quietBudgetMs: 100,
+  quietSeconds: 15,
+});
 // A round whose settlement throws waits this long before its next attempt,
 // doubling up to an hour; the rest keep settling meanwhile.
 const setAsideBaseMs = 60_000,
@@ -426,16 +453,34 @@ export function createCoinDebateSandbox(
   options: {
     turnWindows?: boolean;
     logger?: { error(details: object, message: string): void };
-    // Tests that hold locks on purpose may relax these.
+    // Tests that hold locks on purpose may relax these, and tests may use
+    // smaller settlement batches.
     limits?: { request?: TransactionOptions; worker?: TransactionOptions };
+    settlement?: Partial<typeof SETTLEMENT_BATCH>;
   } = {},
 ) {
+  const batch = { ...SETTLEMENT_BATCH, ...options.settlement };
   const turnWindows = options.turnWindows === true;
   const requestLimits = options.limits?.request ?? COIN_REQUEST_LIMITS,
     workerLimits = options.limits?.worker ?? COIN_WORKER_LIMITS;
   // Rounds whose settlement threw, kept by this process (founder audit item
   // 7): skipped until their retry time and logged each time they fail.
   const setAside = new Map<string, { failures: number; retryAt: number }>();
+  // A round settling over several batches is priced once: its population is
+  // fixed after the cutoff, and the key checks that it hasn't changed.
+  const priced = new Map<
+    string,
+    {
+      key: string;
+      pricing: ReturnType<typeof priceRound>;
+      outcomes: Outcome[];
+    }
+  >();
+  // Measured cost of settling one order, so each batch takes about as many
+  // orders as fit its time budget on this database.
+  let perOrderMs = 2;
+  const capFor = (budgetMs: number, maximum: number) =>
+    Math.max(1, Math.min(maximum, Math.floor(budgetMs / perOrderMs)));
   async function transaction<T>(
     mutation: (client: PoolClient) => Promise<T>,
     limits: TransactionOptions = requestLimits,
@@ -502,25 +547,41 @@ export function createCoinDebateSandbox(
     // round's shared ledger rows can deadlock funding or payout reconciliation.
     // A cancelled or under-review debate's rounds are voided, never settled.
     // The batch stops at SETTLEMENT_BATCH.orders orders (a larger round goes
-    // alone), and skips rounds set aside until their retry time.
+    // alone), or at quietOrders while a live window is closing, and skips
+    // rounds set aside until their retry time.
     const now = Date.now();
     const skipped = [...setAside]
       .filter(([, entry]) => entry.retryAt > now)
       .map(([id]) => id);
     const rounds = (
-      await client.query<{ id: string }>(
+      await client.query<{ id: string; take: number; quiet: boolean }>(
         `WITH due AS (SELECT r.id,r.closes_at,
-            (SELECT count(*) FROM coin_debate_orders o WHERE o.round_id=r.id) AS orders
+            (SELECT count(*) FROM coin_debate_orders o JOIN coin_sandbox_requests q ON q.id=o.request_id
+              WHERE o.round_id=r.id AND q.status='reserved') AS pending
           FROM coin_debate_rounds r WHERE r.state='open' AND r.rail=$1
-          AND r.closes_at<=clock_timestamp() AND ${revealDue("r")} AND NOT EXISTS (SELECT 1 FROM debates d
-            WHERE d.id=r.debate_id AND d.status IN ${unavailableStatuses})
+          AND r.closes_at<=clock_timestamp() AND ${revealDue("r")}
+          AND (NOT EXISTS (SELECT 1 FROM debates d
+            WHERE d.id=r.debate_id AND d.status IN ${unavailableStatuses}) OR ${settlementStarted("r")})
           AND NOT r.id=ANY($4::uuid[])
           ORDER BY r.closes_at,r.id LIMIT $2),
-        running AS (SELECT id,closes_at,orders,
-          sum(orders) OVER (ORDER BY closes_at,id)-orders AS before FROM due)
-        SELECT id FROM running WHERE before=0 OR before+orders<=$3
-        ORDER BY closes_at,id`,
-        [rail, limit, SETTLEMENT_BATCH.orders, skipped],
+        running AS (SELECT id,closes_at,pending,
+          sum(pending) OVER (ORDER BY closes_at,id)-pending AS before FROM due),
+        quiet AS (SELECT EXISTS (SELECT 1 FROM coin_debate_rounds w
+            JOIN debates d ON d.id=w.debate_id
+            WHERE w.state='open' AND w.turn_number IS NOT NULL AND d.status='live'
+              AND w.closes_at>clock_timestamp()
+              AND w.closes_at<=clock_timestamp()+make_interval(secs=>$6)) AS active),
+        cap AS (SELECT active,CASE WHEN active THEN $5::bigint ELSE $3::bigint END AS orders FROM quiet)
+        SELECT id,LEAST(pending,cap.orders-before)::int AS take,cap.active AS quiet
+        FROM running,cap WHERE before<cap.orders ORDER BY closes_at,id`,
+        [
+          rail,
+          limit,
+          capFor(batch.budgetMs, batch.orders),
+          skipped,
+          capFor(batch.quietBudgetMs, batch.quietOrders),
+          batch.quietSeconds,
+        ],
       )
     ).rows;
     // Wait for in-flight submits to these rounds, and keep new ones out.
@@ -529,12 +590,27 @@ export function createCoinDebateSandbox(
       rounds.map((r) => r.id),
       "exclusive",
     );
-    const participants = (
-      await client.query<{ user_id: string }>(
-        "SELECT DISTINCT user_id FROM coin_debate_orders WHERE round_id=ANY($1::uuid[]) ORDER BY user_id",
-        [rounds.map((r) => r.id)],
-      )
-    ).rows.map((r) => r.user_id);
+    // Each round's next orders to settle, by user.
+    const chunks: {
+      id: string;
+      users: ReadonlySet<string>;
+      quiet: boolean;
+    }[] = [];
+    for (const round of rounds)
+      chunks.push({
+        id: round.id,
+        quiet: round.quiet,
+        users: new Set(
+          (
+            await client.query<{ user_id: string }>(
+              `SELECT o.user_id FROM coin_debate_orders o JOIN coin_sandbox_requests q ON q.id=o.request_id
+              WHERE o.round_id=$1 AND q.status='reserved' ORDER BY o.user_id LIMIT $2`,
+              [round.id, round.take],
+            )
+          ).rows.map((row) => row.user_id),
+        ),
+      });
+    const participants = chunks.flatMap((chunk) => [...chunk.users]);
     const users = [
       ...new Set([
         ...participants,
@@ -550,28 +626,39 @@ export function createCoinDebateSandbox(
     // An API caller must be authorized before its request may settle anybody's
     // obligations or initialize financial books. Worker advancement has no user.
     if (authorizeCaller) await authorize(client, authorizeCaller.context);
-    const buckets = [];
-    for (const userId of users) {
-      await lockSandboxBook(client, userId);
-      buckets.push(await ensureSandboxBuckets(client, userId));
-    }
-    await lockLedger(client, buckets);
-    return rounds;
+    // Books, then buckets, in account order, before the shared ledger rows.
+    await lockSandboxBooks(client, users);
+    const buckets = await sandboxBucketsFor(client, users);
+    await lockLedger(client, [...buckets.values()]);
+    return chunks.map((chunk) => ({ ...chunk, buckets }));
   }
-  async function settle(client: PoolClient, roundId: string) {
+  // Settles the given users' orders of a due round (all of them when no
+  // chunk is given) and reveals the round once none is left. Pricing always
+  // uses the round's complete, fixed population, so every chunk computes the
+  // same outcomes. Returns true when the round is revealed.
+  async function settle(
+    client: PoolClient,
+    roundId: string,
+    chunk?: ReadonlySet<string>,
+    deadline = Number.POSITIVE_INFINITY,
+    known: ReadonlyMap<string, SandboxBuckets> = new Map(),
+  ): Promise<{ revealed: boolean; settled: number }> {
     // The batch holds this round's lock exclusively: no new admissions.
     const orders = (
-      await client.query<StoredOrder>(
-        "SELECT * FROM coin_debate_orders WHERE round_id=$1 ORDER BY user_id",
-        [roundId],
-      )
+      await client.query<PendingOrder>(ordersWithStatus, [roundId])
     ).rows;
+    const pending = orders
+      .map((order, index) => ({ order, index }))
+      .filter(({ order }) => order.request_status === "reserved");
+    const settling = chunk
+      ? pending.filter(({ order }) => chunk.has(order.user_id))
+      : pending;
     await client.query(
       "SELECT id FROM users WHERE id=ANY($1::bigint[]) ORDER BY id FOR UPDATE",
-      [orders.map((o) => o.user_id)],
+      [settling.map(({ order }) => order.user_id)],
     );
     const round = await stored(client, roundId);
-    if (round.state !== "open") return false;
+    if (round.state !== "open") return { revealed: false, settled: 0 };
     const due = (
       await client.query<{ due: boolean }>(
         `SELECT clock_timestamp()>=r.closes_at AND ${revealDue("r")} AS due
@@ -579,7 +666,7 @@ export function createCoinDebateSandbox(
         [round.id],
       )
     ).rows[0]!.due;
-    if (!due) return false;
+    if (!due) return { revealed: false, settled: 0 };
     const snapshot: Order[] = orders.map((o) => ({
       participant: o.user_id,
       kind: "human",
@@ -589,35 +676,54 @@ export function createCoinDebateSandbox(
     }));
     if (digest(round.seed) !== round.seed_commitment)
       fail("sandbox seed commitment mismatch", 503);
-    const pricing = priceRound(
-      snapshot,
-      round.terms,
-      randomWord(round.seed, "branch"),
-      randomWord(round.seed, "price"),
+    const key = digest([round.seed, snapshot]);
+    let price = priced.get(roundId);
+    if (price?.key !== key) {
+      const pricing = priceRound(
+        snapshot,
+        round.terms,
+        randomWord(round.seed, "branch"),
+        randomWord(round.seed, "price"),
+      );
+      price = {
+        key,
+        pricing,
+        outcomes: executeRound(
+          snapshot,
+          round.terms,
+          pricing,
+          COIN_DEBATE_FACE,
+        ),
+      };
+      priced.set(roundId, price);
+      if (priced.size > 50) priced.delete(priced.keys().next().value!);
+    }
+    const { pricing, outcomes } = price;
+    const books = await lockSandboxBooks(
+      client,
+      settling.map(({ order }) => order.user_id),
     );
-    const outcomes = executeRound(
-      snapshot,
-      round.terms,
-      pricing,
-      COIN_DEBATE_FACE,
-    );
-    const snapshots = await Promise.all(
-      orders.map((o) => lockSandboxBook(client, o.user_id)),
-    );
+    const snapshots = settling.map(({ order }) => books.get(order.user_id)!);
     const buckets = [];
-    for (const order of orders)
-      buckets.push(await ensureSandboxBuckets(client, order.user_id));
+    for (const { order } of settling)
+      buckets.push(
+        known.get(order.user_id) ??
+          (await ensureSandboxBuckets(client, order.user_id)),
+      );
     await lockLedger(client, buckets);
     const now = (
       await client.query<{ now: Date }>(
         "SELECT date_trunc('milliseconds',clock_timestamp()) AS now",
       )
     ).rows[0]!.now.toISOString();
-    for (let index = 0; index < orders.length; index++) {
-      const order = orders[index]!,
-        outcome = outcomes[index]!,
-        before = snapshots[index]!,
-        bucket = buckets[index]!;
+    let settled = 0;
+    for (const [position, { order, index }] of settling.entries()) {
+      // Past the batch's time budget, the rest wait for the next batch.
+      if (position > 0 && performance.now() > deadline) break;
+      settled++;
+      const outcome = outcomes[index]!,
+        before = snapshots[position]!,
+        bucket = buckets[position]!;
       const committed = commitStakeCost(
         before.book,
         order.funding,
@@ -770,6 +876,9 @@ export function createCoinDebateSandbox(
         [order.request_id],
       );
     }
+    // More orders wait for the next batch; the round stays open until then.
+    if (settled < pending.length) return { revealed: false, settled };
+    priced.delete(roundId);
     const result = {
       snapshot,
       snapshotHash: digest({
@@ -789,7 +898,7 @@ export function createCoinDebateSandbox(
       client,
       orders.map((order) => order.user_id),
     );
-    return true;
+    return { revealed: true, settled };
   }
   // Opens the current speaking turn's trading window of one live debate, at
   // most once per turn (Decision 0012). Its cutoff is the turn deadline copied
@@ -844,10 +953,7 @@ export function createCoinDebateSandbox(
   ) {
     await lockRounds(client, [roundId], "exclusive");
     const orders = (
-      await client.query<StoredOrder>(
-        "SELECT * FROM coin_debate_orders WHERE round_id=$1 ORDER BY user_id",
-        [roundId],
-      )
+      await client.query<PendingOrder>(ordersWithStatus, [roundId])
     ).rows;
     await client.query(
       "SELECT id FROM users WHERE id=ANY($1::bigint[]) ORDER BY id FOR UPDATE",
@@ -856,6 +962,9 @@ export function createCoinDebateSandbox(
     const round = await stored(client, roundId);
     if (round.state === "void") return { created: false };
     if (round.state !== "open") fail("settled obligations cannot be voided");
+    // A round part-way through settlement finishes settling instead.
+    if (orders.some((order) => order.request_status === "settled"))
+      fail("this round's settlement has started; it can't be voided");
     const snapshots = [],
       buckets = [];
     for (const order of orders) {
@@ -1517,10 +1626,12 @@ export function createCoinDebateSandbox(
     // throws is rolled back, set aside with a growing retry delay and logged,
     // and the rest of the batch still settles. A timeout fails the batch,
     // which the next tick retries.
-    async advance(limit = SETTLEMENT_BATCH.rounds, context?: SandboxContext) {
+    async advance(limit = batch.rounds, context?: SandboxContext) {
       if (!Number.isInteger(limit) || limit < 1 || limit > 100)
         fail("invalid transition batch", 400);
       const failed: { roundId: string; error: unknown }[] = [];
+      const started = performance.now();
+      let settledOrders = 0;
       const result = await transaction(
         async (client) => {
           const due = await dueBatch(
@@ -1529,10 +1640,21 @@ export function createCoinDebateSandbox(
             context ? { context } : undefined,
           );
           let completed = 0;
-          for (const r of due) {
+          const deadline =
+            started + (due[0]?.quiet ? batch.quietBudgetMs : batch.budgetMs);
+          for (const [position, r] of due.entries()) {
+            if (position > 0 && performance.now() > deadline) break;
             await client.query("SAVEPOINT coin_round");
             try {
-              if (await settle(client, r.id)) completed++;
+              const done = await settle(
+                client,
+                r.id,
+                r.users,
+                deadline,
+                r.buckets,
+              );
+              if (done.revealed) completed++;
+              settledOrders += done.settled;
               await client.query("RELEASE SAVEPOINT coin_round");
             } catch (error) {
               if (databaseFailure(error) === "busy") throw error;
@@ -1546,6 +1668,10 @@ export function createCoinDebateSandbox(
         },
         context ? requestLimits : workerLimits,
       );
+      // Keep the next batch's size to what fits its time budget here.
+      if (settledOrders)
+        perOrderMs =
+          (perOrderMs + (performance.now() - started) / settledOrders) / 2;
       const now = Date.now();
       for (const { roundId, error } of failed) {
         const failures = (setAside.get(roundId)?.failures ?? 0) + 1;
@@ -1655,6 +1781,7 @@ export function createCoinDebateSandbox(
         await database.query<{ id: string }>(
           `SELECT r.id FROM coin_debate_rounds r JOIN debates d ON d.id=r.debate_id
           WHERE r.state='open' AND r.rail=$1 AND d.status IN ${unavailableStatuses}
+            AND NOT ${settlementStarted("r")}
             AND ($3::uuid[] IS NULL OR r.debate_id=ANY($3::uuid[]))
           ORDER BY r.closes_at,r.id LIMIT $2`,
           [rail, limit, debateIds ?? null],
@@ -1666,7 +1793,8 @@ export function createCoinDebateSandbox(
           const current = (
             await client.query<{ role: string }>(
               `SELECT current_user AS role FROM coin_debate_rounds r JOIN debates d ON d.id=r.debate_id
-              WHERE r.id=$1 AND r.state='open' AND d.status IN ${unavailableStatuses}`,
+              WHERE r.id=$1 AND r.state='open' AND d.status IN ${unavailableStatuses}
+                AND NOT ${settlementStarted("r")}`,
               [id],
             )
           ).rows[0];
@@ -1830,16 +1958,11 @@ export function createCoinDebateSandbox(
       }
       const voided = await step(() => api.voidUnavailable());
       // Open the new turn's window before settling, so a large reveal never
-      // delays it; then settle batch after batch for up to 3 seconds. Each
-      // batch commits on its own, so submits get in between.
+      // delays it; then settle one batch. One batch a second leaves the rest
+      // of each second to the submits that share the treasury rows.
       const opened = await step(() => api.openTurnWindows());
-      const started = Date.now();
-      let completed = 0;
-      for (;;) {
-        const batch = await step(() => api.advance());
-        completed += batch?.completed ?? 0;
-        if (!batch?.completed || Date.now() - started > 3000) break;
-      }
+      const settled = await step(() => api.advance());
+      const completed = settled?.completed ?? 0;
       if (failures.length === 1) throw failures[0];
       if (failures.length)
         throw new AggregateError(failures, "coin debate tick failed");
