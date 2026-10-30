@@ -6,6 +6,7 @@ import { createApp } from "../dist/app.js";
 import { activityLabel } from "../dist/features/identity/activity.js";
 import { createIdentityRepository } from "../dist/features/identity/repository.js";
 import { createIdentityRouter } from "../dist/features/identity/router.js";
+import { MINIMUM_AGE, TERMS_VERSION } from "../dist/features/identity/terms.js";
 import { createLogger } from "../dist/platform/logger.js";
 import express from "express";
 
@@ -68,6 +69,7 @@ describe("profile setup", () => {
       handle: "maya-chen",
       displayName: " Maya Chen ",
       publicationState: "published",
+      acceptTerms: true,
     });
     assert.equal(response.status, 201);
     assert.equal(response.body.profile.publicationState, "published");
@@ -78,13 +80,33 @@ describe("profile setup", () => {
       "Maya Chen",
       null,
       "published",
+      { version: TERMS_VERSION, minimumAge: MINIMUM_AGE },
     ]);
     // Without a choice a profile still starts as a private draft.
     await session("post", "/api/me/profile").send({
       handle: "second-try",
       displayName: "Second",
+      acceptTerms: true,
     });
     assert.equal(calls.at(-1)[5], "draft");
+  });
+
+  it("requires the age and terms confirmation before creating a profile", async () => {
+    const { calls, session } = setup();
+    for (const acceptTerms of [undefined, false, "yes"]) {
+      const response = await session("post", "/api/me/profile").send({
+        handle: "maya-chen",
+        displayName: "Maya",
+        ...(acceptTerms === undefined ? {} : { acceptTerms }),
+      });
+      assert.equal(response.status, 400);
+      assert.equal(response.body.code, "terms_required");
+      assert.equal(response.body.field, "terms");
+      assert.match(response.body.error, /18 or older/);
+    }
+    assert.equal(calls.filter(([name]) => name === "createProfile").length, 0);
+    assert.equal(MINIMUM_AGE, 18);
+    assert.match(TERMS_VERSION, /^\d{4}-\d{2}-\d{2}$/);
   });
 
   it("names the field and says what to fix", async () => {
@@ -142,6 +164,7 @@ describe("profile setup", () => {
       const response = await session("post", "/api/me/profile").send({
         handle: "maya-chen",
         displayName: "Maya",
+        acceptTerms: true,
       });
       assert.equal(response.status, 409);
       assert.equal(response.body.code, code);
@@ -157,6 +180,7 @@ describe("profile setup", () => {
         await session("post", "/api/me/profile").send({
           handle: "maya-chen",
           displayName: "Maya",
+          acceptTerms: true,
         })
       ).status,
       500,
@@ -328,11 +352,13 @@ describe("account data download", () => {
         occurredAt: new Date("2026-10-01"),
       },
     ]);
-    assert.equal(queries.length, 4);
+    assert.equal(queries.length, 5);
     assert.ok(queries.every(({ values }) => values[0] === "7"));
     // Follows, activity and notifications are bounded; the profile is one row.
     assert.equal(queries.filter(({ sql }) => /LIMIT \$2/.test(sql)).length, 3);
     assert.ok(queries.some(({ sql }) => sql.includes("account_notifications")));
+    assert.deepEqual(data.termsAcceptances, []);
+    assert.ok(queries.some(({ sql }) => sql.includes("terms_acceptances")));
   });
 });
 
@@ -415,6 +441,19 @@ describe("readable account activity", () => {
         .publicationState,
       "draft",
     );
+    // A profile from the handle pop-up records its terms in the same statement.
+    await repository.createProfile("7", "maya", "Maya", null, "published", {
+      version: "2026-10-30",
+      minimumAge: 18,
+    });
+    const created = queries.at(-1);
+    assert.match(
+      created.sql,
+      /^WITH accepted AS \(\s*INSERT INTO terms_acceptances/,
+    );
+    assert.match(created.sql, /INSERT INTO public_profiles/);
+    assert.deepEqual(created.values.slice(5), ["2026-10-30", 18]);
+    assert.doesNotMatch(queries.at(-2).sql, /terms_acceptances/);
     assert.equal(await repository.isHandleTaken("alex-rivera"), true);
     assert.equal(await repository.isHandleTaken("maya-chen"), false);
     assert.doesNotMatch(queries.at(-1).sql, /publication_state/);

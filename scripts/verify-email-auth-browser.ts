@@ -255,6 +255,13 @@ try {
     await setup.getByRole("progressbar").getAttribute("aria-valuetext"),
     "Step 2 of 2",
   );
+  // The handle is claimed only after the age and terms confirmation.
+  assert.equal(
+    await setup.getByRole("button", { name: "Claim my handle" }).isDisabled(),
+    true,
+    "claiming waits for the terms tick",
+  );
+  await setup.getByRole("checkbox", { name: /18 or older/ }).check();
   await setup.getByRole("button", { name: "Claim my handle" }).click();
   await setup.getByText("Welcome to the arena, Browser").waitFor();
   await first.screenshot({ path: `${artifactDir}/profile-setup-done.png` });

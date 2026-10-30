@@ -69,6 +69,7 @@ const template = `<div class="ps-glow" aria-hidden="true"></div>
   <section class="ps-step" data-step="confirm" hidden>
     <h2 class="ps-sr" tabindex="-1">Confirm your handle</h2>
     <div class="ps-claim"><span class="ps-avatar ps-avatar-large" data-ps-confirm-avatar></span><strong data-ps-confirm-name></strong><span data-ps-confirm-handle></span></div>
+    <label class="ps-terms"><input type="checkbox" name="acceptTerms" data-ps-terms required><span>I'm 18 or older and I accept the <a href="/terms" target="_blank" rel="noopener">Terms of Use</a> and the <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span></label>
     <p class="ps-form-error" role="alert" data-ps-form-error hidden></p>
     <div class="ps-actions"><button class="ps-secondary" type="button" data-ps-back>Edit</button><button class="ps-primary" type="submit" data-ps-claim>Claim my handle</button></div>
   </section>
@@ -109,6 +110,7 @@ function show() {
   const progress = q<HTMLElement>(".ps-progress");
   const continueButton = q<HTMLButtonElement>("[data-ps-continue]");
   const claimButton = q<HTMLButtonElement>("[data-ps-claim]");
+  const terms = q<HTMLInputElement>("[data-ps-terms]");
   const formError = q<HTMLElement>("[data-ps-form-error]");
   const steps = [...dialog.querySelectorAll<HTMLElement>("[data-step]")];
 
@@ -170,6 +172,8 @@ function show() {
       handleProblem(value) ||
       (available.handle === value && available.value === false),
     );
+    // The server refuses a profile without the age and terms confirmation.
+    claimButton.disabled = !terms.checked;
   }
 
   async function checkHandle(value: string) {
@@ -290,6 +294,7 @@ function show() {
           displayName: name.value.trim(),
           // Every profile is public (founder, 2026-10-24).
           publicationState: "published",
+          acceptTerms: terms.checked,
         },
         timeout: 15000,
       });
@@ -328,6 +333,10 @@ function show() {
         showNameError(body.error ?? "Enter a username.");
         return;
       }
+      if (body.field === "terms") {
+        terms.checked = false;
+        terms.focus();
+      }
       formError.textContent =
         body.error && response.status !== 500
           ? body.error
@@ -338,7 +347,7 @@ function show() {
         "We couldn't reach YAP Arena. Check your connection and try again.";
       formError.hidden = false;
     } finally {
-      claimButton.disabled = false;
+      claimButton.disabled = !terms.checked;
       claimButton.textContent = "Claim my handle";
     }
   }
@@ -365,11 +374,22 @@ function show() {
         `@${handle.value}`;
       formError.hidden = true;
       goTo("confirm");
-    } else if (step === "confirm") void claim();
+    } else if (step === "confirm") {
+      // Enter can submit while the claim button waits for the tick.
+      if (!terms.checked) {
+        terms.focus();
+        return;
+      }
+      void claim();
+    }
   });
   q<HTMLButtonElement>("[data-ps-back]").addEventListener("click", () =>
     goTo("details"),
   );
+  terms.addEventListener("change", () => {
+    formError.hidden = true;
+    render();
+  });
   q<HTMLButtonElement>("[data-ps-finish]").addEventListener("click", () =>
     finish(created),
   );

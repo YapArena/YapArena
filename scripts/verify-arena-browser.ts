@@ -60,6 +60,7 @@ export async function verifyArenaBrowser({
       displayName: "UI Test Participant",
       bio: "Synthetic local interface trial.",
       publicationState: "published",
+      acceptTerms: true,
     });
     await page.goto(base + "/account");
     const dismiss = page.getByRole("button", { name: "Not now", exact: true });

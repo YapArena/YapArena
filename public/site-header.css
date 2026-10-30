@@ -1219,6 +1219,40 @@
   color: var(--ps-acid);
   font-weight: 650;
 }
+/* The age and terms confirmation on the confirm step. */
+.ps-terms {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid #333;
+  border-radius: 14px;
+  background: var(--ps-field);
+  color: #cfcfcf;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  cursor: pointer;
+}
+.ps-terms:has(input:checked) {
+  border-color: #6a6a6a;
+}
+.ps-terms input {
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  accent-color: var(--ps-acid);
+  cursor: pointer;
+}
+.ps-terms input:focus-visible {
+  outline: 2px solid var(--ps-acid);
+  outline-offset: 2px;
+}
+.ps-terms a {
+  color: var(--ps-acid);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 .ps-form-error {
   margin: 0;
   padding: 10px 12px;
