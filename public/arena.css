@@ -2776,8 +2776,9 @@ textarea::placeholder {
   .arena-page .arena-tabs:not([hidden]) {
     margin-top: var(--space-4);
   }
+  /* At least 22rem, so messages keep room while the keyboard is open. */
   .arena-page .arena-chat {
-    height: min(480px, 60svh);
+    height: min(480px, max(60svh, 22rem));
     margin-top: var(--space-4);
   }
   .live-outline {
