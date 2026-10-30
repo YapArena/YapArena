@@ -384,6 +384,7 @@ export async function verifyChatClient({
       true,
       "late acknowledgment does not steal focus",
     );
+    await page.keyboard.press("Escape");
     assert.equal(
       await responseFirst.row.evaluate(
         (node) => node === window.originalPendingRow,

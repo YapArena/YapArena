@@ -347,7 +347,6 @@ exports[`renders a debate 1`] = `
 </svg>
 </summary>
 <div class="chat-more-panel">
-<p class="chat-more-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 <div class="community-toolbar">
 <button type="button" data-community-like aria-pressed="false">Like this event</button>
 <span data-community-likes>0 likes</span>
@@ -404,6 +403,7 @@ exports[`renders a debate 1`] = `
 <p data-community-send-status role="status" aria-live="polite">
 </p>
 </form>
+<p class="chat-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 </section>\\n    </aside>\\n    <div class="arena-more">\\n      <section class="arena-chart-panel" aria-labelledby="arena-results-title">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -941,7 +941,6 @@ exports[`renders a debate 10`] = `
 </svg>
 </summary>
 <div class="chat-more-panel">
-<p class="chat-more-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 <div class="community-toolbar">
 <button type="button" data-community-like aria-pressed="false">Like this event</button>
 <span data-community-likes>0 likes</span>
@@ -998,6 +997,7 @@ exports[`renders a debate 10`] = `
 <p data-community-send-status role="status" aria-live="polite">
 </p>
 </form>
+<p class="chat-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 </section>\\n    </aside>\\n    <div class="arena-more">\\n      <section class="arena-chart-panel" aria-labelledby="arena-results-title">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -1533,7 +1533,6 @@ exports[`renders a debate 2`] = `
 </svg>
 </summary>
 <div class="chat-more-panel">
-<p class="chat-more-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 <div class="community-toolbar">
 <button type="button" data-community-like aria-pressed="false">Like this event</button>
 <span data-community-likes>0 likes</span>
@@ -1590,6 +1589,7 @@ exports[`renders a debate 2`] = `
 <p data-community-send-status role="status" aria-live="polite">
 </p>
 </form>
+<p class="chat-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 </section>\\n    </aside>\\n    <div class="arena-more">\\n      <section class="arena-chart-panel" aria-labelledby="arena-results-title">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -2126,7 +2126,6 @@ exports[`renders a debate 3`] = `
 </svg>
 </summary>
 <div class="chat-more-panel">
-<p class="chat-more-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 <div class="community-toolbar">
 <button type="button" data-community-like aria-pressed="false">Like this event</button>
 <span data-community-likes>0 likes</span>
@@ -2183,6 +2182,7 @@ exports[`renders a debate 3`] = `
 <p data-community-send-status role="status" aria-live="polite">
 </p>
 </form>
+<p class="chat-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 </section>\\n    </aside>\\n    <div class="arena-more">\\n      <section class="arena-chart-panel" aria-labelledby="arena-results-title">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -2719,7 +2719,6 @@ exports[`renders a debate 4`] = `
 </svg>
 </summary>
 <div class="chat-more-panel">
-<p class="chat-more-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 <div class="community-toolbar">
 <button type="button" data-community-like aria-pressed="false">Like this event</button>
 <span data-community-likes>0 likes</span>
@@ -2776,6 +2775,7 @@ exports[`renders a debate 4`] = `
 <p data-community-send-status role="status" aria-live="polite">
 </p>
 </form>
+<p class="chat-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 </section>\\n    </aside>\\n    <div class="arena-more">\\n      <section class="arena-chart-panel" aria-labelledby="arena-results-title">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -3310,7 +3310,6 @@ exports[`renders a debate 5`] = `
 </svg>
 </summary>
 <div class="chat-more-panel">
-<p class="chat-more-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 <div class="community-toolbar">
 <button type="button" data-community-like aria-pressed="false">Like this event</button>
 <span data-community-likes>0 likes</span>
@@ -3367,6 +3366,7 @@ exports[`renders a debate 5`] = `
 <p data-community-send-status role="status" aria-live="polite">
 </p>
 </form>
+<p class="chat-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 </section>\\n    </aside>\\n    <div class="arena-more">\\n      <section class="arena-chart-panel" aria-labelledby="arena-results-title">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -3901,7 +3901,6 @@ exports[`renders a debate 6`] = `
 </svg>
 </summary>
 <div class="chat-more-panel">
-<p class="chat-more-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 <div class="community-toolbar">
 <button type="button" data-community-like aria-pressed="false">Like this event</button>
 <span data-community-likes>0 likes</span>
@@ -3958,6 +3957,7 @@ exports[`renders a debate 6`] = `
 <p data-community-send-status role="status" aria-live="polite">
 </p>
 </form>
+<p class="chat-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 </section>\\n    </aside>\\n    <div class="arena-more">\\n      <section class="arena-chart-panel" aria-labelledby="arena-results-title">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -4494,7 +4494,6 @@ exports[`renders a debate 7`] = `
 </svg>
 </summary>
 <div class="chat-more-panel">
-<p class="chat-more-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 <div class="community-toolbar">
 <button type="button" data-community-like aria-pressed="false">Like this event</button>
 <span data-community-likes>0 likes</span>
@@ -4551,6 +4550,7 @@ exports[`renders a debate 7`] = `
 <p data-community-send-status role="status" aria-live="polite">
 </p>
 </form>
+<p class="chat-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 </section>\\n    </aside>\\n    <div class="arena-more">\\n      <section class="arena-chart-panel" aria-labelledby="arena-results-title">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -5088,7 +5088,6 @@ exports[`renders a debate 8`] = `
 </svg>
 </summary>
 <div class="chat-more-panel">
-<p class="chat-more-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 <div class="community-toolbar">
 <button type="button" data-community-like aria-pressed="false">Like this event</button>
 <span data-community-likes>0 likes</span>
@@ -5145,6 +5144,7 @@ exports[`renders a debate 8`] = `
 <p data-community-send-status role="status" aria-live="polite">
 </p>
 </form>
+<p class="chat-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 </section>\\n    </aside>\\n    <div class="arena-more">\\n      <section class="arena-chart-panel" aria-labelledby="arena-results-title">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -5684,7 +5684,6 @@ exports[`renders a debate 9`] = `
 </svg>
 </summary>
 <div class="chat-more-panel">
-<p class="chat-more-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 <div class="community-toolbar">
 <button type="button" data-community-like aria-pressed="false">Like this event</button>
 <span data-community-likes>0 likes</span>
@@ -5741,6 +5740,7 @@ exports[`renders a debate 9`] = `
 <p data-community-send-status role="status" aria-live="polite">
 </p>
 </form>
+<p class="chat-status" role="status" aria-live="polite" data-community-status>Loading community activity…</p>
 </section>\\n    </aside>\\n    <div class="arena-more">\\n      <section class="arena-chart-panel" aria-labelledby="arena-results-title">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
