@@ -276,9 +276,16 @@ describe(
     it("returns the current turn's window to manual creation during a live debate", async () => {
       const context = await actor(),
         debateId = await liveDebate({ status: "ready" });
-      // A five-minute round opened before the debate went live keeps its own
-      // series and does not hold back the turn windows.
-      const early = await windows.create(context, debateId, randomUUID());
+      // Decision 0013 (founder D5): with turn windows, nothing opens before
+      // the debate is live, so nobody stakes before a scheduled start.
+      await assert.rejects(
+        windows.create(context, debateId, randomUUID()),
+        (error) => error.code === "window_closed" && error.status === 409,
+      );
+      assert.equal((await rounds(debateId)).length, 0);
+      // A five-minute round opened without the flag (an earlier release)
+      // keeps its own series and does not hold back the turn windows.
+      const early = await manual.create(context, debateId, randomUUID());
       assert.equal(early.created, true);
       await owner.query("UPDATE debates SET status='live' WHERE id=$1", [
         debateId,

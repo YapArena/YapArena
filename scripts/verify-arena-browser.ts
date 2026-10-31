@@ -146,7 +146,7 @@ export async function verifyArenaBrowser({
       );
       assert.equal(
         await page.locator("[data-price-yes]").textContent(),
-        `${((100 * Number(point.offer!.n)) / Number(point.offer!.d)).toFixed(2)}¢`,
+        `${(Number(point.offer!.n) / Number(point.offer!.d)).toFixed(2)} YC`,
       );
       assert.match(
         (await page.locator("[data-price-context]").textContent())!,
@@ -213,7 +213,7 @@ export async function verifyArenaBrowser({
     );
     assert.match(
       (await page.locator("[data-price-explanation]").textContent())!,
-      /Median interval|NO median/,
+      /Typical limits|Typical No limit/,
     );
     assert.notEqual(await page.locator("[data-price-yes]").textContent(), "—");
     // A new published settlement re-renders the shared history through the
@@ -381,7 +381,7 @@ export async function verifyArenaBrowser({
     checks.chartSelectionMarksRound = true;
     assert.equal(
       await page
-        .getByRole("link", { name: "Bots sandbox on Yap Coins →" })
+        .getByRole("link", { name: "Practice with bots →" })
         .getAttribute("href"),
       `/coins?debate=${debate.id}`,
     );

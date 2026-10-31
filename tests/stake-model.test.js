@@ -11,7 +11,9 @@ import {
   parseDefaults,
   parseSize,
   percent,
+  placementError,
   positionStatus,
+  price,
   readFromLimit,
   reasonText,
   repeatLabel,
@@ -19,6 +21,7 @@ import {
   replayWindow,
   resultLine,
   resultsHeading,
+  reservedAtoms,
   resultsSummary,
   secondsLeft,
   signedCoins,
@@ -71,14 +74,19 @@ describe("betting panel terms (Decision 0013)", () => {
 
   it("shows the reserved amount and the most a position can lose", () => {
     assert.deepEqual(ticketTerms(10, 62), {
-      reserved: "10.00 YC",
+      reserved: "10 YC",
       mostYouCanLose: "6.20 YC",
     });
     assert.deepEqual(ticketTerms(100, 99), {
-      reserved: "100.00 YC",
-      mostYouCanLose: "99.00 YC",
+      reserved: "100 YC",
+      mostYouCanLose: "99 YC",
     });
     assert.equal(coins(5), "0.05 YC");
+    // A price per contract in Yap Coins, never cents.
+    assert.equal(price(54), "0.54 YC");
+    assert.equal(price(5), "0.05 YC");
+    assert.equal(price(100), "1.00 YC");
+    assert.equal(reservedAtoms(10), 100_000n);
   });
 
   it("accepts only whole sizes from 1 to 100 and prices from 1 to 99 cents", () => {
@@ -95,10 +103,15 @@ describe("betting panel terms (Decision 0013)", () => {
   });
 
   it("formats signed results from atomic units, 10,000 per Yap Coin", () => {
-    assert.equal(signedCoins("10000"), "+1.00 YC");
-    assert.equal(signedCoins("-20000"), "−2.00 YC");
-    assert.equal(signedCoins("0"), "0.00 YC");
+    assert.equal(signedCoins("10000"), "+1 YC");
+    assert.equal(signedCoins("-20000"), "−2 YC");
     assert.equal(signedCoins(12_345n), "+1.23 YC");
+    assert.equal(signedCoins("-4000"), "−0.40 YC");
+    assert.equal(signedCoins(12_345_670_000n), "+1,234,567 YC");
+    // Results that round to zero say so.
+    assert.equal(signedCoins("0"), "no gain or loss");
+    assert.equal(signedCoins("40"), "a gain under 0.01 YC");
+    assert.equal(signedCoins("-99"), "a loss under 0.01 YC");
     assert.equal(percent({ n: "61", d: "100" }), 61);
     assert.equal(percent({ n: "2", d: "3" }), 67);
     assert.equal(percent(null), null);
@@ -210,7 +223,7 @@ describe("betting panel terms (Decision 0013)", () => {
       });
     assert.equal(
       positionStatus(settled(true, "7000"), when),
-      "Settled +0.70 YC",
+      "Settled: +0.70 YC",
     );
     assert.equal(
       positionStatus(settled(false, "0"), when),
@@ -328,22 +341,22 @@ describe("results, repeat and get-ready defaults (Decision 0013)", () => {
     );
     assert.equal(
       resultsHeading({ revealed: [summary.revealed[0]], locked: [], net: 0n }),
-      "Results are in · 0.00 YC across 1 turn",
+      "Results are in · no gain or loss across 1 turn",
     );
   });
 
   it("describes each revealed position from its own side", () => {
     assert.equal(
       resultLine(settled(3, "YES", true, "4000")),
-      "Turn 3 · Yes · 10 · paid 54¢ each · 58% said yes · +0.40 YC",
+      "Turn 3 · Yes · 10 · paid 0.54 YC each · 58% said yes · +0.40 YC",
     );
     assert.equal(
       resultLine(settled(2, "NO", true, "-600")),
-      "Turn 2 · No · 10 · paid 46¢ each · 58% said yes · −0.06 YC",
+      "Turn 2 · No · 10 · paid 0.46 YC each · 58% said yes · −0.06 YC",
     );
     assert.equal(
       resultLine(settled(5, "YES", false, "0", 70)),
-      "Turn 5 · Yes · 10 · not filled at 70¢ · 58% said yes · refunded",
+      "Turn 5 · Yes · 10 · not filled at 0.70 YC · 58% said yes · refunded",
     );
     assert.equal(
       resultLine(
@@ -374,5 +387,90 @@ describe("results, repeat and get-ready defaults (Decision 0013)", () => {
       "Turn 7 · Yes · 5 · not filled · refunded",
     );
     assert.equal(resultLine(round()), "");
+  });
+});
+
+describe("placement refusals in the panel's words", () => {
+  const failure = (status, code, message = "server text") =>
+    Object.assign(new Error(message), { status, code });
+  const context = { turnNumber: 4, available: "123450000" };
+  it("maps every known refusal to plain text, never the server's", () => {
+    const cases = [
+      [
+        failure(409, "window_closed"),
+        /^Turn 4's window closed before you confirmed\. Nothing was reserved\.$/,
+        true,
+      ],
+      [
+        failure(409, "insufficient_balance"),
+        /^You don't have enough Yap Coins: 12,345 YC available\. Lower the size\. Nothing was reserved\.$/,
+      ],
+      [failure(409, "already_answered"), /^You already answered this turn\.$/],
+      [
+        failure(403, "debater"),
+        /^You're in this debate, so you can't answer here\.$/,
+      ],
+      [
+        failure(409, "window_full"),
+        /^This turn's window is full\. Nothing was reserved\.$/,
+      ],
+      [
+        failure(503, "answers_paused"),
+        /^Answers are paused for a moment\. Nothing was reserved; try again soon\.$/,
+      ],
+      [
+        failure(409, "debate_unavailable"),
+        /^This debate isn't taking answers\.$/,
+      ],
+      [failure(403, "financial_review"), /correction review/],
+      [failure(409, "later_window"), /already answered a later turn/],
+      [
+        failure(409, "replay_position"),
+        /isn't in this turn's window\. Nothing was reserved\.$/,
+      ],
+      [failure(409, "session_changed"), /another tab/],
+      [
+        failure(401, "signed_out"),
+        /^You're signed out\. Sign in again to answer\.$/,
+      ],
+      [failure(401, undefined), /^You're signed out/],
+      [failure(429, undefined), /Wait a moment/],
+      [
+        failure(409, "idempotency_conflict"),
+        /^Couldn't place your answer\. Nothing was reserved; try again\.$/,
+      ],
+      [
+        failure(500, undefined, "internal server error"),
+        /^Couldn't place your answer\. Nothing was reserved; try again\.$/,
+      ],
+      // No HTTP status: the request never got an answer.
+      [
+        new TypeError("Failed to fetch"),
+        /^Connection lost\. Nothing was reserved; try again\.$/,
+      ],
+      [
+        Object.assign(new Error("signal timed out"), { name: "TimeoutError" }),
+        /^Connection lost/,
+      ],
+      [new Error("window changed"), /^Turn 4's window closed/, true],
+    ];
+    for (const [error, text, closed = false] of cases) {
+      const result = placementError(error, context);
+      assert.match(result.text, text, String(error.code ?? error.message));
+      assert.equal(result.closed, closed, String(error.code ?? error.message));
+      assert.doesNotMatch(
+        result.text,
+        /server text|internal server|Failed to fetch|signal timed out/,
+      );
+    }
+  });
+  it("leaves the balance out when the panel doesn't know it", () => {
+    assert.equal(
+      placementError(failure(409, "insufficient_balance"), {
+        turnNumber: 1,
+        available: null,
+      }).text,
+      "You don't have enough Yap Coins for this size. Nothing was reserved.",
+    );
   });
 });

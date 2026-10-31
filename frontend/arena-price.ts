@@ -8,8 +8,9 @@ interface PriceElements {
 /* global document, Option */
 import { sharePercent } from "./arena-chart.js";
 
+// A price on the 0–100 scale, as Yap Coins per contract: "0.30 YC".
 export const priceText = (percent: number | null) =>
-  percent === null ? "—" : `${percent.toFixed(2)}¢`;
+  percent === null ? "—" : `${(percent / 100).toFixed(2)} YC`;
 
 export function roundPrices(point: RoundPoint | null | undefined) {
   const offer = sharePercent(point?.offer),
@@ -147,7 +148,7 @@ export function createPriceInspector(
       select.selectedIndex < 0 || select.selectedIndex >= points.length - 1;
     el("context").textContent = point
       ? `Round ${point.number} · ${point.argumentLabel || "Argument not labeled"}${point.state ? ` · ${point.state}` : " · settled"}`
-      : "Start or select a round to inspect its offered price.";
+      : "Choose a round to see its drawn price.";
     el("yes").textContent = priceText(p.offer);
     el("no").textContent = priceText(p.noOffer);
     const x = (value: number) => 46 + value * 6.06;
@@ -158,7 +159,7 @@ export function createPriceInspector(
       p.interval ? (p.b! - p.a!) * 6.06 : 1,
     );
     intervalText.textContent = p.interval
-      ? `Median interval ${priceText(p.a)}–${priceText(p.b)}`
+      ? `Typical limits ${priceText(p.a)}–${priceText(p.b)}`
       : "";
     place(
       intervalLabel,
@@ -166,11 +167,11 @@ export function createPriceInspector(
       p.interval,
     );
     for (const [name, value, label] of [
-      ["median-no", p.a, "Median NO floor"],
-      ["median-yes", p.b, "Median YES ceiling"],
-      ["share", p.share, "Final YES share"],
-      ["limit", p.ownLimit, "Your YES-scale limit"],
-      ["offer", p.offer, "Shared YES offer"],
+      ["median-no", p.a, "Typical No limit"],
+      ["median-yes", p.b, "Typical Yes limit"],
+      ["share", p.share, "Final yes share"],
+      ["limit", p.ownLimit, "Your limit"],
+      ["offer", p.offer, "Drawn Yes price"],
     ] as const) {
       const marker = markers[name]!;
       marker.title.textContent =
@@ -179,7 +180,7 @@ export function createPriceInspector(
           : `${label}: ${name === "share" ? value.toFixed(2) + "%" : priceText(value)}`;
       place(marker.layer, x(value ?? 0), value !== null);
     }
-    offerText.textContent = `p = ${priceText(p.offer)}`;
+    offerText.textContent = priceText(p.offer);
     place(
       offerLabel,
       Math.max(105, Math.min(615, x(p.offer ?? 0))),
@@ -187,16 +188,16 @@ export function createPriceInspector(
     );
     const revealed = point && point.revealed !== false;
     const intervalDescription = p.interval
-      ? `Median interval ${priceText(p.a)}–${priceText(p.b)}`
+      ? `Typical limits ${priceText(p.a)}–${priceText(p.b)}`
       : p.a !== null && p.b !== null
-        ? `NO median ${priceText(p.a)} ≥ YES median ${priceText(p.b)} · no positive interval`
-        : "Median interval unavailable · one side is missing";
+        ? `Typical No limit ${priceText(p.a)} is at or above the typical Yes limit ${priceText(p.b)}`
+        : "No typical limits: one side had no answers";
     const description = !revealed
-      ? "Medians and final endorsement rates remain sealed until final reveal."
-      : `${intervalDescription}${point!.branch ? ` · ${point!.branch} offer` : ""}.${p.ownLimit !== null ? ` Your YES-scale limit ${priceText(p.ownLimit)}.` : ""}`;
+      ? "Typical limits and the final yes share stay hidden until results are revealed."
+      : `${intervalDescription}${point!.branch ? ` · ${point!.branch} draw` : ""}.${p.ownLimit !== null ? ` Your limit ${priceText(p.ownLimit)}.` : ""}`;
     el("explanation").textContent = description;
     root.querySelector("#arena-price-scale-title")!.textContent =
-      `${el("context").textContent}. Shared YES offer ${priceText(p.offer)}. ${description}${p.share !== null ? ` Final YES ${p.share.toFixed(2)}%, NO ${(100 - p.share).toFixed(2)}%.` : ""} Prices are hundredths of one Yap Coin.`;
+      `${el("context").textContent}. Drawn Yes price ${priceText(p.offer)}. ${description}${p.share !== null ? ` Final yes ${p.share.toFixed(2)}%, no ${(100 - p.share).toFixed(2)}%.` : ""} Prices are Yap Coins per contract.`;
   }
   return {
     show,

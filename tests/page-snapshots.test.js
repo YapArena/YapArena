@@ -236,7 +236,8 @@ it("renders the privacy, terms and cookie pages", (t) => {
   snapshot(t, legal.renderCookies(origin));
 });
 
-it("renders the 404 and 500 pages", (t) => {
+it("renders the 400, 404 and 500 pages", (t) => {
+  snapshot(t, web.renderInvalidRequest(origin));
   snapshot(t, web.renderNotFound(origin));
   snapshot(t, web.renderUnavailable());
 });

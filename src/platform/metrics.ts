@@ -137,6 +137,42 @@ export function createMetrics() {
     registers: [registry],
   });
   productSnapshot.set(0);
+  // Founder D1: the valueless center and promotional treasuries that back
+  // every Yap Coins stake. Two label values; no account or user identifiers.
+  const coinTreasury = new Gauge({
+    name: "yaparena_coin_treasury_available_usdc",
+    help: "Available USDC-equivalent in the Yap Coins center and promotional treasuries",
+    labelNames: ["account"],
+    registers: [registry],
+  });
+  const coinTreasuryLow = new Gauge({
+    name: "yaparena_coin_treasury_low",
+    help: "One while a Yap Coins treasury is below COIN_SANDBOX_TREASURY_ALERT_USDC",
+    labelNames: ["account"],
+    registers: [registry],
+  });
+  let coinTreasuryProvider:
+    | (() => Promise<
+        { account: string; availableUsdc: number; low: boolean }[]
+      >)
+    | undefined;
+  let lastTreasuryRefresh = 0;
+  async function refreshTreasury() {
+    if (!coinTreasuryProvider || Date.now() - lastTreasuryRefresh < 60_000)
+      return;
+    try {
+      const status = await coinTreasuryProvider();
+      for (const entry of status) {
+        coinTreasury.set({ account: entry.account }, entry.availableUsdc);
+        coinTreasuryLow.set({ account: entry.account }, entry.low ? 1 : 0);
+      }
+      lastTreasuryRefresh = Date.now();
+    } catch {
+      // A failed read reports nothing rather than stale balances.
+      coinTreasury.reset();
+      coinTreasuryLow.reset();
+    }
+  }
   let productSummaryProvider: (() => Promise<ProductSummary>) | undefined;
   let lastProductRefresh = 0;
   let refreshing: Promise<void> | undefined;
@@ -203,7 +239,7 @@ export function createMetrics() {
   }
 
   async function handler(_request: Request, response: Response) {
-    await refreshProduct();
+    await Promise.all([refreshProduct(), refreshTreasury()]);
     response.type(registry.contentType);
     return response.send(await registry.metrics());
   }
@@ -235,6 +271,14 @@ export function createMetrics() {
     setProductSummaryProvider(provider: () => Promise<ProductSummary>) {
       productSummaryProvider = provider;
       lastProductRefresh = 0;
+    },
+    setCoinTreasuryProvider(
+      provider: () => Promise<
+        { account: string; availableUsdc: number; low: boolean }[]
+      >,
+    ) {
+      coinTreasuryProvider = provider;
+      lastTreasuryRefresh = 0;
     },
   });
 }

@@ -4,6 +4,8 @@
 // terms and receipts, and never shows side totals before the reveal.
 import { api, apiErrorStatus, apiFetch } from "./lib/api.js";
 import { sessionStore } from "./lib/session.js";
+import { formatCoins } from "./lib/coin-format.js";
+import { claimWelcome, spendable, type CoinSummary } from "./lib/coins.js";
 import { watchRoom } from "./community-stream.js";
 import {
   ceilingCents,
@@ -15,12 +17,15 @@ import {
   parseDefaults,
   parseSize,
   percent,
+  placementError,
   positionStatus,
+  price,
   readFromLimit,
   reasonText,
   repeatLabel,
   replayRound,
   replayWindow,
+  reservedAtoms,
   resultLine,
   resultsHeading,
   resultsSummary,
@@ -33,13 +38,6 @@ import {
   type StakeRound,
   type StakeSide,
 } from "./stake-model.js";
-
-interface CoinSummary {
-  sessionId: string;
-  initialized: boolean;
-  financialReviewRequired: boolean;
-  balances: { cashAvailable: string; promotionalPrincipal: string };
-}
 interface Target {
   window: PublicWindow | null;
   round: StakeRound | null;
@@ -124,6 +122,10 @@ if (root) {
   let refreshTimer: number | undefined;
   let loadFailed = false;
   let explaining = false;
+  // The window the review pop-up shows; "Place it" places only on it.
+  let reviewed: { id: string; turnNumber: number } | null = null;
+  // Revealed positions last seen, so a new reveal updates every balance.
+  let revealedSeen: number | null = null;
   const keys = new Map<string, string>();
   const key = (scope: string) => {
     let value = keys.get(scope);
@@ -239,17 +241,20 @@ if (root) {
     // Decision 0013: Yap Coins are always on; the first visit claims the
     // welcome grant.
     if (!value.initialized && !value.financialReviewRequired) {
-      await coinApi("/initialize", "POST", {});
-      value = await coinApi<CoinSummary>("/summary");
+      value = await claimWelcome(value, 15000);
       if (current !== generation) return;
       summary = value;
-      window.dispatchEvent(new Event("yap:coins-changed"));
     }
     const view = await coinApi<StakeRound[]>(
       `/debates/${encodeURIComponent(debateId)}/rounds`,
     );
     if (current !== generation) return;
     rounds = view;
+    // A reveal changes the balance everywhere on the page.
+    const revealed = resultsSummary(view).revealed.length;
+    if (revealedSeen !== null && revealed > revealedSeen)
+      window.dispatchEvent(new Event("yap:coins-changed"));
+    revealedSeen = revealed;
   }
   async function refresh(full = false) {
     const current = generation;
@@ -384,7 +389,7 @@ if (root) {
     if (!current && closedTurn !== null && side)
       return `Turn ${closedTurn}'s window closed before you confirmed. Nothing was reserved.`;
     if (explaining && side && current)
-      return "How it works: answer for this turn, then set how much you'll risk. Each contract pays the final share of people who answered your way. Final once placed; no cash value.";
+      return "How it works: answer for this turn, then set how much you'll risk. Each contract pays the final share of people who answered your way, up to 1 YC. Final once placed.";
     if (unavailable) return "Yap Coins rounds aren't open on this debate.";
     if (eventStatus === "cancelled" || eventStatus === "void_review")
       return "This debate isn't taking answers. Any Yap Coins you placed are refunded.";
@@ -443,7 +448,7 @@ if (root) {
     const value = cents();
     const terms = ticketTerms(size, value);
     readOut.textContent = `${readInput.value}%`;
-    ceilingNote.textContent = `You'll pay at most ${value}¢ per contract.`;
+    ceilingNote.textContent = `You'll pay at most ${price(value)} per contract.`;
     term("reserved").textContent = terms.reserved;
     term("lose").textContent = terms.mostYouCanLose;
     term("back").textContent =
@@ -453,7 +458,12 @@ if (root) {
       windows?.revealMode === "per_round"
         ? "When this turn's window closes"
         : resultsText(current.round);
-    confirm.disabled = busy;
+    // "Reserved now" must fit the balance before the confirm tap.
+    const short = shortfall();
+    if (short) errorLine.textContent = short;
+    else if (errorLine.dataset.shortfall === "true") errorLine.textContent = "";
+    errorLine.dataset.shortfall = String(Boolean(short));
+    confirm.disabled = busy || Boolean(short);
     confirm.textContent = `${
       closedTurn !== null && closedTurn !== current.turnNumber
         ? `Use for turn ${current.turnNumber} · `
@@ -466,7 +476,7 @@ if (root) {
     if (!own || !current?.round) return;
     const round = current.round;
     const lines = [
-      `You said ${sideName(own.side)} · ${own.quantity} contracts · max ${paidCents(own)}¢ each`,
+      `You said ${sideName(own.side)} · ${own.quantity} contracts · max ${price(paidCents(own))} each`,
       `${round.participants.toLocaleString()} ${round.participants === 1 ? "person" : "people"} in this window`,
       round.state === "settled" && round.outcome
         ? round.outcome.executed
@@ -530,8 +540,27 @@ if (root) {
       }),
     );
   }
+  // Not enough coins for "Reserved now", in the panel's words, or "".
+  function shortfall() {
+    if (!summary) return "";
+    const available = spendable(summary.balances);
+    return available < reservedAtoms(size)
+      ? `You have ${formatCoins(available)}, less than this size reserves. Lower the size.`
+      : "";
+  }
+  // The review pop-up names one window. If another takes its place, the
+  // pop-up closes and nothing is reserved.
+  function checkReview(current: Target | null) {
+    if (!review.open || !reviewed || current?.id === reviewed.id) return;
+    const turn = reviewed.turnNumber;
+    reviewed = null;
+    review.close();
+    closedTurn = turn;
+    errorLine.textContent = `Turn ${turn}'s window closed before you confirmed. Nothing was reserved.`;
+  }
   function render() {
     const current = target();
+    checkReview(current);
     renderTurn(current);
     const text = statusText(current);
     if (status.textContent !== text) status.textContent = text;
@@ -541,26 +570,37 @@ if (root) {
     renderReceipt(current);
     renderResults();
     renderPositions();
-    if (summary) {
-      const available =
-        BigInt(summary.balances.cashAvailable) +
-        BigInt(summary.balances.promotionalPrincipal);
-      balanceLine.textContent = `Balance ${signedCoins(available).replace("+", "")} · simulated, no cash value`;
-    } else balanceLine.textContent = "";
+    balanceLine.textContent = summary
+      ? `Available: ${formatCoins(spendable(summary.balances))}`
+      : "";
   }
 
-  async function place() {
+  // Places the ticket on the window the viewer sees, or, from the review
+  // pop-up, only on the window it showed.
+  async function place(expected?: { id: string; turnNumber: number }) {
     const current = target();
-    if (!current || !side || busy) return;
+    if (!side || busy) return;
+    if (!current || (expected && current.id !== expected.id)) {
+      if (expected) {
+        closedTurn = expected.turnNumber;
+        errorLine.textContent = `Turn ${expected.turnNumber}'s window closed before you confirmed. Nothing was reserved.`;
+        render();
+      }
+      return;
+    }
+    if (shortfall()) return render();
     const chosen = side;
     const value = cents();
     const quantity = size;
-    const position = playback?.positionSeconds;
+    // F10: the server binds the replay position, floored to milliseconds, to
+    // the request, so the retry key includes the same position.
+    const position =
+      current.via === "replay" && playback ? playback.positionSeconds : null;
     busy = true;
     errorLine.textContent = "";
     render();
+    let roundId = current.id;
     try {
-      let roundId = current.id;
       if (current.via === "live") {
         const joined = await coinApi<{ id: string }>(
           `/debates/${encodeURIComponent(debateId)}/rounds`,
@@ -578,33 +618,43 @@ if (root) {
           side: chosen,
           ceiling: ceilingText(value),
           quantity,
-          ...(current.via === "replay" && position !== undefined
-            ? { replayPositionSeconds: position }
-            : {}),
+          ...(position === null ? {} : { replayPositionSeconds: position }),
         },
-        key(`stake:${roundId}:${chosen}:${value}:${quantity}`),
+        key(
+          `stake:${roundId}:${chosen}:${value}:${quantity}:${position === null ? "live" : Math.floor(position * 1000)}`,
+        ),
       );
-      closedTurn = null;
-      side = null;
-      explaining = false;
-      window.dispatchEvent(new Event("yap:coins-changed"));
+      placed();
       await refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "";
+      // Read again first: the balance for the message, and after a lost
+      // connection, whether the answer went through after all.
+      await refresh();
+      const failure = placementError(error, {
+        turnNumber: current.turnNumber,
+        available: summary ? String(spendable(summary.balances)) : null,
+      });
       if (
-        message === "window changed" ||
-        /closed|cutoff|no trading window/i.test(message)
-      ) {
-        closedTurn = current.turnNumber;
-        errorLine.textContent = `Turn ${current.turnNumber}'s window closed before you confirmed. Nothing was reserved.`;
-        await refresh();
-      } else
-        errorLine.textContent =
-          message || "Couldn't confirm. Your request is kept; try again.";
+        apiErrorStatus(error) === undefined &&
+        rounds.find((round) => round.id === roundId)?.own
+      )
+        placed();
+      else {
+        if (failure.closed) closedTurn = current.turnNumber;
+        errorLine.textContent = failure.text;
+      }
     } finally {
       busy = false;
       render();
     }
+  }
+
+  function placed() {
+    closedTurn = null;
+    side = null;
+    explaining = false;
+    errorLine.textContent = "";
+    window.dispatchEvent(new Event("yap:coins-changed"));
   }
 
   for (const button of sideButtons)
@@ -684,10 +734,15 @@ if (root) {
   ceilingInput.addEventListener("input", () => {
     errorLine.textContent =
       ceilingInput.value && parseCeiling(ceilingInput.value) === null
-        ? "Enter a maximum price from 1 to 99 cents."
+        ? "Enter a maximum price from 0.01 to 0.99 YC."
         : "";
     render();
   });
+  // Only the confirm button places an answer; Enter in a field does not.
+  for (const field of [sizeInput, ceilingInput])
+    field.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") event.preventDefault();
+    });
   advanced.addEventListener("toggle", render);
   reviewChoice.addEventListener("change", () =>
     remember("yaparena-stake-review", reviewChoice.checked ? "1" : "0"),
@@ -701,16 +756,15 @@ if (root) {
     }
     if (!reviewChoice.checked) return void place();
     const current = target();
+    if (!current) return;
+    if (shortfall()) return render();
     const terms = ticketTerms(size, cents());
     reviewTerms.replaceChildren(
       ...[
-        [
-          "Answer",
-          `${sideName(side)}${current ? ` · turn ${current.turnNumber}` : ""}`,
-        ],
+        ["Answer", `${sideName(side)} · turn ${current.turnNumber}`],
         ["Size", `${size} contracts`],
         ["Most you can lose", terms.mostYouCanLose],
-        ["Results", resultsText(current?.round ?? null)],
+        ["Results", resultsText(current.round)],
       ].map(([name, value]) => {
         const row = document.createElement("div");
         const label = document.createElement("dt");
@@ -721,15 +775,21 @@ if (root) {
         return row;
       }),
     );
+    reviewed = { id: current.id, turnNumber: current.turnNumber };
     review.showModal();
   });
   one("[data-stake-review-place]").addEventListener("click", () => {
+    const shown = reviewed;
+    reviewed = null;
     review.close();
-    void place();
+    if (shown) void place(shown);
   });
   one("[data-stake-review-back]").addEventListener("click", () =>
     review.close(),
   );
+  review.addEventListener("close", () => {
+    reviewed = null;
+  });
 
   // Decision 0012 (F10): the replay player announces what's playing.
   window.addEventListener("yap:playback", (event) => {
@@ -759,6 +819,20 @@ if (root) {
       roomLive = live;
     },
   });
+  // Another part of the page changed the balance: read it again.
+  window.addEventListener("yap:coins-changed", () => {
+    if (!signedIn || !summary) return;
+    const current = generation;
+    void coinApi<CoinSummary>("/summary")
+      .then((value) => {
+        if (current !== generation) return;
+        summary = value;
+        render();
+      })
+      .catch(() => {
+        // The next refresh tries again.
+      });
+  });
   window.addEventListener("yap:account-changed", () => {
     generation++;
     keys.clear();
@@ -766,6 +840,7 @@ if (root) {
     summary = null;
     rounds = [];
     side = null;
+    revealedSeen = null;
     void refresh(true);
   });
   window.addEventListener("yap:provider-logout", () => {

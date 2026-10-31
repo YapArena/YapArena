@@ -8,6 +8,19 @@ exports[`renders a debate 1`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -157,7 +170,7 @@ exports[`renders a debate 1`] = `
 <span class="arena-broadcast-badge ">Upcoming</span>
 </div>
 <div class="arena-watch-meta">
-<span title="Active playback tabs on this staging instance">
+<span title="Browser tabs playing this debate right now">
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
 <circle cx="9" cy="7" r="3"/>
 <path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5v2"/>
@@ -238,18 +251,18 @@ exports[`renders a debate 1`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -285,23 +298,23 @@ exports[`renders a debate 1`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -311,21 +324,21 @@ exports[`renders a debate 1`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -334,9 +347,9 @@ exports[`renders a debate 1`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -414,7 +427,7 @@ exports[`renders a debate 1`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -449,7 +462,7 @@ exports[`renders a debate 1`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -497,16 +510,13 @@ exports[`renders a debate 1`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
-<p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
-</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed.</p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -517,7 +527,7 @@ exports[`renders a debate 1`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -549,6 +559,19 @@ exports[`renders a debate 10`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -700,7 +723,7 @@ exports[`renders a debate 10`] = `
 <span class="arena-broadcast-badge ">Upcoming</span>
 </div>
 <div class="arena-watch-meta">
-<span title="Active playback tabs on this staging instance">
+<span title="Browser tabs playing this debate right now">
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
 <circle cx="9" cy="7" r="3"/>
 <path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5v2"/>
@@ -781,18 +804,18 @@ exports[`renders a debate 10`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -828,23 +851,23 @@ exports[`renders a debate 10`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -854,21 +877,21 @@ exports[`renders a debate 10`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -877,9 +900,9 @@ exports[`renders a debate 10`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -957,7 +980,7 @@ exports[`renders a debate 10`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -992,7 +1015,7 @@ exports[`renders a debate 10`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -1040,16 +1063,13 @@ exports[`renders a debate 10`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
-<p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
-</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed.</p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -1060,7 +1080,7 @@ exports[`renders a debate 10`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -1092,6 +1112,19 @@ exports[`renders a debate 2`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -1243,7 +1276,7 @@ exports[`renders a debate 2`] = `
 </span>Live</span>
 </div>
 <div class="arena-watch-meta">
-<span title="Active playback tabs on this staging instance">
+<span title="Browser tabs playing this debate right now">
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
 <circle cx="9" cy="7" r="3"/>
 <path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5v2"/>
@@ -1324,18 +1357,18 @@ exports[`renders a debate 2`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -1371,23 +1404,23 @@ exports[`renders a debate 2`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -1397,21 +1430,21 @@ exports[`renders a debate 2`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -1420,9 +1453,9 @@ exports[`renders a debate 2`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -1500,7 +1533,7 @@ exports[`renders a debate 2`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -1535,7 +1568,7 @@ exports[`renders a debate 2`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -1583,16 +1616,13 @@ exports[`renders a debate 2`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
-<p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
-</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed.</p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -1603,7 +1633,7 @@ exports[`renders a debate 2`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -1635,6 +1665,19 @@ exports[`renders a debate 3`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -1784,7 +1827,7 @@ exports[`renders a debate 3`] = `
 <span class="arena-broadcast-badge ">Replay</span>
 </div>
 <div class="arena-watch-meta">
-<span title="Active playback tabs on this staging instance">
+<span title="Browser tabs playing this debate right now">
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
 <circle cx="9" cy="7" r="3"/>
 <path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5v2"/>
@@ -1865,18 +1908,18 @@ exports[`renders a debate 3`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -1912,23 +1955,23 @@ exports[`renders a debate 3`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -1938,21 +1981,21 @@ exports[`renders a debate 3`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -1961,9 +2004,9 @@ exports[`renders a debate 3`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -2041,7 +2084,7 @@ exports[`renders a debate 3`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -2076,7 +2119,7 @@ exports[`renders a debate 3`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -2124,16 +2167,13 @@ exports[`renders a debate 3`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
-<p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
-</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed.</p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -2144,7 +2184,7 @@ exports[`renders a debate 3`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -2176,6 +2216,19 @@ exports[`renders a debate 4`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -2325,7 +2378,7 @@ exports[`renders a debate 4`] = `
 <span class="arena-broadcast-badge ">Finalized replay</span>
 </div>
 <div class="arena-watch-meta">
-<span title="Active playback tabs on this staging instance">
+<span title="Browser tabs playing this debate right now">
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
 <circle cx="9" cy="7" r="3"/>
 <path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5v2"/>
@@ -2406,18 +2459,18 @@ exports[`renders a debate 4`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -2453,23 +2506,23 @@ exports[`renders a debate 4`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -2479,21 +2532,21 @@ exports[`renders a debate 4`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -2502,9 +2555,9 @@ exports[`renders a debate 4`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -2582,7 +2635,7 @@ exports[`renders a debate 4`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -2617,7 +2670,7 @@ exports[`renders a debate 4`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -2665,16 +2718,13 @@ exports[`renders a debate 4`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
-<p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
-</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed.</p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -2685,7 +2735,7 @@ exports[`renders a debate 4`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -2717,6 +2767,19 @@ exports[`renders a debate 5`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -2866,7 +2929,7 @@ exports[`renders a debate 5`] = `
 <span class="arena-broadcast-badge ">Cancelled</span>
 </div>
 <div class="arena-watch-meta">
-<span title="Active playback tabs on this staging instance">
+<span title="Browser tabs playing this debate right now">
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
 <circle cx="9" cy="7" r="3"/>
 <path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5v2"/>
@@ -2947,18 +3010,18 @@ exports[`renders a debate 5`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -2994,23 +3057,23 @@ exports[`renders a debate 5`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -3020,21 +3083,21 @@ exports[`renders a debate 5`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -3043,9 +3106,9 @@ exports[`renders a debate 5`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -3123,7 +3186,7 @@ exports[`renders a debate 5`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -3158,7 +3221,7 @@ exports[`renders a debate 5`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -3206,16 +3269,13 @@ exports[`renders a debate 5`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
-<p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
-</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed.</p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -3226,7 +3286,7 @@ exports[`renders a debate 5`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -3258,6 +3318,19 @@ exports[`renders a debate 6`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -3407,7 +3480,7 @@ exports[`renders a debate 6`] = `
 <span class="arena-broadcast-badge ">void review</span>
 </div>
 <div class="arena-watch-meta">
-<span title="Active playback tabs on this staging instance">
+<span title="Browser tabs playing this debate right now">
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
 <circle cx="9" cy="7" r="3"/>
 <path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5v2"/>
@@ -3488,18 +3561,18 @@ exports[`renders a debate 6`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -3535,23 +3608,23 @@ exports[`renders a debate 6`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -3561,21 +3634,21 @@ exports[`renders a debate 6`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -3584,9 +3657,9 @@ exports[`renders a debate 6`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -3664,7 +3737,7 @@ exports[`renders a debate 6`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -3699,7 +3772,7 @@ exports[`renders a debate 6`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -3747,16 +3820,13 @@ exports[`renders a debate 6`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
-<p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
-</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed.</p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -3767,7 +3837,7 @@ exports[`renders a debate 6`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -3799,6 +3869,19 @@ exports[`renders a debate 7`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -3949,7 +4032,7 @@ exports[`renders a debate 7`] = `
 <span class="arena-demo">Demo</span>
 </div>
 <div class="arena-watch-meta">
-<span title="Active playback tabs on this staging instance">
+<span title="Browser tabs playing this debate right now">
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
 <circle cx="9" cy="7" r="3"/>
 <path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5v2"/>
@@ -4030,18 +4113,18 @@ exports[`renders a debate 7`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -4077,23 +4160,23 @@ exports[`renders a debate 7`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -4103,21 +4186,21 @@ exports[`renders a debate 7`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -4126,9 +4209,9 @@ exports[`renders a debate 7`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -4206,7 +4289,7 @@ exports[`renders a debate 7`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -4241,7 +4324,7 @@ exports[`renders a debate 7`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -4289,16 +4372,13 @@ exports[`renders a debate 7`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
-<p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
-</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed.</p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -4309,7 +4389,7 @@ exports[`renders a debate 7`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -4341,6 +4421,19 @@ exports[`renders a debate 8`] = `
 <title>Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
 <link rel="canonical" href="https://arena.example/debates/hostile-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
+<meta property="og:description" content="Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;: Side A &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; vs Side B &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/hostile-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -4493,7 +4586,7 @@ exports[`renders a debate 8`] = `
 <span class="arena-demo">Demo</span>
 </div>
 <div class="arena-watch-meta">
-<span title="Active playback tabs on this staging instance">
+<span title="Browser tabs playing this debate right now">
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
 <circle cx="9" cy="7" r="3"/>
 <path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5v2"/>
@@ -4576,18 +4669,18 @@ exports[`renders a debate 8`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -4623,23 +4716,23 @@ exports[`renders a debate 8`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -4649,21 +4742,21 @@ exports[`renders a debate 8`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -4672,9 +4765,9 @@ exports[`renders a debate 8`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -4752,7 +4845,7 @@ exports[`renders a debate 8`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -4787,7 +4880,7 @@ exports[`renders a debate 8`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -4835,16 +4928,16 @@ exports[`renders a debate 8`] = `
 <dd>Rules &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed. Before that, it shows labeled practice rounds played by bots.</p>
 <p class="arena-bots-link">
-<a href="/coins?debate=55555555-5555-4555-8555-555555555555">Bots sandbox on Yap Coins →</a>
+<a href="/coins?debate=55555555-5555-4555-8555-555555555555">Practice with bots →</a>
 </p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -4855,7 +4948,7 @@ exports[`renders a debate 8`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <template data-shared-bootstrap>{&quot;scope&quot;:&quot;shared&quot;,&quot;synthetic&quot;:true,&quot;revision&quot;:&quot;fixture-revision&quot;,&quot;hasMore&quot;:false,&quot;window&quot;:30,&quot;items&quot;:[{&quot;id&quot;:&quot;round-1&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:1,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;52&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:{&quot;n&quot;:&quot;40&quot;,&quot;d&quot;:&quot;100&quot;},&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;},{&quot;id&quot;:&quot;round-2&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:2,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;47&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:null,&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;}],&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:61,&quot;endorsed&quot;:305,&quot;population&quot;:500},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:39,&quot;endorsed&quot;:195,&quot;population&quot;:500}],&quot;category&quot;:&quot;Category &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;totals&quot;:{&quot;premium&quot;:&quot;5000000000&quot;,&quot;humanCommitments&quot;:4,&quot;botCommitments&quot;:996,&quot;executed&quot;:240}}</template>
 <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
@@ -4888,6 +4981,19 @@ exports[`renders a debate 9`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -5037,7 +5143,7 @@ exports[`renders a debate 9`] = `
 <span class="arena-broadcast-badge ">Upcoming</span>
 </div>
 <div class="arena-watch-meta">
-<span title="Active playback tabs on this staging instance">
+<span title="Browser tabs playing this debate right now">
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
 <circle cx="9" cy="7" r="3"/>
 <path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5v2"/>
@@ -5118,18 +5224,18 @@ exports[`renders a debate 9`] = `
 </div>
 <span data-arena-countdown aria-live="off">Waiting for a round</span>
 <div class="arena-volume">
-<span>Settled volume · this view</span>
+<span>Coins traded in these rounds</span>
 <strong data-arena-volume>— Yap Coins</strong>
-<small data-arena-participants>Finalized commitments</small>
+<small data-arena-participants>Revealed answers</small>
 </div>
 </div>
-<p class="arena-chart-question">What fraction of participants endorse:</p>
+<p class="arena-chart-question">Share of people who said yes to:</p>
 <h2 id="arena-chart-title">“Should we debate this?”</h2>
 <div class="arena-chart-wrap" data-arena-chart>
 <div class="arena-chart-plot">
 <svg class="arena-chart" viewBox="0 0 720 330" role="group" aria-labelledby="endorsement-chart-title endorsement-chart-desc">
-<title id="endorsement-chart-title">Settled endorsement history</title>
-<desc id="endorsement-chart-desc">YES and NO shares appear after each permitted final reveal.</desc>
+<title id="endorsement-chart-title">Share of yes answers by round</title>
+<desc id="endorsement-chart-desc">Yes and no shares appear once each round’s results are revealed.</desc>
 <defs>
 <linearGradient id="arena-yes-fill" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0%" stop-color="#f7f7f7" stop-opacity=".28"/>
@@ -5165,23 +5271,23 @@ exports[`renders a debate 9`] = `
 </div>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
-<title id="arena-price-scale-title">Median interval and offered price, available after final reveal</title>
+<title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
 <line x1="46" x2="652" y1="28" y2="28" class="arena-price-track"/>
 <g data-price-drawing>
 </g>
 <line x1="46" x2="46" y1="48" y2="53" class="arena-price-tick"/>
-<text x="46" y="91" text-anchor="middle">0¢</text>
+<text x="46" y="91" text-anchor="middle">0</text>
 <line x1="197.5" x2="197.5" y1="48" y2="53" class="arena-price-tick"/>
-<text x="197.5" y="91" text-anchor="middle">25¢</text>
+<text x="197.5" y="91" text-anchor="middle">0.25</text>
 <line x1="349" x2="349" y1="48" y2="53" class="arena-price-tick"/>
-<text x="349" y="91" text-anchor="middle">50¢</text>
+<text x="349" y="91" text-anchor="middle">0.50</text>
 <line x1="500.49999999999994" x2="500.49999999999994" y1="48" y2="53" class="arena-price-tick"/>
-<text x="500.49999999999994" y="91" text-anchor="middle">75¢</text>
+<text x="500.49999999999994" y="91" text-anchor="middle">0.75</text>
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
-<text x="652" y="91" text-anchor="middle">100¢</text>
+<text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
 <div class="arena-price-heading">
-<h3 id="arena-price-title">Price &amp; median interval</h3>
+<h3 id="arena-price-title">Price and typical limits</h3>
 <div class="arena-price-navigation">
 <button type="button" data-price-previous aria-label="Previous settled round" disabled>←</button>
 <label class="sr-only" for="arena-price-round">Inspect a settled round</label>
@@ -5191,21 +5297,21 @@ exports[`renders a debate 9`] = `
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
-<p class="arena-price-context" data-price-context>Choose a round to inspect its offered price.</p>
+<p class="arena-price-context" data-price-context>Choose a round to see its drawn price.</p>
 <div class="arena-offer-values">
 <div>
-<span>Shared YES offer · p</span>
+<span>Drawn Yes price</span>
 <strong data-price-yes>—</strong>
 </div>
 <div>
-<span>Complementary NO price</span>
+<span>No price</span>
 <strong data-price-no>—</strong>
 </div>
 </div>
-<p class="arena-price-explanation" data-price-explanation>Medians remain sealed until the round’s final reveal.</p>
+<p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
-<span class="lavender">● Median interval / offered price</span>
-<span class="yes">│ Final YES share</span>
+<span class="lavender">● Typical limits / drawn price</span>
+<span class="yes">│ Final yes share</span>
 </p>
 </section>
 </div>
@@ -5214,9 +5320,9 @@ exports[`renders a debate 9`] = `
 <span class="yes">● YES</span>
 <span class="no">● NO</span>
 </div>
-<span class="arena-sync" data-arena-sync>Settled results · updates automatically</span>
+<span class="arena-sync" data-arena-sync>Revealed results · updates automatically</span>
 </div>
-<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Pending results remain sealed.</p>
+<p class="arena-chart-help">Hover, touch or use arrow keys to inspect a round and its argument. Results stay hidden until they’re revealed.</p>
 </div>\\n</section>\\n      <section class="arena-panel arena-arguments" data-shared-arguments hidden>
 <h2>Behind the position <small>Synthetic argument endorsements</small>
 </h2>
@@ -5294,7 +5400,7 @@ exports[`renders a debate 9`] = `
 </p>
 <details class="stake-advanced" data-stake-advanced>
 <summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (1–99¢)<input name="ceiling" inputmode="numeric" autocomplete="off" placeholder="50">
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
 </label>
 </details>
 <dl class="stake-terms">
@@ -5329,7 +5435,7 @@ exports[`renders a debate 9`] = `
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
-<p class="stake-final">Final once placed. Simulated, no cash value.</p>
+<p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -5377,16 +5483,16 @@ exports[`renders a debate 9`] = `
 <dd>preview-1</dd>
 </div>
 <div>
-<dt>Settlement</dt>
-<dd>Unweighted YES endorsement share. NO receives the complementary share.</dd>
+<dt>How results work</dt>
+<dd>Each turn, a Yes contract pays the share of people who said yes, and a No contract the share who said no. Every answer counts once, whatever its size.</dd>
 </div>
 </dl>
-<p class="arena-info-note">The chart shows each Yap Coins turn's revealed endorsement share once its results are revealed; before that, labeled synthetic bot rounds when Bots mode is on.</p>
+<p class="arena-info-note">The chart shows each turn's share of yes answers once its results are revealed. Before that, it shows labeled practice rounds played by bots.</p>
 <p class="arena-bots-link">
-<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Bots sandbox on Yap Coins →</a>
+<a href="/coins?debate=33333333-3333-4333-8333-333333333333">Practice with bots →</a>
 </p>
 </section>\\n      <section class="arena-panel arena-sentiment">
-<h2>Settled sentiment <small data-arena-sentiment-caption>Latest revealed round</small>
+<h2>Latest result <small data-arena-sentiment-caption>Latest revealed round</small>
 </h2>
 <div class="arena-sentiment-bar" role="img" aria-label="No settled endorsement share yet" data-arena-sentiment-bar data-empty="true">
 <span>
@@ -5397,7 +5503,7 @@ exports[`renders a debate 9`] = `
 <strong class="no" data-arena-no>—</strong>
 </div>
 <p data-arena-scope>Human rounds and private bot sandboxes are shown separately.</p>
-</section>\\n      <p class="arena-disclosure">A4 adjusted FTM · Play money<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
+</section>\\n      <p class="arena-disclosure">Yap Coins are play money with no cash value.<br>Bot activity is synthetic and labeled.</p>\\n    </aside>\\n    <script type="module" src="/assets/a4-inline.js?v=0123456789ab">
 </script>\\n    <script type="module" src="/assets/arena.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/stake-panel.js?v=0123456789ab">
@@ -5429,6 +5535,19 @@ exports[`renders a profile 1`] = `
 <title>Alex Public · YAP Arena</title>
 <meta name="description" content="Public speaker">
 <link rel="canonical" href="https://arena.example/people/alex-public">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Alex Public (@alex-public)">
+<meta property="og:description" content="Public speaker">
+<meta property="og:url" content="https://arena.example/people/alex-public">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -5549,6 +5668,19 @@ exports[`renders a profile 2`] = `
 <title>Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; · YAP Arena</title>
 <meta name="description" content="Bio &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
 <link rel="canonical" href="https://arena.example/people/hostile-person?limit=1">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; (@hostile-person)">
+<meta property="og:description" content="Bio &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
+<meta property="og:url" content="https://arena.example/people/hostile-person?limit=1">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -5694,6 +5826,19 @@ exports[`renders a profile 3`] = `
 <title>Alex Public · YAP Arena</title>
 <meta name="description" content="Public profile for Alex Public.">
 <link rel="canonical" href="https://arena.example/people/alex-public">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Alex Public (@alex-public)">
+<meta property="og:description" content="Public profile for Alex Public.">
+<meta property="og:url" content="https://arena.example/people/alex-public">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -5814,6 +5959,19 @@ exports[`renders a topic 1`] = `
 <title>Public topic · YAP Arena</title>
 <meta name="description" content="A question worth debating.">
 <link rel="canonical" href="https://arena.example/topics/public-topic">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Public topic">
+<meta property="og:description" content="A question worth debating.">
+<meta property="og:url" content="https://arena.example/topics/public-topic">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -5944,6 +6102,19 @@ exports[`renders a topic 2`] = `
 <title>Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; · YAP Arena</title>
 <meta name="description" content="Summary &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
 <link rel="canonical" href="https://arena.example/topics/hostile-topic?limit=2&amp;offset=2">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
+<meta property="og:description" content="Summary &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
+<meta property="og:url" content="https://arena.example/topics/hostile-topic?limit=2&amp;offset=2">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -6117,6 +6288,19 @@ exports[`renders a topic 3`] = `
 <title>Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; · YAP Arena</title>
 <meta name="description" content="Summary &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
 <link rel="canonical" href="https://arena.example/topics/hostile-topic">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
+<meta property="og:description" content="Summary &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
+<meta property="og:url" content="https://arena.example/topics/hostile-topic">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -6259,6 +6443,9 @@ exports[`renders community moderation and the broadcast overlay 1`] = `
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>My moderation · YAP Arena</title>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
 <script defer src="/assets/session-coordination.js?v=0123456789ab">
@@ -6343,8 +6530,10 @@ exports[`renders community moderation and the broadcast overlay 1`] = `
 </main>
 <footer class="site-footer">
 <div class="container footer-inner">
-<span>Community preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -6358,6 +6547,9 @@ exports[`renders community moderation and the broadcast overlay 2`] = `
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Moderation review · YAP Arena</title>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
 <script defer src="/assets/session-coordination.js?v=0123456789ab">
@@ -6458,8 +6650,10 @@ exports[`renders community moderation and the broadcast overlay 2`] = `
 </main>
 <footer class="site-footer">
 <div class="container footer-inner">
-<span>Community preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -6473,6 +6667,9 @@ exports[`renders community moderation and the broadcast overlay 3`] = `
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>My moderation · YAP Arena</title>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
 <script defer src="/assets/session-coordination.js?v=0123456789ab">
@@ -6557,8 +6754,10 @@ exports[`renders community moderation and the broadcast overlay 3`] = `
 </main>
 <footer class="site-footer">
 <div class="container footer-inner">
-<span>Community preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -6572,6 +6771,9 @@ exports[`renders community moderation and the broadcast overlay 4`] = `
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Moderation review · YAP Arena</title>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
 <script defer src="/assets/session-coordination.js?v=0123456789ab">
@@ -6672,8 +6874,10 @@ exports[`renders community moderation and the broadcast overlay 4`] = `
 </main>
 <footer class="site-footer">
 <div class="container footer-inner">
-<span>Community preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -6730,7 +6934,117 @@ exports[`renders community moderation and the broadcast overlay 6`] = `
 </html>
 `;
 
-exports[`renders the 404 and 500 pages 1`] = `
+exports[`renders the 400, 404 and 500 pages 1`] = `
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Invalid link · YAP Arena</title>
+<meta name="description" content="This link has a search, filter or page number that is not valid.">
+<link rel="canonical" href="https://arena.example/debates">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
+<link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
+<script defer src="/assets/session-coordination.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/site-header.js?v=0123456789ab">
+</script>
+<script defer src="/assets/site.js?v=0123456789ab">
+</script>
+<script defer src="/assets/account-balance.js?v=0123456789ab">
+</script>
+<script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" data-site-header data-session="checking">\\n    <div class="container nav arena-nav">\\n      <a class="brand" href="/home" aria-label="YAP Arena home">
+<svg class="arena-brand-symbol" viewBox="0 0 40 40" aria-hidden="true">
+<ellipse cx="20" cy="20" rx="13" ry="16" transform="rotate(30 20 20)"/>
+<path d="M9 35 31 5"/>
+</svg>
+<span>YAP ARENA</span>
+</a>\\n      <nav aria-label="Main navigation">
+<a href="/live">Live</a>
+<a href="/debates">Explore</a>
+<a href="/match">Create</a>
+</nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search">
+<label class="sr-only" for="header-search">Search debates</label>
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="10.5" cy="10.5" r="6.5"/>
+<path d="m16 16 5 5"/>
+</svg>
+<input id="header-search" type="search" name="q" maxlength="80" placeholder="Search debates…">
+<button type="submit" class="sr-only">Search</button>
+</form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
+<span class="sr-only">Checking your account…</span>
+</span>\\n        <div class="header-auth-actions" data-header-guest hidden>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
+</div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
+<summary aria-label="Yap Coins balance and actions">
+<span class="header-balance-label">Balance</span>
+<strong data-header-balance>—</strong>
+<span class="arena-chevron" aria-hidden="true">⌄</span>
+</summary>
+<div class="arena-wallet-popover">
+<strong data-header-balance-heading>Your Yap Coins</strong>
+<span data-header-reserved>Checking balance…</span>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
+</div>
+</details>\\n          <details class="header-user-menu">
+<summary class="arena-avatar" data-header-account aria-label="Open account menu">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+<circle cx="12" cy="8" r="3.5"/>
+<path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
+</svg>
+</summary>
+<div class="header-user-popover">
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
+</button>
+</div>
+</details>\\n        </div>\\n        <noscript>
+<div class="header-auth-actions">
+<a class="header-login" href="/api/auth/login?connection=google">Continue with Google</a>
+<a class="header-signup" href="/api/auth/login?connection=email">Continue with email</a>
+</div>
+</noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
+</p>\\n    </div>\\n  </header>
+<main id="main">
+<section class="container page-intro">
+<span class="eyebrow accent">400 / INVALID LINK</span>
+<h1>Check the<br>
+<em>link.</em>
+</h1>
+<p>Its search, filter or page number is not valid.</p>
+<a class="button" href="/debates">Browse debates ↗</a>
+</section>
+</main>
+<footer class="site-footer">
+<div class="container footer-inner">
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
+</span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
+</div>
+</footer>
+</body>
+</html>
+`;
+
+exports[`renders the 400, 404 and 500 pages 2`] = `
 <!doctype html>
 <html lang="en">
 <head>
@@ -6740,6 +7054,9 @@ exports[`renders the 404 and 500 pages 1`] = `
 <title>Page not found · YAP Arena</title>
 <meta name="description" content="This page could not be found.">
 <link rel="canonical" href="https://arena.example/">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -6837,7 +7154,7 @@ exports[`renders the 404 and 500 pages 1`] = `
 </html>
 `;
 
-exports[`renders the 404 and 500 pages 2`] = `
+exports[`renders the 400, 404 and 500 pages 3`] = `
 <!doctype html>
 <html lang="en">
 <head>
@@ -6847,6 +7164,9 @@ exports[`renders the 404 and 500 pages 2`] = `
 <title>Temporarily unavailable · YAP Arena</title>
 <meta name="description" content="YAP Arena is temporarily unavailable.">
 <link rel="canonical" href="/">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -6952,8 +7272,21 @@ exports[`renders the about and account pages 1`] = `
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
 <title>About · YAP Arena</title>
-<meta name="description" content="About YAP Arena&#39;s public preview.">
+<meta name="description" content="What YAP Arena is and how it works.">
 <link rel="canonical" href="https://arena.example/about">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="About YAP Arena">
+<meta property="og:description" content="What YAP Arena is and how it works.">
+<meta property="og:url" content="https://arena.example/about">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -7035,12 +7368,12 @@ exports[`renders the about and account pages 1`] = `
 <h1>Make room for<br>
 <em>the other side.</em>
 </h1>
-<p>YAP Arena is building a home for live debates and the ideas that connect them.</p>
+<p>YAP Arena is a home for live debates and the ideas that connect them.</p>
 </section>
 <section class="container about-copy">
-<h2>What you can explore now</h2>
-<p>This public preview shows published topics, debate listings, and participant profiles. Sign in to pick your handle and follow people or topics. Listings marked Demo are fictional examples used to develop and test the product.</p>
-<p>Live video and replay are available in a configured local prototype. A listing’s status does not prove that video is available or that a result has been determined. Yap Coins and labeled bot rounds are available when enabled. Real funds remain unavailable.</p>
+<h2>What you can do</h2>
+<p>Browse topics, watch live video debates and replays, and see who is debating. Sign in to pick your handle, follow people and topics, and queue on a side to debate someone live. Listings marked Demo are fictional examples.</p>
+<p>A listing’s status does not guarantee that video is available or that a result has been decided. Yap Coins are play money with no cash value. Bot activity is synthetic and labeled. Real funds are unavailable.</p>
 <h2 id="measurement">Cookies and usage measurement</h2>
 <p>We set an analytics cookie only if you accept it in the cookie banner. It counts discovery pages, watch time, replay starts, matching, follows, reports and return visits, and may be linked to your signed-in account to separate founder-affiliated activity. We don't store search text, chat text or IP addresses in these measurements. Use Cookie settings in the footer to turn it off and delete your measurements. Raw events and watch sessions are kept for up to 90 days; an unused consent expires after 180 days. Debate completion is counted from public event state without a browser identifier. See the <a href="/cookies">Cookie Policy</a>.</p>
 <a class="button" href="/debates">Explore debates ↗</a>
@@ -7068,6 +7401,9 @@ exports[`renders the about and account pages 2`] = `
 <title>Account · YAP Arena</title>
 <meta name="description" content="Your profile, security and Yap Coins.">
 <link rel="canonical" href="https://arena.example/account">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -7322,6 +7658,9 @@ exports[`renders the about and account pages 3`] = `
 <title>Account · YAP Arena</title>
 <meta name="description" content="Your profile, security and Yap Coins.">
 <link rel="canonical" href="https://arena.example/account">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -7593,8 +7932,11 @@ exports[`renders the coins and match pages 1`] = `
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
 <title>Yap Coins · YAP Arena</title>
-<meta name="description" content="Your Yap Coins balance, plus play-money Bots mode rounds.">
+<meta name="description" content="Your Yap Coins balance, positions and history.">
 <link rel="canonical" href="https://arena.example/coins">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -7677,196 +8019,30 @@ exports[`renders the coins and match pages 1`] = `
 <span class="eyebrow accent">YOUR WALLET</span>
 <h1>Yap <em>Coins.</em>
 </h1>
-<p>The coins you use in debates. Buying and withdrawing aren’t open yet.</p>
+<p>The coins you use to answer “Do you agree?” in each speaking turn of a live debate. Play money · no cash value.</p>
 </div>
 <section id="account-wallet" class="coin-wallet" aria-labelledby="coin-wallet-title">
 <div class="coin-wallet-head">
 <span class="coin-wallet-symbol" aria-hidden="true">Y</span>
 <h2 id="coin-wallet-title">Your balance</h2>
-<span class="coin-wallet-rate">100 YC = 1 USDC</span>
 </div>
 <p data-coin-wallet-status role="status" aria-live="polite">Checking your balance…</p>
 <div class="coin-wallet-signed-out" data-coin-wallet-signed-out hidden>
 <p>Sign in to see your balance.</p>
 <a class="button" href="/account?next=%2Fcoins">Sign in</a>
 </div>
-<section id="account-wallet-progress" class="wallet-money-summary" aria-label="Withdrawal balance and grant progress" hidden>
-</section>
 <dl class="account-balances" data-coin-wallet-balances hidden>
 <div>
 <dt>Available</dt>
 <dd data-funds="available">—</dd>
 </div>
 <div>
-<dt>Reserved</dt>
-<dd data-funds="reserved">—</dd>
-</div>
-<div>
-<dt>Pending</dt>
-<dd data-funds="pending">—</dd>
-</div>
-<div>
-<dt>Promotional</dt>
-<dd data-funds="promotional">—</dd>
+<dt>In open positions</dt>
+<dd data-funds="held">—</dd>
 </div>
 </dl>
 </section>
 </section>
-<section class="container page-intro a4-intro">
-<span class="eyebrow accent">BOTS MODE · PLAY MONEY</span>
-<h2>Your position.<br>
-<em>Your limit.</em>
-</h2>
-<p>Endorse an idea and choose a binding purchase ceiling. A shared offer is drawn after commitment. Settlement follows the unweighted YES endorsement share, including orders that never execute.</p>
-<p>Bots mode uses separate play coins with no cash value. They never convert to Yap Coins.</p>
-</section>
-<section class="container section compact" data-a4>
-<p data-a4-notice class="notice" role="status" aria-live="polite">Checking your account…</p>
-<div data-a4-login hidden>
-<a class="button" href="/account?next=%2Fcoins">Sign in to use Bots mode →</a>
-</div>
-<div data-a4-content hidden>
-<div class="a4-grid">
-<section class="information-card">
-<span class="eyebrow">START OR JOIN</span>
-<h2>Choose your round</h2>
-<form data-a4-create class="stack-form">
-<label>Debate<select name="debateId" required>
-</select>
-</label>
-<label>
-<input type="checkbox" data-a4-publish> Share my settled Bots + you and Bots-only aggregate results on public charts</label>
-<label>Mode<select name="mode">
-<option value="mixed">Bots mode + you</option>
-<option value="observer">Bots only · observer</option>
-</select>
-</label>
-<p>Bot runs are private sandboxes with their own play balances. Observer runs cannot accept people. YES endorses the displayed proposition; NO rejects it.</p>
-<details>
-<summary>Round settings</summary>
-<div class="stack-form">
-<label>Bot population<input name="population" type="number" min="1" max="1000" value="500">
-</label>
-<label>Belief preset<select name="preset">
-<option value="heterogeneous">Heterogeneous · behavioral stress fixture</option>
-<option value="reference">Homogeneous · reference fixture</option>
-</select>
-</label>
-<label>Exploration epsilon<select name="epsilon">
-<option value="50000">0.05</option>
-<option value="0">0</option>
-<option value="1000000">1 · full exploration</option>
-</select>
-</label>
-<label>Premium fee<select name="feeBps">
-<option value="0">No fee</option>
-<option value="500">Experimental 5%</option>
-</select>
-</label>
-<label>Bot contracts<input name="quantity" type="number" min="1" max="100" value="1">
-</label>
-<label>Periods<select name="periods">
-<option value="1">Single round</option>
-<option value="3">3 · delayed reveal</option>
-<option value="10">10 · delayed reveal</option>
-</select>
-</label>
-<label>Round duration in seconds<input name="roundSeconds" type="number" min="10" max="3600" value="60">
-</label>
-<label>Initial bot acceleration<select name="speed">
-<option value="1">1×</option>
-<option value="5">5×</option>
-<option value="20">20×</option>
-</select>
-</label>
-<label>Replay seed · bot-only observer runs<input name="seed" maxlength="80" pattern="[a-zA-Z0-9_-]{1,80}" placeholder="Random if empty">
-</label>
-</div>
-</details>
-<button class="button" type="submit">Start a new run →</button>
-</form>
-<label>Existing runs<select data-a4-runs>
-<option value="">Select a run</option>
-</select>
-</label>
-<button type="button" data-a4-list>Refresh runs</button>
-</section>
-<section class="information-card">
-<span class="eyebrow">YOUR PLAY COINS</span>
-<h2 data-a4-balance>Balance</h2>
-<p data-a4-reserved>
-</p>
-<button type="button" data-a4-refill hidden>Get daily play coins for this run</button>
-<p data-a4-funding-policy>Play credits follow the current issuance policy. Multiple wallets share one account allowance.</p>
-<div data-a4-run-summary>
-</div>
-<div data-a4-controls hidden class="a4-controls">
-<button type="button" data-a4-control="run">Run</button>
-<button type="button" data-a4-control="pause">Pause</button>
-<button type="button" data-a4-control="step">Step / lock next</button>
-<label>Processing speed<select data-a4-speed>
-<option value="1">1×</option>
-<option value="5">5×</option>
-<option value="20">20×</option>
-</select>
-</label>
-<button type="button" data-a4-control="archive">Archive / new run</button>
-<p>Step locks the next open round immediately. Pause stops opening future windows; existing cutoffs and final reveal time still apply. Speed changes processing, not locked terms.</p>
-</div>
-<form data-a4-submit class="stack-form" hidden>
-<h3>Make a binding submission</h3>
-<label>Your position<select name="side">
-<option value="YES">YES · endorse the proposition</option>
-<option value="NO">NO · reject the proposition</option>
-</select>
-</label>
-<label>Maximum purchase price in Yap Coins<input name="ceiling" type="text" inputmode="decimal" value="0.50" pattern="(0([.][0-9]{1,6})?|1([.]0{1,6})?)" required>
-</label>
-<label>Number of contracts<input name="quantity" type="number" min="1" max="100" value="10" required>
-</label>
-<p>For NO, a ceiling of 0.78 means a YES-scale floor of 0.22. Quantity determines exposure, not voting weight. No revisions or cancellations after commitment.</p>
-<button class="button" type="submit">Review exact commitment →</button>
-</form>
-</section>
-</div>
-<section class="information-card a4-history">
-<div class="section-heading">
-<h2>Rounds and receipts</h2>
-<button type="button" data-a4-refresh>Refresh</button>
-</div>
-<p>Shared prices are random offers, not sentiment or probability of truth. Pending payouts and sealed diagnostics remain hidden until reveal.</p>
-<div data-a4-rounds>
-</div>
-<div class="a4-controls">
-<button type="button" data-a4-book-prev>Previous orders</button>
-<button type="button" data-a4-book-next>Next orders</button>
-</div>
-<details>
-<summary>Private balance history</summary>
-<div data-a4-history>
-</div>
-<button type="button" data-a4-history-more>More history</button>
-</details>
-<details>
-<summary>Research assumptions and diagnostics</summary>
-<p>Heterogeneous bots use fresh broad private beliefs each period. This is a behavioral UX stress test, not a coherent Bayesian proof. The homogeneous preset preserves the 0.22 / 0.34 analytical reference. Finite populations can reward deviations. No guaranteed truthfulness, Sybil resistance or event winner is claimed.</p>
-<p>
-<a href="/assets/a4-research.json?v=0123456789ab">Read reproducible finite counterfactual results</a>. The audit recomputes medians, acceptance and settlement with fixed quantity, paired random draws and independent confirmation.</p>
-</details>
-</section>
-</div>
-</section>
-<dialog data-a4-review class="information-card" aria-labelledby="a4-review-title">
-<h2 id="a4-review-title">Review Yap Coins commitment</h2>
-<div data-a4-terms>
-</div>
-<p data-a4-review-notice role="status" aria-live="polite">
-</p>
-<button type="button" data-a4-commit class="button">Commit these exact terms</button>
-<button type="button" data-a4-cancel>Back</button>
-</dialog>
-<script type="module" src="/assets/a4.js?v=0123456789ab">
-</script>
 <script type="module" src="/assets/account-coins.js?v=0123456789ab">
 </script>
 </main>
@@ -7892,6 +8068,9 @@ exports[`renders the coins and match pages 2`] = `
 <title>Match · YAP Arena</title>
 <meta name="description" content="Create topics and arrange debates on YAP Arena.">
 <link rel="canonical" href="https://arena.example/match">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -8083,6 +8262,9 @@ exports[`renders the coins and match pages 3`] = `
 <title>Match · YAP Arena</title>
 <meta name="description" content="Create topics and arrange debates on YAP Arena.">
 <link rel="canonical" href="https://arena.example/match">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -8283,6 +8465,19 @@ exports[`renders the debate list 1`] = `
 <title>Debates · YAP Arena</title>
 <meta name="description" content="Browse public debates by status and search term.">
 <link rel="canonical" href="https://arena.example/debates?q=missing">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Debates">
+<meta property="og:description" content="Browse public debates by status and search term.">
+<meta property="og:url" content="https://arena.example/debates?q=missing">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -8413,6 +8608,19 @@ exports[`renders the debate list 2`] = `
 <title>Debates · YAP Arena</title>
 <meta name="description" content="Browse public debates by status and search term.">
 <link rel="canonical" href="https://arena.example/debates?limit=1">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Debates">
+<meta property="og:description" content="Browse public debates by status and search term.">
+<meta property="og:url" content="https://arena.example/debates?limit=1">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -8586,6 +8794,19 @@ exports[`renders the debate list 3`] = `
 <title>Debates · YAP Arena</title>
 <meta name="description" content="Browse public debates by status and search term.">
 <link rel="canonical" href="https://arena.example/debates?q=city&amp;status=scheduled&amp;limit=1&amp;offset=1">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Debates">
+<meta property="og:description" content="Browse public debates by status and search term.">
+<meta property="og:url" content="https://arena.example/debates?q=city&amp;status=scheduled&amp;limit=1&amp;offset=1">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -8739,6 +8960,19 @@ exports[`renders the debate list 4`] = `
 <title>Debates · YAP Arena</title>
 <meta name="description" content="Browse public debates by status and search term.">
 <link rel="canonical" href="https://arena.example/debates?q=q+%3Cb%3E%26amp%3B%3C%2Fb%3E+%22quoted%22+%27single%27+%26+%3C&amp;status=live">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Debates">
+<meta property="og:description" content="Browse public debates by status and search term.">
+<meta property="og:url" content="https://arena.example/debates?q=q+%3Cb%3E%26amp%3B%3C%2Fb%3E+%22quoted%22+%27single%27+%26+%3C&amp;status=live">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -8887,6 +9121,19 @@ exports[`renders the home page 1`] = `
 <title>Where ideas move · YAP Arena</title>
 <meta name="description" content="Follow an idea. Hear both sides. Take a position.">
 <link rel="canonical" href="https://arena.example/home">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="YAP Arena">
+<meta property="og:description" content="Follow an idea. Hear both sides. Take a position.">
+<meta property="og:url" content="https://arena.example/home">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -9147,6 +9394,19 @@ exports[`renders the home page 2`] = `
 <title>Where ideas move · YAP Arena</title>
 <meta name="description" content="Follow an idea. Hear both sides. Take a position.">
 <link rel="canonical" href="https://arena.example/home">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="YAP Arena">
+<meta property="og:description" content="Follow an idea. Hear both sides. Take a position.">
+<meta property="og:url" content="https://arena.example/home">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -9407,6 +9667,19 @@ exports[`renders the home page 3`] = `
 <title>Where ideas move · YAP Arena</title>
 <meta name="description" content="Follow an idea. Hear both sides. Take a position.">
 <link rel="canonical" href="https://arena.example/home">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="YAP Arena">
+<meta property="og:description" content="Follow an idea. Hear both sides. Take a position.">
+<meta property="og:url" content="https://arena.example/home">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -9667,6 +9940,19 @@ exports[`renders the home page 4`] = `
 <title>Where ideas move · YAP Arena</title>
 <meta name="description" content="Follow an idea. Hear both sides. Take a position.">
 <link rel="canonical" href="https://arena.example/home">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="YAP Arena">
+<meta property="og:description" content="Follow an idea. Hear both sides. Take a position.">
+<meta property="og:url" content="https://arena.example/home">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -9992,6 +10278,19 @@ exports[`renders the home page 5`] = `
 <title>Where ideas move · YAP Arena</title>
 <meta name="description" content="Follow an idea. Hear both sides. Take a position.">
 <link rel="canonical" href="https://arena.example/home">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="YAP Arena">
+<meta property="og:description" content="Follow an idea. Hear both sides. Take a position.">
+<meta property="og:url" content="https://arena.example/home">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -10381,6 +10680,19 @@ exports[`renders the home page 6`] = `
 <title>Where ideas move · YAP Arena</title>
 <meta name="description" content="Follow an idea. Hear both sides. Take a position.">
 <link rel="canonical" href="https://arena.example/home">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="YAP Arena">
+<meta property="og:description" content="Follow an idea. Hear both sides. Take a position.">
+<meta property="og:url" content="https://arena.example/home">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -11003,6 +11315,19 @@ exports[`renders the home page 7`] = `
 <title>Where ideas move · YAP Arena</title>
 <meta name="description" content="Follow an idea. Hear both sides. Take a position.">
 <link rel="canonical" href="https://arena.example/home">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="YAP Arena">
+<meta property="og:description" content="Follow an idea. Hear both sides. Take a position.">
+<meta property="og:url" content="https://arena.example/home">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -11328,6 +11653,19 @@ exports[`renders the live page 1`] = `
 <title>Live · YAP Arena</title>
 <meta name="description" content="Discover public debates and topics on YAP Arena.">
 <link rel="canonical" href="https://arena.example/live">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Live debates">
+<meta property="og:description" content="Discover public debates and topics on YAP Arena.">
+<meta property="og:url" content="https://arena.example/live">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -11446,8 +11784,8 @@ exports[`renders the live page 1`] = `
 </div>
 </section>
 <section class="container note-band">
-<span class="eyebrow">ABOUT THIS PREVIEW</span>
-<p>YAP Arena is under development. Demo listings are examples, not real events. Profiles, wallet sign-in, and follows are available. Live debate and replay require configured media. Yap Coins and labeled bot rounds are available when enabled; real funds are unavailable.</p>
+<span class="eyebrow">ABOUT YAP ARENA</span>
+<p>YAP Arena hosts live video debates you can watch, replay or join. Yap Coins are play money with no cash value, and real funds are unavailable. Listings marked Demo are examples, not real events.</p>
 </section>
 </main>
 <footer class="site-footer">
@@ -11472,6 +11810,19 @@ exports[`renders the live page 2`] = `
 <title>Live · YAP Arena</title>
 <meta name="description" content="Discover public debates and topics on YAP Arena.">
 <link rel="canonical" href="https://arena.example/live">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Live debates">
+<meta property="og:description" content="Discover public debates and topics on YAP Arena.">
+<meta property="og:url" content="https://arena.example/live">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -11674,8 +12025,8 @@ exports[`renders the live page 2`] = `
 </div>
 </section>
 <section class="container note-band">
-<span class="eyebrow">ABOUT THIS PREVIEW</span>
-<p>YAP Arena is under development. Demo listings are examples, not real events. Profiles, wallet sign-in, and follows are available. Live debate and replay require configured media. Yap Coins and labeled bot rounds are available when enabled; real funds are unavailable.</p>
+<span class="eyebrow">ABOUT YAP ARENA</span>
+<p>YAP Arena hosts live video debates you can watch, replay or join. Yap Coins are play money with no cash value, and real funds are unavailable. Listings marked Demo are examples, not real events.</p>
 </section>
 <script type="module" src="/assets/hero-preview.js?v=0123456789ab">
 </script>
@@ -11699,6 +12050,9 @@ exports[`renders the measurement dashboard 1`] = `
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Product measurement · YAP Arena</title>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
 <script defer src="/assets/session-coordination.js?v=0123456789ab">
@@ -11779,7 +12133,7 @@ exports[`renders the measurement dashboard 1`] = `
 </div>
 </div>
 <p>Last 28 days, UTC. These are consented browser or account events except debate completion, which comes from the authoritative event transition. Unclassified activity is never treated as independent. Demo events are excluded.</p>
-<p>Counts are actions or browser sessions, not unique people. A wallet is not a person. The proposed 28-day returning participant rate and 30% hypothesis are not approved success or launch gates.</p>
+<p>Counts are actions or browser sessions, not unique people. The proposed 28-day returning participant rate and 30% hypothesis are not approved success or launch gates.</p>
 <div class="information-card">
 <h2>Discover, match, finish, return</h2>
 <div class="table-scroll">
@@ -11903,8 +12257,10 @@ exports[`renders the measurement dashboard 1`] = `
 </main>
 <footer class="site-footer">
 <div class="container footer-inner">
-<span>Measurement preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -11918,6 +12274,9 @@ exports[`renders the measurement dashboard 2`] = `
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Product measurement · YAP Arena</title>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
 <script defer src="/assets/session-coordination.js?v=0123456789ab">
@@ -11998,7 +12357,7 @@ exports[`renders the measurement dashboard 2`] = `
 </div>
 </div>
 <p>Last 28 days, UTC. These are consented browser or account events except debate completion, which comes from the authoritative event transition. Unclassified activity is never treated as independent. Demo events are excluded.</p>
-<p>Counts are actions or browser sessions, not unique people. A wallet is not a person. The proposed 28-day returning participant rate and 30% hypothesis are not approved success or launch gates.</p>
+<p>Counts are actions or browser sessions, not unique people. The proposed 28-day returning participant rate and 30% hypothesis are not approved success or launch gates.</p>
 <div class="information-card">
 <h2>Discover, match, finish, return</h2>
 <div class="table-scroll">
@@ -12125,8 +12484,10 @@ exports[`renders the measurement dashboard 2`] = `
 </main>
 <footer class="site-footer">
 <div class="container footer-inner">
-<span>Measurement preview · No financial activity · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -12144,6 +12505,19 @@ exports[`renders the privacy, terms and cookie pages 1`] = `
 <title>Privacy policy · YAP Arena</title>
 <meta name="description" content="What YAP Arena collects, why, who processes it, where it is stored and how long we keep it.">
 <link rel="canonical" href="https://arena.example/privacy">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Privacy policy · YAP Arena">
+<meta property="og:description" content="What YAP Arena collects, why, who processes it, where it is stored and how long we keep it.">
+<meta property="og:url" content="https://arena.example/privacy">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/landing.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/legal.css?v=0123456789ab">
@@ -12685,6 +13059,19 @@ exports[`renders the privacy, terms and cookie pages 2`] = `
 <title>Terms of use · YAP Arena</title>
 <meta name="description" content="The rules for using YAP Arena: eligibility, public debates, conduct, Yap Coins and your content.">
 <link rel="canonical" href="https://arena.example/terms">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Terms of use · YAP Arena">
+<meta property="og:description" content="The rules for using YAP Arena: eligibility, public debates, conduct, Yap Coins and your content.">
+<meta property="og:url" content="https://arena.example/terms">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/landing.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/legal.css?v=0123456789ab">
@@ -12903,6 +13290,19 @@ exports[`renders the privacy, terms and cookie pages 3`] = `
 <title>Cookie policy · YAP Arena</title>
 <meta name="description" content="The cookies and similar technologies YAP Arena uses, why, and how to change your choice.">
 <link rel="canonical" href="https://arena.example/cookies">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Cookie policy · YAP Arena">
+<meta property="og:description" content="The cookies and similar technologies YAP Arena uses, why, and how to change your choice.">
+<meta property="og:url" content="https://arena.example/cookies">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/landing.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/legal.css?v=0123456789ab">
@@ -13185,6 +13585,19 @@ exports[`renders the topic list 1`] = `
 <title>Topics · YAP Arena</title>
 <meta name="description" content="Explore public topics on YAP Arena.">
 <link rel="canonical" href="https://arena.example/topics?q=missing">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Topics">
+<meta property="og:description" content="Explore public topics on YAP Arena.">
+<meta property="og:url" content="https://arena.example/topics?q=missing">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -13304,6 +13717,19 @@ exports[`renders the topic list 2`] = `
 <title>Topics · YAP Arena</title>
 <meta name="description" content="Explore public topics on YAP Arena.">
 <link rel="canonical" href="https://arena.example/topics?limit=1">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Topics">
+<meta property="og:description" content="Explore public topics on YAP Arena.">
+<meta property="og:url" content="https://arena.example/topics?limit=1">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -13438,6 +13864,19 @@ exports[`renders the topic list 3`] = `
 <title>Topics · YAP Arena</title>
 <meta name="description" content="Explore public topics on YAP Arena.">
 <link rel="canonical" href="https://arena.example/topics?q=q%20%3Cb%3E%26amp%3B%3C%2Fb%3E%20%22quoted%22%20&#39;single&#39;%20%26%20%3C&amp;limit=1&amp;offset=2">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Topics">
+<meta property="og:description" content="Explore public topics on YAP Arena.">
+<meta property="og:url" content="https://arena.example/topics?q=q%20%3Cb%3E%26amp%3B%3C%2Fb%3E%20%22quoted%22%20&#39;single&#39;%20%26%20%3C&amp;limit=1&amp;offset=2">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">

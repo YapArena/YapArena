@@ -221,6 +221,43 @@ export function createDiscoveryRepository(database: Pick<Pool, "query">) {
       return page(mapped, limit, offset);
     },
 
+    // Published, non-demo pages for /sitemap.xml, within the 50,000-URL limit
+    // of one sitemap. A debate's page needs its topic published too. Profiles
+    // are listed only for speakers in such a debate, so the sitemap never
+    // enumerates every account's handle.
+    async listSitemap(): Promise<{
+      topics: string[];
+      debates: string[];
+      profiles: string[];
+    }> {
+      const published = `FROM debates d
+        INNER JOIN topics t ON t.id = d.topic_id AND t.publication_state = 'published'
+        WHERE d.publication_state = 'published' AND NOT d.is_demo`;
+      const [topics, debates, profiles] = await Promise.all([
+        database.query<{ slug: string }>(
+          `SELECT slug FROM topics
+           WHERE publication_state = 'published' AND NOT is_demo
+           ORDER BY created_at DESC, id DESC LIMIT 10000`,
+        ),
+        database.query<{ slug: string }>(
+          `SELECT d.slug ${published}
+           ORDER BY d.created_at DESC, d.id DESC LIMIT 30000`,
+        ),
+        database.query<{ handle: string }>(
+          `SELECT p.handle FROM public_profiles p
+           WHERE p.publication_state = 'published' AND NOT p.is_demo
+             AND EXISTS (SELECT 1 ${published}
+               AND p.id IN (d.speaker_a_profile_id, d.speaker_b_profile_id))
+           ORDER BY p.handle LIMIT 10000`,
+        ),
+      ]);
+      return {
+        topics: topics.rows.map((row) => row.slug),
+        debates: debates.rows.map((row) => row.slug),
+        profiles: profiles.rows.map((row) => row.handle),
+      };
+    },
+
     async getDebate(slug: string): Promise<PublicDebate | null> {
       const result = await database.query<DebateRow>(
         `SELECT ${debateColumns}

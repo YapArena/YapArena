@@ -138,15 +138,14 @@ export function createCommunityRouter({
     });
     return response.type("image/svg+xml").send(svg);
   });
-  router.get("/overlay/:slug", async (request, response) => {
+  // An unknown event falls through to the app's not-found page.
+  router.get("/overlay/:slug", async (request, response, next) => {
     const key = request.params.slug;
     const event =
       typeof key === "string" && slug.test(key)
         ? await community.publicEventBySlug(key)
         : null;
-    return event
-      ? response.type("html").send(renderOverlay(event))
-      : response.status(404).type("html").send("<h1>Event not found</h1>");
+    return event ? response.type("html").send(renderOverlay(event)) : next();
   });
   router.get("/account/moderation", requireAuth, (_request, response) =>
     response.type("html").send(renderMyModeration(emailFirst)),
