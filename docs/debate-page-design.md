@@ -118,8 +118,8 @@ sideways.
   panel), its labels scaled up for the narrow panel.
 - **About:** "About this debate" with the latest result, then the event, moderation and site
   links (Topics, Yap Coins, About YAP Arena).
-- **Chat as a tab (< 1200 px, or a smaller video):** the connection pill and a 44 px "⋯" menu (like, copy link, check
-  chat now, QR code, overlay, report). Messages are 14/20 with the author in bold, coloured from
+- **Chat as a tab (< 1200 px, or a smaller video):** the panel grows to at least 26rem while Chat is open (the rail scrolls on short screens). The connection pill and a 44 px "⋯" menu (like, copy link, check
+  chat now, QR code, overlay, report), which ends just above the composer, measured as it opens. Messages are 14/20 with the author in bold, coloured from
   the visit's five landing colours (`pickHeadlineColors()`) by a stable hash of the name. Time and
   Report show on hover or focus, always on touch. The composer is a 52 px pill with a 44 px white
   send button.

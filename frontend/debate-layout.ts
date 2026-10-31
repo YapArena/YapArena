@@ -329,5 +329,14 @@ if (arena) {
     document.addEventListener("click", (event) => {
       if (more.open && !more.contains(event.target as Node)) more.open = false;
     });
+    // The menu ends just above the composer, whatever the lines under it
+    // take, so the composer stays reachable while the menu is open.
+    const form = chat?.querySelector<HTMLElement>("[data-community-chat-form]");
+    more.addEventListener("toggle", () => {
+      if (!more.open || !chat || !form) return;
+      const below =
+        chat.getBoundingClientRect().bottom - form.getBoundingClientRect().top;
+      chat.style.setProperty("--chat-menu-bottom", `${Math.ceil(below) + 8}px`);
+    });
   }
 }

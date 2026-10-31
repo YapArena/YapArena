@@ -1648,6 +1648,11 @@ textarea::placeholder {
   border-radius: var(--radius-card);
   background: var(--panel);
 }
+/* Chat needs room for a few messages, its composer and its menu above the
+   composer; the rail scrolls when the screen is short. */
+.arena-page .arena-workspace[data-tab="chat"] .arena-insight {
+  min-height: 26rem;
+}
 .arena-page .arena-tabs {
   flex: none;
   display: flex;
@@ -2230,16 +2235,18 @@ textarea::placeholder {
   color: var(--text);
 }
 /* The menu opens over the messages and stops above the composer, so a click
-   there still reaches it (and closes the menu). */
+   there still reaches it (and closes the menu). frontend/debate-layout.ts
+   measures the composer's distance from the chat's bottom as it opens. */
 .arena-page .chat-more-panel {
   position: absolute;
   z-index: 10;
   top: 52px;
   right: var(--space-2);
+  bottom: var(--chat-menu-bottom, 10rem);
   left: var(--space-2);
   display: grid;
+  align-content: start;
   gap: var(--space-3);
-  max-height: max(10rem, calc(100% - 52px - 8.5rem));
   overflow-y: auto;
   padding: var(--space-4);
   border: 1px solid var(--control-border);
@@ -3052,9 +3059,8 @@ textarea::placeholder {
   .arena-page .arena-video-surface > .arena-chat .chat-more-panel {
     top: 0;
     right: 0;
-    bottom: 72px;
+    bottom: var(--chat-menu-bottom, 72px);
     left: 0;
-    max-height: none;
     text-shadow: none;
   }
   .arena-page .arena-video-surface > .arena-chat form {
