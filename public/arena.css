@@ -1075,10 +1075,17 @@ textarea::placeholder {
   outline: 2px solid var(--acid);
   outline-offset: 3px;
 }
-/* Scroll boxes sit inside clipping parents, so their ring is drawn inside. */
+/* Scroll boxes sit inside clipping parents, so their ring is drawn inside.
+   The Results panel takes focus so it can be scrolled from the keyboard
+   before the chart has any rounds to focus (WAI tabs pattern). */
 .arena-page
   .arena-workspace
-  :is(.community-messages, .live-outline-body, video):focus-visible {
+  :is(
+    .community-messages,
+    .live-outline-body,
+    video,
+    #arena-results
+  ):focus-visible {
   outline-offset: -2px;
 }
 /* Every control is a pill; specific controls below refine it. */

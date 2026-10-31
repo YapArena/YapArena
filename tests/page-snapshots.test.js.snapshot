@@ -422,7 +422,7 @@ exports[`renders a debate 1`] = `
 </button>
 <button type="button" role="tab" id="arena-tab-results" aria-controls="arena-results" aria-selected="true">Results</button>
 <button type="button" role="tab" id="arena-tab-about" aria-controls="arena-about" aria-selected="false" tabindex="-1">About</button>
-</div>\\n\\n      <section class="arena-results" id="arena-results" aria-labelledby="arena-results-title">
+</div>\\n\\n      <section class="arena-results" id="arena-results" tabindex="0" aria-labelledby="arena-results-title">
 <div class="arena-chart-panel">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -1043,7 +1043,7 @@ exports[`renders a debate 10`] = `
 </button>
 <button type="button" role="tab" id="arena-tab-results" aria-controls="arena-results" aria-selected="true">Results</button>
 <button type="button" role="tab" id="arena-tab-about" aria-controls="arena-about" aria-selected="false" tabindex="-1">About</button>
-</div>\\n\\n      <section class="arena-results" id="arena-results" aria-labelledby="arena-results-title">
+</div>\\n\\n      <section class="arena-results" id="arena-results" tabindex="0" aria-labelledby="arena-results-title">
 <div class="arena-chart-panel">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -1662,7 +1662,7 @@ exports[`renders a debate 2`] = `
 </button>
 <button type="button" role="tab" id="arena-tab-results" aria-controls="arena-results" aria-selected="true">Results</button>
 <button type="button" role="tab" id="arena-tab-about" aria-controls="arena-about" aria-selected="false" tabindex="-1">About</button>
-</div>\\n\\n      <section class="arena-results" id="arena-results" aria-labelledby="arena-results-title">
+</div>\\n\\n      <section class="arena-results" id="arena-results" tabindex="0" aria-labelledby="arena-results-title">
 <div class="arena-chart-panel">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -2282,7 +2282,7 @@ exports[`renders a debate 3`] = `
 </button>
 <button type="button" role="tab" id="arena-tab-results" aria-controls="arena-results" aria-selected="true">Results</button>
 <button type="button" role="tab" id="arena-tab-about" aria-controls="arena-about" aria-selected="false" tabindex="-1">About</button>
-</div>\\n\\n      <section class="arena-results" id="arena-results" aria-labelledby="arena-results-title">
+</div>\\n\\n      <section class="arena-results" id="arena-results" tabindex="0" aria-labelledby="arena-results-title">
 <div class="arena-chart-panel">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -2902,7 +2902,7 @@ exports[`renders a debate 4`] = `
 </button>
 <button type="button" role="tab" id="arena-tab-results" aria-controls="arena-results" aria-selected="true">Results</button>
 <button type="button" role="tab" id="arena-tab-about" aria-controls="arena-about" aria-selected="false" tabindex="-1">About</button>
-</div>\\n\\n      <section class="arena-results" id="arena-results" aria-labelledby="arena-results-title">
+</div>\\n\\n      <section class="arena-results" id="arena-results" tabindex="0" aria-labelledby="arena-results-title">
 <div class="arena-chart-panel">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -3520,7 +3520,7 @@ exports[`renders a debate 5`] = `
 </button>
 <button type="button" role="tab" id="arena-tab-results" aria-controls="arena-results" aria-selected="true">Results</button>
 <button type="button" role="tab" id="arena-tab-about" aria-controls="arena-about" aria-selected="false" tabindex="-1">About</button>
-</div>\\n\\n      <section class="arena-results" id="arena-results" aria-labelledby="arena-results-title">
+</div>\\n\\n      <section class="arena-results" id="arena-results" tabindex="0" aria-labelledby="arena-results-title">
 <div class="arena-chart-panel">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -4138,7 +4138,7 @@ exports[`renders a debate 6`] = `
 </button>
 <button type="button" role="tab" id="arena-tab-results" aria-controls="arena-results" aria-selected="true">Results</button>
 <button type="button" role="tab" id="arena-tab-about" aria-controls="arena-about" aria-selected="false" tabindex="-1">About</button>
-</div>\\n\\n      <section class="arena-results" id="arena-results" aria-labelledby="arena-results-title">
+</div>\\n\\n      <section class="arena-results" id="arena-results" tabindex="0" aria-labelledby="arena-results-title">
 <div class="arena-chart-panel">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -4758,7 +4758,7 @@ exports[`renders a debate 7`] = `
 </button>
 <button type="button" role="tab" id="arena-tab-results" aria-controls="arena-results" aria-selected="true">Results</button>
 <button type="button" role="tab" id="arena-tab-about" aria-controls="arena-about" aria-selected="false" tabindex="-1">About</button>
-</div>\\n\\n      <section class="arena-results" id="arena-results" aria-labelledby="arena-results-title">
+</div>\\n\\n      <section class="arena-results" id="arena-results" tabindex="0" aria-labelledby="arena-results-title">
 <div class="arena-chart-panel">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -5383,7 +5383,7 @@ exports[`renders a debate 8`] = `
 </button>
 <button type="button" role="tab" id="arena-tab-results" aria-controls="arena-results" aria-selected="true">Results</button>
 <button type="button" role="tab" id="arena-tab-about" aria-controls="arena-about" aria-selected="false" tabindex="-1">About</button>
-</div>\\n\\n      <section class="arena-results" id="arena-results" aria-labelledby="arena-results-title">
+</div>\\n\\n      <section class="arena-results" id="arena-results" tabindex="0" aria-labelledby="arena-results-title">
 <div class="arena-chart-panel">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
@@ -6006,7 +6006,7 @@ exports[`renders a debate 9`] = `
 </button>
 <button type="button" role="tab" id="arena-tab-results" aria-controls="arena-results" aria-selected="true">Results</button>
 <button type="button" role="tab" id="arena-tab-about" aria-controls="arena-about" aria-selected="false" tabindex="-1">About</button>
-</div>\\n\\n      <section class="arena-results" id="arena-results" aria-labelledby="arena-results-title">
+</div>\\n\\n      <section class="arena-results" id="arena-results" tabindex="0" aria-labelledby="arena-results-title">
 <div class="arena-chart-panel">
 <h2 class="arena-section-title" id="arena-results-title">
 <span class="sr-only">Results by turn</span>
