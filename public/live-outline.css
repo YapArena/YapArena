@@ -1,25 +1,37 @@
-/* Decision 0012: live captions under the video. Fixed height and layout
-   containment keep the video, chart and chat from moving as text changes. */
+/* Decision 0012 on the debate page (direction BC1, docs/debate-page-design.md).
+   Live captions: one line under the video at a fixed 44px height. Layout
+   containment keeps the video, chart and chat from moving as text changes. */
 .live-captions {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 10px 0 0;
-  padding: 10px 12px 10px 16px;
-  min-height: 3.9rem;
-  border: 1px solid #2a2a2a;
-  border-radius: 12px;
-  background: #0b0b0b;
+  gap: var(--space-2);
+  height: 44px;
+  margin: var(--space-2) 0 0;
+  padding: 0 4px 0 var(--space-5);
+  border-radius: var(--radius-pill);
+  background: var(--panel);
   contain: layout paint;
 }
+/* The newest words stay visible: the line is cut at its start with an
+   ellipsis. The isolate keeps the text's own direction and punctuation. */
 .live-captions-text {
   flex: 1;
+  min-width: 0;
   margin: 0;
-  max-height: 3rem;
   overflow: hidden;
-  color: #f4f4f4;
-  font-size: 0.95rem;
-  line-height: 1.5rem;
+  color: var(--text);
+  font-size: var(--text-16);
+  line-height: 44px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  direction: rtl;
+  text-align: left;
+}
+.live-captions-text::before {
+  content: "\2068";
+}
+.live-captions-text::after {
+  content: "\2069";
 }
 .live-captions[data-captions-off] .live-captions-text {
   visibility: hidden;
@@ -27,133 +39,382 @@
 .live-captions-toggle {
   flex: none;
   min-height: 36px;
-  padding: 6px 12px;
-  border: 1px solid #4a4a4a;
-  border-radius: 999px;
-  background: transparent;
-  color: #e8e8e8;
-  font: inherit;
-  font-size: 0.78rem;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: var(--raised);
+  color: var(--button-text);
+  font:
+    700 var(--text-12) / 1 Arial,
+    Helvetica,
+    sans-serif;
   cursor: pointer;
 }
 .live-captions-toggle:focus-visible {
-  outline: 2px solid #f8f8f8;
-  outline-offset: 2px;
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
 }
 
-/* The AI outline panel: a fixed-height body that scrolls inside itself, so
-   the video, chart and chat never move when the outline grows. */
+/* The AI outline: one card per argument, like the landing's argument cards
+   ("For the idea" / "Counterargument"), in a fixed-height box that scrolls
+   inside itself, so nothing around it moves when the outline grows. A card
+   opens to show its points and the arguments it rebuts or that rebut it. */
 .live-outline {
-  margin: 14px 0 0;
-  padding: 14px 16px 12px;
-  border: 1px solid #2a2a2a;
-  border-radius: 14px;
-  background: #0b0b0b;
+  --outline-card: #121212;
+  --outline-card-hover: #171717;
+  --outline-counter: #fa9b8c;
+  margin: var(--space-5) 0 0;
   contain: layout paint;
-}
-.live-outline-head {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 4px 12px;
 }
 .live-outline-head h2 {
   margin: 0;
-  font-size: 0.82rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.live-outline-turn {
-  color: #bdbdbd;
-  font-size: 0.8rem;
-}
-.live-outline-note {
-  margin: 6px 0 10px;
-  color: #8f8f8f;
-  font-size: 0.74rem;
-  line-height: 1.45;
+  font-size: var(--text-16);
+  line-height: 1.3;
+  letter-spacing: 0;
 }
 .live-outline-body {
-  height: 15rem;
+  height: 12.5rem;
+  margin-top: var(--space-3);
+  /* Room for the cards' focus rings. */
+  padding: 3px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--control-border) transparent;
 }
 .live-outline-body:focus-visible {
-  outline: 2px solid #f8f8f8;
-  outline-offset: 2px;
+  outline: 2px solid var(--acid);
+  outline-offset: -2px;
+}
+/* Each turn's heading: "Turn 3 · Maya Chen (Free for everyone)". The
+   current turn's has a breathing dot while the debate is live. */
+.live-outline-turn,
+.live-outline-earlier-turn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  color: var(--muted);
+  font-size: var(--text-12);
+  font-weight: 700;
+  line-height: 16px;
+}
+.live-outline[data-outline-live] .live-outline-turn::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--acid);
+  animation: live-outline-breathe 2s ease-in-out infinite;
+}
+.live-outline-earlier {
+  margin-top: var(--space-5);
+}
+.live-outline-earlier > ol {
+  display: grid;
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 .live-outline-arguments {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--space-3);
   margin: 0;
-  padding: 0 0 0 1.2rem;
+  padding: 0;
+  list-style: none;
 }
 .live-outline-argument {
-  margin: 0 0 10px;
-  border-radius: 6px;
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-inner);
+  background: var(--outline-card);
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
+}
+.live-outline-argument[data-expandable="true"]:hover,
+.live-outline-argument[data-open] {
+  border-color: #333;
+  background: var(--outline-card-hover);
+}
+.live-outline-argument:has(.live-outline-toggle:focus-visible),
+.live-outline-argument:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 1px;
+}
+/* The card's top: the whole of it opens the card (the button's hit area
+   covers it), while links and buttons below stay clickable. */
+.live-outline-card {
+  position: relative;
+  padding: 14px var(--space-4);
+}
+.live-outline-kicker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 0 0 6px;
+  color: var(--acid);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.live-outline-argument[data-kind="counter"] .live-outline-kicker {
+  color: var(--outline-counter);
+}
+/* The chevron: down when closed, up when open. */
+.live-outline-argument[data-expandable="true"] .live-outline-kicker::after {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin: 0 3px 4px 0;
+  border-right: 1.5px solid var(--muted);
+  border-bottom: 1.5px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform 0.2s var(--ease-expo);
+}
+.live-outline-argument[data-open] .live-outline-kicker::after {
+  margin-bottom: -2px;
+  transform: rotate(225deg);
 }
 .live-outline-label {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 10px;
   margin: 0;
-  color: #f4f4f4;
-  font-weight: 650;
-  line-height: 1.4;
+  color: var(--text);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 21px;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
 }
-.live-outline-rebuts {
-  color: #c9c9c9;
-  font-size: 0.8rem;
-  font-weight: 400;
+.live-outline .live-outline-argument .live-outline-toggle {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.live-outline-toggle::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.live-outline .live-outline-argument .live-outline-toggle:focus-visible {
+  outline: none;
+}
+.live-outline-foot {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: var(--text-12);
+  line-height: 16px;
+}
+.live-outline-card > .live-outline-flagged {
+  display: block;
+  margin-top: var(--space-2);
+}
+/* Open: the points as small boxes of their own, then the links. */
+.live-outline-more {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0 var(--space-4) 14px;
+  animation: live-outline-open 0.2s var(--ease-expo);
+}
+.live-outline-more[hidden] {
+  display: none;
 }
 .live-outline-points {
-  margin: 4px 0 0;
-  padding-left: 1.1rem;
-  color: #dcdcdc;
-  font-size: 0.88rem;
-  line-height: 1.45;
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-wrap: anywhere;
+}
+.live-outline-points[hidden] {
+  display: none;
 }
 .live-outline-points li {
-  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: 9px var(--space-3);
+  border-left: 2px solid var(--control-border);
+  border-radius: 4px 8px 8px 4px;
+  background: rgb(255 255 255 / 4%);
+  color: var(--button-text);
+  font-size: var(--text-14);
+  line-height: 20px;
+}
+.live-outline-argument[data-kind="counter"] .live-outline-points li {
+  border-left-color: rgb(250 155 140 / 55%);
+}
+/* "Rebuts" and "Rebutted by": the other arguments, opened with a click. */
+.live-outline-rebuts,
+.live-outline-replies {
+  margin: 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+.live-outline-link-lead {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.live-outline-rebuts + .live-outline-replies:not([hidden]) {
+  padding-top: 0;
+  border-top: 0;
+}
+.live-outline-rebuts[hidden],
+.live-outline-replies[hidden] {
+  display: none;
+}
+.live-outline .live-outline-argument .live-outline-jump {
+  display: block;
+  min-height: 24px;
+  margin: 2px 0 0;
+  padding: 3px 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-color: var(--control-border);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.live-outline .live-outline-argument .live-outline-jump::after {
+  content: " →";
+  content: " →" / "";
+  text-decoration: none;
+}
+.live-outline .live-outline-argument .live-outline-jump:hover {
+  text-decoration-color: currentColor;
+}
+.live-outline .live-outline-argument .live-outline-jump:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 2px;
+}
+.live-outline-actions {
+  margin: 0;
+}
+.live-outline-actions:not(:has(> :not([hidden]))) {
+  display: none;
+}
+/* The empty slot after the current turn's last argument, while live. */
+.live-outline[data-outline-live] .live-outline-current::after {
+  content: "Listening for the next argument…";
+  content: "Listening for the next argument…" / "";
+  padding: 14px var(--space-4);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-inner);
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 20px;
 }
 .live-outline-flagged {
   color: #ffb3bc;
-  font-size: 0.72rem;
+  font-size: var(--text-12);
   font-weight: 400;
+  line-height: 16px;
 }
 .live-outline-flag {
-  padding: 2px 8px;
-  border: 1px solid #444;
-  border-radius: 999px;
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
   background: transparent;
-  color: #cfcfcf;
+  color: var(--button-text);
   font: inherit;
-  font-size: 0.72rem;
+  font-size: var(--text-12);
   font-weight: 400;
   cursor: pointer;
 }
-.live-outline-earlier {
-  margin-top: 8px;
-  color: #bdbdbd;
-  font-size: 0.84rem;
+.live-outline-flag:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
 }
-.live-outline-earlier-turn {
-  margin: 8px 0 2px;
-  color: #e6e6e6;
+.live-outline-note {
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: var(--text-12);
+  line-height: 1.5;
 }
 .live-outline .is-changed {
   animation: live-outline-flash 1.2s ease-out;
 }
 @keyframes live-outline-flash {
   from {
-    background: #ffffff24;
+    box-shadow: 0 0 0 2px rgb(255 255 255 / 40%);
   }
   to {
-    background: transparent;
+    box-shadow: 0 0 0 2px transparent;
+  }
+}
+@keyframes live-outline-open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@keyframes live-outline-breathe {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (max-width: 1199px) {
+  .live-outline-arguments {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 599px) {
+  .live-outline-arguments {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .live-outline-body {
+    height: 22rem;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .live-outline .is-changed {
+  .live-outline .is-changed,
+  .live-outline-more,
+  .live-outline[data-outline-live] .live-outline-turn::before {
     animation: none;
+  }
+  .live-outline-body {
+    scroll-behavior: auto;
+  }
+  .live-outline-argument,
+  .live-outline-kicker::after {
+    transition: none;
   }
 }

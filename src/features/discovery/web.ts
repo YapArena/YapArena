@@ -247,12 +247,14 @@ export function renderDebate(
       matchmaking,
       liveOutline,
     ),
-    shareMetadata({
+    // The share tags, then the headline font, preloaded exactly as the landing
+    // does, at the unversioned URL site.css resolves, so it downloads once.
+    html`${shareMetadata({
       origin,
       title: debate.proposition,
       description: `${debate.topic.title}: ${debate.topic.sideALabel} vs ${debate.topic.sideBLabel}. Watch the video debate on YAP Arena.`,
       url: canonical,
-    }),
+    })}<link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>`,
     "arena-page",
   );
 }

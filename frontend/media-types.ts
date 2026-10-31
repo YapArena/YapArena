@@ -9,6 +9,8 @@ export interface MediaState {
   state: "idle" | "running" | "paused" | "ended";
   activeSide: Side | null;
   turnDeadlineAt: string | null;
+  /** The running turn's number; older servers omit it. */
+  turnNumber?: number;
   revision: number;
   incident?: string | null;
   recordingStatus: "pending" | "recording" | "processing" | "ready" | "failed";

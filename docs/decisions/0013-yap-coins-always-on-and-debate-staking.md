@@ -38,10 +38,11 @@ Built on the turn windows and round rules of Decision 0012 (pull requests 1, 1b 
 is an A4 endorsement in one turn's 60-second window; there is no winner (F09).
 
 - Layout: chat on the left, a large video in the centre, the betting panel at the top of the
-  right column. The debate question appears in the video's top-left corner and "Live · N
-  watching" in its top-right corner while the pointer is over the video.
+  right column. Amended 2026-10-30 (below): chat moves over the video on wide screens. The debate
+  question appears in the video's top-left corner and "Live · N watching" in its top-right corner
+  while the pointer is over the video.
 - The panel asks "Do you agree?" about the debate's proposition, with a green Yes and a red No
-  button, each with a text label and icon. The word "bet" is not used.
+  button, each with a text label (amended 2026-10-30: no icon). The word "bet" is not used.
 - Yes and No belong only to the question. A turn names its speaker by display name and topic side
   label ("Turn 3 · Maya speaking (People first)"); side A is not the yes side, and no speaker is
   coloured by answer.
@@ -81,3 +82,31 @@ is an A4 endorsement in one turn's 60-second window; there is no winner (F09).
   page keeps the shared bot history chart and an info card linking to `/coins?debate=…`. On
   `/coins` the human mode option is gone and the run-scoped daily play-coin refill stays for Bots
   runs; only the account-wide refill is retired (410).
+
+## Amendment, 2026-10-30 (founder, canvas round 2)
+
+The founder chose direction BC1 for the debate page: a large stage with the answer panel and chat in
+a right rail. Chat moves from the left column into the right rail, below the betting panel. The
+rest of the Layout bullet stands: the large video, the panel at the top of the right column, and
+the question and "Live · N watching" in the video's corners on hover. The layout, breakpoints and
+look are in [the debate page design](../debate-page-design.md).
+
+## Amendment, 2026-10-30 (founder, review of pull request 1)
+
+Reviewing the BC1 pull request, the founder changed the page again. These replace the first
+amendment where they differ:
+
+- From 1200 px wide, chat sits over the video's lower right, like Twitch's and Kick's overlay
+  chat: no title, no panel, and a button to hide it. Narrower screens, and videos smaller than
+  800 × 480 px (windows of about 1280 × 900 and smaller), show it as a tab of the rail panel,
+  because chat over a smaller video has room for only one or two messages.
+- Under the answer panel, the rail holds one panel with tabs: the AI outline (first when the
+  outline is on), Results and About. The AI outline's arguments are cards that open to show their
+  points and the arguments they rebut or that rebut them.
+- Yes and No show their word only, no icon. The words and the green and red keep the answer from
+  depending on colour alone.
+- The turn clock is the landing emblem between the debaters' cards, draining over the turn. The
+  panel's own turn and time line is kept for screen readers only.
+- The speaking debater's video gets a lit frame, and each debater's name and handle show over
+  their video on hover.
+- From 960 px wide the page fits one screen and doesn't scroll.

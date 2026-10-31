@@ -30,7 +30,8 @@ import { Room, RoomEvent, Track } from "livekit-client";
 import { mediaPresentation } from "./media-presentation.js";
 import { speakerButtonState, stopMediaSession } from "./media-session.js";
 import { joinSpeaker } from "./media-speaker.js";
-import { createMediaTracks } from "./media-tracks.js";
+import { createMediaTracks, sideFromMetadata } from "./media-tracks.js";
+import type { TurnDetail } from "./debate-layout-model.js";
 import {
   createDeadlineFollower,
   createSignalRefresh,
@@ -347,7 +348,12 @@ if (root) {
     nextRoom.on(
       RoomEvent.TrackSubscribed,
       (track, _publication, participant) =>
-        room === nextRoom && mediaTracks.attach(track, participant.identity),
+        room === nextRoom &&
+        mediaTracks.attach(
+          track,
+          participant.identity,
+          sideFromMetadata(participant.metadata),
+        ),
     );
     nextRoom.on(
       RoomEvent.TrackUnsubscribed,
@@ -428,7 +434,11 @@ if (root) {
     for (const participant of nextRoom.remoteParticipants.values())
       for (const publication of participant.trackPublications.values())
         if (publication.track)
-          mediaTracks.attach(publication.track, participant.identity);
+          mediaTracks.attach(
+            publication.track,
+            participant.identity,
+            sideFromMetadata(participant.metadata),
+          );
     return nextRoom;
   }
   async function connectAsViewer(automatic = false, isCurrent = () => true) {
@@ -715,6 +725,7 @@ if (root) {
       currentState = result.state;
       eventStatus = result.eventStatus;
       serverOffset = new Date(result.serverNow).getTime() - Date.now();
+      announceTurn();
       const live = result.eventStatus === "live";
       const presentation = mediaPresentation(
         result.eventStatus,
@@ -873,6 +884,23 @@ if (root) {
       return false;
     }
   }
+  // The debate page's scoreboard follows the turn (frontend/debate-layout.ts).
+  let announcedTurn = "";
+  function announceTurn() {
+    const detail: TurnDetail = {
+      debateId: id,
+      eventStatus: eventStatus ?? "",
+      state: currentState?.state ?? null,
+      activeSide: currentState?.activeSide ?? null,
+      turnNumber: currentState?.turnNumber ?? null,
+      turnDeadlineAt: currentState?.turnDeadlineAt ?? null,
+      serverOffset,
+    };
+    const key = JSON.stringify({ ...detail, serverOffset: 0 });
+    if (key === announcedTurn) return;
+    announcedTurn = key;
+    root!.dispatchEvent(new CustomEvent("yap:turn", { bubbles: true, detail }));
+  }
   function paintClock() {
     if (
       !currentState ||
@@ -888,7 +916,8 @@ if (root) {
         Date.now() -
         serverOffset,
     );
-    clock.textContent = `${currentState.activeSide} · ${Math.ceil(remaining / 1000)}s`;
+    const seconds = Math.ceil(remaining / 1000);
+    clock.textContent = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
   }
   document.addEventListener("visibilitychange", () => {
     void tickWatch();
