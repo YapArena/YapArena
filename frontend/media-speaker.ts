@@ -91,7 +91,7 @@ export async function joinSpeaker({
     );
     if (!camera?.track) throw new Error("Could not open camera");
     assertCurrent();
-    tracks.attach(camera.track, participant.identity);
+    tracks.attach(camera.track, participant.identity, grant.side);
     setSide(grant.side);
 
     const joined = await request("");

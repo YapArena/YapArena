@@ -3,7 +3,15 @@ main = "replay-worker.ts"
 compatibility_date = "2026-10-06"
 workers_dev = false
 
+# The edge's own HTTPS hostname, for example replay.yaparena.com in production.
+# The app's MEDIA_REPLAY_EDGE_URL is this origin.
+routes = [
+  { pattern = "replay.your-app.example", custom_domain = true },
+]
+
 [vars]
+# The exact application origin, for example https://yaparena.com: no www,
+# no path and no trailing slash. CORS allows only this origin.
 APP_ORIGIN = "https://your-app.example"
 
 [[r2_buckets]]
@@ -11,4 +19,4 @@ binding = "REPLAY_BUCKET"
 bucket_name = "your-private-media-bucket"
 
 # Set REPLAY_SIGNING_SECRET through the provider secret store, never this file.
-# Bind a custom domain / route and disable public bucket URLs.
+# Disable public bucket URLs.

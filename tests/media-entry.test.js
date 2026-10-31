@@ -74,6 +74,8 @@ function node() {
     },
     replaceChildren() {},
     append() {},
+    children: [],
+    insertBefore() {},
     removeAttribute() {},
     remove() {},
     load() {},
@@ -117,6 +119,12 @@ function fixture() {
       mediaReplayPlayer: "/assets/replay.bundle.js",
     },
     querySelector: (selector) => elements.get(selector),
+    // The scoreboard's yap:turn events (frontend/debate-layout.ts).
+    turns: [],
+    dispatchEvent(event) {
+      this.turns.push(event.detail);
+      return true;
+    },
   };
   const jobs = new Map();
   const intervals = new Map();
@@ -299,6 +307,7 @@ function fixture() {
     });
   };
   const context = vm.createContext({
+    CustomEvent,
     window,
     document,
     navigator,

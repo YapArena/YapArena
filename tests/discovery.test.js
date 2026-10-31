@@ -547,7 +547,10 @@ describe("public discovery", () => {
       );
     for (const status of ["replay", "finalized"]) {
       const replay = page(status, outline);
-      assert.match(replay, /<section class="live-outline" data-live-outline /);
+      assert.match(
+        replay,
+        /<section class="live-outline" id="arena-outline" data-live-outline /,
+      );
       assert.equal(replay.match(stylesheet)?.length, 1, status);
       assert.doesNotMatch(replay, /data-live-captions/);
     }
@@ -847,6 +850,47 @@ describe("discovery repository visibility", () => {
       displayName: "Morgan Lee",
     });
     assert.equal(anonymous.sponsor, null);
+  });
+
+  it("reads a single debate's turn timing from its rules version", async () => {
+    const row = {
+      ...debate,
+      topicSlug: topic.slug,
+      topicTitle: topic.title,
+      sideALabel: topic.sideALabel,
+      sideBLabel: topic.sideBLabel,
+      speakerAHandle: null,
+      speakerADisplayName: null,
+      speakerBHandle: null,
+      speakerBDisplayName: null,
+    };
+    let timing = { turnSeconds: 60, maximumSeconds: 600 };
+    const queries = [];
+    const repository = createDiscoveryRepository({
+      query: async (sql) => {
+        queries.push(sql);
+        return { rows: [{ ...row, timing }] };
+      },
+    });
+    assert.deepEqual((await repository.getDebate(debate.slug)).timing, {
+      turnCount: 10,
+      turnSeconds: 60,
+    });
+    assert.match(
+      queries[0],
+      /event_rule_versions r\s+WHERE r\.version = d\.rules_version/,
+    );
+    for (timing of [
+      null,
+      { turnSeconds: null, maximumSeconds: null },
+      { turnSeconds: 0, maximumSeconds: 600 },
+      { turnSeconds: 60, maximumSeconds: 30 },
+      { turnSeconds: "60", maximumSeconds: 600 },
+    ])
+      assert.equal((await repository.getDebate(debate.slug)).timing, null);
+    // Lists don't read the rules.
+    const list = await repository.listDebates({ limit: 1 });
+    assert.equal("timing" in list.items[0], false);
   });
 
   it("lists only published, non-demo pages and debating profiles for the sitemap", async () => {

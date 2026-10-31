@@ -6,8 +6,13 @@ import express from "express";
 import request from "../scripts/test-http-request.ts";
 
 import { createApp } from "../dist/app.js";
-import { createLogger, createHttpLogger } from "../dist/platform/logger.js";
+import {
+  createLogger,
+  createHttpLogger,
+  serializeError,
+} from "../dist/platform/logger.js";
 import { hashSessionToken } from "../dist/platform/auth/session-tokens.js";
+import { verifyDatabaseState } from "../dist/platform/migrations.js";
 import { createProductActionRecorder } from "../dist/features/measurement/router.js";
 
 const password = "synthetic logging test secret";
@@ -326,14 +331,43 @@ function assertRedactedCookies(record) {
   );
 }
 
+// A logged error keeps only fields whose shape no credential has (F01): never
+// its message, stack text, nested messages or provider properties.
+const safeErrorShape = {
+  redacted: (value) => value === true,
+  type: (value) => /^[A-Za-z_$][\w$]{0,63}$/.test(value),
+  // Only an OperatorError's message, which is written in code, is kept.
+  message: (value, error) =>
+    error.type === "OperatorError" && typeof value === "string",
+  name: (value) => /^(?:[A-Z][a-z]{1,20}){1,6}$/.test(value),
+  code: (value) => /^[0-9A-Z_]{2,64}$/.test(value),
+  status: (value) => Number.isInteger(value) && value >= 100 && value <= 599,
+  frames: (value) =>
+    Array.isArray(value) &&
+    value.length <= 10 &&
+    value.every((frame) =>
+      /^(?:\[external\]|[\w$.<>[\] ]+ \([^\s()]+:\d+\)|[^\s()]+:\d+)$/.test(
+        frame,
+      ),
+    ),
+  cause: (value) => (assertRedactedError(value), true),
+  errors: (value) =>
+    Array.isArray(value) &&
+    value.length <= 3 &&
+    (value.forEach(assertRedactedError), true),
+};
+
 function assertRedactedError(error) {
   assert.ok(
-    error !== null &&
-      typeof error === "object" &&
-      Object.keys(error).length === 1 &&
-      error.redacted === true,
+    error !== null && typeof error === "object" && error.redacted === true,
     "error diagnostics must be replaced with a safe summary",
   );
+  for (const [field, value] of Object.entries(error))
+    assert.ok(
+      Object.hasOwn(safeErrorShape, field) &&
+        safeErrorShape[field](value, error),
+      "a logged error keeps only safe fields in their safe shape",
+    );
 }
 
 async function loggedResponse(capture, httpRequest, requestId, status) {
@@ -807,8 +841,8 @@ describe("credential-safe HTTP logs", () => {
   });
 
   it("excludes health, readiness and metrics completion logs", async () => {
-    const { app, capture } = fixture();
-    for (const path of ["/health", "/ready", "/metrics"]) {
+    const { app, capture } = fixture({ jobHeartbeat: { age: async () => 1 } });
+    for (const path of ["/health", "/ready", "/ready/jobs", "/metrics"]) {
       const response = await request(app).get(path);
       assert.equal(response.status, 200);
       assert.ok(/^[0-9a-f-]{36}$/.test(response.headers["x-request-id"]));
@@ -854,5 +888,227 @@ describe("credential-safe HTTP logs", () => {
       if (capture.records.length) assertRedactedError(capture.records[0].error);
       capture.assertAbsent([password, providerSecret, authorization]);
     }
+  });
+});
+
+describe("credential-safe error diagnostics", () => {
+  class DatabaseError extends Error {}
+
+  function cancelledQuery() {
+    const error = new DatabaseError(`canceling statement for ${password}`, {
+      cause: Object.assign(new Error(`socket ${providerSecret}`), {
+        code: "ECONNRESET",
+      }),
+    });
+    error.code = "57014";
+    return error;
+  }
+
+  async function logged(values) {
+    const capture = captureLogger();
+    for (const value of values)
+      capture.logger.error({ error: value }, "operation failed");
+    await capture.flush();
+    assert.equal(capture.records.length, values.length);
+    for (const record of capture.records) assertRedactedError(record.error);
+    return { capture, errors: capture.records.map(({ error }) => error) };
+  }
+
+  it("keeps the class, code, status, frames and causes of a logged error", async () => {
+    const upload = Object.assign(
+      new Error(`upload rejected ${providerSecret}`),
+      {
+        name: "NoSuchKey",
+        $metadata: { httpStatusCode: 404 },
+      },
+    );
+    const {
+      capture,
+      errors: [query, provider],
+    } = await logged([cancelledQuery(), upload]);
+    assert.equal(query.type, "DatabaseError");
+    assert.equal(query.code, "57014");
+    assert.match(
+      query.frames[0],
+      /^cancelledQuery \(tests\/logger\.test\.js:\d+\)$/,
+    );
+    assert.equal(query.cause.type, "Error");
+    assert.equal(query.cause.code, "ECONNRESET");
+    assert.match(query.cause.frames[0], /^cancelledQuery \(/);
+    assert.deepEqual(
+      [provider.type, provider.name, provider.status],
+      ["Error", "NoSuchKey", 404],
+    );
+    capture.assertAbsent([
+      password,
+      providerSecret,
+      "canceling statement",
+      "upload rejected",
+    ]);
+  });
+
+  it("drops messages, stack text and provider properties at every depth", async () => {
+    // A frame-shaped line in a message must never surface as a frame.
+    const forgedFrame = `    at ${providerSecret} (${new URL(`../${providerSecret}.js`, import.meta.url).href}:1:1)`;
+    const multiline = new Error(`first line\n${forgedFrame}`);
+    const rewritten = new Error(`token ${providerSecret}\n${forgedFrame}`);
+    assert.ok(rewritten.stack.includes(forgedFrame));
+    rewritten.message = "message rewritten after the stack was read";
+    const credentialShaped = Object.assign(new Error("credential-shaped"), {
+      name: "Hunter2Password",
+      code: "sk_live_51HxAbC",
+      status: "500",
+      statusCode: 99999,
+    });
+    const throwing = new Error(`getter ${providerSecret}`);
+    Object.defineProperty(throwing, "code", {
+      get() {
+        throw new Error(providerSecret);
+      },
+    });
+    const proxy = new Proxy(new Error(providerSecret), {
+      get() {
+        throw new Error(providerSecret);
+      },
+    });
+    const cyclic = new Error(`cycle ${providerSecret}`);
+    cyclic.cause = cyclic;
+    const aggregate = new AggregateError(
+      Array.from(
+        { length: 5 },
+        (_, attempt) => new Error(`attempt ${attempt} ${providerSecret}`),
+      ),
+      `all failed ${providerSecret}`,
+    );
+    const { capture, errors } = await logged([
+      multiline,
+      rewritten,
+      credentialShaped,
+      throwing,
+      proxy,
+      cyclic,
+      aggregate,
+      credentialError(),
+      `diagnostic ${providerSecret}`,
+      null,
+    ]);
+    const [first, second, shaped, getter, trapped, cycle, all, provider] =
+      errors;
+    assert.ok(first.frames.length > 0);
+    assert.equal(second.frames, undefined);
+    assert.deepEqual(shaped, {
+      redacted: true,
+      type: "Error",
+      frames: shaped.frames,
+    });
+    assert.deepEqual(getter, { redacted: true, type: "Error" });
+    assert.deepEqual(trapped, { redacted: true, type: "Error" });
+    assert.ok(cycle.cause.cause.cause);
+    assert.equal(cycle.cause.cause.cause.cause, undefined);
+    assert.equal(all.type, "AggregateError");
+    assert.equal(all.errors.length, 3);
+    // The fixture's name, code and stack all hold the provider secret.
+    assert.equal(provider.name, undefined);
+    assert.equal(provider.code, undefined);
+    assert.equal(provider.frames, undefined);
+    assert.equal(provider.cause.cause.type, "Error");
+    assert.deepEqual(errors.slice(8), [
+      { redacted: true, type: "string" },
+      { redacted: true, type: "null" },
+    ]);
+    capture.assertAbsent([
+      password,
+      providerSecret,
+      "synthetic-wallet-signature",
+      authorization,
+      "synthetic-error-cookie",
+      "first line",
+      "rewritten",
+      "credential-shaped",
+      "Hunter2Password",
+      "sk_live_51HxAbC",
+      "all failed",
+    ]);
+  });
+
+  it("logs the operator guidance of a failed start, and no other message", async () => {
+    // Runbooks tell operators to look for this text when a deploy fails.
+    const pending = await verifyDatabaseState(
+      {
+        query: async (sql) => ({
+          rows: sql.includes("current_user") ? [{ safe: true }] : [],
+        }),
+      },
+      new URL("../migrations", import.meta.url),
+    ).then(
+      () => assert.fail("an unmigrated database must fail the start"),
+      (error) => error,
+    );
+    const {
+      capture,
+      errors: [operator, plain],
+    } = await logged([
+      pending,
+      new Error(pending.message),
+      new Error(`pending ${providerSecret}`),
+    ]);
+    assert.equal(operator.type, "OperatorError");
+    assert.match(
+      operator.message,
+      /^database migrations are pending: \d+_\S+(?:, \d+_\S+)*$/,
+    );
+    assert.equal(plain.message, undefined);
+    capture.assertAbsent([providerSecret]);
+  });
+
+  it("keeps only codes and names in a recognised shape", () => {
+    const codes = {
+      23505: true,
+      ECONNREFUSED: true,
+      EAI_AGAIN: true,
+      ENOTFOUND: true,
+      ERR_INVALID_ARG_TYPE: true,
+      UND_ERR_CONNECT_TIMEOUT: true,
+      OAUTH_RESPONSE_BODY_ERROR: true,
+      JBSWY3DPEHPK3PXP: false,
+      sk_live_51HxAbC: false,
+      invalid_grant: false,
+      [providerSecret]: false,
+    };
+    for (const [code, kept] of Object.entries(codes))
+      assert.equal(
+        serializeError(Object.assign(new Error("x"), { code })).code,
+        kept ? code : undefined,
+      );
+    assert.equal(
+      serializeError(Object.assign(new Error("x"), { code: 42 })).code,
+      undefined,
+    );
+    const names = {
+      NoSuchKey: true,
+      AbortError: true,
+      TimeoutError: true,
+      Hunter2: false,
+      HTTPError: false,
+      error: false,
+      [providerSecret]: false,
+    };
+    for (const [name, kept] of Object.entries(names))
+      assert.equal(
+        serializeError(Object.assign(new Error("x"), { name })).name,
+        kept ? name : undefined,
+      );
+    assert.equal(serializeError(new TypeError("x")).type, "TypeError");
+    assert.equal(serializeError(Object.create(null)).type, undefined);
+    assert.equal(
+      serializeError({ stack: `    at leak (/app/${providerSecret}.js:1:1)` })
+        .frames,
+      undefined,
+    );
+    assert.equal(
+      serializeError({ statusCode: 503, response: { body: providerSecret } })
+        .status,
+      503,
+    );
   });
 });

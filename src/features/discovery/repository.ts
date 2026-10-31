@@ -19,7 +19,7 @@ type TopicRow = PublicTopic;
 type ProfileRow = PublicProfile;
 interface DebateRow extends Omit<
   PublicDebate,
-  "topic" | "speakerA" | "speakerB" | "sponsor"
+  "topic" | "speakerA" | "speakerB" | "sponsor" | "timing"
 > {
   topicSlug: string;
   topicTitle: string;
@@ -36,6 +36,26 @@ function page<T>(rows: T[], limit: number, offset: number): PublicList<T> {
     items: rows.slice(0, limit),
     pagination: { limit, offset, hasMore: rows.length > limit },
   };
+}
+
+// The rules' turn length and maximum duration, as stored (jsonb values).
+interface TimingRow {
+  turnSeconds?: unknown;
+  maximumSeconds?: unknown;
+}
+function timing(row: TimingRow | null) {
+  const turn = row?.turnSeconds;
+  const maximum = row?.maximumSeconds;
+  if (
+    typeof turn !== "number" ||
+    typeof maximum !== "number" ||
+    !Number.isInteger(turn) ||
+    !Number.isInteger(maximum) ||
+    turn <= 0 ||
+    maximum < turn
+  )
+    return null;
+  return { turnCount: Math.floor(maximum / turn), turnSeconds: turn };
 }
 
 function mapDebate(row: DebateRow): PublicDebate {
@@ -259,13 +279,23 @@ export function createDiscoveryRepository(database: Pick<Pool, "query">) {
     },
 
     async getDebate(slug: string): Promise<PublicDebate | null> {
-      const result = await database.query<DebateRow>(
-        `SELECT ${debateColumns}
+      const result = await database.query<
+        DebateRow & { timing?: TimingRow | null }
+      >(
+        `SELECT ${debateColumns},
+           (SELECT jsonb_build_object(
+              'turnSeconds', r.rules->'initial_speaking_time_seconds',
+              'maximumSeconds', r.rules->'maximum_duration_seconds')
+            FROM event_rule_versions r
+            WHERE r.version = d.rules_version) AS timing
          ${debateJoins}
          WHERE d.slug = $1 AND d.publication_state = 'published'`,
         [slug],
       );
-      return result.rows[0] ? mapDebate(result.rows[0]) : null;
+      const row = result.rows[0];
+      return row
+        ? { ...mapDebate(row), timing: timing(row.timing ?? null) }
+        : null;
     },
   });
 }

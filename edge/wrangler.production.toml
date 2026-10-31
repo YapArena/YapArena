@@ -1,0 +1,23 @@
+# Production replay edge at https://replay.yaparena.com. Follow
+# docs/production-rollout.md; staging's edge keeps its own configuration.
+#
+#   npx wrangler@4.151.1 deploy --config edge/wrangler.production.toml
+#
+# Set REPLAY_SIGNING_SECRET with `wrangler secret put`, never in this file. It
+# must equal MEDIA_REPLAY_SIGNING_SECRET on the production Render services.
+name = "yaparena-replay-production"
+main = "replay-worker.ts"
+compatibility_date = "2026-10-06"
+workers_dev = false
+
+routes = [
+  { pattern = "replay.yaparena.com", custom_domain = true },
+]
+
+[vars]
+# CORS allows only this origin: no www, no path, no trailing slash.
+APP_ORIGIN = "https://yaparena.com"
+
+[[r2_buckets]]
+binding = "REPLAY_BUCKET"
+bucket_name = "yaparena-production-media"

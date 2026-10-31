@@ -1,16 +1,14 @@
 import { asset } from "./assets.ts";
+import { inscribe } from "./inscribe.ts";
 import { iconLinks, shareMetadata } from "./page-chrome-web.ts";
 import { html } from "../../platform/html.ts";
+
+export { inscribe };
 
 // The headline's flip tracks. frontend/landing-headline.ts holds the same
 // words for its step logic; tests/landing.test.js keeps the two in step.
 const pronouns = ["our", "appers", "our"];
 const nouns = ["opinions", "debates", "ideas", "discussions", "", "opinions"];
-
-// Roman inscriptional style: every "u" is shown as "v" (YOVR, DISCVSSIONS).
-// Only the visible, aria-hidden words change; the screen-reader sentence keeps
-// the real spelling.
-export const inscribe = (word: string) => word.replace(/u/g, "v");
 
 const track = (words: string[], space: string) =>
   html`<span class="flip-track">${words.map((word) => html`<span class="flip-word">${word && space + inscribe(word)}</span>`)}</span>`;

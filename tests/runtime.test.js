@@ -4,6 +4,111 @@ import { describe, it, mock } from "node:test";
 import { createRuntime } from "../dist/platform/runtime.js";
 
 describe("service runtime", () => {
+  it("beats while every one-second job keeps ticking and stops when one stalls", async () => {
+    const callbacks = new Map();
+    const errors = [];
+    const cleared = [];
+    let clock = 0;
+    let beats = 0;
+    let failBeat = false;
+    let sweeps = 0;
+    let finishSweep;
+    const runtime = createRuntime({
+      database: { end: async () => {} },
+      sessions: { deleteExpired: async () => 0 },
+      matchmaking: {
+        sweep: () => {
+          sweeps++;
+          return sweeps === 2
+            ? new Promise((resolve) => {
+                finishSweep = resolve;
+              })
+            : Promise.resolve();
+        },
+        pruneExpired: async () => 0,
+      },
+      heartbeat: {
+        beat: async () => {
+          beats++;
+          if (failBeat) throw new Error("heartbeat unavailable");
+        },
+      },
+      logger: {
+        info() {},
+        error: ({ jobs, error }, message) =>
+          errors.push({ message, jobs, error: error?.message }),
+      },
+      config: { port: 3000, host: "127.0.0.1" },
+      verifyDatabase: async () => {},
+      now: () => clock,
+      setIntervalFn: (callback, interval) => {
+        callbacks.set(interval, callback);
+        return { interval, unref() {} };
+      },
+      clearIntervalFn: (timer) => cleared.push(timer.interval),
+    });
+    await runtime.start();
+    assert.equal(beats, 1, "the worker beats once as it starts");
+    const beat = callbacks.get(15000);
+    const sweep = callbacks.get(1000);
+    await sweep();
+    clock = 59_000;
+    await beat();
+    assert.equal(beats, 2);
+    const stuck = sweep();
+    clock = 120_000;
+    await beat();
+    assert.equal(beats, 2, "a job stuck in its tick stops the heartbeat");
+    assert.deepEqual(errors, [
+      {
+        message: "background jobs stopped ticking",
+        jobs: ["matchmaking"],
+        error: undefined,
+      },
+    ]);
+    finishSweep();
+    await stuck;
+    failBeat = true;
+    await beat();
+    assert.equal(beats, 3, "the heartbeat resumes once the job ticks again");
+    assert.deepEqual(errors.at(-1), {
+      message: "jobs heartbeat failed",
+      jobs: undefined,
+      error: "heartbeat unavailable",
+    });
+    await runtime.stop();
+    assert.ok(cleared.includes(15000));
+    await beat();
+    assert.equal(beats, 3, "a stopped runtime never beats");
+  });
+
+  it("never beats in a process that runs no background jobs", async () => {
+    const intervals = [];
+    let beats = 0;
+    const runtime = createRuntime({
+      database: { end: async () => {} },
+      sessions: { deleteExpired: async () => 0 },
+      heartbeat: {
+        beat: async () => {
+          beats++;
+        },
+      },
+      backgroundJobs: false,
+      logger: { info() {}, error() {} },
+      config: { port: 3000, host: "127.0.0.1" },
+      verifyDatabase: async () => {},
+      setIntervalFn: (_callback, interval) => {
+        intervals.push(interval);
+        return { unref() {} };
+      },
+      clearIntervalFn() {},
+    });
+    await runtime.start();
+    await runtime.stop();
+    assert.deepEqual(intervals, []);
+    assert.equal(beats, 0);
+  });
+
   for (const failing of ["play", "sandbox"])
     it(`awaits both market jobs when ${failing} recovery fails`, async () => {
       let callback,

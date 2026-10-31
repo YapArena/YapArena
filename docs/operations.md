@@ -62,6 +62,11 @@ The `--fail` option makes either check return an error for unsuccessful HTTP res
 
 - `/health` confirms the HTTP process is alive.
 - `/ready` confirms PostgreSQL is reachable.
+- `/ready/jobs` answers `200` while the jobs worker's heartbeat is at most 60 seconds old and `503`
+  otherwise, with `ageSeconds` (`null` before the first beat). The worker beats every 15 seconds,
+  and only while each one-second job keeps finishing ticks, so a job stuck in a tick also turns it
+  stale (logged as `background jobs stopped ticking`). Point the jobs uptime alert here; never use it
+  as web's health check, which stays `/ready`.
 
 ### Monitoring checks
 
@@ -258,7 +263,8 @@ through application rollback; restored session rows must be retired before reope
 2. Read recent logs: `docker compose logs --tail=100 app db`.
 3. Follow application logs: `docker compose logs --follow app`.
 4. Call `/health`; failure suggests a process or network problem.
-5. Call `/ready`; `503` suggests a database problem.
+5. Call `/ready`; `503` suggests a database problem. Call `/ready/jobs`; `503` means the jobs worker
+   stopped or a job is stuck.
 6. Correlate a request using its `X-Request-Id`:
 
    ```sh
@@ -270,10 +276,26 @@ through application rollback; restored session rows must be retired before reope
 
 Logs redact incoming Authorization/Cookie headers and the entire outgoing Set-Cookie field.
 Keep log access restricted. Error fields (`error`, `err`, `permissionError`, `pauseError`,
-`stopError`) contain a fixed redacted summary: raw messages, stacks, nested causes and provider
-diagnostics can include credentials. Diagnose using fixed event messages, request IDs, status,
-timing and safe structured context. Field redaction does not sanitize arbitrary free-text log
-messages; do not interpolate credentials or raw errors into messages or other context fields.
+`stopError`) never contain an error's text: raw messages, stack headers, nested causes and provider
+diagnostics can include credentials. Each holds `redacted: true` and only values whose shape no
+credential has: `type` (the class), `name` when it is capitalised words such as `NoSuchKey`, `code`
+when it is a SQLSTATE (`57014`), a system code (`ECONNREFUSED`) or a constant such as
+`ERR_INVALID_ARG_TYPE`, an HTTP `status`, up to ten `frames` (function and repository-relative
+`file:line`), and the same for up to three levels of `cause` and the first three aggregated
+`errors`. Frames are kept only when the stack still contains the error's message, so a message
+rewritten after its stack was read keeps none, and frames outside the repository read `[external]`.
+Only an `OperatorError`, whose message is operator guidance written in code, also keeps its
+`message`: a failed start logs `database migrations are pending: <names>` or `database runtime
+identity violates the server-only boundary` this way. Diagnose using these, fixed event messages,
+request IDs, status, timing and safe structured context. Field redaction does not sanitize
+arbitrary free-text log messages; do not interpolate credentials or raw errors into messages or
+other context fields.
+
+An uncaught exception or unhandled rejection in web, the jobs worker or the encoder is logged
+as `process crashed` (level `fatal`, with `origin` and the same safe `error`), then the service stops
+within 10 seconds and exits with status 1 for Render to restart it. Node no longer prints the raw
+error to stderr. Web and jobs statements are cancelled after 15 seconds (`code` `57014`);
+transactions that need longer set their own limit.
 
 ### Credential logging follow-up (F01)
 

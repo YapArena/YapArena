@@ -149,6 +149,8 @@ export async function verifyPublicBotsBrowser({
     checks.separateCreatorKeepsWorkspaceRoundsPrivate = true;
     await home.goto(base + "/home");
     await watch.goto(base + "/debates/" + debateSlug);
+    // The chart is in the rail panel's Results tab (debate page direction BC1).
+    await watch.locator("#arena-tab-results").click();
     home.setDefaultTimeout(20000);
     watch.setDefaultTimeout(20000);
     await home.bringToFront();
@@ -369,6 +371,7 @@ export async function verifyPublicBotsBrowser({
     const publicWatch = await anonymous.newPage();
     publicWatch.on("pageerror", (e) => errors.push(e.message));
     await publicWatch.goto(base + "/debates/" + debateSlug);
+    await publicWatch.locator("#arena-tab-results").click();
     await publicWatch.locator(`[data-chart-round="${mixed}"]`).waitFor();
     for (const selector of [
       "[data-inline-access]",

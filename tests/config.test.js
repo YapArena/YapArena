@@ -96,6 +96,7 @@ describe("configuration", () => {
   it("provides safe development defaults", () => {
     assert.deepEqual(loadConfig({ DATABASE_URL: databaseUrl }), {
       environment: "development",
+      productionService: false,
       homepageReferenceEnabled: false,
       landingFontFile: undefined,
       coinSandboxEnabled: false,
@@ -151,6 +152,7 @@ describe("configuration", () => {
       }),
       {
         environment: "production",
+        productionService: false,
         homepageReferenceEnabled: false,
         landingFontFile: "/etc/secrets/landing-headline-font.b64",
         coinSandboxEnabled: false,

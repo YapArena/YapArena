@@ -10,6 +10,71 @@
   font-family: Arial, Helvetica, sans-serif;
   font-synthesis: none;
 }
+/* The landing page's values, shared with the debate page (docs/debate-page-design.md).
+   --bg, --panel, --line, --text, --muted and --acid above are the ground,
+   surface, divider, text, muted and acid colours. tests/design-tokens.test.js
+   keeps every value here equal to landing.css. */
+:root {
+  --raised: #161616;
+  --control-border: #4b4b4b;
+  --button-text: #e2e2e2;
+  --on-acid: #0c0c0c;
+  --primary-gradient: linear-gradient(180deg, #fcfcfc, #f7f7f7);
+  /* "Do you agree?" answers. arena.css's --yes is the chart's old white. */
+  --answer-yes: #2fbf71;
+  --on-yes: #04140b;
+  --answer-yes-tint: rgb(47 191 113 / 12%);
+  --answer-no: #ff536c;
+  --on-no: #2a0509;
+  --answer-no-tint: rgb(255 83 108 / 12%);
+  /* The queue's last-10-seconds colour. */
+  --warning: #ff8a5c;
+  --rest-opacity: 0.13;
+  /* 8-point spacing scale. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --radius-card: 16px;
+  --radius-inner: 12px;
+  --radius-pill: 999px;
+  --font-display: "Dydema Capitals", "Forum", Georgia, serif;
+  --font-number: "Forum", Georgia, serif;
+  --font-body: Arial, Helvetica, sans-serif;
+  --text-12: 0.75rem;
+  --text-14: 0.875rem;
+  --text-16: 1rem;
+  --text-20: 1.25rem;
+  --text-24: 1.5rem;
+  --text-28: 1.75rem;
+  --text-40: 2.5rem;
+  --ease-expo: cubic-bezier(0.19, 1, 0.22, 1);
+}
+/* The landing fonts, at the same URLs landing.css resolves
+   (/assets/landing/fonts/…). Dydema Capitals is not committed; without it
+   the display text falls back to Forum (docs/landing-page.md). */
+@font-face {
+  font-family: "Dydema Capitals";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("landing/fonts/headline.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Forum";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("landing/fonts/forum-latin-400-normal.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
 * {
   box-sizing: border-box;
 }
