@@ -32,6 +32,7 @@ import type { loadConfig } from "./platform/config.ts";
 import type { createLogger } from "./platform/logger.ts";
 import type { createMetrics } from "./platform/metrics.ts";
 import { verifyDatabaseState } from "./platform/migrations.ts";
+import { createJobHeartbeat } from "./platform/job-heartbeat.ts";
 import { createRuntime } from "./platform/runtime.ts";
 
 type ServiceOptions = {
@@ -256,6 +257,7 @@ export function createServices({
           database,
           new URL("../migrations", import.meta.url),
         ),
+      heartbeat: createJobHeartbeat(database),
     },
     close() {
       abuseStore?.close();
