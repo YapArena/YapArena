@@ -82,6 +82,7 @@ import {
   createApiRateLimiter,
   createCsrfOriginProtection,
 } from "./platform/security.ts";
+import { createSearchIndexing } from "./platform/search-indexing.ts";
 
 // A browser asking for a page, not a script or API client asking for JSON.
 const wantsPage = (request: Request) =>
@@ -144,6 +145,7 @@ export function createApp({
   sessions,
   logger,
   environment = "development",
+  productionService = false,
   homepageReferenceEnabled = false,
   landingFont,
   publicBots,
@@ -199,6 +201,8 @@ export function createApp({
   sessions: ReturnType<typeof createSessionRepository>;
   logger: Logger;
   environment?: string;
+  // PRODUCTION_SERVICE=true: the one deployment search engines may index.
+  productionService?: boolean;
   homepageReferenceEnabled?: boolean;
   // The licensed landing headline font, read from LANDING_FONT_FILE at startup.
   landingFont?: Buffer;
@@ -304,6 +308,8 @@ export function createApp({
           : undefined,
       ),
     );
+  // Before every route and limiter, so 404s, 429s and errors carry the header.
+  app.use(createSearchIndexing({ productionService, applicationOrigin }));
   // The transcriber agent's private ingest has its own per-debate limit.
   const internalIngest = (request: Request) =>
     request.path.startsWith("/api/internal/transcription/");

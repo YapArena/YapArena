@@ -130,7 +130,7 @@ web adaptive access during a canary; omitting it enables the eligible catalog.
 `MEDIA_REPLAY_CONCURRENCY=1` is the provisional default (hard maximum two).
 Job/input/output limits are documented in `.env.example` and replay automation.
 
-CI publishes the encoder image (`ghcr.io/boufe/yaparena-encoder`) with FFmpeg and
+CI publishes the encoder image (`ghcr.io/yaparena/yaparena-encoder`) with FFmpeg and
 ffprobe for every `main` commit; see [the CI-published images](render-staging.md#deploy-the-ci-published-images).
 A worker built from source by Render's Docker runtime instead needs
 `MEDIA_WORKER_TOOLS=true`, which Render maps to the Docker build argument that installs

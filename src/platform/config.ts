@@ -430,6 +430,9 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
 
   return Object.freeze({
     environment: nodeEnvironment,
+    // Set only on the production web service. Its Auth0 check rejects any
+    // other value; every other deployment asks search engines not to index it.
+    productionService: environment.PRODUCTION_SERVICE === "true",
     homepageReferenceEnabled: homepageReference === "true",
     landingFontFile,
     coinSandboxEnabled: coinSandbox === "true",

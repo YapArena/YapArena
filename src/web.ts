@@ -184,6 +184,7 @@ export function createWebServer(
     sessions,
     logger,
     environment: config.environment,
+    productionService: config.productionService,
     homepageReferenceEnabled: config.homepageReferenceEnabled,
     applicationOrigin: config.applicationOrigin,
     trustProxy: config.trustProxy,
