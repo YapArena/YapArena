@@ -295,7 +295,7 @@ export function createApp({
       ),
     );
   // Before every route and limiter, so 404s, 429s and errors carry the header.
-  app.use(createSearchIndexing({ productionService }));
+  app.use(createSearchIndexing({ productionService, applicationOrigin }));
   // The transcriber agent's private ingest has its own per-debate limit.
   const internalIngest = (request: Request) =>
     request.path.startsWith("/api/internal/transcription/");

@@ -4,15 +4,22 @@ import { Router } from "express";
 // results. Every other deployment, staging and local development included,
 // sends X-Robots-Tag: noindex on every response and disallows all crawling.
 // Production keeps crawlers out of /api/: its JSON is not a page, and each
-// /api/auth/login request starts a sign-in.
-const productionRobots = "User-agent: *\nDisallow: /api/\n";
+// /api/auth/login request starts a sign-in. Its robots.txt also names the
+// sitemap, which must be an absolute URL on the canonical origin.
 const blockedRobots = "User-agent: *\nDisallow: /\n";
 
 export function createSearchIndexing({
   productionService,
+  applicationOrigin,
 }: {
   productionService: boolean;
+  applicationOrigin?: string;
 }) {
+  const sitemap =
+    productionService && applicationOrigin
+      ? `Sitemap: ${new URL("/sitemap.xml", applicationOrigin).href}\n`
+      : "";
+  const productionRobots = `User-agent: *\nDisallow: /api/\n${sitemap}`;
   const router = Router();
   if (!productionService)
     router.use((_request, response, next) => {

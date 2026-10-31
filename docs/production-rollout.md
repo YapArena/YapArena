@@ -31,21 +31,21 @@ own value of every secret, and shares no project, tenant, bucket or key with sta
 
 Plan four sittings. Start step 2 a day early: moving the nameservers can take up to a day.
 
-| Step                                                       | What happens                                                | Where                         | Time               |
-| ---------------------------------------------------------- | ----------------------------------------------------------- | ----------------------------- | ------------------ |
-| [0](#0-before-you-start)                                   | Accounts, plans, tools, private folder                      | Browser, Terminal             | 1–1½ h             |
-| [1](#1-switch-staging-to-ci-images-and-choose-the-release) | Staging runs CI images; the launch release is chosen        | GitHub, Render, Terminal      | 45 min             |
-| [2](#2-move-yaparenacoms-dns-to-cloudflare)                | yaparena.com's DNS moves to Cloudflare                      | Registrar, Cloudflare         | 30 min, then ≤ 1 d |
-| [3](#3-resend-for-sign-in-emails)                          | Resend sends from `no-reply@yaparena.com`                   | Resend, Cloudflare            | 30 min             |
-| [4](#4-google-sign-in-client)                              | Production's own Google sign-in client                      | Google Cloud                  | 20 min             |
-| [5](#5-auth0-production-tenant)                            | Auth0 tenant on `auth.yaparena.com`                         | Auth0, Cloudflare             | 1–1½ h             |
-| [6](#6-production-database)                                | Supabase project, identities, migrations, first backup      | Supabase, Terminal            | 1 h                |
-| [7](#7-video-livekit-r2-replay-edge-and-transcriber)       | LiveKit, R2, the replay edge, the transcriber agent         | LiveKit, Cloudflare, Terminal | 1½ h               |
-| [8](#8-render-services)                                    | `yaparena-web`, `yaparena-jobs` and `yaparena-encoder`      | Render, Terminal              | 1 h                |
-| [9](#9-open-items-at-launch)                               | What follows after launch                                   | Separate tasks                | —                  |
-| [10](#10-connect-yaparenacom)                              | yaparena.com points at production; certificates             | Render, Cloudflare            | 30 min–1 h         |
-| [11](#11-launch-checks)                                    | Redirects, sign-up, sign-out, a two-account debate, staging | Browsers, phone, Terminal     | 1–1½ h             |
-| [Releasing](#releasing-from-now-on), [Rollback](#rollback) | Every later release, and going back                         | GitHub, Render, Terminal      | 45 min per release |
+| Step                                                       | What happens                                               | Where                         | Time               |
+| ---------------------------------------------------------- | ---------------------------------------------------------- | ----------------------------- | ------------------ |
+| [0](#0-before-you-start)                                   | Accounts, plans, tools, private folder                     | Browser, Terminal             | 1–1½ h             |
+| [1](#1-switch-staging-to-ci-images-and-choose-the-release) | Staging runs CI images; the launch release is chosen       | GitHub, Render, Terminal      | 45 min             |
+| [2](#2-move-yaparenacoms-dns-to-cloudflare)                | yaparena.com's DNS moves to Cloudflare                     | Registrar, Cloudflare         | 30 min, then ≤ 1 d |
+| [3](#3-resend-for-sign-in-emails)                          | Resend sends from `no-reply@yaparena.com`                  | Resend, Cloudflare            | 30 min             |
+| [4](#4-google-sign-in-client)                              | Production's own Google sign-in client                     | Google Cloud                  | 20 min             |
+| [5](#5-auth0-production-tenant)                            | Auth0 tenant on `auth.yaparena.com`                        | Auth0, Cloudflare             | 1–1½ h             |
+| [6](#6-production-database)                                | Supabase project, identities, migrations, first backup     | Supabase, Terminal            | 1 h                |
+| [7](#7-video-livekit-r2-replay-edge-and-transcriber)       | LiveKit, R2, the replay edge, the transcriber agent        | LiveKit, Cloudflare, Terminal | 1½ h               |
+| [8](#8-render-services)                                    | `yaparena-web`, `yaparena-jobs` and `yaparena-encoder`     | Render, Terminal              | 1 h                |
+| [9](#9-open-items-at-launch)                               | What follows after launch                                  | Separate tasks                | —                  |
+| [10](#10-connect-yaparenacom)                              | yaparena.com points at production; certificates            | Render, Cloudflare            | 30 min–1 h         |
+| [11](#11-launch-checks)                                    | Redirects, sign-up, sign-out, Yap Coins, a debate, staging | Browsers, phone, Terminal     | 1¼–1¾ h            |
+| [Releasing](#releasing-from-now-on), [Rollback](#rollback) | Every later release, and going back                        | GitHub, Render, Terminal      | 45 min per release |
 
 Everything can be undone except the migrations and what's fixed when it's created: the Auth0
 tenant's name and region, the LiveKit project's region, the transcriber agent's region and the
@@ -56,18 +56,18 @@ Google project's ID. Nobody can reach production until step 10, so steps 0 to 8 
 Prices as read on 2026-10-29 on each provider's pricing page; check them again before you confirm.
 The fixed part is about **$96 a month** (Render $21, Supabase $25, LiveKit $50), plus usage.
 
-| Account                                       | What it's for                                       | Plan                                  | Monthly cost                                                                                     | Used in    |
-| --------------------------------------------- | --------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ---------- |
-| Render, the workspace that holds staging      | `yaparena-web`, `yaparena-jobs`, `yaparena-encoder` | Hobby workspace; each service Starter | $7 per service, $21 in all. Hobby includes 5 GB of outbound bandwidth, then $0.15 per GB         | 1, 8, 10   |
-| Supabase, a **new** organization              | The production database                             | Pro                                   | $25, which includes $10 of compute: one Micro database. Daily backups kept 7 days                | 6, 9       |
-| Auth0, a **new** tenant                       | Sign-in on `auth.yaparena.com`                      | Free (a card on file, not charged)    | $0 up to 25,000 monthly active users; includes one custom domain                                 | 5          |
-| Resend (new)                                  | Sign-in code emails from `no-reply@yaparena.com`    | Free to start                         | $0 for 3,000 emails a month and **100 a day**; Pro is $20 for 50,000 a month with no daily limit | 3, 5       |
-| Google Cloud, a new project                   | Production's Google sign-in client                  | No plan                               | $0                                                                                               | 4          |
-| LiveKit Cloud, a **new** project              | Video, recording, the transcriber agent             | Ship                                  | $50: 600 recording minutes, 5,000 agent minutes, $5 of speech-to-text, then per minute           | 7          |
-| Cloudflare, the account that holds staging R2 | DNS, the media bucket, the replay edge              | Free; Workers Free                    | $0: R2 10 GB free, then $0.015 per GB; Workers 100,000 requests a day, Workers Paid $5 for more  | 2, 7, 10   |
-| Claude Console, a new workspace               | The AI outline (Claude Haiku and Sonnet)            | Prepaid credits                       | About $0.50 per 10-minute debate                                                                 | 7          |
-| A password manager                            | Every secret below                                  | Any                                   | —                                                                                                | Throughout |
-| Two email addresses you can read              | Your production account and a second test one       | Free (`you+b@gmail.com` works)        | —                                                                                                | 11         |
+| Account                                       | What it's for                                       | Plan                                                | Monthly cost                                                                                     | Used in    |
+| --------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ---------- |
+| Render, the workspace that holds staging      | `yaparena-web`, `yaparena-jobs`, `yaparena-encoder` | Hobby workspace; each service Starter               | $7 per service, $21 in all. Hobby includes 5 GB of outbound bandwidth, then $0.15 per GB         | 1, 8, 10   |
+| Supabase, a **new** organization              | The production database                             | Pro                                                 | $25, which includes $10 of compute: one Micro database. Daily backups kept 7 days                | 6, 9       |
+| Auth0, a **new** tenant                       | Sign-in on `auth.yaparena.com`                      | Free (a card on file, not charged)                  | $0 up to 25,000 monthly active users; includes one custom domain                                 | 5          |
+| Resend (new)                                  | Sign-in code emails from `no-reply@yaparena.com`    | Free to start                                       | $0 for 3,000 emails a month and **100 a day**; Pro is $20 for 50,000 a month with no daily limit | 3, 5       |
+| Google Cloud, a new project                   | Production's Google sign-in client                  | No plan                                             | $0                                                                                               | 4          |
+| LiveKit Cloud, a **new** project              | Video, recording, the transcriber agent             | Ship                                                | $50: 600 recording minutes, 5,000 agent minutes, $5 of speech-to-text, then per minute           | 7          |
+| Cloudflare, the account that holds staging R2 | DNS, the media bucket, the replay edge              | Free; Workers Free                                  | $0: R2 10 GB free, then $0.015 per GB; Workers 100,000 requests a day, Workers Paid $5 for more  | 2, 7, 10   |
+| Claude Console, a new workspace               | The AI outline (Claude Haiku and Sonnet)            | Prepaid credits                                     | About $0.50 per 10-minute debate                                                                 | 7          |
+| A password manager                            | Every secret below                                  | Any                                                 | —                                                                                                | Throughout |
+| Three email addresses you can read            | Your production account and two test ones           | Free (`you+b@gmail.com` and `you+c@gmail.com` work) | —                                                                                                | 11         |
 
 Three limits to watch after launch:
 
@@ -282,6 +282,10 @@ accept, captions, the AI outline, a turn window, and the replay after it ends.
 
 - Check: the same results as the staging rollout's checks. If anything fails, stop: production
   takes only a release staging passed.
+- If an answer in the turn window says answers are paused, staging's Yap Coins treasuries are empty.
+  Fund them once with `~/yaparena-private/owner.env`, as in
+  [funding the center and promotional treasuries](coin-sandbox-operations.md#funding-the-center-and-promotional-treasuries-d1),
+  then answer again.
 
 ## 2. Move yaparena.com's DNS to Cloudflare
 
@@ -930,8 +934,9 @@ Time: 15 minutes. Step 6.5 migrated the database for this release. Then:
   curl -s -o /dev/null -w '%{http_code}\n' https://<RENDER_HOST>/metrics
   ```
 
-  In order: `{"status":"ready"}`; the smoke report as in step 1.4; `User-agent: *` and
-  `Disallow: /api/`; `0` (production may be indexed); `404` (`/metrics` needs the token).
+  In order: `{"status":"ready"}`; the smoke report as in step 1.4; `User-agent: *`,
+  `Disallow: /api/` and `Sitemap: https://yaparena.com/sitemap.xml`; `0` (production may be
+  indexed); `404` (`/metrics` needs the token).
 
 - Check, **Logs**:
   - `yaparena-web`: `server started` with `"auth0":true`, and `landing font loaded`.
@@ -992,6 +997,8 @@ Secret files: `supabase-ca.crt` on all three; `landing-headline-font.b64` on web
   app refuses to start with any of them.
 - `AUTH0_*` and `PRODUCTION_SERVICE` on the jobs worker or the encoder: web only.
 - `HOMEPAGE_REFERENCE_ENABLED`: refused in production.
+- `COIN_SANDBOX_TRANSFERS_ENABLED`: simulated purchases and withdrawals. The production web service
+  refuses to start with it.
 - `MEDIA_REPLAY_EDGE_ROOMS`: a canary allowlist; production serves every eligible replay.
 - `COIN_SANDBOX_WEBHOOK_SECRET`, `USER_STREAM_ENABLED` (live updates are on with matchmaking),
   `MEDIA_WORKER_TOOLS` (image builds only), `A4_MODE` (unset is `disabled`), `REDIS_*` (one
@@ -1036,8 +1043,15 @@ production, then delete the scratch project. Ask the hub for the exact procedure
 An outside check that alerts your phone. Until it exists, nothing tells you when the site or the
 jobs worker stops; check `https://yaparena.com/ready` and Render's **Events** yourself.
 
+Until then, also search the jobs worker's **Logs** now and then for these lines:
+
+- `coin treasury low`: top up as in step 11.6. Web's `/metrics` also shows it as
+  `yaparena_coin_treasury_low`.
+- `coin round settlement failed; round set aside`: a turn's Yap Coins didn't settle. Ask the hub.
+- `debate live past maximum duration`: a debate didn't end by itself. End it as operator.
+
 - Done when: stopping a test target sends an alert within five minutes, and alerts cover
-  `https://yaparena.com/ready` and the jobs worker stopping.
+  `https://yaparena.com/ready`, the jobs worker stopping and the three log lines above.
 
 ### 9.5 Account deletion
 
@@ -1088,8 +1102,9 @@ here on, the public can reach production; don't announce it until step 11 passes
 
 ## 11. Launch checks
 
-Time: 1–1½ hours. Two browser profiles, as in the staging rollout: profile A for your own account,
-profile B for `you+b@…`.
+Time: 1¼–1¾ hours. Two browser profiles, as in the staging rollout: profile A for your own account,
+profile B for `you+b@…`. Step 11.7 adds a third account, `you+c@…`, in profile C or a private
+window.
 
 ### 11.1 Redirects and pages
 
@@ -1102,6 +1117,7 @@ curl -sIL -o /dev/null -w '%{url_effective}\n' 'http://yaparena.com/topics'
 curl -s https://yaparena.com/ | grep -o '<link rel="canonical" href="[^"]*"'
 SMOKE_BASE_URL=https://yaparena.com node scripts/smoke-staging.ts
 curl -s https://yaparena.com/robots.txt
+curl -s https://yaparena.com/sitemap.xml | grep -o '<loc>[^<]*</loc>' | head -2
 curl -s -o /dev/null -w '%{http_code}\n' https://yaparena.com/metrics
 ```
 
@@ -1111,7 +1127,8 @@ curl -s -o /dev/null -w '%{http_code}\n' https://yaparena.com/metrics
   - `https://yaparena.com/topics`;
   - `<link rel="canonical" href="https://yaparena.com/"`;
   - the smoke report as in step 1.4;
-  - `User-agent: *` and `Disallow: /api/`;
+  - `User-agent: *`, `Disallow: /api/` and `Sitemap: https://yaparena.com/sitemap.xml`;
+  - `<loc>https://yaparena.com/</loc>` and `<loc>https://yaparena.com/home</loc>`;
   - `404`.
 - If a redirect goes to `www`, step 10.1 added the wrong domain first.
 
@@ -1156,7 +1173,63 @@ ON CONFLICT DO NOTHING;
 
 - Check: signed in as A, `https://yaparena.com/api/me/roles` shows `"operator"`.
 
-### 11.6 A two-account debate
+### 11.6 Fund Yap Coins
+
+Time: 10 minutes. Do this before anyone answers in a debate: on an empty database every answer is
+refused as paused until the center and promotional treasuries are funded. The funds are play money
+with no cash value (founder decisions D1 and D2 in
+[the coin operations guide](coin-sandbox-operations.md#launch-mode-play-money-only)).
+
+1. In the production SQL editor:
+
+   ```sql
+   SELECT user_id FROM yaparena.public_profiles WHERE handle = '<handle-a>';
+   ```
+
+   That's `<operator-id>`.
+
+2. Terminal: run `uuidgen` twice. Then `nano ~/yaparena-private/production/seed-center.json`:
+
+   ```json
+   {
+     "userId": "<operator-id>",
+     "purpose": "center",
+     "amount": "1000000000000",
+     "idempotencyKey": "<first-uuid>"
+   }
+   ```
+
+   `nano ~/yaparena-private/production/seed-promotional.json`: the same, with
+   `"purpose": "promotional"` and the second UUID.
+
+3. Terminal:
+
+   ```sh
+   cd ~/yaparena-release
+   node --env-file="$HOME/yaparena-private/production/owner.env" scripts/coin-sandbox-operator.ts seed-simulation < ~/yaparena-private/production/seed-center.json
+   node --env-file="$HOME/yaparena-private/production/owner.env" scripts/coin-sandbox-operator.ts seed-simulation < ~/yaparena-private/production/seed-promotional.json
+   ```
+
+- Check: each command prints
+  `{"command":"seed-simulation","environment":"sandbox","rail":"simulation","status":"recorded","processed":0}`.
+  Then, in the SQL editor:
+
+  ```sql
+  SELECT s.purpose, a.balance
+  FROM yaparena.coin_sandbox_system_accounts s
+  JOIN yaparena.coin_accounts a ON a.id = s.account_id
+  WHERE s.purpose IN ('center_available','promotional_available')
+  ORDER BY 1;
+  ```
+
+  shows `1000000000000` for both: 1,000,000 USDC-equivalent, or 100,000,000 YC, each.
+
+- If a command fails, run step 6.4's check: `owner.env` must connect as `yaparena_owner`. Running a
+  file again with the same UUID changes nothing.
+- Top up when the jobs worker logs `coin treasury low` (a treasury under 200,000 USDC-equivalent, a
+  fifth of the seed): repeat steps 2 and 3 for that treasury with a new UUID.
+
+### 11.7 A first debate
 
 Time: 30 minutes.
 
@@ -1167,10 +1240,15 @@ Time: 30 minutes.
 3. Queue A for one side and B for the other on `https://yaparena.com/topics/<topic-slug>`, accept,
    and join as speakers, as in
    [8.5 of the staging rollout](staging-rollout.md#85-queue-accept-and-start-automatically).
-4. Talk for two turns, then end it as operator (**Operator controls** → reason → **End**).
+4. Talk for two turns. During the first, in profile C (or a private window), sign up with
+   `you+c@…` as in step 11.3, open the debate and answer **Yes** in the turn's window.
+5. End it as operator (**Operator controls** → reason → **End**).
 
 - Check:
   - The debate goes live by itself; captions appear and the **AI outline** fills.
+  - C's header shows 2,500 YC before answering. After **Yes**, C's panel shows "You said Yes · …"
+    and the header balance drops by the size. If it says answers are paused, step 11.6 didn't
+    fund the treasuries.
   - The production agent's logs show `transcriber joined` (Terminal: `lk project set-default` to
     production, `cd ~/yaparena-transcriber-production`, `lk agent logs`; switch back afterwards).
   - A Yap Coins window opens for each turn.
@@ -1180,7 +1258,7 @@ Time: 30 minutes.
 - These test accounts and the debate stay in production. Unpublish the topic afterwards if you
   don't want it public.
 
-### 11.7 Staging still works on its own
+### 11.8 Staging still works on its own
 
 ```sh
 curl -fsS https://yaparena-staging-web.onrender.com/ready
@@ -1204,6 +1282,7 @@ Ship. Set them on web and the jobs worker together.
 | Flag                             | Staging             | Production at launch  | Why                                                 |
 | -------------------------------- | ------------------- | --------------------- | --------------------------------------------------- |
 | `COIN_SANDBOX_ENABLED`           | `true`              | `true`                | Yap Coins are always on (Decision 0013); play money |
+| `COIN_SANDBOX_TRANSFERS_ENABLED` | unset               | unset                 | No buying or withdrawing; production refuses it     |
 | `TURN_WINDOWS_ENABLED`           | `true`              | `true`                | One Yap Coins window per turn                       |
 | `LIVE_OUTLINE_ENABLED`           | `true`              | `true`                | Captions and the AI outline                         |
 | `MATCHMAKING_ENABLED`            | `true`              | `true`                | The live queue and challenges                       |

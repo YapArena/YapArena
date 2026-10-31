@@ -74,12 +74,39 @@ describe("search indexing", () => {
     assert.equal(robots.status, 200);
     assert.match(robots.headers["content-type"], /^text\/plain/);
     assert.equal(robots.headers["cache-control"], "public, max-age=3600");
-    assert.equal(robots.text, "User-agent: *\nDisallow: /api/\n");
+    assert.equal(
+      robots.text,
+      "User-agent: *\nDisallow: /api/\nSitemap: https://yaparena.com/sitemap.xml\n",
+    );
     assert.equal(robots.headers["x-robots-tag"], undefined);
     for (const path of ["/health", "/no-such-page"]) {
       const response = await request(production).get(path);
       assert.equal(response.headers["x-robots-tag"], undefined, path);
     }
+  });
+
+  it("names the sitemap only when production knows its origin", async () => {
+    const trailingSlash = createApp({
+      messages,
+      sessions,
+      logger,
+      productionService: true,
+      applicationOrigin: "https://yaparena.com/",
+    });
+    assert.equal(
+      (await request(trailingSlash).get("/robots.txt")).text,
+      "User-agent: *\nDisallow: /api/\nSitemap: https://yaparena.com/sitemap.xml\n",
+    );
+    const noOrigin = createApp({
+      messages,
+      sessions,
+      logger,
+      productionService: true,
+    });
+    assert.equal(
+      (await request(noOrigin).get("/robots.txt")).text,
+      "User-agent: *\nDisallow: /api/\n",
+    );
   });
 
   it("serves robots.txt to HEAD requests", async () => {
