@@ -8,7 +8,20 @@ exports[`renders a debate 1`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -92,7 +105,7 @@ exports[`renders a debate 1`] = `
 <span>Public topic</span>
 </div>\\n        <div class="arena-video-overlay arena-video-status">
 <span class="arena-broadcast-badge">Upcoming</span>
-<span class="arena-watch-count" title="Active playback tabs on this staging instance" data-arena-viewers>— watching</span>
+<span class="arena-watch-count" title="Browser tabs playing this debate right now" data-arena-viewers>— watching</span>
 <span class="arena-watch-time" data-arena-playback>
 </span>
 </div>\\n        <div class="arena-video-empty">
@@ -627,7 +640,20 @@ exports[`renders a debate 10`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -713,7 +739,7 @@ exports[`renders a debate 10`] = `
 <span>Public topic</span>
 </div>\\n        <div class="arena-video-overlay arena-video-status">
 <span class="arena-broadcast-badge">Upcoming</span>
-<span class="arena-watch-count" title="Active playback tabs on this staging instance" data-arena-viewers>— watching</span>
+<span class="arena-watch-count" title="Browser tabs playing this debate right now" data-arena-viewers>— watching</span>
 <span class="arena-watch-time" data-arena-playback>
 </span>
 </div>\\n        <div class="arena-video-empty">
@@ -1248,7 +1274,20 @@ exports[`renders a debate 2`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -1334,7 +1373,7 @@ exports[`renders a debate 2`] = `
 <span class="arena-broadcast-badge is-live">
 <span class="arena-live-dot" aria-hidden="true">
 </span>Live</span>
-<span class="arena-watch-count" title="Active playback tabs on this staging instance" data-arena-viewers>— watching</span>
+<span class="arena-watch-count" title="Browser tabs playing this debate right now" data-arena-viewers>— watching</span>
 <span class="arena-watch-time" data-arena-playback>
 </span>
 </div>\\n        <div class="arena-video-empty">
@@ -1867,7 +1906,20 @@ exports[`renders a debate 3`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -1951,7 +2003,7 @@ exports[`renders a debate 3`] = `
 <span>Public topic</span>
 </div>\\n        <div class="arena-video-overlay arena-video-status">
 <span class="arena-broadcast-badge">Replay</span>
-<span class="arena-watch-count" title="Active playback tabs on this staging instance" data-arena-viewers>— watching</span>
+<span class="arena-watch-count" title="Browser tabs playing this debate right now" data-arena-viewers>— watching</span>
 <span class="arena-watch-time" data-arena-playback>
 </span>
 </div>\\n        <div class="arena-video-empty">
@@ -2487,7 +2539,20 @@ exports[`renders a debate 4`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -2571,7 +2636,7 @@ exports[`renders a debate 4`] = `
 <span>Public topic</span>
 </div>\\n        <div class="arena-video-overlay arena-video-status">
 <span class="arena-broadcast-badge">Finalized replay</span>
-<span class="arena-watch-count" title="Active playback tabs on this staging instance" data-arena-viewers>— watching</span>
+<span class="arena-watch-count" title="Browser tabs playing this debate right now" data-arena-viewers>— watching</span>
 <span class="arena-watch-time" data-arena-playback>
 </span>
 </div>\\n        <div class="arena-video-empty">
@@ -3107,7 +3172,20 @@ exports[`renders a debate 5`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -3191,7 +3269,7 @@ exports[`renders a debate 5`] = `
 <span>Public topic</span>
 </div>\\n        <div class="arena-video-overlay arena-video-status">
 <span class="arena-broadcast-badge">Cancelled</span>
-<span class="arena-watch-count" title="Active playback tabs on this staging instance" data-arena-viewers>— watching</span>
+<span class="arena-watch-count" title="Browser tabs playing this debate right now" data-arena-viewers>— watching</span>
 <span class="arena-watch-time" data-arena-playback>
 </span>
 </div>\\n        <div class="arena-video-empty">
@@ -3725,7 +3803,20 @@ exports[`renders a debate 6`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -3809,7 +3900,7 @@ exports[`renders a debate 6`] = `
 <span>Public topic</span>
 </div>\\n        <div class="arena-video-overlay arena-video-status">
 <span class="arena-broadcast-badge">void review</span>
-<span class="arena-watch-count" title="Active playback tabs on this staging instance" data-arena-viewers>— watching</span>
+<span class="arena-watch-count" title="Browser tabs playing this debate right now" data-arena-viewers>— watching</span>
 <span class="arena-watch-time" data-arena-playback>
 </span>
 </div>\\n        <div class="arena-video-empty">
@@ -4343,7 +4434,20 @@ exports[`renders a debate 7`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -4428,7 +4532,7 @@ exports[`renders a debate 7`] = `
 </div>\\n        <div class="arena-video-overlay arena-video-status">
 <span class="arena-broadcast-badge">Upcoming</span>
 <span class="arena-demo">Demo</span>
-<span class="arena-watch-count" title="Active playback tabs on this staging instance" data-arena-viewers>— watching</span>
+<span class="arena-watch-count" title="Browser tabs playing this debate right now" data-arena-viewers>— watching</span>
 <span class="arena-watch-time" data-arena-playback>
 </span>
 </div>\\n        <div class="arena-video-empty">
@@ -4963,7 +5067,20 @@ exports[`renders a debate 8`] = `
 <title>Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
 <link rel="canonical" href="https://arena.example/debates/hostile-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
+<meta property="og:description" content="Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;: Side A &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; vs Side B &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/hostile-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -5050,7 +5167,7 @@ exports[`renders a debate 8`] = `
 <span class="arena-live-dot" aria-hidden="true">
 </span>Live</span>
 <span class="arena-demo">Demo</span>
-<span class="arena-watch-count" title="Active playback tabs on this staging instance" data-arena-viewers>— watching</span>
+<span class="arena-watch-count" title="Browser tabs playing this debate right now" data-arena-viewers>— watching</span>
 <span class="arena-watch-time" data-arena-playback>
 </span>
 </div>\\n        <div class="arena-video-empty">
@@ -5592,7 +5709,20 @@ exports[`renders a debate 9`] = `
 <title>Should we debate this? · YAP Arena</title>
 <meta name="description" content="Watch and participate in the debate: Should we debate this?">
 <link rel="canonical" href="https://arena.example/debates/public-debate">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Should we debate this?">
+<meta property="og:description" content="Public topic: For vs Against. Watch the video debate on YAP Arena.">
+<meta property="og:url" content="https://arena.example/debates/public-debate">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -5676,7 +5806,7 @@ exports[`renders a debate 9`] = `
 <span>Public topic</span>
 </div>\\n        <div class="arena-video-overlay arena-video-status">
 <span class="arena-broadcast-badge">Upcoming</span>
-<span class="arena-watch-count" title="Active playback tabs on this staging instance" data-arena-viewers>— watching</span>
+<span class="arena-watch-count" title="Browser tabs playing this debate right now" data-arena-viewers>— watching</span>
 <span class="arena-watch-time" data-arena-playback>
 </span>
 </div>\\n        <div class="arena-video-empty">
@@ -6214,6 +6344,19 @@ exports[`renders a profile 1`] = `
 <title>Alex Public · YAP Arena</title>
 <meta name="description" content="Public speaker">
 <link rel="canonical" href="https://arena.example/people/alex-public">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Alex Public (@alex-public)">
+<meta property="og:description" content="Public speaker">
+<meta property="og:url" content="https://arena.example/people/alex-public">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -6334,6 +6477,19 @@ exports[`renders a profile 2`] = `
 <title>Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; · YAP Arena</title>
 <meta name="description" content="Bio &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
 <link rel="canonical" href="https://arena.example/people/hostile-person?limit=1">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; (@hostile-person)">
+<meta property="og:description" content="Bio &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
+<meta property="og:url" content="https://arena.example/people/hostile-person?limit=1">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -6479,6 +6635,19 @@ exports[`renders a profile 3`] = `
 <title>Alex Public · YAP Arena</title>
 <meta name="description" content="Public profile for Alex Public.">
 <link rel="canonical" href="https://arena.example/people/alex-public">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Alex Public (@alex-public)">
+<meta property="og:description" content="Public profile for Alex Public.">
+<meta property="og:url" content="https://arena.example/people/alex-public">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -6599,6 +6768,19 @@ exports[`renders a topic 1`] = `
 <title>Public topic · YAP Arena</title>
 <meta name="description" content="A question worth debating.">
 <link rel="canonical" href="https://arena.example/topics/public-topic">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Public topic">
+<meta property="og:description" content="A question worth debating.">
+<meta property="og:url" content="https://arena.example/topics/public-topic">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -6729,6 +6911,19 @@ exports[`renders a topic 2`] = `
 <title>Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; · YAP Arena</title>
 <meta name="description" content="Summary &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
 <link rel="canonical" href="https://arena.example/topics/hostile-topic?limit=2&amp;offset=2">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
+<meta property="og:description" content="Summary &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
+<meta property="og:url" content="https://arena.example/topics/hostile-topic?limit=2&amp;offset=2">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -6902,6 +7097,19 @@ exports[`renders a topic 3`] = `
 <title>Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; · YAP Arena</title>
 <meta name="description" content="Summary &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
 <link rel="canonical" href="https://arena.example/topics/hostile-topic">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
+<meta property="og:description" content="Summary &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
+<meta property="og:url" content="https://arena.example/topics/hostile-topic">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -7044,6 +7252,9 @@ exports[`renders community moderation and the broadcast overlay 1`] = `
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>My moderation · YAP Arena</title>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
 <script defer src="/assets/session-coordination.js?v=0123456789ab">
@@ -7127,7 +7338,12 @@ exports[`renders community moderation and the broadcast overlay 1`] = `
 </section>
 </main>
 <footer class="site-footer">
-<div class="container footer-inner">Community preview · No financial activity</div>
+<div class="container footer-inner">
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
+</span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+</div>
 </footer>
 </body>
 </html>
@@ -7140,6 +7356,9 @@ exports[`renders community moderation and the broadcast overlay 2`] = `
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Moderation review · YAP Arena</title>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
 <script defer src="/assets/session-coordination.js?v=0123456789ab">
@@ -7239,7 +7458,12 @@ exports[`renders community moderation and the broadcast overlay 2`] = `
 </section>
 </main>
 <footer class="site-footer">
-<div class="container footer-inner">Community preview · No financial activity</div>
+<div class="container footer-inner">
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
+</span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+</div>
 </footer>
 </body>
 </html>
@@ -7252,6 +7476,9 @@ exports[`renders community moderation and the broadcast overlay 3`] = `
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>My moderation · YAP Arena</title>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
 <script defer src="/assets/session-coordination.js?v=0123456789ab">
@@ -7335,7 +7562,12 @@ exports[`renders community moderation and the broadcast overlay 3`] = `
 </section>
 </main>
 <footer class="site-footer">
-<div class="container footer-inner">Community preview · No financial activity</div>
+<div class="container footer-inner">
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
+</span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+</div>
 </footer>
 </body>
 </html>
@@ -7348,6 +7580,9 @@ exports[`renders community moderation and the broadcast overlay 4`] = `
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Moderation review · YAP Arena</title>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
 <script defer src="/assets/session-coordination.js?v=0123456789ab">
@@ -7447,7 +7682,12 @@ exports[`renders community moderation and the broadcast overlay 4`] = `
 </section>
 </main>
 <footer class="site-footer">
-<div class="container footer-inner">Community preview · No financial activity</div>
+<div class="container footer-inner">
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
+</span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+</div>
 </footer>
 </body>
 </html>
@@ -7503,7 +7743,117 @@ exports[`renders community moderation and the broadcast overlay 6`] = `
 </html>
 `;
 
-exports[`renders the 404 and 500 pages 1`] = `
+exports[`renders the 400, 404 and 500 pages 1`] = `
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Invalid link · YAP Arena</title>
+<meta name="description" content="This link has a search, filter or page number that is not valid.">
+<link rel="canonical" href="https://arena.example/debates">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
+<link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
+<script defer src="/assets/session-coordination.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/site-header.js?v=0123456789ab">
+</script>
+<script defer src="/assets/site.js?v=0123456789ab">
+</script>
+<script defer src="/assets/account-balance.js?v=0123456789ab">
+</script>
+<script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" data-site-header data-session="checking">\\n    <div class="container nav arena-nav">\\n      <a class="brand" href="/home" aria-label="YAP Arena home">
+<svg class="arena-brand-symbol" viewBox="0 0 40 40" aria-hidden="true">
+<ellipse cx="20" cy="20" rx="13" ry="16" transform="rotate(30 20 20)"/>
+<path d="M9 35 31 5"/>
+</svg>
+<span>YAP ARENA</span>
+</a>\\n      <nav aria-label="Main navigation">
+<a href="/live">Live</a>
+<a href="/debates">Explore</a>
+<a href="/match">Create</a>
+</nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search">
+<label class="sr-only" for="header-search">Search debates</label>
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="10.5" cy="10.5" r="6.5"/>
+<path d="m16 16 5 5"/>
+</svg>
+<input id="header-search" type="search" name="q" maxlength="80" placeholder="Search debates…">
+<button type="submit" class="sr-only">Search</button>
+</form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
+<span class="sr-only">Checking your account…</span>
+</span>\\n        <div class="header-auth-actions" data-header-guest hidden>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
+</div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
+<summary aria-label="Yap Coins balance and actions">
+<span class="header-balance-label">Balance</span>
+<strong data-header-balance>—</strong>
+<span class="arena-chevron" aria-hidden="true">⌄</span>
+</summary>
+<div class="arena-wallet-popover">
+<strong data-header-balance-heading>Your Yap Coins</strong>
+<span data-header-reserved>Checking balance…</span>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
+</div>
+</details>\\n          <details class="header-user-menu">
+<summary class="arena-avatar" data-header-account aria-label="Open account menu">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+<circle cx="12" cy="8" r="3.5"/>
+<path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
+</svg>
+</summary>
+<div class="header-user-popover">
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
+</button>
+</div>
+</details>\\n        </div>\\n        <noscript>
+<div class="header-auth-actions">
+<a class="header-login" href="/api/auth/login?connection=google">Continue with Google</a>
+<a class="header-signup" href="/api/auth/login?connection=email">Continue with email</a>
+</div>
+</noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
+</p>\\n    </div>\\n  </header>
+<main id="main">
+<section class="container page-intro">
+<span class="eyebrow accent">400 / INVALID LINK</span>
+<h1>Check the<br>
+<em>link.</em>
+</h1>
+<p>Its search, filter or page number is not valid.</p>
+<a class="button" href="/debates">Browse debates ↗</a>
+</section>
+</main>
+<footer class="site-footer">
+<div class="container footer-inner">
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
+</span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+</div>
+</footer>
+</body>
+</html>
+`;
+
+exports[`renders the 400, 404 and 500 pages 2`] = `
 <!doctype html>
 <html lang="en">
 <head>
@@ -7513,6 +7863,9 @@ exports[`renders the 404 and 500 pages 1`] = `
 <title>Page not found · YAP Arena</title>
 <meta name="description" content="This page could not be found.">
 <link rel="canonical" href="https://arena.example/">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -7610,7 +7963,7 @@ exports[`renders the 404 and 500 pages 1`] = `
 </html>
 `;
 
-exports[`renders the 404 and 500 pages 2`] = `
+exports[`renders the 400, 404 and 500 pages 3`] = `
 <!doctype html>
 <html lang="en">
 <head>
@@ -7620,6 +7973,9 @@ exports[`renders the 404 and 500 pages 2`] = `
 <title>Temporarily unavailable · YAP Arena</title>
 <meta name="description" content="YAP Arena is temporarily unavailable.">
 <link rel="canonical" href="/">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -7725,8 +8081,21 @@ exports[`renders the about and account pages 1`] = `
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
 <title>About · YAP Arena</title>
-<meta name="description" content="About YAP Arena&#39;s public preview.">
+<meta name="description" content="What YAP Arena is and how it works.">
 <link rel="canonical" href="https://arena.example/about">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="About YAP Arena">
+<meta property="og:description" content="What YAP Arena is and how it works.">
+<meta property="og:url" content="https://arena.example/about">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -7808,14 +8177,14 @@ exports[`renders the about and account pages 1`] = `
 <h1>Make room for<br>
 <em>the other side.</em>
 </h1>
-<p>YAP Arena is building a home for live debates and the ideas that connect them.</p>
+<p>YAP Arena is a home for live debates and the ideas that connect them.</p>
 </section>
 <section class="container about-copy">
-<h2>What you can explore now</h2>
-<p>This public preview shows published topics, debate listings, and participant profiles. Sign in to pick your handle and follow people or topics. Listings marked Demo are fictional examples used to develop and test the product.</p>
-<p>Live video and replay are available in a configured local prototype. A listing’s status does not prove that video is available or that a result has been determined. Yap Coins and labeled bot rounds are available when enabled. Real funds remain unavailable.</p>
+<h2>What you can do</h2>
+<p>Browse topics, watch live video debates and replays, and see who is debating. Sign in to pick your handle, follow people and topics, and queue on a side to debate someone live. Listings marked Demo are fictional examples.</p>
+<p>A listing’s status does not guarantee that video is available or that a result has been decided. Yap Coins are play money with no cash value. Bot activity is synthetic and labeled. Real funds are unavailable.</p>
 <h2 id="measurement">Optional usage measurement</h2>
-<p>We ask before recording discovery pages, watch time, replay starts, matching, follows, reports, or return visits. If you allow it, we use a random browser cookie, not your wallet address, and may associate events with your signed-in account to separate founder-affiliated activity. We do not store search text, chat text, IP addresses, or wallet addresses in product events. Use Measurement settings in the footer to turn it off and delete your measurements. Raw events and watch sessions are retained for up to 90 days; an unused consent expires after 180 days. Debate completion is counted from public event state without a browser identifier.</p>
+<p>We ask before recording discovery pages, watch time, replay starts, matching, follows, reports, or return visits. If you allow it, we use a random browser cookie and may associate events with your signed-in account to separate founder-affiliated activity. We do not store search text, chat text or IP addresses in product events. Use Measurement settings in the footer to turn it off and delete your measurements. Raw events and watch sessions are retained for up to 90 days; an unused consent expires after 180 days. Debate completion is counted from public event state without a browser identifier.</p>
 <a class="button" href="/debates">Explore debates ↗</a>
 </section>
 </main>
@@ -7841,6 +8210,9 @@ exports[`renders the about and account pages 2`] = `
 <title>Account · YAP Arena</title>
 <meta name="description" content="Your profile, security and Yap Coins.">
 <link rel="canonical" href="https://arena.example/account">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -8095,6 +8467,9 @@ exports[`renders the coins and match pages 1`] = `
 <title>Yap Coins · YAP Arena</title>
 <meta name="description" content="Your Yap Coins balance, positions and history.">
 <link rel="canonical" href="https://arena.example/coins">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -8226,6 +8601,9 @@ exports[`renders the coins and match pages 2`] = `
 <title>Match · YAP Arena</title>
 <meta name="description" content="Create topics and arrange debates on YAP Arena.">
 <link rel="canonical" href="https://arena.example/match">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -8417,6 +8795,9 @@ exports[`renders the coins and match pages 3`] = `
 <title>Match · YAP Arena</title>
 <meta name="description" content="Create topics and arrange debates on YAP Arena.">
 <link rel="canonical" href="https://arena.example/match">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -8617,6 +8998,19 @@ exports[`renders the debate list 1`] = `
 <title>Debates · YAP Arena</title>
 <meta name="description" content="Browse public debates by status and search term.">
 <link rel="canonical" href="https://arena.example/debates?q=missing">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Debates">
+<meta property="og:description" content="Browse public debates by status and search term.">
+<meta property="og:url" content="https://arena.example/debates?q=missing">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -8747,6 +9141,19 @@ exports[`renders the debate list 2`] = `
 <title>Debates · YAP Arena</title>
 <meta name="description" content="Browse public debates by status and search term.">
 <link rel="canonical" href="https://arena.example/debates?limit=1">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Debates">
+<meta property="og:description" content="Browse public debates by status and search term.">
+<meta property="og:url" content="https://arena.example/debates?limit=1">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -8920,6 +9327,19 @@ exports[`renders the debate list 3`] = `
 <title>Debates · YAP Arena</title>
 <meta name="description" content="Browse public debates by status and search term.">
 <link rel="canonical" href="https://arena.example/debates?q=city&amp;status=scheduled&amp;limit=1&amp;offset=1">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Debates">
+<meta property="og:description" content="Browse public debates by status and search term.">
+<meta property="og:url" content="https://arena.example/debates?q=city&amp;status=scheduled&amp;limit=1&amp;offset=1">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -9073,6 +9493,19 @@ exports[`renders the debate list 4`] = `
 <title>Debates · YAP Arena</title>
 <meta name="description" content="Browse public debates by status and search term.">
 <link rel="canonical" href="https://arena.example/debates?q=q+%3Cb%3E%26amp%3B%3C%2Fb%3E+%22quoted%22+%27single%27+%26+%3C&amp;status=live">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Debates">
+<meta property="og:description" content="Browse public debates by status and search term.">
+<meta property="og:url" content="https://arena.example/debates?q=q+%3Cb%3E%26amp%3B%3C%2Fb%3E+%22quoted%22+%27single%27+%26+%3C&amp;status=live">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -9221,6 +9654,19 @@ exports[`renders the home page 1`] = `
 <title>Where ideas move · YAP Arena</title>
 <meta name="description" content="Follow an idea. Hear both sides. Take a position.">
 <link rel="canonical" href="https://arena.example/home">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="YAP Arena">
+<meta property="og:description" content="Follow an idea. Hear both sides. Take a position.">
+<meta property="og:url" content="https://arena.example/home">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -9481,6 +9927,19 @@ exports[`renders the home page 2`] = `
 <title>Where ideas move · YAP Arena</title>
 <meta name="description" content="Follow an idea. Hear both sides. Take a position.">
 <link rel="canonical" href="https://arena.example/home">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="YAP Arena">
+<meta property="og:description" content="Follow an idea. Hear both sides. Take a position.">
+<meta property="og:url" content="https://arena.example/home">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -9741,6 +10200,19 @@ exports[`renders the home page 3`] = `
 <title>Where ideas move · YAP Arena</title>
 <meta name="description" content="Follow an idea. Hear both sides. Take a position.">
 <link rel="canonical" href="https://arena.example/home">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="YAP Arena">
+<meta property="og:description" content="Follow an idea. Hear both sides. Take a position.">
+<meta property="og:url" content="https://arena.example/home">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -10001,6 +10473,19 @@ exports[`renders the home page 4`] = `
 <title>Where ideas move · YAP Arena</title>
 <meta name="description" content="Follow an idea. Hear both sides. Take a position.">
 <link rel="canonical" href="https://arena.example/home">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="YAP Arena">
+<meta property="og:description" content="Follow an idea. Hear both sides. Take a position.">
+<meta property="og:url" content="https://arena.example/home">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -10326,6 +10811,19 @@ exports[`renders the home page 5`] = `
 <title>Where ideas move · YAP Arena</title>
 <meta name="description" content="Follow an idea. Hear both sides. Take a position.">
 <link rel="canonical" href="https://arena.example/home">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="YAP Arena">
+<meta property="og:description" content="Follow an idea. Hear both sides. Take a position.">
+<meta property="og:url" content="https://arena.example/home">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -10715,6 +11213,19 @@ exports[`renders the home page 6`] = `
 <title>Where ideas move · YAP Arena</title>
 <meta name="description" content="Follow an idea. Hear both sides. Take a position.">
 <link rel="canonical" href="https://arena.example/home">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="YAP Arena">
+<meta property="og:description" content="Follow an idea. Hear both sides. Take a position.">
+<meta property="og:url" content="https://arena.example/home">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -11337,6 +11848,19 @@ exports[`renders the home page 7`] = `
 <title>Where ideas move · YAP Arena</title>
 <meta name="description" content="Follow an idea. Hear both sides. Take a position.">
 <link rel="canonical" href="https://arena.example/home">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="YAP Arena">
+<meta property="og:description" content="Follow an idea. Hear both sides. Take a position.">
+<meta property="og:url" content="https://arena.example/home">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -11662,6 +12186,19 @@ exports[`renders the live page 1`] = `
 <title>Live · YAP Arena</title>
 <meta name="description" content="Discover public debates and topics on YAP Arena.">
 <link rel="canonical" href="https://arena.example/live">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Live debates">
+<meta property="og:description" content="Discover public debates and topics on YAP Arena.">
+<meta property="og:url" content="https://arena.example/live">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -11780,8 +12317,8 @@ exports[`renders the live page 1`] = `
 </div>
 </section>
 <section class="container note-band">
-<span class="eyebrow">ABOUT THIS PREVIEW</span>
-<p>YAP Arena is under development. Demo listings are examples, not real events. Profiles, wallet sign-in, and follows are available. Live debate and replay require configured media. Yap Coins and labeled bot rounds are available when enabled; real funds are unavailable.</p>
+<span class="eyebrow">ABOUT YAP ARENA</span>
+<p>YAP Arena hosts live video debates you can watch, replay or join. Yap Coins are play money with no cash value, and real funds are unavailable. Listings marked Demo are examples, not real events.</p>
 </section>
 </main>
 <footer class="site-footer">
@@ -11806,6 +12343,19 @@ exports[`renders the live page 2`] = `
 <title>Live · YAP Arena</title>
 <meta name="description" content="Discover public debates and topics on YAP Arena.">
 <link rel="canonical" href="https://arena.example/live">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Live debates">
+<meta property="og:description" content="Discover public debates and topics on YAP Arena.">
+<meta property="og:url" content="https://arena.example/live">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -12008,8 +12558,8 @@ exports[`renders the live page 2`] = `
 </div>
 </section>
 <section class="container note-band">
-<span class="eyebrow">ABOUT THIS PREVIEW</span>
-<p>YAP Arena is under development. Demo listings are examples, not real events. Profiles, wallet sign-in, and follows are available. Live debate and replay require configured media. Yap Coins and labeled bot rounds are available when enabled; real funds are unavailable.</p>
+<span class="eyebrow">ABOUT YAP ARENA</span>
+<p>YAP Arena hosts live video debates you can watch, replay or join. Yap Coins are play money with no cash value, and real funds are unavailable. Listings marked Demo are examples, not real events.</p>
 </section>
 <script type="module" src="/assets/hero-preview.js?v=0123456789ab">
 </script>
@@ -12033,6 +12583,9 @@ exports[`renders the measurement dashboard 1`] = `
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Product measurement · YAP Arena</title>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
 <script defer src="/assets/session-coordination.js?v=0123456789ab">
@@ -12113,7 +12666,7 @@ exports[`renders the measurement dashboard 1`] = `
 </div>
 </div>
 <p>Last 28 days, UTC. These are consented browser or account events except debate completion, which comes from the authoritative event transition. Unclassified activity is never treated as independent. Demo events are excluded.</p>
-<p>Counts are actions or browser sessions, not unique people. A wallet is not a person. The proposed 28-day returning participant rate and 30% hypothesis are not approved success or launch gates.</p>
+<p>Counts are actions or browser sessions, not unique people. The proposed 28-day returning participant rate and 30% hypothesis are not approved success or launch gates.</p>
 <div class="information-card">
 <h2>Discover, match, finish, return</h2>
 <div class="table-scroll">
@@ -12236,7 +12789,12 @@ exports[`renders the measurement dashboard 1`] = `
 </p>
 </main>
 <footer class="site-footer">
-<div class="container footer-inner">Measurement preview · No financial activity</div>
+<div class="container footer-inner">
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
+</span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+</div>
 </footer>
 </body>
 </html>
@@ -12249,6 +12807,9 @@ exports[`renders the measurement dashboard 2`] = `
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Product measurement · YAP Arena</title>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
 <script defer src="/assets/session-coordination.js?v=0123456789ab">
@@ -12329,7 +12890,7 @@ exports[`renders the measurement dashboard 2`] = `
 </div>
 </div>
 <p>Last 28 days, UTC. These are consented browser or account events except debate completion, which comes from the authoritative event transition. Unclassified activity is never treated as independent. Demo events are excluded.</p>
-<p>Counts are actions or browser sessions, not unique people. A wallet is not a person. The proposed 28-day returning participant rate and 30% hypothesis are not approved success or launch gates.</p>
+<p>Counts are actions or browser sessions, not unique people. The proposed 28-day returning participant rate and 30% hypothesis are not approved success or launch gates.</p>
 <div class="information-card">
 <h2>Discover, match, finish, return</h2>
 <div class="table-scroll">
@@ -12455,7 +13016,12 @@ exports[`renders the measurement dashboard 2`] = `
 </p>
 </main>
 <footer class="site-footer">
-<div class="container footer-inner">Measurement preview · No financial activity</div>
+<div class="container footer-inner">
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
+</span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+</div>
 </footer>
 </body>
 </html>
@@ -12471,6 +13037,19 @@ exports[`renders the topic list 1`] = `
 <title>Topics · YAP Arena</title>
 <meta name="description" content="Explore public topics on YAP Arena.">
 <link rel="canonical" href="https://arena.example/topics?q=missing">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Topics">
+<meta property="og:description" content="Explore public topics on YAP Arena.">
+<meta property="og:url" content="https://arena.example/topics?q=missing">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -12590,6 +13169,19 @@ exports[`renders the topic list 2`] = `
 <title>Topics · YAP Arena</title>
 <meta name="description" content="Explore public topics on YAP Arena.">
 <link rel="canonical" href="https://arena.example/topics?limit=1">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Topics">
+<meta property="og:description" content="Explore public topics on YAP Arena.">
+<meta property="og:url" content="https://arena.example/topics?limit=1">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
@@ -12724,6 +13316,19 @@ exports[`renders the topic list 3`] = `
 <title>Topics · YAP Arena</title>
 <meta name="description" content="Explore public topics on YAP Arena.">
 <link rel="canonical" href="https://arena.example/topics?q=q%20%3Cb%3E%26amp%3B%3C%2Fb%3E%20%22quoted%22%20&#39;single&#39;%20%26%20%3C&amp;limit=1&amp;offset=2">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Topics">
+<meta property="og:description" content="Explore public topics on YAP Arena.">
+<meta property="og:url" content="https://arena.example/topics?q=q%20%3Cb%3E%26amp%3B%3C%2Fb%3E%20%22quoted%22%20&#39;single&#39;%20%26%20%3C&amp;limit=1&amp;offset=2">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
