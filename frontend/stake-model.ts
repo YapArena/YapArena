@@ -177,11 +177,17 @@ export function speakerLine(
   return `${speakers[side]} speaking (${labels[side]})`;
 }
 
-/** The window taking live orders at the server-adjusted time, if any. */
+/**
+ * The window taking live orders at the server-adjusted time, if any. A
+ * debate that is no longer live takes no live orders, even before a
+ * window's cutoff.
+ */
 export function liveWindow(
   windows: readonly PublicWindow[],
   serverNow: number,
+  eventStatus = "live",
 ) {
+  if (eventStatus !== "live") return null;
   return (
     windows.find(
       (window) =>
@@ -452,6 +458,12 @@ export function placementError(
       return plain(
         "Answers are paused for a moment. Nothing was reserved; try again soon.",
       );
+    case "busy":
+      return plain("Yap Coins are busy. Nothing was reserved; try again.");
+    case "replay_untimed":
+      return plain(
+        "This replay isn't taking answers yet. Nothing was reserved.",
+      );
     case "debate_unavailable":
       return plain("This debate isn't taking answers.");
     case "financial_review":
@@ -476,4 +488,9 @@ export function placementError(
   if (status === 429)
     return plain("Too many tries. Wait a moment, then try again.");
   return plain("Couldn't place your answer. Nothing was reserved; try again.");
+}
+
+/** True when no window has a span in the recording yet (F10 can't work). */
+export function replayUntimed(windows: readonly PublicWindow[]) {
+  return !windows.some((window) => window.recording != null);
 }

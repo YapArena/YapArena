@@ -1,7 +1,10 @@
 import type { Pool } from "pg";
 import { createA4Repository } from "./features/a4/repository.ts";
 import { createCoinDebateSandbox } from "./features/account-wallet/debate-sandbox.ts";
-import { createTreasuryMonitor } from "./features/account-wallet/treasury-monitor.ts";
+import {
+  createLiveDebateMonitor,
+  createTreasuryMonitor,
+} from "./features/account-wallet/treasury-monitor.ts";
 import { createIdentityRepository } from "./features/identity/repository.ts";
 import { createMatchingRepository } from "./features/matching/repository.ts";
 import { createMatchmaking } from "./features/matching/matchmaking.ts";
@@ -183,6 +186,7 @@ export function createServices({
   const coinDebates = config.coinSandboxEnabled
     ? createCoinDebateSandbox(database, "simulation", {
         turnWindows: config.turnWindowsEnabled,
+        logger,
       })
     : undefined;
 
@@ -213,11 +217,7 @@ export function createServices({
       a4,
       coinDebates,
       coinTreasury: coinDebates
-        ? createTreasuryMonitor({
-            read: () => coinDebates.treasury(),
-            thresholdUsdc: config.coinTreasuryAlertUsdc,
-            logger,
-          })
+        ? coinMonitor(coinDebates, config.coinTreasuryAlertUsdc, logger)
         : undefined,
       transcription:
         transcription && transcriber && outlines
@@ -259,6 +259,29 @@ export function createServices({
     },
     close() {
       abuseStore?.close();
+    },
+  });
+}
+
+// The worker's once-a-minute Yap Coins check: low treasuries (founder D1)
+// and debates stuck in live past their maximum duration.
+function coinMonitor(
+  coinDebates: ReturnType<typeof createCoinDebateSandbox>,
+  thresholdUsdc: number,
+  logger: { warn(details: object, message: string): void },
+) {
+  const treasury = createTreasuryMonitor({
+    read: () => coinDebates.treasury(),
+    thresholdUsdc,
+    logger,
+  });
+  const live = createLiveDebateMonitor({
+    read: () => coinDebates.overdueLive(),
+    logger,
+  });
+  return Object.freeze({
+    async check() {
+      await Promise.all([treasury.check(), live.check()]);
     },
   });
 }

@@ -28,16 +28,47 @@ the actual source, and aggregate custody cash must reconcile against aggregate
 cash liabilities. Historical A4/YAP remains isolated and nonredeemable.
 
 Sandbox debate results affect each grant's net profit and permanent qualification
-peak in round-closing order, with round UUID as the fixed tie-breaker. Opening a
-successor round and maintenance advancement use the same ordered batch (20
-rounds by default). A target outside that bounded batch stays open until earlier
-obligations are processed; an API caller cannot move its later gain ahead of an
-earlier loss. The batch locks every participating account and prepares all books,
-buckets and cash/promotional ledger rows before posting any result. This prevents
-a later account lock from deadlocking funding or payout reconciliation. An API
-caller must have a current session at admission and again before commit, including
-an idempotent or existing-round return; workers can settle existing obligations
-without a user session.
+peak in round-closing order, with round UUID as the fixed tie-breaker. Only the
+worker settles, and a viewer's request never settles anybody's round. Its coin loop
+runs one ordered batch a second, of at most 20 rounds and 200 orders, sized from the
+measured cost per order to fit 250 ms and cut off at 250 ms whatever the database's
+speed; while any live turn window is in its final 15 seconds, when most answers
+arrive, at most 50 orders and 100 ms.
+A larger round settles over several batches: each prices the whole round the same
+way, from its complete and fixed set of orders, and settles the next orders by
+account; the last one reveals the round and sends the results notice. A later round
+waits until the earlier one is revealed. A round part-way through settlement
+finishes settling even if its debate is cancelled, and can no longer be voided. The
+batch locks every participating account and prepares all books, buckets and
+cash/promotional ledger rows before posting any result. This prevents a later
+account lock from deadlocking funding or payout reconciliation. An API caller must
+have a current session at admission and again before commit, including an
+idempotent or existing-round return; workers settle existing obligations without a
+user session.
+
+Each round's part of a batch settles in its own savepoint. A round whose settlement
+throws is rolled back and set aside by the worker, which logs `coin round settlement failed; round
+set aside` (error level, with `roundId`, `failures` and `retryInSeconds`) and keeps
+settling the rest. It retries the round after 1 minute, then 2, 4 and so on up to an
+hour; a restarted worker retries at once. Investigate the logged error, then fix it
+or, if none of the round's orders has settled yet, refund it with `void-round`.
+
+**Locks and timeouts.** Settlement and voiding read a round's complete population
+of orders. A submit holds its round's advisory lock shared for its whole
+transaction; settling or voiding takes it exclusively first, so it waits for
+in-flight submits and keeps new ones out until it commits. Reads (the signed-in
+round view, results, the public window list) take no round, account or ledger lock.
+Every submit still locks the shared treasury rows in turn, so submits to one window
+run one after another inside the database. Request transactions set
+`lock_timeout` 3 s and `statement_timeout` 5 s; the worker's set 5 s and 30 s. Both
+are `SET LOCAL`, so they win over a pool-wide default. A timeout, a deadlock or a
+full connection pool returns `503` with code `busy` ("Yap Coins are busy; try
+again. Nothing was reserved."), never a 500.
+
+The worker also warns `debate live past maximum duration` (with `debateId`,
+`liveStartedAt` and `maximumSeconds`) once a minute for each debate still `live` 30
+minutes past its rules' maximum duration (2 hours when unset): such a debate never
+reveals and keeps every reservation in its windows. End it as operator.
 
 ## Launch mode: play money only
 

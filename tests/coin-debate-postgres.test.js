@@ -34,6 +34,15 @@ import {
   confirmedApproval,
   openSandbox,
 } from "./helpers/confirmations.js";
+// Behaviour cases hold locks on purpose, sometimes for seconds, while other
+// PostgreSQL suites run in parallel; they relax the sandbox's lock and
+// statement timeouts. Dedicated cases check the real limits.
+const relaxed = {
+  limits: {
+    request: { lockTimeoutMs: 60_000, statementTimeoutMs: 120_000 },
+    worker: { lockTimeoutMs: 60_000, statementTimeoutMs: 120_000 },
+  },
+};
 const ownerUrl = process.env.A4_TEST_OWNER_URL,
   runtimeUrl = process.env.A4_TEST_DATABASE_URL;
 describe(
@@ -57,8 +66,8 @@ describe(
       operator = createCoinSandboxOperatorRepository(owner, {
         rail: "simulation",
       });
-      a4 = createCoinDebateSandbox(runtime, "simulation");
-      a4Other = createCoinDebateSandbox(runtime, "simulation");
+      a4 = createCoinDebateSandbox(runtime, "simulation", relaxed);
+      a4Other = createCoinDebateSandbox(runtime, "simulation", relaxed);
     });
     after(async () => {
       await Promise.all([owner?.end(), runtime?.end()]);
@@ -231,7 +240,9 @@ describe(
             };
           },
         };
-        await callback(createCoinDebateSandbox(nestedPool, "simulation"));
+        await callback(
+          createCoinDebateSandbox(nestedPool, "simulation", relaxed),
+        );
       } finally {
         await client.query("ROLLBACK");
         client.release();
@@ -453,12 +464,13 @@ describe(
         );
       }
     });
-    it("rolls back ordered settlements when a create caller expires during ledger waits on either existing-round return path", async () => {
+    // PR 2 (audit item 6): only the worker settles. A viewer's request never
+    // runs a settlement batch, so a 120-hour reveal never lands in a Place.
+    it("never settles anybody's due round inside a viewer's create; only the worker's advance does", async () => {
       const context = await actor(),
         other = await actor(),
         debateId = await debate(),
         key = randomUUID();
-      await a4.create(context, debateId, key);
       await fund(other);
       await seed(other, "center", "1000000");
       const due = await a4.create(other, await debate(), randomUUID());
@@ -468,144 +480,25 @@ describe(
         quantity: 1,
       });
       await close(due.id);
-      const before = (await sandbox.summary(other)).book,
-        account = (
-          await owner.query(
-            "SELECT id FROM coin_accounts WHERE user_id=$1 AND asset='USDC' AND kind='available'",
-            [context.userId],
-          )
-        ).rows[0].id;
-      const expireFunction = `fixture_expiry_${randomUUID().replaceAll("-", "")}`,
-        fixture = await owner.connect();
-      assert.match(context.userId, /^[1-9][0-9]*$/);
-      try {
-        await fixture.query("BEGIN");
-        await fixture.query(`CREATE FUNCTION yaparena.${expireFunction}(bigint)
-          RETURNS integer LANGUAGE sql SECURITY DEFINER
-          SET search_path=pg_catalog,yaparena,pg_temp AS $$
-          WITH expired AS (UPDATE yaparena.sessions
-            SET expires_at=clock_timestamp()-interval '1 second'
-            WHERE id=$1 AND user_id=${context.userId} RETURNING id)
-          SELECT count(*)::integer FROM expired $$`);
-        await fixture.query(
-          `REVOKE ALL ON FUNCTION yaparena.${expireFunction}(bigint) FROM PUBLIC`,
-        );
-        await fixture.query(
-          `GRANT EXECUTE ON FUNCTION yaparena.${expireFunction}(bigint) TO yaparena_runtime`,
-        );
-        await fixture.query("COMMIT");
-      } catch (error) {
-        await fixture.query("ROLLBACK");
-        throw error;
-      } finally {
-        fixture.release();
-      }
-      let inFlight;
-      try {
-        for (const existingReference of [false, true]) {
-          const token = createSessionToken(),
-            generation = (
-              await owner.query(
-                "SELECT auth_generation FROM users WHERE id=$1",
-                [context.userId],
-              )
-            ).rows[0].auth_generation,
-            session = await createSessionRepository(runtime).create(
-              context.userId,
-              token.tokenHash,
-              new Date(Date.now() + 3600000),
-              { authGeneration: generation },
-            ),
-            shortContext = {
-              ...context,
-              sessionTokenHash: token.tokenHash,
-              expectedSessionId: session.id,
-            },
-            gate = await owner.connect();
-          let initialSessionAuthorized = false,
-            ledgerBarrierObserved = false,
-            expirations = 0;
-          const expiringCaller = createCoinDebateSandbox(
-            {
-              query: (...args) => runtime.query(...args),
-              async connect() {
-                const client = await runtime.connect();
-                return {
-                  release: () => client.release(),
-                  async query(sql, values) {
-                    const result = await client.query(sql, values);
-                    if (
-                      typeof sql === "string" &&
-                      sql.includes("FOR UPDATE OF s") &&
-                      result.rows.some((row) => row.id === session.id)
-                    )
-                      initialSessionAuthorized = true;
-                    if (
-                      expirations === 0 &&
-                      typeof sql === "string" &&
-                      sql.includes("FROM coin_accounts") &&
-                      sql.includes("FOR UPDATE") &&
-                      result.rows.some((row) => row.id === account)
-                    ) {
-                      assert.equal(initialSessionAuthorized, true);
-                      assert.equal(ledgerBarrierObserved, true);
-                      // Runtime owns the session row lock. The temporary,
-                      // exact-user fixture function changes expiry on this same
-                      // connection without granting runtime UPDATE(expires_at).
-                      const expired = await client.query(
-                        `SELECT yaparena.${expireFunction}($1::bigint) AS expired`,
-                        [session.id],
-                      );
-                      assert.equal(expired.rows[0].expired, 1);
-                      expirations++;
-                    }
-                    return result;
-                  },
-                };
-              },
-            },
-            "simulation",
-          );
-          let pending;
-          try {
-            await gate.query("BEGIN");
-            await gate.query(
-              "SELECT id FROM coin_accounts WHERE id=$1 FOR UPDATE",
-              [account],
-            );
-            const pid = (await gate.query("SELECT pg_backend_pid() AS pid"))
-              .rows[0].pid;
-            pending = inFlight = expiringCaller.create(
-              shortContext,
-              debateId,
-              existingReference ? key : randomUUID(),
-            );
-            pending.catch(() => {});
-            await waitForBlocked(pid, 1);
-            ledgerBarrierObserved = true;
-          } finally {
-            await gate.query("COMMIT");
-            gate.release();
-          }
-          await assert.rejects(pending, /session/);
-          assert.equal(initialSessionAuthorized, true);
-          assert.equal(ledgerBarrierObserved, true);
-          assert.equal(expirations, 1);
-          assert.equal(
-            (
-              await owner.query(
-                "SELECT state FROM coin_debate_rounds WHERE id=$1",
-                [due.id],
-              )
-            ).rows[0].state,
-            "open",
-          );
-          assert.deepEqual((await sandbox.summary(other)).book, before);
-        }
-      } finally {
-        await inFlight?.catch(() => {});
-        await owner.query(`DROP FUNCTION yaparena.${expireFunction}(bigint)`);
-      }
+      const before = (await sandbox.summary(other)).book;
+      // A new round, its idempotent repeat, and the current-round return.
+      const opened = await a4.create(context, debateId, key);
+      assert.equal((await a4.create(context, debateId, key)).id, opened.id);
+      assert.equal(
+        (await a4.create(context, debateId, randomUUID())).id,
+        opened.id,
+      );
+      assert.equal(await roundState(due.id), "open");
+      assert.deepEqual((await sandbox.summary(other)).book, before);
+      // An expired session still refuses the request.
+      await assert.rejects(
+        a4.create(
+          { ...context, sessionTokenHash: "0".repeat(64) },
+          debateId,
+          randomUUID(),
+        ),
+        /session/,
+      );
       // Other suites may have due rounds too; this one's due round settles.
       assert.ok((await a4.advance()).completed >= 1);
       assert.equal(await roundState(due.id), "settled");
@@ -867,7 +760,20 @@ describe(
           ).rows[0].n,
           2,
         );
+        // Asking the later debate for its next round settles nothing: only
+        // the worker settles (PR 2), and it does so in closing order.
         await a4.create(context, rounds[1].debateId, randomUUID());
+        const stillOpen = async () =>
+          (
+            await owner.query(
+              "SELECT count(*)::int n FROM coin_debate_rounds WHERE id=ANY($1::uuid[]) AND state='open'",
+              [rounds.map((r) => r.id)],
+            )
+          ).rows[0].n;
+        assert.equal(await stillOpen(), 2);
+        // Other suites' due rounds share the ordered batches.
+        for (let attempt = 0; attempt < 20 && (await stillOpen()); attempt++)
+          await a4.advance();
         const posted = (
           await owner.query(
             "SELECT metadata->>'roundId' AS round_id FROM coin_sandbox_events WHERE user_id=$1 AND kind='debate.settled' ORDER BY sequence",
@@ -1761,6 +1667,142 @@ describe(
         before.balances,
       );
       await reconcile();
+    });
+    // PR 2 (audit item 7): one failing round no longer blocks settlement.
+    it("sets a round whose settlement throws aside, logs it and keeps settling the rest", async () => {
+      const context = await actor(),
+        logged = [],
+        worker = createCoinDebateSandbox(runtime, "simulation", {
+          ...relaxed,
+          logger: {
+            error: (details, message) => logged.push([details, message]),
+          },
+        });
+      await sandbox.initialize(context);
+      for (const purpose of ["center", "promotional"])
+        await seed(context, purpose, "1000000");
+      const broken = await a4.create(context, await debate(), randomUUID()),
+        healthy = await a4.create(context, await debate(), randomUUID());
+      for (const round of [broken, healthy])
+        await a4.submit(context, round.id, randomUUID(), {
+          side: "YES",
+          limit: "1",
+          quantity: 1,
+        });
+      await close(broken.id);
+      await close(healthy.id);
+      // A fixture fault: the seed no longer matches its commitment, so this
+      // round's settlement throws every time.
+      const fixture = await owner.connect();
+      try {
+        await fixture.query("BEGIN");
+        await fixture.query(
+          "ALTER TABLE coin_debate_rounds DISABLE TRIGGER coin_debate_round_guard",
+        );
+        await fixture.query(
+          "UPDATE coin_debate_rounds SET seed_commitment=$2,opens_at=opens_at-INTERVAL '1 second',closes_at=closes_at-INTERVAL '1 second' WHERE id=$1",
+          [broken.id, "0".repeat(64)],
+        );
+        await fixture.query(
+          "ALTER TABLE coin_debate_rounds ENABLE TRIGGER coin_debate_round_guard",
+        );
+        await fixture.query("COMMIT");
+      } catch (error) {
+        await fixture.query("ROLLBACK");
+        throw error;
+      } finally {
+        fixture.release();
+      }
+      // Other suites' due rounds share the ordered batches; advance until
+      // this file's two rounds have had their turn.
+      let setAsideOnce = false;
+      for (let attempt = 0; attempt < 20; attempt++) {
+        const batch = await worker.advance();
+        setAsideOnce ||= batch.setAside.includes(broken.id);
+        if (setAsideOnce && (await roundState(healthy.id)) === "settled") break;
+      }
+      assert.equal(setAsideOnce, true);
+      assert.equal(await roundState(broken.id), "open");
+      assert.equal(await roundState(healthy.id), "settled");
+      const entries = logged.filter(
+        ([details]) => details.roundId === broken.id,
+      );
+      // Logged once: skipped until its retry time, not retried every batch.
+      assert.equal(entries.length, 1);
+      assert.equal(
+        entries[0][1],
+        "coin round settlement failed; round set aside",
+      );
+      assert.equal(entries[0][0].failures, 1);
+      assert.equal(entries[0][0].retryInSeconds, 60);
+      // The owner refunds it; nothing was half-settled.
+      await createCoinDebateSandbox(owner, "simulation").voidRound(
+        broken.id,
+        "operator_cancelled",
+      );
+      await reconcile();
+    });
+    // PR 2 (audit item 6): reads take no account, round or ledger lock.
+    it("answers a viewer's read while settlement holds their account", async () => {
+      const context = await actor(),
+        debateId = await debate();
+      await sandbox.initialize(context);
+      await a4.create(context, debateId, randomUUID());
+      const gate = await owner.connect();
+      try {
+        await gate.query("BEGIN");
+        await gate.query("SELECT id FROM users WHERE id=$1 FOR UPDATE", [
+          context.userId,
+        ]);
+        const started = Date.now();
+        const [view] = await a4.view(context, debateId);
+        assert.equal(view.debateId, debateId);
+        await a4.results(context, new Date(0));
+        assert.ok(Date.now() - started < 1500);
+      } finally {
+        await gate.query("ROLLBACK");
+        gate.release();
+      }
+    });
+    // PR 2: a request that can't get its locks in time says busy, never 500.
+    it("refuses a submit that waits past its lock timeout with 503 busy and reserves nothing", async () => {
+      const context = await actor(),
+        debateId = await debate();
+      await sandbox.initialize(context);
+      for (const purpose of ["center", "promotional"])
+        await seed(context, purpose, "1000000");
+      const round = await a4.create(context, debateId, randomUUID());
+      const before = await sandbox.summary(context);
+      // The real request limits: a 3-second lock timeout.
+      const strict = createCoinDebateSandbox(runtime, "simulation");
+      const gate = await owner.connect();
+      let error;
+      try {
+        await gate.query("BEGIN");
+        await gate.query(
+          "SELECT 1 FROM coin_sandbox_books WHERE user_id=$1 FOR UPDATE",
+          [context.userId],
+        );
+        error = await strict
+          .submit(context, round.id, randomUUID(), {
+            side: "YES",
+            limit: "1",
+            quantity: 1,
+          })
+          .then(
+            () => null,
+            (failure) => failure,
+          );
+      } finally {
+        await gate.query("ROLLBACK");
+        gate.release();
+      }
+      assert.equal(error?.status, 503);
+      assert.equal(error.code, "busy");
+      assert.deepEqual(
+        (await sandbox.summary(context)).balances,
+        before.balances,
+      );
     });
   },
 );
