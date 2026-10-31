@@ -60,3 +60,31 @@ export function createTreasuryMonitor(options: {
     },
   });
 }
+
+/**
+ * A debate stuck in `live` never reveals and holds every reservation in its
+ * windows. The worker logs one warning per such debate per check, which the
+ * uptime alerts can match on its message.
+ */
+export function createLiveDebateMonitor(options: {
+  read(): Promise<
+    { debateId: string; liveStartedAt: Date; maximumSeconds: number }[]
+  >;
+  logger: { warn(details: object, message: string): void };
+}) {
+  return Object.freeze({
+    async check() {
+      const overdue = await options.read();
+      for (const debate of overdue)
+        options.logger.warn(
+          {
+            debateId: debate.debateId,
+            liveStartedAt: debate.liveStartedAt,
+            maximumSeconds: debate.maximumSeconds,
+          },
+          "debate live past maximum duration",
+        );
+      return overdue;
+    },
+  });
+}

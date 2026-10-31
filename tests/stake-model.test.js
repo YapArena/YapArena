@@ -419,6 +419,14 @@ describe("placement refusals in the panel's words", () => {
         /^Answers are paused for a moment\. Nothing was reserved; try again soon\.$/,
       ],
       [
+        failure(503, "busy"),
+        /^Yap Coins are busy\. Nothing was reserved; try again\.$/,
+      ],
+      [
+        failure(409, "replay_untimed"),
+        /^This replay isn't taking answers yet\. Nothing was reserved\.$/,
+      ],
+      [
         failure(409, "debate_unavailable"),
         /^This debate isn't taking answers\.$/,
       ],

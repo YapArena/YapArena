@@ -38,7 +38,9 @@ function pool(fail = new Set()) {
 }
 
 describe("coin loop step", () => {
-  it("voids, settles and opens windows in order", async () => {
+  // A new turn's window opens before settlement, so a large reveal batch
+  // never delays it (PR 2).
+  it("voids, opens windows and then settles, in order", async () => {
     const database = pool();
     const loop = createCoinDebateSandbox(database, "simulation", {
       turnWindows: true,
@@ -46,8 +48,8 @@ describe("coin loop step", () => {
     assert.deepEqual(await loop.tick(), { voided: 0, completed: 0, opened: 0 });
     const order = [
       "r.debate_id=ANY($3::uuid[])",
-      "coin-debate-transition",
       "FROM debate_media m",
+      "WITH due AS",
     ].map((marker) =>
       database.statements.findIndex((sql) => sql.includes(marker)),
     );
@@ -88,7 +90,7 @@ describe("coin loop step", () => {
       assert.ok(error instanceof AggregateError);
       assert.deepEqual(
         error.errors.map((e) => e.message),
-        ["void step failed", "settle step failed", "open step failed"],
+        ["void step failed", "open step failed", "settle step failed"],
       );
       return true;
     });
