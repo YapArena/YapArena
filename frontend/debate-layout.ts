@@ -123,13 +123,19 @@ if (arena) {
       if (!document.hidden && !turn) render();
     }, 1000);
 
-  // Outline | Chat tabs below 960px (WAI tabs pattern).
+  // The insight panel's tabs (WAI tabs pattern): AI outline, Results and
+  // About in the rail, plus Chat below 1200px, where chat leaves the video.
   const tablist = arena.querySelector<HTMLElement>("[data-arena-tabs]");
-  const narrow = matchMedia("(max-width: 959px)");
-  if (tablist) {
+  const insight = arena.querySelector<HTMLElement>("[data-insight]");
+  const chat = arena.querySelector<HTMLElement>("#arena-chat");
+  const surface = arena.querySelector<HTMLElement>("[data-arena-video]");
+  const chatHome = chat?.nextElementSibling ?? null;
+  const narrow = matchMedia("(max-width: 1199px)");
+  if (tablist && insight) {
     const tabs = [
       ...tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
     ];
+    const chatTab = tabs.find((tab) => tab.id === "arena-tab-chat");
     const unseenLabel =
       tablist.querySelector<HTMLElement>("[data-chat-unseen]");
     const messages = arena.querySelector<HTMLElement>(
@@ -138,6 +144,7 @@ if (arena) {
     let unseen = 0;
     const panelOf = (tab: HTMLButtonElement) =>
       document.getElementById(tab.getAttribute("aria-controls")!);
+    const usable = () => tabs.filter((tab) => !tab.hidden);
     function showUnseen() {
       if (unseenLabel)
         unseenLabel.textContent = unseen ? ` · ${unseen} new` : "";
@@ -148,26 +155,29 @@ if (arena) {
         item.setAttribute("aria-selected", String(selected));
         item.tabIndex = selected ? 0 : -1;
       }
-      arena!.dataset.tab = tab.id === "arena-tab-chat" ? "chat" : "outline";
+      arena!.dataset.tab = tab.id.replace("arena-tab-", "");
       if (arena!.dataset.tab === "chat") {
         unseen = 0;
         showUnseen();
       }
       if (focus) tab.focus();
     }
+    // Chat sits over the video from 1200px and in the panel below.
     function sync() {
-      tablist!.hidden = !narrow.matches;
-      for (const tab of tabs) {
-        const target = panelOf(tab);
-        if (narrow.matches) target?.setAttribute("role", "tabpanel");
-        else target?.removeAttribute("role");
+      if (chat && chatTab) {
+        chatTab.hidden = !narrow.matches;
+        const target = narrow.matches ? insight : surface;
+        if (target && chat.parentElement !== target) {
+          if (narrow.matches) tablist!.after(chat);
+          else surface!.insertBefore(chat, chatHome);
+        }
       }
-      if (narrow.matches)
-        select(
-          tabs.find((tab) => tab.getAttribute("aria-selected") === "true") ??
-            tabs[0]!,
-        );
-      else delete arena!.dataset.tab;
+      for (const tab of tabs) panelOf(tab)?.setAttribute("role", "tabpanel");
+      if (chat && !narrow.matches) chat.removeAttribute("role");
+      const selected = tabs.find(
+        (tab) => tab.getAttribute("aria-selected") === "true" && !tab.hidden,
+      );
+      select(selected ?? usable()[0]!);
     }
     tablist.addEventListener("click", (event) => {
       const tab = (event.target as Element).closest<HTMLButtonElement>(
@@ -176,23 +186,24 @@ if (arena) {
       if (tab) select(tab);
     });
     tablist.addEventListener("keydown", (event) => {
-      const index = tabs.indexOf(document.activeElement as HTMLButtonElement);
+      const list = usable();
+      const index = list.indexOf(document.activeElement as HTMLButtonElement);
       if (index < 0) return;
       const next =
         event.key === "ArrowRight"
-          ? tabs[(index + 1) % tabs.length]
+          ? list[(index + 1) % list.length]
           : event.key === "ArrowLeft"
-            ? tabs[(index - 1 + tabs.length) % tabs.length]
+            ? list[(index - 1 + list.length) % list.length]
             : event.key === "Home"
-              ? tabs[0]
+              ? list[0]
               : event.key === "End"
-                ? tabs.at(-1)
+                ? list.at(-1)
                 : undefined;
       if (!next) return;
       event.preventDefault();
       select(next, true);
     });
-    // "Chat · N new" counts messages that arrive while the outline shows.
+    // "Chat · N new" counts messages that arrive while chat is a hidden tab.
     // The first batch is the chat's history, not news.
     let history = true;
     if (messages)
@@ -201,7 +212,7 @@ if (arena) {
           history = false;
           return;
         }
-        if (!narrow.matches || arena!.dataset.tab !== "outline") return;
+        if (!narrow.matches || arena!.dataset.tab === "chat") return;
         for (const record of records)
           if (record.nextSibling === null)
             for (const node of record.addedNodes)
@@ -214,6 +225,36 @@ if (arena) {
       }).observe(messages, { childList: true });
     narrow.addEventListener("change", sync);
     sync();
+  }
+
+  // Wide screens: chat over the video, which the viewer can hide (like
+  // Twitch's and Kick's overlay chat). The choice is kept on this device.
+  const chatToggle =
+    arena.querySelector<HTMLButtonElement>("[data-chat-toggle]");
+  if (chatToggle && surface) {
+    const key = "yaparena-chat-overlay";
+    const showChat = (shown: boolean) => {
+      if (shown) delete surface.dataset.chat;
+      else surface.dataset.chat = "hidden";
+      chatToggle.setAttribute("aria-pressed", String(shown));
+      chatToggle.title = shown ? "Hide chat" : "Show chat";
+    };
+    let stored: string | null = null;
+    try {
+      stored = localStorage.getItem(key);
+    } catch {
+      // Storage can be unavailable; chat then shows.
+    }
+    showChat(stored !== "hidden");
+    chatToggle.addEventListener("click", () => {
+      const shown = chatToggle.getAttribute("aria-pressed") !== "true";
+      showChat(shown);
+      try {
+        localStorage.setItem(key, shown ? "shown" : "hidden");
+      } catch {
+        // A per-device convenience only.
+      }
+    });
   }
 
   // Phones: picking Yes or No opens the pinned answer bar as a sheet. Back

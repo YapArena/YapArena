@@ -1,6 +1,7 @@
 // A small DOM for unit tests of the outline panel: elements with classes,
 // datasets, children and the class/attribute selectors the panel uses
-// (".a", "[data-x]", ":scope > .a", and comma-free compounds of those).
+// (".a", "[data-x]", ":scope > .a", and comma-free compounds of those;
+// ":scope .a" matches any descendant).
 
 class FakeClassList {
   constructor(element) {
@@ -58,6 +59,8 @@ export class FakeElement {
     this.classList = new FakeClassList(this);
     this.ownText = "";
     this.textWrites = 0;
+    this.id = "";
+    this.tabIndex = 0;
   }
   get textContent() {
     return this.children.length
@@ -80,6 +83,17 @@ export class FakeElement {
       node.parent = this;
       this.children.push(node);
     }
+  }
+  prepend(...nodes) {
+    for (const node of nodes) node.remove();
+    for (const node of nodes) node.parent = this;
+    this.children.unshift(...nodes);
+  }
+  focus() {
+    this.focused = (this.focused ?? 0) + 1;
+  }
+  scrollIntoView(options) {
+    this.scrolledInto = options ?? {};
   }
   replaceChildren(...nodes) {
     for (const child of this.children) child.parent = null;
@@ -146,7 +160,7 @@ export function outlinePanel(bootstrap) {
   turn.dataset.liveOutlineTurn = "";
   const list = new FakeElement("ol");
   list.dataset.liveOutlineArguments = "";
-  const earlier = new FakeElement("details");
+  const earlier = new FakeElement("div");
   earlier.dataset.liveOutlineEarlier = "";
   earlier.hidden = true;
   const turns = new FakeElement("ol");

@@ -87,6 +87,9 @@ export async function verifyArenaBrowser({
     await page.goto(base + "/debates/" + debateSlug);
     if (await dismiss.isVisible()) await dismiss.click();
     await page.locator("[data-a4-inline]").waitFor();
+    // The chart shares the rail panel with the AI outline and About
+    // (direction BC1, revision 2): open Results for the chart checks.
+    await page.locator("#arena-tab-results").click();
     phase = "live chat";
     await page.waitForFunction(
       () =>
@@ -313,12 +316,14 @@ export async function verifyArenaBrowser({
     );
     await page.emulateMedia({ reducedMotion: "no-preference" });
     checks.rapidScrubbingAndReducedMotion = true;
-    // Layout since 2026-10-30 (direction BC1, amending Decision 0013): the
-    // stage on the left; the rail on the right holds the answer panel and,
-    // below it, chat. The video and the panel start level.
+    // Layout since 2026-10-30 (direction BC1, amending Decision 0013): one
+    // screen; the stage on the left with chat over the video from 1200px;
+    // the rail on the right holds the answer panel and, below it, the AI
+    // outline, results and about panel. The video and the panel start level.
     await page.evaluate(() => window.scrollTo(0, 0));
     const sidebar = (await page.locator("[data-stake-panel]").boundingBox())!,
       video = (await page.locator("[data-arena-video]").boundingBox())!,
+      insight = (await page.locator("[data-insight]").boundingBox())!,
       chatPanel = (await page
         .locator("[data-community-chat-panel]")
         .boundingBox())!;
@@ -331,10 +336,92 @@ export async function verifyArenaBrowser({
       "the video is left of the rail",
     );
     assert.ok(
-      Math.abs(chatPanel.x - sidebar.x) <= 1 &&
-        chatPanel.y >= sidebar.y + sidebar.height,
-      "chat is in the rail, below the answer panel",
+      chatPanel.x >= video.x &&
+        chatPanel.y >= video.y &&
+        chatPanel.x + chatPanel.width <= video.x + video.width + 1 &&
+        chatPanel.y + chatPanel.height <= video.y + video.height + 1,
+      "chat sits over the video",
     );
+    assert.ok(
+      Math.abs(insight.x - sidebar.x) <= 1 &&
+        insight.y >= sidebar.y + sidebar.height,
+      "the outline, results and about panel is in the rail, below the answer panel",
+    );
+    assert.ok(
+      await page.evaluate(
+        () => document.documentElement.scrollHeight <= window.innerHeight + 1,
+      ),
+      "the page fits one screen",
+    );
+    // The turn clock: a timer on the emblem, between the debaters' cards.
+    assert.equal(
+      await page
+        .locator(".arena-turn-face [data-media-clock]")
+        .getAttribute("role"),
+      "timer",
+    );
+    assert.equal(
+      await page.locator(".arena-turn-face canvas.arena-ring").count(),
+      1,
+    );
+    // Chat over the video can be hidden and shown again.
+    await page.locator("[data-arena-video]").hover();
+    await page.locator("[data-chat-toggle]").click();
+    assert.equal(
+      await page.locator("[data-community-chat-panel]").isVisible(),
+      false,
+    );
+    await page.locator("[data-chat-toggle]").click();
+    assert.equal(
+      await page.locator("[data-community-chat-panel]").isVisible(),
+      true,
+    );
+    // The frame over the speaking debater's video lights up, and only
+    // theirs. Stand-in videos: no LiveKit tracks here.
+    if (
+      (await page
+        .locator("[data-arena]")
+        .getAttribute("data-debate-status")) === "live"
+    ) {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      const lit = await page.evaluate((debateId) => {
+        const box = document.querySelector("[data-media-videos]")!;
+        const videos = (["A", "B"] as const).map((side) => {
+          const video = document.createElement("video");
+          video.dataset.side = side;
+          box.append(video);
+          return video;
+        });
+        const shadows = (["A", "B"] as const).map((activeSide) => {
+          window.dispatchEvent(
+            new CustomEvent("yap:turn", {
+              detail: {
+                debateId,
+                eventStatus: "live",
+                state: "running",
+                activeSide,
+                turnNumber: 1,
+                turnDeadlineAt: new Date(Date.now() + 30_000).toISOString(),
+                serverOffset: 0,
+              },
+            }),
+          );
+          return (["A", "B"] as const).map((side) =>
+            getComputedStyle(
+              document.querySelector(`.arena-frame[data-side="${side}"]`)!,
+            ).boxShadow.includes("inset"),
+          );
+        });
+        for (const video of videos) video.remove();
+        return shadows;
+      }, debate.id);
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      assert.deepEqual(lit, [
+        [true, false],
+        [false, true],
+      ]);
+      checks.speakerFrameLights = true;
+    }
     checks.hoverPricesArgumentsAndCompactSidebar = true;
     const media = (await page.locator("[data-media-event]").elementHandle())!,
       chat = (await page
@@ -385,6 +472,7 @@ export async function verifyArenaBrowser({
       .waitFor({ state: "attached" });
     await expectInspection(first);
     checks.chartSelectionMarksRound = true;
+    await page.locator("#arena-tab-about").click();
     assert.equal(
       await page
         .getByRole("link", { name: "Practice with bots →" })
@@ -393,12 +481,15 @@ export async function verifyArenaBrowser({
     );
     checks.botsSandboxLink = true;
     phase = "a11y";
-    // The video's hover corners fade over 0.15s; scan them hidden or shown,
-    // not mid-fade, when their text is still partly transparent.
+    // The video's hover corners, name tags and chat controls fade over
+    // 0.15s; scan them hidden or shown, not mid-fade, when their text is
+    // still partly transparent.
     await page.waitForFunction(() =>
-      [...document.querySelectorAll(".arena-video-overlay")].every((node) =>
-        ["0", "1"].includes(getComputedStyle(node).opacity),
-      ),
+      [
+        ...document.querySelectorAll(
+          ".arena-video-overlay, .arena-frame-tag, .arena-chat-toggle, .chat-older",
+        ),
+      ].every((node) => ["0", "1"].includes(getComputedStyle(node).opacity)),
     );
     await page.addScriptTag({ content: axe.source });
     const a11y = await page.evaluate(async () => {
@@ -433,21 +524,28 @@ export async function verifyArenaBrowser({
       bar.y >= 0 && bar.y + bar.height <= 844 + 1 && bar.y > 844 / 2,
       "the answer bar shows at the bottom of the first screen",
     );
-    // Outline | Chat tabs follow the WAI pattern when the outline is on.
+    // The rail panel's tabs follow the WAI pattern; on phones chat is one
+    // of them, after the AI outline when the outline is on.
     const tabs = page.locator("[data-arena-tabs]");
-    if (await tabs.isVisible()) {
-      await tabs.getByRole("tab", { name: "AI outline" }).focus();
+    await tabs.locator('[role="tab"][aria-selected="true"]').focus();
+    await page.keyboard.press("Home");
+    const chatTab = tabs.getByRole("tab", { name: /^Chat/ });
+    if ((await chatTab.getAttribute("aria-selected")) !== "true")
       await page.keyboard.press("ArrowRight");
-      const chatTab = tabs.getByRole("tab", { name: /^Chat/ });
-      assert.equal(await chatTab.getAttribute("aria-selected"), "true");
-      assert.equal(
-        await chatTab.evaluate((node) => document.activeElement === node),
-        true,
-      );
-      assert.ok(await page.locator("[data-community-chat-panel]").isVisible());
-      await page.keyboard.press("Home");
-      checks.mobileTabsKeyboard = true;
-    }
+    assert.equal(await chatTab.getAttribute("aria-selected"), "true");
+    assert.equal(
+      await chatTab.evaluate((node) => document.activeElement === node),
+      true,
+    );
+    assert.ok(await page.locator("[data-community-chat-panel]").isVisible());
+    await page.keyboard.press("End");
+    assert.equal(
+      await tabs
+        .getByRole("tab", { name: "About" })
+        .getAttribute("aria-selected"),
+      "true",
+    );
+    checks.mobileTabsKeyboard = true;
     await page.screenshot({ path: directory + "/mobile.png", fullPage: true });
     checks.mobileNoOverflow = true;
     // Reduced motion removes the hover fades.

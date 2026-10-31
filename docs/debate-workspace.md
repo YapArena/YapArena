@@ -20,22 +20,27 @@ existing surface: it preserves media nodes, tracks, playback and chat. Hover,
 keyboard focus and touch expose the control; Restore or Escape returns its exact
 original bounds. Keyboard focus stays inside the enlarged video until restored.
 
-**Layout since 2026-10-30 (direction BC1; amends Decision 0013 and supersedes the column order
-above):** two columns on wide screens. The stage holds any status banner, the 16:9 video, the
-live captions line, the media status, the scoreboard (the two debaters' cards with the turn clock
-between them), then the AI outline as argument cards, the chart ("Results by turn") and "About
-this debate". The right rail holds the answer panel and, filling the rest of the screen, chat; it
-stays in view while the stage scrolls. From 960 to 1199 px the rail narrows to 340 px. From 600 to
-959 px the page is one column: stage, panel, Outline | Chat tabs, then the rest. On phones the video
-is full-bleed, the tabs follow the scoreboard, and the answer panel is a bar pinned to the bottom of
-the screen that opens into a sheet when Yes or No is picked. The question appears in the video's
-top-left corner and "Live · N watching" in its top-right corner, left of the expand button, while
-the pointer is over the video or focus is inside it. On touch screens a tap on the video shows them
-until the next tap elsewhere. They never take clicks, the question stays the page's `h1` for screen
-readers, and reduced motion removes the fade. The markup is in
+**Layout since 2026-10-30 (direction BC1, revised in review; amends Decision 0013 and supersedes
+the column order above):** two columns on wide screens, fitting one screen from 960 px. The stage
+holds any status banner, the 16:9 video, the live captions line, the media status and the
+scoreboard (the two debaters' cards with the emblem turn clock between them). From 1200 px chat
+sits over the video's lower right with no title or panel, and a button next to Enlarge hides it.
+A frame over each debater's video lights up while they have the floor and shows their name and
+@handle on hover. The right rail holds the answer panel and, under it, a panel of tabs: the AI
+outline (argument cards that open to their points and rebuttals), Results ("Results by turn") and
+"About this debate"; below 1200 px chat joins them as a tab. From 960 to 1199 px the rail narrows
+to 340 px. Below 960 px the page is one column that scrolls: stage, answer panel, then the tabs.
+On phones the video is full-bleed and the answer panel is a bar pinned to the bottom of the screen
+that opens into a sheet when Yes or No is picked. The question appears in the video's top-left
+corner and "Live · N watching" in its top-right corner, left of the chat and expand buttons, while
+the pointer is over the video or focus is inside it. On touch screens a tap on the video shows
+them until the next tap elsewhere. They never take clicks, the question stays the page's `h1` for
+screen readers, and reduced motion removes the fade. The markup is in
 [`debate-web.ts`](../src/features/discovery/debate-web.ts), the rules in `public/arena.css` and
-`public/live-outline.css`, and the behaviour (speaking state, tabs, phone sheet, chat colours) in
-`frontend/debate-layout.ts`. Sizes, tokens and states: [the debate page design](debate-page-design.md).
+`public/live-outline.css`, and the behaviour in `frontend/debate-layout.ts` (speaking state, tabs,
+chat placement and hiding, phone sheet, chat colours), `frontend/outline-panel.ts` (the argument
+cards) and `frontend/turn-clock.ts` (the clock). Sizes, tokens and states:
+[the debate page design](debate-page-design.md).
 
 **Betting panel (Decision 0013):** the right column starts with the Yap Coins panel
 (`frontend/stake-panel.ts`, pure logic in `frontend/stake-model.ts`). It reads the anonymous

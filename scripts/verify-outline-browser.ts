@@ -286,8 +286,9 @@ window.harness = {
     return { tab, errors, requests };
   }
   const labels = (tab: Page) =>
-    tab.$$eval(".live-outline-arguments .live-outline-label-text", (nodes) =>
-      nodes.map((node) => node.textContent),
+    tab.$$eval(
+      "[data-live-outline-arguments] .live-outline-label-text",
+      (nodes) => nodes.map((node) => node.textContent),
     );
 
   // 1. The page's initial state paints with no request, then the data-only
@@ -358,7 +359,8 @@ window.harness = {
   }
   await live.tab.waitForFunction(
     () =>
-      document.querySelectorAll(".live-outline-arguments > li").length === 4,
+      document.querySelectorAll("[data-live-outline-arguments] > li").length ===
+      4,
   );
   results.applyMs = Date.now() - started;
   assert.equal(live.requests.length, before, "zero requests per live update");
@@ -375,8 +377,8 @@ window.harness = {
     "the unchanged argument's node is kept",
   );
   assert.equal(
-    await live.tab.textContent('[data-id="t2a2"] .live-outline-rebuts'),
-    "Rebuts: Renewables are cheaper",
+    await live.tab.textContent('[data-id="t2a2"] .live-outline-jump'),
+    "Renewables are cheaper",
   );
   assert.ok(
     (
@@ -401,6 +403,22 @@ window.harness = {
   results.announcement = await live.tab.textContent(
     "[data-live-outline-announce]",
   );
+  // Each argument is a card that opens to show its points; a rebuttal's
+  // link opens and focuses the card it answers.
+  assert.equal(await live.tab.isVisible('[data-id="t2a2p1"]'), false);
+  await live.tab.locator('[data-id="t2a2"] .live-outline-toggle').click();
+  assert.equal(await live.tab.isVisible('[data-id="t2a2p1"]'), true);
+  await live.tab.locator('[data-id="t2a2"] .live-outline-jump').click();
+  await live.tab.waitForFunction(
+    () => document.activeElement?.closest('[data-id="t1a1"]') != null,
+  );
+  assert.equal(
+    await live.tab
+      .locator('[data-id="t1a1"] .live-outline-toggle')
+      .getAttribute("aria-expanded"),
+    "true",
+  );
+  results.cardsOpenAndLink = true;
 
   // 3. A gap is repaired with exactly one catch-up request.
   version++;
@@ -495,7 +513,8 @@ window.harness = {
   await tab.goto(`${base}/debates/${debate.slug}`);
   await tab.waitForFunction(
     () =>
-      document.querySelectorAll(".live-outline-arguments > li").length === 1,
+      document.querySelectorAll("[data-live-outline-arguments] > li").length ===
+      1,
   );
   assert.equal(await tab.locator("[data-live-captions]").count(), 1);
   // The heading is set in Dydema Capitals; its accessible name stays.

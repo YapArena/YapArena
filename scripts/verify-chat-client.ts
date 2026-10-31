@@ -682,6 +682,9 @@ export async function verifyChatClient({
         },
         name === "zoom" ? "2" : "1",
       );
+      // Below 1200px chat is a tab of the rail panel (direction BC1).
+      const chatTab = page.locator("#arena-tab-chat");
+      if (await chatTab.isVisible()) await chatTab.click();
       try {
         await page.waitForFunction(
           () => {

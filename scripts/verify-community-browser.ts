@@ -172,6 +172,8 @@ try {
   });
   const mobilePage = await mobile.newPage();
   await mobilePage.goto(`${base}/debates/${eventSlug}`);
+  // On phones chat is a tab of the rail panel (debate page direction BC1).
+  await mobilePage.locator("#arena-tab-chat").click();
   await mobilePage.getByText(connectionReady).waitFor();
   await openChatMenu(author.page);
   await author.page.locator("[data-community-like]").click();
