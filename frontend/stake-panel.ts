@@ -24,6 +24,7 @@ import {
   reasonText,
   repeatLabel,
   replayRound,
+  replayUntimed,
   replayWindow,
   reservedAtoms,
   resultLine,
@@ -233,9 +234,15 @@ if (root) {
       }),
     );
   }
-  async function loadPrivate(current: number) {
+  // With readSummary false, the balance already shown stays: at a window
+  // boundary only the windows and this viewer's rounds change, unless a
+  // position of theirs just closed.
+  async function loadPrivate(current: number, readSummary = true) {
     if (!signedIn) return;
-    let value = await coinApi<CoinSummary>("/summary");
+    let value =
+      readSummary || !summary || !summary.initialized
+        ? await coinApi<CoinSummary>("/summary")
+        : summary;
     if (current !== generation) return;
     summary = value;
     // Decision 0013: Yap Coins are always on; the first visit claims the
@@ -256,7 +263,7 @@ if (root) {
       window.dispatchEvent(new Event("yap:coins-changed"));
     revealedSeen = revealed;
   }
-  async function refresh(full = false) {
+  async function refresh(full = false, readSummary = true) {
     const current = generation;
     try {
       if (full || signedIn === null) {
@@ -269,7 +276,7 @@ if (root) {
       }
       await loadWindows();
       if (current !== generation) return;
-      await loadPrivate(current).catch((error: unknown) => {
+      await loadPrivate(current, readSummary).catch((error: unknown) => {
         // A disabled coin sandbox (404) leaves only the public view.
         if (apiErrorStatus(error) === 404) summary = null;
         else throw error;
@@ -285,7 +292,7 @@ if (root) {
   // five-day replay the window of the turn that's playing.
   function target(): Target | null {
     if (!windows) return null;
-    const live = liveWindow(windows.windows, now());
+    const live = liveWindow(windows.windows, now(), windows.eventStatus);
     if (live) {
       const round = rounds.find((item) => item.id === live.id) ?? null;
       return {
@@ -416,9 +423,12 @@ if (root) {
       windows?.revealMode === "five_day" &&
       (!closeAt || Date.parse(closeAt) > now())
     )
-      return playback
-        ? "You can join the window for the turn that's playing."
-        : "Play the replay to answer the turn that's playing.";
+      // F10 needs the recording's start, reported once it completes.
+      return replayUntimed(windows.windows)
+        ? "Answers from the replay open once its recording is ready."
+        : playback
+          ? "You can join the window for the turn that's playing."
+          : "Play the replay to answer the turn that's playing.";
     return "Answers for this debate are closed.";
   }
   function joinable(current: Target | null): current is Target {
@@ -805,15 +815,24 @@ if (root) {
     }
     render();
   });
-  const spread = () =>
-    window.setTimeout(() => void refresh(), Math.random() * 3000);
+  // Everyone in a room crosses a window boundary in the same second; spread
+  // their reads over 0–3 seconds.
+  const spread = (readSummary = true) =>
+    window.setTimeout(
+      () => void refresh(false, readSummary),
+      Math.random() * 3000,
+    );
   watchRoom({
     room: debateId,
     topics: ["window"],
     events: window,
     signal() {
+      // A window opened, closed or settled; only a viewer with an open
+      // position here can see their balance change.
       window.clearTimeout(refreshTimer);
-      refreshTimer = spread();
+      refreshTimer = spread(
+        rounds.some((round) => round.own && round.state === "open"),
+      );
     },
     health(live) {
       roomLive = live;
@@ -863,8 +882,13 @@ if (root) {
         closedTurn = lastTarget.turnNumber;
         errorLine.textContent = `Turn ${lastTarget.turnNumber}'s window closed before you confirmed. Nothing was reserved.`;
       }
+      // Read the balance again only if a position of this viewer's was in
+      // the window that just closed.
+      const owned = Boolean(lastTarget?.round?.own);
       lastTarget = current;
-      void refresh();
+      window.clearTimeout(refreshTimer);
+      refreshTimer = spread(owned);
+      render();
       return;
     }
     lastTarget = current;

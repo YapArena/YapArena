@@ -169,7 +169,11 @@ describe(
         }),
         createCoinSandboxRouter({
           sandbox: repo,
-          debates: createCoinDebateSandbox(a, "simulation"),
+          debates: createCoinDebateSandbox(a, "simulation", {
+            limits: {
+              request: { lockTimeoutMs: 60_000, statementTimeoutMs: 120_000 },
+            },
+          }),
           operations: createAccountOperationRepository(a),
           environment: "test",
           applicationOrigin: origin,
