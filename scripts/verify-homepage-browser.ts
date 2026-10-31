@@ -237,7 +237,7 @@ try {
   page.on("request", (r) => requests.push(r.url()));
   async function openNative() {
     await page.mouse.move(0, 0);
-    await page.goto(base + "/?reference=1");
+    await page.goto(base + "/home?reference=1");
     await page.locator("#ya-grid [data-expand]").first().waitFor();
   }
   async function pause(scope: Page | Frame) {
@@ -770,7 +770,7 @@ try {
   // Use the browser's controlled clock to inspect progress/advance over repeated cycles.
   const timed = await context.newPage();
   await timed.clock.install();
-  await timed.goto(base + "/?reference=1");
+  await timed.goto(base + "/home?reference=1");
   await timed.locator("[data-expand]").first().waitFor();
   await timed.mouse.move(0, 0);
   const selected = () =>
@@ -839,7 +839,7 @@ try {
   // controlled animation clock above. Exercise offscreen suspension in real time.
   const offscreen = await context.newPage();
   await offscreen.setViewportSize({ width: 1440, height: 500 });
-  await offscreen.goto(base + "/?reference=1");
+  await offscreen.goto(base + "/home?reference=1");
   await offscreen.locator("#ya-grid [data-expand]").first().waitFor();
   await offscreen.mouse.move(0, 0);
   const offscreenSelected = await offscreen
@@ -891,7 +891,7 @@ try {
   });
   const phone = await touchContext.newPage();
   phone.on("pageerror", (e) => errors.push(e.message));
-  await phone.goto(base + "/?reference=1");
+  await phone.goto(base + "/home?reference=1");
   await phone.locator("#ya-chart").waitFor();
   assert.ok(
     await phone.evaluate(
@@ -917,7 +917,7 @@ try {
   await touchContext.close();
   checks.coarsePointerMobileTouchInspection = true;
   // Real data uses nullable histories, actual wallet/follows and canonical routes.
-  await page.goto(base);
+  await page.goto(base + "/home");
   await page.locator("#ya-grid [data-expand]").first().waitFor();
   assert.equal(await page.locator("#ya-value").textContent(), "—");
   assert.equal(await page.locator("#ya-price").textContent(), "—");
@@ -992,7 +992,7 @@ try {
       viewport: { width: 1440, height: 1100 },
     }),
     plain = await nojs.newPage();
-  await plain.goto(base);
+  await plain.goto(base + "/home");
   assert.equal(await plain.locator("h1").textContent(), "Yap Arena");
   assert.equal(await plain.locator(".ya-heading").count(), 0);
   assert.equal(
@@ -1014,14 +1014,14 @@ try {
     .click();
   assert.ok(plain.url().endsWith("/debates/published-debate"));
   assert.equal(await plain.locator("[data-media-event]").count(), 1);
-  await plain.goto(base);
+  await plain.goto(base + "/home");
   await plain.getByRole("searchbox", { name: "Search ideas" }).fill("idea");
   await Promise.all([
     plain.waitForURL((url) => url.pathname === "/topics"),
     plain.getByRole("searchbox", { name: "Search ideas" }).press("Enter"),
   ]);
   assert.equal(new URL(plain.url()).searchParams.get("q"), "idea");
-  await plain.goto(base);
+  await plain.goto(base + "/home");
   // Without JavaScript the header still offers both Auth0 sign-in methods.
   for (const [name, connection] of [
     ["Continue with Google", "google"],
@@ -1035,7 +1035,7 @@ try {
   checks.serverRenderedNoJavaScriptFallback = true;
   checks.realDebateAndAccountNavigation = true;
   unavailable = true;
-  const response = await page.goto(base);
+  const response = await page.goto(base + "/home");
   assert.equal(response!.status(), 503);
   assert.match((await page.locator(".ya-empty").textContent())!, /unavailable/);
   assert.equal(await page.locator("#ya-value").textContent(), "—");
@@ -1044,7 +1044,7 @@ try {
   tickerTrial = true;
   const tickerPage = await context.newPage();
   tickerPage.on("pageerror", (e) => errors.push(e.message));
-  await tickerPage.goto(base);
+  await tickerPage.goto(base + "/home");
   const ticker = tickerPage.locator(".ya-ticker-marquee"),
     tickerTrack = tickerPage.locator(".ya-ticker-track");
   await tickerTrack.waitFor();

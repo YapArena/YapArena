@@ -31,6 +31,7 @@ import {
   recoverDraft,
   shouldSendOnEnter,
 } from "./community-state.js";
+import { authorTint } from "./debate-layout-model.js";
 const reasons = ["harassment", "hate", "threat", "spam", "privacy", "other"];
 let mutationAccountEpoch = 0;
 window.addEventListener("yap:account-changed", () => mutationAccountEpoch++);
@@ -392,8 +393,12 @@ function initEvent(root: HTMLElement) {
   ) {
     if (item.id) line.dataset.messageId = item.id;
     const removed = item.state === "removed" || record?.state === "removed";
-    line.querySelector<HTMLElement>(".community-message-author")!.textContent =
-      item.authorName || "You";
+    const author = line.querySelector<HTMLElement>(
+      ".community-message-author",
+    )!;
+    author.textContent = item.authorName || "You";
+    // The debate page colours names from the visit's palette.
+    author.dataset.tint = String(authorTint(author.textContent));
     line.querySelector<HTMLElement>(".community-message-body")!.textContent =
       removed ? "Removed by moderation." : item.body;
     const timestamp = line.querySelector<HTMLTimeElement>("time")!;

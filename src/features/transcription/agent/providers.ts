@@ -15,6 +15,13 @@ import type {
 
 /** How long a finishing channel waits for its last final transcript. */
 export const FINISH_TIMEOUT_MS = 4000;
+/**
+ * ElevenLabs commits a final segment after this much silence (it accepts
+ * 0.192 to 3 s). With its default, read speech rarely paused long enough and
+ * Scribe committed only every ~36 s of audio, so the live outline, which reads
+ * finals, updated about twice per turn in the staging trial.
+ */
+export const ELEVENLABS_SILENCE_SECS = 0.5;
 
 type Log = (message: string, detail?: Record<string, unknown>) => void;
 
@@ -85,35 +92,61 @@ function channel(
 
 export function createSpeechEngine(
   provider: TranscriptionProvider,
-  { elevenLabsKey, log }: { elevenLabsKey: string | undefined; log: Log },
+  {
+    elevenLabsKey,
+    elevenLabsUrl,
+    log,
+  }: {
+    elevenLabsKey: string | undefined;
+    /** Another ElevenLabs API origin (tests); the plugin's default otherwise. */
+    elevenLabsUrl?: string;
+    log: Log;
+  },
 ): SpeechEngine<AudioFrame> {
-  // Both concrete classes take the stream's language; the base class does not.
-  const engine =
-    provider === "deepgram"
-      ? new inference.STT<"deepgram/nova-3">({
-          model: "deepgram/nova-3",
-          modelOptions: {
-            interim_results: true,
-            punctuate: true,
-            smart_format: true,
-            filler_words: false,
-          },
-        })
-      : new elevenlabs.STT({
-          model: "scribe_v2_realtime",
-          apiKey: elevenLabsKey,
-          includeTimestamps: true,
-          serverVad: {},
-          sampleRate: 16000,
-        });
   // A bare EventEmitter 'error' without a listener would crash the job.
-  engine.on("error", (error: unknown) =>
-    log("speech provider error", { provider, error }),
-  );
+  const onError = (error: unknown) =>
+    log("speech provider error", { provider, error });
+  let stream: (language: DebaterLanguage) => stt.SpeechStream;
+  if (provider === "deepgram") {
+    // LiveKit Inference opens its connection with the engine's language and
+    // ignores the stream's (@livekit/agents 1.9.3); without one, Deepgram
+    // transcribes French as English. So each language has its own engine.
+    const deepgram = (language: DebaterLanguage) => {
+      const engine = new inference.STT<"deepgram/nova-3">({
+        model: "deepgram/nova-3",
+        language,
+        modelOptions: {
+          interim_results: true,
+          punctuate: true,
+          smart_format: true,
+          filler_words: false,
+        },
+      });
+      engine.on("error", onError);
+      return engine;
+    };
+    const engines: Record<DebaterLanguage, ReturnType<typeof deepgram>> = {
+      fr: deepgram("fr"),
+      en: deepgram("en"),
+    };
+    stream = (language) => engines[language].stream({ language });
+  } else {
+    // The ElevenLabs plugin connects with the stream's language.
+    const engine = new elevenlabs.STT({
+      model: "scribe_v2_realtime",
+      apiKey: elevenLabsKey,
+      ...(elevenLabsUrl ? { baseURL: elevenLabsUrl } : {}),
+      includeTimestamps: true,
+      serverVad: { vadSilenceThresholdSecs: ELEVENLABS_SILENCE_SECS },
+      sampleRate: 16000,
+    });
+    engine.on("error", onError);
+    stream = (language) => engine.stream({ language });
+  }
   return {
     provider,
     open(language: DebaterLanguage) {
-      return channel(engine.stream({ language }), provider, log);
+      return channel(stream(language), provider, log);
     },
   };
 }

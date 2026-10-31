@@ -268,6 +268,10 @@ export async function runDebateTranscriber(
   }, REFRESH_MS);
   ctx.addShutdownCallback(async () => {
     clearInterval(refresh);
+    // A shutdown that begins while the transcriber is stopping (the room
+    // closing, for example) lets it finish the last turn's cleanup, within
+    // LiveKit's shutdown timeout.
+    await ending;
     for (const stream of audio.values())
       if (!stream.locked) await stream.cancel().catch(() => {});
   });

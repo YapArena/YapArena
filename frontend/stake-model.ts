@@ -1,6 +1,12 @@
 // Pure logic for the debate betting panel (Decision 0013): terms, formatting
 // and which turn window a viewer can join. No DOM access, so tests can import
 // the built module directly.
+import {
+  formatCoins,
+  formatHundredths,
+  formatPrice,
+  formatSignedCoins,
+} from "./lib/coin-format.js";
 
 export type StakeSide = "YES" | "NO";
 export type SpeakingSide = "A" | "B";
@@ -128,9 +134,17 @@ export function parseCeiling(text: string) {
   return cents >= 1 && cents <= 99 ? cents : null;
 }
 
-/** Yap Coins with two decimals, from hundredths of a coin. */
+/** Yap Coins from hundredths of a coin: "10 YC", "5.40 YC". */
 export function coins(hundredths: number) {
-  return `${Math.floor(hundredths / 100)}.${String(hundredths % 100).padStart(2, "0")} YC`;
+  return formatHundredths(hundredths);
+}
+
+/** A price per contract, in hundredths of a coin: "0.54 YC". */
+export const price = formatPrice;
+
+/** The coins a ticket reserves: one Yap Coin per contract (no fee). */
+export function reservedAtoms(size: number) {
+  return BigInt(size) * 10_000n;
 }
 
 /** The terms a ticket shows before the viewer confirms. */
@@ -141,16 +155,9 @@ export function ticketTerms(size: number, cents: number) {
   };
 }
 
-// 10,000 atomic units are one Yap Coin, for cash and grant principal alike.
-const atomsPerCoin = 10_000n;
-
-/** Signed Yap Coins with two decimals, from atomic units. */
+/** A result in Yap Coins from atomic units: "+3.40 YC", "no gain or loss". */
 export function signedCoins(atoms: string | bigint) {
-  const value = BigInt(atoms);
-  const magnitude = value < 0n ? -value : value;
-  const hundredths = (magnitude * 100n) / atomsPerCoin;
-  const text = `${hundredths / 100n}.${String(hundredths % 100n).padStart(2, "0")}`;
-  return `${value < 0n ? "−" : value > 0n ? "+" : ""}${text} YC`;
+  return formatSignedCoins(atoms);
 }
 
 /** A fraction as whole percent, or null when it is missing. */
@@ -170,11 +177,17 @@ export function speakerLine(
   return `${speakers[side]} speaking (${labels[side]})`;
 }
 
-/** The window taking live orders at the server-adjusted time, if any. */
+/**
+ * The window taking live orders at the server-adjusted time, if any. A
+ * debate that is no longer live takes no live orders, even before a
+ * window's cutoff.
+ */
 export function liveWindow(
   windows: readonly PublicWindow[],
   serverNow: number,
+  eventStatus = "live",
 ) {
+  if (eventStatus !== "live") return null;
   return (
     windows.find(
       (window) =>
@@ -356,9 +369,9 @@ export function resultsHeading(
 }
 
 /**
- * One revealed position: "Turn 3 · Yes · 10 · paid 54¢ each · 58% said yes ·
- * +0.40 YC". Prices are from the position's side: a No pays 100 minus the
- * drawn yes price.
+ * One revealed position: "Turn 3 · Yes · 10 · paid 0.54 YC each · 58% said
+ * yes · +0.40 YC". Prices are from the position's side: a No pays 1 YC minus
+ * the drawn yes price.
  */
 export function resultLine(round: StakeRound) {
   const own = round.own;
@@ -371,10 +384,10 @@ export function resultLine(round: StakeRound) {
   const executed = round.outcome?.executed === true;
   const parts = [head];
   if (executed) {
-    if (sidePrice !== null) parts.push(`paid ${sidePrice}¢ each`);
+    if (sidePrice !== null) parts.push(`paid ${price(sidePrice)} each`);
   } else
     parts.push(
-      sidePrice === null ? "not filled" : `not filled at ${sidePrice}¢`,
+      sidePrice === null ? "not filled" : `not filled at ${price(sidePrice)}`,
     );
   if (share !== null) parts.push(`${share}% said yes`);
   parts.push(
@@ -394,9 +407,90 @@ export function positionStatus(
       : "Voided · refunded";
   if (round.state === "settled" && round.outcome)
     return round.outcome.executed
-      ? `Settled ${signedCoins(round.outcome.net)}`
+      ? `Settled: ${signedCoins(round.outcome.net)}`
       : "Not filled · refunded";
   return round.revealAt
     ? `Locked · results ${when(round.revealAt)}`
     : "Locked · results 5 days after the debate ends";
+}
+
+/**
+ * What a failed placement means, in the panel's words. The server sends a
+ * code with each refusal (src/features/account-wallet/debate-sandbox.ts);
+ * its own text is never shown. `closed` is true when the window closed
+ * first, so the ticket offers the next turn. A failure without a status is
+ * a lost connection.
+ */
+export function placementError(
+  error: unknown,
+  context: { turnNumber: number; available: string | null },
+): { text: string; closed: boolean } {
+  const known = typeof error === "object" && error !== null;
+  const status = known && "status" in error ? error.status : undefined;
+  const code = known && "code" in error ? error.code : undefined;
+  const closed = {
+    text: `Turn ${context.turnNumber}'s window closed before you confirmed. Nothing was reserved.`,
+    closed: true,
+  };
+  const plain = (text: string) => ({ text, closed: false });
+  if (typeof status !== "number")
+    return error instanceof Error && error.message === "window changed"
+      ? closed
+      : plain("Connection lost. Nothing was reserved; try again.");
+  switch (code) {
+    case "window_closed":
+      return closed;
+    case "insufficient_balance":
+      return plain(
+        context.available === null
+          ? "You don't have enough Yap Coins for this size. Nothing was reserved."
+          : `You don't have enough Yap Coins: ${formatCoins(
+              context.available,
+            )} available. Lower the size. Nothing was reserved.`,
+      );
+    case "already_answered":
+      return plain("You already answered this turn.");
+    case "debater":
+      return plain("You're in this debate, so you can't answer here.");
+    case "window_full":
+      return plain("This turn's window is full. Nothing was reserved.");
+    case "answers_paused":
+      return plain(
+        "Answers are paused for a moment. Nothing was reserved; try again soon.",
+      );
+    case "busy":
+      return plain("Yap Coins are busy. Nothing was reserved; try again.");
+    case "replay_untimed":
+      return plain(
+        "This replay isn't taking answers yet. Nothing was reserved.",
+      );
+    case "debate_unavailable":
+      return plain("This debate isn't taking answers.");
+    case "financial_review":
+      return plain("Your Yap Coins are paused for a correction review.");
+    case "later_window":
+      return plain(
+        "You already answered a later turn, so you can't go back to this one.",
+      );
+    case "replay_position":
+      return plain(
+        "That part of the replay isn't in this turn's window. Nothing was reserved.",
+      );
+    case "session_changed":
+      return plain(
+        "Your account changed in another tab. Refresh the page; nothing was reserved.",
+      );
+    case "signed_out":
+      return plain("You're signed out. Sign in again to answer.");
+  }
+  if (status === 401)
+    return plain("You're signed out. Sign in again to answer.");
+  if (status === 429)
+    return plain("Too many tries. Wait a moment, then try again.");
+  return plain("Couldn't place your answer. Nothing was reserved; try again.");
+}
+
+/** True when no window has a span in the recording yet (F10 can't work). */
+export function replayUntimed(windows: readonly PublicWindow[]) {
+  return !windows.some((window) => window.recording != null);
 }

@@ -49,6 +49,7 @@ try {
     data: {
       handle: `f03-${randomUUID().slice(0, 8)}`,
       displayName: "Session check",
+      acceptTerms: true,
     },
   });
   if (profile.status() !== 201)

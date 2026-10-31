@@ -37,6 +37,14 @@ describes a source-built service.
 To roll out the matchmaking, Yap Coins turn window and live outline release (Decisions 0011 to
 0013), follow the step-by-step [staging rollout](staging-rollout.md).
 
+Production is a separate stack at `https://yaparena.com`, described by
+[`render.production.yaml`](../render.production.yaml) and built with the
+[production rollout](production-rollout.md). It shares no service, project, tenant, bucket or secret
+with staging, and syncing one Blueprint never changes the other environment. Staging stays on Render
+Free and out of search engines: a service without `PRODUCTION_SERVICE=true` sends
+`X-Robots-Tag: noindex` on every response, and its `/robots.txt` disallows all crawling. Every release
+runs on staging before production ([releasing](production-rollout.md#releasing-from-now-on)).
+
 This is a small trial environment. Render Free sleeps after 15 minutes without inbound traffic and
 can take about a minute to wake. An open debate page still sends the app requests at least once a
 minute, but an instance restart can still interrupt the turn clock. The background jobs run in the paid jobs
@@ -80,7 +88,7 @@ credentials or API settings. Verify those in the provider dashboards and keep th
 
    ```sh
    docker run --rm --env-file /secure/yaparena-migration.env \
-     ghcr.io/boufe/yaparena@sha256:WEB_DIGEST \
+     ghcr.io/yaparena/yaparena@sha256:WEB_DIGEST \
      node scripts/migrate-database.ts
    ```
 
@@ -94,7 +102,9 @@ credentials or API settings. Verify those in the provider dashboards and keep th
    deployments are off in the **actual service**, including existing services whose settings may
    differ from the file. Set `DATABASE_URL` to the **runtime** Session pooler URL. The Blueprint
    generates `METRICS_TOKEN`; metrics collectors and hosted verifiers send it as a bearer token,
-   and `/metrics` returns 404 without it. Remove all
+   and `/metrics` returns 404 without it. For the landing headline font, add the secret file
+   `landing-headline-font.b64` that `LANDING_FONT_FILE` points to
+   ([landing page font](landing-page.md#deploying-the-headline-font)). Remove all
    migration/admin secrets and combined operator files from web/worker environments. Replacing the
    URL does not rotate the old shared owner password; handle old credentials/deployment copies under
    separately authorized credential rotation.
@@ -167,6 +177,19 @@ hours after the debate ends.
 | Variable               | Default | Purpose                                                    |
 | ---------------------- | ------- | ---------------------------------------------------------- |
 | `TURN_WINDOWS_ENABLED` | `false` | One Yap Coins trading window per live turn; web and worker |
+
+Yap Coins run in launch mode on staging as in production
+([coin sandbox operations](coin-sandbox-operations.md#launch-mode-play-money-only)): no simulated
+purchases or withdrawals, and turn windows as the only way to take a position. Seed the center and
+promotional treasuries once per database before the first debate
+([procedure](coin-sandbox-operations.md#funding-the-center-and-promotional-treasuries-d1)); until
+then every answer is refused as paused. Set `COIN_SANDBOX_TRANSFERS_ENABLED=true` on the web
+service only for a deliberate trial of the simulated money flows.
+
+| Variable                           | Default  | Purpose                                                                      |
+| ---------------------------------- | -------- | ---------------------------------------------------------------------------- |
+| `COIN_SANDBOX_TRANSFERS_ENABLED`   | `false`  | Simulated purchases, withdrawals and error reports; web; never on production |
+| `COIN_SANDBOX_TREASURY_ALERT_USDC` | `200000` | Worker warning and `/metrics` flag below this treasury balance               |
 
 ## Enable live transcription and captions
 
@@ -284,7 +307,8 @@ web service so it stays awake. Database-backed clock ownership and canonical per
 now coordinate clock work across processes, but reliable compute and hosted recovery still need
 validation. Move to a paid database with restore-tested backups before accepting real users. Add
 alert delivery, load and media trials, and a shared rate limiter before scaling web instances.
-Keep production in separate provider projects and credentials. See
+Keep production in separate provider projects and credentials, as the
+[production rollout](production-rollout.md) does. See
 [decision 0004](decisions/0004-live-debate-replay.md) for open production media decisions.
 
 ## Deploy the automatic replay encoder
@@ -300,7 +324,7 @@ per-recording operations or evidence that the Blueprint creates a worker.
    operator, then run the runtime database identity/isolation checks. Deploy the reviewed web
    commit with packaging disabled first. Keep the additive migration on rollback.
 2. Create a background worker from the encoder image published by the same CI run as the web
-   image (`ghcr.io/boufe/yaparena-encoder@sha256:ENCODER_DIGEST`) and set Docker Command to
+   image (`ghcr.io/yaparena/yaparena-encoder@sha256:ENCODER_DIGEST`) and set Docker Command to
    `node dist/replay-worker.js`. That image already contains FFmpeg and ffprobe. A worker built
    from source instead needs `MEDIA_WORKER_TOOLS=true`, which Render maps to a Docker build
    argument; web images keep the default `false`. Never reference secrets in build arguments.
@@ -332,10 +356,10 @@ After `quality / check` and `container` pass on a push to `main`, CI publishes t
 images; Render runs only that platform. Tagged `vX.Y.Z` releases still publish multi-platform web
 images separately.
 
-| Image                            | Contents                                  | Render service                          |
-| -------------------------------- | ----------------------------------------- | --------------------------------------- |
-| `ghcr.io/boufe/yaparena`         | Production web image                      | Web service, jobs worker, migration job |
-| `ghcr.io/boufe/yaparena-encoder` | Same build with `MEDIA_WORKER_TOOLS=true` | Replay encoder worker                   |
+| Image                               | Contents                                  | Render service                          |
+| ----------------------------------- | ----------------------------------------- | --------------------------------------- |
+| `ghcr.io/yaparena/yaparena`         | Production web image                      | Web service, jobs worker, migration job |
+| `ghcr.io/yaparena/yaparena-encoder` | Same build with `MEDIA_WORKER_TOOLS=true` | Replay encoder worker                   |
 
 The `publish` jobs push each image by digest without a tag, scan that pushed digest with the
 `container` job's Trivy settings, and only then tag it `sha-<full commit SHA>`. A failed scan
@@ -376,13 +400,13 @@ worker. This has not yet been tried on these services.
    sync before switching. `render.yaml` still declares `runtime: docker`, and a Blueprint cannot
    change an existing service's runtime, so a later sync would conflict.
 2. Migrate with the chosen web digest as in step 2 of [deploy the web service](#deploy-the-web-service).
-3. Switch the web service to `ghcr.io/boufe/yaparena@sha256:WEB_DIGEST`, selecting the registry
+3. Switch the web service to `ghcr.io/yaparena/yaparena@sha256:WEB_DIGEST`, selecting the registry
    credential if the package is private. Keep Docker Command `/bin/sh /app/scripts/start-staging.sh`,
    health check path `/ready` and every environment variable. Render deploys the image after the
    change; confirm `/ready` and the smoke checks.
 4. Switch the `yaparena-staging-jobs` worker to the same web digest and keep Docker
    Command `node dist/worker.js`. Confirm its `background worker started` log line.
-5. Switch the encoder to `ghcr.io/boufe/yaparena-encoder@sha256:ENCODER_DIGEST` from the same CI
+5. Switch the encoder to `ghcr.io/yaparena/yaparena-encoder@sha256:ENCODER_DIGEST` from the same CI
    run and keep Docker Command `node dist/replay-worker.js`. `MEDIA_WORKER_TOOLS` only affected
    source builds and can be removed. Confirm the worker passes its tool, codec and runtime
    identity checks before it claims jobs.

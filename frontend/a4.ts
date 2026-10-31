@@ -160,7 +160,7 @@ if (root) {
   function showFunding(policy: FundingPolicy | undefined) {
     if (policy)
       el("funding-policy").textContent =
-        `${policy.starterCoins.toLocaleString()} starter coins per account and scope. Refill adds ${policy.refillCoins.toLocaleString()} once per UTC day. Multiple wallets share one account allowance.`;
+        `Each run starts with ${policy.starterCoins.toLocaleString()} play coins. A refill adds ${policy.refillCoins.toLocaleString()} once a day (UTC).`;
   }
   function showBalances(balances: Balance[]) {
     el("balance").textContent = money(

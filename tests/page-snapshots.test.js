@@ -23,6 +23,7 @@ import {
 process.env.RENDER_GIT_COMMIT = "0123456789abcdef0123456789abcdef01234567";
 const web = await import("../dist/features/discovery/web.js");
 const community = await import("../dist/features/community/web.js");
+const legal = await import("../dist/features/discovery/legal-web.js");
 const { renderMeasurementDashboard } =
   await import("../dist/features/measurement/web.js");
 
@@ -158,6 +159,8 @@ it("renders a profile", (t) => {
 it("renders the about and account pages", (t) => {
   snapshot(t, web.renderAbout(origin));
   snapshot(t, web.renderAccount(origin));
+  // The Debating card and its consent wording (live outline on).
+  snapshot(t, web.renderAccount(origin, true));
 });
 
 it("renders community moderation and the broadcast overlay", (t) => {
@@ -227,7 +230,14 @@ it("renders the measurement dashboard", (t) => {
   );
 });
 
-it("renders the 404 and 500 pages", (t) => {
+it("renders the privacy, terms and cookie pages", (t) => {
+  snapshot(t, legal.renderPrivacy(origin));
+  snapshot(t, legal.renderTerms(origin));
+  snapshot(t, legal.renderCookies(origin));
+});
+
+it("renders the 400, 404 and 500 pages", (t) => {
+  snapshot(t, web.renderInvalidRequest(origin));
   snapshot(t, web.renderNotFound(origin));
   snapshot(t, web.renderUnavailable());
 });

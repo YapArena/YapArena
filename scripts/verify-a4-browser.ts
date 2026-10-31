@@ -206,8 +206,10 @@ try {
       `${selector} left the debate page`,
     );
   debatePageBots.privateControlsRemoved = true;
+  // The link sits in the rail panel's About tab (debate page direction BC1).
+  await page.locator("#arena-tab-about").click();
   const botsLink = page.getByRole("link", {
-    name: "Bots sandbox on Yap Coins →",
+    name: "Practice with bots →",
   });
   assert.equal(await botsLink.getAttribute("href"), `/coins?debate=${debate}`);
   debatePageBots.sandboxLink = true;

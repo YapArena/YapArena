@@ -89,7 +89,12 @@ describe("owned profiles and follows", () => {
     const response = await request(app)
       .post("/api/me/profile")
       .set("Cookie", "session=token")
-      .send({ handle: "new-handle", displayName: "New Person", bio: "Hello" });
+      .send({
+        handle: "new-handle",
+        displayName: "New Person",
+        bio: "Hello",
+        acceptTerms: true,
+      });
     assert.equal(response.status, 201);
     assert.equal(response.body.profile.publicationState, "draft");
     assert.deepEqual(calls.at(-1), [
@@ -240,7 +245,11 @@ describe("owned profiles and follows", () => {
         await request(duplicate.app)
           .post("/api/me/profile")
           .set("Cookie", "session=token")
-          .send({ handle: "valid-name", displayName: "Name" })
+          .send({
+            handle: "valid-name",
+            displayName: "Name",
+            acceptTerms: true,
+          })
       ).status,
       409,
     );

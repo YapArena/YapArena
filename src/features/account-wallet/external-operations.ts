@@ -25,10 +25,17 @@ export interface ExternalOperationTerms {
   quoteId: string;
 }
 
+/**
+ * A refusal the API returns as `{ error, code?, ...details }`. The code lets
+ * browsers show their own words instead of the server's text; details carry
+ * safe extra fields, such as the caller's own available balance.
+ */
 export class CoinOperationError extends Error {
   constructor(
     message: string,
     readonly status = 409,
+    readonly code?: string,
+    readonly details?: Readonly<Record<string, string>>,
   ) {
     super(message);
   }

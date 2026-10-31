@@ -109,9 +109,15 @@ export interface SandboxBuckets {
 const columns = `id,user_id AS "userId",kind,reference,terms_digest AS "termsDigest",terms,status,
   expires_at AS "expiresAt",created_at AS "createdAt"`;
 const uuid = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
-function error(message: string, status = 409): never {
-  throw new CoinOperationError(message, status);
+function error(message: string, status = 409, code?: string): never {
+  throw new CoinOperationError(message, status, code);
 }
+/**
+ * The most one simulated purchase may buy: 1,000 USDC (100,000 YC). It keeps
+ * any valueless simulated balance far below numeric(36,0), so a settlement
+ * batch can never overflow.
+ */
+export const SIMULATED_FUNDING_LIMIT = 1_000_000_000n;
 function hash(value: unknown) {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
 }
@@ -224,7 +230,11 @@ export async function assertSandboxFinancialOpen(
       )
     ).rowCount
   )
-    error("financial activity is paused for correction review", 403);
+    error(
+      "financial activity is paused for correction review",
+      403,
+      "financial_review",
+    );
 }
 // New review/signing authority must follow the current account state, even
 // when the user reserved funds earlier. Authoritative reconciliation and safe
@@ -254,6 +264,34 @@ export async function lockSandboxBook(
   ).rows[0]!;
   checkBook(userId, row.book);
   return row;
+}
+/**
+ * lockSandboxBook for many accounts in one round trip, locking in account
+ * order, for settlement. Accounts without a book get an empty one first.
+ */
+export async function lockSandboxBooks(
+  client: PoolClient,
+  userIds: readonly string[],
+): Promise<Map<string, SandboxBookSnapshot>> {
+  const ids = [...new Set(userIds)];
+  const books = new Map<string, SandboxBookSnapshot>();
+  if (!ids.length) return books;
+  await client.query(
+    `INSERT INTO coin_sandbox_books(user_id,book)
+    SELECT id,book FROM unnest($1::bigint[],$2::jsonb[]) AS fresh(id,book)
+    ORDER BY id ON CONFLICT(user_id) DO NOTHING`,
+    [ids, ids.map((id) => JSON.stringify(emptyBook(id)))],
+  );
+  for (const row of (
+    await client.query<SandboxBookSnapshot & { user_id: string }>(
+      "SELECT user_id::text,book,version::text FROM coin_sandbox_books WHERE user_id=ANY($1::bigint[]) ORDER BY user_id FOR UPDATE",
+      [ids],
+    )
+  ).rows) {
+    checkBook(row.user_id, row.book);
+    books.set(row.user_id, { book: row.book, version: row.version });
+  }
+  return books;
 }
 export async function appendSandboxBookEvent(
   client: PoolClient,
@@ -413,6 +451,83 @@ export async function ensureSandboxBuckets(
       grant_issuer: systemId("grant_issuer"),
     },
   };
+}
+/**
+ * ensureSandboxBuckets for many accounts with two reads, for settlement. An
+ * account missing any bucket, or a sandbox without its system accounts yet,
+ * takes the one-account path.
+ */
+export async function sandboxBucketsFor(
+  client: PoolClient,
+  userIds: readonly string[],
+): Promise<Map<string, SandboxBuckets>> {
+  const ids = [...new Set(userIds)];
+  const result = new Map<string, SandboxBuckets>();
+  if (!ids.length) return result;
+  const system = (
+    await client.query<{ purpose: SandboxSystemPurpose; id: string }>(
+      "SELECT purpose,account_id AS id FROM coin_sandbox_system_accounts",
+    )
+  ).rows;
+  const accounts = (
+    await client.query<{
+      user_id: string;
+      asset: string;
+      kind: string;
+      id: string;
+    }>(
+      `SELECT user_id::text,asset,kind,id FROM coin_accounts WHERE user_id=ANY($1::bigint[])
+      AND environment='sandbox' AND ((asset='USDC' AND kind IN ('available','reserved','pending'))
+        OR (asset='YC_PROMO' AND kind IN ('promotional','reserved')))`,
+      [ids],
+    )
+  ).rows;
+  const systemIds = Object.fromEntries(
+    system.map((row) => [row.purpose, row.id]),
+  );
+  const byAccount = new Map(
+    accounts.map((row) => [`${row.user_id}:${row.asset}:${row.kind}`, row.id]),
+  );
+  for (const userId of ids) {
+    const own = (asset: string, kind: string) =>
+      byAccount.get(`${userId}:${asset}:${kind}`);
+    const buckets = {
+      cashAvailable: own("USDC", "available"),
+      cashReserved: own("USDC", "reserved"),
+      cashPending: own("USDC", "pending"),
+      promoAvailable: own("YC_PROMO", "promotional"),
+      promoReserved: own("YC_PROMO", "reserved"),
+    };
+    if (
+      system.length === 10 &&
+      buckets.cashAvailable &&
+      buckets.cashReserved &&
+      buckets.cashPending &&
+      buckets.promoAvailable &&
+      buckets.promoReserved
+    )
+      result.set(userId, {
+        cashAvailable: buckets.cashAvailable,
+        cashReserved: buckets.cashReserved,
+        cashPending: buckets.cashPending,
+        promoAvailable: buckets.promoAvailable,
+        promoReserved: buckets.promoReserved,
+        system: {
+          purchased_external: systemIds.purchased_external!,
+          promotional_external: systemIds.promotional_external!,
+          promotional_available: systemIds.promotional_available!,
+          promotional_reserved: systemIds.promotional_reserved!,
+          center_external: systemIds.center_external!,
+          center_available: systemIds.center_available!,
+          center_reserved: systemIds.center_reserved!,
+          fees: systemIds.fees!,
+          correction_available: systemIds.correction_available!,
+          grant_issuer: systemIds.grant_issuer!,
+        },
+      });
+    else result.set(userId, await ensureSandboxBuckets(client, userId));
+  }
+  return result;
 }
 async function journal(
   client: PoolClient,
@@ -693,6 +808,12 @@ export function createCoinSandboxRepository(
     input: { idempotencyKey: string; amount: string; destination?: string },
   ) {
     const amount = atomicAmount(input.amount);
+    if (
+      kind === "funding" &&
+      config.rail === "simulation" &&
+      amount > SIMULATED_FUNDING_LIMIT
+    )
+      error("a simulated purchase is limited to 1,000 USDC", 400);
     if (
       kind === "withdrawal" &&
       (amount < 5_000_000n || amount <= BigInt(config.fee))

@@ -12,6 +12,7 @@ import {
   renderDebate,
   renderDebates,
   renderHome,
+  renderInvalidRequest,
   renderLive,
   renderMatchmaking,
   renderNotFound,
@@ -19,6 +20,9 @@ import {
   renderTopic,
   renderTopics,
 } from "./web.ts";
+import { renderLanding } from "./landing-web.ts";
+import { renderCookies, renderPrivacy, renderTerms } from "./legal-web.ts";
+import { html as markup } from "../../platform/html.ts";
 
 type Repository = ReturnType<typeof createDiscoveryRepository>;
 const statuses = new Set<DebateStatus>([
@@ -46,7 +50,17 @@ function integer(value: unknown, fallback: number, max: number): number | null {
   return Number.isSafeInteger(number) && number <= max ? number : null;
 }
 
-function listParameters(request: Request, response: Response) {
+type Invalid = (
+  response: Response,
+  requestPath: string,
+  message: string,
+) => unknown;
+
+function listParameters(
+  request: Request,
+  response: Response,
+  invalid: Invalid,
+) {
   const query = text(request.query.q, 80);
   const limit = integer(request.query.limit, 12, 50);
   const offset = integer(request.query.offset, 0, 10_000);
@@ -57,7 +71,11 @@ function listParameters(request: Request, response: Response) {
   return { query, limit, offset };
 }
 
-function statusParameter(request: Request, response: Response) {
+function statusParameter(
+  request: Request,
+  response: Response,
+  invalid: Invalid,
+) {
   const raw = request.query.status;
   if (raw === undefined || raw === "all") return { status: undefined };
   if (typeof raw !== "string" || !statuses.has(raw as DebateStatus)) {
@@ -67,15 +85,28 @@ function statusParameter(request: Request, response: Response) {
   return { status: raw as DebateStatus };
 }
 
-function invalid(response: Response, requestPath: string, message: string) {
-  return requestPath.startsWith("/api/")
-    ? response.status(400).json({ error: message })
-    : response
-        .status(400)
-        .type("html")
-        .send(
-          `<h1>Invalid request</h1><p>${message}</p><a href="/debates">Browse debates</a>`,
-        );
+// Sends a server-rendered page with this deployment's page flags. The app's
+// not-found page uses it too, so it matches every other page.
+export function createPageSender({
+  emailFirst = false,
+  matchmakingEnabled = false,
+}: {
+  emailFirst?: boolean;
+  matchmakingEnabled?: boolean;
+}) {
+  return (response: Response, body: string, status = 200) => {
+    const page = emailFirst
+      ? body.replace('<html lang="en">', '<html lang="en" data-email-first>')
+      : body;
+    return response
+      .status(status)
+      .type("html")
+      .send(
+        matchmakingEnabled
+          ? page.replace('<html lang="en"', '<html lang="en" data-matchmaking')
+          : page,
+      );
+  };
 }
 
 function slug(value: string | string[]): string | null {
@@ -94,6 +125,7 @@ export function createDiscoveryRouter({
   emailFirst = false,
   liveOutline,
   matchmakingEnabled = false,
+  signedIn = async () => false,
 }: {
   discovery: Repository;
   a4Enabled?: boolean;
@@ -107,22 +139,16 @@ export function createDiscoveryRouter({
   emailFirst?: boolean;
   // Live topic queue (Decision 0011): pages load the queue module and show its controls.
   matchmakingEnabled?: boolean;
+  // Whether the request carries a valid session; / sends those readers to /home.
+  signedIn?: (request: Request) => Promise<boolean>;
 }) {
   const router = Router();
   const origin = applicationOrigin.replace(/\/$/, "");
-  function html(response: Response, body: string, status = 200) {
-    const page = emailFirst
-      ? body.replace('<html lang="en">', '<html lang="en" data-email-first>')
-      : body;
-    return response
-      .status(status)
-      .type("html")
-      .send(
-        matchmakingEnabled
-          ? page.replace('<html lang="en"', '<html lang="en" data-matchmaking')
-          : page,
-      );
-  }
+  const html = createPageSender({ emailFirst, matchmakingEnabled });
+  const invalid: Invalid = (response, requestPath, message) =>
+    requestPath.startsWith("/api/")
+      ? response.status(400).json({ error: message })
+      : html(response, renderInvalidRequest(origin), 400);
 
   router.use((_request, response, next) => {
     response.set("Cache-Control", "no-store");
@@ -130,7 +156,7 @@ export function createDiscoveryRouter({
   });
 
   router.get("/api/public/topics", async (request, response) => {
-    const parameters = listParameters(request, response);
+    const parameters = listParameters(request, response, invalid);
     if (!parameters) return;
     response.json(await discovery.listTopics(parameters));
   });
@@ -142,9 +168,9 @@ export function createDiscoveryRouter({
     return response.json(item);
   });
   router.get("/api/public/debates", async (request, response) => {
-    const parameters = listParameters(request, response);
+    const parameters = listParameters(request, response, invalid);
     if (!parameters) return;
-    const selected = statusParameter(request, response);
+    const selected = statusParameter(request, response, invalid);
     if (!selected) return;
     const topicSlug = text(request.query.topic, 80);
     const profileHandle = text(request.query.profile, 40);
@@ -222,7 +248,37 @@ export function createDiscoveryRouter({
       ? response.json(data)
       : response.status(404).json({ error: "Debate not found" });
   });
+  // Public pages for search engines; demo listings are left out. Profiles are
+  // listed only once their owner has appeared in a public debate.
+  router.get("/sitemap.xml", async (_request, response) => {
+    const { topics, debates, profiles } = await discovery.listSitemap();
+    const paths = [
+      "/",
+      "/home",
+      "/live",
+      "/debates",
+      "/topics",
+      "/about",
+      ...topics.map((key) => `/topics/${encodeURIComponent(key)}`),
+      ...debates.map((key) => `/debates/${encodeURIComponent(key)}`),
+      ...profiles.map((key) => `/people/${encodeURIComponent(key)}`),
+    ];
+    return response
+      .set("Cache-Control", "public, max-age=3600")
+      .type("application/xml")
+      .send(
+        markup`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${paths.map((page) => markup`<url><loc>${origin}${page}</loc></url>`)}</urlset>\n`.toString(),
+      );
+  });
+  // The landing page (docs/landing-page.md). Signed-in readers go to /home; a
+  // session lookup that fails leaves the reader on the landing page.
   router.get("/", async (request, response) => {
+    response.vary("Cookie");
+    const member = await signedIn(request).catch(() => false);
+    if (member) return response.redirect(303, "/home");
+    return html(response, renderLanding(origin));
+  });
+  router.get("/home", async (request, response) => {
     if (request.query.reference !== undefined) {
       if (!homepageReferenceEnabled || request.query.reference !== "1")
         return html(response, renderNotFound(origin), 404);
@@ -249,16 +305,17 @@ export function createDiscoveryRouter({
     ]);
     return html(response, renderLive(origin, debates, topics));
   });
+  // Founder D4: Bots mode appears on /coins only while A4 is enabled.
   router.get("/coins", (_request, response) =>
-    html(response, renderCoins(origin)),
+    html(response, renderCoins(origin, a4Enabled)),
   );
   router.get("/match", (_request, response) =>
     html(response, renderMatchmaking(origin, matchmakingEnabled)),
   );
   router.get("/debates", async (request, response) => {
-    const parameters = listParameters(request, response);
+    const parameters = listParameters(request, response, invalid);
     if (!parameters) return;
-    const selected = statusParameter(request, response);
+    const selected = statusParameter(request, response, invalid);
     if (!selected) return;
     const list = await discovery.listDebates({
       ...parameters,
@@ -270,7 +327,7 @@ export function createDiscoveryRouter({
     );
   });
   router.get("/topics", async (request, response) => {
-    const parameters = listParameters(request, response);
+    const parameters = listParameters(request, response, invalid);
     if (!parameters) return;
     return html(
       response,
@@ -285,7 +342,7 @@ export function createDiscoveryRouter({
     const key = slug(request.params.slug);
     const topic = key ? await discovery.getTopic(key) : null;
     if (!topic) return html(response, renderNotFound(origin), 404);
-    const parameters = listParameters(request, response);
+    const parameters = listParameters(request, response, invalid);
     if (!parameters) return;
     const debates = await discovery.listDebates({
       topicSlug: key!,
@@ -320,7 +377,7 @@ export function createDiscoveryRouter({
     const key = slug(request.params.handle);
     const profile = key ? await discovery.getProfile(key) : null;
     if (!profile) return html(response, renderNotFound(origin), 404);
-    const parameters = listParameters(request, response);
+    const parameters = listParameters(request, response, invalid);
     if (!parameters) return;
     const debates = await discovery.listDebates({
       profileHandle: key!,
@@ -331,6 +388,16 @@ export function createDiscoveryRouter({
   });
   router.get("/about", (_request, response) =>
     html(response, renderAbout(origin)),
+  );
+  // Production runbook step 9.1; Google's sign-in branding links to both.
+  router.get("/privacy", (_request, response) =>
+    html(response, renderPrivacy(origin)),
+  );
+  router.get("/terms", (_request, response) =>
+    html(response, renderTerms(origin)),
+  );
+  router.get("/cookies", (_request, response) =>
+    html(response, renderCookies(origin)),
   );
   router.get("/account", (_request, response) =>
     html(response, renderAccount(origin, Boolean(liveOutline))),

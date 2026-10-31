@@ -265,7 +265,7 @@ describe(
         assert.equal(callback.status, 200);
         const target = continueTarget(callback);
         assert.ok(
-          target === "/" || target === "/%0d%0aSet-Cookie:x=y",
+          target === "/home" || target === "/%0d%0aSet-Cookie:x=y",
           `${unsafe} -> ${target}`,
         );
         assert.equal(new URL(target, origin).origin, origin);

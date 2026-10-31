@@ -130,9 +130,27 @@ describe("outline panel", () => {
     assert.equal(h.list.lang, "fr");
     assert.deepEqual(labels(h.list), ["Le coût baisse", "Sûreté"]);
     const [costNode, safetyNode] = h.list.children;
+    // A card per argument: a counterargument when it rebuts another.
+    assert.equal(costNode.dataset.kind, "counter");
+    assert.equal(
+      costNode.querySelector(".live-outline-kicker").textContent,
+      "Counterargument",
+    );
+    assert.equal(
+      safetyNode.querySelector(".live-outline-kicker").textContent,
+      "Argument",
+    );
+    assert.equal(
+      safetyNode.querySelector(".live-outline-foot").textContent,
+      "2 points",
+    );
     const rebuts = costNode.querySelector(".live-outline-rebuts");
     assert.equal(rebuts.hidden, false);
-    assert.equal(rebuts.textContent, "Rebuts: Costs too much");
+    assert.equal(rebuts.textContent, "RebutsCosts too much");
+    assert.equal(
+      rebuts.querySelector(".live-outline-jump").dataset.jump,
+      "t1a1",
+    );
     assert.equal(safetyNode.querySelector(".live-outline-rebuts").hidden, true);
     assert.deepEqual(pointsOf(safetyNode), ["Aucun accident", "Contrôles"]);
     const flagged = safetyNode.querySelector(".live-outline-points")
@@ -147,15 +165,34 @@ describe("outline panel", () => {
       false,
       "the first paint does not flash",
     );
-    // Earlier turns, newest first, in their own language.
+    // Earlier turns, newest first, in their own language, as cards.
     assert.equal(h.earlier.hidden, false);
     assert.equal(h.turns.children[0].lang, "en");
     assert.equal(
-      h.turns.children[0].textContent,
-      "Turn 1 · AgainstCosts too much",
+      h.turns.children[0].querySelector(".live-outline-earlier-turn")
+        .textContent,
+      "Turn 1 · Against",
+    );
+    const earlierCard = h.turns.children[0].querySelector(
+      ".live-outline-argument",
+    );
+    assert.equal(
+      earlierCard.querySelector(".live-outline-label-text").textContent,
+      "Costs too much",
+    );
+    assert.equal(
+      earlierCard.querySelector(".live-outline-replies").textContent,
+      "Rebutted byLe coût baisse",
+      "an earlier argument links to its rebuttal",
+    );
+    assert.equal(
+      earlierCard.querySelector(".live-outline-foot").textContent,
+      "1 rebuttal",
     );
 
-    // A reworded label flashes its argument; a reworded point flashes only the point.
+    // A reworded label flashes its argument. A reworded point flashes the
+    // point, and the card too while it's closed (the point is out of sight).
+    safetyNode.querySelector(".live-outline-toggle").click();
     const second = view(
       turn(2, [
         argument(
@@ -191,7 +228,7 @@ describe("outline panel", () => {
       earlierItem,
       "unchanged earlier turns are not rebuilt",
     );
-    costNode.dispatch("animationend");
+    costNode.dispatch("animationend", { target: costNode });
     changedPoint.dispatch("animationend");
     assert.equal(costNode.classList.contains("is-changed"), false);
     assert.equal(changedPoint.classList.contains("is-changed"), false);
@@ -212,7 +249,7 @@ describe("outline panel", () => {
     assert.deepEqual(labels(h.list), ["Sûreté", "Déchets"]);
     assert.equal(
       h.list.children[1].querySelector(".live-outline-rebuts").textContent,
-      "Rebuts: Sûreté",
+      "RebutsSûreté",
     );
     h.panel.show(view(turn(2, [argument("t2a4", "Inconnu", [], "t9a9")])));
     h.flush();
@@ -243,7 +280,7 @@ describe("outline panel", () => {
     );
     h.panel.setSpeaker("A");
     assert.ok(buttons.every((button) => !button.hidden));
-    buttons[1].click();
+    buttons.find((button) => button.dataset.flag === "t1a1p1").click();
     assert.deepEqual(h.flags, [[1, "t1a1p1"]]);
     h.panel.setSpeaker("B");
     assert.ok(buttons.every((button) => button.hidden));
@@ -255,9 +292,16 @@ describe("outline panel", () => {
       }),
     );
     h.flush();
-    const head = h.list.children[0].querySelector(".live-outline-label");
-    assert.ok(head.querySelector(".live-outline-flagged"));
-    assert.equal(head.querySelector(".live-outline-flag"), null);
+    const card = h.list.children[0];
+    assert.ok(
+      card
+        .querySelector(".live-outline-card")
+        .querySelector(":scope > .live-outline-flagged"),
+    );
+    assert.equal(
+      card.querySelector(".live-outline-actions .live-outline-flag"),
+      null,
+    );
     // New nodes get the button in its current state.
     h.panel.show(
       view(turn(1, [argument("t1a1", "Un"), argument("t1a2", "Deux")]), {
@@ -271,6 +315,174 @@ describe("outline panel", () => {
     panelWithoutHandler.panel.show(view(turn(1, [argument("t1a1", "Un")])));
     panelWithoutHandler.flush();
     panelWithoutHandler.root.querySelector(".live-outline-flag").click();
+  });
+
+  it("opens a card to show its points and keeps it open", () => {
+    const h = harness();
+    const one = view(
+      turn(1, [
+        argument("t1a1", "Un", [point("t1a1p1", "x"), point("t1a1p2", "y")]),
+        argument("t1a2", "Deux"),
+      ]),
+    );
+    h.panel.show(one);
+    h.flush();
+    const [card, plain] = h.list.children;
+    const toggle = card.querySelector(".live-outline-toggle");
+    const more = card.querySelector(".live-outline-more");
+    assert.equal(card.dataset.expandable, "true");
+    assert.equal(toggle.getAttribute("aria-expanded"), "false");
+    assert.equal(toggle.getAttribute("aria-controls"), more.id);
+    assert.equal(more.hidden, true);
+    assert.equal(
+      plain.querySelector(".live-outline-toggle"),
+      null,
+      "a card with nothing more to show is not a button",
+    );
+    assert.equal(plain.dataset.expandable, "false");
+    assert.equal(plain.querySelector(".live-outline-foot").hidden, true);
+    toggle.click();
+    assert.equal(toggle.getAttribute("aria-expanded"), "true");
+    assert.equal(more.hidden, false);
+    assert.ok("open" in card.dataset);
+    // A repaint keeps it open; a point arriving makes the other one a button.
+    h.panel.show(
+      view(
+        turn(1, [
+          argument("t1a1", "Un", [point("t1a1p1", "x")]),
+          argument("t1a2", "Deux", [point("t1a2p1", "z")]),
+        ]),
+        { version: 2 },
+      ),
+    );
+    h.flush();
+    assert.equal(more.hidden, false);
+    assert.equal(
+      card.querySelector(".live-outline-foot").textContent,
+      "1 point",
+    );
+    const label = plain.querySelector(".live-outline-label");
+    assert.equal(
+      label.children[0].className,
+      "live-outline-toggle",
+      "the label text moves into the new button",
+    );
+    assert.equal(
+      label.children[0].querySelector(".live-outline-label-text").textContent,
+      "Deux",
+    );
+    assert.equal(
+      plain.classList.contains("is-changed"),
+      true,
+      "a closed card flashes when a point arrives",
+    );
+    toggle.click();
+    assert.equal(more.hidden, true);
+  });
+
+  it("gives earlier turns the points this page saw and links rebuttals", () => {
+    const h = harness();
+    const first = turn(1, [
+      argument("t1a1", "Un", [point("t1a1p1", "x")]),
+      argument("t1a2", "Deux"),
+    ]);
+    h.panel.show(view(first));
+    h.flush();
+    h.list.children[0].querySelector(".live-outline-toggle").click();
+    const summary = {
+      turnNumber: 1,
+      side: "A",
+      language: "fr",
+      arguments: [
+        { id: "t1a1", label: "Un", rebuts: null, continues: null },
+        { id: "t1a2", label: "Deux", rebuts: null, continues: null },
+      ],
+      final: true,
+    };
+    const earlierTurns = [summary];
+    h.panel.show(
+      view(turn(2, [argument("t2a1", "Contre", [], "t1a1")], "B"), {
+        turns: earlierTurns,
+        version: 2,
+      }),
+    );
+    h.flush();
+    const [seen, unseen] = h.turns.children[0].querySelectorAll(
+      ".live-outline-argument",
+    );
+    assert.deepEqual(pointsOf(seen), ["x"], "points seen live stay");
+    assert.equal(
+      seen.querySelector(".live-outline-more").hidden,
+      false,
+      "a card opened earlier stays open",
+    );
+    assert.equal(seen.querySelector(".live-outline-flag"), null);
+    assert.equal(unseen.dataset.expandable, "false");
+    // The rebuttal opens, shows and focuses the card it answers, and back.
+    const counter = h.list.children[0];
+    assert.equal(counter.dataset.expandable, "true");
+    counter.querySelector(".live-outline-jump").click();
+    assert.equal(seen.querySelector(".live-outline-more").hidden, false);
+    assert.equal(seen.querySelector(".live-outline-toggle").focused, 1);
+    assert.deepEqual(seen.scrolledInto, { block: "nearest" });
+    assert.equal(seen.classList.contains("is-changed"), true);
+    const back = seen
+      .querySelector(".live-outline-replies")
+      .querySelector(".live-outline-jump");
+    assert.equal(back.dataset.jump, "t2a1");
+    back.click();
+    assert.equal(counter.querySelector(".live-outline-more").hidden, false);
+    // A new rebuttal in the current turn links the earlier card in place.
+    assert.equal(unseen.dataset.expandable, "false");
+    h.panel.show(
+      view(
+        turn(
+          2,
+          [
+            argument("t2a1", "Contre", [], "t1a1"),
+            argument("t2a2", "Encore", [], "t1a2"),
+          ],
+          "B",
+        ),
+        { turns: earlierTurns, version: 3 },
+      ),
+    );
+    h.flush();
+    assert.equal(
+      h.turns.children[0].querySelectorAll(".live-outline-argument")[1],
+      unseen,
+      "the earlier card is updated, not rebuilt",
+    );
+    assert.equal(unseen.dataset.expandable, "true");
+    assert.equal(
+      unseen.querySelector(".live-outline-replies").textContent,
+      "Rebutted byEncore",
+    );
+    // No link to an argument that isn't on the page.
+    h.panel.show(
+      view(turn(2, [argument("t2a1", "Contre", [], "t1a2")], "B"), {
+        version: 4,
+      }),
+    );
+    h.flush();
+    assert.equal(
+      h.list.children[0].querySelector(".live-outline-rebuts").hidden,
+      true,
+    );
+  });
+
+  it("opens the speaker's own cards to their flag buttons", () => {
+    const h = harness();
+    h.panel.show(view(turn(1, [argument("t1a1", "Un")])));
+    h.flush();
+    const card = h.list.children[0];
+    assert.equal(card.dataset.expandable, "false");
+    h.panel.setSpeaker("A");
+    h.flush();
+    assert.equal(card.dataset.expandable, "true");
+    h.panel.setSpeaker(null);
+    h.flush();
+    assert.equal(card.dataset.expandable, "false");
   });
 
   it("does not paint while the tab is hidden", () => {

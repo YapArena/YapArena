@@ -2,6 +2,7 @@ import { loadConfig } from "./platform/config.ts";
 import { createDatabase } from "./platform/database.ts";
 import { createLogger } from "./platform/logger.ts";
 import { verifyDatabaseState } from "./platform/migrations.ts";
+import { exitOnCrash } from "./platform/process-crash.ts";
 import { createReplayJobs } from "./features/media/replay-jobs.ts";
 import { createReplayStorage } from "./features/media/replay-storage.ts";
 import { createReplayWorker } from "./features/media/replay-worker.ts";
@@ -39,48 +40,42 @@ const worker = createReplayWorker({
     logger,
   }),
 });
-try {
-  await verifyDatabaseState(
-    database,
-    new URL("../migrations", import.meta.url),
-  );
-  await verifyReplayTools();
-  worker.start();
-  logger.info(
-    {
-      event: "replay_worker_started",
-      concurrency: config.replayPackaging.concurrency,
-    },
-    "Automatic replay worker started",
-  );
-} catch (error) {
-  await worker.stop();
-  storage.close();
-  await database.end();
-  throw error;
+let stopping: Promise<void> | undefined;
+function shutdown() {
+  stopping ??= (async () => {
+    const forced = setTimeout(() => {
+      logger.fatal("replay worker shutdown deadline exceeded");
+      process.exit(1);
+    }, 10000);
+    forced.unref();
+    try {
+      await worker.stop();
+      storage.close();
+      await database.end();
+      clearTimeout(forced);
+      logger.info(
+        { event: "replay_worker_stopped" },
+        "Automatic replay worker stopped",
+      );
+    } catch {
+      logger.error("replay worker shutdown failed");
+      process.exitCode = 1;
+    }
+  })();
+  return stopping;
 }
-let stopping = false;
-async function shutdown() {
-  if (stopping) return;
-  stopping = true;
-  const forced = setTimeout(() => {
-    logger.fatal("replay worker shutdown deadline exceeded");
-    process.exit(1);
-  }, 10000);
-  forced.unref();
-  try {
-    await worker.stop();
-    storage.close();
-    await database.end();
-    clearTimeout(forced);
-    logger.info(
-      { event: "replay_worker_stopped" },
-      "Automatic replay worker stopped",
-    );
-  } catch {
-    logger.error("replay worker shutdown failed");
-    process.exitCode = 1;
-  }
-}
+// A failed start reaches the crash handler, which logs it, releases the
+// worker, storage and pool through shutdown, and exits with status 1.
+exitOnCrash({ logger, stop: shutdown });
+await verifyDatabaseState(database, new URL("../migrations", import.meta.url));
+await verifyReplayTools();
+worker.start();
+logger.info(
+  {
+    event: "replay_worker_started",
+    concurrency: config.replayPackaging.concurrency,
+  },
+  "Automatic replay worker started",
+);
 process.on("SIGTERM", () => void shutdown());
 process.on("SIGINT", () => void shutdown());

@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { setTimeout as delay } from "node:timers/promises";
 import axe from "axe-core";
-import type { Browser, ViewportSize } from "playwright-core";
+import type { Browser, Page, ViewportSize } from "playwright-core";
 import type { publicFrame } from "../dist/features/community/delivery.js";
 
 declare global {
@@ -40,6 +40,22 @@ interface PendingPost {
 }
 
 // Deterministic real-browser transport races. All content and responses are synthetic.
+
+// The like, share and refresh controls sit in the chat's "⋯" menu (debate
+// page direction BC1).
+async function openChatMenu(page: Page) {
+  const menu = page.locator("[data-chat-more]");
+  if (!(await menu.evaluate((node: HTMLDetailsElement) => node.open)))
+    await menu.locator("summary").click();
+}
+
+// Chat is a tab of the rail panel below 1200px and when the video is too
+// small for chat over it, as at this check's 1280 × 900 (direction BC1).
+async function showChat(page: Page) {
+  const tab = page.locator("#arena-tab-chat");
+  if (await tab.isVisible()) await tab.click();
+}
+
 export async function verifyChatClient({
   browser,
   base,
@@ -270,8 +286,15 @@ export async function verifyChatClient({
       (response) =>
         response.url().includes("/updates") && response.status() === 200,
     );
+    await openChatMenu(page);
     await page.locator("[data-community-refresh]").click();
     await response;
+    // Close the menu so it doesn't cover the messages.
+    await page
+      .locator("[data-chat-more]")
+      .evaluate((node: HTMLDetailsElement) => {
+        node.open = false;
+      });
   };
   const waitPost = async (count: number) => {
     for (let n = 0; n < 100 && posts.length < count; n++) await delay(20);
@@ -303,8 +326,12 @@ export async function verifyChatClient({
   };
   try {
     await page.goto(`${base}/debates/${eventSlug}`);
+    await showChat(page);
     await page.getByText("Polling updates on", { exact: false }).waitFor();
-    const consent = page.getByRole("button", { name: "Not now", exact: true });
+    const consent = page.getByRole("button", {
+      name: "Reject all",
+      exact: true,
+    });
     if (await consent.isVisible()) await consent.click();
     assert.equal(await rows.count(), 10);
     await page.locator("[data-community-older]").click();
@@ -349,6 +376,7 @@ export async function verifyChatClient({
       await composer.inputValue(),
       "Text typed during the request\n",
     );
+    await openChatMenu(page);
     await page.locator("[data-community-like]").focus();
     feed.push(gap, responseFirst.post.item);
     responseFirst.post.release({});
@@ -367,6 +395,7 @@ export async function verifyChatClient({
       true,
       "late acknowledgment does not steal focus",
     );
+    await page.keyboard.press("Escape");
     assert.equal(
       await responseFirst.row.evaluate(
         (node) => node === window.originalPendingRow,
@@ -493,6 +522,7 @@ export async function verifyChatClient({
     await rejected.row.getByText("Rejected", { exact: false }).waitFor();
     const postCount = posts.length;
     disconnected = true;
+    await openChatMenu(page);
     await page.locator("[data-community-refresh]").click();
     await page.getByText("Connection interrupted", { exact: false }).waitFor();
     disconnected = false;
@@ -663,6 +693,7 @@ export async function verifyChatClient({
         },
         name === "zoom" ? "2" : "1",
       );
+      await showChat(page);
       try {
         await page.waitForFunction(
           () => {
@@ -750,6 +781,7 @@ export async function verifyChatClient({
     );
     await page.reload();
     await originalReady;
+    await showChat(page);
     await page.getByText("Polling updates on", { exact: false }).waitFor();
     const original = await send(
       "Original account pending message",

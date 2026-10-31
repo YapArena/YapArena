@@ -89,513 +89,6 @@ textarea::placeholder {
   background: linear-gradient(135deg, #111, #0c0c0c);
   border-color: var(--line);
 }
-.arena-page .site-footer {
-  margin-top: 20px;
-}
-.arena-page main {
-  min-height: calc(100vh - 130px);
-}
-.arena-workspace {
-  max-width: 1800px;
-  margin: 14px auto 0;
-  padding: 0 14px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 13px;
-  align-items: start;
-}
-.arena-left {
-  flex: 0.8 1 260px;
-}
-.arena-center {
-  flex: 1.9 1 520px;
-}
-.arena-right {
-  flex: 0.9 1 280px;
-}
-.arena-left,
-.arena-center,
-.arena-right {
-  min-width: 0;
-  display: grid;
-  gap: 12px;
-}
-.arena-panel {
-  min-width: 0;
-  border: 1px solid #202020;
-  border-radius: 13px;
-  background: linear-gradient(125deg, #0e0e0e, #0b0b0b 70%, #0f0f0f);
-  box-shadow: inset 0 1px 0 #ffffff02;
-  overflow: hidden;
-}
-.arena-workspace h2 {
-  font-size: 1.05rem;
-  line-height: 1.4;
-  letter-spacing: -0.025em;
-  margin: 0;
-}
-.arena-workspace p {
-  line-height: 1.5;
-}
-.arena-watch {
-  min-width: 0;
-}
-.arena-video-slot {
-  aspect-ratio: 16/9;
-  width: 100%;
-  border-radius: 15px;
-  background: #02060b;
-}
-.arena-video-surface {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  border: 1px solid #3a3a3a;
-  overflow: hidden;
-  background:
-    radial-gradient(ellipse at 22% 50%, #37373755, transparent 60%),
-    radial-gradient(ellipse at 80% 60%, #4c172e44, transparent 60%), #050505;
-}
-/* Hover corners on the video: the question top left, the broadcast state and
-   watch count top right, clear of the expand button. They show while the
-   pointer is over the video, or focus is inside it, and never take clicks. */
-.arena-workspace .arena-video-overlay {
-  position: absolute;
-  top: 12px;
-  z-index: 5;
-  display: grid;
-  gap: 5px;
-  max-width: calc(50% - 40px);
-  padding: 8px 10px;
-  border: 1px solid #ffffff14;
-  border-radius: 9px;
-  background: #0b0b0bd9;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-.arena-workspace .arena-video-topic {
-  left: 12px;
-}
-.arena-workspace .arena-video-status {
-  right: 58px;
-  justify-items: end;
-  text-align: right;
-}
-.arena-workspace .arena-video-surface:hover .arena-video-overlay,
-.arena-workspace .arena-video-surface:focus-within .arena-video-overlay {
-  opacity: 1;
-}
-.arena-video-topic h1 {
-  margin: 0;
-  font-size: clamp(0.95rem, 1.2vw, 1.15rem);
-  line-height: 1.3;
-  letter-spacing: -0.02em;
-  overflow-wrap: anywhere;
-}
-.arena-video-topic span {
-  color: #bdbdbd;
-  font-size: 0.72rem;
-}
-.arena-video-status-badges {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-.arena-video-status .arena-watch-meta {
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  color: #d0d0d0;
-}
-@media (hover: none) {
-  /* Touch browsers then show the corners on a tap. */
-  .arena-workspace .arena-video-surface {
-    cursor: pointer;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .arena-workspace .arena-video-overlay {
-    transition: none;
-  }
-}
-.arena-broadcast-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border-radius: 5px;
-  background: #1d1d1de8;
-  color: #f0f0f0;
-  text-transform: uppercase;
-  font-size: 0.65rem;
-  letter-spacing: 0.045em;
-  font-weight: 700;
-  padding: 4px 9px;
-}
-.arena-broadcast-badge.is-live {
-  background: linear-gradient(120deg, #de3248, #b6112c);
-  box-shadow: 0 0 18px #ff234b22;
-}
-.arena-live-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: white;
-}
-.arena-demo {
-  background: #090909c9;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.65rem;
-  color: #c4c4c4;
-}
-.arena-video-empty {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  align-content: center;
-  justify-items: center;
-  padding: 45px 32px 70px;
-  text-align: center;
-  gap: 9px;
-}
-.arena-video-empty strong {
-  font-size: 1.05rem;
-  font-weight: 500;
-}
-.arena-video-empty > span:last-child {
-  max-width: 235px;
-  font-size: 0.78rem;
-  color: #a6a6a6;
-}
-.arena-video-symbol {
-  border: 1px solid #6c6c6c;
-  color: #c3c3c3;
-  border-radius: 50%;
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  font-size: 1.7rem;
-  margin-bottom: 8px;
-  box-shadow: 0 0 35px #6c6c6c30;
-}
-.arena-video-surface .media-videos {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  gap: 2px;
-  background: transparent;
-}
-.arena-video-surface .media-videos > * {
-  min-width: 0;
-  height: 100%;
-  overflow: hidden;
-}
-.arena-video-surface .media-videos video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 0;
-  margin: 0;
-}
-.arena-video-surface > video {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  background: #000;
-  object-fit: contain;
-}
-.arena-video-surface:has(video:not([hidden])) .arena-video-empty {
-  display: none;
-}
-.arena-speaker-labels {
-  position: absolute;
-  inset: auto 0 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2px;
-  background: #0a0a0a;
-  pointer-events: auto;
-}
-.arena-speaker-labels > div {
-  border-top: 2px solid #bababa;
-  border-bottom: 3px solid #a7a7a7;
-  padding: 8px 12px;
-  background: linear-gradient(90deg, #131313e6, #0f0f0fe8);
-}
-.arena-speaker-labels > div:last-child {
-  border-color: #fd6576;
-  background: linear-gradient(90deg, #121212e8, #111111ee);
-}
-.arena-speaker-labels strong {
-  display: block;
-  font-size: 0.78rem;
-  font-weight: 500;
-  line-height: 1.4;
-}
-.arena-speaker-labels span {
-  display: block;
-  color: #bbb;
-  font-size: 0.65rem;
-  line-height: 1.4;
-}
-.arena-video-surface:has(> video:not([hidden])) .arena-speaker-labels {
-  display: none;
-}
-.arena-video-expand {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 6;
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  padding: 7px;
-  color: white;
-  background: #0b0b0bd9;
-  border: 1px solid #86868677;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-.arena-video-expand svg {
-  width: 100%;
-  height: 100%;
-}
-.arena-video-surface:hover .arena-video-expand,
-.arena-video-surface:focus-within .arena-video-expand,
-.arena-video-surface.is-expanded .arena-video-expand {
-  opacity: 1;
-}
-.arena-video-theater {
-  overflow: hidden;
-}
-.arena-video-surface.is-expanded {
-  position: fixed;
-  z-index: 1000;
-  inset: 24px;
-  width: auto;
-  height: auto;
-  border-radius: 14px;
-  box-shadow:
-    0 0 0 100vmax #02060bf2,
-    0 0 70px #8c8c8c33;
-}
-.arena-video-surface.is-expanded .media-videos video {
-  object-fit: contain;
-  background: #000;
-}
-.arena-video-surface.is-expanded .arena-speaker-labels > div {
-  text-align: center;
-}
-.arena-video-surface.is-expanded .arena-video-empty {
-  gap: 16px;
-}
-.arena-video-surface.is-expanded .arena-video-empty strong {
-  font-size: 1.8rem;
-}
-.arena-video-surface.is-expanded .arena-video-expand {
-  top: 16px;
-  right: 16px;
-  width: 42px;
-  height: 42px;
-}
-.arena-watch .media-status-row {
-  margin: 7px 4px;
-  color: var(--muted);
-  gap: 5px;
-  font-size: 0.68rem;
-  display: flex;
-  align-items: center;
-}
-.arena-watch .media-status-row p {
-  margin: 0;
-}
-.arena-watch .media-actions {
-  gap: 5px;
-  margin: 0 3px;
-}
-.arena-watch .media-actions button {
-  font-size: 0.7rem;
-  padding: 5px 8px;
-}
-.arena-watch .media-operator {
-  margin: 10px 0;
-  padding: 10px;
-  background: #121212;
-}
-.arena-debate-meta {
-  padding: 1px 9px 3px;
-}
-.arena-debate-meta p {
-  color: #afafaf;
-  margin-bottom: 11px;
-  font-size: 0.85rem;
-}
-.arena-topic-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin: 12px 0 15px;
-}
-.arena-topic-tags > * {
-  border-radius: 25px;
-  background: #191919;
-  padding: 5px 10px;
-  color: #d1d1d1;
-  font-size: 0.68rem;
-}
-.arena-watch-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  color: #a2a2a2;
-  font-size: 0.71rem;
-}
-.arena-watch-meta > span {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.arena-watch-meta svg {
-  width: 16px;
-  height: 16px;
-}
-.arena-community {
-  min-width: 0;
-}
-.arena-workspace .live-chat {
-  padding: 14px 12px 8px;
-  position: static;
-  max-height: none;
-  border-radius: 12px;
-}
-.arena-workspace .live-chat-heading {
-  margin-bottom: 6px;
-  align-items: center;
-}
-.arena-workspace .live-chat-heading h2 {
-  font-size: 1rem;
-  margin: 0;
-}
-.arena-workspace .live-chat-connection {
-  font-size: 0.62rem;
-}
-.arena-workspace .live-chat-state {
-  font-size: 0.65rem;
-  color: #aaa;
-  margin: 0 0 6px;
-}
-.arena-workspace .community-messages {
-  min-height: 160px;
-  height: clamp(210px, 33vh, 380px);
-  max-height: 380px;
-  padding: 3px 4px;
-  margin: 0 0 10px;
-  scrollbar-width: thin;
-  scrollbar-color: #3b3b3b transparent;
-}
-.arena-workspace .community-messages li {
-  border: 0;
-  padding: 6px 0;
-  font-size: 0.75rem;
-  background: transparent;
-}
-.arena-workspace .community-messages li p {
-  margin: 3px 0;
-}
-.arena-workspace .community-messages li button {
-  padding: 2px 5px;
-  font-size: 0.59rem;
-  background: transparent;
-}
-.arena-workspace .community-messages li strong {
-  color: #c5c5c5;
-  font-size: 0.71rem;
-  font-weight: 500;
-}
-.arena-workspace .community-messages time {
-  font-size: 0.6rem;
-}
-.arena-chat-compose {
-  display: flex;
-  align-items: center;
-  border-radius: 25px;
-  border: 1px solid #3a3a3a;
-  padding: 6px 9px 6px 13px;
-  background: #0b0b0b;
-}
-.arena-chat-compose textarea {
-  flex: 1;
-  border: none;
-  outline-offset: 1px;
-  min-width: 0;
-  min-height: 28px;
-  padding: 3px 0;
-  margin: 0;
-  font-size: 0.8rem;
-  resize: vertical;
-  background: transparent;
-}
-.arena-chat-compose button {
-  background: transparent;
-  border: 0;
-  color: #b1b1b1;
-  padding: 3px;
-  width: 28px;
-  height: 28px;
-}
-.arena-chat-compose svg {
-  width: 22px;
-  height: 22px;
-}
-.arena-workspace .live-chat form .form-help {
-  font-size: 0.61rem;
-  margin: 7px 0 2px;
-  color: #9b9b9b;
-}
-.arena-workspace [data-community-send-status],
-.arena-workspace [data-community-cooldown] {
-  font-size: 0.69rem;
-  margin: 3px 0;
-}
-.arena-community-tools {
-  font-size: 0.66rem;
-  color: #a6a6a6;
-  padding: 9px 6px;
-}
-.arena-community-tools p {
-  margin: 4px 0;
-}
-.arena-community-tools .community-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px 9px;
-  margin: 0 0 5px;
-}
-.arena-community-tools .community-toolbar button {
-  min-height: 24px;
-  background: none;
-  padding: 0;
-  border: none;
-  color: #c4c4c4;
-  font-size: 0.66rem;
-}
-/* WCAG 2.2 target size: the narrower chat column wraps these small text
-   controls closer together, so each keeps a 24 px tall target. */
-.arena-community-tools > details > summary {
-  line-height: 24px;
-}
-.arena-community-tools select,
-.arena-community-tools textarea {
-  width: 100%;
-  margin: 6px 0;
-}
 .arena-chart-panel {
   padding: 18px 19px 12px;
 }
@@ -881,89 +374,6 @@ textarea::placeholder {
 .arena-rounds-note a {
   color: #c5c5c5;
 }
-.arena-info {
-  padding: 5px 17px;
-  font-size: 0.74rem;
-}
-.arena-info div {
-  padding: 12px 0;
-  border-bottom: 1px solid #333;
-}
-.arena-info dt {
-  color: #9a9a9a;
-  font-size: 0.65rem;
-  margin-bottom: 3px;
-}
-.arena-info dd {
-  margin: 0;
-}
-.arena-info-note {
-  padding: 0 17px 10px;
-  color: #b1b1b1;
-  font-size: 0.7rem;
-}
-/* Debate info card; Bots mode itself lives on /coins (Decision 0013). */
-.arena-info-card h2 {
-  padding: 14px 17px 0;
-  font-size: 0.9rem;
-}
-.arena-bots-link {
-  margin: 0;
-  padding: 0 17px 14px;
-  font-size: 0.78rem;
-}
-.arena-bots-link a {
-  display: inline-block;
-  min-height: 24px;
-  line-height: 24px;
-}
-.arena-sentiment {
-  padding: 17px;
-}
-.arena-sentiment h2 {
-  font-size: 0.9rem;
-  margin-bottom: 16px;
-}
-.arena-sentiment h2 small {
-  color: #aeaeae;
-  font-size: 0.64rem;
-  font-weight: 400;
-  display: block;
-  margin-top: 4px;
-}
-.arena-sentiment-bar {
-  height: 8px;
-  border-radius: 20px;
-  background: #a9324b;
-  overflow: hidden;
-}
-.arena-sentiment-bar span {
-  height: 100%;
-  width: var(--yes-share, 0%);
-  display: block;
-  background: linear-gradient(90deg, #f9f9f9, #8f8f8f);
-  border-radius: 20px;
-  transition: width 0.5s ease;
-}
-.arena-sentiment-values {
-  display: flex;
-  justify-content: space-between;
-  margin: 8px 0 0;
-  font-size: 1.25rem;
-}
-.arena-sentiment-values strong {
-  font-weight: 500;
-}
-.arena-sentiment p {
-  font-size: 0.61rem;
-  color: #a3a3a3;
-  margin: 9px 0 0;
-}
-.arena-disclosure {
-  font-size: 0.61rem;
-  color: #878787;
-  padding: 0 8px;
-}
 [hidden] {
   display: none !important;
 }
@@ -972,216 +382,6 @@ textarea::placeholder {
     opacity: 0.25;
   }
   to {
-    opacity: 1;
-  }
-}
-@media (min-width: 1191px) {
-  .arena-left .community-messages {
-    height: clamp(260px, calc(100vh - 430px), 640px);
-    max-height: 640px;
-  }
-}
-@media (min-width: 1550px) {
-  .arena-workspace {
-    gap: 18px;
-    padding-inline: 24px;
-  }
-  .arena-left {
-    flex-basis: 300px;
-  }
-  .arena-center {
-    flex-basis: 720px;
-  }
-  .arena-right {
-    flex-basis: 320px;
-  }
-  .arena-chart-panel {
-    padding: 24px 25px 16px;
-  }
-  .arena-chart-panel h2 {
-    font-size: 1.9rem;
-  }
-}
-@media (max-width: 1190px) {
-  .arena-left {
-    order: 2;
-    flex-basis: 100%;
-  }
-  .arena-center {
-    flex-basis: 450px;
-  }
-  .arena-right {
-    flex-basis: 260px;
-  }
-  .arena-round-list {
-    max-height: 240px;
-  }
-}
-@media (max-width: 920px) {
-  .arena-workspace {
-    padding-inline: 10px;
-    gap: 10px;
-  }
-  .arena-center {
-    flex-basis: 390px;
-  }
-  .arena-chart-panel {
-    padding: 14px 12px 12px;
-  }
-  .arena-chart-top {
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
-  }
-  .arena-volume {
-    font-size: 0.7rem;
-  }
-  .arena-volume > strong {
-    font-size: 0.8rem;
-  }
-}
-@media (max-width: 740px) {
-  .arena-workspace {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    width: 100%;
-    margin-top: 10px;
-    padding: 0 10px;
-  }
-  .arena-left,
-  .arena-center,
-  .arena-right {
-    display: contents;
-  }
-  .arena-center > *,
-  .arena-right > *,
-  .arena-community {
-    width: 100%;
-  }
-  .arena-center > * {
-    order: 5;
-  }
-  .arena-right > * {
-    order: 6;
-  }
-  .arena-center > :has(~ .arena-watch) {
-    order: 0;
-  }
-  .arena-watch {
-    order: 1;
-  }
-  .arena-right > .stake-panel {
-    order: 2;
-  }
-  .arena-community {
-    order: 3;
-  }
-  .arena-debate-meta {
-    order: 4;
-    padding: 3px 5px 7px;
-  }
-  .arena-video-slot {
-    aspect-ratio: 16/10;
-  }
-  .arena-workspace .arena-video-overlay {
-    top: 8px;
-    gap: 3px;
-    max-width: calc(50% - 32px);
-    padding: 6px 8px;
-  }
-  .arena-workspace .arena-video-topic {
-    left: 8px;
-  }
-  .arena-workspace .arena-video-status {
-    right: 54px;
-  }
-  .arena-video-topic h1 {
-    display: -webkit-box;
-    overflow: hidden;
-    font-size: 0.82rem;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-  }
-  .arena-video-status .arena-watch-meta {
-    font-size: 0.65rem;
-  }
-  .arena-video-status .arena-watch-meta > span:last-child {
-    display: none;
-  }
-  .arena-chart-top {
-    font-size: 0.69rem;
-  }
-  .arena-round-state {
-    padding: 6px 8px;
-    gap: 6px;
-  }
-  .arena-volume {
-    flex-basis: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    text-align: left;
-    gap: 5px 10px;
-    border-top: 1px solid #202020;
-    padding-top: 10px;
-    margin-top: 3px;
-  }
-  .arena-volume small {
-    flex-basis: 100%;
-  }
-  .arena-chart-panel h2 {
-    font-size: 1.18rem;
-    margin-inline: 0;
-  }
-  .arena-chart-question {
-    margin-inline: 0;
-    font-size: 0.85rem;
-  }
-  .arena-chart-empty {
-    font-size: 0.7rem;
-    padding: 10px;
-    inset-inline: 18%;
-  }
-  .arena-chart-footer {
-    gap: 7px;
-    margin-inline: 0;
-  }
-  .arena-sync {
-    font-size: 0.58rem;
-  }
-  .arena-chart-key {
-    font-size: 0.65rem;
-    gap: 10px;
-  }
-  .arena-round-markers {
-    margin-left: 15px;
-    margin-right: 15px;
-    overflow-x: auto;
-  }
-  .arena-round-marker {
-    white-space: nowrap;
-    font-size: 0.59rem;
-  }
-  .arena-round-list {
-    max-height: 340px;
-  }
-  .arena-sentiment h2 small {
-    display: inline;
-    margin-left: 5px;
-  }
-  .arena-video-surface.is-expanded {
-    inset: 10px;
-  }
-  .arena-speaker-labels > div {
-    padding: 6px 10px;
-  }
-  .arena-speaker-labels strong {
-    font-size: 0.7rem;
-  }
-}
-@media (hover: none) {
-  .arena-video-expand {
     opacity: 1;
   }
 }
@@ -1194,23 +394,6 @@ textarea::placeholder {
     scroll-behavior: auto !important;
   }
 }
-.arena-sentiment-bar[data-empty="true"] {
-  background: #323232;
-}
-.arena-video-surface .media-videos > audio {
-  display: none;
-}
-.arena-workspace button {
-  border-style: solid;
-  border-width: 1px;
-}
-
-.arena-workspace .arena-round-item,
-.arena-workspace .arena-round-marker,
-.arena-workspace .arena-chat-compose button {
-  border-width: 0;
-}
-
 .arena-chart-hover-line {
   stroke: #c6c6c6;
   stroke-width: 1;
@@ -1840,312 +1023,2439 @@ textarea::placeholder {
     transform: none;
   }
 }
-/* Debate betting panel (Decision 0013). Green and red belong only to the
-   question's Yes and No buttons; nothing colours a speaker by answer. */
-.stake-panel {
-  display: grid;
-  gap: 10px;
-  padding: 14px;
+/* The debate page, direction BC1 (founder, 2026-10-30; docs/debate-page-design.md):
+   a large stage with the answer panel and chat in a right rail. Every rule is
+   scoped to .arena-page, the debate page's body class: this file loads on
+   every discovery page. Values come from the landing tokens in site.css. */
+.arena-page {
+  background: var(--bg);
 }
-.stake-turn {
-  display: grid;
-  gap: 6px;
+.arena-page main {
+  min-height: auto;
 }
-.stake-turn-top {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 0.82rem;
+.arena-page .site-footer {
+  margin-top: var(--space-6);
 }
-.stake-turn-top span {
-  color: #d6d6d6;
-  font-variant-numeric: tabular-nums;
-}
-.stake-turn-top span.is-ending {
-  color: #ffb4bf;
-}
-.stake-progress {
-  height: 4px;
+.arena-video-theater {
   overflow: hidden;
-  border-radius: 2px;
-  background: #232323;
 }
-.stake-progress span {
-  display: block;
-  width: var(--stake-left, 0%);
-  height: 100%;
-  background: #f4f4f4;
-  transition: width 1s linear;
-}
-.stake-panel .stake-meta,
-.stake-panel .stake-status,
-.stake-panel .stake-balance,
-.stake-panel .stake-final,
-.stake-panel .stake-ceiling {
-  margin: 0;
-  color: #a9a9a9;
-  font-size: 0.74rem;
-}
-.stake-panel .stake-status:empty,
-.stake-panel .stake-error:empty,
-.stake-panel .stake-meta:empty,
-.stake-panel .stake-balance:empty {
-  display: none;
-}
-.stake-panel .stake-question {
-  margin: 2px 0 0;
-  font-size: 1.2rem;
-}
-.stake-panel .stake-proposition {
-  margin: 0;
-  color: #e9e9e9;
-  font-size: 0.9rem;
-}
-.stake-sides {
+.arena-page .arena-workspace {
+  --rail: 400px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) var(--rail);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas:
+    "banner rail"
+    "watch rail";
+  column-gap: var(--space-5);
+  max-width: 1920px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  color: var(--text);
 }
-.stake-side {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
+.arena-page .arena-workspace :is(h2, h3, h4) {
+  margin: 0;
+  font-size: var(--text-16);
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+.arena-page .arena-workspace p {
+  line-height: 1.5;
+}
+/* Text in Dydema Capitals: capitals with U shown as V. Digits and
+   punctuation fall back to Forum. */
+.arena-page .ins {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-kerning: normal;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+.arena-page .arena-workspace :focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
+}
+/* Scroll boxes sit inside clipping parents, so their ring is drawn inside.
+   The Results panel takes focus so it can be scrolled from the keyboard
+   before the chart has any rounds to focus (WAI tabs pattern). */
+.arena-page
+  .arena-workspace
+  :is(
+    .community-messages,
+    .live-outline-body,
+    video,
+    #arena-results
+  ):focus-visible {
+  outline-offset: -2px;
+}
+/* Every control is a pill; specific controls below refine it. */
+.arena-page :where(.arena-workspace) :where(button) {
   min-height: 44px;
-  border: 0;
-  border-radius: 9px;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: var(--raised);
+  color: var(--button-text);
+  font: 700 var(--text-14) / 1.2 var(--font-body);
 }
-.stake-yes {
-  background: #2fbf71;
-  color: #04140b;
+.arena-page
+  :where(.arena-workspace)
+  :where(select, textarea, input:not([type])) {
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-inner);
+  background: var(--bg);
+  color: var(--text);
 }
-.stake-no {
-  background: #ff536c;
-  color: #2a0509;
+.arena-page .queue-banner {
+  grid-area: banner;
+  margin: 0 0 var(--space-4);
 }
-.stake-side[aria-pressed="true"] {
-  box-shadow:
-    0 0 0 2px #000,
-    0 0 0 4px #f8f8f8;
+
+/* The stage: video, captions, status, scoreboard. */
+.arena-page .arena-watch {
+  grid-area: watch;
+  min-width: 0;
 }
-.stake-side:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
+.arena-page .arena-video-slot {
+  /* The scoreboard stays on the first screen of tall, wide monitors:
+     968 × 544 at 1440 × 900. */
+  width: min(100%, max(30rem, calc((100svh - 296px) * 16 / 9)));
+  margin-inline: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-card);
+  background: var(--panel);
 }
-.stake-ticket {
+.arena-page .arena-video-surface {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  background: var(--panel);
+}
+.arena-page .arena-video-surface .media-videos {
+  position: absolute;
+  inset: 0;
   display: grid;
-  gap: 10px;
-}
-.stake-size {
-  display: grid;
-  gap: 6px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
   margin: 0;
   padding: 0;
   border: 0;
-}
-.stake-size legend,
-.stake-size-input,
-.stake-read,
-.stake-advanced summary,
-.stake-advanced label,
-.stake-review-choice {
-  color: #c9c9c9;
-  font-size: 0.74rem;
-}
-.stake-size legend {
-  margin-bottom: 6px;
-  padding: 0;
-}
-.stake-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.stake-chips button {
-  min-width: 40px;
-  min-height: 32px;
-  border: 1px solid #3a3a3a;
-  border-radius: 8px;
+  border-radius: 0;
   background: transparent;
-  color: #f4f4f4;
 }
-.stake-chips button[aria-pressed="true"] {
-  border-color: #f8f8f8;
-  background: #f8f8f8;
-  color: #000;
+.arena-page .arena-video-surface .media-videos:not(:empty) {
+  background: var(--bg);
 }
-.stake-size-input,
-.stake-read,
-.stake-advanced label {
-  display: grid;
-  gap: 4px;
-}
-.stake-size-input input,
-.stake-advanced input {
-  height: 34px;
-  padding: 0 10px;
-  border: 1px solid #333;
-  border-radius: 7px;
-  background: #111;
-  color: #f4f4f4;
-}
-.stake-read-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.stake-read-row input {
-  flex: 1;
-  accent-color: #f8f8f8;
-}
-.stake-read-row output {
-  min-width: 3ch;
-  color: #f4f4f4;
-  font-weight: 600;
-}
-.stake-advanced summary,
-.stake-positions summary {
-  min-height: 24px;
-  line-height: 24px;
-  cursor: pointer;
-}
-.stake-panel .stake-terms {
-  display: grid;
-  gap: 4px;
+.arena-page .arena-video-surface .media-videos video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
   margin: 0;
-  padding-top: 8px;
-  border-top: 1px solid #202020;
-  font-size: 0.78rem;
+  object-fit: cover;
+  border-radius: 0;
+  background: var(--raised);
 }
-.stake-terms div {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-}
-.stake-terms dt {
-  color: #a9a9a9;
-}
-.stake-terms dd {
-  margin: 0;
-  text-align: right;
-}
-.stake-review-choice {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 24px;
-}
-.stake-review-choice input {
-  width: 24px;
-  height: 24px;
-  margin: 0;
-  accent-color: #f8f8f8;
-}
-.stake-panel .stake-error {
-  margin: 0;
-  color: #ffb4bf;
-  font-size: 0.76rem;
-}
-.stake-confirm {
-  min-height: 42px;
-  border: 0;
-  border-radius: 9px;
-  background: #f8f8f8;
-  color: #000;
-  font-weight: 600;
-}
-.stake-receipt {
-  display: grid;
-  gap: 4px;
-  padding: 10px;
-  border: 1px solid #2a2a2a;
-  border-radius: 9px;
-  font-size: 0.8rem;
-}
-.stake-receipt p {
-  margin: 0;
-  color: #bdbdbd;
-}
-.stake-positions ul {
-  display: grid;
-  gap: 4px;
-  margin: 6px 0 0;
-  padding-left: 18px;
-  color: #c9c9c9;
-  font-size: 0.76rem;
-}
-.stake-repeat,
-.stake-ready-save {
-  min-height: 36px;
-  padding: 0 12px;
-  border: 1px solid #3a3a3a;
-  border-radius: 9px;
-  background: transparent;
-  color: #f4f4f4;
-  font-size: 0.8rem;
-}
-.stake-ready,
-.stake-results {
-  display: grid;
-  gap: 8px;
-  padding: 10px;
-  border: 1px solid #2a2a2a;
-  border-radius: 9px;
-}
-.stake-panel .stake-ready h3,
-.stake-panel .stake-results h3 {
-  margin: 0;
-  font-size: 0.9rem;
-}
-.stake-panel .stake-ready p {
-  margin: 0;
-  color: #a9a9a9;
-  font-size: 0.74rem;
-}
-.stake-panel .stake-ready-note:empty {
+.arena-page .arena-video-surface .media-videos > audio {
   display: none;
 }
-.stake-results ul {
+/* A frame over each debater's video, in the same two columns. The side
+   that has the floor lights up: a white ring with a soft glow, fading in
+   and out as turns change. The name and handle show on hover or focus. */
+.arena-page .arena-frames {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
   display: grid;
-  gap: 4px;
-  margin: 0;
-  padding-left: 18px;
-  color: #c9c9c9;
-  font-size: 0.76rem;
-  font-variant-numeric: tabular-nums;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+  pointer-events: none;
 }
-.stake-panel .stake-signin {
-  margin: 0;
-  font-size: 0.82rem;
+.arena-page .arena-frame {
+  position: relative;
+  grid-row: 1;
+  visibility: hidden;
+  transition: box-shadow 0.3s ease-out;
 }
-.stake-review {
-  max-width: 360px;
+.arena-page .arena-frame[data-side="A"] {
+  grid-column: 1;
+  border-radius: var(--radius-card) 0 0 var(--radius-card);
 }
-.stake-review-actions {
+.arena-page .arena-frame[data-side="B"] {
+  grid-column: 2;
+  border-radius: 0 var(--radius-card) var(--radius-card) 0;
+}
+.arena-page
+  .arena-video-surface:has(.media-videos > video[data-side="A"])
+  .arena-frame[data-side="A"],
+.arena-page
+  .arena-video-surface:has(.media-videos > video[data-side="B"])
+  .arena-frame[data-side="B"] {
+  visibility: visible;
+}
+/* Side B alone takes the first column, like its video. */
+.arena-page
+  .arena-video-surface:not(:has(.media-videos > video[data-side="A"]))
+  .arena-frame[data-side="B"] {
+  grid-column: 1;
+  border-radius: var(--radius-card) 0 0 var(--radius-card);
+}
+.arena-page .arena-workspace[data-active-side="A"] .arena-frame[data-side="A"],
+.arena-page .arena-workspace[data-active-side="B"] .arena-frame[data-side="B"] {
+  box-shadow:
+    inset 0 0 0 3px var(--acid),
+    inset 0 0 36px rgb(255 255 255 / 24%);
+}
+.arena-page .arena-video-surface.is-expanded .arena-frame {
+  border-radius: 0;
+}
+.arena-page .arena-frame-tag {
+  position: absolute;
+  bottom: var(--space-3);
+  left: var(--space-3);
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  max-width: min(12rem, calc(100% - 2 * var(--space-3)));
+  margin: 0;
+  padding: 6px var(--space-3) 7px;
+  border-radius: 10px;
+  background: rgb(0 0 0 / 62%);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+}
+.arena-page .arena-frame-tag > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.arena-page .arena-frame-name {
+  color: var(--text);
+  font-size: var(--text-14);
+  font-weight: 700;
+  line-height: 18px;
+}
+.arena-page .arena-frame-handle {
+  color: var(--muted);
+  font-size: var(--text-12);
+  line-height: 16px;
+}
+.arena-page .arena-video-surface:is(:hover, :focus-within) .arena-frame-tag {
+  opacity: 1;
+  transform: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .stake-progress span {
+  .arena-page :is(.arena-frame, .arena-frame-tag) {
     transition: none;
   }
 }
-@media (max-width: 740px) {
-  /* The compact question bar stays in view while the chat scrolls; an open
-     ticket, the get-ready card and the results card scroll normally. */
-  .stake-panel:has(> .stake-ticket[hidden]):not(
-      :has(> .stake-ready:not([hidden]), > .stake-results:not([hidden]))
-    ) {
-    position: sticky;
+.arena-page .arena-video-surface > video {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  object-fit: contain;
+}
+.arena-page .arena-video-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  text-align: center;
+}
+.arena-page .arena-video-surface:has(video:not([hidden])) .arena-video-empty {
+  display: none;
+}
+.arena-page .arena-emblem {
+  width: clamp(5rem, 18%, 11rem);
+  height: auto;
+  margin-bottom: var(--space-2);
+  opacity: var(--rest-opacity);
+}
+.arena-page .arena-stage-title {
+  margin: 0;
+  font-size: var(--text-20);
+  line-height: 1.3;
+}
+.arena-page .arena-stage-line {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+.arena-page .arena-stage-line:empty,
+.arena-page .arena-stage-actions:not(:has(> :not([hidden]))) {
+  display: none;
+}
+.arena-page .arena-stage-actions {
+  margin-top: var(--space-2);
+}
+.arena-page .arena-workspace .arena-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: 0 var(--space-6);
+  border: 0;
+  background: var(--primary-gradient);
+  color: var(--on-acid);
+  font-size: 0.9375rem;
+}
+.arena-page .arena-primary svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  stroke: none;
+}
+/* Hover corners (Decision 0013): the question top left, "Live · N watching"
+   top right. They show on hover or focus (a tap on touch screens) and never
+   take clicks. */
+.arena-page .arena-video-overlay {
+  position: absolute;
+  top: var(--space-4);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: calc(50% - 48px);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-inner);
+  background: rgb(0 0 0 / 72%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.arena-page .arena-video-topic {
+  left: var(--space-4);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+.arena-page .arena-workspace .arena-video-topic h1 {
+  margin: 0;
+  max-width: none;
+  font-size: var(--text-20);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+.arena-page .arena-video-topic span {
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.arena-page .arena-video-status {
+  right: calc(var(--space-4) + 44px + var(--space-2));
+  color: var(--button-text);
+  font-size: var(--text-12);
+  white-space: nowrap;
+}
+.arena-page
+  .arena-video-surface:is(:hover, :focus-within)
+  .arena-video-overlay {
+  opacity: 1;
+}
+.arena-page .arena-broadcast-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+/* The live dot is white, never red. */
+.arena-page .arena-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--acid);
+}
+.arena-page .arena-demo {
+  padding: 2px 8px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+}
+.arena-page .arena-watch-count::before,
+.arena-page .arena-watch-time::before {
+  content: "· ";
+}
+.arena-page .arena-watch-time:empty {
+  display: none;
+}
+.arena-page .arena-workspace .arena-video-expand {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 12px;
+  border-color: rgb(255 255 255 / 16%);
+  background: rgb(0 0 0 / 72%);
+  color: var(--acid);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.arena-page .arena-video-expand svg {
+  width: 100%;
+  height: 100%;
+}
+.arena-page
+  .arena-video-surface:is(:hover, :focus-within, .is-expanded)
+  .arena-video-expand {
+  opacity: 1;
+}
+.arena-page .arena-video-surface.is-expanded {
+  position: fixed;
+  z-index: 1000;
+  inset: var(--space-5);
+  width: auto;
+  height: auto;
+  border-radius: var(--radius-card);
+  box-shadow: 0 0 0 100vmax rgb(0 0 0 / 94%);
+}
+.arena-page .arena-video-surface.is-expanded .media-videos video {
+  object-fit: contain;
+  background: var(--bg);
+}
+@media (hover: none) {
+  .arena-page .arena-workspace .arena-video-expand {
+    opacity: 1;
+  }
+}
+.arena-page .arena-watch .media-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  min-height: 20px;
+  margin: var(--space-2) 0 0;
+  color: var(--muted);
+  font-size: var(--text-12);
+  line-height: 20px;
+}
+.arena-page .media-status-row [data-media-status] {
+  color: var(--muted);
+}
+.arena-page .media-status-row [data-media-microphone]:not([hidden]) {
+  padding: 0 var(--space-2);
+  border-color: var(--control-border);
+  font-size: var(--text-12);
+}
+.arena-page .arena-watch .media-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+}
+.arena-page .arena-watch .media-actions:not(:has(> button:not([hidden]))) {
+  display: none;
+}
+.arena-page .arena-watch .media-actions button {
+  min-height: 44px;
+  padding: 0 var(--space-5);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: var(--raised);
+  color: var(--button-text);
+  font: 700 var(--text-14) / 1 var(--font-body);
+}
+.arena-page .arena-watch .media-operator {
+  margin: var(--space-4) 0 0;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-inner);
+}
+/* The scoreboard: the two sides with the turn clock between them. Cards are
+   white and grey only, never green or red (Decision 0013). */
+.arena-page .arena-scoreboard {
+  container: scoreboard / inline-size;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 152px minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--space-5);
+  margin-top: var(--space-4);
+}
+.arena-page .arena-side {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  grid-template-areas: "avatar who pill";
+  align-items: center;
+  column-gap: var(--space-3);
+  min-width: 0;
+  min-height: 74px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-card);
+  transition: border-color 0.4s;
+}
+.arena-page .arena-avatar {
+  grid-area: avatar;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--control-border);
+  border-radius: 50%;
+  background: var(--raised);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+.arena-page .arena-side-who {
+  grid-area: who;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.arena-page .arena-side-name {
+  overflow: hidden;
+  color: var(--text);
+  font-size: var(--text-16);
+  font-weight: 700;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.arena-page .arena-side-meta {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.arena-page .arena-side-handle + .arena-side-state:not(:empty)::before {
+  content: " · ";
+}
+.arena-page .arena-side-pill {
+  grid-area: pill;
+  max-width: 12rem;
+  overflow: hidden;
+  padding: 3px 11px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-12);
+  font-weight: 700;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.arena-page .arena-workspace[data-active-side="A"] .arena-side[data-side="A"],
+.arena-page .arena-workspace[data-active-side="B"] .arena-side[data-side="B"] {
+  border-color: var(--acid);
+}
+.arena-page
+  .arena-workspace[data-active-side="A"]
+  .arena-side[data-side="A"]
+  .arena-side-pill,
+.arena-page
+  .arena-workspace[data-active-side="B"]
+  .arena-side[data-side="B"]
+  .arena-side-pill {
+  border-color: var(--acid);
+  background: var(--acid);
+  color: var(--on-acid);
+}
+.arena-page .arena-turn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  text-align: center;
+}
+/* The turn clock: the landing emblem drains clockwise over the turn
+   (frontend/turn-clock.ts); the time sits in its hole. */
+.arena-page .arena-turn-face {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2048 / 1715;
+}
+.arena-page .arena-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.arena-page :is(.arena-clock, .arena-turn-hole) {
+  position: absolute;
+  top: 59.42%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.arena-page .arena-clock {
+  font-family: var(--font-number);
+  font-size: var(--text-28);
+  font-weight: 400;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s;
+}
+.arena-page .arena-turn-face[data-ending] .arena-clock {
+  color: var(--warning);
+}
+.arena-page .arena-clock:empty,
+.arena-page .arena-clock:not(:empty) + .arena-turn-hole {
+  display: none;
+}
+.arena-page .arena-turn-hole {
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 1;
+  white-space: nowrap;
+}
+.arena-page .arena-turn-label {
+  min-height: 20px;
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+/* The rail: the answer panel, then the AI outline, results and about panel
+   filling the rest of the screen. */
+.arena-page .arena-rail {
+  grid-area: rail;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--control-border) transparent;
+}
+.arena-page .arena-insight {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 18rem;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border-radius: var(--radius-card);
+  background: var(--panel);
+}
+/* Chat needs room for a few messages, its composer and its menu above the
+   composer; the rail scrolls when the screen is short. */
+.arena-page .arena-workspace[data-tab="chat"] .arena-insight {
+  min-height: 26rem;
+}
+.arena-page .arena-tabs {
+  flex: none;
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+}
+.arena-page .arena-workspace .arena-tabs button {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  white-space: nowrap;
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+}
+.arena-page .arena-workspace .arena-tabs button[aria-selected="true"] {
+  border-color: var(--acid);
+  background: var(--acid);
+  color: var(--on-acid);
+}
+/* One panel at a time; the tab names it, so the panels' own headings are
+   for screen readers. Without the script, all three show and scroll. */
+.arena-page .arena-insight > :not(.arena-tabs) {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: var(--space-3);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--control-border) transparent;
+}
+.arena-page .arena-workspace:not([data-tab]) .arena-insight {
+  overflow-y: auto;
+}
+.arena-page .arena-workspace[data-tab] .arena-insight > :not(.arena-tabs) {
+  display: none;
+}
+.arena-page
+  .arena-workspace[data-tab="outline"]
+  .arena-insight
+  > #arena-outline,
+.arena-page
+  .arena-workspace[data-tab="results"]
+  .arena-insight
+  > #arena-results,
+.arena-page .arena-workspace[data-tab="about"] .arena-insight > #arena-about {
+  display: flex;
+}
+.arena-page .arena-workspace[data-tab="chat"] .arena-insight > #arena-chat {
+  display: grid;
+}
+.arena-page .arena-insight > :is(#arena-results, #arena-about) {
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.arena-page
+  .arena-insight
+  :is(#live-outline-title, .arena-section-title, #community-chat-title) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The answer panel (Decision 0013). Its behaviour and copy belong to
+   frontend/stake-panel.ts; only its look is here. Green and red belong only
+   to Yes and No. */
+.arena-page .stake-panel {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-5);
+  border-radius: var(--radius-card);
+  background: var(--panel);
+}
+.arena-page .stake-panel p {
+  margin: 0;
+}
+.arena-page .stake-sheet-close {
+  display: none;
+}
+/* The turn, time left and window count are on the scoreboard; the panel
+   keeps them for screen readers. */
+.arena-page .stake-panel .stake-turn {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.arena-page .stake-turn {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "title title"
+    "meta clock"
+    "progress progress";
+  column-gap: var(--space-3);
+  row-gap: var(--space-1);
+}
+.arena-page .stake-turn-title {
+  grid-area: title;
+  font-size: var(--text-14);
+  line-height: 20px;
+}
+.arena-page .stake-panel .stake-meta {
+  grid-area: meta;
+  color: var(--muted);
+  font-size: var(--text-12);
+  line-height: 16px;
+}
+.arena-page .stake-clock {
+  grid-area: clock;
+  color: var(--muted);
+  font-size: var(--text-12);
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.arena-page .stake-clock:not(:empty)::after {
+  content: " left";
+}
+.arena-page .stake-clock.is-ending {
+  color: var(--warning);
+}
+.arena-page .stake-progress {
+  grid-area: progress;
+  height: 2px;
+  margin-top: var(--space-1);
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--line);
+}
+.arena-page .stake-progress span {
+  display: block;
+  width: var(--stake-left, 0%);
+  height: 100%;
+  background: var(--acid);
+  transition: width 1s linear;
+}
+.arena-page
+  .stake-panel
+  :is(.stake-status, .stake-ceiling, .stake-final, .stake-balance) {
+  color: var(--muted);
+  font-size: var(--text-12);
+  line-height: 16px;
+}
+.arena-page .stake-panel .stake-status {
+  margin: 0 0 var(--space-4);
+}
+.arena-page
+  .stake-panel
+  :is(
+    .stake-status,
+    .stake-error,
+    .stake-meta,
+    .stake-balance,
+    .stake-ready-note
+  ):empty {
+  display: none;
+}
+.arena-page .stake-panel .stake-question {
+  margin-top: 0;
+  font-size: var(--text-28);
+  line-height: 1.2;
+}
+.arena-page .stake-panel .stake-proposition {
+  margin-top: var(--space-2);
+  font-family: var(--font-number);
+  font-size: var(--text-20);
+  line-height: 26px;
+}
+.arena-page .stake-sides {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.arena-page .arena-workspace .stake-side {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  color: var(--text);
+  font-size: var(--text-16);
+}
+.arena-page .stake-side svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+}
+.arena-page .arena-workspace .stake-yes {
+  border-color: var(--answer-yes);
+  background: var(--answer-yes-tint);
+}
+.arena-page .stake-yes svg {
+  color: var(--answer-yes);
+}
+.arena-page .arena-workspace .stake-no {
+  border-color: var(--answer-no);
+  background: var(--answer-no-tint);
+}
+.arena-page .stake-no svg {
+  color: var(--answer-no);
+}
+.arena-page .arena-workspace .stake-yes[aria-pressed="true"] {
+  background: var(--answer-yes);
+  color: var(--on-yes);
+}
+.arena-page .arena-workspace .stake-no[aria-pressed="true"] {
+  background: var(--answer-no);
+  color: var(--on-no);
+}
+.arena-page .stake-side[aria-pressed="true"] svg {
+  color: currentColor;
+}
+.arena-page .stake-side:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.arena-page .arena-workspace :is(.stake-repeat, .stake-ready-save) {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+.arena-page .arena-workspace .stake-repeat {
+  border-color: transparent;
+  background: transparent;
+}
+.arena-page :is(.stake-ticket, .stake-ready) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+.arena-page .stake-ready {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
+}
+.arena-page .stake-panel .stake-ready h3 {
+  font-size: var(--text-20);
+}
+.arena-page .stake-ready > p {
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 20px;
+}
+.arena-page .stake-size {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.arena-page .stake-size legend {
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.arena-page .stake-chips {
+  display: flex;
+  gap: var(--space-2);
+}
+.arena-page .arena-workspace .stake-chips button {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0;
+  background: transparent;
+}
+.arena-page .arena-workspace .stake-chips button[aria-pressed="true"] {
+  border-color: var(--acid);
+  background: var(--acid);
+  color: var(--on-acid);
+}
+.arena-page :is(.stake-size-input, .stake-advanced label) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.arena-page :is(.stake-size-input, .stake-advanced) input {
+  width: 7rem;
+  height: 40px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-14);
+}
+/* The read: its question and value on one line, the slider below. */
+.arena-page .stake-read {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "text value"
+    "range range";
+  align-items: baseline;
+  column-gap: var(--space-3);
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.arena-page .stake-read-row {
+  display: contents;
+}
+.arena-page .stake-read-row output {
+  grid-area: value;
+  color: var(--text);
+  font-family: var(--font-number);
+  font-size: var(--text-24);
+  line-height: 1;
+}
+.arena-page .stake-read-row input {
+  grid-area: range;
+  width: 100%;
+  margin: var(--space-2) 0 0;
+  accent-color: var(--acid);
+}
+.arena-page :is(.stake-advanced, .stake-positions) summary {
+  min-height: 24px;
+  color: var(--button-text);
+  font-size: var(--text-12);
+  line-height: 24px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.arena-page .stake-advanced label {
+  margin-top: var(--space-2);
+}
+.arena-page .stake-panel .stake-terms {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+  font-size: var(--text-14);
+  line-height: 20px;
+}
+.arena-page .stake-terms div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.arena-page .stake-terms dt {
+  color: var(--muted);
+}
+.arena-page .stake-terms dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.arena-page .stake-review-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 24px;
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.arena-page .stake-review-choice input {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--acid);
+}
+.arena-page .stake-panel .stake-error {
+  color: #ffb4bf;
+  font-size: var(--text-12);
+}
+.arena-page .arena-workspace .stake-confirm {
+  min-height: 48px;
+  border: 0;
+  background: var(--primary-gradient);
+  color: var(--on-acid);
+  font-size: var(--text-16);
+}
+.arena-page .stake-panel .stake-final {
+  margin-top: calc(var(--space-2) * -1);
+  text-align: center;
+}
+/* The receipt: a bordered inner box with a green check. */
+.arena-page .stake-receipt {
+  display: grid;
+  gap: var(--space-1);
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-inner);
+}
+.arena-page .stake-receipt strong {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-14);
+  line-height: 20px;
+}
+.arena-page .stake-receipt strong::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 11px;
+  margin: 0 3px 3px;
+  border: solid var(--answer-yes);
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg);
+}
+.arena-page .stake-receipt p {
+  color: var(--muted);
+  font-size: var(--text-12);
+  line-height: 16px;
+}
+.arena-page .stake-panel .stake-balance {
+  margin-top: var(--space-4);
+}
+.arena-page .stake-signin {
+  margin-top: var(--space-4);
+}
+.arena-page .stake-signin a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border-radius: var(--radius-pill);
+  background: var(--primary-gradient);
+  color: var(--on-acid);
+  font-weight: 700;
+}
+.arena-page :is(.stake-results, .stake-positions) {
+  margin-top: var(--space-4);
+}
+.arena-page .stake-results {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-inner);
+}
+.arena-page .stake-panel .stake-results h3 {
+  font-size: var(--text-14);
+}
+.arena-page :is(.stake-results, .stake-positions) ul {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding-left: var(--space-4);
+  color: var(--button-text);
+  font-size: var(--text-12);
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+}
+.arena-page .stake-positions ul {
+  margin-top: var(--space-2);
+}
+.arena-page .stake-review {
+  max-width: 360px;
+  padding: var(--space-5);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-card);
+  background: var(--panel);
+  color: var(--text);
+}
+.arena-page .stake-review h2 {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-20);
+}
+.arena-page .stake-review > p {
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.arena-page .stake-review-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+.arena-page .stake-review-actions button {
+  flex: 1;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: var(--raised);
+  color: var(--button-text);
+  font-weight: 700;
+}
+.arena-page .stake-review-actions [data-stake-review-place] {
+  border: 0;
+  background: var(--primary-gradient);
+  color: var(--on-acid);
+}
+@media (prefers-reduced-motion: reduce) {
+  .arena-page .stake-progress span {
+    transition: none;
+  }
+}
+
+/* Chat, filling the rail under the panel. Author names take the visit's
+   five landing colours, set by frontend/debate-layout.ts. */
+/* The feed's height depends only on the card's: the status lines keep fixed
+   heights, "Load earlier" sits at the end of the state line and "Jump to
+   latest" has a slot of its own under the feed, so new messages, loading and
+   text changes around it don't resize it (the chat keeps a reader's place
+   through resizes, frontend/community.ts). */
+.arena-page .arena-chat {
+  position: relative;
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 36px minmax(0, 1fr) 44px auto auto;
+  grid-template-areas:
+    "heading heading"
+    "state older"
+    "feed feed"
+    "new new"
+    "form form"
+    "status status";
+  min-height: 360px;
+  padding: var(--space-2) var(--space-4) var(--space-4);
+  border: 0;
+  border-radius: var(--radius-card);
+  background: var(--panel);
+}
+.arena-page .arena-chat .live-chat-heading {
+  grid-area: heading;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  margin: 0;
+}
+.arena-page .arena-chat .live-chat-heading h2 {
+  margin: 0;
+  font-size: var(--text-16);
+}
+.arena-page .arena-chat .live-chat-connection {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 2px var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  color: var(--muted);
+  font-size: var(--text-12);
+  line-height: 16px;
+  text-align: left;
+}
+.arena-page .chat-more {
+  margin-left: auto;
+}
+.arena-page .chat-more > summary {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  color: var(--muted);
+  list-style: none;
+  cursor: pointer;
+}
+.arena-page .chat-more > summary::-webkit-details-marker {
+  display: none;
+}
+.arena-page .chat-more > summary svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  stroke: none;
+}
+.arena-page .chat-more[open] > summary,
+.arena-page .chat-more > summary:hover {
+  background: var(--raised);
+  color: var(--text);
+}
+/* The menu opens over the messages and stops above the composer, so a click
+   there still reaches it (and closes the menu). frontend/debate-layout.ts
+   measures the composer's distance from the chat's bottom as it opens. */
+.arena-page .chat-more-panel {
+  position: absolute;
+  z-index: 10;
+  top: 52px;
+  right: var(--space-2);
+  bottom: var(--chat-menu-bottom, 10rem);
+  left: var(--space-2);
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  overflow-y: auto;
+  padding: var(--space-4);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-inner);
+  background: var(--raised);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 60%);
+  color: var(--button-text);
+  font-size: var(--text-14);
+}
+.arena-page .chat-more-panel p {
+  margin: 0;
+}
+.arena-page .chat-more-panel a {
+  display: inline-block;
+  min-height: 24px;
+  line-height: 24px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.arena-page .arena-chat .chat-status {
+  grid-area: status;
+  height: 16px;
+  margin: var(--space-1) 0 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--text-12);
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.arena-page .chat-more .community-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.arena-page .chat-more [data-community-like][aria-pressed="true"] {
+  border-color: var(--acid);
+  background: var(--acid);
+  color: var(--on-acid);
+}
+.arena-page .chat-more [data-community-likes] {
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.arena-page .chat-more form {
+  display: grid;
+  gap: var(--space-2);
+}
+.arena-page .chat-more form :is(select, textarea) {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  font: var(--text-14) / 20px var(--font-body);
+}
+.arena-page .chat-more form button {
+  justify-self: start;
+}
+.arena-page .arena-chat .live-chat-state {
+  grid-area: state;
+  align-self: center;
+  height: 16px;
+  margin: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--text-12);
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.arena-page .arena-workspace :is(.chat-older, .chat-new) {
+  justify-self: center;
+  min-height: 36px;
+  margin: var(--space-1) 0;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--raised);
+  color: var(--text);
+  font-size: var(--text-12);
+}
+.arena-page .arena-workspace .chat-older {
+  grid-area: older;
+  align-self: center;
+  justify-self: end;
+  margin: 0 0 0 var(--space-2);
+}
+.arena-page .arena-workspace .chat-new {
+  grid-area: new;
+  align-self: end;
+  margin-bottom: 0;
+}
+.arena-page .arena-chat .community-messages {
+  grid-area: feed;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--control-border) transparent;
+}
+.arena-page .arena-chat .community-message {
+  position: relative;
+  padding: var(--space-1) 0;
+  border: 0;
+  background: transparent;
+  color: var(--button-text);
+  font-size: var(--text-14);
+  line-height: 20px;
+}
+.arena-page .arena-chat .community-message-author {
+  margin-inline-end: var(--space-1);
+  color: var(--text);
+  font-size: var(--text-14);
+  font-weight: 700;
+}
+.arena-page .community-message-author[data-tint="0"] {
+  color: var(--visit-0, var(--text));
+}
+.arena-page .community-message-author[data-tint="1"] {
+  color: var(--visit-1, var(--text));
+}
+.arena-page .community-message-author[data-tint="2"] {
+  color: var(--visit-2, var(--text));
+}
+.arena-page .community-message-author[data-tint="3"] {
+  color: var(--visit-3, var(--text));
+}
+.arena-page .community-message-author[data-tint="4"] {
+  color: var(--visit-4, var(--text));
+}
+/* Time and Report show on hover or focus (always on touch screens), over the
+   end of the message. Delivery labels always show. */
+.arena-page .arena-chat .community-message-meta {
+  position: absolute;
+  top: -6px;
+  right: 0;
+  gap: var(--space-2);
+  padding: 0 var(--space-1) 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--raised);
+  color: var(--muted);
+  font-size: var(--text-12);
+  opacity: 0;
+}
+.arena-page
+  .arena-chat
+  .community-message:is(:hover, :focus-within)
+  .community-message-meta,
+.arena-page
+  .arena-chat
+  .community-message-meta:has(.community-message-delivery:not(:empty)) {
+  opacity: 1;
+}
+.arena-page
+  .arena-chat
+  .community-message-meta:has(.community-message-delivery:not(:empty)) {
+  position: static;
+  margin-top: var(--space-1);
+  padding: 0;
+  background: transparent;
+}
+.arena-page .arena-chat .community-message-actions button {
+  min-height: 28px;
+  padding: 0 var(--space-2);
+  border: 0;
+  background: transparent;
+  color: var(--button-text);
+  font: 400 var(--text-12) / 1 var(--font-body);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (hover: none), (pointer: coarse) {
+  .arena-page .arena-chat .community-message-meta {
+    position: static;
+    padding: 0;
+    background: transparent;
+    opacity: 1;
+  }
+  .arena-page .arena-chat .community-message-actions button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+.arena-page .arena-chat form {
+  grid-area: form;
+  display: block;
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  border: 0;
+}
+.arena-page .arena-chat-compose {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 52px;
+  padding: 3px 3px 3px var(--space-4);
+  border: 1px solid var(--control-border);
+  border-radius: 26px;
+  background: var(--bg);
+}
+.arena-page .arena-chat-compose:has(textarea:focus-visible) {
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
+}
+.arena-page .arena-workspace .arena-chat-compose textarea {
+  flex: 1;
+  min-width: 0;
+  min-height: 24px;
+  max-height: 120px;
+  margin: 0;
+  padding: 11px 0;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font: var(--text-14) / 20px var(--font-body);
+  resize: none;
+}
+.arena-page .arena-workspace .arena-chat-compose button {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--primary-gradient);
+  color: var(--on-acid);
+}
+.arena-page .arena-chat-compose svg {
+  width: 18px;
+  height: 18px;
+}
+.arena-page
+  .arena-chat
+  form
+  :is(.form-help, [data-community-send-status], [data-community-cooldown]) {
+  margin: var(--space-2) 0 0;
+  color: var(--muted);
+  font-size: var(--text-12);
+  line-height: 16px;
+}
+.arena-page
+  .arena-chat
+  form
+  :is([data-community-send-status], [data-community-cooldown]):empty {
+  display: none;
+}
+
+/* Results in the rail panel: the chart's header compact and its labels
+   scaled up to stay readable in the narrow panel. */
+.arena-page .arena-insight .arena-chart-top {
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  font-size: var(--text-12);
+}
+.arena-page .arena-insight .arena-round-state {
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-12);
+}
+.arena-page .arena-insight .arena-volume {
+  display: flex;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-2);
+  margin-left: 0;
+  text-align: left;
+}
+.arena-page .arena-insight .arena-volume > strong {
+  font-size: var(--text-16);
+}
+.arena-page .arena-insight .arena-chart-question {
+  font-size: var(--text-12);
+}
+.arena-page .arena-workspace .arena-insight #arena-chart-title {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-16);
+}
+.arena-page .arena-insight .arena-chart-plot {
+  padding-left: var(--space-3);
+}
+.arena-page .arena-insight .arena-chart text {
+  font-size: 24px;
+}
+.arena-page .arena-insight .arena-price-scale text {
+  font-size: 22px;
+}
+.arena-page .arena-insight .arena-chart-empty {
+  inset: 22% 4% auto;
+  padding: var(--space-3);
+  font-size: var(--text-12);
+}
+/* The AI outline in the rail panel (its look is in live-outline.css): the
+   cards stack in one column and the panel scrolls. */
+.arena-page .arena-insight .live-outline {
+  flex-direction: column;
+  overflow: hidden;
+}
+.arena-page .arena-insight .live-outline-body {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
+.arena-page .arena-insight .live-outline-arguments {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+}
+.arena-page .arena-insight .live-outline-note {
+  flex: none;
+  margin-top: var(--space-2);
+}
+.arena-page .arena-section-title {
+  margin-bottom: var(--space-3);
+}
+/* The chart, restyled with CSS only: Yes in green, No in red, landing type
+   and no gradient panel. */
+.arena-page .arena-chart-panel {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.arena-page .arena-chart-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+.arena-page .arena-round-state {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: var(--raised);
+  box-shadow: none;
+  color: var(--text);
+  font-weight: 700;
+}
+.arena-page .arena-state-chip {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--bg);
+  font-size: var(--text-12);
+}
+.arena-page .arena-volume {
+  margin-left: auto;
+  display: grid;
+  gap: 2px;
+  text-align: right;
+}
+.arena-page .arena-volume > span,
+.arena-page .arena-volume small {
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.arena-page .arena-volume > strong {
+  color: var(--text);
+  font-family: var(--font-number);
+  font-size: var(--text-20);
+  font-weight: 400;
+}
+.arena-page .arena-chart-question {
+  margin: 0 0 var(--space-1);
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+.arena-page .arena-workspace #arena-chart-title {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-number);
+  font-size: var(--text-24);
+  font-weight: 400;
+  line-height: 1.3;
+}
+.arena-page .arena-chart text {
+  fill: var(--muted);
+}
+.arena-page .arena-chart-grid line {
+  stroke: var(--line);
+}
+.arena-page .arena-chart-line.yes,
+.arena-page .arena-price-share {
+  stroke: var(--answer-yes);
+}
+.arena-page .arena-chart-point circle.yes {
+  fill: var(--answer-yes);
+}
+.arena-page #arena-yes-fill stop {
+  stop-color: var(--answer-yes);
+}
+.arena-page .arena-chart-badge.yes {
+  fill: #1d7f4b;
+  stroke: var(--answer-yes);
+  filter: none;
+}
+.arena-page .arena-chart-badge.no {
+  fill: #c42e49;
+  stroke: var(--answer-no);
+  filter: none;
+}
+.arena-page .yes {
+  color: var(--answer-yes);
+}
+.arena-page .no {
+  color: var(--answer-no);
+}
+.arena-page .arena-chart-empty {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-inner);
+  background: rgb(0 0 0 / 85%);
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+.arena-page .arena-chart-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 var(--space-3);
+}
+.arena-page
+  :is(
+    .arena-chart-key,
+    .arena-sync,
+    .arena-chart-help,
+    .arena-price-context,
+    .arena-price-explanation,
+    .arena-price-legend,
+    .arena-offer-values span
+  ) {
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.arena-page .arena-chart-key .yes {
+  color: var(--answer-yes);
+}
+.arena-page .arena-chart-key .no {
+  color: var(--answer-no);
+}
+.arena-page .arena-chart-help {
+  margin: 0;
+}
+.arena-page .arena-price-heading h4 {
+  color: var(--text);
+  font-size: var(--text-14);
+}
+.arena-page .arena-offer-values strong {
+  color: var(--text);
+  font-family: var(--font-number);
+  font-size: var(--text-16);
+  font-weight: 400;
+}
+.arena-page .arena-workspace .arena-price-navigation button {
+  min-width: 44px;
+  padding: 0 var(--space-3);
+}
+.arena-page .arena-price-navigation select {
+  width: 12rem;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-12);
+}
+.arena-page .arena-arguments {
+  padding: var(--space-5);
+  border-radius: var(--radius-card);
+  background: var(--panel);
+}
+/* About this debate, below the chart. */
+.arena-page .arena-about {
+  padding: var(--space-5);
+  border-radius: var(--radius-card);
+  background: var(--panel);
+}
+.arena-page .arena-about p {
+  margin: 0;
+}
+.arena-page .arena-about-lead {
+  margin-bottom: var(--space-4);
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+.arena-page .arena-about a {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.arena-page .arena-about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+.arena-page .arena-info {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-5);
+  margin: 0;
+  padding: 0;
+  font-size: var(--text-14);
+}
+.arena-page .arena-info div {
+  padding: 0;
+  border: 0;
+}
+.arena-page .arena-info div:last-child {
+  grid-column: 1 / -1;
+}
+.arena-page .arena-info dt {
+  margin: 0 0 2px;
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.arena-page .arena-info dd {
+  margin: 0;
+}
+.arena-page .arena-sentiment {
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-inner);
+}
+.arena-page .arena-workspace .arena-sentiment h3 {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-14);
+}
+.arena-page .arena-sentiment h3 small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: var(--text-12);
+  font-weight: 400;
+}
+.arena-page .arena-sentiment-bar {
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--answer-no);
+}
+.arena-page .arena-sentiment-bar span {
+  display: block;
+  width: var(--yes-share, 0%);
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--answer-yes);
+  transition: width 0.5s ease;
+}
+.arena-page .arena-sentiment-bar[data-empty="true"] {
+  background: var(--raised);
+}
+.arena-page .arena-sentiment-values {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-2);
+  font-family: var(--font-number);
+  font-size: var(--text-20);
+}
+.arena-page .arena-sentiment-values strong {
+  font-weight: 400;
+}
+.arena-page .arena-about .arena-sentiment p {
+  margin-top: var(--space-2);
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.arena-page
+  .arena-about
+  :is(
+    .arena-info-note,
+    .arena-bots-link,
+    .arena-about-links,
+    .arena-disclosure
+  ) {
+  margin-top: var(--space-3);
+  color: var(--muted);
+  font-size: var(--text-12);
+  line-height: 1.5;
+}
+.arena-page .arena-about :is(.arena-bots-link, .arena-about-links) a {
+  display: inline-block;
+  min-height: 24px;
+  line-height: 24px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .arena-page .arena-video-overlay,
+  .arena-page .arena-workspace .arena-video-expand {
+    transition: none;
+  }
+}
+
+/* 960–1199px: a narrower rail. */
+/* Narrow scoreboards (under 896px, from about 1366px windows down): the
+   cards drop the @handle and set the side as text under the name. */
+@container scoreboard (max-width: 56rem) {
+  .arena-page .arena-side {
+    grid-template-columns: 48px minmax(0, 1fr);
+    grid-template-areas:
+      "avatar name"
+      "avatar pill"
+      "avatar state";
+    padding-block: var(--space-2);
+  }
+  .arena-page .arena-side-who {
+    display: contents;
+  }
+  .arena-page .arena-side-name {
+    grid-area: name;
+  }
+  .arena-page .arena-side-meta {
+    grid-area: state;
+    font-size: var(--text-12);
+    line-height: 16px;
+  }
+  .arena-page .arena-side-meta:not(:has(.arena-side-state:not(:empty))) {
+    display: none;
+  }
+  .arena-page .arena-side-handle {
+    display: none;
+  }
+  .arena-page .arena-side-handle + .arena-side-state:not(:empty)::before {
+    content: none;
+  }
+  .arena-page .arena-workspace .arena-side-pill {
+    max-width: none;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font-weight: 400;
+    line-height: 16px;
+  }
+  .arena-page
+    .arena-workspace[data-active-side]
+    .arena-side[data-side]
+    .arena-side-pill {
+    border: 0;
+    background: none;
+    color: var(--muted);
+  }
+}
+/* From 960px the page is one screen, like a player: the header, then the
+   stage and the rail filling the window, with no page scroll. The video is
+   the largest 16:9 box that fits above the scoreboard. */
+@media (min-width: 960px) {
+  body.arena-page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100svh;
+  }
+  .arena-page main {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .arena-page .site-footer {
+    display: none;
+  }
+  .arena-page .arena-workspace {
+    height: 100%;
+  }
+  /* The rows under the video have fixed heights (status line, scoreboard
+     and, with captions, their line), so the video takes the rest. */
+  .arena-page .arena-watch {
+    --stage-rest: calc(28px + var(--space-3) + 151px);
+    container: stage / size;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .arena-page .arena-watch:has(.live-captions) {
+    --stage-rest: calc(28px + var(--space-3) + 151px + 52px);
+  }
+  /* A size container would hold the enlarged video's fixed position. */
+  .arena-page .arena-watch:has(.is-expanded) {
+    container-type: normal;
+  }
+  .arena-page .arena-watch > * {
+    flex: none;
+  }
+  .arena-page .arena-video-slot {
+    width: 100%;
+    height: max(12rem, min(100cqw * 9 / 16, 100cqh - var(--stage-rest)));
+    aspect-ratio: auto;
+    border-radius: 0;
+    background: none;
+  }
+  .arena-page .arena-video-surface {
+    width: auto;
+    max-width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-card);
+  }
+  .arena-page .arena-watch .media-status-row {
+    flex-wrap: nowrap;
+    height: 20px;
+    overflow: hidden;
+  }
+  .arena-page .arena-watch .media-status-row p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .arena-page .arena-video-surface.is-expanded {
+    margin: 0;
+    aspect-ratio: auto;
+  }
+}
+/* From 1200px chat sits over the video, like Twitch's and Kick's overlay
+   chat: no title and no panel, just the messages over a soft shadow in the
+   video's lower right corner, ending clear of side B's name tag. The menu
+   button sits beside the composer, "Load earlier" sits above the messages,
+   and the viewer can hide it all. Below 1200px it's a tab in the rail. */
+@media (min-width: 1200px) {
+  .arena-page .arena-video-surface {
+    --chat-width: max(14rem, min(20rem, calc(50% - 10.5rem)));
+  }
+  .arena-page .arena-video-surface > .arena-chat {
+    position: absolute;
+    z-index: 4;
+    /* At least 15rem tall: more of a small video, all of a tiny one. */
+    top: max(0px, min(42%, 100% - 15rem));
+    right: var(--space-3);
+    bottom: var(--space-3);
+    grid-template-rows: 0 36px minmax(0, 1fr) 40px auto auto;
+    width: var(--chat-width);
+    min-height: 0;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    text-shadow:
+      0 1px 2px rgb(0 0 0 / 90%),
+      0 0 12px rgb(0 0 0 / 60%);
+  }
+  /* The shadow that keeps white text readable over a bright video. */
+  .arena-page .arena-video-surface:has(> .arena-chat)::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+    width: min(100%, calc(var(--chat-width) * 1.9));
+    height: 78%;
+    background: radial-gradient(
+      farthest-side at 100% 100%,
+      rgb(0 0 0 / 62%),
+      rgb(0 0 0 / 30%) 55%,
+      transparent
+    );
+    pointer-events: none;
+  }
+  .arena-page .arena-video-surface[data-chat="hidden"]::after {
+    display: none;
+  }
+  .arena-page
+    .arena-video-surface
+    > .arena-chat
+    :is(.live-chat-heading h2, .live-chat-connection, .form-help),
+  .arena-page
+    .arena-video-surface
+    > .arena-chat:not(:has(form[data-writable="false"]))
+    .live-chat-state {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .arena-page .arena-video-surface > .arena-chat .live-chat-heading {
+    min-height: 0;
+    height: 0;
+  }
+  .arena-page .arena-video-surface > .arena-chat .live-chat-state {
+    color: var(--button-text);
+  }
+  /* The menu button beside the composer; its menu fills the space above. */
+  .arena-page .arena-video-surface > .arena-chat .chat-more > summary {
+    position: absolute;
+    right: 0;
+    bottom: 20px;
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgb(255 255 255 / 20%);
+    background: rgb(0 0 0 / 42%);
+    backdrop-filter: blur(12px);
+    color: var(--button-text);
+  }
+  .arena-page .arena-video-surface > .arena-chat .chat-more[open] > summary,
+  .arena-page .arena-video-surface > .arena-chat .chat-more > summary:hover {
+    background: rgb(0 0 0 / 72%);
+    color: var(--text);
+  }
+  .arena-page .arena-video-surface > .arena-chat .chat-more-panel {
     top: 0;
-    z-index: 20;
+    right: 0;
+    bottom: var(--chat-menu-bottom, 72px);
+    left: 0;
+    text-shadow: none;
+  }
+  .arena-page .arena-video-surface > .arena-chat form {
+    margin-right: 52px;
+  }
+  /* "Load earlier messages" keeps its own row above the messages, so it
+     never covers a message's buttons, and the row's fixed height keeps the
+     feed steady when it comes and goes. */
+  .arena-page .arena-video-surface > .arena-chat .chat-older {
+    min-height: 32px;
+    white-space: nowrap;
+    background: rgb(0 0 0 / 72%);
+    text-shadow: none;
+  }
+  .arena-page .arena-video-surface > .arena-chat .chat-new {
+    background: rgb(0 0 0 / 72%);
+    text-shadow: none;
+  }
+  /* Newest at the bottom, fading out towards the top. */
+  .arena-page .arena-video-surface > .arena-chat .community-messages {
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to bottom, transparent, #000 3.5rem);
+  }
+  .arena-page
+    .arena-video-surface
+    > .arena-chat
+    .community-messages
+    > :first-child {
+    margin-top: auto;
+  }
+  .arena-page .arena-video-surface > .arena-chat .community-message {
+    padding: 3px 0;
+    color: #fff;
+  }
+  .arena-page .arena-video-surface > .arena-chat .community-message-meta {
+    background: rgb(0 0 0 / 72%);
+    text-shadow: none;
+  }
+  .arena-page .arena-video-surface > .arena-chat .arena-chat-compose {
+    min-height: 44px;
+    padding: 2px 2px 2px var(--space-4);
+    border-color: rgb(255 255 255 / 20%);
+    background: rgb(0 0 0 / 42%);
+    backdrop-filter: blur(12px);
+    text-shadow: none;
+  }
+  .arena-page
+    .arena-video-surface
+    > .arena-chat
+    .arena-chat-compose
+    textarea::placeholder {
+    color: rgb(255 255 255 / 72%);
+  }
+  .arena-page .arena-video-surface > .arena-chat .arena-chat-compose textarea {
+    padding: 10px 0;
+  }
+  .arena-page .arena-video-surface > .arena-chat .arena-chat-compose button {
+    width: 38px;
+    height: 38px;
+  }
+  .arena-page .arena-video-surface > .arena-chat .chat-status {
+    color: var(--button-text);
+  }
+  .arena-page .arena-video-surface[data-chat="hidden"] > .arena-chat {
+    display: none;
+  }
+  .arena-page
+    .arena-video-surface:has(> .arena-chat):not([data-chat="hidden"])
+    .arena-video-empty {
+    padding-right: calc(var(--chat-width) + var(--space-6));
+  }
+  .arena-page .arena-workspace .arena-chat-toggle {
+    position: absolute;
+    top: var(--space-4);
+    right: calc(var(--space-4) + 44px + var(--space-2));
+    z-index: 6;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 12px;
+    border-color: rgb(255 255 255 / 16%);
+    background: rgb(0 0 0 / 72%);
+    color: var(--acid);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .arena-page .arena-chat-toggle svg {
+    width: 100%;
+    height: 100%;
+  }
+  .arena-page .arena-workspace .arena-chat-toggle[aria-pressed="true"] {
+    border-color: var(--acid);
+  }
+  .arena-page
+    .arena-video-surface:is(:hover, :focus-within, .is-expanded)
+    .arena-chat-toggle {
+    opacity: 1;
+  }
+  .arena-page .arena-video-surface:has(> .arena-chat) .arena-video-status {
+    right: calc(var(--space-4) + 2 * 44px + 2 * var(--space-2));
+  }
+}
+@media (min-width: 1200px) and (hover: none) {
+  .arena-page .arena-workspace .arena-chat-toggle {
+    opacity: 1;
+  }
+}
+@media (min-width: 1200px) and (prefers-reduced-motion: reduce) {
+  .arena-page .arena-workspace .arena-chat-toggle {
+    transition: none;
+  }
+}
+/* Chat as a tab of the rail panel: below 1200px, or when the video is too
+   small for chat over it (frontend/debate-layout.ts moves it). */
+.arena-page .arena-insight > .arena-chat {
+  min-height: 0;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+}
+.arena-page .arena-video-surface:not(:has(> .arena-chat)) .arena-chat-toggle {
+  display: none;
+}
+@media (max-width: 1199px) {
+  .arena-page .arena-workspace {
+    --rail: 340px;
+  }
+  .arena-page .arena-scoreboard {
+    grid-template-columns: minmax(0, 1fr) 120px minmax(0, 1fr);
+    column-gap: var(--space-4);
+  }
+  .arena-page .arena-clock {
+    font-size: var(--text-24);
+  }
+  .arena-page .arena-about-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* 600–959px: one column. The panel follows the scoreboard, then the
+   Outline | Chat tabs, then the rest. */
+@media (max-width: 959px) {
+  .arena-page .arena-workspace {
+    display: flex;
+    flex-direction: column;
+    max-width: 720px;
+    padding: var(--space-4);
+  }
+  .arena-page .arena-rail {
+    position: static;
+    height: auto;
+    min-height: 0;
+    margin-top: var(--space-5);
+    overflow: visible;
+  }
+  /* The panel holds chat as a tab at a fixed height. */
+  .arena-page .arena-insight {
+    flex: none;
+    height: min(560px, max(70svh, 26rem));
+  }
+  .arena-page .arena-scoreboard {
+    grid-template-columns: minmax(0, 1fr) 112px minmax(0, 1fr);
+  }
+}
+/* Phones: the video full-bleed, the scoreboard, the tabs, and the answer
+   bar pinned to the bottom of the screen. Picking Yes or No opens it as a
+   sheet. */
+@media (max-width: 599px) {
+  :root:has(body.arena-page) {
+    scroll-padding-bottom: 11rem;
+  }
+  .arena-page .arena-workspace {
+    padding: 0;
+    max-width: none;
+  }
+  .arena-page
+    .arena-workspace
+    > :not(.arena-watch, .arena-rail, script, template),
+  .arena-page .arena-rail > :not(.stake-panel),
+  .arena-page .arena-watch > :not(.arena-video-slot, .sr-only) {
+    margin-inline: var(--space-4);
+  }
+  .arena-page .arena-video-slot,
+  .arena-page .arena-video-surface {
+    width: 100%;
+    border-radius: 0;
+  }
+  .arena-page .arena-video-overlay {
+    top: var(--space-2);
+    max-width: calc(50% - 32px);
+    padding: var(--space-1) var(--space-2);
+  }
+  .arena-page .arena-video-topic {
+    left: var(--space-2);
+  }
+  .arena-page .arena-video-status {
+    right: calc(var(--space-2) + 44px + var(--space-1));
+  }
+  .arena-page .arena-workspace .arena-video-topic h1 {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: var(--text-14);
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+  .arena-page .arena-workspace .arena-video-expand {
+    top: var(--space-2);
+    right: var(--space-2);
+  }
+  .arena-page .arena-video-surface.is-expanded {
+    inset: var(--space-2);
+  }
+  .arena-page .arena-video-empty {
+    gap: var(--space-2);
+    padding: var(--space-4);
+  }
+  .arena-page .arena-emblem {
+    display: none;
+  }
+  .arena-page .arena-stage-title {
+    font-size: var(--text-16);
+  }
+  .arena-page .arena-stage-line {
+    font-size: var(--text-12);
+  }
+  .arena-page .arena-scoreboard {
+    grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr);
+    column-gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+  .arena-page .arena-side {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "name"
+      "pill"
+      "state";
+    min-height: 0;
+    padding: var(--space-2) var(--space-3);
+  }
+  .arena-page .arena-side[data-side="B"] {
+    text-align: right;
+  }
+  .arena-page .arena-avatar {
+    display: none;
+  }
+  .arena-page .arena-side-name {
+    font-size: var(--text-14);
+    line-height: 18px;
+  }
+  .arena-page .arena-clock {
+    font-size: var(--text-20);
+  }
+  .arena-page .arena-turn-hole,
+  .arena-page .arena-turn-label {
+    font-size: var(--text-12);
+  }
+  .arena-page .arena-rail {
+    display: contents;
+  }
+  .arena-page .arena-tabs:not([hidden]) {
+    margin-top: var(--space-4);
+  }
+  .arena-page .arena-insight {
+    margin-inline: var(--space-4);
+    margin-top: var(--space-4);
+  }
+  .live-outline {
+    margin-top: var(--space-4);
+  }
+  .arena-page .arena-about-grid,
+  .arena-page .arena-info {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .arena-page .arena-chart-top {
+    font-size: var(--text-12);
+  }
+  .arena-page .arena-volume {
+    margin-left: 0;
+    flex-basis: 100%;
+    text-align: left;
+  }
+  .arena-page .arena-workspace #arena-chart-title {
+    font-size: var(--text-20);
+  }
+  /* The pinned answer bar: the question, the window count, the proposition
+     on one line, and Yes and No. */
+  .arena-page .stake-panel {
+    order: 10;
+    position: sticky;
+    bottom: 0;
+    z-index: 30;
+    margin-top: var(--space-5);
+    padding: var(--space-3) var(--space-4)
+      max(var(--space-4), env(safe-area-inset-bottom));
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    box-shadow: 0 -1px 0 var(--line);
+  }
+  .arena-page .stake-panel:not([data-sheet]) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "question meta"
+      "proposition proposition"
+      "sides sides";
+    column-gap: var(--space-2);
+  }
+  .arena-page
+    .stake-panel:not([data-sheet])
+    > :not(.stake-turn, .stake-question, .stake-proposition, .stake-sides) {
+    display: none;
+  }
+  .arena-page .stake-panel:not([data-sheet]) .stake-turn {
+    display: contents;
+  }
+  .arena-page .stake-panel:not([data-sheet]) .stake-turn > :not(.stake-meta) {
+    display: none;
+  }
+  .arena-page .stake-panel:not([data-sheet]) .stake-meta {
+    grid-area: meta;
+    align-self: baseline;
+    text-align: right;
+  }
+  .arena-page .stake-panel:not([data-sheet]) .stake-question {
+    grid-area: question;
+    margin: 0;
+    font-size: var(--text-20);
+  }
+  .arena-page .stake-panel:not([data-sheet]) .stake-proposition {
+    grid-area: proposition;
+    margin-top: 2px;
+    overflow: hidden;
+    color: var(--button-text);
+    font-size: var(--text-16);
+    line-height: 20px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .arena-page .stake-panel:not([data-sheet]) .stake-sides {
+    grid-area: sides;
+    margin-top: var(--space-3);
+  }
+  /* The sheet: the bar opens upward over the page and scrolls. */
+  .arena-page .stake-panel[data-sheet] {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    max-height: 85svh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    margin: 0;
+    box-shadow:
+      0 -16px 40px rgb(0 0 0 / 60%),
+      0 -1px 0 var(--line);
+  }
+  .arena-page .arena-workspace .stake-panel[data-sheet] .stake-sheet-close {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: var(--space-1);
+    margin: 0 0 var(--space-3) calc(var(--space-2) * -1);
+    padding: 0 var(--space-3) 0 var(--space-1);
+    border-color: transparent;
+    background: transparent;
+  }
+  .arena-page .stake-sheet-close svg {
+    width: 20px;
+    height: 20px;
+  }
+  /* The bar never covers the composer or the cookie banner: it steps aside
+     while the composer has focus or the banner is open. */
+  .arena-page
+    .arena-workspace:has(.arena-chat-compose textarea:focus)
+    .stake-panel:not([data-sheet]),
+  .arena-page:has(.cookie-choice:not([hidden])) .stake-panel:not([data-sheet]) {
+    display: none;
+  }
+}
+@media (max-width: 599px) and (prefers-reduced-motion: no-preference) {
+  .arena-page .stake-panel[data-sheet] {
+    animation: arena-sheet-in 0.3s var(--ease-expo);
+  }
+}
+@keyframes arena-sheet-in {
+  from {
+    transform: translateY(24px);
+    opacity: 0.6;
   }
 }
 
 /* Yap Coins results notice (Decision 0013, interface 10), on every page. It
-   sits below the header and under the measurement choice banner. */
+   sits below the header and under the cookie banner. */
 .results-notice {
   position: fixed;
   z-index: 90;

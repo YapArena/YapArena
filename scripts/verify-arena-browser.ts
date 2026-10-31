@@ -60,9 +60,13 @@ export async function verifyArenaBrowser({
       displayName: "UI Test Participant",
       bio: "Synthetic local interface trial.",
       publicationState: "published",
+      acceptTerms: true,
     });
     await page.goto(base + "/account");
-    const dismiss = page.getByRole("button", { name: "Not now", exact: true });
+    const dismiss = page.getByRole("button", {
+      name: "Reject all",
+      exact: true,
+    });
     if (await dismiss.isVisible()) await dismiss.click();
     await page.locator("#signed-in").waitFor({ state: "visible" });
     const debates = await api<PublicList<PublicDebate>>(
@@ -87,6 +91,9 @@ export async function verifyArenaBrowser({
     await page.goto(base + "/debates/" + debateSlug);
     if (await dismiss.isVisible()) await dismiss.click();
     await page.locator("[data-a4-inline]").waitFor();
+    // The chart shares the rail panel with the AI outline and About
+    // (direction BC1, revision 2): open Results for the chart checks.
+    await page.locator("#arena-tab-results").click();
     phase = "live chat";
     await page.waitForFunction(
       () =>
@@ -142,7 +149,7 @@ export async function verifyArenaBrowser({
       );
       assert.equal(
         await page.locator("[data-price-yes]").textContent(),
-        `${((100 * Number(point.offer!.n)) / Number(point.offer!.d)).toFixed(2)}¢`,
+        `${(Number(point.offer!.n) / Number(point.offer!.d)).toFixed(2)} YC`,
       );
       assert.match(
         (await page.locator("[data-price-context]").textContent())!,
@@ -209,7 +216,7 @@ export async function verifyArenaBrowser({
     );
     assert.match(
       (await page.locator("[data-price-explanation]").textContent())!,
-      /Median interval|NO median/,
+      /Typical limits|Typical No limit/,
     );
     assert.notEqual(await page.locator("[data-price-yes]").textContent(), "—");
     // A new published settlement re-renders the shared history through the
@@ -313,22 +320,112 @@ export async function verifyArenaBrowser({
     );
     await page.emulateMedia({ reducedMotion: "no-preference" });
     checks.rapidScrubbingAndReducedMotion = true;
-    // Layout since 2026-10-25: chat left, video centre, the betting panel
-    // right (Decision 0013), all three starting level.
+    // Layout since 2026-10-30 (direction BC1, amending Decision 0013): one
+    // screen; the stage on the left with chat over the video from 1200px;
+    // the rail on the right holds the answer panel and, below it, the AI
+    // outline, results and about panel. The video and the panel start level.
+    await page.evaluate(() => window.scrollTo(0, 0));
     const sidebar = (await page.locator("[data-stake-panel]").boundingBox())!,
       video = (await page.locator("[data-arena-video]").boundingBox())!,
+      insight = (await page.locator("[data-insight]").boundingBox())!,
       chatPanel = (await page
         .locator("[data-community-chat-panel]")
         .boundingBox())!;
     assert.ok(
-      Math.abs(sidebar.y - video.y) <= 2 &&
-        Math.abs(chatPanel.y - video.y) <= 2,
-      "chat, video and betting panel start level",
+      Math.abs(sidebar.y - video.y) <= 2,
+      "video and answer panel start level",
     );
     assert.ok(
-      chatPanel.x < video.x && video.x < sidebar.x,
-      "chat is left of the video and the betting panel right of it",
+      video.x + video.width < sidebar.x,
+      "the video is left of the rail",
     );
+    assert.ok(
+      chatPanel.x >= video.x &&
+        chatPanel.y >= video.y &&
+        chatPanel.x + chatPanel.width <= video.x + video.width + 1 &&
+        chatPanel.y + chatPanel.height <= video.y + video.height + 1,
+      "chat sits over the video",
+    );
+    assert.ok(
+      Math.abs(insight.x - sidebar.x) <= 1 &&
+        insight.y >= sidebar.y + sidebar.height,
+      "the outline, results and about panel is in the rail, below the answer panel",
+    );
+    assert.ok(
+      await page.evaluate(
+        () => document.documentElement.scrollHeight <= window.innerHeight + 1,
+      ),
+      "the page fits one screen",
+    );
+    // The turn clock: a timer on the emblem, between the debaters' cards.
+    assert.equal(
+      await page
+        .locator(".arena-turn-face [data-media-clock]")
+        .getAttribute("role"),
+      "timer",
+    );
+    assert.equal(
+      await page.locator(".arena-turn-face canvas.arena-ring").count(),
+      1,
+    );
+    // Chat over the video can be hidden and shown again.
+    await page.locator("[data-arena-video]").hover();
+    await page.locator("[data-chat-toggle]").click();
+    assert.equal(
+      await page.locator("[data-community-chat-panel]").isVisible(),
+      false,
+    );
+    await page.locator("[data-chat-toggle]").click();
+    assert.equal(
+      await page.locator("[data-community-chat-panel]").isVisible(),
+      true,
+    );
+    // The frame over the speaking debater's video lights up, and only
+    // theirs. Stand-in videos: no LiveKit tracks here.
+    if (
+      (await page
+        .locator("[data-arena]")
+        .getAttribute("data-debate-status")) === "live"
+    ) {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      const lit = await page.evaluate((debateId) => {
+        const box = document.querySelector("[data-media-videos]")!;
+        const videos = (["A", "B"] as const).map((side) => {
+          const video = document.createElement("video");
+          video.dataset.side = side;
+          box.append(video);
+          return video;
+        });
+        const shadows = (["A", "B"] as const).map((activeSide) => {
+          window.dispatchEvent(
+            new CustomEvent("yap:turn", {
+              detail: {
+                debateId,
+                eventStatus: "live",
+                state: "running",
+                activeSide,
+                turnNumber: 1,
+                turnDeadlineAt: new Date(Date.now() + 30_000).toISOString(),
+                serverOffset: 0,
+              },
+            }),
+          );
+          return (["A", "B"] as const).map((side) =>
+            getComputedStyle(
+              document.querySelector(`.arena-frame[data-side="${side}"]`)!,
+            ).boxShadow.includes("inset"),
+          );
+        });
+        for (const video of videos) video.remove();
+        return shadows;
+      }, debate.id);
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      assert.deepEqual(lit, [
+        [true, false],
+        [false, true],
+      ]);
+      checks.speakerFrameLights = true;
+    }
     checks.hoverPricesArgumentsAndCompactSidebar = true;
     const media = (await page.locator("[data-media-event]").elementHandle())!,
       chat = (await page
@@ -345,7 +442,11 @@ export async function verifyArenaBrowser({
       "true",
     );
     const enlarged = (await page.locator("[data-arena-video]").boundingBox())!;
-    assert.ok(enlarged.width > original.width * 2);
+    // The enlarged video fills the window, 24px in from each edge.
+    assert.ok(
+      enlarged.width > original.width &&
+        enlarged.width >= page.viewportSize()!.width - 2 * 24 - 2,
+    );
     await page.keyboard.press("Escape");
     assert.equal(
       await page.locator("[data-video-expand]").getAttribute("aria-expanded"),
@@ -375,14 +476,25 @@ export async function verifyArenaBrowser({
       .waitFor({ state: "attached" });
     await expectInspection(first);
     checks.chartSelectionMarksRound = true;
+    await page.locator("#arena-tab-about").click();
     assert.equal(
       await page
-        .getByRole("link", { name: "Bots sandbox on Yap Coins →" })
+        .getByRole("link", { name: "Practice with bots →" })
         .getAttribute("href"),
       `/coins?debate=${debate.id}`,
     );
     checks.botsSandboxLink = true;
     phase = "a11y";
+    // The video's hover corners, name tags and chat controls fade over
+    // 0.15s; scan them hidden or shown, not mid-fade, when their text is
+    // still partly transparent.
+    await page.waitForFunction(() =>
+      [
+        ...document.querySelectorAll(
+          ".arena-video-overlay, .arena-frame-tag, .arena-chat-toggle, .chat-older",
+        ),
+      ].every((node) => ["0", "1"].includes(getComputedStyle(node).opacity)),
+    );
     await page.addScriptTag({ content: axe.source });
     const a11y = await page.evaluate(async () => {
       const r = await window.axe.run(document, {
@@ -410,8 +522,47 @@ export async function verifyArenaBrowser({
         () => document.documentElement.scrollWidth <= window.innerWidth,
       ),
     );
+    // The answer bar is pinned to the bottom of the first screen.
+    const bar = (await page.locator("[data-stake-panel]").boundingBox())!;
+    assert.ok(
+      bar.y >= 0 && bar.y + bar.height <= 844 + 1 && bar.y > 844 / 2,
+      "the answer bar shows at the bottom of the first screen",
+    );
+    // The rail panel's tabs follow the WAI pattern; on phones chat is one
+    // of them, after the AI outline when the outline is on.
+    const tabs = page.locator("[data-arena-tabs]");
+    await tabs.locator('[role="tab"][aria-selected="true"]').focus();
+    await page.keyboard.press("Home");
+    const chatTab = tabs.getByRole("tab", { name: /^Chat/ });
+    if ((await chatTab.getAttribute("aria-selected")) !== "true")
+      await page.keyboard.press("ArrowRight");
+    assert.equal(await chatTab.getAttribute("aria-selected"), "true");
+    assert.equal(
+      await chatTab.evaluate((node) => document.activeElement === node),
+      true,
+    );
+    assert.ok(await page.locator("[data-community-chat-panel]").isVisible());
+    await page.keyboard.press("End");
+    assert.equal(
+      await tabs
+        .getByRole("tab", { name: "About" })
+        .getAttribute("aria-selected"),
+      "true",
+    );
+    checks.mobileTabsKeyboard = true;
     await page.screenshot({ path: directory + "/mobile.png", fullPage: true });
     checks.mobileNoOverflow = true;
+    // Reduced motion removes the hover fades.
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    assert.equal(
+      await page
+        .locator(".arena-video-overlay")
+        .first()
+        .evaluate((node) => getComputedStyle(node).transitionDuration),
+      "0s",
+    );
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    checks.reducedMotionHoverCorners = true;
     phase = "search";
     await page.locator("#header-search").fill("walkability");
     await page.locator("#header-search").press("Enter");

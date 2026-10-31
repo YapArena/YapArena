@@ -614,7 +614,7 @@ async function loadNotifications(version = accountVersion) {
 document
   .querySelector<HTMLButtonElement>("[data-open-measurement]")!
   .addEventListener("click", () =>
-    document.querySelector<HTMLButtonElement>(".measurement-settings")?.click(),
+    document.querySelector<HTMLButtonElement>(".cookie-settings")?.click(),
   );
 
 function clearAccountState(checking = false) {

@@ -34,6 +34,7 @@ function fixture({
   hidden = false,
   apiRateLimit,
   streams,
+  discovery,
 } = {}) {
   const calls = [];
   const community = {
@@ -125,6 +126,7 @@ function fixture({
   };
   const app = createApp({
     community,
+    discovery,
     communityStreams: streams,
     identity: { getRoles: async () => roles },
     sessions: {
@@ -294,6 +296,12 @@ describe("community API and share surfaces", () => {
     assert.match(overlay.text, /Should public debates have chat/);
     assert.doesNotMatch(overlay.text, /score|tally|sponsor|billing/i);
     assert.equal((await request(app).get("/overlay/not-found")).status, 404);
+    // With the site's pages served, browsers get the styled not-found page.
+    const styled = await request(fixture({ discovery: {} }).app)
+      .get("/overlay/not-found")
+      .set("Accept", "text/html");
+    assert.equal(styled.status, 404);
+    assert.match(styled.text, /404 \/ NO SUCH PAGE/);
     assert.equal(
       (await request(app).get("/debates/not-found/qr.svg")).status,
       404,

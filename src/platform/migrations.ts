@@ -1,6 +1,7 @@
 import { readdir } from "node:fs/promises";
 import type { Pool } from "pg";
 import { verifyRuntimeIdentity } from "./database.ts";
+import { OperatorError } from "./operator-error.ts";
 
 export async function verifyDatabaseState(
   database: Pool,
@@ -20,6 +21,8 @@ export async function verifyDatabaseState(
   const missing = expected.filter((name) => !applied.includes(name));
 
   if (missing.length > 0) {
-    throw new Error(`database migrations are pending: ${missing.join(", ")}`);
+    throw new OperatorError(
+      `database migrations are pending: ${missing.join(", ")}`,
+    );
   }
 }

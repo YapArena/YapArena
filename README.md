@@ -203,7 +203,7 @@ The [wide homepage](docs/wide-homepage.md) connects published topics, playable
 debates, follows and the existing Yap Coins header to the supplied visual design.
 Unavailable topic-market figures stay explicitly unknown. For local reference
 comparisons only, enable `HOMEPAGE_REFERENCE_ENABLED=true` in the runtime-only
-environment and visit `/?reference=1`; this labeled sample mode is disabled by
+environment and visit `/home?reference=1`; this labeled sample mode is disabled by
 default and forbidden in production.
 
 [Shared bot discovery](docs/shared-bot-discovery.md) additionally supports stored,
@@ -329,33 +329,37 @@ protected environment file, never in Git.
 An environment variable is a named setting read when a process starts. Changing `.env` does not edit
 source code, and a running process or container must be restarted before it sees a changed value.
 
-| Setting                              | Local default                      | Meaning                                                                                                                                  |
-| ------------------------------------ | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `NODE_ENV`                           | `development`                      | Selects development or production security and error behavior.                                                                           |
-| `HOST` / `PORT`                      | `0.0.0.0` / `3000`                 | Select the network interface and port used by `npm run dev`; normally keep the local defaults.                                           |
-| `HOST_PORT`                          | `3000`                             | Selects the host port used to reach the API when it runs through Docker Compose.                                                         |
-| `LOG_LEVEL`                          | `debug`                            | Controls how much structured log detail the application emits.                                                                           |
-| `APP_ORIGIN`                         | `http://localhost:3000`            | Identifies the browser origin allowed to make cookie-authenticated write requests.                                                       |
-| `TRUST_PROXY`                        | `false`                            | Trusts no reverse proxy locally; production must use the exact trusted proxy-hop count.                                                  |
-| `REQUEST_BODY_LIMIT`                 | `10kb`                             | Rejects JSON request bodies larger than this amount.                                                                                     |
-| `API_RATE_LIMIT`                     | `300`                              | Limits general API requests from one client during each rate-limit window.                                                               |
-| `AUTH_RATE_LIMIT`                    | `10`                               | Applies a stricter limit to sign-in starts, callbacks and confirmations during the same window.                                          |
-| `RATE_LIMIT_WINDOW_MS`               | `900000` (15 minutes)              | Defines the time window, in milliseconds, for both request limits.                                                                       |
-| `SESSION_DURATION_MS`                | `604800000` (7 days)               | Defines how long a signed-in server-side session remains valid.                                                                          |
-| `METRICS_TOKEN`                      | unset                              | Bearer token required by `/metrics` (32+ characters); production returns 404 for `/metrics` while it is unset.                           |
-| `AUTH0_ISSUER_BASE_URL`              | unset                              | Auth0 tenant or custom domain (`https://…`). Web service only; production refuses to start without the three Auth0 settings.             |
-| `AUTH0_CLIENT_ID` / `..._SECRET`     | unset                              | The Regular Web Application's credentials. Locally, leave all Auth0 settings unset and use `npm run start:test-identity`.                |
-| `PRODUCTION_SERVICE`                 | unset                              | Set to `true` only on the production web service; it then refuses an `*.auth0.com` issuer.                                               |
-| `REDIS_SECURITY_URL` / `...`         | unset                              | Optional shared Redis abuse controls (`REDIS_SECURITY_URL`, `REDIS_NAMESPACE`, `REDIS_KEY_SECRET`); production requires TLS.             |
-| `POSTGRES_DB` / `POSTGRES_USER`      | project-specific                   | Name the local PostgreSQL database and its bootstrap administrator, separate from runtime.                                               |
-| `POSTGRES_PASSWORD`                  | `local-development-only`           | Authenticates the local PostgreSQL user; never reuse this example password outside local development.                                    |
-| `POSTGRES_PORT`                      | `5433`                             | Exposes PostgreSQL on this host port while PostgreSQL continues to use port `5432` in its container.                                     |
-| `DATABASE_URL`                       | project-specific PostgreSQL URL    | Gives Node.js a complete database connection string; it must use the dedicated `yaparena_runtime` login, never the owner/admin identity. |
-| `PROMETHEUS_PORT` / `GRAFANA_PORT`   | `9090` / `3001`                    | Expose the optional local monitoring interfaces on these host ports.                                                                     |
-| `GRAFANA_ADMIN_USER` / `...PASSWORD` | `admin` / `local-development-only` | Provide local Grafana sign-in credentials; replace them in every nonlocal environment.                                                   |
+| Setting                              | Local default                      | Meaning                                                                                                                                                                                                                     |
+| ------------------------------------ | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NODE_ENV`                           | `development`                      | Selects development or production security and error behavior.                                                                                                                                                              |
+| `HOST` / `PORT`                      | `0.0.0.0` / `3000`                 | Select the network interface and port used by `npm run dev`; normally keep the local defaults.                                                                                                                              |
+| `HOST_PORT`                          | `3000`                             | Selects the host port used to reach the API when it runs through Docker Compose.                                                                                                                                            |
+| `LOG_LEVEL`                          | `debug`                            | Controls how much structured log detail the application emits.                                                                                                                                                              |
+| `APP_ORIGIN`                         | `http://localhost:3000`            | Identifies the browser origin allowed to make cookie-authenticated write requests.                                                                                                                                          |
+| `TRUST_PROXY`                        | `false`                            | Trusts no reverse proxy locally; production must use the exact trusted proxy-hop count.                                                                                                                                     |
+| `REQUEST_BODY_LIMIT`                 | `10kb`                             | Rejects JSON request bodies larger than this amount.                                                                                                                                                                        |
+| `API_RATE_LIMIT`                     | `300`                              | Limits general API requests from one client during each rate-limit window.                                                                                                                                                  |
+| `AUTH_RATE_LIMIT`                    | `10`                               | Applies a stricter limit to sign-in starts, callbacks and confirmations during the same window.                                                                                                                             |
+| `RATE_LIMIT_WINDOW_MS`               | `900000` (15 minutes)              | Defines the time window, in milliseconds, for both request limits.                                                                                                                                                          |
+| `SESSION_DURATION_MS`                | `604800000` (7 days)               | Defines how long a signed-in server-side session remains valid.                                                                                                                                                             |
+| `METRICS_TOKEN`                      | unset                              | Bearer token required by `/metrics` (32+ characters); production returns 404 for `/metrics` while it is unset.                                                                                                              |
+| `AUTH0_ISSUER_BASE_URL`              | unset                              | Auth0 tenant or custom domain (`https://…`). Web service only; production refuses to start without the three Auth0 settings.                                                                                                |
+| `AUTH0_CLIENT_ID` / `..._SECRET`     | unset                              | The Regular Web Application's credentials. Locally, leave all Auth0 settings unset and use `npm run start:test-identity`.                                                                                                   |
+| `PRODUCTION_SERVICE`                 | unset                              | `true` only on the production web service: it refuses an `*.auth0.com` issuer and is the only service search engines may index. Every other deployment sends `X-Robots-Tag: noindex` and a `robots.txt` that disallows all. |
+| `REDIS_SECURITY_URL` / `...`         | unset                              | Optional shared Redis abuse controls (`REDIS_SECURITY_URL`, `REDIS_NAMESPACE`, `REDIS_KEY_SECRET`); production requires TLS.                                                                                                |
+| `POSTGRES_DB` / `POSTGRES_USER`      | project-specific                   | Name the local PostgreSQL database and its bootstrap administrator, separate from runtime.                                                                                                                                  |
+| `POSTGRES_PASSWORD`                  | `local-development-only`           | Authenticates the local PostgreSQL user; never reuse this example password outside local development.                                                                                                                       |
+| `POSTGRES_PORT`                      | `5433`                             | Exposes PostgreSQL on this host port while PostgreSQL continues to use port `5432` in its container.                                                                                                                        |
+| `DATABASE_URL`                       | project-specific PostgreSQL URL    | Gives Node.js a complete database connection string; it must use the dedicated `yaparena_runtime` login, never the owner/admin identity.                                                                                    |
+| `PROMETHEUS_PORT` / `GRAFANA_PORT`   | `9090` / `3001`                    | Expose the optional local monitoring interfaces on these host ports.                                                                                                                                                        |
+| `GRAFANA_ADMIN_USER` / `...PASSWORD` | `admin` / `local-development-only` | Provide local Grafana sign-in credentials; replace them in every nonlocal environment.                                                                                                                                      |
 
 See `.env.example` for local ports and monitoring settings, and the
 [operations runbook](docs/operations.md#release-and-deploy-an-image) for production values.
+Production runs at `https://yaparena.com` from [`render.production.yaml`](render.production.yaml), a
+Blueprint separate from staging's [`render.yaml`](render.yaml); the
+[production rollout](docs/production-rollout.md) lists every production variable and where its value
+comes from. `APP_ORIGIN` is exactly `https://yaparena.com` there, with no `www`.
 
 ## Logging
 

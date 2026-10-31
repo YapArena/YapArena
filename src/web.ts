@@ -16,13 +16,17 @@ import {
 } from "./platform/shared-abuse.ts";
 import { loadConfig } from "./platform/config.ts";
 import { createDatabase } from "./platform/database.ts";
+import { createJobHeartbeat } from "./platform/job-heartbeat.ts";
 import { createLogger } from "./platform/logger.ts";
+import { exitOnCrash } from "./platform/process-crash.ts";
+import { readLandingFont } from "./features/discovery/landing-font.ts";
 import { createRuntime } from "./platform/runtime.ts";
 import { createMetrics } from "./platform/metrics.ts";
 import { createCommunityStreams } from "./features/community/streams.ts";
 import { createServices } from "./services.ts";
 import { createUserStreams } from "./platform/user-streams.ts";
 import { RESULTS_CHANNEL } from "./features/account-wallet/debate-sandbox.ts";
+import { treasuryStatus } from "./features/account-wallet/treasury-monitor.ts";
 
 // Builds the web service. dist/server.js runs it for every deployment; the
 // local test identity entry under scripts/ wraps the same application.
@@ -111,7 +115,21 @@ export function createWebServer(
       })
     : undefined;
   const sharedLimits = abuseConfig && abuseStore;
+  // The licensed landing font comes from outside the public repository. If it
+  // is missing or invalid the site still runs and the headline uses Forum.
+  let landingFont: Buffer | undefined;
+  if (config.landingFontFile)
+    try {
+      landingFont = readLandingFont(config.landingFontFile);
+      logger.info({ bytes: landingFont.length }, "landing font loaded");
+    } catch (error) {
+      logger.warn(
+        { error },
+        "landing font unavailable; the headline falls back to Forum",
+      );
+    }
   const app = createApp({
+    landingFont,
     coinWebhook: config.coinSandboxWebhookSecret
       ? createSandboxWebhookRouter({
           database,
@@ -127,6 +145,8 @@ export function createWebServer(
           debates: coinDebates,
           operations: accountSecurity.operations,
           reports: createSandboxErrorReports(database, "simulation"),
+          transfersEnabled: config.coinSandboxTransfersEnabled,
+          manualRounds: !config.turnWindowsEnabled,
         }
       : undefined,
     turnWindows: config.turnWindowsEnabled ? coinDebates : undefined,
@@ -143,6 +163,7 @@ export function createWebServer(
     outlines,
     messages: createMessageRepository(database),
     database,
+    jobHeartbeat: createJobHeartbeat(database),
     a4,
     publicBots: createPublicBotRepository(database),
     discovery: createDiscoveryRepository(database),
@@ -163,6 +184,7 @@ export function createWebServer(
     sessions,
     logger,
     environment: config.environment,
+    productionService: config.productionService,
     homepageReferenceEnabled: config.homepageReferenceEnabled,
     applicationOrigin: config.applicationOrigin,
     trustProxy: config.trustProxy,
@@ -217,6 +239,13 @@ export function createWebServer(
       : undefined,
   });
 
+  if (coinDebates)
+    metrics.setCoinTreasuryProvider(async () =>
+      treasuryStatus(
+        await coinDebates.treasury(),
+        config.coinTreasuryAlertUsdc,
+      ),
+    );
   const runtime = createRuntime({
     ...services.background,
     app: wrap ? wrap(app, { ...services, config }) : app,
@@ -249,27 +278,30 @@ export function createWebServer(
   });
 }
 
-// Runs a web service until SIGTERM or SIGINT, then stops it within 10 seconds.
+// Runs a web service until SIGTERM, SIGINT or a crash, then stops it within 10
+// seconds; a crash also exits with status 1.
 export async function runWebServer(server: ReturnType<typeof createWebServer>) {
-  await server.start();
-  let shuttingDown = false;
-  async function shutdown(signal: string) {
-    if (shuttingDown) return;
-    shuttingDown = true;
-    server.logger.info({ signal }, "shutdown requested");
-    const forcedExit = setTimeout(() => {
-      server.logger.fatal("forced shutdown");
-      process.exit(1);
-    }, 10_000);
-    forcedExit.unref();
-    try {
-      await server.stop();
-      clearTimeout(forcedExit);
-    } catch (error) {
-      server.logger.error({ error }, "server shutdown failed");
-      process.exitCode = 1;
-    }
+  let stopping: Promise<void> | undefined;
+  function shutdown(signal: string) {
+    stopping ??= (async () => {
+      server.logger.info({ signal }, "shutdown requested");
+      const forcedExit = setTimeout(() => {
+        server.logger.fatal("forced shutdown");
+        process.exit(1);
+      }, 10_000);
+      forcedExit.unref();
+      try {
+        await server.stop();
+        clearTimeout(forcedExit);
+      } catch (error) {
+        server.logger.error({ error }, "server shutdown failed");
+        process.exitCode = 1;
+      }
+    })();
+    return stopping;
   }
+  exitOnCrash({ logger: server.logger, stop: () => shutdown("crash") });
+  await server.start();
   process.on("SIGTERM", () => void shutdown("SIGTERM"));
   process.on("SIGINT", () => void shutdown("SIGINT"));
 }

@@ -97,6 +97,7 @@ export async function verifyPublicBotsBrowser({
       handle: "shared-ui-" + randomUUID().slice(0, 8),
       displayName: "UI Test Participant",
       bio: "Synthetic local interface trial.",
+      acceptTerms: true,
     });
     const profile = await isolated.request.patch(base + "/api/me/profile", {
       data: { publicationState: "published" },
@@ -146,12 +147,17 @@ export async function verifyPublicBotsBrowser({
       "sharing this fixture must not publish the arena creator's other rounds",
     );
     checks.separateCreatorKeepsWorkspaceRoundsPrivate = true;
-    await home.goto(base + "/");
+    await home.goto(base + "/home");
     await watch.goto(base + "/debates/" + debateSlug);
+    // The chart is in the rail panel's Results tab (debate page direction BC1).
+    await watch.locator("#arena-tab-results").click();
     home.setDefaultTimeout(20000);
     watch.setDefaultTimeout(20000);
     await home.bringToFront();
-    const dismiss = home.getByRole("button", { name: "Not now", exact: true });
+    const dismiss = home.getByRole("button", {
+      name: "Reject all",
+      exact: true,
+    });
     if (await dismiss.isVisible()) await dismiss.click();
     await home.locator(`[data-trending="${topic}"]`).click();
     await watch
@@ -365,6 +371,7 @@ export async function verifyPublicBotsBrowser({
     const publicWatch = await anonymous.newPage();
     publicWatch.on("pageerror", (e) => errors.push(e.message));
     await publicWatch.goto(base + "/debates/" + debateSlug);
+    await publicWatch.locator("#arena-tab-results").click();
     await publicWatch.locator(`[data-chart-round="${mixed}"]`).waitFor();
     for (const selector of [
       "[data-inline-access]",

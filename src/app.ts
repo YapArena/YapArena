@@ -37,7 +37,10 @@ import { createEmailAuthSecurity } from "./platform/auth/browser-security.ts";
 import { SessionUnavailableError } from "./platform/auth/sessions.ts";
 
 import { createMessageRouter } from "./features/messages/router.ts";
-import { createDiscoveryRouter } from "./features/discovery/router.ts";
+import {
+  createDiscoveryRouter,
+  createPageSender,
+} from "./features/discovery/router.ts";
 import { createIdentityRouter } from "./features/identity/router.ts";
 import { createMatchingRouter } from "./features/matching/router.ts";
 import { createMatchmakingRouter } from "./features/matching/matchmaking-router.ts";
@@ -50,14 +53,20 @@ import {
   createMediaRouter,
   createMediaWebhookRouter,
 } from "./features/media/router.ts";
-import { renderUnavailable } from "./features/discovery/web.ts";
+import { renderNotFound, renderUnavailable } from "./features/discovery/web.ts";
 import { assetRevision } from "./features/discovery/assets.ts";
+import {
+  LANDING_FONT_PATH,
+  serveLandingFont,
+} from "./features/discovery/landing-font.ts";
 import {
   createAuthRouter,
   createRequireAuthentication,
+  createSessionCheck,
   type Auth0SignIn,
 } from "./platform/auth/router.ts";
 import { pingDatabase } from "./platform/database.ts";
+import { heartbeatStaleSeconds } from "./platform/job-heartbeat.ts";
 import { createHttpLogger } from "./platform/logger.ts";
 import {
   createMetrics,
@@ -73,6 +82,12 @@ import {
   createApiRateLimiter,
   createCsrfOriginProtection,
 } from "./platform/security.ts";
+import { createSearchIndexing } from "./platform/search-indexing.ts";
+
+// A browser asking for a page, not a script or API client asking for JSON.
+const wantsPage = (request: Request) =>
+  Boolean(request.headers?.accept?.includes("text/html")) &&
+  !request.path.startsWith("/api/");
 
 export const handleError: ErrorRequestHandler = (
   error: unknown,
@@ -100,10 +115,7 @@ export const handleError: ErrorRequestHandler = (
 
   request.log.error({ error }, "unhandled request error");
 
-  if (
-    request.headers?.accept?.includes("text/html") &&
-    !request.path.startsWith("/api/")
-  ) {
+  if (wantsPage(request)) {
     return response.status(500).type("html").send(renderUnavailable());
   }
 
@@ -115,6 +127,7 @@ export const handleError: ErrorRequestHandler = (
 export function createApp({
   messages,
   database,
+  jobHeartbeat,
   a4,
   discovery,
   identity,
@@ -132,7 +145,9 @@ export function createApp({
   sessions,
   logger,
   environment = "development",
+  productionService = false,
   homepageReferenceEnabled = false,
+  landingFont,
   publicBots,
   metrics = createMetrics(),
   metricsToken,
@@ -160,6 +175,8 @@ export function createApp({
   messages: ReturnType<typeof createMessageRepository>;
   // Readiness pings this pool. Without it the service reports not ready.
   database?: Pick<Pool, "query">;
+  // Mounts /ready/jobs, which reports whether the jobs worker is beating.
+  jobHeartbeat?: { age(): Promise<number | null> };
   a4?: ReturnType<typeof createA4Repository>;
   discovery?: ReturnType<typeof createDiscoveryRepository>;
   identity?: ReturnType<typeof createIdentityRepository>;
@@ -184,7 +201,11 @@ export function createApp({
   sessions: ReturnType<typeof createSessionRepository>;
   logger: Logger;
   environment?: string;
+  // PRODUCTION_SERVICE=true: the one deployment search engines may index.
+  productionService?: boolean;
   homepageReferenceEnabled?: boolean;
+  // The licensed landing headline font, read from LANDING_FONT_FILE at startup.
+  landingFont?: Buffer;
   publicBots?: ReturnType<typeof createPublicBotRepository>;
   metrics?: ReturnType<typeof createMetrics>;
   metricsToken?: string;
@@ -209,7 +230,12 @@ export function createApp({
   accountWallet?: ReturnType<typeof createAccountWallet>;
   coinSandbox?: Pick<
     Parameters<typeof createCoinSandboxRouter>[0],
-    "sandbox" | "debates" | "operations" | "reports"
+    | "sandbox"
+    | "debates"
+    | "operations"
+    | "reports"
+    | "transfersEnabled"
+    | "manualRounds"
   >;
   coinWebhook?: RequestHandler;
   // Decision 0012: public turn-window timing, mounted only when enabled.
@@ -282,6 +308,8 @@ export function createApp({
           : undefined,
       ),
     );
+  // Before every route and limiter, so 404s, 429s and errors carry the header.
+  app.use(createSearchIndexing({ productionService, applicationOrigin }));
   // The transcriber agent's private ingest has its own per-debate limit.
   const internalIngest = (request: Request) =>
     request.path.startsWith("/api/internal/transcription/");
@@ -369,12 +397,38 @@ export function createApp({
     }
   });
 
+  // For the uptime alert on the jobs worker. Kept apart from /ready, the web
+  // health check, so a stopped worker never takes web out of service. Like
+  // /ready it is public and says only whether jobs run.
+  if (jobHeartbeat)
+    app.get("/ready/jobs", async (request, response) => {
+      response.set("Cache-Control", "no-store");
+      try {
+        const age = await jobHeartbeat.age();
+        const ageSeconds = age === null ? null : Math.max(0, Math.round(age));
+        if (ageSeconds !== null && ageSeconds <= heartbeatStaleSeconds)
+          return response.json({ status: "ok", ageSeconds });
+        return response.status(503).json({ status: "stale", ageSeconds });
+      } catch (error) {
+        request.log.error({ error }, "jobs heartbeat check failed");
+        return response.status(503).json({ status: "unknown" });
+      }
+    });
+
   app.get(
     "/metrics",
     createMetricsAuthorization({ token: metricsToken, environment }),
     metrics.handler,
   );
 
+  const origin = (applicationOrigin ?? "http://localhost:3000").replace(
+    /\/$/,
+    "",
+  );
+  const pageFlags = {
+    emailFirst: true,
+    matchmakingEnabled: Boolean(matchmaking && identity),
+  };
   const recordProductAction = measurement
     ? createProductActionRecorder({ measurement, environment })
     : undefined;
@@ -386,6 +440,12 @@ export function createApp({
         .sendFile(fileURLToPath(new URL("../public/sw.js", import.meta.url)));
     });
     const assetRoot = fileURLToPath(new URL("../public", import.meta.url));
+    // Browsers request /favicon.ico from the root even without a link to it.
+    app.get("/favicon.ico", (_request, response) => {
+      response
+        .set("Cache-Control", "public, max-age=86400")
+        .sendFile("icons/favicon.ico", { root: assetRoot });
+    });
     const assets = express.static(assetRoot, { maxAge: 0 });
     // Only the current revision is immutable: a stale ?v= from another
     // deploy must not pin this build's content under an old URL.
@@ -396,6 +456,9 @@ export function createApp({
     // Shared ESM chunks are imported without ?v=; their names carry an esbuild
     // content hash, so a changed chunk always gets a new URL.
     const hashedChunk = /^\/chunks\/[\w-]+-[A-Z2-7]{8}\.js$/;
+    // The licensed font is not in the public repository; when the deployment
+    // supplies it, serve it at the URL the landing page already uses.
+    if (landingFont) app.get(LANDING_FONT_PATH, serveLandingFont(landingFont));
     app.use("/assets", (request, response, next) =>
       (request.query.v === assetRevision && request.path !== "/offline.html") ||
       hashedChunk.test(request.path)
@@ -411,8 +474,8 @@ export function createApp({
         a4Enabled: a4?.mode !== undefined && a4.mode !== "disabled",
         mediaEnabled: Boolean(media && mediaProvider && matching && identity),
         applicationOrigin: applicationOrigin ?? "http://localhost:3000",
-        emailFirst: true,
-        matchmakingEnabled: Boolean(matchmaking && identity),
+        ...pageFlags,
+        signedIn: createSessionCheck({ sessions, environment }),
         liveOutline: outlines
           ? { snapshot: (id: string) => outlines.snapshot(id) }
           : undefined,
@@ -475,8 +538,11 @@ export function createApp({
         response
           .set("Cache-Control", "private, no-store")
           .set("Vary", "Cookie");
+        // While Yap Coins run on the coin sandbox, the live ledger holds
+        // nothing in phase 1 (founder D2); browsers read the sandbox summary
+        // instead, so this reports itself off rather than showing zeros.
         return response.json({
-          enabled: Boolean(auth0),
+          enabled: Boolean(auth0) && !coinSandbox,
           withdrawalsEnabled: false,
           ...(await accountWallet.balances(request.user!.id)),
         });
@@ -585,7 +651,11 @@ export function createApp({
     );
   }
 
-  app.use((_request, response) => {
+  // Browsers get the styled page when the site's pages and assets are served.
+  const sendPage = discovery ? createPageSender(pageFlags) : undefined;
+  app.use((request, response) => {
+    if (sendPage && wantsPage(request))
+      return sendPage(response, renderNotFound(origin), 404);
     response.status(404).json({
       error: "resource not found",
     });

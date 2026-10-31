@@ -123,6 +123,25 @@ export function createRequireAuthentication({
   };
 }
 
+// For public pages that differ for a signed-in reader, such as the landing
+// page at /. A missing, revoked or expired session is simply not signed in.
+export function createSessionCheck({
+  sessions,
+  environment,
+}: {
+  sessions: ReturnType<typeof createSessionRepository>;
+  environment: string;
+}) {
+  const cookie = getCookieSettings(environment);
+  return async function signedIn(request: Request) {
+    const token: unknown = request.cookies[cookie.name];
+    if (typeof token !== "string") return false;
+    return (
+      (await sessions.findUserByTokenHash(hashSessionToken(token))) !== null
+    );
+  };
+}
+
 export function createAuthRouter({
   sessions,
   environment,
@@ -221,7 +240,7 @@ export function createAuthRouter({
 
   router.get("/login", authLimiter, async (request, response) => {
     const returnPath =
-      safeReturnPath(request.query.return, applicationOrigin) ?? "/";
+      safeReturnPath(request.query.return, applicationOrigin) ?? "/home";
     if (!auth0) return problem(response, 503, unavailablePage(returnPath));
     const connection = request.query.connection;
     if (
@@ -339,7 +358,7 @@ export function createAuthRouter({
         message:
           "This sign-in expired or was already used, so nothing changed. Start again.",
         back: "/",
-        retry: signInLink("/"),
+        retry: signInLink("/home"),
       });
     }
     const back = transaction.returnPath;

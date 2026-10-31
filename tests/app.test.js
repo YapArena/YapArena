@@ -270,6 +270,42 @@ describe("yaparena API", () => {
     assert.equal(unconfigured.status, 503);
   });
 
+  it("reports whether the jobs worker is beating, apart from readiness", async () => {
+    const jobsApp = (age) =>
+      createApp({
+        messages,
+        database,
+        users,
+        sessions,
+        logger,
+        jobHeartbeat: { age },
+      });
+    for (const [age, status, body] of [
+      [async () => 7.4, 200, { status: "ok", ageSeconds: 7 }],
+      [async () => 60, 200, { status: "ok", ageSeconds: 60 }],
+      [async () => 61, 503, { status: "stale", ageSeconds: 61 }],
+      [async () => -0.2, 200, { status: "ok", ageSeconds: 0 }],
+      [async () => null, 503, { status: "stale", ageSeconds: null }],
+      [
+        async () => {
+          throw new Error("database unavailable");
+        },
+        503,
+        { status: "unknown" },
+      ],
+    ]) {
+      const response = await request(jobsApp(age)).get("/ready/jobs");
+      assert.equal(response.status, status);
+      assert.deepEqual(response.body, body);
+      assert.equal(response.headers["cache-control"], "no-store");
+    }
+    // A stopped worker never makes web itself report not ready.
+    const ready = await request(jobsApp(async () => null)).get("/ready");
+    assert.equal(ready.status, 200);
+    const unmounted = await request(app).get("/ready/jobs");
+    assert.equal(unmounted.status, 404);
+  });
+
   it("preserves an incoming request ID", async () => {
     const response = await request(app)
       .get("/health")

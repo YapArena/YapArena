@@ -33,6 +33,12 @@ export interface NotificationItem {
   createdAt: Date;
 }
 
+export interface TermsAcceptance {
+  termsVersion: string;
+  minimumAge: number;
+  acceptedAt: Date;
+}
+
 type ActivityRow = Omit<ActivityItem, "label"> & { subject: string | null };
 
 function page<T>(rows: T[], limit: number, offset: number) {
@@ -72,17 +78,27 @@ export function createIdentityRepository(database: Pool) {
       return result.rows[0] ?? null;
     },
 
+    // The handle pop-up passes the terms the account accepted. One statement
+    // records both, so a profile created there always has its acceptance.
     async createProfile(
       userId: string,
       handle: string,
       displayName: string,
       bio: string | null,
       publicationState: "draft" | "published" = "draft",
+      terms?: { version: string; minimumAge: number },
     ) {
+      const insert = `INSERT INTO public_profiles (user_id, handle, display_name, bio, publication_state)
+         VALUES ($1, $2, $3, $4, $5) RETURNING ${profileFields}`;
+      const values = [userId, handle, displayName, bio, publicationState];
       const result = await database.query<OwnedProfile>(
-        `INSERT INTO public_profiles (user_id, handle, display_name, bio, publication_state)
-         VALUES ($1, $2, $3, $4, $5) RETURNING ${profileFields}`,
-        [userId, handle, displayName, bio, publicationState],
+        terms
+          ? `WITH accepted AS (
+               INSERT INTO terms_acceptances (user_id, terms_version, minimum_age)
+               VALUES ($1, $6, $7) ON CONFLICT (user_id, terms_version) DO NOTHING
+             ) ${insert}`
+          : insert,
+        terms ? [...values, terms.version, terms.minimumAge] : values,
       );
       if (!result.rows[0]) throw new Error("created profile was not returned");
       return result.rows[0];
@@ -281,6 +297,14 @@ export function createIdentityRepository(database: Pool) {
           }),
         ),
         notifications: notifications.rows,
+        termsAcceptances: (
+          await database.query<TermsAcceptance>(
+            `SELECT terms_version AS "termsVersion", minimum_age AS "minimumAge",
+               accepted_at AS "acceptedAt"
+             FROM terms_acceptances WHERE user_id = $1 ORDER BY accepted_at DESC`,
+            [userId],
+          )
+        ).rows,
       };
     },
 

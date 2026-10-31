@@ -1,6 +1,10 @@
 import type { Pool } from "pg";
 import { createA4Repository } from "./features/a4/repository.ts";
 import { createCoinDebateSandbox } from "./features/account-wallet/debate-sandbox.ts";
+import {
+  createLiveDebateMonitor,
+  createTreasuryMonitor,
+} from "./features/account-wallet/treasury-monitor.ts";
 import { createIdentityRepository } from "./features/identity/repository.ts";
 import { createMatchingRepository } from "./features/matching/repository.ts";
 import { createMatchmaking } from "./features/matching/matchmaking.ts";
@@ -28,6 +32,7 @@ import type { loadConfig } from "./platform/config.ts";
 import type { createLogger } from "./platform/logger.ts";
 import type { createMetrics } from "./platform/metrics.ts";
 import { verifyDatabaseState } from "./platform/migrations.ts";
+import { createJobHeartbeat } from "./platform/job-heartbeat.ts";
 import { createRuntime } from "./platform/runtime.ts";
 
 type ServiceOptions = {
@@ -182,6 +187,7 @@ export function createServices({
   const coinDebates = config.coinSandboxEnabled
     ? createCoinDebateSandbox(database, "simulation", {
         turnWindows: config.turnWindowsEnabled,
+        logger,
       })
     : undefined;
 
@@ -211,6 +217,9 @@ export function createServices({
     background: {
       a4,
       coinDebates,
+      coinTreasury: coinDebates
+        ? coinMonitor(coinDebates, config.coinTreasuryAlertUsdc, logger)
+        : undefined,
       transcription:
         transcription && transcriber && outlines
           ? {
@@ -248,9 +257,33 @@ export function createServices({
           database,
           new URL("../migrations", import.meta.url),
         ),
+      heartbeat: createJobHeartbeat(database),
     },
     close() {
       abuseStore?.close();
+    },
+  });
+}
+
+// The worker's once-a-minute Yap Coins check: low treasuries (founder D1)
+// and debates stuck in live past their maximum duration.
+function coinMonitor(
+  coinDebates: ReturnType<typeof createCoinDebateSandbox>,
+  thresholdUsdc: number,
+  logger: { warn(details: object, message: string): void },
+) {
+  const treasury = createTreasuryMonitor({
+    read: () => coinDebates.treasury(),
+    thresholdUsdc,
+    logger,
+  });
+  const live = createLiveDebateMonitor({
+    read: () => coinDebates.overdueLive(),
+    logger,
+  });
+  return Object.freeze({
+    async check() {
+      await Promise.all([treasury.check(), live.check()]);
     },
   });
 }

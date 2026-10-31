@@ -29,7 +29,8 @@ async function check(path: string, expectedStatus: number, includes: string) {
 const results = [];
 for (const [path, status, text] of [
   ["/ready", 200, '"ready"'],
-  ["/", 200, "YAP ARENA"],
+  ["/", 200, "Join the arena."],
+  ["/home", 200, "YAP ARENA"],
   ["/debates", 200, "Debates"],
   ["/assets/measurement.js", 200, "measurement"],
   ["/api/measurement/consent", 200, '"consented":false'],

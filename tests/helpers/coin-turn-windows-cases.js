@@ -18,6 +18,15 @@ import { attachSubject, openSandbox } from "./confirmations.js";
 // fixtures hold account locks before waiting for the transition lock. Other
 // PostgreSQL suites share the database in parallel, so window opening and
 // voiding stay scoped to this file's own debates.
+// Behaviour cases hold locks on purpose, sometimes for seconds, while other
+// PostgreSQL suites run in parallel; they relax the sandbox's lock and
+// statement timeouts. Dedicated cases check the real limits.
+const relaxed = {
+  limits: {
+    request: { lockTimeoutMs: 60_000, statementTimeoutMs: 120_000 },
+    worker: { lockTimeoutMs: 60_000, statementTimeoutMs: 120_000 },
+  },
+};
 const ownerUrl = process.env.A4_TEST_OWNER_URL,
   runtimeUrl = process.env.A4_TEST_DATABASE_URL;
 describe(
@@ -42,9 +51,10 @@ describe(
         rail: "simulation",
       });
       windows = createCoinDebateSandbox(runtime, "simulation", {
+        ...relaxed,
         turnWindows: true,
       });
-      manual = createCoinDebateSandbox(runtime, "simulation");
+      manual = createCoinDebateSandbox(runtime, "simulation", relaxed);
       topicId = (
         await owner.query(
           "INSERT INTO topics(slug,title,summary,side_a_label,side_b_label,publication_state) VALUES($1,'Turn windows','Synthetic turn window fixture','Support','Oppose','published') RETURNING id",
@@ -276,9 +286,16 @@ describe(
     it("returns the current turn's window to manual creation during a live debate", async () => {
       const context = await actor(),
         debateId = await liveDebate({ status: "ready" });
-      // A five-minute round opened before the debate went live keeps its own
-      // series and does not hold back the turn windows.
-      const early = await windows.create(context, debateId, randomUUID());
+      // Decision 0013 (founder D5): with turn windows, nothing opens before
+      // the debate is live, so nobody stakes before a scheduled start.
+      await assert.rejects(
+        windows.create(context, debateId, randomUUID()),
+        (error) => error.code === "window_closed" && error.status === 409,
+      );
+      assert.equal((await rounds(debateId)).length, 0);
+      // A five-minute round opened without the flag (an earlier release)
+      // keeps its own series and does not hold back the turn windows.
+      const early = await manual.create(context, debateId, randomUUID());
       assert.equal(early.created, true);
       await owner.query("UPDATE debates SET status='live' WHERE id=$1", [
         debateId,
@@ -766,9 +783,10 @@ describe(
       const [untimedView] = await windows.view(viewer, untimed);
       assert.equal(untimedView.recording, null);
       assert.equal(untimedView.eligibility.reason, "closed");
+      // Its own refusal, not the five-day rule (audit item 9).
       await assert.rejects(
         windows.submit(viewer, untimedWindow.id, randomUUID(), order(1)),
-        /only by a five-day debate's turn windows/,
+        (error) => error.code === "replay_untimed" && error.status === 409,
       );
       await assert.rejects(
         windows.submit(viewer, untimedWindow.id, randomUUID(), {
@@ -777,6 +795,124 @@ describe(
         }),
         /invalid replay position/,
       );
+    });
+
+    // PR 2 (audit item 9): an operator who ends a debate early closes its
+    // open window to live orders, before the turn's own cutoff.
+    it("refuses live orders once the debate is no longer live", async () => {
+      const viewer = await funded(),
+        debateId = await liveDebate();
+      await windows.openTurnWindows(20, [debateId]);
+      const [window] = await rounds(debateId);
+      await owner.query(
+        "UPDATE debates SET status='ended',live_ended_at=clock_timestamp() WHERE id=$1",
+        [debateId],
+      );
+      await assert.rejects(
+        windows.submit(viewer, window.id, randomUUID(), order(1)),
+        (error) => error.code === "window_closed" && error.status === 409,
+      );
+      const [view] = await windows.view(viewer, debateId);
+      assert.equal(view.eligibility.reason, "closed");
+      assert.equal(
+        (
+          await owner.query(
+            "SELECT count(*)::int n FROM coin_debate_orders WHERE round_id=$1",
+            [window.id],
+          )
+        ).rows[0].n,
+        0,
+      );
+      await owner.query("UPDATE debates SET status='cancelled' WHERE id=$1", [
+        debateId,
+      ]);
+      await windows.voidUnavailable(20, [debateId]);
+    });
+
+    it("names debates stuck in live past their maximum duration", async () => {
+      const stuck = await liveDebate(),
+        recent = await liveDebate();
+      // The fixture's maximum is 600 seconds; 30 minutes of grace follow.
+      await owner.query(
+        "UPDATE debates SET live_started_at=clock_timestamp()-INTERVAL '41 minutes' WHERE id=$1",
+        [stuck],
+      );
+      const overdue = (await windows.overdueLive()).map((row) => row.debateId);
+      assert.ok(overdue.includes(stuck));
+      assert.ok(!overdue.includes(recent));
+      const row = (await windows.overdueLive()).find(
+        (entry) => entry.debateId === stuck,
+      );
+      assert.equal(row.maximumSeconds, 600);
+      for (const id of [stuck, recent])
+        await owner.query("UPDATE debates SET status='cancelled' WHERE id=$1", [
+          id,
+        ]);
+    });
+
+    // PR 2: a round larger than a batch settles over several batches, in
+    // smaller ones while a live window is in its final seconds, and is
+    // revealed only by the last one.
+    it("settles a large round over several batches and reveals it with the last", async () => {
+      const quiet = createCoinDebateSandbox(runtime, "simulation", {
+        ...relaxed,
+        settlement: { orders: 300, quietOrders: 1, quietSeconds: 15 },
+      });
+      const one = await funded(),
+        two = await funded();
+      const debateId = await liveDebate();
+      await windows.openTurnWindows(20, [debateId]);
+      const [window] = await rounds(debateId);
+      for (const viewer of [one, two])
+        await windows.submit(viewer, window.id, randomUUID(), order());
+      // A second live debate's window closes within 15 seconds: quiet.
+      const closing = await liveDebate({ deadline: "10 seconds" });
+      await windows.openTurnWindows(20, [closing]);
+      await close(window.id);
+      const progress = async () =>
+        (
+          await owner.query(
+            `SELECT r.state,count(*) FILTER (WHERE q.status='settled')::int AS settled
+            FROM coin_debate_rounds r JOIN coin_debate_orders o ON o.round_id=r.id
+            JOIN coin_sandbox_requests q ON q.id=o.request_id WHERE r.id=$1 GROUP BY r.state`,
+            [window.id],
+          )
+        ).rows[0];
+      // Batches of one order: other suites' due rounds may come first.
+      for (
+        let attempt = 0;
+        attempt < 20 && (await progress()).settled === 0;
+        attempt++
+      )
+        await quiet.advance(20);
+      assert.deepEqual(await progress(), { state: "open", settled: 1 });
+      // Part-way through settlement, it can no longer be voided.
+      await assert.rejects(
+        createCoinDebateSandbox(owner, "simulation").voidRound(
+          window.id,
+          "operator_cancelled",
+        ),
+        /settlement has started/,
+      );
+      // Once no window of ours is closing, the last batch reveals it.
+      for (const id of [closing, debateId])
+        await owner.query(
+          "UPDATE debates SET status='ended',live_ended_at=clock_timestamp() WHERE id=$1",
+          [id],
+        );
+      for (
+        let attempt = 0;
+        attempt < 20 && (await progress()).state === "open";
+        attempt++
+      ) {
+        // Other suites' live windows can make it quiet for a few seconds.
+        await quiet.advance(20);
+        await owner.query("SELECT pg_sleep(0.5)");
+      }
+      assert.deepEqual(await progress(), { state: "settled", settled: 2 });
+      const [view] = await windows.view(one, debateId);
+      assert.equal(view.state, "settled");
+      assert.ok(view.outcome);
     });
   },
 );

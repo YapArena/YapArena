@@ -82,7 +82,7 @@ it("adapts public topics/debates without manufacturing market histories or argum
   assert.ok(!html.includes("A real <question>"));
   assert.ok(!html.includes('class="ya-heading"'));
   assert.ok(html.includes('href="#main"'));
-  assert.ok(html.includes('rel="canonical" href="https://arena.example/"'));
+  assert.ok(html.includes('rel="canonical" href="https://arena.example/home"'));
   assert.ok(html.includes("data-header-balance"));
   assert.ok(html.includes("measurement.js?v="));
   assert.ok(
@@ -107,15 +107,25 @@ it("gates reference data explicitly and never falls back to it on a real request
         applicationOrigin: "https://arena.example",
       }),
     );
-  assert.equal((await request(app(false)).get("/?reference=1")).status, 404);
-  assert.equal((await request(app(true)).get("/?reference=yes")).status, 404);
-  const demo = await request(app(true)).get("/?reference=1");
+  assert.equal(
+    (await request(app(false)).get("/home?reference=1")).status,
+    404,
+  );
+  assert.equal(
+    (await request(app(true)).get("/home?reference=yes")).status,
+    404,
+  );
+  const demo = await request(app(true)).get("/home?reference=1");
   assert.equal(demo.status, 200);
   assert.equal(demo.headers["cache-control"], "no-store");
   assert.ok(demo.text.includes("Concept · Sample data"));
   assert.ok(demo.text.includes("68%"));
   assert.ok(!demo.text.includes("measurement.js"));
-  const failed = await request(app(true)).get("/");
+  // The reference view moved with the homepage; / is the landing page.
+  assert.ok(
+    !(await request(app(true)).get("/?reference=1")).text.includes("68%"),
+  );
+  const failed = await request(app(true)).get("/home");
   assert.equal(failed.status, 503);
   assert.ok(failed.text.includes("Discovery temporarily unavailable"));
   assert.ok(!failed.text.includes("68%"));

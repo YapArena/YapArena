@@ -9,7 +9,9 @@ import { debaterLanguages, type DebaterLanguage } from "./protocol.ts";
 
 // Bump when the consent wording on the account page changes: an older
 // consent no longer counts, and the debater is asked again.
-export const DEBATER_CONSENT_VERSION = "2026-10-25";
+// 2026-10-30: the wording adds video recording, public replay and the
+// providers (Deepgram or ElevenLabs, and Anthropic).
+export const DEBATER_CONSENT_VERSION = "2026-10-30";
 
 export interface DebaterSettings {
   language: DebaterLanguage | null;
@@ -27,7 +29,7 @@ export class DebaterSettingsRequiredError extends Error {
   readonly code = "debater_settings_required";
   constructor(readonly missing: ("language" | "consent")[]) {
     super(
-      "Choose your debate language and agree to transcription and the public AI outline in your account settings.",
+      "Choose your debate language and agree to recording, transcription and the public AI outline in your account settings.",
     );
   }
 }

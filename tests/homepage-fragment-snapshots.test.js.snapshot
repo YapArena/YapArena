@@ -2985,7 +2985,7 @@ exports[`renders the shared homepage fragments 18`] = `
 </div>
 </section>\\n    <footer class="ya-footer footer-inner">
 <span>Endorsement = share of participants choosing YES in the latest closed round.</span>
-<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a>
+<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </footer>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
 <strong>
@@ -4141,7 +4141,7 @@ exports[`renders the shared homepage fragments 22`] = `
 </div>
 </section>\\n    <footer class="ya-footer footer-inner">
 <span>Endorsement = share of participants choosing YES in the latest closed round.</span>
-<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a>
+<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </footer>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
 <strong>
@@ -4404,7 +4404,7 @@ exports[`renders the shared homepage fragments 26`] = `
 </div>
 </section>\\n    <footer class="ya-footer footer-inner">
 <span>Endorsement = share of participants choosing YES in the latest closed round.</span>
-<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a>
+<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </footer>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
 <strong>
@@ -5604,7 +5604,7 @@ exports[`renders the shared homepage fragments 30`] = `
 </div>
 </section>\\n    <footer class="ya-footer footer-inner">
 <span>Endorsement = share of participants choosing YES in the latest closed round.</span>
-<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a>
+<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </footer>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
 <strong>

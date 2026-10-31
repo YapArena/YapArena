@@ -1,4 +1,6 @@
 import { api as request, apiFetch } from "./lib/api.js";
+import { formatCoins, formatSignedCoins } from "./lib/coin-format.js";
+import { features, held, type CoinFeatures } from "./lib/coins.js";
 
 interface CoinRequest {
   id: string;
@@ -14,6 +16,15 @@ interface CoinSummary {
   opened: boolean;
   initialized: boolean;
   financialReviewRequired: boolean;
+  features?: CoinFeatures;
+  book: {
+    grants: {
+      id: string;
+      kind: "welcome" | "daily";
+      createdAt: string;
+      principal: string;
+    }[];
+  };
   projection: {
     grantPrincipal: string;
     grantProfit: string;
@@ -34,9 +45,31 @@ interface CoinSummary {
     reserved: string;
     pending: string;
     promotionalPrincipal: string;
+    promotionalReserved: string;
   };
   requests: CoinRequest[];
 }
+// One revealed or voided position, from GET /api/coin-sandbox/results.
+interface CoinResult {
+  roundId: string;
+  slug: string;
+  proposition: string;
+  turnNumber: number | null;
+  state: "settled" | "void";
+  side: "YES" | "NO";
+  quantity: number;
+  outcome: { status: string; net: string } | null;
+  revealedAt: string;
+}
+// The grant day, as the server counts it: the calendar day in Toronto.
+const torontoDay = (at: Date) =>
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Toronto",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(at);
+const nextClaim = "next claim after midnight Toronto time";
 // A debate round: a speaking turn's window during a live debate, otherwise a
 // manual round. Its eligibility says whether this account can still answer.
 interface CoinRound {
@@ -170,14 +203,7 @@ const usdc = (value: string) => {
       .replace(/0+$/, "") || "0"
   } USDC`;
 };
-const yc = (value: string) => {
-  const n = BigInt(value),
-    a = n < 0n ? -n : n;
-  const fraction = String(a % 10_000n)
-    .padStart(4, "0")
-    .replace(/0+$/, "");
-  return `${n < 0n ? "−" : ""}${a / 10_000n}${fraction ? `.${fraction}` : ""} YC`;
-};
+const yc = (value: string) => formatCoins(value);
 function amount(value: string) {
   if (!/^(0|[1-9][0-9]{0,20})(\.\d{1,6})?$/.test(value))
     throw new Error("Enter an amount with at most six decimal places.");
@@ -190,15 +216,19 @@ if (container) {
   const root = document.createElement("section");
   root.id = "coin-sandbox";
   root.hidden = true;
-  root.innerHTML = `<h3>Coin sandbox</h3><p class="form-note">Simulated funds. No cash value. These balances are separate from historical play coins and live funds.</p>
-    <p data-coin-notice role="status" aria-live="polite" aria-atomic="true"></p><dl class="account-balances" data-coin-balances></dl>
+  // Founder D3/D5: purchases, withdrawals, their error reports and manual
+  // rounds appear only when the server offers them (summary.features).
+  root.innerHTML = `<p data-coin-notice role="status" aria-live="polite" aria-atomic="true"></p>
+    <div class="coin-claim"><button type="button" class="button-secondary" data-coin-daily>Claim today’s 500 YC</button><p class="form-note" data-coin-claim-status role="status" aria-live="polite"></p></div>
+    <h3 class="coin-section-title">Grants</h3><ul class="account-list" data-coin-grants></ul>
+    <h3 class="coin-section-title">History</h3><p class="form-note" data-coin-open-positions></p><ul class="account-list" data-coin-history></ul>
+    <div data-coin-transfers hidden><h3 class="coin-section-title">Simulated purchases and withdrawals</h3><p class="form-note">This deployment simulates buying and withdrawing for testing. No real money moves.</p><dl class="account-balances" data-coin-balances></dl>
     <button type="button" class="button-secondary" data-coin-refresh>Refresh sandbox</button>
-    <button type="button" class="button-secondary" data-coin-daily>Claim daily 500 YC</button><ul class="account-list" data-coin-grants></ul>
-    <details class="account-details"><summary>Simulate a purchase</summary><form class="stack-form" data-coin-funding><label>Test USDC amount<input name="amount" inputmode="decimal" value="10" required autocomplete="off"></label><p>Fixed simulation: 1 test USDC buys 100 YC. No crypto is sent and no provider conversion is performed.</p><button class="button" type="submit">Get simulated quote</button></form></details>
+    <details class="account-details"><summary>Simulate a purchase</summary><form class="stack-form" data-coin-funding><label>Test USDC amount<input name="amount" inputmode="decimal" value="10" required autocomplete="off"></label><p>Fixed simulation: 1 test USDC buys 100 YC, up to 1,000 USDC at a time. No crypto is sent and no provider conversion is performed.</p><button class="button" type="submit">Get simulated quote</button></form></details>
     <details class="account-details"><summary>Request a simulated withdrawal</summary><form class="stack-form" data-coin-withdraw><label>Total to deduct (USDC)<input name="gross" inputmode="decimal" value="5" required autocomplete="off"></label><label>External wallet destination<input name="destination" maxlength="200" required autocomplete="off" spellcheck="false"></label><p>Minimum deduction: 5 USDC. The displayed fee comes out of that amount. No daily cap. Purchased funds need no profit target; only grant profits have qualification rules.</p><p>Manual review target: two business days (Toronto weekdays, excluding Canadian federal holidays). Network confirmation time is additional. Pending funds stay reserved.</p><button class="button" type="submit">Review amount and network fee</button></form></details>
-    <details class="account-details"><summary>Join a YES/NO debate with sandbox coins</summary><label>Existing debate<select data-coin-debate></select></label><button type="button" class="button-secondary" data-coin-open>Open or join the current round</button><div data-coin-rounds></div><form class="stack-form" data-coin-participate hidden><label>Position<select name="side"><option value="YES">YES</option><option value="NO">NO</option></select></label><label>Maximum purchase price per YC (0–1)<input name="ceiling" inputmode="decimal" value="0.5" required></label><label>Quantity (1–100)<input name="quantity" type="number" min="1" max="100" value="1" required></label><p>The first commitment is final. Oldest grants are used first. A4 uses the existing YES/NO mechanism; participation is not a bet on an externally judged winner.</p><button class="button" type="submit">Review and commit participation</button></form></details>
     <h4>Sandbox receipts</h4><ul class="account-list" data-coin-receipts></ul>
-    <details class="account-details"><summary>Report a deposit or payout error</summary><p>Reports have no submission deadline. Include the receipt ID and explain what went wrong. Do not include passwords, verification codes or private keys. Ordinary trading losses are final.</p><form class="stack-form" data-coin-report><label>Receipt ID<input name="requestId" required maxlength="36" autocomplete="off" spellcheck="false"></label><label>What happened?<textarea name="description" required maxlength="2000" rows="4"></textarea></label><button class="button-secondary" type="submit">Submit error report</button></form><p data-coin-report-notice role="status" aria-live="polite" aria-atomic="true"></p><ul class="account-list" data-coin-reports></ul></details>`;
+    <details class="account-details"><summary>Report a deposit or payout error</summary><p>Reports have no submission deadline. Include the receipt ID and explain what went wrong. Do not include passwords, verification codes or private keys. Ordinary trading losses are final.</p><form class="stack-form" data-coin-report><label>Receipt ID<input name="requestId" required maxlength="36" autocomplete="off" spellcheck="false"></label><label>What happened?<textarea name="description" required maxlength="2000" rows="4"></textarea></label><button class="button-secondary" type="submit">Submit error report</button></form><p data-coin-report-notice role="status" aria-live="polite" aria-atomic="true"></p><ul class="account-list" data-coin-reports></ul></details></div>
+    <details class="account-details" data-coin-manual hidden><summary>Join a YES/NO debate with sandbox coins</summary><label>Existing debate<select data-coin-debate></select></label><button type="button" class="button-secondary" data-coin-open>Open or join the current round</button><div data-coin-rounds></div><form class="stack-form" data-coin-participate hidden><label>Position<select name="side"><option value="YES">YES</option><option value="NO">NO</option></select></label><label>Maximum purchase price per YC (0–1)<input name="ceiling" inputmode="decimal" value="0.5" required></label><label>Quantity (1–100)<input name="quantity" type="number" min="1" max="100" value="1" required></label><p>The first commitment is final. Oldest grants are used first. Positions are Yes or No answers to the debate’s question; nobody is judged the winner.</p><button class="button" type="submit">Review and commit participation</button></form></details>`;
   container.append(root);
   const select = <T extends Element>(selector: string) =>
     root.querySelector<T>(selector)!;
@@ -212,12 +242,18 @@ if (container) {
   const funding = select<HTMLFormElement>("[data-coin-funding]"),
     withdraw = select<HTMLFormElement>("[data-coin-withdraw]"),
     participation = select<HTMLFormElement>("[data-coin-participate]"),
-    debate = select<HTMLSelectElement>("[data-coin-debate]");
+    debate = select<HTMLSelectElement>("[data-coin-debate]"),
+    transfers = select<HTMLElement>("[data-coin-transfers]"),
+    manual = select<HTMLElement>("[data-coin-manual]"),
+    claimStatus = select<HTMLElement>("[data-coin-claim-status]"),
+    historyList = select<HTMLElement>("[data-coin-history]"),
+    openPositions = select<HTMLElement>("[data-coin-open-positions]");
   reportNotice.tabIndex = -1;
   let version = 0,
     busy = false,
     roundId: string | null = null,
-    sessionId: string | null = null;
+    sessionId: string | null = null,
+    offered: CoinFeatures = { transfers: false, manualRounds: false };
   const keys = new Map<string, string>();
   const key = (scope: string) => {
     let k = keys.get(scope);
@@ -246,8 +282,8 @@ if (container) {
       timeout: 30_000,
       errorMessage: (status) =>
         status === 404
-          ? "Sandbox is disabled."
-          : "Could not confirm the result. Refresh receipts before retrying.",
+          ? "Yap Coins aren’t available on this site."
+          : "Couldn’t confirm the result. Refresh the page before trying again.",
     });
   }
   function setBusy(value: boolean) {
@@ -269,9 +305,9 @@ if (container) {
     } catch (error) {
       if (generation === version)
         notice.textContent =
-          error instanceof Error
+          error instanceof Error && offered.transfers
             ? error.message
-            : "Could not confirm the result. Refresh receipts before retrying.";
+            : "Something went wrong. Refresh the page and try again.";
     } finally {
       if (generation === version) {
         setBusy(false);
@@ -298,7 +334,7 @@ if (container) {
     }
     // Decision 0013: Yap Coins are always on. The first visit claims the
     // welcome grant itself; there is no unlock or claim step. A failed claim
-    // still shows the sandbox, and Refresh sandbox tries again.
+    // still shows the page, and a refresh tries again.
     let welcomeFailed = false;
     if (!summary.initialized && !summary.financialReviewRequired) {
       try {
@@ -313,9 +349,19 @@ if (container) {
       sessionId = summary.sessionId;
     }
     root.hidden = false;
+    offered = features(summary);
+    transfers.hidden = !offered.transfers;
+    manual.hidden = !offered.manualRounds;
     balanceList.replaceChildren();
     grants.replaceChildren();
     receipts.replaceChildren();
+    showGrants(summary);
+    const open = summary.requests.filter(
+      (entry) => entry.kind === "stake" && entry.status === "reserved",
+    ).length;
+    openPositions.textContent = open
+      ? `${open} open ${open === 1 ? "position holds" : "positions hold"} ${yc(String(held(summary.balances)))}. Each one's result arrives when its turn is revealed.`
+      : "No open positions.";
     for (const [label, value] of [
       ["Purchased principal", summary.projection.purchasedPrincipal],
       ["Purchased profit", summary.projection.purchasedProfit],
@@ -333,12 +379,7 @@ if (container) {
       item.append(term, valueElement);
       balanceList.append(item);
     }
-    for (const grant of summary.projection.grants) {
-      const item = document.createElement("li");
-      item.textContent = `${grant.kind === "welcome" ? "Welcome" : "Daily"} grant: ${grant.qualified ? "permanently qualified" : `${yc(grant.remainingTarget)} new net profit needed`}; ${yc(grant.withdrawableProfit)} eligible profit. Principal stays spend-only.`;
-      grants.append(item);
-    }
-    for (const request of summary.requests) {
+    for (const request of offered.transfers ? summary.requests : []) {
       const item = document.createElement("li");
       item.textContent = `${request.kind} · ${request.status} · ${request.terms.gross ? `deduct ${usdc(request.terms.gross)}, fee ${usdc(request.terms.fee!)}, receive ${usdc(request.terms.net!)}` : request.terms.amount ? usdc(request.terms.amount) : `${request.terms.side ?? ""} ${request.terms.quantity ?? ""} YC`} · ${request.id}`;
       if (["funding", "withdrawal"].includes(request.kind)) {
@@ -359,11 +400,100 @@ if (container) {
       receipts.append(item);
     }
     notice.textContent = summary.financialReviewRequired
-      ? "Financial activity is paused for correction review. Ordinary account access remains available."
+      ? "Your Yap Coins are paused for a correction review. Everything else on your account works as usual."
       : welcomeFailed
-        ? "Your welcome grant couldn't be added yet. Use Refresh sandbox to try again."
-        : "Sandbox balances refreshed. Simulated withdrawals require manual operator review.";
-    await loadReports(generation);
+        ? "Your welcome grant couldn’t be added yet. Refresh the page to try again."
+        : offered.transfers
+          ? "Sandbox balances refreshed. Simulated withdrawals require manual operator review."
+          : "";
+    await loadHistory(generation);
+    if (offered.transfers) await loadReports(generation);
+  }
+  // Grants: the welcome grant and each daily claim, newest first, and
+  // whether today's daily claim is done.
+  function showGrants(summary: CoinSummary) {
+    const today = torontoDay(new Date());
+    const list = [...summary.book.grants].sort((a, b) =>
+      b.createdAt.localeCompare(a.createdAt),
+    );
+    for (const grant of list) {
+      const item = document.createElement("li");
+      const day = new Date(grant.createdAt).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+      });
+      item.textContent =
+        grant.kind === "welcome"
+          ? `Welcome grant: ${yc(grant.principal)}`
+          : `Daily grant: ${yc(grant.principal)} · ${day}`;
+      grants.append(item);
+    }
+    if (!list.length) {
+      const item = document.createElement("li");
+      item.textContent = "No grants yet.";
+      grants.append(item);
+    }
+    const claimed = list.some(
+      (grant) =>
+        grant.kind === "daily" &&
+        torontoDay(new Date(grant.createdAt)) === today,
+    );
+    claimStatus.textContent = claimed ? `Claimed today — ${nextClaim}.` : "";
+  }
+  // History: revealed and voided positions, newest first, from the results
+  // the notice also reads (interface 10).
+  async function loadHistory(generation = version) {
+    let results: CoinResult[];
+    try {
+      results = (
+        await api<{ results: CoinResult[] }>(
+          `/results?since=${encodeURIComponent(new Date(0).toISOString())}`,
+        )
+      ).results;
+    } catch {
+      if (generation !== version) return;
+      historyList.replaceChildren(
+        Object.assign(document.createElement("li"), {
+          textContent:
+            "Your history couldn’t load. Refresh the page to try again.",
+        }),
+      );
+      return;
+    }
+    if (generation !== version) return;
+    historyList.replaceChildren(
+      ...results.map((result) => {
+        const item = document.createElement("li"),
+          link = document.createElement("a");
+        link.href = `/debates/${encodeURIComponent(result.slug)}`;
+        link.textContent = `“${result.proposition}”`;
+        // An executed position's outcome is "pending" in the engine's words;
+        // the others never filled and were refunded.
+        const outcome =
+          result.state === "void"
+            ? "voided · refunded"
+            : result.outcome &&
+                !["no_opposite", "limit_not_met"].includes(
+                  result.outcome.status,
+                )
+              ? formatSignedCoins(result.outcome.net)
+              : "not filled · refunded";
+        item.append(
+          link,
+          document.createTextNode(
+            ` · ${result.turnNumber === null ? "Round" : `Turn ${result.turnNumber}`} · ${result.side === "YES" ? "Yes" : "No"} · ${result.quantity} · ${outcome}`,
+          ),
+        );
+        return item;
+      }),
+    );
+    if (!results.length)
+      historyList.append(
+        Object.assign(document.createElement("li"), {
+          textContent:
+            "No results yet. Answer “Do you agree?” during a live debate’s speaking turns.",
+        }),
+      );
   }
   async function loadReports(generation = version) {
     try {
@@ -532,10 +662,26 @@ if (container) {
   }
   select<HTMLButtonElement>("[data-coin-daily]").onclick = () =>
     void action(async (g) => {
-      await api("/grants/daily", "POST", {});
+      const claim = await api<{ created: boolean }>(
+        "/grants/daily",
+        "POST",
+        {},
+      );
       window.dispatchEvent(new Event("yap:coins-changed"));
       await load(g);
+      if (g !== version) return;
+      claimStatus.textContent = claim.created
+        ? `Claimed — ${nextClaim}.`
+        : `Already claimed today — ${nextClaim}.`;
     });
+  // A stake, a reveal or the header changed the balance elsewhere.
+  window.addEventListener("yap:coins-changed", () => {
+    if (busy || root.hidden) return;
+    const generation = version;
+    void load(generation).catch(() => {
+      // The page keeps its last figures; the next change reads again.
+    });
+  });
   funding.onsubmit = (event) => {
     event.preventDefault();
     void action(async (g) => {
@@ -665,6 +811,9 @@ if (container) {
     grants.replaceChildren();
     balanceList.replaceChildren();
     select<HTMLElement>("[data-coin-rounds]").replaceChildren();
+    historyList.replaceChildren();
+    openPositions.textContent = "";
+    claimStatus.textContent = "";
     funding.reset();
     withdraw.reset();
     participation.reset();
@@ -686,7 +835,7 @@ if (container) {
               ? error.message
               : "The confirmed action could not finish. Refresh and try again.";
       });
-      if (generation !== version) return;
+      if (generation !== version || !offered.manualRounds) return;
       const response = await apiFetch("/api/public/debates?limit=100", {
         cache: "no-store",
         timeout: 10_000,
@@ -720,6 +869,9 @@ if (container) {
     reportNotice.textContent = "";
     grants.replaceChildren();
     balanceList.replaceChildren();
+    historyList.replaceChildren();
+    openPositions.textContent = "";
+    claimStatus.textContent = "";
     select<HTMLElement>("[data-coin-rounds]").replaceChildren();
     debate.replaceChildren();
     funding.reset();

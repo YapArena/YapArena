@@ -8,3 +8,8 @@ dist-transcriber/
 public/**/*.js
 .DS_Store
 npm-debug.log*
+
+# The landing headline font is provided outside git: the repository is public
+# (see docs/landing-page.md). Local copies only.
+public/landing/fonts/headline.woff2
+public/landing/fonts/perpetua-titling-light.otf
