@@ -97,8 +97,9 @@ Reviewing the BC1 pull request, the founder changed the page again. These replac
 amendment where they differ:
 
 - From 1200 px wide, chat sits over the video's lower right, like Twitch's and Kick's overlay
-  chat: no title, no panel, and a button to hide it. Narrower screens show it as a tab of the rail
-  panel.
+  chat: no title, no panel, and a button to hide it. Narrower screens, and videos smaller than
+  800 × 480 px (windows of about 1280 × 900 and smaller), show it as a tab of the rail panel,
+  because chat over a smaller video has room for only one or two messages.
 - Under the answer panel, the rail holds one panel with tabs: the AI outline (first when the
   outline is on), Results and About. The AI outline's arguments are cards that open to show their
   points and the arguments they rebut or that rebut them.

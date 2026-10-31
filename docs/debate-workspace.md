@@ -23,12 +23,13 @@ original bounds. Keyboard focus stays inside the enlarged video until restored.
 **Layout since 2026-10-30 (direction BC1, revised in review; amends Decision 0013 and supersedes
 the column order above):** two columns on wide screens, fitting one screen from 960 px. The stage
 holds any status banner, the 16:9 video, the live captions line, the media status and the
-scoreboard (the two debaters' cards with the emblem turn clock between them). From 1200 px chat
-sits over the video's lower right with no title or panel, and a button next to Enlarge hides it.
+scoreboard (the two debaters' cards with the emblem turn clock between them). From 1200 px, when
+the video is at least 800 × 480 px, chat sits over its lower right with no title or panel, and a
+button next to Enlarge hides it.
 A frame over each debater's video lights up while they have the floor and shows their name and
 @handle on hover. The right rail holds the answer panel and, under it, a panel of tabs: the AI
 outline (argument cards that open to their points and rebuttals), Results ("Results by turn") and
-"About this debate"; below 1200 px chat joins them as a tab. From 960 to 1199 px the rail narrows
+"About this debate"; below 1200 px or on a smaller video chat joins them as a tab. From 960 to 1199 px the rail narrows
 to 340 px. Below 960 px the page is one column that scrolls: stage, answer panel, then the tabs.
 On phones the video is full-bleed and the answer panel is a bar pinned to the bottom of the screen
 that opens into a sheet when Yes or No is picked. The question appears in the video's top-left

@@ -53,6 +53,12 @@ async function openChatMenu(page: Page) {
   if (!(await menu.evaluate((node: HTMLDetailsElement) => node.open)))
     await menu.locator("summary").click();
 }
+// Chat is a tab of the rail panel on phones and when the video is too small
+// for chat over it, as in this trial's 1280 × 720 desktop pages.
+async function showChat(page: Page) {
+  const tab = page.locator("#arena-tab-chat");
+  if (await tab.isVisible()) await tab.click();
+}
 async function closeChatMenu(page: Page) {
   await page
     .locator("[data-chat-more]")
@@ -157,11 +163,13 @@ try {
   await mkdir(artifactDir, { recursive: true });
   const author = await register("author", true);
   await author.page.goto(`${base}/debates/${eventSlug}`);
+  await showChat(author.page);
   await author.page
     .locator("[data-community-chat-form]")
     .waitFor({ state: "visible" });
   const reporter = await register("reporter", true);
   await reporter.page.goto(`${base}/debates/${eventSlug}`);
+  await showChat(reporter.page);
   await reporter.page.getByText(connectionReady).waitFor();
   const mobile = await browser.newContext({
     viewport: { width: 390, height: 844 },
@@ -172,8 +180,7 @@ try {
   });
   const mobilePage = await mobile.newPage();
   await mobilePage.goto(`${base}/debates/${eventSlug}`);
-  // On phones chat is a tab of the rail panel (debate page direction BC1).
-  await mobilePage.locator("#arena-tab-chat").click();
+  await showChat(mobilePage);
   await mobilePage.getByText(connectionReady).waitFor();
   await openChatMenu(author.page);
   await author.page.locator("[data-community-like]").click();
@@ -399,6 +406,7 @@ try {
     1,
   );
   await author.page.goto(`${base}/debates/${eventSlug}`);
+  await showChat(author.page);
   await author.page.getByText("A useful public comment").waitFor();
   if (process.env.COMMUNITY_DURABLE_TRIAL === "1") {
     // The HTTPS write commits, its response is lost, and the live stream plus
@@ -525,6 +533,7 @@ try {
   const archiveContext = await browser.newContext({ bypassCSP: true });
   const archivePage = await archiveContext.newPage();
   await archivePage.goto(`${base}/debates/${eventSlug}`);
+  await showChat(archivePage);
   await archivePage
     .locator("[data-community-older]")
     .waitFor({ state: "visible" });
@@ -559,6 +568,7 @@ try {
       };
     });
     await stalePage.goto(`${base}/debates/${eventSlug}`);
+    await showChat(stalePage);
     await stalePage.getByText("Live updates on", { exact: true }).waitFor();
     const captured = new Promise<void>((resolve) => {
       historyCaptured = resolve;

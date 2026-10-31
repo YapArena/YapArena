@@ -46,12 +46,12 @@ preloads `headline.woff2` as the landing does; without the file, the labels show
 
 ## Layout
 
-| Width       | Layout                                                                                                                                                                                                                                                                                                                                                                      |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ≥ 1200 px   | Grid `minmax(0, 1fr) 400px`, gap 24, max width 1920. The page fits one screen: the footer is hidden (its links are in About) and the video takes the largest 16:9 size above the status line and scoreboard (968 × 544 at 1440 × 900). Chat sits over the video. The rail is the answer panel, then the tabs panel; the rail scrolls inside itself when the ticket is tall. |
-| 960–1199 px | One screen as above, rail 340 px. Chat becomes a tab ("Chat · N new" counts messages that arrive while it is hidden). The cards drop the @handle and show the side as text.                                                                                                                                                                                                 |
-| 600–959 px  | One column, max width 720, scrolling: stage, answer panel, then the tabs panel (`min(560px, max(70svh, 26rem))` tall) with Chat as a tab.                                                                                                                                                                                                                                   |
-| < 600 px    | Video full-bleed with no radius, compact cards, the tabs panel, then the answer bar pinned to the bottom with safe-area padding. Picking Yes or No opens it as a sheet (at most 85svh, scrolls); Back or Escape closes it and returns focus to the answer.                                                                                                                  |
+| Width       | Layout                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ≥ 1200 px   | Grid `minmax(0, 1fr) 400px`, gap 24, max width 1920. The page fits one screen: the footer is hidden (its links are in About) and the video takes the largest 16:9 size above the status line and scoreboard (968 × 544 at 1440 × 900). Chat sits over the video when the video is at least 800 × 480 px; on a smaller video (about 1280 × 900 windows and smaller) it is a tab, as below 1200 px. The rail is the answer panel, then the tabs panel; the rail scrolls inside itself when the ticket is tall. |
+| 960–1199 px | One screen as above, rail 340 px. Chat becomes a tab ("Chat · N new" counts messages that arrive while it is hidden). The cards drop the @handle and show the side as text.                                                                                                                                                                                                                                                                                                                                  |
+| 600–959 px  | One column, max width 720, scrolling: stage, answer panel, then the tabs panel (`min(560px, max(70svh, 26rem))` tall) with Chat as a tab.                                                                                                                                                                                                                                                                                                                                                                    |
+| < 600 px    | Video full-bleed with no radius, compact cards, the tabs panel, then the answer bar pinned to the bottom with safe-area padding. Picking Yes or No opens it as a sheet (at most 85svh, scrolls); Back or Escape closes it and returns focus to the answer.                                                                                                                                                                                                                                                   |
 
 On phones the bar steps aside while the chat composer has focus or the cookie banner is open, and
 `scroll-padding-bottom` keeps focused elements clear of it. No width from 320 px up scrolls
@@ -68,12 +68,12 @@ sideways.
   radius). The scoreboard names them for screen readers.
 - **Hover corners:** black at 72%, 12 px radius; the question as a 20 px bold `h1`; "Live · N
   watching" with a white dot.
-- **Chat over the video (≥ 1200 px):** in the lower right, from 42% of the video's height (at
+- **Chat over the video (≥ 1200 px and a video of at least 800 × 480 px):** in the lower right, from 42% of the video's height (at
   least 15rem tall) to 12 px from the bottom, `min(20rem, 50% − 10.5rem)` wide (at least 14rem)
   so it ends before side B's name tag. No title and no panel: a radial shadow in the corner keeps
   white text readable, the messages fade out towards the top, newest at the bottom. The composer
   is a 44 px see-through pill with the "⋯" menu beside it; the menu fills the chat area above
-  the composer. "Load earlier messages" shows on hover or focus. A chat button next to Enlarge
+  the composer. "Load earlier messages" has its own row above the messages. A chat button next to Enlarge
   hides it; the choice is kept on the device (`yaparena-chat-overlay`).
 - **Empty states:** upcoming (emblem at rest, "Starts Nov 4 · 3:00 PM EST", "Video appears here
   when the debate begins."), live before joining ("The debate is live", the turn summary, Join as
@@ -118,7 +118,7 @@ sideways.
   panel), its labels scaled up for the narrow panel.
 - **About:** "About this debate" with the latest result, then the event, moderation and site
   links (Topics, Yap Coins, About YAP Arena).
-- **Chat as a tab (< 1200 px):** the connection pill and a 44 px "⋯" menu (like, copy link, check
+- **Chat as a tab (< 1200 px, or a smaller video):** the connection pill and a 44 px "⋯" menu (like, copy link, check
   chat now, QR code, overlay, report). Messages are 14/20 with the author in bold, coloured from
   the visit's five landing colours (`pickHeadlineColors()`) by a stable hash of the name. Time and
   Report show on hover or focus, always on touch. The composer is a 52 px pill with a 44 px white

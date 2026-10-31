@@ -124,13 +124,23 @@ if (arena) {
     }, 1000);
 
   // The insight panel's tabs (WAI tabs pattern): AI outline, Results and
-  // About in the rail, plus Chat below 1200px, where chat leaves the video.
+  // About in the rail, plus Chat when chat leaves the video: below 1200px,
+  // and whenever the video is too small to leave room for chat over it
+  // (under 800 × 480, about 1280 × 900 windows and smaller).
   const tablist = arena.querySelector<HTMLElement>("[data-arena-tabs]");
   const insight = arena.querySelector<HTMLElement>("[data-insight]");
   const chat = arena.querySelector<HTMLElement>("#arena-chat");
   const surface = arena.querySelector<HTMLElement>("[data-arena-video]");
   const chatHome = chat?.nextElementSibling ?? null;
   const narrow = matchMedia("(max-width: 1199px)");
+  const fits = (width: number, height: number) => {
+    const rem =
+      parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    return width >= 50 * rem && height >= 30 * rem;
+  };
+  const start = surface?.getBoundingClientRect();
+  let roomy = start ? fits(start.width, start.height) : true;
+  const inPanel = () => narrow.matches || !roomy;
   if (tablist && insight) {
     const tabs = [
       ...tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
@@ -162,18 +172,19 @@ if (arena) {
       }
       if (focus) tab.focus();
     }
-    // Chat sits over the video from 1200px and in the panel below.
+    // Chat sits over a large enough video from 1200px, else in the panel.
     function sync() {
+      const panel = inPanel();
       if (chat && chatTab) {
-        chatTab.hidden = !narrow.matches;
-        const target = narrow.matches ? insight : surface;
+        chatTab.hidden = !panel;
+        const target = panel ? insight : surface;
         if (target && chat.parentElement !== target) {
-          if (narrow.matches) tablist!.after(chat);
+          if (panel) tablist!.after(chat);
           else surface!.insertBefore(chat, chatHome);
         }
       }
       for (const tab of tabs) panelOf(tab)?.setAttribute("role", "tabpanel");
-      if (chat && !narrow.matches) chat.removeAttribute("role");
+      if (chat && !panel) chat.removeAttribute("role");
       const selected = tabs.find(
         (tab) => tab.getAttribute("aria-selected") === "true" && !tab.hidden,
       );
@@ -212,7 +223,7 @@ if (arena) {
           history = false;
           return;
         }
-        if (!narrow.matches || arena!.dataset.tab === "chat") return;
+        if (!inPanel() || arena!.dataset.tab === "chat") return;
         for (const record of records)
           if (record.nextSibling === null)
             for (const node of record.addedNodes)
@@ -224,6 +235,14 @@ if (arena) {
         showUnseen();
       }).observe(messages, { childList: true });
     narrow.addEventListener("change", sync);
+    // The video's size doesn't depend on where chat is, so this can't loop.
+    if (surface)
+      new ResizeObserver(([entry]) => {
+        const next = fits(entry!.contentRect.width, entry!.contentRect.height);
+        if (next === roomy) return;
+        roomy = next;
+        sync();
+      }).observe(surface);
     sync();
   }
 

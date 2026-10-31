@@ -2965,8 +2965,8 @@ textarea::placeholder {
 /* From 1200px chat sits over the video, like Twitch's and Kick's overlay
    chat: no title and no panel, just the messages over a soft shadow in the
    video's lower right corner, ending clear of side B's name tag. The menu
-   button sits beside the composer, "Load earlier" shows on hover, and the
-   viewer can hide it all. Below 1200px it's a tab in the rail. */
+   button sits beside the composer, "Load earlier" sits above the messages,
+   and the viewer can hide it all. Below 1200px it's a tab in the rail. */
 @media (min-width: 1200px) {
   .arena-page .arena-video-surface {
     --chat-width: max(14rem, min(20rem, calc(50% - 10.5rem)));
@@ -2978,7 +2978,7 @@ textarea::placeholder {
     top: max(0px, min(42%, 100% - 15rem));
     right: var(--space-3);
     bottom: var(--space-3);
-    grid-template-rows: 0 auto minmax(0, 1fr) 40px auto auto;
+    grid-template-rows: 0 36px minmax(0, 1fr) 40px auto auto;
     width: var(--chat-width);
     min-height: 0;
     padding: 0;
@@ -3029,10 +3029,7 @@ textarea::placeholder {
     height: 0;
   }
   .arena-page .arena-video-surface > .arena-chat .live-chat-state {
-    height: auto;
-    margin-bottom: var(--space-2);
     color: var(--button-text);
-    white-space: normal;
   }
   /* The menu button beside the composer; its menu fills the space above. */
   .arena-page .arena-video-surface > .arena-chat .chat-more > summary {
@@ -3063,24 +3060,14 @@ textarea::placeholder {
   .arena-page .arena-video-surface > .arena-chat form {
     margin-right: 52px;
   }
+  /* "Load earlier messages" keeps its own row above the messages, so it
+     never covers a message's buttons, and the row's fixed height keeps the
+     feed steady when it comes and goes. */
   .arena-page .arena-video-surface > .arena-chat .chat-older {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    z-index: 1;
-    margin: 0;
+    min-height: 32px;
     white-space: nowrap;
     background: rgb(0 0 0 / 72%);
     text-shadow: none;
-    opacity: 0;
-    transform: translateX(-50%);
-    transition: opacity 0.15s;
-  }
-  .arena-page
-    .arena-video-surface
-    > .arena-chat:is(:hover, :focus-within)
-    .chat-older {
-    opacity: 1;
   }
   .arena-page .arena-video-surface > .arena-chat .chat-new {
     background: rgb(0 0 0 / 72%);
@@ -3137,7 +3124,7 @@ textarea::placeholder {
     display: none;
   }
   .arena-page
-    .arena-video-surface:not([data-chat="hidden"])
+    .arena-video-surface:has(> .arena-chat):not([data-chat="hidden"])
     .arena-video-empty {
     padding-right: calc(var(--chat-width) + var(--space-6));
   }
@@ -3169,7 +3156,7 @@ textarea::placeholder {
     .arena-chat-toggle {
     opacity: 1;
   }
-  .arena-page .arena-video-status {
+  .arena-page .arena-video-surface:has(> .arena-chat) .arena-video-status {
     right: calc(var(--space-4) + 2 * 44px + 2 * var(--space-2));
   }
 }
@@ -3183,18 +3170,20 @@ textarea::placeholder {
     transition: none;
   }
 }
+/* Chat as a tab of the rail panel: below 1200px, or when the video is too
+   small for chat over it (frontend/debate-layout.ts moves it). */
+.arena-page .arena-insight > .arena-chat {
+  min-height: 0;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+}
+.arena-page .arena-video-surface:not(:has(> .arena-chat)) .arena-chat-toggle {
+  display: none;
+}
 @media (max-width: 1199px) {
   .arena-page .arena-workspace {
     --rail: 340px;
-  }
-  .arena-page .arena-insight > .arena-chat {
-    min-height: 0;
-    padding: 0;
-    border-radius: 0;
-    background: none;
-  }
-  .arena-page .arena-chat-toggle {
-    display: none;
   }
   .arena-page .arena-scoreboard {
     grid-template-columns: minmax(0, 1fr) 120px minmax(0, 1fr);

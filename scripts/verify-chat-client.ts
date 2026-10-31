@@ -49,6 +49,13 @@ async function openChatMenu(page: Page) {
     await menu.locator("summary").click();
 }
 
+// Chat is a tab of the rail panel below 1200px and when the video is too
+// small for chat over it, as at this check's 1280 × 900 (direction BC1).
+async function showChat(page: Page) {
+  const tab = page.locator("#arena-tab-chat");
+  if (await tab.isVisible()) await tab.click();
+}
+
 export async function verifyChatClient({
   browser,
   base,
@@ -319,6 +326,7 @@ export async function verifyChatClient({
   };
   try {
     await page.goto(`${base}/debates/${eventSlug}`);
+    await showChat(page);
     await page.getByText("Polling updates on", { exact: false }).waitFor();
     const consent = page.getByRole("button", { name: "Not now", exact: true });
     if (await consent.isVisible()) await consent.click();
@@ -682,9 +690,7 @@ export async function verifyChatClient({
         },
         name === "zoom" ? "2" : "1",
       );
-      // Below 1200px chat is a tab of the rail panel (direction BC1).
-      const chatTab = page.locator("#arena-tab-chat");
-      if (await chatTab.isVisible()) await chatTab.click();
+      await showChat(page);
       try {
         await page.waitForFunction(
           () => {
@@ -772,6 +778,7 @@ export async function verifyChatClient({
     );
     await page.reload();
     await originalReady;
+    await showChat(page);
     await page.getByText("Polling updates on", { exact: false }).waitFor();
     const original = await send(
       "Original account pending message",
