@@ -60,9 +60,13 @@ export async function verifyArenaBrowser({
       displayName: "UI Test Participant",
       bio: "Synthetic local interface trial.",
       publicationState: "published",
+      acceptTerms: true,
     });
     await page.goto(base + "/account");
-    const dismiss = page.getByRole("button", { name: "Not now", exact: true });
+    const dismiss = page.getByRole("button", {
+      name: "Reject all",
+      exact: true,
+    });
     if (await dismiss.isVisible()) await dismiss.click();
     await page.locator("#signed-in").waitFor({ state: "visible" });
     const debates = await api<PublicList<PublicDebate>>(

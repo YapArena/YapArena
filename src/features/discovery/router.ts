@@ -21,6 +21,7 @@ import {
   renderTopics,
 } from "./web.ts";
 import { renderLanding } from "./landing-web.ts";
+import { renderCookies, renderPrivacy, renderTerms } from "./legal-web.ts";
 import { html as markup } from "../../platform/html.ts";
 
 type Repository = ReturnType<typeof createDiscoveryRepository>;
@@ -387,6 +388,16 @@ export function createDiscoveryRouter({
   });
   router.get("/about", (_request, response) =>
     html(response, renderAbout(origin)),
+  );
+  // Production runbook step 9.1; Google's sign-in branding links to both.
+  router.get("/privacy", (_request, response) =>
+    html(response, renderPrivacy(origin)),
+  );
+  router.get("/terms", (_request, response) =>
+    html(response, renderTerms(origin)),
+  );
+  router.get("/cookies", (_request, response) =>
+    html(response, renderCookies(origin)),
   );
   router.get("/account", (_request, response) =>
     html(response, renderAccount(origin, Boolean(liveOutline))),

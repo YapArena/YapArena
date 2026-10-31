@@ -27,9 +27,7 @@ try {
     pages.push(page);
     const started = performance.now();
     await page.goto(base + "/home");
-    await page
-      .getByRole("region", { name: "Usage measurement choice" })
-      .waitFor();
+    await page.getByRole("region", { name: "Cookie choices" }).waitFor();
     if (artifactDir) {
       await mkdir(artifactDir, { recursive: true });
       await page.screenshot({
@@ -40,7 +38,7 @@ try {
     await page.evaluate((source) => window.eval(source), axe.source);
     const choiceViolations = await page.evaluate(async () => {
       const result = await window.axe.run(
-        document.querySelector(".measurement-choice")!,
+        document.querySelector(".cookie-choice")!,
         {
           runOnly: {
             type: "tag",
@@ -55,7 +53,7 @@ try {
       fetch("/api/measurement/consent").then((r) => r.json()),
     );
     assert.equal(before.consented, false);
-    await page.getByRole("button", { name: "Allow measurement" }).click();
+    await page.getByRole("button", { name: "Accept all" }).click();
     await page.waitForFunction(() => window.yapMeasurement?.consented === true);
     const after = await page.evaluate<{ consented: boolean }>(() =>
       fetch("/api/measurement/consent").then((r) => r.json()),
@@ -63,10 +61,13 @@ try {
     assert.equal(after.consented, true);
     await page.goto(`${base}/debates`);
     await page.waitForFunction(() => window.yapMeasurement?.consented === true);
-    await page.getByRole("button", { name: "Measurement settings" }).click();
-    await page
-      .getByRole("button", { name: "Turn off and delete data" })
-      .click();
+    // Cookie settings: the analytics switch reflects the choice; turning it
+    // off and saving deletes this browser's measurements.
+    await page.getByRole("button", { name: "Cookie settings" }).click();
+    const analytics = page.getByRole("switch", { name: /Analytics/ });
+    assert.equal(await analytics.isChecked(), true);
+    await analytics.uncheck();
+    await page.getByRole("button", { name: "Save choices" }).click();
     await page.waitForFunction(
       () => window.yapMeasurement?.consented === false,
     );

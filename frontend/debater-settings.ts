@@ -25,7 +25,7 @@ if (card && form) {
   const describe = (settings: DebaterSettings) =>
     settings.consented
       ? "Saved. You're ready to debate."
-      : "Saved. Agree to transcription before you debate.";
+      : "Saved. Agree to recording and transcription before you debate.";
   void (async () => {
     const response = await apiFetch("/api/me/debater-settings").catch(
       () => undefined,

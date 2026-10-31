@@ -623,7 +623,7 @@ exports[`renders a debate 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -1257,7 +1257,7 @@ exports[`renders a debate 10`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -1889,7 +1889,7 @@ exports[`renders a debate 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -2522,7 +2522,7 @@ exports[`renders a debate 3`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -3155,7 +3155,7 @@ exports[`renders a debate 4`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -3786,7 +3786,7 @@ exports[`renders a debate 5`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -4417,7 +4417,7 @@ exports[`renders a debate 6`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -5050,7 +5050,7 @@ exports[`renders a debate 7`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -5692,7 +5692,7 @@ exports[`renders a debate 8`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -6327,7 +6327,7 @@ exports[`renders a debate 9`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -6460,7 +6460,7 @@ exports[`renders a profile 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -6618,7 +6618,7 @@ exports[`renders a profile 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -6751,7 +6751,7 @@ exports[`renders a profile 3`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -6894,7 +6894,7 @@ exports[`renders a topic 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -7080,7 +7080,7 @@ exports[`renders a topic 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -7238,7 +7238,7 @@ exports[`renders a topic 3`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -7342,7 +7342,7 @@ exports[`renders community moderation and the broadcast overlay 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -7462,7 +7462,7 @@ exports[`renders community moderation and the broadcast overlay 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -7566,7 +7566,7 @@ exports[`renders community moderation and the broadcast overlay 3`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -7686,7 +7686,7 @@ exports[`renders community moderation and the broadcast overlay 4`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -7846,7 +7846,7 @@ exports[`renders the 400, 404 and 500 pages 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -7956,7 +7956,7 @@ exports[`renders the 400, 404 and 500 pages 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -8066,7 +8066,7 @@ exports[`renders the 400, 404 and 500 pages 3`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -8183,8 +8183,8 @@ exports[`renders the about and account pages 1`] = `
 <h2>What you can do</h2>
 <p>Browse topics, watch live video debates and replays, and see who is debating. Sign in to pick your handle, follow people and topics, and queue on a side to debate someone live. Listings marked Demo are fictional examples.</p>
 <p>A listing’s status does not guarantee that video is available or that a result has been decided. Yap Coins are play money with no cash value. Bot activity is synthetic and labeled. Real funds are unavailable.</p>
-<h2 id="measurement">Optional usage measurement</h2>
-<p>We ask before recording discovery pages, watch time, replay starts, matching, follows, reports, or return visits. If you allow it, we use a random browser cookie and may associate events with your signed-in account to separate founder-affiliated activity. We do not store search text, chat text or IP addresses in product events. Use Measurement settings in the footer to turn it off and delete your measurements. Raw events and watch sessions are retained for up to 90 days; an unused consent expires after 180 days. Debate completion is counted from public event state without a browser identifier.</p>
+<h2 id="measurement">Cookies and usage measurement</h2>
+<p>We set an analytics cookie only if you accept it in the cookie banner. It counts discovery pages, watch time, replay starts, matching, follows, reports and return visits, and may be linked to your signed-in account to separate founder-affiliated activity. We don't store search text, chat text or IP addresses in these measurements. Use Cookie settings in the footer to turn it off and delete your measurements. Raw events and watch sessions are kept for up to 90 days; an unused consent expires after 180 days. Debate completion is counted from public event state without a browser identifier. See the <a href="/cookies">Cookie Policy</a>.</p>
 <a class="button" href="/debates">Explore debates ↗</a>
 </section>
 </main>
@@ -8193,7 +8193,7 @@ exports[`renders the about and account pages 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -8433,9 +8433,9 @@ exports[`renders the about and account pages 2`] = `
 <path d="M4 19h16M7 16v-4m5 4V8m5 8v-6"/>
 </svg>
 </span>\\n            <div>
-<h2>Usage measurement</h2>
-<p>We only count page views and watch time if you allow it, and you can turn it off and delete that data anytime.</p>
-</div>\\n            <button class="button-secondary" type="button" data-open-measurement>Measurement settings</button>\\n          </div>\\n          <div class="settings-card settings-row-card">\\n            <span class="settings-card-icon">
+<h2>Cookies</h2>
+<p>Essential cookies keep you signed in. The analytics cookie stays off until you accept it, and turning it off deletes its data.</p>
+</div>\\n            <button class="button-secondary" type="button" data-open-measurement>Cookie settings</button>\\n          </div>\\n          <div class="settings-card settings-row-card">\\n            <span class="settings-card-icon">
 <svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 <path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/>
 </svg>
@@ -8450,7 +8450,283 @@ exports[`renders the about and account pages 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
+</div>
+</footer>
+</body>
+</html>
+`;
+
+exports[`renders the about and account pages 3`] = `
+<!doctype html>
+<html lang="en" data-email-first>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Account · YAP Arena</title>
+<meta name="description" content="Your profile, security and Yap Coins.">
+<link rel="canonical" href="https://arena.example/account">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
+<link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
+<script defer src="/assets/session-coordination.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/site-header.js?v=0123456789ab">
+</script>
+<script defer src="/assets/site.js?v=0123456789ab">
+</script>
+<script defer src="/assets/account-balance.js?v=0123456789ab">
+</script>
+<script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
+</head>
+<body class="account-page">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" data-site-header data-session="checking">\\n    <div class="container nav arena-nav">\\n      <a class="brand" href="/home" aria-label="YAP Arena home">
+<svg class="arena-brand-symbol" viewBox="0 0 40 40" aria-hidden="true">
+<ellipse cx="20" cy="20" rx="13" ry="16" transform="rotate(30 20 20)"/>
+<path d="M9 35 31 5"/>
+</svg>
+<span>YAP ARENA</span>
+</a>\\n      <nav aria-label="Main navigation">
+<a href="/live">Live</a>
+<a href="/debates">Explore</a>
+<a href="/match">Create</a>
+</nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search">
+<label class="sr-only" for="header-search">Search debates</label>
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="10.5" cy="10.5" r="6.5"/>
+<path d="m16 16 5 5"/>
+</svg>
+<input id="header-search" type="search" name="q" maxlength="80" placeholder="Search debates…">
+<button type="submit" class="sr-only">Search</button>
+</form>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
+<span class="sr-only">Checking your account…</span>
+</span>\\n        <div class="header-auth-actions" data-header-guest hidden>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
+</div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
+<summary aria-label="Yap Coins balance and actions">
+<span class="header-balance-label">Balance</span>
+<strong data-header-balance>—</strong>
+<span class="arena-chevron" aria-hidden="true">⌄</span>
+</summary>
+<div class="arena-wallet-popover">
+<strong data-header-balance-heading>Your Yap Coins</strong>
+<span data-header-reserved>Checking balance…</span>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
+</div>
+</details>\\n          <details class="header-user-menu">
+<summary class="arena-avatar" data-header-account aria-label="Open account menu">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+<circle cx="12" cy="8" r="3.5"/>
+<path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
+</svg>
+</summary>
+<div class="header-user-popover">
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
+</button>
+</div>
+</details>\\n        </div>\\n        <noscript>
+<div class="header-auth-actions">
+<a class="header-login" href="/api/auth/login?connection=google">Continue with Google</a>
+<a class="header-signup" href="/api/auth/login?connection=email">Continue with email</a>
+</div>
+</noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
+</p>\\n    </div>\\n  </header>
+<main id="main">
+<link rel="stylesheet" href="/assets/account-auth.css?v=0123456789ab">\\n  <section class="container account-shell">\\n    <div class="account-status-row">
+<a class="account-back" data-auth-return href="/debates">← Back to the arena</a>
+<p id="account-notice" role="status" aria-live="polite">Checking your account…</p>
+</div>\\n    <div id="signed-out" hidden>\\n      <div class="auth-layout">\\n        <aside class="auth-story">\\n          <span class="eyebrow accent">IDEAS UNDER PRESSURE</span>\\n          <h1>Every idea<br>deserves <em>a voice.</em>
+</h1>\\n          <p>Follow the ideas that move you.<br>Make your mark when you’re ready.</p>\\n          <div class="auth-arena-art" aria-hidden="true">
+<svg viewBox="0 0 440 300" fill="none">
+<ellipse cx="220" cy="150" rx="145" ry="93" transform="rotate(-28 220 150)"/>
+<ellipse cx="220" cy="150" rx="145" ry="93" transform="rotate(28 220 150)"/>
+<circle cx="220" cy="150" r="53"/>
+<path d="m195 183 50-66"/>
+<circle cx="100" cy="86" r="7"/>
+<circle cx="345" cy="213" r="5"/>
+<circle cx="220" cy="30" r="3"/>
+</svg>
+<span>YOUR NEXT PERSPECTIVE STARTS HERE</span>
+</div>\\n        </aside>\\n        <div class="auth-panel">\\n          <div class="auth-card account-sign-in" id="account-sign-in">
+<span class="eyebrow accent">SIGN IN OR CREATE AN ACCOUNT</span>
+<h2>Join the arena</h2>
+<div class="auth-sign-in-actions">
+<a class="button" href="/api/auth/login?connection=google&amp;return=%2Faccount" data-sign-in="google">Continue with Google</a>
+<a class="button-secondary" href="/api/auth/login?connection=email&amp;return=%2Faccount" data-sign-in="email">Continue with email</a>
+</div>
+</div>\\n        </div>\\n      </div>\\n    </div>\\n    <div id="signed-in" hidden>\\n      <header class="settings-hero">\\n        <span class="settings-avatar" id="account-avatar" aria-hidden="true">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<circle cx="12" cy="8" r="3.5"/>
+<path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
+</svg>
+</span>\\n        <div class="settings-identity">
+<span class="eyebrow accent">SETTINGS</span>
+<h1 id="account-display-name">Your account</h1>
+<p>
+<span id="account-handle">
+</span>
+<span id="account-name">
+</span>
+</p>
+</div>\\n        <div class="settings-hero-actions">
+<a class="button-secondary" id="view-profile" href="/account#profile" hidden>
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M14 5h5v5M19 5l-8 8M17 14v5H5V7h5"/>
+</svg>View profile</a>
+<button class="button-secondary" id="sign-out" type="button">Sign out</button>
+</div>\\n      </header>\\n      <div class="settings-layout">\\n        <nav class="settings-nav" aria-label="Settings">\\n          <div class="settings-tabs" role="tablist" aria-orientation="vertical">
+<a class="settings-tab" role="tab" id="tab-profile" href="#profile" aria-controls="panel-profile" aria-selected="true" tabindex="0">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<circle cx="12" cy="8" r="3.5"/>
+<path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
+</svg>
+<span>Profile</span>
+</a>
+<a class="settings-tab" role="tab" id="tab-security" href="#security" aria-controls="panel-security" aria-selected="false" tabindex="-1">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/>
+<path d="m8.5 12 2.5 2.5 4.5-5"/>
+</svg>
+<span>Sign-in &amp; security</span>
+</a>
+<a class="settings-tab" role="tab" id="tab-notifications" href="#notifications" aria-controls="panel-notifications" aria-selected="false" tabindex="-1">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15L6 16Z"/>
+<path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>
+</svg>
+<span>Notifications</span>
+<span class="settings-badge" id="notification-count" hidden>
+</span>
+</a>
+<a class="settings-tab" role="tab" id="tab-privacy" href="#privacy" aria-controls="panel-privacy" aria-selected="false" tabindex="-1">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<rect x="5" y="10.5" width="14" height="10" rx="2.5"/>
+<path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/>
+</svg>
+<span>Privacy &amp; data</span>
+</a>
+</div>\\n          <a class="settings-tab settings-tab-link" href="/coins">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<circle cx="12" cy="12" r="8.5"/>
+<path d="M14.5 9.2c-.6-.8-1.5-1.2-2.6-1.2-1.6 0-2.6.8-2.6 2s1 1.7 2.7 2c1.7.3 2.7.9 2.7 2.1 0 1.3-1.1 2.1-2.7 2.1-1.2 0-2.2-.5-2.8-1.4M12 6.5V8m0 8v1.5"/>
+</svg>
+<span>Yap Coins</span>
+<span class="settings-tab-arrow" aria-hidden="true">↗</span>
+</a>\\n        </nav>\\n        <div class="settings-panels">\\n        <section class="settings-panel" role="tabpanel" id="panel-profile" aria-labelledby="tab-profile" tabindex="-1">\\n          <div class="settings-card">\\n            <div class="settings-card-head">
+<div>
+<h2>Public profile</h2>
+<p>How you show up in debates, chat and search.</p>
+</div>
+</div>\\n            <div class="settings-banner" id="profile-state-box" hidden>
+<p id="profile-state" role="status">
+</p>
+<button class="button-secondary" type="button" id="profile-publish" hidden>Make it public</button>
+</div>\\n            <form id="profile-form" class="settings-form" novalidate>\\n              <div class="settings-field">\\n                <div class="settings-label-row">
+<label for="profile-display-name">Username</label>
+<span class="settings-count" data-count-for="profile-display-name" aria-hidden="true">0/80</span>
+</div>\\n                <input id="profile-display-name" name="displayName" maxlength="80" autocomplete="name" required aria-describedby="profile-display-name-error">\\n                <p class="settings-error" id="profile-display-name-error" data-error-for="displayName" hidden>
+</p>\\n              </div>\\n              <div class="settings-field">\\n                <div class="settings-label-row">
+<label for="profile-handle">Handle</label>
+<span class="settings-lock">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<rect x="5" y="10.5" width="14" height="10" rx="2.5"/>
+<path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/>
+</svg>Permanent</span>
+</div>\\n                <div class="settings-handle">
+<span aria-hidden="true">@</span>
+<input id="profile-handle" name="handle" readonly aria-describedby="profile-handle-help">
+</div>\\n                <p class="settings-help" id="profile-handle-help">Handles never change, so links to you never break. <a id="profile-url" href="/account#profile">
+</a>
+</p>\\n              </div>\\n              <div class="settings-field">\\n                <div class="settings-label-row">
+<label for="profile-bio">Bio</label>
+<span class="settings-count" data-count-for="profile-bio" aria-hidden="true">0/500</span>
+</div>\\n                <textarea id="profile-bio" name="bio" maxlength="500" rows="4" placeholder="A little about you and the ideas you care about." aria-describedby="profile-bio-error">
+</textarea>\\n                <p class="settings-error" id="profile-bio-error" data-error-for="bio" hidden>
+</p>\\n              </div>\\n              <div class="settings-save">
+<p id="profile-save-status" role="status" aria-live="polite">
+</p>
+<button class="button" type="submit" disabled>Save changes</button>
+</div>\\n            </form>\\n          </div>\\n<div class="settings-card debater-settings" id="debater-settings" hidden>\\n            <div class="settings-card-head">
+<div>
+<h2>Debating</h2>
+<p>Used when you debate live. Debates are recorded and replayed publicly, and each of your turns is transcribed and summarized in a public AI outline.</p>
+</div>
+</div>\\n            <form id="debater-settings-form" class="settings-form" novalidate>\\n              <div class="settings-field">\\n                <div class="settings-label-row">
+<label for="debater-language">Language you debate in</label>
+</div>\\n                <select id="debater-language" name="language" required aria-describedby="debater-language-help">
+<option value="">Choose a language</option>
+<option value="fr" lang="fr">Français</option>
+<option value="en" lang="en">English</option>
+</select>\\n                <p class="settings-help" id="debater-language-help">Transcription and the AI outline of your turns use this language.</p>\\n              </div>\\n              <div class="settings-field">\\n                <label class="debater-consent">
+<input type="checkbox" id="debater-consent" name="consent" aria-describedby="debater-consent-help">
+<span>I agree that my live debates are recorded on video and audio and shown publicly, live and as a replay; that my speech is transcribed by Deepgram or ElevenLabs and stored with word timings; and that Anthropic's Claude summarizes it in a public AI outline shown with the debate and its replay.</span>
+</label>\\n                <p class="settings-help" id="debater-consent-help">Required to debate. You can withdraw anytime for future debates; debates already held keep their recording, transcript and outline. See the <a href="/privacy#debates">Privacy Policy</a>.</p>\\n              </div>\\n              <div class="settings-save">
+<p id="debater-save-status" role="status" aria-live="polite">
+</p>
+<button class="button" type="submit">Save debating settings</button>
+</div>\\n            </form>\\n          </div>          <div class="settings-card">\\n            <div class="settings-card-head">
+<div>
+<h2>Following</h2>
+<p>People and topics you follow. Follow more from their public pages.</p>
+</div>
+</div>\\n            <ul id="follow-list" class="settings-list">
+</ul>\\n          </div>\\n        </section>\\n        <section class="settings-panel" role="tabpanel" id="panel-security" aria-labelledby="tab-security" tabindex="-1" hidden>\\n          <div class="settings-card">\\n            <div class="settings-card-head">
+<div>
+<h2>Sign-in methods</h2>
+<p>The ways you can sign in to this account.</p>
+</div>
+</div>\\n            <ul id="sign-in-methods" class="settings-methods">
+</ul>\\n            <p class="settings-help">Google and an email code for the same address both open this account. Signing out ends your session on this device only.</p>\\n          </div>\\n          <div class="settings-card">\\n            <div class="settings-card-head">
+<div>
+<h2>Recent account activity</h2>
+<p>Sign-ins and changes from the last 90 days.</p>
+</div>
+</div>\\n            <ul id="activity-list" class="settings-list settings-timeline">
+</ul>\\n            <a class="settings-link" href="/account/moderation">My reports and appeals<span aria-hidden="true">→</span>
+</a>\\n          </div>\\n        </section>\\n        <section class="settings-panel" role="tabpanel" id="panel-notifications" aria-labelledby="tab-notifications" tabindex="-1" hidden>\\n          <div class="settings-card">\\n            <div class="settings-card-head">
+<div>
+<h2>Notifications</h2>
+<p>Updates about your debates, sign-ins and account.</p>
+</div>
+</div>\\n            <ul id="account-notifications" class="settings-list settings-notifications">
+</ul>\\n          </div>\\n        </section>\\n        <section class="settings-panel" role="tabpanel" id="panel-privacy" aria-labelledby="tab-privacy" tabindex="-1" hidden>\\n          <div class="settings-card settings-row-card">\\n            <span class="settings-card-icon">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M4 19h16M7 16v-4m5 4V8m5 8v-6"/>
+</svg>
+</span>\\n            <div>
+<h2>Cookies</h2>
+<p>Essential cookies keep you signed in. The analytics cookie stays off until you accept it, and turning it off deletes its data.</p>
+</div>\\n            <button class="button-secondary" type="button" data-open-measurement>Cookie settings</button>\\n          </div>\\n          <div class="settings-card settings-row-card">\\n            <span class="settings-card-icon">
+<svg class="account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/>
+</svg>
+</span>\\n            <div>
+<h2>Download your data</h2>
+<p>A JSON file with your profile, sign-in methods, follows, notifications and account activity.</p>
+</div>\\n            <a class="button-secondary" href="/api/me/export" download data-export>Download</a>\\n          </div>\\n        </section>\\n        </div>\\n      </div>\\n    </div>\\n  </section>\\n  <script defer src="/assets/account.js?v=0123456789ab">
+</script>\\n  <script type="module" src="/assets/debater-settings.js?v=0123456789ab">
+</script>
+</main>
+<footer class="site-footer">
+<div class="container footer-inner">
+<span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
+</span>
+<span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -8584,7 +8860,7 @@ exports[`renders the coins and match pages 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -8778,7 +9054,7 @@ exports[`renders the coins and match pages 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -8981,7 +9257,7 @@ exports[`renders the coins and match pages 3`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -9124,7 +9400,7 @@ exports[`renders the debate list 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -9310,7 +9586,7 @@ exports[`renders the debate list 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -9476,7 +9752,7 @@ exports[`renders the debate list 3`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -9637,7 +9913,7 @@ exports[`renders the debate list 4`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -9903,7 +10179,7 @@ exports[`renders the home page 1`] = `
 </div>
 </section>\\n    <footer class="ya-footer footer-inner">
 <span>Endorsement = share of participants choosing YES in the latest closed round.</span>
-<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a>
+<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </footer>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
 <strong>
@@ -10176,7 +10452,7 @@ exports[`renders the home page 2`] = `
 </div>
 </section>\\n    <footer class="ya-footer footer-inner">
 <span>Endorsement = share of participants choosing YES in the latest closed round.</span>
-<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a>
+<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </footer>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
 <strong>
@@ -10449,7 +10725,7 @@ exports[`renders the home page 3`] = `
 </div>
 </section>\\n    <footer class="ya-footer footer-inner">
 <span>Endorsement = share of participants choosing YES in the latest closed round.</span>
-<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a>
+<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </footer>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
 <strong>
@@ -10787,7 +11063,7 @@ exports[`renders the home page 4`] = `
 </div>
 </section>\\n    <footer class="ya-footer footer-inner">
 <span>Endorsement = share of participants choosing YES in the latest closed round.</span>
-<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a>
+<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </footer>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
 <strong>
@@ -11189,7 +11465,7 @@ exports[`renders the home page 5`] = `
 </div>
 </section>\\n    <footer class="ya-footer footer-inner">
 <span>Endorsement = share of participants choosing YES in the latest closed round.</span>
-<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a>
+<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </footer>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
 <strong>
@@ -12162,7 +12438,7 @@ exports[`renders the home page 7`] = `
 </div>
 </section>\\n    <footer class="ya-footer footer-inner">
 <span>Endorsement = share of participants choosing YES in the latest closed round.</span>
-<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a>
+<span>Synthetic activity is labeled · <a href="/live">Watch debates</a> · <a href="/coins">Yap Coins</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a>
 </span>
 </footer>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
 <strong>
@@ -12326,7 +12602,7 @@ exports[`renders the live page 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -12569,7 +12845,7 @@ exports[`renders the live page 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -12793,7 +13069,7 @@ exports[`renders the measurement dashboard 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -13020,8 +13296,1089 @@ exports[`renders the measurement dashboard 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
+</footer>
+</body>
+</html>
+`;
+
+exports[`renders the privacy, terms and cookie pages 1`] = `
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<title>Privacy policy · YAP Arena</title>
+<meta name="description" content="What YAP Arena collects, why, who processes it, where it is stored and how long we keep it.">
+<link rel="canonical" href="https://arena.example/privacy">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Privacy policy · YAP Arena">
+<meta property="og:description" content="What YAP Arena collects, why, who processes it, where it is stored and how long we keep it.">
+<meta property="og:url" content="https://arena.example/privacy">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/landing.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/legal.css?v=0123456789ab">
+</head>
+<body class="landing legal">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="landing-header landing-container legal-header">
+<a class="landing-brand" href="/">
+<img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena">
+</a>
+<nav class="legal-switch" aria-label="Legal">
+<a href="/privacy" aria-current="page">Privacy</a>
+<a href="/terms">Terms</a>
+<a href="/cookies">Cookies</a>
+</nav>
+</header>
+<main id="main" class="legal-main landing-container">
+<header class="legal-hero">
+<p class="legal-eyebrow reveal">YAP ARENA · LEGAL</p>
+<h1 class="legal-title reveal reveal-2">
+<span class="sr-only">Privacy policy</span>
+<span aria-hidden="true">Privacy policy</span>
+</h1>
+<p class="legal-lede reveal reveal-3">YAP Arena is a live debate site run from Québec. This policy explains, in plain terms, what we collect when you watch, sign in or debate, why we collect it, who processes it for us, where it is stored, how long we keep it and how to reach us about it.</p>
+<dl class="legal-meta reveal reveal-4">
+<div>
+<dt>Updated</dt>
+<dd>
+<time datetime="2026-10-30">October 30, 2026</time>
+</dd>
+</div>
+<div>
+<dt>Version</dt>
+<dd>2026-10-30</dd>
+</div>
+</dl>
+<ul class="legal-glance reveal reveal-5">
+<li>
+<strong>Debates are public</strong>
+<span>Debaters’ video, voice and username are shown live and in public replays.</span>
+</li>
+<li>
+<strong>So is the AI outline</strong>
+<span>Captions and an AI summary of each turn are shown with the debate.</span>
+</li>
+<li>
+<strong>Chat is public</strong>
+<span>Messages show with your username. Reports stay private.</span>
+</li>
+<li>
+<strong>No ads, no selling</strong>
+<span>We don’t sell personal information or use it for advertising.</span>
+</li>
+<li>
+<strong>Analytics only if you accept</strong>
+<span>The analytics cookie stays off until you choose Accept all.</span>
+</li>
+<li>
+<strong>Stored in the United States</strong>
+<span>Our database, servers and main providers are outside Québec and Canada.</span>
+</li>
+<li>
+<strong>18 and older</strong>
+<span>YAP Arena is only for adults.</span>
+</li>
+<li>
+<strong>You stay in control</strong>
+<span>Download your data, change your choices, or ask us to delete it.</span>
+</li>
+</ul>
+</header>
+<div class="legal-layout">
+<nav class="legal-toc" aria-labelledby="legal-toc-title">
+<h2 id="legal-toc-title">ON THIS PAGE</h2>
+<ol>
+<li>
+<a href="#who">Who we are</a>
+</li>
+<li>
+<a href="#collect">Information we collect</a>
+</li>
+<li>
+<a href="#use">How we use it</a>
+</li>
+<li>
+<a href="#public">What others can see</a>
+</li>
+<li>
+<a href="#ai">AI features</a>
+</li>
+<li>
+<a href="#sharing">How we share it</a>
+</li>
+<li>
+<a href="#coins">Yap Coins</a>
+</li>
+<li>
+<a href="#transfers">Where it is stored</a>
+</li>
+<li>
+<a href="#retention">How long we keep it</a>
+</li>
+<li>
+<a href="#cookies">Cookies</a>
+</li>
+<li>
+<a href="#rights">Your rights and choices</a>
+</li>
+<li>
+<a href="#security">How we protect it</a>
+</li>
+<li>
+<a href="#age">Age</a>
+</li>
+<li>
+<a href="#governance">How we manage personal information</a>
+</li>
+<li>
+<a href="#changes">Changes to this policy</a>
+</li>
+<li>
+<a href="#contact">Contact and complaints</a>
+</li>
+</ol>
+</nav>
+<article class="legal-body">
+<section id="who" aria-labelledby="who-title">
+<h2 id="who-title">Who we are</h2>
+<p>YAP Arena (yaparena.com) is operated by <mark class="legal-todo">[Legal name of the business]</mark>, <mark class="legal-todo">[Business address in Québec]</mark> (“YAP Arena”, “we”, “us”). This policy covers yaparena.com and the sign-in, live video and replay services that are part of it.</p>
+<p>The person in charge of the protection of personal information at YAP Arena is <mark class="legal-todo">[Name and title of the person in charge]</mark>. You can reach them at <mark class="legal-todo">[Privacy email]</mark>. Under Québec law, this is the person with the highest authority in the business unless that role is delegated in writing.</p>
+</section>
+<section id="collect" aria-labelledby="collect-title">
+<h2 id="collect-title">Information we collect</h2>
+<h3>Information you give us</h3>
+<ul>
+<li>
+<strong>Account.</strong> Your email address, confirmed by a one-time code or by Google. From Google we take only your email address. We never ask for or store a password.</li>
+<li>
+<strong>Profile.</strong> Your username, your permanent handle and an optional bio, and your confirmation that you are 18 or older and accept the Terms of Use, with its version and time.</li>
+<li>
+<strong>Debates.</strong> The video and audio of your debates; the transcript of your turns with the time of each word; the AI outline of your arguments and any flags you add to it; the language you debate in and your consent to recording and transcription.</li>
+<li>
+<strong>Taking part.</strong> Chat messages, likes, reports and appeals, the topics and people you follow, and the challenges, queue entries and times you propose.</li>
+<li>
+<strong>Yap Coins.</strong> The positions you take in each turn of a debate and their results.</li>
+<li>
+<strong>Messages to us.</strong> What you write when you contact us.</li>
+</ul>
+<h3>Information we collect automatically</h3>
+<ul>
+<li>
+<strong>Sign-in and security.</strong> A random session identifier in a cookie, and the sign-in methods and activity on your account (shown in your account settings).</li>
+<li>
+<strong>Device and connection.</strong> Your IP address and browser details reach our hosting and video providers with each request, and they keep them in their logs for security and troubleshooting. We don’t store your IP address in our database.</li>
+<li>
+<strong>Debating readiness.</strong> Whether your camera and microphone check passed, and whether you are on the site to receive a challenge.</li>
+<li>
+<strong>Analytics, only if you accept analytics cookies.</strong> Which public pages you open, live and replay watch time, replay starts, matches, follows, reports and return visits. We don’t record your email, handle, IP address, search text, chat or report text in analytics.</li>
+</ul>
+<h3>Information from others</h3>
+<ul>
+<li>
+<strong>Sign-in providers.</strong> Auth0, and Google if you use it, confirm your email address.</li>
+<li>
+<strong>Other people on YAP Arena.</strong> Reports that name your messages or debates, and moderators’ decisions about them.</li>
+<li>
+<strong>Our AI providers.</strong> The captions and AI outline made from what you say in a debate.</li>
+</ul>
+<p>We don’t ask for your date of birth, a payment card, government ID, your contacts or your precise location.</p>
+</section>
+<section id="use" aria-labelledby="use-title">
+<h2 id="use-title">How we use it</h2>
+<ul>
+<li>
+<strong>To run your account</strong>: sign-in, your profile, follows and notifications.</li>
+<li>
+<strong>To run debates</strong>: matching debaters, carrying live video, recording it and publishing the replay.</li>
+<li>
+<strong>To caption and outline debates</strong>: speech-to-text for captions, and an AI outline that summarizes each side’s arguments.</li>
+<li>
+<strong>To run Yap Coins</strong>, the play-money game on each debate.</li>
+<li>
+<strong>To keep the community safe</strong>: chat, reports, moderation, appeals, rate limits and abuse prevention.</li>
+<li>
+<strong>To improve YAP Arena</strong>, with analytics cookies only if you accept them.</li>
+<li>
+<strong>To meet legal obligations</strong> and answer lawful requests.</li>
+</ul>
+<p>We use your information only for these purposes, or for another purpose you consent to or the law allows.</p>
+</section>
+<section id="public" aria-labelledby="public-title">
+<h2 id="public-title">What others can see</h2>
+<div class="legal-note">
+<p>Debates are public. When you debate, anyone can watch you live and in the replay afterwards: your video, your voice, your username and handle, the captions of what you say and the AI outline of your arguments. Debates can be shared by link and QR code.</p>
+</div>
+<table class="legal-table">
+<caption>Public and private information</caption>
+<thead>
+<tr>
+<th scope="col">Information</th>
+<th scope="col">Who can see it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">Username, handle and bio</th>
+<td data-label="Who can see it">Everyone, including people who aren’t signed in.</td>
+</tr>
+<tr>
+<th scope="row">Debates you take part in</th>
+<td data-label="Who can see it">Everyone: video, voice, captions, the AI outline and your flags on it, live and in the replay.</td>
+</tr>
+<tr>
+<th scope="row">Chat messages</th>
+<td data-label="Who can see it">Everyone, with your username.</td>
+</tr>
+<tr>
+<th scope="row">Likes</th>
+<td data-label="Who can see it">Everyone sees the count, not who liked.</td>
+</tr>
+<tr>
+<th scope="row">Yap Coins positions</th>
+<td data-label="Who can see it">Only you. Each turn’s combined results are public once revealed, without names.</td>
+</tr>
+<tr>
+<th scope="row">Reports and appeals</th>
+<td data-label="Who can see it">You and our moderators.</td>
+</tr>
+<tr>
+<th scope="row">Email, sign-in methods, notifications and analytics</th>
+<td data-label="Who can see it">Only you and the staff who run YAP Arena.</td>
+</tr>
+</tbody>
+</table>
+<p>Before your first debate, the Debating card in your account settings asks for your consent to recording and public replay. You can withdraw it anytime for future debates. Debates already held keep their recording, transcript and outline for the periods in <a href="#retention">How long we keep it</a>. Viewers can make their own copies of what they watch, for example by recording their screen, and we can’t control those copies.</p>
+<p>A debate belongs to both debaters, so deleting your account may not delete a debate you took part in. <mark class="legal-todo">[Founder decision: remove, or remove your name from, a deleted account’s debates and chat]</mark>
+</p>
+</section>
+<section id="ai" aria-labelledby="ai-title">
+<h2 id="ai-title">AI features</h2>
+<ul>
+<li>
+<strong>Captions.</strong> A speech-to-text provider, Deepgram (or ElevenLabs, if we switch), turns the active speaker’s audio into text.</li>
+<li>
+<strong>AI outline.</strong> Anthropic’s Claude models summarize each turn into the arguments shown beside the debate. They receive the transcript, the debate’s question and the arguments already made, not your name, handle or email.</li>
+<li>
+<strong>Mistakes.</strong> Captions and outlines are automatic and can be wrong. Debaters can flag mistakes in the outline, and the flag is shown publicly.</li>
+<li>
+<strong>No decisions about you.</strong> The outline summarizes what was said. It doesn’t pick a winner, and it isn’t used to make decisions about you or your account.</li>
+<li>
+<strong>Training.</strong> We don’t use your content to train AI models. <mark class="legal-todo">[Confirm that Deepgram, ElevenLabs and Anthropic don’t train on our data under their API terms]</mark>
+</li>
+</ul>
+</section>
+<section id="sharing" aria-labelledby="sharing-title">
+<h2 id="sharing-title">How we share it</h2>
+<p>
+<strong>We don’t sell or rent personal information, and we don’t share it for advertising.</strong> We share it only in these cases:</p>
+<ul>
+<li>
+<strong>Service providers</strong> that run YAP Arena for us, listed below. Each receives only what it needs to provide its service.</li>
+<li>
+<strong>Everyone, for public content</strong>: the profile, debates and chat described in <a href="#public">What others can see</a>.</li>
+<li>
+<strong>The law and safety</strong>: when the law requires it, or to protect people’s safety, investigate abuse or defend our rights.</li>
+<li>
+<strong>A business change</strong>: if YAP Arena is merged, sold or reorganized, under the same protections.</li>
+</ul>
+<table class="legal-table">
+<caption>Service providers and what each receives</caption>
+<thead>
+<tr>
+<th scope="col">Provider</th>
+<th scope="col">What it does for us</th>
+<th scope="col">What it receives</th>
+<th scope="col">Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">Supabase</th>
+<td data-label="What it does for us">Hosts our database.</td>
+<td data-label="What it receives">Everything in our database: accounts, profiles, debates, chat, transcripts, outlines, Yap Coins records and measurement.</td>
+<td data-label="Where">United States (Ohio)</td>
+</tr>
+<tr>
+<th scope="row">Render</th>
+<td data-label="What it does for us">Runs our website, background jobs and replay encoder.</td>
+<td data-label="What it receives">Every request to yaparena.com, including your IP address and browser details in its request logs, and the recordings it prepares for replay.</td>
+<td data-label="Where">United States (Ohio)</td>
+</tr>
+<tr>
+<th scope="row">Auth0 (Okta)</th>
+<td data-label="What it does for us">Signs you in with an email code or Google.</td>
+<td data-label="What it receives">Your email address, your sign-in identifier, the IP address and browser you sign in from and, if you use Google, what Google shares with it.</td>
+<td data-label="Where">United States</td>
+</tr>
+<tr>
+<th scope="row">Google</th>
+<td data-label="What it does for us">“Continue with Google”, only if you choose it.</td>
+<td data-label="What it receives">Google confirms your email address to Auth0; YAP Arena takes only your email address from it. Google learns that you signed in to YAP Arena. See <a href="https://policies.google.com/privacy">Google’s privacy policy</a>.</td>
+<td data-label="Where">Google’s infrastructure</td>
+</tr>
+<tr>
+<th scope="row">Resend</th>
+<td data-label="What it does for us">Sends the sign-in code emails for Auth0.</td>
+<td data-label="What it receives">Your email address and the one-time code.</td>
+<td data-label="Where">United States (Virginia)</td>
+</tr>
+<tr>
+<th scope="row">LiveKit</th>
+<td data-label="What it does for us">Carries live video and audio, records debates and runs our transcription agent.</td>
+<td data-label="What it receives">Debaters’ video and audio with an internal account number (not your name or email), live captions, and viewers’ connection details such as IP address.</td>
+<td data-label="Where">United States</td>
+</tr>
+<tr>
+<th scope="row">Deepgram</th>
+<td data-label="What it does for us">Turns debaters’ speech into text, through LiveKit.</td>
+<td data-label="What it receives">The audio of the speaker whose turn it is.</td>
+<td data-label="Where">
+<mark class="legal-todo">[Confirm region]</mark>
+</td>
+</tr>
+<tr>
+<th scope="row">ElevenLabs</th>
+<td data-label="What it does for us">Alternative speech-to-text. Not used in production today; we may switch to it.</td>
+<td data-label="What it receives">The audio of the speaker whose turn it is, if we switch.</td>
+<td data-label="Where">
+<mark class="legal-todo">[Confirm region]</mark>
+</td>
+</tr>
+<tr>
+<th scope="row">Anthropic</th>
+<td data-label="What it does for us">Its Claude models write the AI outline of each turn.</td>
+<td data-label="What it receives">The transcript of each turn, the debate’s question and the arguments already made in it. Not your name, handle or email.</td>
+<td data-label="Where">
+<mark class="legal-todo">[Confirm region]</mark>
+</td>
+</tr>
+<tr>
+<th scope="row">Cloudflare</th>
+<td data-label="What it does for us">Runs our domain’s DNS, stores recordings and replays (R2) and delivers replays.</td>
+<td data-label="What it receives">Recordings and replay files, and viewers’ IP address and browser details when they watch a replay.</td>
+<td data-label="Where">R2 storage location <mark class="legal-todo">[Confirm location]</mark>; delivery from Cloudflare’s worldwide network</td>
+</tr>
+</tbody>
+</table>
+<p>
+<mark class="legal-todo">[Confirm each provider’s data processing terms and that none may use our data for its own purposes]</mark>
+</p>
+</section>
+<section id="coins" aria-labelledby="coins-title">
+<h2 id="coins-title">Yap Coins</h2>
+<p>Yap Coins are play money with no cash value. They can’t be bought or withdrawn, so we collect no payment information. We keep a record of each account’s balance, grants and positions so the game stays fair. The combined results of each turn are public once revealed, without names.</p>
+</section>
+<section id="transfers" aria-labelledby="transfers-title">
+<h2 id="transfers-title">Where it is stored</h2>
+<p>Your information is stored and processed <strong>outside Québec and Canada</strong>. Our database and servers are in Ohio, in the United States, and our sign-in, email and video providers keep information in the United States. Our speech-to-text, AI and replay storage providers may process it in the United States or other countries <mark class="legal-todo">[Confirm Deepgram, Anthropic and Cloudflare R2 locations]</mark>. Information held abroad is subject to the laws of that country and may be accessed by its courts and authorities.</p>
+<p>Before sending personal information outside Québec, we assess whether it will be adequately protected, taking into account its sensitivity, the purpose, the safeguards in place and the laws that apply, and we rely on written agreements with our providers. <mark class="legal-todo">[Founder: complete the privacy impact assessment for transfers outside Québec]</mark>
+</p>
+</section>
+<section id="retention" aria-labelledby="retention-title">
+<h2 id="retention-title">How long we keep it</h2>
+<table class="legal-table">
+<caption>How long we keep each kind of information</caption>
+<thead>
+<tr>
+<th scope="col">Information</th>
+<th scope="col">How long</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">Account, profile, follows, notifications and Debating settings</th>
+<td data-label="How long">Until you delete your account.</td>
+</tr>
+<tr>
+<th scope="row">Terms acceptance</th>
+<td data-label="How long">With your account, as a record of what you accepted and when.</td>
+</tr>
+<tr>
+<th scope="row">Sign-in session</th>
+<td data-label="How long">7 days at most; signing out ends it on that device.</td>
+</tr>
+<tr>
+<th scope="row">Sign-in steps in progress</th>
+<td data-label="How long">10 minutes, used once, and deleted within the next hour.</td>
+</tr>
+<tr>
+<th scope="row">Account activity log</th>
+<td data-label="How long">90 days.</td>
+</tr>
+<tr>
+<th scope="row">Debate recordings and replays</th>
+<td data-label="How long">Kept with the debate. <mark class="legal-todo">[Founder decision: retention period for recordings and replays]</mark>
+</td>
+</tr>
+<tr>
+<th scope="row">Transcripts with word timings</th>
+<td data-label="How long">Kept with the debate, and deleted with the speaker’s account. <mark class="legal-todo">[Founder decision: retention period for transcripts]</mark>
+</td>
+</tr>
+<tr>
+<th scope="row">AI outline</th>
+<td data-label="How long">Kept with the debate. A debater’s flags on it are deleted with their account.</td>
+</tr>
+<tr>
+<th scope="row">Provider comparison transcripts</th>
+<td data-label="How long">90 days. Only made while we compare two speech-to-text providers.</td>
+</tr>
+<tr>
+<th scope="row">Transcription delivery receipts</th>
+<td data-label="How long">7 days.</td>
+</tr>
+<tr>
+<th scope="row">Chat and likes</th>
+<td data-label="How long">365 days. A message that is the subject of a report is kept as long as the report.</td>
+</tr>
+<tr>
+<th scope="row">Reports, appeals and moderation records</th>
+<td data-label="How long">365 days after the decision. An open report or appeal is kept until it is decided.</td>
+</tr>
+<tr>
+<th scope="row">Finished matchmaking queue entries</th>
+<td data-label="How long">30 days.</td>
+</tr>
+<tr>
+<th scope="row">Challenges and the debates you took part in</th>
+<td data-label="How long">Kept with the debate. <mark class="legal-todo">[Founder decision: retention period for challenges and debate participation]</mark>
+</td>
+</tr>
+<tr>
+<th scope="row">Yap Coins records</th>
+<td data-label="How long">Kept in a ledger that can’t be edited, so balances stay correct. <mark class="legal-todo">[Founder decision: what happens to Yap Coins records after account deletion]</mark>
+</td>
+</tr>
+<tr>
+<th scope="row">Analytics (only if you accept analytics cookies)</th>
+<td data-label="How long">Events and watch sessions 90 days; an unused consent 180 days; staff reviews that classify accounts in measurement 365 days. Turning analytics off deletes that browser’s measurements at once.</td>
+</tr>
+<tr>
+<th scope="row">Database backups</th>
+<td data-label="How long">7 days, then overwritten.</td>
+</tr>
+<tr>
+<th scope="row">Hosting and provider logs</th>
+<td data-label="How long">As set by each provider. <mark class="legal-todo">[Confirm Render, LiveKit and Cloudflare log retention]</mark>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Cleanup jobs run every hour and delete information when its period ends. Deleted information can remain in database backups until they expire.</p>
+</section>
+<section id="cookies" aria-labelledby="cookies-title">
+<h2 id="cookies-title">Cookies</h2>
+<p>We use strictly necessary cookies to sign you in, keep YAP Arena secure and remember your choices. We don’t use advertising or third-party tracking cookies.</p>
+<p>Our one analytics cookie recognizes your browser across visits so we can count return visits and watch time. It is off by default: it is set only if you choose <strong>Accept all</strong> or turn on Analytics, and we treat your browser’s Global Privacy Control signal as a refusal.</p>
+<p>The <a href="/cookies">Cookie Policy</a> lists every cookie and how long it lasts. Change your choice anytime with <strong>Cookie settings</strong> at the bottom of any page.</p>
+</section>
+<section id="rights" aria-labelledby="rights-title">
+<h2 id="rights-title">Your rights and choices</h2>
+<p>You can ask to access the personal information we hold about you, to correct it, to receive it in a structured, commonly used format, to stop its use or have it deleted, and to have links to it de-indexed where the law allows. You can also withdraw a consent you gave.</p>
+<ul>
+<li>
+<strong>Download your data</strong> from your account’s Privacy settings: a file with your profile, sign-in methods, follows, notifications, terms acceptance and account activity. Chat, reports, debate participation and Yap Coins records aren’t in the file yet; ask us for them.</li>
+<li>
+<strong>Correct your profile</strong> in your account settings. Your handle is permanent; ask us if it must change.</li>
+<li>
+<strong>Turn analytics cookies off</strong> with Cookie settings; it deletes that browser’s measurements.</li>
+<li>
+<strong>Withdraw debating consent</strong> in the Debating card in your account settings.</li>
+<li>
+<strong>Delete your account</strong> by emailing <mark class="legal-todo">[Privacy email]</mark> from the address you sign in with. Deletion is done by hand for now: we confirm the request, end your sessions, delete your profile and sign-in details, and delete or de-identify the other information tied to your account, except what the periods above say we keep. <mark class="legal-todo">[Founder decision: account deletion rules (prompt 12c)]</mark>
+</li>
+</ul>
+<p>We answer requests within 30 days. We may ask you to confirm your identity first.</p>
+</section>
+<section id="security" aria-labelledby="security-title">
+<h2 id="security-title">How we protect it</h2>
+<p>Connections use HTTPS. We don’t store passwords; sign-in uses one-time email codes or Google through Auth0. Sessions are random values that we can end at any time, and staff access is limited by role. Recordings are stored privately and served only through short-lived signed links.</p>
+<p>No system is perfectly secure. If a confidentiality incident creates a risk of serious injury, we will notify the Commission d’accès à l’information and the people affected, and we keep a register of incidents.</p>
+</section>
+<section id="age" aria-labelledby="age-title">
+<h2 id="age-title">Age</h2>
+<p>YAP Arena is for people 18 and older. We don’t knowingly collect information from anyone younger. If we learn that an account belongs to someone under 18, we close it and delete its information. Contact us at <mark class="legal-todo">[Privacy email]</mark> if you believe this has happened.</p>
+</section>
+<section id="governance" aria-labelledby="governance-title">
+<h2 id="governance-title">How we manage personal information</h2>
+<ul>
+<li>
+<strong>Who is responsible.</strong> The person in charge of the protection of personal information (see <a href="#who">Who we are</a>) approves how we collect, use, keep and destroy personal information, and handles requests and complaints.</li>
+<li>
+<strong>Access.</strong> Staff and contractors see personal information only when their role needs it. Moderation and operator tools need a role we grant on purpose.</li>
+<li>
+<strong>Keeping and destroying.</strong> We keep information only for the periods in <a href="#retention">How long we keep it</a>, then delete it or remove what identifies you.</li>
+<li>
+<strong>New projects.</strong> We assess privacy risks before a new project involving personal information, and before sending it outside Québec.</li>
+<li>
+<strong>Complaints.</strong> Write to <mark class="legal-todo">[Privacy email]</mark>. We acknowledge your complaint, look into it and answer in writing within 30 days.</li>
+</ul>
+</section>
+<section id="changes" aria-labelledby="changes-title">
+<h2 id="changes-title">Changes to this policy</h2>
+<p>When we change this policy, we post the new version here with its date. If a change affects how we use information you have already given us, we tell you in YAP Arena before it applies and ask for your consent again where the law requires it.</p>
+</section>
+<section id="contact" aria-labelledby="contact-title">
+<h2 id="contact-title">Contact and complaints</h2>
+<p>Questions, requests and complaints about privacy go to <mark class="legal-todo">[Name and title of the person in charge]</mark> at <mark class="legal-todo">[Privacy email]</mark>, or by mail to <mark class="legal-todo">[Legal name of the business]</mark>, <mark class="legal-todo">[Business address in Québec]</mark>.</p>
+<p>If you aren’t satisfied with our answer, you can complain to the <a href="https://www.cai.gouv.qc.ca">Commission d’accès à l’information du Québec</a> or to the <a href="https://www.priv.gc.ca">Office of the Privacy Commissioner of Canada</a>.</p>
+</section>
+<a class="legal-top" href="#main">Back to top <span aria-hidden="true">↑</span>
+</a>
+</article>
+</div>
+</main>
+<footer class="landing-footer landing-container">
+<nav aria-label="Site">
+<a href="/topics">Topics</a>
+<a href="/coins">Yap Coins</a>
+<a href="/about">About</a>
+<a href="/privacy" aria-current="page">Privacy</a>
+<a href="/terms">Terms</a>
+<a href="/cookies">Cookies</a>
+<span>Play money</span>
+</nav>
+</footer>
+</body>
+</html>
+`;
+
+exports[`renders the privacy, terms and cookie pages 2`] = `
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<title>Terms of use · YAP Arena</title>
+<meta name="description" content="The rules for using YAP Arena: eligibility, public debates, conduct, Yap Coins and your content.">
+<link rel="canonical" href="https://arena.example/terms">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Terms of use · YAP Arena">
+<meta property="og:description" content="The rules for using YAP Arena: eligibility, public debates, conduct, Yap Coins and your content.">
+<meta property="og:url" content="https://arena.example/terms">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/landing.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/legal.css?v=0123456789ab">
+</head>
+<body class="landing legal">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="landing-header landing-container legal-header">
+<a class="landing-brand" href="/">
+<img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena">
+</a>
+<nav class="legal-switch" aria-label="Legal">
+<a href="/privacy">Privacy</a>
+<a href="/terms" aria-current="page">Terms</a>
+<a href="/cookies">Cookies</a>
+</nav>
+</header>
+<main id="main" class="legal-main landing-container">
+<header class="legal-hero">
+<p class="legal-eyebrow reveal">YAP ARENA · LEGAL</p>
+<h1 class="legal-title reveal reveal-2">
+<span class="sr-only">Terms of use</span>
+<span aria-hidden="true">Terms of vse</span>
+</h1>
+<p class="legal-lede reveal reveal-3">These terms are the agreement between you and <mark class="legal-todo">[Legal name of the business]</mark> for using YAP Arena. Please read them together with the <a href="/privacy">Privacy Policy</a>.</p>
+<dl class="legal-meta reveal reveal-4">
+<div>
+<dt>Updated</dt>
+<dd>
+<time datetime="2026-10-30">October 30, 2026</time>
+</dd>
+</div>
+<div>
+<dt>Version</dt>
+<dd>2026-10-30</dd>
+</div>
+</dl>
+<ul class="legal-glance reveal reveal-5">
+<li>
+<strong>18 and older</strong>
+<span>You must be at least 18 to create an account or use YAP Arena.</span>
+</li>
+<li>
+<strong>Debates are public</strong>
+<span>Debates are recorded and replayed publicly, with captions and an AI outline.</span>
+</li>
+<li>
+<strong>Yap Coins are play money</strong>
+<span>They have no cash value and can’t be bought, sold or withdrawn.</span>
+</li>
+<li>
+<strong>Argue the idea</strong>
+<span>No harassment, hate, threats, spam or sharing other people’s private information.</span>
+</li>
+</ul>
+</header>
+<div class="legal-layout">
+<nav class="legal-toc" aria-labelledby="legal-toc-title">
+<h2 id="legal-toc-title">ON THIS PAGE</h2>
+<ol>
+<li>
+<a href="#agreement">Agreement</a>
+</li>
+<li>
+<a href="#eligibility">Eligibility and your account</a>
+</li>
+<li>
+<a href="#debates">Debates, recording and replay</a>
+</li>
+<li>
+<a href="#content">Your content and our licence</a>
+</li>
+<li>
+<a href="#conduct">Conduct</a>
+</li>
+<li>
+<a href="#coins">Yap Coins</a>
+</li>
+<li>
+<a href="#service">Our service</a>
+</li>
+<li>
+<a href="#ending">Suspension and ending your account</a>
+</li>
+<li>
+<a href="#liability">Liability</a>
+</li>
+<li>
+<a href="#changes">Changes to these terms</a>
+</li>
+<li>
+<a href="#law">Governing law</a>
+</li>
+<li>
+<a href="#contact">Contact</a>
+</li>
+</ol>
+</nav>
+<article class="legal-body">
+<section id="agreement" aria-labelledby="agreement-title">
+<h2 id="agreement-title">Agreement</h2>
+<p>By creating an account or using YAP Arena, you accept these terms and the <a href="/privacy">Privacy Policy</a>. If you don’t accept them, don’t use YAP Arena. New accounts confirm this when they claim their handle.</p>
+<p>YAP Arena is operated by <mark class="legal-todo">[Legal name of the business]</mark>, <mark class="legal-todo">[Business address in Québec]</mark> (“YAP Arena”, “we”, “us”).</p>
+</section>
+<section id="eligibility" aria-labelledby="eligibility-title">
+<h2 id="eligibility-title">Eligibility and your account</h2>
+<ul>
+<li>You must be <strong>18 or older</strong> and able to enter into a contract.</li>
+<li>One person per account. Use your own email address or Google account and keep access to it secure: anyone who can read your email or use your Google account can sign in as you.</li>
+<li>Your handle is permanent. Don’t choose a username or handle that impersonates someone, misleads people about who you are or breaks the conduct rules; we may change or remove one that does.</li>
+<li>You are responsible for what happens through your account. Tell us at <mark class="legal-todo">[Contact email]</mark> if you think someone else is using it.</li>
+</ul>
+</section>
+<section id="debates" aria-labelledby="debates-title">
+<h2 id="debates-title">Debates, recording and replay</h2>
+<div class="legal-note">
+<p>Debates on YAP Arena are public. They are shown live, <strong>recorded on video and audio</strong> and <strong>published as replays</strong> that anyone can watch and share.</p>
+</div>
+<ul>
+<li>Each turn is transcribed into captions and summarized in an <strong>AI outline</strong>. Both are automatic and can be wrong; they are not statements by YAP Arena or by the debater. YAP Arena does not declare winners.</li>
+<li>To debate, you must agree to recording, public replay, transcription and the AI outline in the Debating card in your account settings.</li>
+<li>Only show and say what you have the right to share. Don’t put other people on camera without their permission, and don’t play music, video or other material you don’t have the rights to.</li>
+<li>We may pause, end, cancel or remove a debate, for example when it breaks these terms or a technical problem affects it.</li>
+</ul>
+</section>
+<section id="content" aria-labelledby="content-title">
+<h2 id="content-title">Your content and our licence</h2>
+<p>You keep ownership of what you create on YAP Arena: your debate video and audio, what you say and write, your chat messages and your profile (“your content”).</p>
+<p>You grant <mark class="legal-todo">[Legal name of the business]</mark> a non-exclusive, worldwide, royalty-free licence to host, store, record, reproduce, transcribe, caption, summarize (including with AI), adapt for format and length, publish, display, stream and distribute your content on YAP Arena and in links and previews of it, and to have our service providers do so for us. <mark class="legal-todo">[Founder: say whether YAP Arena may also use debate clips to promote itself elsewhere]</mark>
+</p>
+<p>The licence lasts as long as we keep your content under the Privacy Policy, and ends when it is deleted, except for copies in backups until they expire and copies others made while it was public. To the extent the law allows, you agree not to assert moral rights against changes needed only to format, caption or summarize your content.</p>
+<p>You confirm that you have the rights needed to grant this licence. Other people’s debates and content belong to them: you may watch and share links to them, but don’t copy, re-publish or sell them beyond what the law allows.</p>
+</section>
+<section id="conduct" aria-labelledby="conduct-title">
+<h2 id="conduct-title">Conduct</h2>
+<p>Argue the idea, not the person. On YAP Arena, including debates, chat, profiles and usernames, you must not:</p>
+<ul>
+<li>
+<strong>Harass</strong>, bully or threaten anyone, or encourage violence or self-harm.</li>
+<li>Post <strong>hate</strong>: attacks on people for their race, ethnicity, national origin, religion, sex, gender identity, sexual orientation, disability, age or other protected characteristic.</li>
+<li>Share <strong>private information</strong> about someone, such as their address, phone number or documents, or images of them without their consent.</li>
+<li>Post <strong>spam</strong>, scams or misleading links, or impersonate a person or organization.</li>
+<li>Show sexual content or nudity, or anything illegal.</li>
+<li>
+<strong>Manipulate</strong> YAP Arena: use bots or several accounts, coordinate to distort Yap Coins results, or try to take a position in your own debate.</li>
+<li>Interfere with the service: attack, overload or probe it, get around limits or bans, or collect other people’s information by automated means.</li>
+</ul>
+<p>Anyone can report a chat message or a debate. Moderators may remove chat, pause a debate’s chat, restrict your community access for 7 days, or suspend or close your account. If a decision affects your chat or account, you can appeal once within 30 days from <a href="/account/moderation">your reports and appeals</a>; a different moderator decides.</p>
+</section>
+<section id="coins" aria-labelledby="coins-title">
+<h2 id="coins-title">Yap Coins</h2>
+<div class="legal-note">
+<p>
+<strong>Yap Coins are play money.</strong> They have no cash value and are not money, property, a currency or an investment.</p>
+</div>
+<ul>
+<li>Every account receives a welcome grant of Yap Coins. You use them to answer each turn of a debate in a play-money game.</li>
+<li>Yap Coins <strong>can’t be bought, sold, withdrawn, transferred to another account or exchanged</strong> for money, prizes or anything else of value. YAP Arena has no real-money features.</li>
+<li>We may change the game’s rules, correct balances affected by errors, and adjust or remove Yap Coins obtained by breaking these terms. Closing an account ends its Yap Coins without compensation.</li>
+<li>If YAP Arena ever offers anything of real value, it will come with separate terms that you accept first.</li>
+</ul>
+</section>
+<section id="service" aria-labelledby="service-title">
+<h2 id="service-title">Our service</h2>
+<p>YAP Arena is new and changes often. We may add, change or remove features, and the service may be interrupted for maintenance or because of problems with our providers. We provide YAP Arena “as is” and don’t promise that it will always be available or free of errors.</p>
+<p>What debaters and other users say is their own opinion. YAP Arena doesn’t endorse it, and it isn’t professional advice.</p>
+</section>
+<section id="ending" aria-labelledby="ending-title">
+<h2 id="ending-title">Suspension and ending your account</h2>
+<p>You can stop using YAP Arena at any time and ask us to delete your account at <mark class="legal-todo">[Contact email]</mark> (see the <a href="/privacy#rights">Privacy Policy</a>).</p>
+<p>We may remove content, or suspend or close an account, if it breaks these terms, if the law requires it, or to protect people or YAP Arena. We tell you why unless the law or someone’s safety prevents it. When an account ends, its Yap Coins end, and its debates remain public under the Privacy Policy’s periods unless we remove them.</p>
+</section>
+<section id="liability" aria-labelledby="liability-title">
+<h2 id="liability-title">Liability</h2>
+<p>To the extent the law allows, <mark class="legal-todo">[Legal name of the business]</mark> is not liable for indirect or consequential losses, or for what other users say or do. Nothing in these terms limits rights you have as a consumer under the laws of Québec or Canada that can’t be waived, or our liability for our own intentional or gross fault.</p>
+</section>
+<section id="changes" aria-labelledby="changes-title">
+<h2 id="changes-title">Changes to these terms</h2>
+<p>We may update these terms. We post the new version here with its date and version. If a change is significant, we tell you in YAP Arena before it applies and ask you to accept the new version to keep using your account.</p>
+</section>
+<section id="law" aria-labelledby="law-title">
+<h2 id="law-title">Governing law</h2>
+<p>These terms are governed by the laws of Québec and the federal laws of Canada that apply there. Disputes go to the courts of the judicial district of <mark class="legal-todo">[Judicial district]</mark>, Québec, without limiting a consumer’s right to bring a claim where they live.</p>
+</section>
+<section id="contact" aria-labelledby="contact-title">
+<h2 id="contact-title">Contact</h2>
+<p>Questions about these terms go to <mark class="legal-todo">[Contact email]</mark>, or by mail to <mark class="legal-todo">[Legal name of the business]</mark>, <mark class="legal-todo">[Business address in Québec]</mark>.</p>
+</section>
+<a class="legal-top" href="#main">Back to top <span aria-hidden="true">↑</span>
+</a>
+</article>
+</div>
+</main>
+<footer class="landing-footer landing-container">
+<nav aria-label="Site">
+<a href="/topics">Topics</a>
+<a href="/coins">Yap Coins</a>
+<a href="/about">About</a>
+<a href="/privacy">Privacy</a>
+<a href="/terms" aria-current="page">Terms</a>
+<a href="/cookies">Cookies</a>
+<span>Play money</span>
+</nav>
+</footer>
+</body>
+</html>
+`;
+
+exports[`renders the privacy, terms and cookie pages 3`] = `
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<title>Cookie policy · YAP Arena</title>
+<meta name="description" content="The cookies and similar technologies YAP Arena uses, why, and how to change your choice.">
+<link rel="canonical" href="https://arena.example/cookies">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Cookie policy · YAP Arena">
+<meta property="og:description" content="The cookies and similar technologies YAP Arena uses, why, and how to change your choice.">
+<meta property="og:url" content="https://arena.example/cookies">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/landing.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/legal.css?v=0123456789ab">
+</head>
+<body class="landing legal">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="landing-header landing-container legal-header">
+<a class="landing-brand" href="/">
+<img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena">
+</a>
+<nav class="legal-switch" aria-label="Legal">
+<a href="/privacy">Privacy</a>
+<a href="/terms">Terms</a>
+<a href="/cookies" aria-current="page">Cookies</a>
+</nav>
+</header>
+<main id="main" class="legal-main landing-container">
+<header class="legal-hero">
+<p class="legal-eyebrow reveal">YAP ARENA · LEGAL</p>
+<h1 class="legal-title reveal reveal-2">
+<span class="sr-only">Cookie policy</span>
+<span aria-hidden="true">Cookie policy</span>
+</h1>
+<p class="legal-lede reveal reveal-3">This policy explains the cookies and similar technologies YAP Arena uses, why we use them and how you control them. It is part of our <a href="/privacy">Privacy Policy</a>.</p>
+<dl class="legal-meta reveal reveal-4">
+<div>
+<dt>Updated</dt>
+<dd>
+<time datetime="2026-10-30">October 30, 2026</time>
+</dd>
+</div>
+<div>
+<dt>Version</dt>
+<dd>2026-10-30</dd>
+</div>
+</dl>
+<ul class="legal-glance reveal reveal-5">
+<li>
+<strong>Essential by default</strong>
+<span>Only the cookies YAP Arena needs to work are on until you choose.</span>
+</li>
+<li>
+<strong>Analytics is your choice</strong>
+<span>Accept or reject it in the banner; both buttons weigh the same.</span>
+</li>
+<li>
+<strong>No advertising cookies</strong>
+<span>No ad networks, no cross-site tracking, no third-party analytics.</span>
+</li>
+<li>
+<strong>Change it anytime</strong>
+<span>Cookie settings is at the bottom of every page and in your account.</span>
+</li>
+</ul>
+</header>
+<div class="legal-layout">
+<nav class="legal-toc" aria-labelledby="legal-toc-title">
+<h2 id="legal-toc-title">ON THIS PAGE</h2>
+<ol>
+<li>
+<a href="#what">What cookies are</a>
+</li>
+<li>
+<a href="#categories">How we use cookies</a>
+</li>
+<li>
+<a href="#list">The cookies we set</a>
+</li>
+<li>
+<a href="#storage">Similar technologies</a>
+</li>
+<li>
+<a href="#third-parties">Other services</a>
+</li>
+<li>
+<a href="#choices">Your choices</a>
+</li>
+<li>
+<a href="#changes">Changes to this policy</a>
+</li>
+<li>
+<a href="#contact">Contact</a>
+</li>
+</ol>
+</nav>
+<article class="legal-body">
+<section id="what" aria-labelledby="what-title">
+<h2 id="what-title">What cookies are</h2>
+<p>Cookies are small text files a website stores in your browser. They let the site recognize your browser between pages, for example to keep you signed in. Some last only for a visit; others stay for a set time.</p>
+<p>Websites also use similar technologies, such as your browser’s local and session storage, which keep small values on your device. This policy covers both, and calls them all “cookies” where the difference doesn’t matter.</p>
+</section>
+<section id="categories" aria-labelledby="categories-title">
+<h2 id="categories-title">How we use cookies</h2>
+<table class="legal-table">
+<caption>Cookie categories</caption>
+<thead>
+<tr>
+<th scope="col">Category</th>
+<th scope="col">What it does</th>
+<th scope="col">Your choice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">Strictly necessary</th>
+<td data-label="What it does">Signs you in, keeps your session secure, limits abuse and remembers your choices, such as your cookie choice and captions setting.</td>
+<td data-label="Your choice">Always on. YAP Arena can’t work without them.</td>
+</tr>
+<tr>
+<th scope="row">Analytics</th>
+<td data-label="What it does">Counts which debates and pages people find, watch time, replay starts and return visits, so we can see what works and improve YAP Arena.</td>
+<td data-label="Your choice">Off until you accept. You can turn it off anytime.</td>
+</tr>
+<tr>
+<th scope="row">Advertising</th>
+<td data-label="What it does">None. We don’t use advertising or cross-site tracking cookies.</td>
+<td data-label="Your choice">Not used.</td>
+</tr>
+</tbody>
+</table>
+<p>All our cookies are first-party: yaparena.com sets them, and they are sent only to yaparena.com.</p>
+</section>
+<section id="list" aria-labelledby="list-title">
+<h2 id="list-title">The cookies we set</h2>
+<table class="legal-table">
+<caption>Cookies set by yaparena.com</caption>
+<thead>
+<tr>
+<th scope="col">Cookie</th>
+<th scope="col">Category</th>
+<th scope="col">Purpose</th>
+<th scope="col">Duration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">__Host-session</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">Keeps you signed in. It holds a random value, never your email.</td>
+<td data-label="Duration">7 days, or until you sign out</td>
+</tr>
+<tr>
+<th scope="row">__Host-sign-in</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">Ties a sign-in in progress to your browser, for security.</td>
+<td data-label="Duration">10 minutes</td>
+</tr>
+<tr>
+<th scope="row">yap_media_guard</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">A signed random value that limits how fast one browser can load pages and video, to prevent abuse.</td>
+<td data-label="Duration">15 minutes</td>
+</tr>
+<tr>
+<th scope="row">__Host-measurement</th>
+<td data-label="Category">Analytics</td>
+<td data-label="Purpose">Set only after you accept analytics. A random value that groups this browser’s measurements; we store only a fingerprint of it.</td>
+<td data-label="Duration">180 days, or until you turn analytics off</td>
+</tr>
+</tbody>
+</table>
+<p>Our cookies are marked HttpOnly and Secure, so page scripts can’t read them and they are only sent over HTTPS.</p>
+</section>
+<section id="storage" aria-labelledby="storage-title">
+<h2 id="storage-title">Similar technologies</h2>
+<p>These values stay on your device. We don’t send them to our servers except where the purpose says so, and none of them is used for analytics or advertising.</p>
+<table class="legal-table">
+<caption>Similar technologies on your device</caption>
+<thead>
+<tr>
+<th scope="col">Name</th>
+<th scope="col">Category</th>
+<th scope="col">Purpose</th>
+<th scope="col">Duration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">yaparena-measurement-declined</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">Remembers that you rejected analytics, so we don’t ask again.</td>
+<td data-label="Duration">Until you clear site data</td>
+</tr>
+<tr>
+<th scope="row">yap:live-captions</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">Remembers whether you turned captions on or off.</td>
+<td data-label="Duration">Until you clear site data</td>
+</tr>
+<tr>
+<th scope="row">yaparena-stake-defaults, -review, -explained</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">Your Yap Coins ticket defaults, whether to show the review step, and that you’ve seen the explanation.</td>
+<td data-label="Duration">Until you clear site data</td>
+</tr>
+<tr>
+<th scope="row">yaparena-results-seen</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">Which Yap Coins results you’ve already seen.</td>
+<td data-label="Duration">Until you clear site data</td>
+</tr>
+<tr>
+<th scope="row">yaparena-auth-return, yaparena-coin-confirmation</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">The page to return to after signing in, and a Yap Coins confirmation in progress.</td>
+<td data-label="Duration">Until you close the tab</td>
+</tr>
+<tr>
+<th scope="row">media-speaker</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">While you debate: your chosen camera, microphone and mute state.</td>
+<td data-label="Duration">Until you close the tab</td>
+</tr>
+<tr>
+<th scope="row">Offline page</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">Our service worker keeps a copy of the offline page and its stylesheet, shown if you lose your connection.</td>
+<td data-label="Duration">Until we update it or you clear site data</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="third-parties" aria-labelledby="third-parties-title">
+<h2 id="third-parties-title">Other services</h2>
+<p>We don’t load third-party scripts, analytics or advertising on yaparena.com.</p>
+<ul>
+<li>
+<strong>Sign-in.</strong> When you sign in, you go to our sign-in provider, Auth0, at auth.yaparena.com. Auth0 sets its own cookies there to run sign-in. If you choose Google, Google may set cookies on its own sites. Their policies apply: <a href="https://www.okta.com/privacy-policy/">Okta (Auth0)</a> and <a href="https://policies.google.com/technologies/cookies">Google</a>.</li>
+<li>
+<strong>Video and replays.</strong> Live video comes from LiveKit and replays from Cloudflare. Your browser connects to them directly, so they receive your IP address, but they don’t set cookies on yaparena.com.</li>
+</ul>
+</section>
+<section id="choices" aria-labelledby="choices-title">
+<h2 id="choices-title">Your choices</h2>
+<ul>
+<li>
+<strong>The banner.</strong> On your first visit, choose <strong>Accept all</strong>, <strong>Reject all</strong> or <strong>Customize</strong>. Both buttons weigh the same, and until you choose, analytics stays off. If your browser sends a Global Privacy Control signal, we treat it as Reject all and don’t show the banner.</li>
+<li>
+<strong>Cookie settings.</strong> Change your choice anytime with <strong>Cookie settings</strong> at the bottom of any page, in your account’s Privacy tab, or <a href="/home#cookie-settings">here</a>. Turning analytics off deletes the measurements collected through that browser.</li>
+<li>
+<strong>Your browser.</strong> You can block or delete cookies in your browser’s settings. If you block strictly necessary cookies, you won’t be able to sign in.</li>
+</ul>
+<p>Your choice is saved for each browser. If you use another browser or device, or clear your cookies, we ask again.</p>
+</section>
+<section id="changes" aria-labelledby="changes-title">
+<h2 id="changes-title">Changes to this policy</h2>
+<p>When we change how we use cookies, we update this page and its date. If we add a new kind of optional cookie, we ask for your choice again.</p>
+</section>
+<section id="contact" aria-labelledby="contact-title">
+<h2 id="contact-title">Contact</h2>
+<p>Questions about cookies go to <mark class="legal-todo">[Privacy email]</mark>.</p>
+</section>
+<a class="legal-top" href="#main">Back to top <span aria-hidden="true">↑</span>
+</a>
+</article>
+</div>
+</main>
+<footer class="landing-footer landing-container">
+<nav aria-label="Site">
+<a href="/topics">Topics</a>
+<a href="/coins">Yap Coins</a>
+<a href="/about">About</a>
+<a href="/privacy">Privacy</a>
+<a href="/terms">Terms</a>
+<a href="/cookies" aria-current="page">Cookies</a>
+<span>Play money</span>
+</nav>
 </footer>
 </body>
 </html>
@@ -13152,7 +14509,7 @@ exports[`renders the topic list 1`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -13299,7 +14656,7 @@ exports[`renders the topic list 2`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>
@@ -13446,7 +14803,7 @@ exports[`renders the topic list 3`] = `
 <span>YAP ARENA <span class="muted">/ Ideas under pressure.</span>
 </span>
 <span>
-<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · Play money</span>
+<a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span>
 </div>
 </footer>
 </body>

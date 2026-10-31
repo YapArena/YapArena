@@ -2,6 +2,7 @@ import { Router } from "express";
 import type { NextFunction, Request, Response } from "express";
 import type { createIdentityRepository } from "./repository.ts";
 import type { ProductActionRecorder } from "../measurement/router.ts";
+import { MINIMUM_AGE, TERMS_VERSION } from "./terms.ts";
 
 type Repository = ReturnType<typeof createIdentityRepository>;
 const handlePattern = /^[a-z0-9][a-z0-9-]{2,39}$/;
@@ -21,7 +22,8 @@ function pagination(query: Record<string, unknown>) {
     : null;
 }
 
-type ProfileField = "handle" | "displayName" | "bio" | "publicationState";
+type ProfileField =
+  "handle" | "displayName" | "bio" | "publicationState" | "terms";
 type FieldProblem = { field?: ProfileField; message: string };
 
 // People see these messages next to the field they describe.
@@ -41,12 +43,16 @@ const problems = {
     field: "publicationState",
     message: "Choose a public or private profile.",
   },
+  terms: {
+    field: "terms",
+    message: `Confirm you're ${MINIMUM_AGE} or older and accept the Terms of Use and Privacy Policy.`,
+  },
 } as const satisfies Record<string, FieldProblem>;
 
 function invalid(response: Response, problem: FieldProblem) {
   return response.status(400).json({
     error: problem.message,
-    code: "invalid_profile",
+    code: problem === problems.terms ? "terms_required" : "invalid_profile",
     ...(problem.field ? { field: problem.field } : {}),
   });
 }
@@ -58,6 +64,7 @@ function profileInput(body: unknown):
         displayName: string;
         bio: string | null;
         publicationState: "draft" | "published";
+        acceptTerms: boolean;
       };
     }
   | { problem: FieldProblem } {
@@ -67,7 +74,13 @@ function profileInput(body: unknown):
   if (
     Object.keys(value).some(
       (key) =>
-        !["handle", "displayName", "bio", "publicationState"].includes(key),
+        ![
+          "handle",
+          "displayName",
+          "bio",
+          "publicationState",
+          "acceptTerms",
+        ].includes(key),
     )
   )
     return { problem: problems.body };
@@ -87,8 +100,16 @@ function profileInput(body: unknown):
     return { problem: problems.bio };
   if (publicationState !== "draft" && publicationState !== "published")
     return { problem: problems.publicationState };
+  if (value.acceptTerms !== undefined && typeof value.acceptTerms !== "boolean")
+    return { problem: problems.terms };
   return {
-    value: { handle, displayName: displayName.trim(), bio, publicationState },
+    value: {
+      handle,
+      displayName: displayName.trim(),
+      bio,
+      publicationState,
+      acceptTerms: value.acceptTerms === true,
+    },
   };
 }
 
@@ -194,6 +215,8 @@ export function createIdentityRouter({
   router.post("/profile", requireParticipant, async (request, response) => {
     const input = profileInput(request.body);
     if ("problem" in input) return invalid(response, input.problem);
+    // A new account confirms the minimum age and accepts the terms first.
+    if (!input.value.acceptTerms) return invalid(response, problems.terms);
     try {
       const profile = await identity.createProfile(
         request.user!.id,
@@ -201,6 +224,7 @@ export function createIdentityRouter({
         input.value.displayName,
         input.value.bio,
         input.value.publicationState,
+        { version: TERMS_VERSION, minimumAge: MINIMUM_AGE },
       );
       return response.status(201).json({ profile });
     } catch (error) {

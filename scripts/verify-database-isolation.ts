@@ -129,6 +129,7 @@ const applicationTables = [
   "outline_flags",
   "challenge_time_proposals",
   "matchmaking_presence",
+  "terms_acceptances",
   "job_heartbeats",
 ];
 const container = `yaparena-isolation-${randomUUID().slice(0, 8)}`;

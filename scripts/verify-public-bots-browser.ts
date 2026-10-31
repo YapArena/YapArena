@@ -97,6 +97,7 @@ export async function verifyPublicBotsBrowser({
       handle: "shared-ui-" + randomUUID().slice(0, 8),
       displayName: "UI Test Participant",
       bio: "Synthetic local interface trial.",
+      acceptTerms: true,
     });
     const profile = await isolated.request.patch(base + "/api/me/profile", {
       data: { publicationState: "published" },
@@ -153,7 +154,10 @@ export async function verifyPublicBotsBrowser({
     home.setDefaultTimeout(20000);
     watch.setDefaultTimeout(20000);
     await home.bringToFront();
-    const dismiss = home.getByRole("button", { name: "Not now", exact: true });
+    const dismiss = home.getByRole("button", {
+      name: "Reject all",
+      exact: true,
+    });
     if (await dismiss.isVisible()) await dismiss.click();
     await home.locator(`[data-trending="${topic}"]`).click();
     await watch

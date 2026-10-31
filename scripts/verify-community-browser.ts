@@ -112,6 +112,7 @@ async function register(name: string, publishProfile = false) {
     await setup.getByLabel("Handle", { exact: true }).fill(handle);
     await setup.getByText(`@${handle} is free.`).waitFor();
     await setup.getByRole("button", { name: "Continue" }).click();
+    await setup.getByRole("checkbox", { name: /18 or older/ }).check();
     await setup.getByRole("button", { name: "Claim my handle" }).click();
     await setup.getByRole("button", { name: "Start exploring" }).click();
     await setup.waitFor({ state: "detached" });
@@ -270,7 +271,7 @@ try {
     "Too soon",
   );
   const desktopConsent = author.page.getByRole("button", {
-    name: "Not now",
+    name: "Reject all",
     exact: true,
   });
   if (await desktopConsent.isVisible()) await desktopConsent.click();
@@ -481,7 +482,7 @@ try {
     "mobile emulation uses 44px message actions",
   );
   const mobileConsent = mobilePage.getByRole("button", {
-    name: "Not now",
+    name: "Reject all",
     exact: true,
   });
   if (await mobileConsent.isVisible()) await mobileConsent.click();

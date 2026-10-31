@@ -59,7 +59,7 @@ export async function createProfileForTest(
   },
 ) {
   const response = await context.request.post(`${base}/api/me/profile`, {
-    data: { publicationState: "draft", ...profile },
+    data: { publicationState: "draft", acceptTerms: true, ...profile },
   });
   if (response.status() !== 201)
     throw new Error(`test profile failed with HTTP ${response.status()}`);

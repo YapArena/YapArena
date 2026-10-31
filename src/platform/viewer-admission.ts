@@ -22,6 +22,9 @@ export function mediaDeliveryLane(
     ([
       "/",
       "/about",
+      "/privacy",
+      "/terms",
+      "/cookies",
       "/debates",
       "/topics",
       "/people",

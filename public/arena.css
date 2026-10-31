@@ -3438,11 +3438,7 @@ textarea::placeholder {
   .arena-page
     .arena-workspace:has(.arena-chat-compose textarea:focus)
     .stake-panel:not([data-sheet]),
-  .arena-page:has(
-      .measurement-choice:not([hidden]),
-      .cookie-choice:not([hidden])
-    )
-    .stake-panel:not([data-sheet]) {
+  .arena-page:has(.cookie-choice:not([hidden])) .stake-panel:not([data-sheet]) {
     display: none;
   }
 }
@@ -3459,7 +3455,7 @@ textarea::placeholder {
 }
 
 /* Yap Coins results notice (Decision 0013, interface 10), on every page. It
-   sits below the header and under the measurement choice banner. */
+   sits below the header and under the cookie banner. */
 .results-notice {
   position: fixed;
   z-index: 90;
