@@ -90,7 +90,7 @@ function choicePanel() {
   panel.className = "measurement-choice";
   panel.setAttribute("aria-label", "Usage measurement choice");
   panel.hidden = true;
-  panel.innerHTML = `<p><strong>Help improve YAP Arena?</strong> With your permission, we count which pages people discover and how long they watch. We do not count wallets as people. You can change this choice anytime. <a href="/about#measurement">How measurement works</a></p><div><button type="button" data-measurement-allow>Allow measurement</button><button type="button" data-measurement-decline>Not now</button></div><p role="status" aria-live="polite" data-measurement-status></p>`;
+  panel.innerHTML = `<p><strong>Help improve YAP Arena?</strong> With your permission, we count which pages people discover and how long they watch. You can change this choice anytime. <a href="/about#measurement">How measurement works</a></p><div><button type="button" data-measurement-allow>Allow measurement</button><button type="button" data-measurement-decline>Not now</button></div><p role="status" aria-live="polite" data-measurement-status></p>`;
   document.body.append(panel);
   const status = panel.querySelector<HTMLElement>("[data-measurement-status]")!;
   panel
