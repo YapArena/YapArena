@@ -1,6 +1,7 @@
 import type { Pool } from "pg";
 import { createA4Repository } from "./features/a4/repository.ts";
 import { createCoinDebateSandbox } from "./features/account-wallet/debate-sandbox.ts";
+import { createTreasuryMonitor } from "./features/account-wallet/treasury-monitor.ts";
 import { createIdentityRepository } from "./features/identity/repository.ts";
 import { createMatchingRepository } from "./features/matching/repository.ts";
 import { createMatchmaking } from "./features/matching/matchmaking.ts";
@@ -211,6 +212,13 @@ export function createServices({
     background: {
       a4,
       coinDebates,
+      coinTreasury: coinDebates
+        ? createTreasuryMonitor({
+            read: () => coinDebates.treasury(),
+            thresholdUsdc: config.coinTreasuryAlertUsdc,
+            logger,
+          })
+        : undefined,
       transcription:
         transcription && transcriber && outlines
           ? {

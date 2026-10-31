@@ -9,6 +9,13 @@ import type { AuthRequest } from "./auth-events.js";
 import type { Profile } from "./account-types.js";
 import { apiErrorStatus, apiFetch } from "./lib/api.js";
 import { sessionStore } from "./lib/session.js";
+import { formatCoins } from "./lib/coin-format.js";
+import {
+  claimWelcome,
+  held,
+  spendable,
+  type CoinSummary,
+} from "./lib/coins.js";
 
 type HeaderProfile = Pick<
   Profile,
@@ -141,13 +148,10 @@ if (header) {
       source: emailFirst ? ("wallet" as const) : ("play" as const),
     };
   }
-  // 10,000 atomic units are one Yap Coin for both cash and grant principal.
-  const yapCoins = (atoms: bigint) => {
-    const fraction = String(atoms % 10_000n)
-      .padStart(4, "0")
-      .replace(/0+$/, "");
-    return `${atoms / 10_000n}${fraction ? `.${fraction}` : ""} YC`;
-  };
+  // Decision 0013: the header claims the welcome grant the first time a
+  // signed-in summary shows none, once per page and account, so a new
+  // account never sees 0 YC.
+  let welcomeTried = false;
   // Shows a balance response; returns false when the account is signed out.
   async function showBalance(
     { response, source }: Awaited<ReturnType<typeof balanceRequest>>,
@@ -160,22 +164,24 @@ if (header) {
       return true;
     }
     if (source === "sandbox") {
-      const value: {
-        balances: {
-          cashAvailable: string;
-          reserved: string;
-          promotionalPrincipal: string;
-          promotionalReserved: string;
-        };
-      } = await response.json();
+      let value: CoinSummary = await response.json();
       if (current !== version) return true;
-      const { balances } = value;
-      balance.textContent = yapCoins(
-        BigInt(balances.cashAvailable) + BigInt(balances.promotionalPrincipal),
-      );
-      reserved.textContent = `Reserved ${yapCoins(
-        BigInt(balances.reserved) + BigInt(balances.promotionalReserved),
-      )}`;
+      if (
+        !value.initialized &&
+        !value.financialReviewRequired &&
+        !welcomeTried
+      ) {
+        welcomeTried = true;
+        try {
+          value = await claimWelcome(value);
+        } catch {
+          // The next read tries again on another page; show what we have.
+        }
+        if (current !== version) return true;
+      }
+      // The same figures as /coins and the debate panel (frontend/lib/coins.ts).
+      balance.textContent = formatCoins(spendable(value.balances));
+      reserved.textContent = `In open positions: ${formatCoins(held(value.balances))}`;
     } else if (source === "wallet") {
       const value: { available: string; reserved: string } =
         await response.json();
@@ -282,6 +288,7 @@ if (header) {
   });
   window.addEventListener("yap:account-changed", () => {
     resumeNotice = "";
+    welcomeTried = false;
     clearAccount();
     session("checking");
     void refresh(false);

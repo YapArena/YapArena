@@ -139,8 +139,11 @@ describe("results notice (Decision 0013, interface 10)", () => {
       groupLine(refunds),
       "“Canada should expand nuclear power” · 2 positions were refunded",
     );
-    assert.equal(noteText(0), "Simulated, no cash value.");
-    assert.equal(noteText(1), "And 1 more debate. Simulated, no cash value.");
-    assert.equal(noteText(3), "And 3 more debates. Simulated, no cash value.");
+    assert.equal(noteText(0), "Play money · no cash value.");
+    assert.equal(noteText(1), "And 1 more debate. Play money · no cash value.");
+    assert.equal(
+      noteText(3),
+      "And 3 more debates. Play money · no cash value.",
+    );
   });
 });

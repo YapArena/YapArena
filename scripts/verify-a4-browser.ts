@@ -207,7 +207,7 @@ try {
     );
   debatePageBots.privateControlsRemoved = true;
   const botsLink = page.getByRole("link", {
-    name: "Bots sandbox on Yap Coins →",
+    name: "Practice with bots →",
   });
   assert.equal(await botsLink.getAttribute("href"), `/coins?debate=${debate}`);
   debatePageBots.sandboxLink = true;

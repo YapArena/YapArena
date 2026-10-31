@@ -170,6 +170,19 @@ hours after the debate ends.
 | ---------------------- | ------- | ---------------------------------------------------------- |
 | `TURN_WINDOWS_ENABLED` | `false` | One Yap Coins trading window per live turn; web and worker |
 
+Yap Coins run in launch mode on staging as in production
+([coin sandbox operations](coin-sandbox-operations.md#launch-mode-play-money-only)): no simulated
+purchases or withdrawals, and turn windows as the only way to take a position. Seed the center and
+promotional treasuries once per database before the first debate
+([procedure](coin-sandbox-operations.md#funding-the-center-and-promotional-treasuries-d1)); until
+then every answer is refused as paused. Set `COIN_SANDBOX_TRANSFERS_ENABLED=true` on the web
+service only for a deliberate trial of the simulated money flows.
+
+| Variable                           | Default  | Purpose                                                                      |
+| ---------------------------------- | -------- | ---------------------------------------------------------------------------- |
+| `COIN_SANDBOX_TRANSFERS_ENABLED`   | `false`  | Simulated purchases, withdrawals and error reports; web; never on production |
+| `COIN_SANDBOX_TREASURY_ALERT_USDC` | `200000` | Worker warning and `/metrics` flag below this treasury balance               |
+
 ## Enable live transcription and captions
 
 [Decision 0012](decisions/0012-live-argument-outline.md) adds a LiveKit Cloud transcriber agent.
