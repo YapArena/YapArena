@@ -37,7 +37,10 @@ import { createEmailAuthSecurity } from "./platform/auth/browser-security.ts";
 import { SessionUnavailableError } from "./platform/auth/sessions.ts";
 
 import { createMessageRouter } from "./features/messages/router.ts";
-import { createDiscoveryRouter } from "./features/discovery/router.ts";
+import {
+  createDiscoveryRouter,
+  createPageSender,
+} from "./features/discovery/router.ts";
 import { createIdentityRouter } from "./features/identity/router.ts";
 import { createMatchingRouter } from "./features/matching/router.ts";
 import { createMatchmakingRouter } from "./features/matching/matchmaking-router.ts";
@@ -50,7 +53,7 @@ import {
   createMediaRouter,
   createMediaWebhookRouter,
 } from "./features/media/router.ts";
-import { renderUnavailable } from "./features/discovery/web.ts";
+import { renderNotFound, renderUnavailable } from "./features/discovery/web.ts";
 import { assetRevision } from "./features/discovery/assets.ts";
 import {
   LANDING_FONT_PATH,
@@ -80,6 +83,11 @@ import {
   createCsrfOriginProtection,
 } from "./platform/security.ts";
 
+// A browser asking for a page, not a script or API client asking for JSON.
+const wantsPage = (request: Request) =>
+  Boolean(request.headers?.accept?.includes("text/html")) &&
+  !request.path.startsWith("/api/");
+
 export const handleError: ErrorRequestHandler = (
   error: unknown,
   request,
@@ -106,10 +114,7 @@ export const handleError: ErrorRequestHandler = (
 
   request.log.error({ error }, "unhandled request error");
 
-  if (
-    request.headers?.accept?.includes("text/html") &&
-    !request.path.startsWith("/api/")
-  ) {
+  if (wantsPage(request)) {
     return response.status(500).type("html").send(renderUnavailable());
   }
 
@@ -221,7 +226,12 @@ export function createApp({
   accountWallet?: ReturnType<typeof createAccountWallet>;
   coinSandbox?: Pick<
     Parameters<typeof createCoinSandboxRouter>[0],
-    "sandbox" | "debates" | "operations" | "reports"
+    | "sandbox"
+    | "debates"
+    | "operations"
+    | "reports"
+    | "transfersEnabled"
+    | "manualRounds"
   >;
   coinWebhook?: RequestHandler;
   // Decision 0012: public turn-window timing, mounted only when enabled.
@@ -405,6 +415,14 @@ export function createApp({
     metrics.handler,
   );
 
+  const origin = (applicationOrigin ?? "http://localhost:3000").replace(
+    /\/$/,
+    "",
+  );
+  const pageFlags = {
+    emailFirst: true,
+    matchmakingEnabled: Boolean(matchmaking && identity),
+  };
   const recordProductAction = measurement
     ? createProductActionRecorder({ measurement, environment })
     : undefined;
@@ -416,6 +434,12 @@ export function createApp({
         .sendFile(fileURLToPath(new URL("../public/sw.js", import.meta.url)));
     });
     const assetRoot = fileURLToPath(new URL("../public", import.meta.url));
+    // Browsers request /favicon.ico from the root even without a link to it.
+    app.get("/favicon.ico", (_request, response) => {
+      response
+        .set("Cache-Control", "public, max-age=86400")
+        .sendFile("icons/favicon.ico", { root: assetRoot });
+    });
     const assets = express.static(assetRoot, { maxAge: 0 });
     // Only the current revision is immutable: a stale ?v= from another
     // deploy must not pin this build's content under an old URL.
@@ -444,8 +468,7 @@ export function createApp({
         a4Enabled: a4?.mode !== undefined && a4.mode !== "disabled",
         mediaEnabled: Boolean(media && mediaProvider && matching && identity),
         applicationOrigin: applicationOrigin ?? "http://localhost:3000",
-        emailFirst: true,
-        matchmakingEnabled: Boolean(matchmaking && identity),
+        ...pageFlags,
         signedIn: createSessionCheck({ sessions, environment }),
         liveOutline: outlines
           ? { snapshot: (id: string) => outlines.snapshot(id) }
@@ -509,8 +532,11 @@ export function createApp({
         response
           .set("Cache-Control", "private, no-store")
           .set("Vary", "Cookie");
+        // While Yap Coins run on the coin sandbox, the live ledger holds
+        // nothing in phase 1 (founder D2); browsers read the sandbox summary
+        // instead, so this reports itself off rather than showing zeros.
         return response.json({
-          enabled: Boolean(auth0),
+          enabled: Boolean(auth0) && !coinSandbox,
           withdrawalsEnabled: false,
           ...(await accountWallet.balances(request.user!.id)),
         });
@@ -619,7 +645,11 @@ export function createApp({
     );
   }
 
-  app.use((_request, response) => {
+  // Browsers get the styled page when the site's pages and assets are served.
+  const sendPage = discovery ? createPageSender(pageFlags) : undefined;
+  app.use((request, response) => {
+    if (sendPage && wantsPage(request))
+      return sendPage(response, renderNotFound(origin), 404);
     response.status(404).json({
       error: "resource not found",
     });

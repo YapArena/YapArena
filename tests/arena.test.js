@@ -69,7 +69,7 @@ describe("settlement dashboard boundaries", () => {
       share: 25,
       interval: true,
     });
-    assert.equal(priceText(result.offer), "30.00¢");
+    assert.equal(priceText(result.offer), "0.30 YC");
     assert.equal(priceText(null), "—");
     assert.equal(
       roundPrices({

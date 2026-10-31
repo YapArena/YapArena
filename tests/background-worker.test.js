@@ -115,9 +115,10 @@ describe("background worker", () => {
         COIN_SANDBOX_ENABLED: "true",
       });
     await worker.start();
+    // The coin treasury check runs at start, then once a minute (founder D1).
     assert.deepEqual(
       timers.map(({ interval }) => interval).sort((a, b) => a - b),
-      [1000, 1000, 1000, 15000, 3600000],
+      [1000, 1000, 1000, 15000, 60000, 3600000],
     );
     await new Promise(setImmediate);
     assert.deepEqual(await authJourney(metrics), {});
@@ -126,8 +127,11 @@ describe("background worker", () => {
     assert.ok(errors.includes("speaker access revocation failed"));
     assert.ok(errors.includes("A4 recovery tick failed"));
     assert.ok(errors.includes("media clock failed"));
+    await timers.find(({ interval }) => interval === 60000).callback();
+    assert.ok(errors.includes("coin treasury check failed"));
     assert.deepEqual(ran.sort(), [
       "a4-recovery",
+      "coin-treasury",
       "media-clock",
       "speaker-revocation",
     ]);

@@ -27,6 +27,8 @@ import { postCoinJournal } from "../dist/features/account-wallet/ledger.js";
 import { createSessionRepository } from "../dist/platform/auth/sessions.js";
 import { createSessionToken } from "../dist/platform/auth/session-tokens.js";
 import { runCoinSandboxOperator } from "../scripts/coin-sandbox-operator.ts";
+import { formatCoins } from "../public/lib/coin-format.js";
+import { held, spendable } from "../public/lib/coins.js";
 import {
   attachSubject,
   confirmedApproval,
@@ -940,6 +942,8 @@ describe(
       const openKey = randomUUID(),
         round = await a4.create(context, debateId, openKey);
       assert.equal((await a4.create(context, debateId, openKey)).id, round.id);
+      // An unfunded center pauses answers with its own refusal, not the
+      // ledger's generic "insufficient funds" (founder D1).
       await withEmptyTreasury(context, (unfunded) =>
         assert.rejects(
           unfunded.submit(context, round.id, randomUUID(), {
@@ -947,7 +951,10 @@ describe(
             limit: "1",
             quantity: 100,
           }),
-          /insufficient funds/,
+          (error) =>
+            error.status === 503 &&
+            error.code === "answers_paused" &&
+            /answers are paused/.test(error.message),
         ),
       );
       assert.equal(
@@ -1614,6 +1621,146 @@ describe(
         await listener.query(`UNLISTEN ${RESULTS_CHANNEL}`);
         listener.release();
       }
+    });
+    // Yap Coins launch mode: the caller's own shortfall is its own refusal,
+    // with their available balance, apart from a paused treasury.
+    it("refuses the caller's own shortfall with their balance, and the balance every page shows agrees after a grant, a stake and a reveal", async () => {
+      const context = await actor(),
+        other = await actor(),
+        debateId = await debate();
+      for (const purpose of ["center", "promotional"])
+        await seed(context, purpose, "1000000");
+      const round = await a4.create(context, debateId, randomUUID());
+      // No welcome grant claimed yet: nothing to spend.
+      await assert.rejects(
+        a4.submit(context, round.id, randomUUID(), {
+          side: "YES",
+          limit: "0.54",
+          quantity: 10,
+        }),
+        (error) =>
+          error.status === 409 &&
+          error.code === "insufficient_balance" &&
+          error.details?.available === "0",
+      );
+      // The header, its pop-up, /coins and the debate panel all show
+      // spendable() and held() of this summary (frontend/lib/coins.ts).
+      const shown = async (who) => {
+        const { balances } = await sandbox.summary(who);
+        return [formatCoins(spendable(balances)), formatCoins(held(balances))];
+      };
+      await sandbox.initialize(context);
+      await sandbox.initialize(other);
+      assert.deepEqual(await shown(context), ["2,500 YC", "0 YC"]);
+      await a4.submit(context, round.id, randomUUID(), {
+        side: "YES",
+        limit: "0.54",
+        quantity: 10,
+      });
+      await a4.submit(other, round.id, randomUUID(), {
+        side: "NO",
+        limit: "0.3",
+        quantity: 10,
+      });
+      assert.deepEqual(await shown(context), ["2,490 YC", "10 YC"]);
+      await close(round.id);
+      await a4.advance();
+      assert.equal(await roundState(round.id), "settled");
+      const [view] = await a4.view(context, debateId);
+      const net = BigInt(view.outcome.net);
+      assert.deepEqual(await shown(context), [
+        formatCoins(25_000_000n + net),
+        "0 YC",
+      ]);
+      // The results history reports the same net.
+      const { results } = await a4.results(context, new Date(0));
+      assert.equal(
+        results.find((result) => result.roundId === round.id).outcome.net,
+        view.outcome.net,
+      );
+      await reconcile();
+    });
+    // The order guard re-checks the cutoff at insert, after every lock wait.
+    // A submit that loses that race is a 409 the panel reads as "window
+    // closed", never a 500, and reserves nothing.
+    it("refuses a submit that waits past the cutoff with 409 window_closed and reserves nothing", async () => {
+      const context = await actor(),
+        debateId = await debate();
+      await sandbox.initialize(context);
+      for (const purpose of ["center", "promotional"])
+        await seed(context, purpose, "1000000");
+      const round = await a4.create(context, debateId, randomUUID());
+      const fixture = await owner.connect();
+      try {
+        await fixture.query("BEGIN");
+        await fixture.query(
+          "ALTER TABLE coin_debate_rounds DISABLE TRIGGER coin_debate_round_guard",
+        );
+        await fixture.query(
+          "UPDATE coin_debate_rounds SET closes_at=clock_timestamp()+INTERVAL '3 seconds' WHERE id=$1",
+          [round.id],
+        );
+        await fixture.query(
+          "ALTER TABLE coin_debate_rounds ENABLE TRIGGER coin_debate_round_guard",
+        );
+        await fixture.query("COMMIT");
+      } catch (error) {
+        await fixture.query("ROLLBACK");
+        throw error;
+      } finally {
+        fixture.release();
+      }
+      const before = await sandbox.summary(context);
+      // Hold the caller's book, which submit locks after its own cutoff
+      // check, until the cutoff passes.
+      const holder = await owner.connect();
+      let pending;
+      try {
+        await holder.query("BEGIN");
+        await holder.query(
+          "SELECT 1 FROM coin_sandbox_books WHERE user_id=$1 FOR UPDATE",
+          [context.userId],
+        );
+        const pid = (await holder.query("SELECT pg_backend_pid() AS pid"))
+          .rows[0].pid;
+        pending = a4
+          .submit(context, round.id, randomUUID(), {
+            side: "YES",
+            limit: "1",
+            quantity: 1,
+          })
+          .then(
+            () => null,
+            (error) => error,
+          );
+        // Blocked on the book proves submit passed its own cutoff check.
+        await waitForBlocked(pid, 1);
+        await holder.query(
+          `SELECT pg_sleep(GREATEST(0,extract(epoch FROM
+            (SELECT closes_at FROM coin_debate_rounds WHERE id=$1)-clock_timestamp())+0.2))`,
+          [round.id],
+        );
+        await holder.query("COMMIT");
+      } finally {
+        holder.release();
+      }
+      const error = await pending;
+      assert.equal(error?.status, 409);
+      assert.equal(error.code, "window_closed");
+      assert.equal(
+        (
+          await owner.query(
+            "SELECT count(*)::int n FROM coin_debate_orders WHERE round_id=$1",
+            [round.id],
+          )
+        ).rows[0].n,
+        0,
+      );
+      assert.deepEqual(
+        (await sandbox.summary(context)).balances,
+        before.balances,
+      );
+      await reconcile();
     });
   },
 );

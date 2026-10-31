@@ -25,6 +25,8 @@ let unavailable = false;
 let stopStream: (() => void) | null = null;
 let pending: number | undefined;
 let notice: HTMLElement | null = null;
+// The newest reveal this page has read; undefined before the first read.
+let newestRead: string | null | undefined;
 
 const seenKey = (id: string) => `yaparena-results-seen:${id}`;
 // Per-device convenience only; without storage the notice uses a week back.
@@ -105,6 +107,11 @@ async function check(queue = false) {
     );
     if (current !== generation) return;
     show(value.results, account);
+    // A reveal after this page loaded changes the balance everywhere on it.
+    const newest = newestRevealed(value.results);
+    if (newestRead !== undefined && newest && newest !== newestRead)
+      window.dispatchEvent(new Event("yap:coins-changed"));
+    newestRead = newest ?? newestRead ?? null;
     // Listen for reveals only once Yap Coins answered for this account.
     stopStream ??= userStream().on("results", soon);
   } catch (error) {
@@ -132,6 +139,7 @@ function soon() {
 export function stop() {
   generation++;
   userId = null;
+  newestRead = undefined;
   unavailable = false;
   window.clearTimeout(pending);
   stopStream?.();

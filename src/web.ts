@@ -26,6 +26,7 @@ import { createCommunityStreams } from "./features/community/streams.ts";
 import { createServices } from "./services.ts";
 import { createUserStreams } from "./platform/user-streams.ts";
 import { RESULTS_CHANNEL } from "./features/account-wallet/debate-sandbox.ts";
+import { treasuryStatus } from "./features/account-wallet/treasury-monitor.ts";
 
 // Builds the web service. dist/server.js runs it for every deployment; the
 // local test identity entry under scripts/ wraps the same application.
@@ -144,6 +145,8 @@ export function createWebServer(
           debates: coinDebates,
           operations: accountSecurity.operations,
           reports: createSandboxErrorReports(database, "simulation"),
+          transfersEnabled: config.coinSandboxTransfersEnabled,
+          manualRounds: !config.turnWindowsEnabled,
         }
       : undefined,
     turnWindows: config.turnWindowsEnabled ? coinDebates : undefined,
@@ -235,6 +238,13 @@ export function createWebServer(
       : undefined,
   });
 
+  if (coinDebates)
+    metrics.setCoinTreasuryProvider(async () =>
+      treasuryStatus(
+        await coinDebates.treasury(),
+        config.coinTreasuryAlertUsdc,
+      ),
+    );
   const runtime = createRuntime({
     ...services.background,
     app: wrap ? wrap(app, { ...services, config }) : app,

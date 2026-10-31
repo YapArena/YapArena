@@ -1,5 +1,6 @@
 import { siteHeaderMarkup } from "../discovery/site-header-web.ts";
 import { asset } from "../discovery/assets.ts";
+import { iconLinks, siteFooterMarkup } from "../discovery/page-chrome-web.ts";
 import { html, type SafeHtml } from "../../platform/html.ts";
 import type { createCommunityRepository } from "./repository.ts";
 
@@ -10,7 +11,7 @@ type PublicEvent = NonNullable<
 >;
 
 function shell(title: string, content: SafeHtml, emailFirst: boolean) {
-  return html`<!doctype html><html lang="en"${emailFirst ? " data-email-first" : ""}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title} · YAP Arena</title><link rel="stylesheet" href="${asset("site.css")}"><link rel="stylesheet" href="${asset("site-header.css")}"><script defer src="${asset("session-coordination.js")}"></script><script defer src="${asset("site.js")}"></script><script defer src="${asset("account-balance.js")}"></script><script type="module" src="${asset("site-header.js")}"></script><script type="module" src="${asset("community.js")}"></script></head><body><a class="skip-link" href="#main">Skip to content</a>${siteHeaderMarkup()}<main id="main" class="container section">${content}</main><footer class="site-footer"><div class="container footer-inner">Community preview · No financial activity</div></footer></body></html>`.toString();
+  return html`<!doctype html><html lang="en"${emailFirst ? " data-email-first" : ""}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title} · YAP Arena</title>${iconLinks()}<link rel="stylesheet" href="${asset("site.css")}"><link rel="stylesheet" href="${asset("site-header.css")}"><script defer src="${asset("session-coordination.js")}"></script><script defer src="${asset("site.js")}"></script><script defer src="${asset("account-balance.js")}"></script><script type="module" src="${asset("site-header.js")}"></script><script type="module" src="${asset("community.js")}"></script></head><body><a class="skip-link" href="#main">Skip to content</a>${siteHeaderMarkup()}<main id="main" class="container section">${content}</main>${siteFooterMarkup()}</body></html>`.toString();
 }
 
 export function renderMyModeration(emailFirst = false) {

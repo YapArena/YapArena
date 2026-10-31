@@ -19,6 +19,7 @@ export function createRuntime({
   app,
   a4,
   coinDebates,
+  coinTreasury,
   transcription,
   database,
   sessions,
@@ -48,6 +49,8 @@ export function createRuntime({
   app?: Express;
   a4?: { tick(): Promise<void> };
   coinDebates?: { tick(): Promise<unknown> };
+  // Founder D1: warns when a Yap Coins treasury runs low, once a minute.
+  coinTreasury?: { check(): Promise<unknown> };
   // Decision 0012: transcriber warm-up dispatch and transcript retention.
   transcription?: {
     tick(): Promise<unknown>;
@@ -101,6 +104,8 @@ export function createRuntime({
   let a4Timer: NodeJS.Timeout | undefined;
   let a4Task: Promise<void> | undefined;
   let a4Ticking = false;
+  let treasuryTimer: NodeJS.Timeout | undefined;
+  let treasuryTask: Promise<void> | undefined;
   let speakerTimer: NodeJS.Timeout | undefined;
   let speakerTask: Promise<void> | undefined;
   let speakerWorking = false;
@@ -170,6 +175,19 @@ export function createRuntime({
       mediaTicking = false;
       completed("media-clock");
     }
+  }
+
+  function checkTreasury() {
+    if (!coinTreasury || treasuryTask || stopping) return treasuryTask;
+    treasuryTask = coinTreasury
+      .check()
+      .then(() => {})
+      .catch((error) => logger.error({ error }, "coin treasury check failed"))
+      .finally(() => {
+        treasuryTask = undefined;
+        completed("coin-treasury");
+      });
+    return treasuryTask;
   }
 
   async function cleanupSessions() {
@@ -309,6 +327,11 @@ export function createRuntime({
           }, 1000);
           if (app) a4Timer.unref();
         }
+        if (coinTreasury) {
+          void checkTreasury();
+          treasuryTimer = setIntervalFn(checkTreasury, 60_000);
+          if (app) treasuryTimer.unref();
+        }
         if (transcription) {
           tickingJobs.push("transcriber-dispatch");
           transcriptionTimer = setIntervalFn(() => {
@@ -376,7 +399,9 @@ export function createRuntime({
       if (a4Timer) clearIntervalFn(a4Timer);
       if (speakerTimer) clearIntervalFn(speakerTimer);
       if (transcriptionTimer) clearIntervalFn(transcriptionTimer);
+      if (treasuryTimer) clearIntervalFn(treasuryTimer);
       if (heartbeatTimer) clearIntervalFn(heartbeatTimer);
+      await treasuryTask;
       await speakerTask;
       await transcriptionTask;
       await a4Task;
