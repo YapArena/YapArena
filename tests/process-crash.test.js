@@ -156,16 +156,19 @@ describe("process crash handling", () => {
         .trim()
         .split("\n")
         .map((line) => JSON.parse(line));
-      assert.deepEqual(
-        records.map(({ msg }) => msg),
-        ["process crashed", "stopped"],
-      );
-      assert.equal(records[0].level, 60);
+      // pino writes the crash record asynchronously and this stop is instant,
+      // so the exit flush can write "stopped" before that write lands.
+      assert.deepEqual(records.map(({ msg }) => msg).sort(), [
+        "process crashed",
+        "stopped",
+      ]);
+      const crashed = records.find(({ msg }) => msg === "process crashed");
+      assert.equal(crashed.level, 60);
       assert.match(
-        records[0].origin,
+        crashed.origin,
         /^(?:uncaughtException|unhandledRejection)$/,
       );
-      assert.equal(records[0].error.redacted, true);
-      assert.equal(records[0].error.type, "Error");
+      assert.equal(crashed.error.redacted, true);
+      assert.equal(crashed.error.type, "Error");
     });
 });
