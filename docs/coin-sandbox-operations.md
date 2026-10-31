@@ -39,6 +39,97 @@ caller must have a current session at admission and again before commit, includi
 an idempotent or existing-round return; workers can settle existing obligations
 without a user session.
 
+## Launch mode: play money only
+
+Founder decisions D1–D6 (2026-10-30) set how Yap Coins run at launch:
+
+- **D2.** Phase-1 Yap Coins are play money. They never convert to real USDC; a paid phase would
+  start on the separate `live` ledger. That is what makes the valueless treasury seed below safe.
+- **D3.** Buying, withdrawing and their error reports stay off, and no page shows the
+  `100 YC = 1 USDC` rate or withdrawal wording, until real withdrawals are approved (F06).
+  `COIN_SANDBOX_TRANSFERS_ENABLED` (default `false`) turns the simulated purchase, withdrawal and
+  deposit/payout error-report routes on for tests and a staging trial. While it is off those routes
+  answer 404 and `GET /summary` reports `features.transfers: false`, so `/coins` hides the forms.
+  The production web service (`PRODUCTION_SERVICE=true`) refuses to start with it on. Even when it
+  is on, one simulated purchase is at most 1,000 USDC, so no balance approaches `numeric(36,0)`.
+- **D4.** `/coins` shows Bots mode only while `A4_MODE` enables it.
+- **D5.** With `TURN_WINDOWS_ENABLED=true`, turn windows are the only way to take a position:
+  `POST /debates/:id/rounds` opens no manual round, and `/coins` hides the manual round form
+  (`features.manualRounds: false`).
+
+### Funding the center and promotional treasuries (D1)
+
+Every contract reserves its face value, 1 YC (0.01 USDC-equivalent), from `center_available` into
+`center_reserved`. A stake funded by grant coins also reserves the same again from
+`promotional_available`. Both are operating accounts that start at zero on an empty database and can
+never go negative. Until the operator seeds them, every answer is refused with
+`503 answers_paused` ("answers are paused"); the caller's own shortfall is a separate
+`409 insufficient_balance` with their available balance.
+
+Settlement returns each reservation, minus what it paid out. The center's balance moves both ways;
+the promotional treasury only drains, because it pays new profit on grant coins while lost grant
+principal returns to `grant_issuer`. Five-day reveals hold their reservations for 120 hours.
+
+Seed both on every new simulation database, before the first debate: production, staging, and any
+fresh trial database. The seed is a valueless fixture (D2); it creates no real money.
+
+1. Sign in once on the site with the operator's own account and pick its handle.
+   `seed-simulation` records its journal against an existing account, and an empty database has
+   none.
+2. Find that account's ID as the owner:
+
+   ```sql
+   SELECT user_id FROM yaparena.public_profiles WHERE handle = '<operator-handle>';
+   ```
+
+3. Save two private inputs, each with its own new idempotency key (for example `uuidgen`), and run
+   them with the owner environment. `amount` is atomic USDC-equivalent: `1000000000000` is
+   1,000,000 USDC-equivalent, or 100,000,000 YC. `~/yaparena-private/seed-center.json`:
+
+   ```json
+   {
+     "userId": "<operator-id>",
+     "purpose": "center",
+     "amount": "1000000000000",
+     "idempotencyKey": "<new-uuid-1>"
+   }
+   ```
+
+   `~/yaparena-private/seed-promotional.json` is the same with `"purpose": "promotional"` and a
+   second new key. Then:
+
+   ```sh
+   node --env-file="$HOME/yaparena-private/owner.env" scripts/coin-sandbox-operator.ts seed-simulation < ~/yaparena-private/seed-center.json
+   node --env-file="$HOME/yaparena-private/owner.env" scripts/coin-sandbox-operator.ts seed-simulation < ~/yaparena-private/seed-promotional.json
+   ```
+
+   Each prints
+   `{"command":"seed-simulation","environment":"sandbox","rail":"simulation","status":"recorded","processed":0}`.
+   Repeating an input with the same key changes nothing.
+
+4. Check the balances as the owner. Both `_available` rows should read `1000000000000`:
+
+   ```sql
+   SELECT s.purpose, a.balance
+   FROM yaparena.coin_sandbox_system_accounts s
+   JOIN yaparena.coin_accounts a ON a.id = s.account_id
+   WHERE s.purpose IN ('center_available','center_reserved','promotional_available','promotional_reserved')
+   ORDER BY 1;
+   ```
+
+   On a database where no stake or grant has run yet the system accounts may not exist; the first
+   seed creates them.
+
+**Top-up.** When a treasury falls below `COIN_SANDBOX_TREASURY_ALERT_USDC` (default `200000`,
+20% of the seed), run step 3 again for that purpose with a new idempotency key. Never change ledger
+rules to let a system account go negative.
+
+**Monitoring.** The worker checks both treasuries at start and once a minute, and logs the warning
+`coin treasury low` with `account` (`center` or `promotional`), `availableUsdc` and
+`thresholdUsdc` while either is below the threshold. The web service's `/metrics` exports
+`yaparena_coin_treasury_available_usdc{account}` and `yaparena_coin_treasury_low{account}`
+(1 while low), refreshed at most once a minute. Alert on either, as with the other uptime checks.
+
 ## Turn windows and automatic voiding
 
 With `TURN_WINDOWS_ENABLED=true` (web and worker), each live speaking turn is one trading window

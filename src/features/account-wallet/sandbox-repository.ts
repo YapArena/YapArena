@@ -109,9 +109,15 @@ export interface SandboxBuckets {
 const columns = `id,user_id AS "userId",kind,reference,terms_digest AS "termsDigest",terms,status,
   expires_at AS "expiresAt",created_at AS "createdAt"`;
 const uuid = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
-function error(message: string, status = 409): never {
-  throw new CoinOperationError(message, status);
+function error(message: string, status = 409, code?: string): never {
+  throw new CoinOperationError(message, status, code);
 }
+/**
+ * The most one simulated purchase may buy: 1,000 USDC (100,000 YC). It keeps
+ * any valueless simulated balance far below numeric(36,0), so a settlement
+ * batch can never overflow.
+ */
+export const SIMULATED_FUNDING_LIMIT = 1_000_000_000n;
 function hash(value: unknown) {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
 }
@@ -224,7 +230,11 @@ export async function assertSandboxFinancialOpen(
       )
     ).rowCount
   )
-    error("financial activity is paused for correction review", 403);
+    error(
+      "financial activity is paused for correction review",
+      403,
+      "financial_review",
+    );
 }
 // New review/signing authority must follow the current account state, even
 // when the user reserved funds earlier. Authoritative reconciliation and safe
@@ -693,6 +703,12 @@ export function createCoinSandboxRepository(
     input: { idempotencyKey: string; amount: string; destination?: string },
   ) {
     const amount = atomicAmount(input.amount);
+    if (
+      kind === "funding" &&
+      config.rail === "simulation" &&
+      amount > SIMULATED_FUNDING_LIMIT
+    )
+      error("a simulated purchase is limited to 1,000 USDC", 400);
     if (
       kind === "withdrawal" &&
       (amount < 5_000_000n || amount <= BigInt(config.fee))

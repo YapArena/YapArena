@@ -524,6 +524,9 @@ try {
       operations,
       environment: "test",
       applicationOrigin: origin,
+      // This journey exercises the simulated purchase, withdrawal and report
+      // flows, which only a deployment that enables them offers.
+      transfersEnabled: true,
     }),
   );
   app.use(
@@ -721,7 +724,7 @@ try {
     await root
       .locator("[data-coin-balances] div")
       .filter({ hasText: "Purchased principal" })
-      .getByText("1000 YC", { exact: true })
+      .getByText("1,000 YC", { exact: true })
       .waitFor();
     const funded = await sandbox.summary(accountContext);
     assert.equal(funded.projection.purchasedPrincipal, "10000000");
@@ -1163,7 +1166,7 @@ try {
       .click();
     await root
       .getByText(
-        "Commitment recorded. Settlement occurs after the five-minute cutoff.",
+        "Commitment recorded. It settles when this round's results are revealed.",
         { exact: true },
       )
       .waitFor();

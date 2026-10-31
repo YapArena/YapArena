@@ -199,6 +199,27 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     throw new Error("TURN_WINDOWS_ENABLED must be true or false");
   if (turnWindows === "true" && coinSandbox !== "true")
     throw new Error("TURN_WINDOWS_ENABLED requires COIN_SANDBOX_ENABLED");
+  // The simulated purchase, withdrawal and error-report flows (financial
+  // brief F06, founder D2/D3): off by default, and never on the production
+  // service, where Yap Coins can't be bought or withdrawn.
+  const coinTransfers = environment.COIN_SANDBOX_TRANSFERS_ENABLED ?? "false";
+  if (!["true", "false"].includes(coinTransfers))
+    throw new Error("COIN_SANDBOX_TRANSFERS_ENABLED must be true or false");
+  if (coinTransfers === "true" && coinSandbox !== "true")
+    throw new Error(
+      "COIN_SANDBOX_TRANSFERS_ENABLED requires COIN_SANDBOX_ENABLED",
+    );
+  if (coinTransfers === "true" && environment.PRODUCTION_SERVICE === "true")
+    throw new Error(
+      "simulated Yap Coins purchases and withdrawals are not allowed on the production service",
+    );
+  // The worker warns, and /metrics flags, a center or promotional treasury
+  // below this many USDC-equivalent (docs/coin-sandbox-operations.md).
+  const coinTreasuryAlertUsdc = parseInteger(
+    environment.COIN_SANDBOX_TREASURY_ALERT_USDC ?? "200000",
+    "COIN_SANDBOX_TREASURY_ALERT_USDC",
+    { minimum: 0, maximum: 1_000_000_000 },
+  );
   if (!["true", "false"].includes(homepageReference))
     throw new Error("HOMEPAGE_REFERENCE_ENABLED must be true or false");
   if (homepageReference === "true" && nodeEnvironment === "production")
@@ -417,6 +438,8 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     coinSandboxEnabled: coinSandbox === "true",
     turnWindowsEnabled: turnWindows === "true",
     coinSandboxWebhookSecret,
+    coinSandboxTransfersEnabled: coinTransfers === "true",
+    coinTreasuryAlertUsdc,
     host,
     port,
     databaseUrl,

@@ -102,6 +102,8 @@ describe("configuration", () => {
       coinSandboxEnabled: false,
       turnWindowsEnabled: false,
       coinSandboxWebhookSecret: undefined,
+      coinSandboxTransfersEnabled: false,
+      coinTreasuryAlertUsdc: 200000,
       host: "0.0.0.0",
       port: 3000,
       databaseUrl,
@@ -156,6 +158,8 @@ describe("configuration", () => {
         coinSandboxEnabled: false,
         turnWindowsEnabled: false,
         coinSandboxWebhookSecret: undefined,
+        coinSandboxTransfersEnabled: false,
+        coinTreasuryAlertUsdc: 200000,
         host: "127.0.0.1",
         port: 8080,
         databaseUrl,
@@ -278,6 +282,69 @@ describe("configuration", () => {
             TURN_WINDOWS_ENABLED: value,
           }),
         /TURN_WINDOWS_ENABLED must be true or false/,
+      );
+  });
+
+  it("keeps simulated purchases and withdrawals off unless asked, and never on the production service", () => {
+    const coins = { DATABASE_URL: databaseUrl, COIN_SANDBOX_ENABLED: "true" };
+    assert.equal(loadConfig(coins).coinSandboxTransfersEnabled, false);
+    assert.equal(
+      loadConfig({ ...coins, COIN_SANDBOX_TRANSFERS_ENABLED: "true" })
+        .coinSandboxTransfersEnabled,
+      true,
+    );
+    // Staging runs NODE_ENV=production without PRODUCTION_SERVICE.
+    assert.equal(
+      loadConfig({
+        ...coins,
+        NODE_ENV: "production",
+        APP_ORIGIN: "https://staging.example",
+        COIN_SANDBOX_TRANSFERS_ENABLED: "true",
+      }).coinSandboxTransfersEnabled,
+      true,
+    );
+    assert.throws(
+      () =>
+        loadConfig({
+          ...coins,
+          NODE_ENV: "production",
+          APP_ORIGIN: "https://yaparena.example",
+          PRODUCTION_SERVICE: "true",
+          COIN_SANDBOX_TRANSFERS_ENABLED: "true",
+        }),
+      /not allowed on the production service/,
+    );
+    assert.equal(
+      loadConfig({
+        ...coins,
+        NODE_ENV: "production",
+        APP_ORIGIN: "https://yaparena.example",
+        PRODUCTION_SERVICE: "true",
+      }).coinSandboxTransfersEnabled,
+      false,
+    );
+    assert.throws(
+      () =>
+        loadConfig({
+          DATABASE_URL: databaseUrl,
+          COIN_SANDBOX_TRANSFERS_ENABLED: "true",
+        }),
+      /requires COIN_SANDBOX_ENABLED/,
+    );
+    for (const value of ["1", "TRUE", "yes"])
+      assert.throws(
+        () => loadConfig({ ...coins, COIN_SANDBOX_TRANSFERS_ENABLED: value }),
+        /COIN_SANDBOX_TRANSFERS_ENABLED must be true or false/,
+      );
+    assert.equal(
+      loadConfig({ ...coins, COIN_SANDBOX_TREASURY_ALERT_USDC: "50000" })
+        .coinTreasuryAlertUsdc,
+      50000,
+    );
+    for (const value of ["-1", "1.5", "lots"])
+      assert.throws(
+        () => loadConfig({ ...coins, COIN_SANDBOX_TREASURY_ALERT_USDC: value }),
+        /COIN_SANDBOX_TREASURY_ALERT_USDC must be an integer/,
       );
   });
 

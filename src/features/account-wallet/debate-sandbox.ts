@@ -45,6 +45,7 @@ import {
   type SandboxRail,
   type SandboxBuckets,
 } from "./sandbox-repository.ts";
+import type { TreasuryBalances } from "./treasury-monitor.ts";
 
 // Same A4 algorithm and ordinary human schedule. This asset is new: one YC
 // contract has a 0.01 USDC quote, NOT the historical YAP atomic face value.
@@ -180,8 +181,51 @@ const reference = (userId: string, operation: string, key: string) =>
     operation,
     idempotencyKey: key,
   });
-function fail(message: string, status = 409): never {
-  throw new CoinOperationError(message, status);
+function fail(
+  message: string,
+  status = 409,
+  code?: string,
+  details?: Readonly<Record<string, string>>,
+): never {
+  throw new CoinOperationError(message, status, code, details);
+}
+// The order guard's refusals (migration 1792984636802), raised with SQLSTATE
+// 23514 when a race passes the earlier checks: a submit that waited for locks
+// past the cutoff, for example. Each maps to the code the API returns.
+const guardRefusals: Readonly<
+  Record<string, { status: number; code: string; message: string }>
+> = {
+  "sandbox debate is past cutoff": {
+    status: 409,
+    code: "window_closed",
+    message: "this turn's window closed",
+  },
+  "this window is not playing at that replay position": {
+    status: 409,
+    code: "replay_position",
+    message: "this window is not playing at that replay position",
+  },
+  "a later turn's window was already joined": {
+    status: 409,
+    code: "later_window",
+    message: "you already joined a later turn's window",
+  },
+  "debaters cannot take a position in their own debate": {
+    status: 403,
+    code: "debater",
+    message: "debaters cannot take a position in their own debate",
+  },
+};
+function guardRefusal(error: unknown) {
+  if (
+    typeof error !== "object" ||
+    error === null ||
+    !("code" in error) ||
+    error.code !== "23514" ||
+    !(error instanceof Error)
+  )
+    return undefined;
+  return guardRefusals[error.message];
 }
 function resource(id: string) {
   if (!uuid.test(id)) fail("sandbox round not found", 404);
@@ -320,7 +364,11 @@ export function createCoinDebateSandbox(
       context.expectedSessionId !== undefined &&
       currentSession.id !== context.expectedSessionId
     )
-      fail("account context changed; refresh balances and review again");
+      fail(
+        "account context changed; refresh balances and review again",
+        409,
+        "session_changed",
+      );
   }
   async function authorize(client: PoolClient, context: SandboxContext) {
     if (!(await lockAccount(client, context.userId)))
@@ -825,10 +873,21 @@ export function createCoinDebateSandbox(
           if (!window)
             fail(
               "no trading window is open; the next one opens with the next speaking turn",
+              409,
+              "window_closed",
             );
           await assertCallerSession(client, context);
           return window;
         }
+        // Decision 0013 (founder D5): with turn windows, positions are taken
+        // only in a live turn's window, or from the replay. No manual round
+        // opens, so nobody stakes before a scheduled debate starts.
+        if (turnWindows)
+          fail(
+            "answers open with each speaking turn once the debate is live",
+            409,
+            "window_closed",
+          );
         // A five-day manual round stays open after its cutoff until the
         // debate's 120-hour close; only one still taking orders is current.
         const current = (
@@ -920,10 +979,15 @@ export function createCoinDebateSandbox(
         ).rows[0];
         if (existing) {
           if (existing.terms_digest !== termsDigest)
-            fail("idempotency key has different participation terms");
+            fail(
+              "idempotency key has different participation terms",
+              409,
+              "idempotency_conflict",
+            );
           return { id: existing.id, created: false };
         }
-        if (round.state !== "open") fail("sandbox round is closed");
+        if (round.state !== "open")
+          fail("sandbox round is closed", 409, "window_closed");
         // A five-day round stays open after its cutoff, until its reveal.
         // Replay viewers then join the window playing at their position (F10).
         const timing = (
@@ -945,14 +1009,25 @@ export function createCoinDebateSandbox(
         let replayPositionMs: number | null = null;
         if (!timing.accepting) {
           if (input.replayPositionMs === undefined)
-            fail("sandbox debate is past cutoff");
+            fail("sandbox debate is past cutoff", 409, "window_closed");
           if (!timing.replayable)
             fail(
               "replay positions are taken only by a five-day debate's turn windows, from its end until its 120-hour close",
+              409,
+              "window_closed",
             );
           if (!timing.inSpan)
-            fail("this window is not playing at that replay position");
-          if (timing.later) fail("you already joined a later turn's window");
+            fail(
+              "this window is not playing at that replay position",
+              409,
+              "replay_position",
+            );
+          if (timing.later)
+            fail(
+              "you already joined a later turn's window",
+              409,
+              "later_window",
+            );
           replayPositionMs = input.replayPositionMs;
         }
         // F14: debaters may not take a position in their own debate.
@@ -966,7 +1041,11 @@ export function createCoinDebateSandbox(
             )
           ).rowCount
         )
-          fail("debaters cannot take a position in their own debate", 403);
+          fail(
+            "debaters cannot take a position in their own debate",
+            403,
+            "debater",
+          );
         if (
           !(
             await client.query(
@@ -975,7 +1054,11 @@ export function createCoinDebateSandbox(
             )
           ).rowCount
         )
-          fail("debate unavailable for new commitments");
+          fail(
+            "debate unavailable for new commitments",
+            409,
+            "debate_unavailable",
+          );
         if (
           (
             await client.query(
@@ -984,7 +1067,7 @@ export function createCoinDebateSandbox(
             )
           ).rowCount
         )
-          fail("your first commitment is final");
+          fail("your first commitment is final", 409, "already_answered");
         if (
           Number(
             (
@@ -995,21 +1078,64 @@ export function createCoinDebateSandbox(
             ).rows[0]!.count,
           ) >= round.terms.capacity
         )
-          fail("sandbox round is full");
+          fail("sandbox round is full", 409, "window_full");
         const before = await lockSandboxBook(client, context.userId),
           buckets = await ensureSandboxBuckets(client, context.userId);
         await lockLedger(client, [buckets]);
-        const plan = planStake(
-          before.book,
-          String(
-            reservation(order.quantity, COIN_DEBATE_FACE, round.terms.feeBps),
-          ),
-        );
-        const total = fundingTotals(plan.funding),
-          collateral = BigInt(order.quantity) * COIN_DEBATE_FACE;
+        // This transaction now holds every ledger row it can touch, so these
+        // balances stay put until it commits.
+        const balance = async (...ids: string[]) =>
+          (
+            await client.query<{ total: string }>(
+              "SELECT COALESCE(sum(balance),0)::text AS total FROM coin_accounts WHERE id=ANY($1::uuid[])",
+              [ids],
+            )
+          ).rows[0]!.total;
+        const collateral = BigInt(order.quantity) * COIN_DEBATE_FACE;
+        // The center (and, for grant coins, the promotional treasury) backs
+        // every contract. When the operator's seed runs low, say so plainly
+        // instead of the ledger's generic refusal (docs/coin-sandbox-operations.md).
+        const paused = () =>
+          fail(
+            "answers are paused while Yap Coins are topped up; nothing was reserved",
+            503,
+            "answers_paused",
+          );
+        if (BigInt(await balance(buckets.system.center_available)) < collateral)
+          paused();
+        let plan: ReturnType<typeof planStake>;
+        try {
+          plan = planStake(
+            before.book,
+            String(
+              reservation(order.quantity, COIN_DEBATE_FACE, round.terms.feeBps),
+            ),
+          );
+        } catch (error) {
+          if (!(error instanceof CoinOperationError)) throw error;
+          // The caller's own shortfall, with their own available balance.
+          fail(
+            "insufficient Yap Coins for this stake",
+            409,
+            "insufficient_balance",
+            {
+              available: await balance(
+                buckets.cashAvailable,
+                buckets.promoAvailable,
+              ),
+            },
+          );
+        }
+        const total = fundingTotals(plan.funding);
         const promotional = plan.funding.sources.some((s) => s.kind === "grant")
           ? collateral
           : 0n;
+        if (
+          promotional &&
+          BigInt(await balance(buckets.system.promotional_available)) <
+            promotional
+        )
+          paused();
         const cash: CoinPosting[] = [],
           promo: CoinPosting[] = [];
         transfer(cash, buckets.cashAvailable, buckets.cashReserved, total.cash);
@@ -1052,23 +1178,31 @@ export function createCoinDebateSandbox(
           `INSERT INTO coin_sandbox_requests(id,user_id,kind,reference,terms_digest,terms,status) VALUES($1,$2,'stake',$3,$4,$5::jsonb,'reserved')`,
           [requestId, context.userId, key, termsDigest, JSON.stringify(terms)],
         );
-        // DB cutoff is checked AFTER ledger-lock waits and immediately at insert.
-        await client.query(
-          `INSERT INTO coin_debate_orders(round_id,user_id,request_id,side,limit_value,quantity,funding,center_reservation,promotional_reservation,replay_position_ms)
+        // DB cutoff is checked AFTER ledger-lock waits and immediately at
+        // insert. A submit that loses that race reserves nothing: the guard's
+        // refusal rolls the whole transaction back.
+        await client
+          .query(
+            `INSERT INTO coin_debate_orders(round_id,user_id,request_id,side,limit_value,quantity,funding,center_reservation,promotional_reservation,replay_position_ms)
           VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9,$10)`,
-          [
-            roundId,
-            context.userId,
-            requestId,
-            order.side,
-            order.limit,
-            order.quantity,
-            JSON.stringify(plan.funding),
-            String(collateral),
-            String(promotional),
-            replayPositionMs,
-          ],
-        );
+            [
+              roundId,
+              context.userId,
+              requestId,
+              order.side,
+              order.limit,
+              order.quantity,
+              JSON.stringify(plan.funding),
+              String(collateral),
+              String(promotional),
+              replayPositionMs,
+            ],
+          )
+          .catch((error: unknown) => {
+            const refusal = guardRefusal(error);
+            if (refusal) fail(refusal.message, refusal.status, refusal.code);
+            throw error;
+          });
         await appendSandboxBookEvent(client, {
           userId: context.userId,
           snapshot: before,
@@ -1344,6 +1478,24 @@ export function createCoinDebateSandbox(
         if (result.created) voided++;
       }
       return { voided };
+    },
+    // The treasuries that back every stake (founder D1), for the worker's
+    // low-balance warning and /metrics. A plain read without locks; zero
+    // before the sandbox's system accounts exist.
+    async treasury(): Promise<TreasuryBalances> {
+      const rows = (
+        await database.query<{ purpose: string; balance: string }>(
+          `SELECT s.purpose,a.balance::text AS balance FROM coin_sandbox_system_accounts s
+          JOIN coin_accounts a ON a.id=s.account_id
+          WHERE s.purpose IN ('center_available','promotional_available')`,
+        )
+      ).rows;
+      const available = (purpose: string) =>
+        rows.find((row) => row.purpose === purpose)?.balance ?? "0";
+      return {
+        centerAvailable: available("center_available"),
+        promotionalAvailable: available("promotional_available"),
+      };
     },
     // Coin loop: open the current turn's window of each live debate that has
     // none yet, at most one second after the turn starts (Decision 0012).

@@ -108,5 +108,5 @@ export function noteText(hidden: number) {
     hidden > 0
       ? `And ${hidden} more ${hidden === 1 ? "debate" : "debates"}. `
       : "";
-  return `${more}Simulated, no cash value.`;
+  return `${more}Play money · no cash value.`;
 }
