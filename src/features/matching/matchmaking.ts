@@ -93,6 +93,14 @@ export interface MatchmakingState {
     deadlineAt: string;
     acceptedByMe: boolean;
     acceptedByOpponent: boolean;
+    // Who the player was paired with, for the match screen. Sent only on the player's private
+    // stream (Decision 0006). The handle and name are null if the opponent's profile is no longer
+    // published.
+    opponent: {
+      handle: string | null;
+      displayName: string | null;
+      sideLabel: string;
+    };
   } | null;
   // The debate a matched ticket or an accepted "now" challenge created; joinDeadlineAt is when
   // an unstarted one is cancelled.
@@ -434,11 +442,20 @@ export function createMatchmaking(
         deadlineAt: Date;
         mine: Date | null;
         theirs: Date | null;
+        handle: string | null;
+        displayName: string | null;
+        opponentSideLabel: string;
       }>(
-        `SELECT id, deadline_at AS "deadlineAt",
-             CASE WHEN ticket_a_id = $1 THEN accepted_a_at ELSE accepted_b_at END AS mine,
-             CASE WHEN ticket_a_id = $1 THEN accepted_b_at ELSE accepted_a_at END AS theirs
-           FROM match_offers WHERE (ticket_a_id = $1 OR ticket_b_id = $1) AND status = 'pending'`,
+        `SELECT o.id, o.deadline_at AS "deadlineAt",
+             CASE WHEN o.ticket_a_id = $1 THEN o.accepted_a_at ELSE o.accepted_b_at END AS mine,
+             CASE WHEN o.ticket_a_id = $1 THEN o.accepted_b_at ELSE o.accepted_a_at END AS theirs,
+             p.handle, p.display_name AS "displayName",
+             CASE WHEN o.ticket_a_id = $1 THEN tp.side_b_label ELSE tp.side_a_label END
+               AS "opponentSideLabel"
+           FROM match_offers o JOIN topics tp ON tp.id = o.topic_id
+           LEFT JOIN public_profiles p ON p.user_id = CASE WHEN o.ticket_a_id = $1
+             THEN o.user_b_id ELSE o.user_a_id END AND p.publication_state = 'published'
+           WHERE (o.ticket_a_id = $1 OR o.ticket_b_id = $1) AND o.status = 'pending'`,
         [row.id],
       );
       const entry = found.rows[0];
@@ -448,6 +465,11 @@ export function createMatchmaking(
           deadlineAt: new Date(entry.deadlineAt).toISOString(),
           acceptedByMe: Boolean(entry.mine),
           acceptedByOpponent: Boolean(entry.theirs),
+          opponent: {
+            handle: entry.handle,
+            displayName: entry.displayName,
+            sideLabel: entry.opponentSideLabel,
+          },
         };
     }
     return {

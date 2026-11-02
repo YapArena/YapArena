@@ -32,6 +32,12 @@ export interface ClockState {
   /** The turn's length in seconds. */
   total: number;
   reduced: boolean;
+  /**
+   * Seconds since this page saw the countdown begin. When given, the refill
+   * sweep is timed from it rather than from `total − left`, so network delay
+   * doesn't cut the sweep short (the queue overlay's match countdown).
+   */
+  sinceStart?: number;
 }
 
 export type TileKind = "lit" | "warn" | "spent" | "ember" | "rest";
@@ -63,7 +69,7 @@ export function clockFrame(state: ClockState) {
   const left = state.reduced
     ? Math.ceil(Math.max(0, state.left))
     : Math.max(0, state.left);
-  const elapsed = total - left;
+  const elapsed = state.sinceStart ?? total - left;
   const warn = left <= WARNING_SECONDS;
   // A deadline further away than a turn (clock skew) waits unlit.
   const refill =

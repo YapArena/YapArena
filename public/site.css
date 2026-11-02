@@ -1786,7 +1786,8 @@ label.cookie-option {
   margin: 0.5rem;
 }
 
-/* Live topic queue (Decision 0011): topic panel, header pill, match dialog, debate banner. */
+/* Live topic queue (Decision 0011): topic panel, header pill, challenge dialog, queue overlay and
+   debate banner. */
 .queue-panel {
   display: grid;
   gap: 1rem;
@@ -1856,6 +1857,765 @@ label.cookie-option {
   display: flex;
   justify-content: center;
   gap: 0.75rem;
+}
+.queue-pill-time {
+  font-family: var(--font-display);
+  font-size: 1.2em;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The queue overlay (docs/queue-overlay.md): one full-screen dialog for the whole queue, ported from
+   the approved preview. A grid with flexible rows above and below keeps the group just above the
+   middle, as on the landing page; the emblem's row shrinks first when height runs out, and the
+   overlay scrolls only if even the smallest emblem doesn't fit. Spacing uses the landing's 8-point
+   scale and type is in rem, so it follows the reader's text size. */
+html:has(.queue-overlay[open]) {
+  overflow: hidden;
+}
+.queue-overlay {
+  --qo-serif: "Forum", Georgia, "Times New Roman", serif;
+  --qo-accepted: rgb(124 225 151);
+  --qo-ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --qo-gutter: clamp(1rem, 4.5vw, 4rem);
+  --qo-quote: clamp(1.4375rem, 2.3vw, 1.875rem);
+  --qo-quote-lines: 3;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.5 var(--font-body);
+  overflow-y: auto;
+  padding-block: max(var(--space-5), env(safe-area-inset-top, 0px))
+    max(var(--space-5), env(safe-area-inset-bottom, 0px));
+  padding-left: max(var(--qo-gutter), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--qo-gutter), env(safe-area-inset-right, 0px));
+}
+.queue-overlay[open] {
+  display: grid;
+  /* minmax(0, 1fr) gives the centre a fixed height, so the emblem's row can shrink. */
+  grid-template-rows: auto minmax(0, 1fr);
+  row-gap: var(--space-4);
+}
+.queue-overlay::backdrop {
+  background: var(--bg);
+}
+.queue-overlay :focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
+}
+/* The top bar: the logo, and the topic the player queued on, centred on the same axis as everything
+   below. The empty third column mirrors the logo's. Titles wrap to two balanced lines, then end with
+   an ellipsis. */
+.qo-top {
+  display: grid;
+  grid-template-columns: 7.625rem minmax(0, 1fr) 7.625rem;
+  align-items: center;
+  column-gap: var(--space-5);
+  min-width: 0;
+}
+.qo-logo {
+  display: block;
+  width: auto;
+  height: 2rem;
+}
+.qo-topic {
+  grid-column: 2;
+  justify-self: center;
+  display: grid;
+  justify-items: center;
+  row-gap: var(--space-1);
+  width: min(40rem, 100%);
+  margin: 0;
+  text-align: center;
+}
+.qo-topic-side {
+  color: var(--muted);
+  font: 400 0.8125rem/1.25 var(--font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.qo-topic-side b {
+  color: var(--text);
+  font-weight: 400;
+}
+.qo-topic-title {
+  display: -webkit-box;
+  max-width: 100%;
+  overflow: hidden;
+  font: 400 clamp(1.125rem, 1rem + 0.4vw, 1.375rem) / 1.3 var(--qo-serif);
+  text-wrap: balance;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.qo-center {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 1fr minmax(8rem, 23rem) auto auto auto 1.3fr;
+  grid-template-areas: "." "emblem" "head" "body" "actions" ".";
+  justify-items: center;
+  min-width: 0;
+}
+.qo-emblem {
+  grid-area: emblem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  container-type: size;
+}
+.qo-stage {
+  --qo-rest: 0.13;
+  position: relative;
+  width: min(100cqw, calc(100cqh * 2048 / 1715), 27.5rem);
+  aspect-ratio: 2048 / 1715;
+  isolation: isolate;
+  container-type: inline-size;
+}
+.qo-glow,
+.qo-stage canvas,
+.qo-mark {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.qo-mark {
+  z-index: 1;
+  opacity: var(--qo-rest);
+  filter: brightness(0) invert(1);
+  transition: opacity 0.4s linear;
+}
+.qo-stage canvas {
+  opacity: 0;
+  pointer-events: none;
+}
+.qo-aura,
+.qo-ring-aura {
+  z-index: 0;
+  filter: blur(10px);
+}
+.qo-bloom,
+.qo-ring-bloom {
+  z-index: 2;
+  filter: blur(2.5px);
+}
+.qo-cores,
+.qo-ring {
+  z-index: 3;
+}
+/* The countdown draws every tile itself, so the still emblem steps aside. */
+.qo-stage.is-counting {
+  --qo-rest: 0;
+}
+.qo-stage .qo-ring {
+  transition: opacity 0.4s linear;
+}
+.qo-stage.is-counting .qo-ring {
+  opacity: 1;
+}
+.qo-stage.is-counting .qo-ring-bloom {
+  opacity: 0.45;
+}
+.qo-stage.is-counting .qo-ring-aura {
+  opacity: 0.5;
+}
+.qo-stage.is-full .qo-ring-bloom {
+  opacity: 0.9;
+}
+.qo-stage.is-full .qo-ring-aura {
+  opacity: 0.95;
+}
+.qo-hole {
+  position: absolute;
+  z-index: 4;
+  top: 59.42%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  width: 58cqw;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+/* The elapsed time is secondary while waiting; the countdown is the point of the match screen. */
+.qo-hole-number {
+  font: 400 clamp(2.25rem, 16cqw, 4.5rem) / 1 var(--font-display);
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+  transition: color 0.3s linear;
+}
+.queue-overlay:is(.is-match, .is-entering) .qo-hole-number {
+  font-size: clamp(2.75rem, 21cqw, 6rem);
+}
+.qo-hole-number.qo-warm {
+  color: var(--warning);
+}
+.qo-hole-label {
+  color: var(--muted);
+  font: 400 clamp(0.75rem, 3.4cqw, 0.9375rem) / 1.25 var(--font-display);
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+.qo-head {
+  --qo-slot: 1.3em;
+  --qo-pitch: 1.6em;
+  grid-area: head;
+  width: 100%;
+  height: var(--qo-slot);
+  margin: var(--space-6) 0 0;
+  overflow: hidden;
+  font: 400 clamp(1.75rem, 1.15rem + 2.2vw, 2.875rem) / 1.3 var(--font-display);
+  font-kerning: normal;
+  text-align: center;
+  text-transform: uppercase;
+}
+.qo-track {
+  display: block;
+  transition: transform 0.7s var(--ease-expo);
+}
+.qo-item {
+  display: block;
+  height: var(--qo-slot);
+  margin-bottom: calc(var(--qo-pitch) - var(--qo-slot));
+  white-space: nowrap;
+}
+/* Dydema has no punctuation, so the dots fall back to Forum. */
+.qo-dots span {
+  display: inline-block;
+}
+.queue-overlay.is-waiting:not(.is-paused) .qo-dots span {
+  animation: qo-dot 1.4s ease-in-out infinite;
+}
+.qo-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.qo-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+/* One cell holds the quote, the match cards or the closed message. It keeps room for the longest
+   quote and its credit, worked out from the quote's size, so nothing moves when quotes change or the
+   match arrives. */
+.qo-body {
+  grid-area: body;
+  display: grid;
+  align-content: start;
+  width: min(42rem, 100%);
+  min-height: calc(var(--qo-quote) * 1.3 * var(--qo-quote-lines) + 2.625rem);
+  margin-top: var(--space-4);
+}
+.qo-body > * {
+  grid-area: 1 / 1;
+}
+.qo-quote {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.875rem;
+  margin: 0;
+}
+.qo-quote[hidden],
+.qo-match[hidden],
+.qo-closed[hidden],
+.qo-row[hidden],
+.qo-button[hidden] {
+  display: none;
+}
+/* Quotes keep the first preview's presentation: a wide measure, each line filled before the next. */
+.qo-quote blockquote {
+  max-width: 21em;
+  margin: 0;
+  font: 400 var(--qo-quote) / 1.3 var(--qo-serif);
+  text-align: center;
+}
+.qo-words {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 0.26em;
+}
+.qo-qw {
+  display: inline-block;
+  margin: -0.06em 0 -0.14em;
+  padding: 0.06em 0 0.14em;
+  overflow: hidden;
+  vertical-align: top;
+}
+.qo-qw > span {
+  display: inline-block;
+}
+.qo-quote.in .qo-qw > span {
+  animation: qo-rise 0.9s var(--ease-expo) var(--word-delay, 0s) both;
+}
+.qo-quote.out .qo-qw > span {
+  animation: qo-leave 0.45s var(--qo-ease-in) var(--word-delay, 0s) both;
+}
+.qo-quote figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.125rem var(--space-3);
+}
+.qo-who {
+  font: 400 clamp(1rem, 1.4vw, 1.125rem) / 1.3 var(--font-display);
+  text-transform: uppercase;
+}
+.qo-source {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.qo-match {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding-bottom: 2.25rem;
+}
+.qo-players {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-5);
+  width: min(42rem, 100%);
+}
+/* A player's card lights up in the countdown's colour once they accept: white like the ring and the
+   number, then coral with them in the last 10 seconds. */
+.qo-card {
+  --qo-glow: 248 248 248;
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  max-width: 18.5rem;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--control-border);
+  border-radius: 1rem;
+  transition:
+    border-color 0.3s linear,
+    background-color 0.3s linear,
+    box-shadow 0.3s linear;
+}
+.qo-card.lit {
+  border-color: rgb(var(--qo-glow));
+  background-color: rgb(var(--qo-glow) / 0.06);
+  box-shadow:
+    0 0 0 1px rgb(var(--qo-glow) / 0.9),
+    0 0 1.5rem rgb(var(--qo-glow) / 0.3),
+    inset 0 0 1.25rem rgb(var(--qo-glow) / 0.08);
+}
+.qo-match.qo-warm .qo-card {
+  --qo-glow: 255 138 92;
+}
+.qo-initials {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid var(--control-border);
+  border-radius: 50%;
+  background: var(--raised);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+.qo-who-block {
+  display: grid;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+}
+.qo-who-block strong {
+  overflow: hidden;
+  font-size: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.qo-handle {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.qo-handle[hidden] {
+  display: none;
+}
+.qo-state {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.qo-state.qo-accepted {
+  color: var(--qo-accepted);
+  font-weight: 700;
+}
+.qo-side {
+  flex: none;
+  padding: 0.3125rem 0.75rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+.qo-mine {
+  background: var(--acid);
+  color: var(--on-acid);
+}
+.qo-theirs {
+  padding: 0.25rem 0.6875rem;
+  border: 1px solid var(--control-border);
+}
+.qo-vs {
+  flex: none;
+  color: var(--muted);
+  font: 400 1.625rem/1 var(--font-display);
+  text-transform: uppercase;
+}
+.qo-closed {
+  align-self: center;
+  margin: 0;
+  font: 400 clamp(1.375rem, 1.1rem + 1vw, 1.75rem) / 1.3 var(--qo-serif);
+  text-align: center;
+  text-wrap: balance;
+}
+.qo-status {
+  align-self: end;
+  min-height: 1.3125rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+/* While waiting the status line is for screen readers only: the screen shows no small print. */
+.queue-overlay.is-waiting .qo-status {
+  clip-path: inset(50%);
+}
+.qo-actions {
+  grid-area: actions;
+  width: min(25rem, 100%);
+  margin-top: var(--space-6);
+}
+/* Paired buttons share one width, so the pair reads as one control. */
+.qo-row {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: var(--space-3);
+}
+.qo-button {
+  min-height: 3rem;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-pill);
+  font: 700 0.9375rem var(--font-body);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.qo-button:disabled {
+  cursor: default;
+}
+.qo-primary {
+  border: 0;
+  background: var(--primary-gradient);
+  color: var(--on-acid);
+}
+.qo-primary:hover:not(:disabled) {
+  filter: brightness(0.88);
+}
+.qo-primary:disabled {
+  opacity: 0.55;
+}
+.qo-outline {
+  border: 1px solid var(--control-border);
+  background: transparent;
+  color: var(--acid);
+}
+.qo-quiet {
+  border: 1px solid var(--control-border);
+  background: var(--raised);
+  color: var(--button-text);
+}
+.qo-outline:hover:not(:disabled),
+.qo-quiet:hover:not(:disabled) {
+  border-color: #f3f3f3;
+}
+.qo-outline:disabled {
+  opacity: 0.5;
+}
+/* The landing's page-load reveal: blocks wipe up as the overlay opens or a block appears. "soft"
+   fades controls in with opacity and transform only, so they are clickable at once. */
+.queue-overlay .reveal {
+  animation:
+    qo-wipe 1.05s var(--ease-expo) var(--reveal-delay, 0s) both,
+    qo-fade 0.525s var(--ease-expo) var(--reveal-delay, 0s) both;
+}
+/* The cards' glow reaches past the wipe's usual margin. */
+.queue-overlay .qo-match.reveal {
+  animation-name: qo-wipe-wide, qo-fade;
+}
+.queue-overlay .soft {
+  animation: qo-soft 0.5s var(--ease-expo) var(--reveal-delay, 0s) both;
+}
+@keyframes qo-wipe {
+  from {
+    clip-path: inset(100% -8% -8%);
+  }
+  to {
+    clip-path: inset(-8%);
+  }
+}
+@keyframes qo-wipe-wide {
+  from {
+    clip-path: inset(100% -2.5rem -2.5rem);
+  }
+  to {
+    clip-path: inset(-2.5rem);
+  }
+}
+@keyframes qo-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes qo-soft {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes qo-rise {
+  from {
+    opacity: 0;
+    transform: translateY(110%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes qo-leave {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-110%);
+  }
+}
+@keyframes qo-dot {
+  0%,
+  70%,
+  100% {
+    opacity: 0.25;
+  }
+  35% {
+    opacity: 1;
+  }
+}
+/* Phones: the buttons sit at the bottom, in reach of the thumb; the content is centred above. */
+@media (max-width: 600px) {
+  .queue-overlay {
+    --qo-quote: 1.4375rem;
+    --qo-quote-lines: 4;
+    padding-block: max(var(--space-4), env(safe-area-inset-top, 0px))
+      max(var(--space-4), env(safe-area-inset-bottom, 0px));
+  }
+  .queue-overlay[open] {
+    row-gap: var(--space-3);
+  }
+  .qo-logo {
+    display: none;
+  }
+  .qo-top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .qo-topic {
+    grid-column: 1;
+  }
+  .qo-topic-side {
+    font-size: 0.75rem;
+  }
+  .qo-center {
+    grid-template-rows: 1fr minmax(7rem, 15.75rem) auto auto 1fr auto;
+    grid-template-areas: "." "emblem" "head" "body" "." "actions";
+  }
+  .qo-stage {
+    width: min(100cqw, calc(100cqh * 2048 / 1715), 18.75rem);
+  }
+  .qo-head {
+    --qo-slot: 2.6em;
+    --qo-pitch: 3em;
+    margin-top: var(--space-5);
+    font-size: clamp(1.625rem, 7.6vw, 1.875rem);
+  }
+  .qo-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .qo-line {
+    display: block;
+  }
+  .qo-body {
+    margin-top: var(--space-3);
+  }
+  .qo-match {
+    gap: var(--space-3);
+    padding-bottom: 1.75rem;
+  }
+  .qo-actions {
+    width: 100%;
+    margin-top: var(--space-4);
+  }
+  .qo-button {
+    padding: 0 var(--space-3);
+  }
+}
+/* Shorter phones: the quote steps down to 21 px. */
+@media (max-width: 600px) and (max-height: 700px) {
+  .queue-overlay {
+    --qo-quote: 1.3125rem;
+  }
+}
+/* Short phones: a smaller headline keeps a four-line quote and the buttons on screen. */
+@media (max-width: 600px) and (max-height: 640px) {
+  .qo-head {
+    margin-top: var(--space-4);
+    font-size: 1.625rem;
+  }
+}
+/* Phones on their side: the emblem on the left, the words and buttons on the right. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .queue-overlay {
+    --qo-quote: 1.25rem;
+    padding-block: max(var(--space-4), env(safe-area-inset-top, 0px))
+      max(var(--space-4), env(safe-area-inset-bottom, 0px));
+  }
+  .queue-overlay[open] {
+    row-gap: var(--space-3);
+  }
+  .qo-logo {
+    display: none;
+  }
+  .qo-top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* One line: the side, then the topic, shortened with an ellipsis if it doesn't fit. */
+  .qo-topic {
+    grid-column: 1;
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    column-gap: var(--space-3);
+    width: 100%;
+  }
+  .qo-topic-side {
+    flex: none;
+    font-size: 0.75rem;
+  }
+  .qo-topic-title {
+    min-width: 0;
+    font-size: 1.0625rem;
+    -webkit-line-clamp: 1;
+  }
+  .qo-center {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    grid-template-rows: 1fr auto auto auto 1fr;
+    grid-template-areas: "emblem ." "emblem head" "emblem body" "emblem actions" "emblem .";
+    column-gap: var(--space-6);
+  }
+  .qo-emblem {
+    min-height: 6rem;
+  }
+  .qo-stage {
+    width: min(100cqw, calc(100cqh * 2048 / 1715), 22rem);
+  }
+  /* The headline stays on one line in the text column, down to 667 px wide phones. */
+  .qo-head {
+    margin-top: 0;
+    font-size: min(1.75rem, 3.6vw);
+  }
+  .qo-body {
+    margin-top: var(--space-3);
+  }
+  .qo-match {
+    gap: var(--space-2);
+    padding-bottom: 1.5rem;
+  }
+  .qo-actions {
+    margin-top: var(--space-4);
+  }
+}
+/* Phones, upright or on their side: the cards stack full width, with no VS. */
+@media (max-width: 600px), (orientation: landscape) and (max-height: 520px) {
+  .qo-players {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .qo-vs {
+    display: none;
+  }
+  .qo-card {
+    flex: none;
+    width: 100%;
+    max-width: none;
+    padding: var(--space-2) var(--space-3);
+  }
+  .qo-initials {
+    width: 2.125rem;
+    height: 2.125rem;
+    font-size: 0.8125rem;
+  }
+  .qo-who-block {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: var(--space-2);
+  }
+  .qo-who-block strong {
+    flex-basis: 100%;
+    font-size: 0.9375rem;
+  }
+  .qo-handle {
+    font-size: 0.75rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .queue-overlay .reveal,
+  .queue-overlay .soft,
+  .qo-quote.in .qo-qw > span,
+  .qo-quote.out .qo-qw > span,
+  .queue-overlay.is-waiting .qo-dots span {
+    animation: none;
+  }
+  .qo-track,
+  .qo-mark,
+  .qo-stage .qo-ring,
+  .qo-hole-number,
+  .qo-card {
+    transition: none;
+  }
+  .qo-stage .qo-aura,
+  .qo-stage .qo-bloom,
+  .qo-stage .qo-ring-aura,
+  .qo-stage .qo-ring-bloom {
+    display: none;
+  }
 }
 .queue-banner {
   margin-bottom: 0.75rem;
