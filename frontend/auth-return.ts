@@ -10,14 +10,18 @@ export function safeAuthReturn(
   )
     return null;
   const target = new URL(value, origin);
+  const path = target.pathname + target.search + target.hash;
+  // Parsing removes "." and ".." segments, so "/.//host" becomes "//host",
+  // which the browser would treat as another site.
   if (
     target.origin !== origin ||
     target.pathname === "/account" ||
     target.username ||
-    target.password
+    target.password ||
+    path.startsWith("//")
   )
     return null;
-  return target.pathname + target.search + target.hash;
+  return path;
 }
 
 export type AuthResumeAction =

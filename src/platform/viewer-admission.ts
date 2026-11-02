@@ -87,11 +87,14 @@ export function createViewerAdmission({
   const prunedAt = new WeakMap<Map<string, Window>, number>();
   let processWindow: Window = { expires: 0, counts: empty() };
   let inFlight = 0;
+  // Lease issuance is limited per network only: a network that discards its
+  // cookies uses up its own budget and cannot lock new visitors on other
+  // networks out of public pages.
   const limits = {
-    viewer: { read: 90, grant: 8, report: 30, issue: 1 },
-    browser: { read: 450, grant: 40, report: 150, issue: 1 },
+    viewer: { read: 90, grant: 8, report: 30 },
+    browser: { read: 450, grant: 40, report: 150 },
     network: { read: 45000, grant: 3000, report: 15000, issue: 2000 },
-    process: { read: 60000, grant: 6000, report: 30000, issue: 6000 },
+    process: { read: 60000, grant: 6000, report: 30000 },
   };
   const sign = (value: string) =>
     createHmac("sha256", secret)
@@ -161,11 +164,7 @@ export function createViewerAdmission({
     let viewer = verify(value, time);
     let rejection: "viewer" | "network" | "process" | "capacity" | undefined;
     if (!peer) rejection = "capacity";
-    else if (
-      !viewer &&
-      (peer.counts.issue >= limits.network.issue ||
-        processWindow.counts.issue >= limits.process.issue)
-    )
+    else if (!viewer && peer.counts.issue >= limits.network.issue)
       rejection = "network";
     if (!rejection && !viewer) {
       viewer = randomBytes(16).toString("hex");
@@ -178,25 +177,26 @@ export function createViewerAdmission({
         path: "/",
       });
       peer!.counts.issue++;
-      processWindow.counts.issue++;
     }
     const room = request.path
       .match(
         /^\/api\/(?:media|community)\/events\/([0-9a-f-]{36})(?:\/|$)/i,
       )?.[1]
       ?.toLowerCase();
+    // Per-lease counters live in a bounded map. When it is full, the request
+    // is still served under its network and process budgets, so filling the
+    // map cannot lock other visitors out.
     const browser = viewer
       ? entry(viewers, viewer, maxViewers, time)
       : undefined;
-    const actor =
-      viewer && room
+    const roomBucket =
+      browser && room
         ? entry(viewers, `${viewer}:${room}`, maxViewers, time)
-        : browser;
+        : undefined;
     if (!rejection) {
-      if (!actor) rejection = "capacity";
-      else if (!browser || browser.counts[lane] >= limits.browser[lane])
+      if (browser && browser.counts[lane] >= limits.browser[lane])
         rejection = "viewer";
-      else if (actor !== browser && actor.counts[lane] >= limits.viewer[lane])
+      else if (roomBucket && roomBucket.counts[lane] >= limits.viewer[lane])
         rejection = "viewer";
       else if (peer!.counts[lane] >= limits.network[lane])
         rejection = "network";
@@ -210,8 +210,8 @@ export function createViewerAdmission({
         .status(rejection === "capacity" ? 503 : 429)
         .json({ error: "media request limit reached; retry shortly" });
     }
-    actor!.counts[lane]++;
-    if (actor !== browser) browser!.counts[lane]++;
+    if (roomBucket) roomBucket.counts[lane]++;
+    if (browser) browser.counts[lane]++;
     peer!.counts[lane]++;
     processWindow.counts[lane]++;
     inFlight++;

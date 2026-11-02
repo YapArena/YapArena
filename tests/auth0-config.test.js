@@ -244,6 +244,32 @@ describe("sign-in helpers", () => {
     ])
       assert.equal(safeReturnPath(value, origin), expected, String(value));
   });
+  it("checks the parsed return path, not only the input", () => {
+    const origin = "https://arena.example";
+    for (const [value, expected] of [
+      // Dot segments collapse into "//host", which a browser reads as
+      // another site.
+      ["/.//evil.example", null],
+      ["/%2e//evil.example", null],
+      ["/%2E//evil.example", null],
+      ["/..//evil.example", null],
+      ["/a/..//evil.example", null],
+      ["/x/../..//evil.example", null],
+      ["/.//evil.example/x?y=1#z", null],
+      ["/.//arena.example@evil.example/", null],
+      // Routing ignores case, so these are API routes.
+      ["/API/auth/login", null],
+      ["/Api", null],
+      ["/./api/me", null],
+      // Percent-encoding would lengthen the stored path past its limit.
+      [`/${"é".repeat(1000)}`, null],
+      // Ordinary dot segments still resolve to a local page.
+      ["/./debates/ai", "/debates/ai"],
+      ["/topics/../debates", "/debates"],
+      ["/apis", "/apis"],
+    ])
+      assert.equal(safeReturnPath(value, origin), expected, String(value));
+  });
   it("derives the method from the Auth0 subject and normalizes email", () => {
     assert.equal(signInMethod("email|abc"), "email");
     assert.equal(signInMethod("google-oauth2|123"), "google");

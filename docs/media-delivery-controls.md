@@ -54,10 +54,14 @@ process memory. Cookie deletion is rate-limited by separate issuance budgets.
 | Shared network (IPv6 prefix normalized) | 45,000 |         3,000 |           15,000 |
 | Process                                 | 60,000 |         6,000 |           30,000 |
 
-Issuance is capped at 2,000 leases/network/minute and 6,000/process/minute.
-There are at most 6,000 browser/room counter buckets, 2,000 network buckets and
-128 concurrent delivery responses. Expired buckets are reclaimed lazily; overflow
-scans occur at most once/second/map. Finish/close releases response capacity once.
+Issuance is capped at 2,000 leases/network/minute. There is no process-wide
+issuance cap: a few networks discarding their cookies must not lock new visitors
+on other networks out of public pages. There are at most 6,000 browser/room
+counter buckets, 2,000 network buckets and 128 concurrent delivery responses.
+When the browser/room buckets are full, a request is still served and counted
+against its network and process budgets, without per-lease counters. Expired
+buckets are reclaimed lazily; overflow scans occur at most once/second/map.
+Finish/close releases response capacity once.
 Pressure returns 503 with Retry-After 1; rate exhaustion returns 429 with Retry-After 60.
 Clients recover by fresh reads/reconnect backoff; no mutation allowance is consumed.
 These ceilings are abuse/memory limits, not a promise of 6,000 concurrent viewers.
