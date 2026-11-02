@@ -1,4 +1,6 @@
 import { html, type SafeHtml } from "../../platform/html.ts";
+import { livingEmblem } from "./emblem-web.ts";
+import { inscription } from "./kit-web.ts";
 
 const icons = {
   person: html`<circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>`,
@@ -20,17 +22,17 @@ const tabs = [
   ["privacy", "lock", "Privacy & data"],
 ] as const;
 
+// Signed out: the landing's layout, the words in columns 1–7 and the living
+// emblem in 8–12 (docs/site-design.md#sign-in).
 const signedOut = html`<div id="signed-out" hidden>
-      <div class="auth-layout">
-        <aside class="auth-story">
-          <span class="eyebrow accent">IDEAS UNDER PRESSURE</span>
-          <h1>Every idea<br>deserves <em>a voice.</em></h1>
-          <p>Follow the ideas that move you.<br>Make your mark when you’re ready.</p>
-          <div class="auth-arena-art" aria-hidden="true"><svg viewBox="0 0 440 300" fill="none"><ellipse cx="220" cy="150" rx="145" ry="93" transform="rotate(-28 220 150)"/><ellipse cx="220" cy="150" rx="145" ry="93" transform="rotate(28 220 150)"/><circle cx="220" cy="150" r="53"/><path d="m195 183 50-66"/><circle cx="100" cy="86" r="7"/><circle cx="345" cy="213" r="5"/><circle cx="220" cy="30" r="3"/></svg><span>YOUR NEXT PERSPECTIVE STARTS HERE</span></div>
-        </aside>
-        <div class="auth-panel">
-          <div class="auth-card account-sign-in" id="account-sign-in"><span class="eyebrow accent">SIGN IN OR CREATE AN ACCOUNT</span><h2>Join the arena</h2><div class="auth-sign-in-actions"><a class="button" href="/api/auth/login?connection=google&amp;return=%2Faccount" data-sign-in="google">Continue with Google</a><a class="button-secondary" href="/api/auth/login?connection=email&amp;return=%2Faccount" data-sign-in="email">Continue with email</a></div></div>
-        </div>
+      <div class="signin-grid">
+        <section class="signin-join" aria-labelledby="signin-title">
+          <p class="kicker kit-reveal">${inscription("Ideas under pressure")}</p>
+          <h1 class="signin-headline kit-reveal" id="signin-title">${inscription("Every idea deserves", "a voice.")}</h1>
+          <p class="page-lead signin-lead">Follow the ideas that move you.<br>Make your mark when you’re ready.</p>
+          <div class="account-sign-in" id="account-sign-in"><h2 class="signin-join-title">${inscription("Join the arena")}</h2><p class="signin-caption">Sign in or create an account</p><div class="auth-sign-in-actions"><a class="btn btn-primary" href="/api/auth/login?connection=google&amp;return=%2Faccount" data-sign-in="google">Continue with Google</a><a class="btn btn-secondary" href="/api/auth/login?connection=email&amp;return=%2Faccount" data-sign-in="email">Continue with email</a></div></div>
+        </section>
+        <div class="signin-emblem">${livingEmblem()}</div>
       </div>
     </div>`;
 
@@ -38,7 +40,7 @@ const profilePanel = (
   debating: SafeHtml | "",
 ) => html`<section class="settings-panel" role="tabpanel" id="panel-profile" aria-labelledby="tab-profile" tabindex="-1">
           <div class="settings-card">
-            <div class="settings-card-head"><div><h2>Public profile</h2><p>How you show up in debates, chat and search.</p></div></div>
+            <div class="settings-card-head"><div><h2>${inscription("Public profile")}</h2><p>How you show up in debates, chat and search.</p></div></div>
             <div class="settings-banner" id="profile-state-box" hidden><p id="profile-state" role="status"></p><button class="button-secondary" type="button" id="profile-publish" hidden>Make it public</button></div>
             <form id="profile-form" class="settings-form" novalidate>
               <div class="settings-field">
@@ -60,19 +62,19 @@ const profilePanel = (
             </form>
           </div>
 ${debating}          <div class="settings-card">
-            <div class="settings-card-head"><div><h2>Following</h2><p>People and topics you follow. Follow more from their public pages.</p></div></div>
+            <div class="settings-card-head"><div><h2>${inscription("Following")}</h2><p>People and topics you follow. Follow more from their public pages.</p></div></div>
             <ul id="follow-list" class="settings-list"></ul>
           </div>
         </section>`;
 
 const securityPanel = html`<section class="settings-panel" role="tabpanel" id="panel-security" aria-labelledby="tab-security" tabindex="-1" hidden>
           <div class="settings-card">
-            <div class="settings-card-head"><div><h2>Sign-in methods</h2><p>The ways you can sign in to this account.</p></div></div>
+            <div class="settings-card-head"><div><h2>${inscription("Sign-in methods")}</h2><p>The ways you can sign in to this account.</p></div></div>
             <ul id="sign-in-methods" class="settings-methods"></ul>
             <p class="settings-help">Google and an email code for the same address both open this account. Signing out ends your session on this device only.</p>
           </div>
           <div class="settings-card">
-            <div class="settings-card-head"><div><h2>Recent account activity</h2><p>Sign-ins and changes from the last 90 days.</p></div></div>
+            <div class="settings-card-head"><div><h2>${inscription("Recent account activity")}</h2><p>Sign-ins and changes from the last 90 days.</p></div></div>
             <ul id="activity-list" class="settings-list settings-timeline"></ul>
             <a class="settings-link" href="/account/moderation">My reports and appeals<span aria-hidden="true">→</span></a>
           </div>
@@ -80,7 +82,7 @@ const securityPanel = html`<section class="settings-panel" role="tabpanel" id="p
 
 const notificationsPanel = html`<section class="settings-panel" role="tabpanel" id="panel-notifications" aria-labelledby="tab-notifications" tabindex="-1" hidden>
           <div class="settings-card">
-            <div class="settings-card-head"><div><h2>Notifications</h2><p>Updates about your debates, sign-ins and account.</p></div></div>
+            <div class="settings-card-head"><div><h2>${inscription("Notifications")}</h2><p>Updates about your debates, sign-ins and account.</p></div></div>
             <ul id="account-notifications" class="settings-list settings-notifications"></ul>
           </div>
         </section>`;
@@ -88,12 +90,12 @@ const notificationsPanel = html`<section class="settings-panel" role="tabpanel" 
 const privacyPanel = html`<section class="settings-panel" role="tabpanel" id="panel-privacy" aria-labelledby="tab-privacy" tabindex="-1" hidden>
           <div class="settings-card settings-row-card">
             <span class="settings-card-icon">${icon("chart")}</span>
-            <div><h2>Cookies</h2><p>Essential cookies keep you signed in. The analytics cookie stays off until you accept it, and turning it off deletes its data.</p></div>
+            <div><h2>${inscription("Cookies")}</h2><p>Essential cookies keep you signed in. The analytics cookie stays off until you accept it, and turning it off deletes its data.</p></div>
             <button class="button-secondary" type="button" data-open-measurement>Cookie settings</button>
           </div>
           <div class="settings-card settings-row-card">
             <span class="settings-card-icon">${icon("download")}</span>
-            <div><h2>Download your data</h2><p>A JSON file with your profile, sign-in methods, follows, notifications and account activity.</p></div>
+            <div><h2>${inscription("Download your data")}</h2><p>A JSON file with your profile, sign-in methods, follows, notifications and account activity.</p></div>
             <a class="button-secondary" href="/api/me/export" download data-export>Download</a>
           </div>
         </section>`;
@@ -102,7 +104,7 @@ const privacyPanel = html`<section class="settings-panel" role="tabpanel" id="pa
 // transcription and the public AI outline, shown only while the live outline
 // is enabled. Changing the consent wording needs a new DEBATER_CONSENT_VERSION.
 const debaterCard = html`<div class="settings-card debater-settings" id="debater-settings" hidden>
-            <div class="settings-card-head"><div><h2>Debating</h2><p>Used when you debate live. Debates are recorded and replayed publicly, and each of your turns is transcribed and summarized in a public AI outline.</p></div></div>
+            <div class="settings-card-head"><div><h2>${inscription("Debating")}</h2><p>Used when you debate live. Debates are recorded and replayed publicly, and each of your turns is transcribed and summarized in a public AI outline.</p></div></div>
             <form id="debater-settings-form" class="settings-form" novalidate>
               <div class="settings-field">
                 <div class="settings-label-row"><label for="debater-language">Language you debate in</label></div>
@@ -123,12 +125,12 @@ export function accountMarkup(
 ) {
   return html`<link rel="stylesheet" href="${asset("account-auth.css")}">
   <section class="container account-shell">
-    <div class="account-status-row"><a class="account-back" data-auth-return href="/debates">← Back to the arena</a><p id="account-notice" role="status" aria-live="polite">Checking your account…</p></div>
+    <div class="account-status-row"><a class="back-link account-back" data-auth-return href="/debates"><span aria-hidden="true">←</span> Back to the arena</a><p id="account-notice" role="status" aria-live="polite">Checking your account…</p></div>
     ${signedOut}
     <div id="signed-in" hidden>
       <header class="settings-hero">
         <span class="settings-avatar" id="account-avatar" aria-hidden="true">${icon("person")}</span>
-        <div class="settings-identity"><span class="eyebrow accent">SETTINGS</span><h1 id="account-display-name">Your account</h1><p><span id="account-handle"></span><span id="account-name"></span></p></div>
+        <div class="settings-identity"><p class="kicker">${inscription("Settings")}</p><h1 id="account-display-name">Your account</h1><p><span id="account-handle"></span><span id="account-name"></span></p></div>
         <div class="settings-hero-actions"><a class="button-secondary" id="view-profile" href="/account#profile" hidden>${icon("external")}View profile</a><button class="button-secondary" id="sign-out" type="button">Sign out</button></div>
       </header>
       <div class="settings-layout">
@@ -137,7 +139,7 @@ export function accountMarkup(
             ([id, name, label], index) =>
               html`<a class="settings-tab" role="tab" id="tab-${id}" href="#${id}" aria-controls="panel-${id}" aria-selected="${index === 0 ? "true" : "false"}" tabindex="${index === 0 ? "0" : "-1"}">${icon(name)}<span>${label}</span>${id === "notifications" ? html`<span class="settings-badge" id="notification-count" hidden></span>` : ""}</a>`,
           )}</div>
-          <a class="settings-tab settings-tab-link" href="/coins">${icon("coin")}<span>Yap Coins</span><span class="settings-tab-arrow" aria-hidden="true">↗</span></a>
+          <a class="settings-tab settings-tab-link" href="/coins">${icon("coin")}<span>Yap Coins</span><span class="settings-tab-arrow" aria-hidden="true">→</span></a>
         </nav>
         <div class="settings-panels">
         ${profilePanel(liveOutline ? debaterCard : "")}
@@ -147,8 +149,10 @@ export function accountMarkup(
         </div>
       </div>
     </div>
+    <div class="account-checking" aria-hidden="true"><span class="pixel-loader"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
   </section>
-  <script defer src="${asset("account.js")}"></script>${
+  <script defer src="${asset("account.js")}"></script>
+  <script type="module" src="${asset("living-emblem.js")}"></script>${
     liveOutline
       ? html`
   <script type="module" src="${asset("debater-settings.js")}"></script>`

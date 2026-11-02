@@ -2,15 +2,11 @@
 // with the words beside it, or the living emblem when nothing is live.
 // frontend/hero-preview.ts drives the data-preview hooks.
 import type { PublicDebate } from "./repository.ts";
-import { asset } from "./assets.ts";
+import { livingEmblem } from "./emblem-web.ts";
 import { avatarSlot, inscription } from "./kit-web.ts";
 import { html } from "../../platform/html.ts";
 
 const versus = html`<span class="vs"><span class="sr-only">versus</span><span aria-hidden="true">VS</span></span>`;
-
-// The landing's emblem with its three canvases (frontend/living-emblem.ts).
-export const livingEmblem = () =>
-  html`<div class="living-emblem" data-living-emblem aria-hidden="true"><canvas class="aura"></canvas><img src="${asset("landing/yaparena-emblem.png")}" width="2048" height="1715" alt=""><canvas class="bloom"></canvas><canvas class="cores"></canvas></div>`;
 
 export function renderFeaturedDebate(
   debate: PublicDebate | null,
