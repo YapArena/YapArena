@@ -33,7 +33,9 @@ worker settles, and a viewer's request never settles anybody's round. Its coin l
 runs one ordered batch a second, of at most 20 rounds and 200 orders, sized from the
 measured cost per order to fit 250 ms and cut off at 250 ms whatever the database's
 speed; while any live turn window is in its final 15 seconds, when most answers
-arrive, at most 50 orders and 100 ms.
+arrive, at most 50 orders and 100 ms. Both the budget and the measured cost count
+only the time a batch spends settling once it holds its locks: waiting for them
+neither cuts the batch short nor shrinks the next ones.
 A larger round settles over several batches: each prices the whole round the same
 way, from its complete and fixed set of orders, and settles the next orders by
 account; the last one reveals the round and sends the results notice. A later round
