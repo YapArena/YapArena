@@ -216,3 +216,39 @@ document.addEventListener("click", (event) => {
     link.href = account.pathname + account.search;
   }
 });
+
+// Menus built on <details data-menu> (Explore's More filter) close on a click
+// outside them and on Escape, which returns focus to their summary.
+const openMenus = () =>
+  document.querySelectorAll<HTMLDetailsElement>("details[data-menu][open]");
+document.addEventListener("click", (event) => {
+  for (const menu of openMenus())
+    if (!(event.target instanceof Node && menu.contains(event.target)))
+      menu.open = false;
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  for (const menu of openMenus()) {
+    menu.open = false;
+    menu.querySelector("summary")?.focus();
+  }
+});
+
+// A debate card's still hides when the recording has none, which shows both
+// speakers' panes under it. Errors before this script ran are caught by the
+// sweep below.
+document.addEventListener(
+  "error",
+  (event) => {
+    if (
+      event.target instanceof HTMLImageElement &&
+      event.target.classList.contains("dcard-still")
+    )
+      event.target.hidden = true;
+  },
+  true,
+);
+for (const still of document.querySelectorAll<HTMLImageElement>(
+  "img.dcard-still",
+))
+  if (still.complete && !still.naturalWidth) still.hidden = true;

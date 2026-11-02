@@ -1193,7 +1193,7 @@ Time: 5 minutes if you already did [start a test debate](#start-a-test-debate), 
   - `https://yaparena-staging-web.onrender.com/people/<handle-a>` and `/people/<handle-b>` open
     both profiles.
   - `https://yaparena-staging-web.onrender.com/topics/<topic-slug>` shows "Take a side and get
-    matched", with **Queue for For** and **Queue for Against**.
+    matched", with a **Queue for this side** button under **For** and another under **Against**.
 - If the queue later answers "Choose your debate language…", click its **Open your account
   settings** link and save the **Debating** card.
 
@@ -1202,8 +1202,8 @@ Time: 5 minutes if you already did [start a test debate](#start-a-test-debate), 
 Time: 15 minutes, including the 10-minute debate (or end it early, 8.9).
 
 1. A opens `https://yaparena-staging-web.onrender.com/topics/<topic-slug>`, clicks **Queue for
-   For**, and allows the camera and microphone.
-2. B opens the same address, clicks **Queue for Against**, and allows them.
+   this side** under **For**, and allows the camera and microphone.
+2. B opens the same address, clicks **Queue for this side** under **Against**, and allows them.
 3. Both click **Accept** in the "Match found" window.
 4. On the debate page, both click **Check camera and join as speaker**.
 

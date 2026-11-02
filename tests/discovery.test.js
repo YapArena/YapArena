@@ -481,7 +481,7 @@ describe("public discovery", () => {
     );
     assert.match(
       renderTopics(origin, { ...first, items: [topic] }, ""),
-      /Next →/,
+      /Next <span aria-hidden="true">→<\/span>/,
     );
     assert.match(renderDebates(origin, second, "", "all"), /Previous/);
     assert.match(
@@ -581,7 +581,12 @@ describe("live topic queue pages", () => {
       /<html lang="en" data-matchmaking data-email-first>/,
     );
     assert.match(topicPage.text, /data-queue-topic="public-topic"/);
-    assert.match(topicPage.text, /data-queue-side="A">Queue for /);
+    // Each side's button reads "Queue for this side" and is described by
+    // the side's name, which the queue script reads for its waiting count.
+    assert.match(
+      topicPage.text,
+      /<p class="side-label" id="queue-side-a">[^<]+<\/p><button class="btn btn-secondary queue-button" type="button" data-queue-side="A" data-side-label="[^"]+" aria-describedby="queue-side-a">Queue for this side<\/button>/,
+    );
     const debatePage = await request(on).get(`/debates/${debate.slug}`);
     assert.match(
       debatePage.text,
