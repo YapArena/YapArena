@@ -87,8 +87,9 @@ it("uses one navigation and session-aware account header across normal pages", (
   assert.deepEqual(current(pages[5]), ["/match"]);
   assert.deepEqual(current(pages[2]), []);
   const home = pages[0];
-  assert.match(home, /data-nav="following"/);
-  assert.match(home, /id="ya-search"/);
+  // With no ideas, /home is its empty state, under the same header and footer.
+  assert.match(home, /No public ideas yet/);
+  assert.match(home, /<footer class="site-footer">/);
   assert.doesNotMatch(home, /<script[^>]+account-auth[.]bundle/);
 });
 

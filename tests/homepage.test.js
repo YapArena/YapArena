@@ -14,7 +14,7 @@ import {
   interpolate,
   formatValue,
 } from "../dist/features/discovery/homepage-chart.js";
-import { createRotationClock } from "../dist/features/discovery/homepage-clock.js";
+import { pixelMark, fnv1a } from "../dist/features/discovery/pixel-mark.js";
 import * as view from "../dist/features/discovery/homepage-view.js";
 import { renderHome } from "../dist/features/discovery/web.js";
 import { loadConfig } from "../dist/platform/config.js";
@@ -165,14 +165,19 @@ it("keeps reference/demo follows local and emits real canonical links and shared
     const card = String(view.cardMarkup(m, true));
     assert.ok(card.includes('aria-expanded="true"'));
     assert.ok(String(view.cardMarkup(m)).includes('aria-expanded="false"'));
-    assert.ok(String(view.featureMarkup(m)).includes('id="ya-chart"'));
-    assert.ok(String(view.featureMarkup(m, true)).includes("Following"));
+    const trend = String(view.trendMarkup(m));
+    assert.ok(trend.includes('id="ya-chart"'));
+    assert.ok(trend.includes('aria-label="Follow this idea"'));
     assert.ok(
-      String(view.argumentsMarkup(m)).includes('aria-hidden="true" inert'),
+      String(view.trendMarkup(m, true)).includes(
+        'aria-label="Following this idea"',
+      ),
     );
+    // Up to three arguments, never the old looping copy.
+    const args = String(view.argumentsMarkup(m));
+    assert.ok(!args.includes("inert"));
+    assert.ok((args.match(/class="trend-arg[ "]/g) ?? []).length <= 3);
     assert.ok(String(view.detailMarkup(m, true)).includes("ya-detail-chart"));
-    for (const side of ["live", "debate", "trade"])
-      assert.ok(String(view.sideMarkup(m, side, "NO")).length > 100);
     String(view.sparkMarkup(m));
     for (const d of m.debates)
       assert.ok(String(view.playerMarkup(m, d)).includes("Concept preview"));
@@ -180,7 +185,17 @@ it("keeps reference/demo follows local and emits real canonical links and shared
       String(view.debatesMarkup(m, filter, m.debates[0]?.id ?? null));
   }
   assert.ok(
-    String(view.followMarkup(real)).includes('class="ya-follow follow-button"'),
+    String(view.followMarkup(real)).includes(
+      'class="ya-follow ya-bookmark follow-button"',
+    ),
+  );
+  assert.ok(
+    String(view.followMarkup(real)).includes('data-follow-icon="true"'),
+  );
+  assert.ok(
+    String(view.followMarkup(real, false, true)).includes(
+      'data-follow-compact="true"',
+    ),
   );
   assert.ok(
     !String(view.followMarkup({ ...real, demo: true })).includes(
@@ -188,8 +203,16 @@ it("keeps reference/demo follows local and emits real canonical links and shared
     ),
   );
   assert.ok(!String(view.followMarkup(emptyIdea)).includes("follow-button"));
-  assert.ok(
-    String(view.sideMarkup(real)).includes('href="/debates/real-debate"'),
+  // One way into the debate; the old "Enter round" is gone.
+  const trend = String(view.trendMarkup(real));
+  assert.ok(trend.includes('href="/debates/real-debate">Explore debate</a>'));
+  assert.ok(!trend.includes("Enter round"));
+  assert.ok(trend.includes("No rounds yet"));
+  assert.ok(trend.includes("Live now"));
+  // Sample ideas have no page: their links open the idea's panel.
+  assert.match(
+    String(view.trendMarkup(concepts.ideas[1])),
+    /data-open-idea="[^"]+"/,
   );
   assert.ok(
     String(view.debatesMarkup(real)).startsWith(
@@ -203,17 +226,63 @@ it("keeps reference/demo follows local and emits real canonical links and shared
     }),
   );
   assert.ok(empty.includes("Discovery temporarily unavailable"));
+  assert.ok(empty.includes('href="/home">Try again</a>'));
+  assert.ok(!empty.includes("ya-home-data"));
+  const none = String(view.homepageMarkup(publicHomepage([], [])));
+  assert.ok(none.includes("No public ideas yet"));
   assert.ok(
-    String(view.homepageMarkup(publicHomepage([], []))).includes(
-      "No public ideas yet",
-    ),
+    none.includes("Published topics and their debates will appear here."),
   );
   assert.ok(
     String(view.homepageMarkup(publicHomepage([topic], [debate]))).includes(
       "Ideas",
     ),
   );
-  assert.ok(String(view.homepageMarkup(concepts)).includes("1 / 6"));
+  const page = String(view.homepageMarkup(concepts));
+  assert.ok(page.includes('aria-label="1 of 6: '));
+  assert.ok(!page.includes("ya-ticker"));
+  assert.ok(!page.includes('data-carousel="pause"'));
+});
+it("names the neighbours, ranks popular ideas and shows what is live", () => {
+  const nav = String(view.navMarkup(concepts.ideas, concepts.ideas[0].id));
+  assert.ok(
+    nav.includes(`aria-label="Previous idea: ${concepts.ideas.at(-1).title}"`),
+  );
+  assert.ok(nav.includes(`aria-label="Next idea: ${concepts.ideas[1].title}"`));
+  assert.ok(!nav.includes("disabled"));
+  assert.ok(
+    String(view.navMarkup([concepts.ideas[0]], concepts.ideas[0].id)).includes(
+      "disabled",
+    ),
+  );
+  const rail = String(view.railMarkup(concepts));
+  assert.ok(rail.includes("rail-live"));
+  assert.ok(rail.includes("Take a side"));
+  assert.ok(rail.includes("Join the arena"));
+  assert.equal((rail.match(/class="rail-rank num"/g) ?? []).length, 5);
+  // Nothing live: no Live now card.
+  assert.ok(
+    !String(view.railMarkup(publicHomepage([topic], []))).includes("rail-live"),
+  );
+  const dots = String(view.dotsMarkup(concepts.ideas, concepts.ideas[2].id));
+  assert.equal((dots.match(/aria-current="true"/g) ?? []).length, 1);
+});
+it("draws an idea's pixel mark from its id, mirrored, in a visit colour", () => {
+  const a = String(pixelMark("idea-a", 48));
+  assert.equal(a, String(pixelMark("idea-a", 48)));
+  assert.notEqual(a, String(pixelMark("idea-b", 48)));
+  assert.match(a, /^<svg class="pixel-mark" width="48" height="48"/);
+  assert.match(a, /fill="var\(--visit-[0-4]\)"/);
+  assert.match(a, /aria-hidden="true"/);
+  assert.equal(fnv1a(""), 0x811c9dc5);
+  // Every cell has its mirror: columns 0 and 1 reflect to 4 and 3.
+  const cells = [...a.matchAll(/M(\d(?:\.5)?) (\d\.5)h1v1h-1z/g)].map(
+    ([, x, y]) => `${x},${y}`,
+  );
+  for (const cell of cells) {
+    const [x, y] = cell.split(",").map(Number);
+    assert.ok(cells.includes(`${5 - x},${y}`));
+  }
 });
 it("reproduces both chart geometries/ranges and interpolates the actual pointer fraction", () => {
   for (const m of [...concepts.ideas, emptyIdea])
@@ -223,22 +292,27 @@ it("reproduces both chart geometries/ranges and interpolates the actual pointer 
           const series = chartSeries(m, metric, range),
             c = chartGeometry(m, metric, range, 900, detail),
             markup = String(c.markup);
-          assert.equal(c.h, detail ? 290 : 165);
+          assert.equal(c.h, detail ? 290 : 240);
           assert.equal(c.w, 900);
           if (m.reference) {
             assert.equal(series.length, 16);
             assert.equal(series.at(-1), metric === "price" ? m.price : m.pct);
             assert.ok(markup.includes("data-chart-clip"));
-            assert.ok(markup.includes("data-chart-hover-date"));
+            assert.ok(markup.includes("data-chart-hover-marker"));
+            assert.equal((markup.match(/class="ya-guide"/g) ?? []).length, 5);
             assert.ok(markup.includes("ya-endpoint-pulse"));
             assert.ok(markup.includes("ya-endpoint"));
           } else {
             assert.deepEqual(series, []);
-            assert.ok(markup.includes("History unavailable"));
+            assert.ok(
+              markup.includes("The chart starts after the first closed round."),
+            );
             assert.ok(!markup.includes("ya-linepath"));
           }
         }
   assert.equal(chartGeometry(emptyIdea, "price", "1D", 10).w, 190);
+  assert.equal(chartGeometry(emptyIdea, "price", "1D", 400, false, 320).h, 320);
+  assert.equal(chartGeometry(emptyIdea, "price", "1D", 400, false, 20).h, 160);
   assert.equal(formatValue(null), "—");
   assert.equal(formatValue(0.34, "price"), "0.34");
   assert.equal(formatValue(67.6), "68%");
@@ -248,60 +322,4 @@ it("reproduces both chart geometries/ranges and interpolates the actual pointer 
   assert.equal(interpolate([10, 20, 40], 0.625), 25);
   assert.equal(interpolate([10, 20], -1), 10);
   assert.equal(interpolate([10, 20], 2), 20);
-});
-it("uses one clock for fill/advance, preserving elapsed time through repeated pauses and cycles", () => {
-  let time = 0,
-    next = 0,
-    count = 0,
-    fill = 0;
-  const frames = new Map();
-  let clock;
-  clock = createRotationClock({
-    now: () => time,
-    frame: (cb) => {
-      frames.set(++next, cb);
-      return next;
-    },
-    cancel: (id) => frames.delete(id),
-    progress: (v) => (fill = v),
-    advance: () => {
-      count++;
-      clock.reset();
-      clock.resume();
-    },
-  });
-  const tick = (ms) => {
-    time += ms;
-    const work = [...frames.values()];
-    frames.clear();
-    work.forEach((cb) => cb());
-  };
-  clock.pause();
-  clock.resume();
-  clock.resume();
-  assert.equal(frames.size, 1);
-  tick(2000);
-  assert.equal(fill, 2000 / 6500);
-  clock.pause();
-  clock.pause();
-  tick(9000);
-  assert.equal(fill, 2000 / 6500);
-  assert.equal(count, 0);
-  clock.resume();
-  tick(4499);
-  assert.equal(count, 0);
-  tick(1);
-  assert.equal(count, 1);
-  assert.equal(fill, 0);
-  tick(6500);
-  assert.equal(count, 2);
-  clock.reset();
-  assert.equal(clock.fraction(), 0);
-  clock.resume();
-  tick(1000);
-  clock.destroy();
-  tick(10000);
-  assert.equal(count, 2);
-  clock.resume();
-  assert.equal(frames.size, 0);
 });

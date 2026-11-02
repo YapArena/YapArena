@@ -181,7 +181,10 @@ try {
     requests.some((url) => url.includes("/api/media/")),
     false,
   );
-  await page.getByRole("link", { name: "Watch debates", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Main navigation" })
+    .getByRole("link", { name: "Live", exact: true })
+    .click();
   await page.waitForURL("**/live");
   checks.homeAndLiveNavigation = true;
   await page.waitForFunction(
@@ -238,7 +241,7 @@ try {
         ).opacity,
       ) === 0,
   );
-  assert.equal(await page.locator(".arena-featured-backdrop").count(), 0);
+  assert.equal(await page.locator(".live-feature-empty").count(), 0);
   assert.match(
     (await page
       .locator("[data-featured-preview] [data-preview-thumbnail]")
@@ -309,15 +312,17 @@ try {
   // Preserve the old card grid geometry while exercising actual video handoff.
   const cards = page.locator("[data-card-preview]");
   assert.equal(await cards.count(), 6);
+  // Instant, so the site's smooth scrolling has settled before the hovers.
   await page.evaluate(() => {
-    window.scrollTo(
-      0,
-      document
-        .querySelector<HTMLVideoElement>(".arena-video-grid")!
-        .getBoundingClientRect().top +
+    window.scrollTo({
+      top:
+        document
+          .querySelector<HTMLVideoElement>(".live-grid")!
+          .getBoundingClientRect().top +
         window.scrollY -
         120,
-    );
+      behavior: "instant",
+    });
   });
   await cards.first().locator("[data-preview-video]").waitFor();
   await page.waitForFunction(
@@ -325,7 +330,7 @@ try {
       document.querySelector<HTMLElement>("[data-card-preview]")!.dataset
         .playing === "true",
   );
-  const grid = await page.locator(".arena-video-grid").evaluate((node) => ({
+  const grid = await page.locator(".live-grid").evaluate((node) => ({
     columns: window.getComputedStyle(node).gridTemplateColumns.split(" ")
       .length,
     gap: window.getComputedStyle(node).gap,
@@ -338,11 +343,13 @@ try {
     })(),
     width: node.firstElementChild!.getBoundingClientRect().width,
   }));
+  // Three cards a row; each preview fills the card's 16:9 picture, with the
+  // words under it.
   assert.equal(grid.columns, 3);
-  assert.equal(grid.gap, "14px");
-  assert.equal(grid.height, 320);
-  assert.equal(grid.video.height, grid.height - 2);
+  assert.equal(grid.gap, "16px");
   assert.ok(Math.abs(grid.video.width - (grid.width - 2)) < 1);
+  assert.ok(Math.abs(grid.video.height - (grid.video.width * 9) / 16) < 1);
+  assert.ok(grid.height > grid.video.height + 80);
   await cards.nth(1).locator("[data-preview-open]").hover();
   await page.waitForFunction(
     () =>
@@ -431,12 +438,15 @@ try {
     (document.activeElement as HTMLElement).blur();
     window.scrollTo({ top: 0, behavior: "instant" });
   });
-  await page.mouse.move(0, 0);
+  // The first row of cards is on screen at the top too and keeps its preview,
+  // so pointing at the featured debate's words brings the featured one back.
+  await page.locator("[data-featured-preview] .live-copy").hover();
   await page.waitForFunction(
     () =>
       document.querySelector<HTMLElement>("[data-featured-preview]")!.dataset
         .playing === "true",
   );
+  await page.mouse.move(0, 0);
   // Let the programmatic scroll finish dispatching its cancellation event.
   await page.evaluate(
     () =>

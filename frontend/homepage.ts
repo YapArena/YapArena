@@ -3,8 +3,9 @@ import type {
   HomeMetric,
   HomeRange,
 } from "../src/features/discovery/homepage-chart.ts";
-// Selectors and dataset values below come from the existing homepage markup.
-// Non-null assertions preserve its markup guarantees without adding runtime guards.
+// Selectors and dataset values below come from the server-rendered homepage
+// markup (src/features/discovery/homepage-view.ts). Non-null assertions
+// preserve its markup guarantees without adding runtime guards.
 interface HomeDataset extends DOMStringMap {
   detailMetric?: HomeMetric;
   metric?: HomeMetric;
@@ -17,31 +18,30 @@ type HomeEventMap = HTMLElementEventMap &
   WindowEventMap &
   DocumentEventMap &
   MediaQueryListEventMap;
-/* global window, document, ResizeObserver, IntersectionObserver, requestAnimationFrame, cancelAnimationFrame, getComputedStyle, matchMedia */
+/* global window, document, ResizeObserver, requestAnimationFrame, cancelAnimationFrame, getComputedStyle, matchMedia */
 import {
-  argumentsMarkup,
   cardMarkup,
-  featureMarkup,
+  trendMarkup,
   detailMarkup,
   debatesMarkup,
-  sideMarkup,
   playerMarkup,
-  tickerMarkup,
   dotsMarkup,
+  navMarkup,
+  railMarkup,
   filtersMarkup,
 } from "../src/features/discovery/homepage-view.ts";
-import { emptyIdea } from "../src/features/discovery/homepage-model.ts";
 import { chartGeometry } from "../src/features/discovery/homepage-chart.ts";
-import { createRotationClock } from "../src/features/discovery/homepage-clock.ts";
+import { inscription } from "../src/features/discovery/kit-web.ts";
 import { html } from "../src/platform/html.ts";
 import { bindHomepageChart, revealSparks } from "./homepage-chart.js";
 
 const root = document.getElementById("ya-market-v4")!;
-if (root) {
-  const data: HomeData = JSON.parse(
-    (document.getElementById("ya-home-data") as HTMLTemplateElement).content
-      .textContent!,
-  );
+const template = document.getElementById(
+  "ya-home-data",
+) as HTMLTemplateElement | null;
+// With no ideas the page is one empty or error state and needs no controller.
+if (root && template) {
+  const data: HomeData = JSON.parse(template.content.textContent!);
   let dispose: (() => void) | undefined;
   function mount() {
     const $ = <T extends Element = HomeControl>(selector: string) =>
@@ -69,20 +69,15 @@ if (root) {
     let metric: HomeMetric = "endorsement",
       range: HomeRange = "1D",
       category = "All",
-      nav = "all",
-      side = "live",
-      position = "YES";
+      nav = "all";
     let expandedIdea = root.dataset.expanded || null,
       detailMetric: HomeMetric = "endorsement",
       detailRange: HomeRange = "1D",
       debateFilter = "all",
       activeDebate: string | null = null;
     let columns = 3,
-      paused = motion.matches,
       hovered = false,
       focused = false,
-      visible = true,
-      tickerVisible = true,
       touchPinned = false;
     let ghost: HTMLElement | undefined,
       animations: Animation[] = [],
@@ -97,26 +92,14 @@ if (root) {
       activityBusy = false;
     let followsState = "loading";
     const following = new Set(data.following);
-    const observers: (IntersectionObserver | ResizeObserver)[] = [];
-    const current = () => markets.find((m) => m.id === selected) ?? emptyIdea;
+    const observers: ResizeObserver[] = [];
+    const current = () => markets.find((m) => m.id === selected)!;
     const expanded = () => markets.find((m) => m.id === expandedIdea);
     const announce = (message: string) => {
       $("#ya-status").textContent = message;
     };
-    const progress = (fraction: number) => {
-      const fill = $("#ya-carousel-dots [aria-current=true] .ya-dot-fill");
-      if (fill) fill.style.transform = `scaleX(${fraction})`;
-    };
-    const clock = createRotationClock({
-      now: () => performance.now(),
-      frame: requestAnimationFrame,
-      cancel: cancelAnimationFrame,
-      progress,
-      advance: () => step(1, false),
-    });
     function controls() {
       const i = markets.findIndex((m) => m.id === selected);
-      $("#ya-carousel-count").textContent = `${i + 1} / ${markets.length}`;
       $("#ya-trending-slide").setAttribute(
         "aria-label",
         `${i + 1} of ${markets.length}: ${current().title}`,
@@ -124,92 +107,10 @@ if (root) {
       $$("[data-trending]").forEach((b) =>
         b.setAttribute("aria-current", String(b.dataset.trending === selected)),
       );
-      const button = $("#ya-carousel-pause");
-      button.textContent = paused ? "▶" : "Ⅱ";
-      button.setAttribute("aria-pressed", String(paused));
-      button.setAttribute(
-        "aria-label",
-        paused ? "Play trending rotation" : "Pause trending rotation",
-      );
-      $$<HTMLButtonElement>("[data-carousel]").forEach(
-        (b) => (b.disabled = markets.length < 2),
-      );
-    }
-    function schedule() {
-      root.dataset.motionPaused = String(paused || !visible || document.hidden);
-      root.dataset.tickerPaused = String(
-        paused || !tickerVisible || document.hidden,
-      );
-      if (
-        disposed ||
-        paused ||
-        hovered ||
-        focused ||
-        $(".ya-ticker").matches(":hover,:focus-within") ||
-        touchPinned ||
-        !visible ||
-        document.hidden ||
-        side !== "live" ||
-        markets.length < 2
-      )
-        clock.pause();
-      else clock.resume();
-    }
-    function tickerProgress() {
-      const animation = $(".ya-ticker-track")?.getAnimations()[0];
-      const duration = Number(animation?.effect!.getTiming().duration);
-      return duration
-        ? (Number(animation!.currentTime ?? 0) % duration) / duration
-        : 0;
-    }
-    function sizeTicker(progress = tickerProgress()) {
-      const track = $(".ya-ticker-track"),
-        group = $(".ya-ticker-group");
-      if (!track || !group) return;
-      const duration = Math.max(
-        60000,
-        (group.getBoundingClientRect().width / 24) * 1000,
-      );
-      track.style.setProperty("--ya-ticker-duration", duration + "ms");
-      const animation = track.getAnimations()[0];
-      if (animation) animation!.currentTime = progress * duration;
-    }
-    function revealTickerItem(item: Element) {
-      const ticker = $(".ya-ticker"),
-        track = $(".ya-ticker-track"),
-        group = $(".ya-ticker-group"),
-        animation = track?.getAnimations()[0];
-      if (!animation || !group?.contains(item)) return;
-      ticker.scrollLeft = 0;
-      const bounds = item.getBoundingClientRect(),
-        viewport = ticker.getBoundingClientRect();
-      if (bounds.left >= viewport.left && bounds.right <= viewport.right)
-        return;
-      const width = group.getBoundingClientRect().width;
-      animation!.currentTime =
-        (Math.max(0, bounds.left - group.getBoundingClientRect().left - 16) /
-          width) *
-        Number(animation.effect!.getTiming().duration);
-    }
-    function moveArguments(delta: number, edge?: "start" | "end") {
-      const track = $("#ya-argument-track"),
-        viewport = $(".ya-arguments-window"),
-        animation = track
-          .getAnimations()
-          .find((a) => (a as CSSAnimation).animationName === "ya-arguments-up"),
-        distance = track.getBoundingClientRect().height / 2,
-        duration = Number(animation?.effect!.getTiming().duration);
-      if (!animation || !distance || !duration) return false;
-      const next =
-        edge === "start"
-          ? 0
-          : edge === "end"
-            ? (Math.max(0, distance - viewport.clientHeight) / distance) *
-              duration
-            : Number(animation!.currentTime ?? 0) +
-              (delta / distance) * duration;
-      animation!.currentTime = ((next % duration) + duration) % duration;
-      return true;
+      $("#ya-carousel-nav").innerHTML = navMarkup(
+        markets,
+        selected!,
+      ).toString();
     }
     function finishSlide() {
       animations.forEach((a) => a.cancel());
@@ -217,25 +118,19 @@ if (root) {
       ghost?.remove();
       ghost = undefined;
     }
-    function step(direction: number, manual = true) {
-      if (!markets.length) return;
+    function step(direction: number) {
       const index = markets.findIndex((m) => m.id === selected);
       changeTrending(
         markets[(index + direction + markets.length) % markets.length]!.id,
         direction,
-        manual,
       );
     }
-    function changeTrending(id: string, direction = 1, manual = true) {
-      if (!markets.some((m) => m.id === id)) return;
-      if (id === selected) {
-        clock.reset();
-        schedule();
-        return;
-      }
+    // The slides move together with the original 620 ms easing and direction;
+    // the outgoing copy is inert, hidden and stripped of IDs.
+    function changeTrending(id: string, direction = 1) {
+      if (!markets.some((m) => m.id === id) || id === selected) return;
       finishSlide();
       chartReset?.();
-      clock.reset();
       const slide = $("#ya-trending-slide");
       if (
         !motion.matches &&
@@ -264,23 +159,13 @@ if (root) {
         ghost.classList.add("ya-carousel-ghost");
         ghost.setAttribute("aria-hidden", "true");
         ghost.inert = true;
-        const track = ghost.querySelector<HTMLElement>(".ya-argument-track")!;
-        track.style.animation = "none";
-        track.style.transform = getComputedStyle(
-          $("#ya-argument-track"),
-        ).transform;
         $("#ya-carousel-window").append(ghost);
       }
       selected = id;
       root.dataset.selected = id;
-      side = "live";
       mainChart?.destroy();
-      $(".ya-feature").innerHTML = featureMarkup(
-        current(),
-        following.has(id),
-      ).toString();
+      slide.innerHTML = trendMarkup(current(), following.has(id)).toString();
       renderMain();
-      $("#ya-side").innerHTML = sideMarkup(current()).toString();
       controls();
       if (ghost) {
         const old = ghost,
@@ -312,45 +197,23 @@ if (root) {
           })
           .catch(() => {});
       }
-      if (manual) announce(current().title + " selected in trending.");
-      schedule();
+      announce(current().title + " selected in trending.");
     }
     function syncFollowLabels() {
       for (const b of $$(".ya-follow")) {
         const id = b.dataset.idea,
           active = following.has(id!);
         b.setAttribute("aria-pressed", String(active));
-        b.textContent = active ? "✓ Following" : "+ Follow";
+        if (b.classList.contains("ya-bookmark"))
+          b.setAttribute(
+            "aria-label",
+            active ? "Following this idea" : "Follow this idea",
+          );
+        else b.textContent = active ? "✓ Following" : "+ Follow";
       }
       window.yapFollows?.initialize(root);
     }
     function renderMain() {
-      const m = current(),
-        track = $("#ya-argument-track");
-      if (
-        track.dataset.idea !== m.id ||
-        track.dataset.revision !== (m.activity?.revision ?? "")
-      ) {
-        track.innerHTML = argumentsMarkup(m).toString();
-        track.dataset.idea = m.id;
-        track.dataset.revision = m.activity?.revision ?? "";
-        track.style.animation = "none";
-        void track.offsetHeight;
-        track.style.animation = "";
-      }
-      $(".ya-arguments-foot").textContent = m.activity
-        ? "Independent endorsements · Synthetic bots"
-        : m.reference
-          ? "Independent endorsement · Sample data"
-          : "Argument endorsements unavailable";
-      $("#ya-volume").textContent =
-        m.vol === null ? "—" : m.vol.toFixed(1) + "k YC";
-      $("#ya-people").textContent =
-        m.people === null
-          ? "—"
-          : m.people + (m.activity ? " endorsements" : " people");
-      $("#ya-price").textContent =
-        m.price === null ? "—" : m.price.toFixed(2) + " YC";
       $$("[data-metric]").forEach((b) =>
         b.setAttribute("aria-pressed", String(b.dataset.metric === metric)),
       );
@@ -368,12 +231,14 @@ if (root) {
       else mainChart?.destroy();
       const metricName = detail ? detailMetric : metric,
         rangeName = detail ? detailRange : range;
+      const box = svg.getBoundingClientRect();
       const c = chartGeometry(
         m,
         metricName,
         rangeName,
-        svg.getBoundingClientRect().width,
+        box.width,
         detail,
+        box.height,
       );
       svg.setAttribute("viewBox", `0 0 ${c.w} ${c.h}`);
       svg.dataset.latestRound = m.activity?.items.at(-1)?.id ?? "";
@@ -395,14 +260,10 @@ if (root) {
         },
         pin(value) {
           touchPinned = value;
-          schedule();
         },
       });
       if (detail) detailChart = chart;
-      else {
-        mainChart = chart;
-        $("#ya-chart-debate").hidden = range !== "1D";
-      }
+      else mainChart = chart;
     }
     function renderDebates() {
       if (!expanded()) return;
@@ -421,6 +282,7 @@ if (root) {
       if (d) target.innerHTML = playerMarkup(expanded()!, d).toString();
       else target.replaceChildren();
     }
+    // An expanded idea takes the full grid row right after its card's row.
     function renderGrid() {
       const focus = document.activeElement as HTMLElement | null;
       const focusKey = focus?.dataset.expand;
@@ -466,15 +328,18 @@ if (root) {
       }
       detailChart?.destroy();
       detailChart = undefined;
-      $("#ya-grid-title").textContent =
-        nav === "following" ? "Your watchlist" : "Ideas in motion";
+      $("#ya-grid-title").innerHTML = inscription(
+        nav === "following" ? "Your watchlist" : "Ideas in motion",
+      ).toString();
       $("#ya-grid").innerHTML = (
         items.length
           ? html`${items.map(
               (m, i) =>
                 html`${cardMarkup(m, m.id === expandedIdea)}${i === insert ? detailMarkup(expanded()!, following.has(expandedIdea!)) : ""}`,
             )}`
-          : html`<p class="ya-empty">${data.available === false ? "Discovery temporarily unavailable. Try again shortly." : nav === "following" && followsState === "signed-out" ? html`<a href="/account">Sign in</a> to see your followed ideas.` : nav === "following" && followsState === "unavailable" ? "Follow status is unavailable. Try again when your connection returns." : "No ideas match this view. Try another category or follow an idea above."}</p>`
+          : nav === "following"
+            ? html`<div class="state state-quiet ya-empty"><h3>${inscription(followsState === "signed-out" ? "Sign in to follow ideas." : "No followed ideas yet.")}</h3><p>${followsState === "signed-out" ? "Ideas you follow appear here." : followsState === "unavailable" ? "Follow status is unavailable. Try again when your connection returns." : "Follow an idea to keep it here."}</p>${followsState === "signed-out" ? html`<a class="btn btn-secondary" href="/account">Sign in</a>` : html`<button class="btn btn-secondary" type="button" data-nav="all">Show all ideas</button>`}</div>`
+            : html`<p class="ya-empty">No ideas match this view. Try another category or follow an idea above.</p>`
       ).toString();
       revealSparks($("#ya-grid"));
       if (insert >= 0) {
@@ -523,10 +388,7 @@ if (root) {
                     b.dataset[key] === focusData[key],
                 ),
               );
-        if (!target) {
-          target = $("#ya-grid-title");
-          target.tabIndex = -1;
-        }
+        if (!target) target = $("#ya-grid-title");
         if (focusSlider !== null && target.matches('input[type="range"]'))
           (target as HTMLInputElement).value = focusSlider;
         target.focus({ preventScroll: true });
@@ -569,51 +431,43 @@ if (root) {
       syncFollowLabels();
       if (nav === "following") renderGrid();
     }
+    // New activity waits while someone is reading or inspecting the card.
     function flushActivity() {
       if (
         !pendingActivity ||
         disposed ||
         hovered ||
         focused ||
-        $(".ya-ticker").matches(":hover,:focus-within") ||
         touchPinned ||
-        chartReset ||
-        side !== "live"
+        chartReset
       )
         return;
       const next = pendingActivity;
       pendingActivity = undefined;
       finishSlide();
       markets.splice(0, markets.length, ...next.ideas);
-      if (!markets.some((m) => m.id === selected)) {
-        selected = markets[0]?.id;
-        clock.reset();
-      }
-      const tickerPhase = tickerProgress();
-      $(".ya-ticker").dataset.static = String(markets.length < 2);
-      $(".ya-ticker").innerHTML = tickerMarkup(markets)
-        .toString()
-        .replace(/^<div[^>]*>|<\/div>$/g, "");
-      sizeTicker(tickerPhase);
+      if (!markets.some((m) => m.id === selected)) selected = markets[0]?.id;
+      if (!selected) return;
       $("#ya-carousel-dots").innerHTML = dotsMarkup(
         markets,
-        selected!,
+        selected,
       ).toString();
       $(".ya-filters").innerHTML = filtersMarkup({
         ...next,
         ideas: markets,
       }).toString();
+      $("#ya-rail").innerHTML = railMarkup({
+        ...next,
+        ideas: markets,
+      }).toString();
       mainChart?.destroy();
-      $(".ya-feature").innerHTML = featureMarkup(
+      $("#ya-trending-slide").innerHTML = trendMarkup(
         current(),
-        following.has(selected!),
+        following.has(selected),
       ).toString();
       renderMain();
-      $("#ya-side").innerHTML = sideMarkup(current()).toString();
       renderGrid();
       controls();
-      progress(clock.fraction());
-      schedule();
       void loadFollows();
     }
     async function pollActivity() {
@@ -629,7 +483,10 @@ if (root) {
         if (!response.ok) throw new Error("Activity refresh unavailable");
         const next: HomeData & { revision: string } = await response.json();
         activityRevision = next.revision;
-        if (JSON.stringify(next.ideas) !== JSON.stringify(markets)) {
+        if (
+          next.ideas.length &&
+          JSON.stringify(next.ideas) !== JSON.stringify(markets)
+        ) {
           pendingActivity = next;
           flushActivity();
         }
@@ -643,10 +500,9 @@ if (root) {
         if (!disposed) activityTimer = window.setTimeout(pollActivity, 5000);
       }
     }
-    function review(inline: boolean) {
-      const prefix = inline ? "ya-inline-" : "ya-",
-        ex = $<HTMLInputElement>("#" + prefix + "expectation"),
-        q = $<HTMLInputElement>("#" + prefix + "quantity");
+    function review() {
+      const ex = $<HTMLInputElement>("#ya-inline-expectation"),
+        q = $<HTMLInputElement>("#ya-inline-quantity");
       if (
         !ex.reportValidity() ||
         !q.reportValidity() ||
@@ -654,22 +510,56 @@ if (root) {
         q.value === ""
       )
         return;
-      const target = $("#" + prefix + "review"),
-        box = document.createElement("div");
+      const box = document.createElement("div");
       box.className = "ya-confirm";
-      box.textContent = `${inline ? $<HTMLSelectElement>("#ya-inline-position").value : position} · ${Number(q.value)} contracts · Expected YES endorsement: ${Number(ex.value)}%. Demo preview · No coins spent`;
-      target.replaceChildren(box);
+      box.textContent = `${$<HTMLSelectElement>("#ya-inline-position").value} · ${Number(q.value)} contracts · Expected YES endorsement: ${Number(ex.value)}%. Demo preview · No coins spent`;
+      $("#ya-inline-review").replaceChildren(box);
+    }
+    function expand(id: string) {
+      expandedIdea = expandedIdea === id ? null : id;
+      root.dataset.expanded = expandedIdea ?? "";
+      detailMetric = "endorsement";
+      detailRange = "1D";
+      debateFilter = "all";
+      activeDebate = null;
+      renderGrid();
+      const panel = $("#ya-detail");
+      if (panel && !motion.matches)
+        panel.animate(
+          [
+            { maxHeight: "0px", opacity: 0.75 },
+            { maxHeight: panel.scrollHeight + "px", opacity: 1 },
+          ],
+          { duration: 260, easing: "ease-out" },
+        );
+      announce(
+        expandedIdea
+          ? "Expanded " +
+              expanded()!.title +
+              ". Large chart, live debates, and replays are below."
+          : "Idea closed.",
+      );
     }
     listen(root, "click", (event) => {
       const b = (event.target as HTMLElement).closest<HomeControl>(
-        "button,[data-expand],[data-select]",
+        "button,[data-expand],[data-open-idea]",
       );
       if (!b || !root.contains(b) || b.closest(".ya-carousel-ghost")) return;
-      if (b.id === "ya-chart-debate" && !current().reference) {
-        if (expandedIdea !== current().id)
-          $$("[data-expand]")
-            .find((n) => n.dataset.expand === current().id)
-            ?.click();
+      // Sample ideas have no page: their links open the idea's panel below.
+      if (b.dataset.openIdea) {
+        event.preventDefault();
+        const id = b.dataset.openIdea;
+        if (category !== "All" || nav !== "all") {
+          category = "All";
+          nav = "all";
+          $$("[data-filter]").forEach((n) =>
+            n.setAttribute("aria-pressed", String(n.dataset.filter === "All")),
+          );
+          $$("[data-nav]").forEach((n) =>
+            n.setAttribute("aria-pressed", String(n.dataset.nav === "all")),
+          );
+        }
+        if (expandedIdea !== id) expand(id);
         $("#ya-detail")?.scrollIntoView({
           block: "start",
           behavior: motion.matches ? "instant" : "smooth",
@@ -678,53 +568,15 @@ if (root) {
       }
       if (b.dataset.expand) {
         event.preventDefault();
-        const id = b.dataset.expand;
-        expandedIdea = expandedIdea === id ? null : id;
-        root.dataset.expanded = expandedIdea ?? "";
-        detailMetric = "endorsement";
-        detailRange = "1D";
-        debateFilter = "all";
-        activeDebate = null;
-        renderGrid();
-        const panel = $("#ya-detail");
-        if (panel && !motion.matches)
-          panel.animate(
-            [
-              { maxHeight: "0px", opacity: 0.75 },
-              { maxHeight: panel.scrollHeight + "px", opacity: 1 },
-            ],
-            { duration: 260, easing: "ease-out" },
-          );
-        announce(
-          expandedIdea
-            ? "Expanded " +
-                expanded()!.title +
-                ". Large chart, live debates, and replays are below."
-            : "Idea closed.",
-        );
+        expand(b.dataset.expand);
         return;
       }
       if (b.dataset.carousel) {
-        if (b.dataset.carousel === "pause") {
-          paused = !paused;
-          controls();
-          schedule();
-        } else step(b.dataset.carousel === "next" ? 1 : -1);
+        step(b.dataset.carousel === "next" ? 1 : -1);
         return;
       }
-      if (b.dataset.trending || b.dataset.select) {
-        changeTrending((b.dataset.trending ?? b.dataset.select)!);
-        return;
-      }
-      if (b.id === "ya-arguments-toggle") {
-        const value = $("#ya-arguments").dataset.paused !== "true";
-        $("#ya-arguments").dataset.paused = String(value);
-        b.setAttribute("aria-pressed", String(value));
-        b.setAttribute(
-          "aria-label",
-          value ? "Resume argument flow" : "Pause argument flow",
-        );
-        b.textContent = value ? "▶" : "Ⅱ";
+      if (b.dataset.trending) {
+        changeTrending(b.dataset.trending);
         return;
       }
       if (b.dataset.detailClose) {
@@ -788,7 +640,7 @@ if (root) {
           preventScroll: true,
         });
       }
-      if (b.dataset.inlineReview) review(true);
+      if (b.dataset.inlineReview) review();
       if (b.dataset.detailFollow || b.id === "ya-follow") {
         const id = b.dataset.idea,
           m = markets.find((m) => m.id === id);
@@ -797,7 +649,7 @@ if (root) {
       if (b.dataset.nav) {
         nav = b.dataset.nav;
         $$("[data-nav]").forEach((n) =>
-          n.setAttribute("aria-pressed", String(n === b)),
+          n.setAttribute("aria-pressed", String(n.dataset.nav === nav)),
         );
         renderGrid();
       }
@@ -819,111 +671,26 @@ if (root) {
         );
         renderChart(false);
       }
-      if (b.dataset.position) {
-        position = b.dataset.position;
-        $$("[data-position]").forEach((n) =>
-          n.setAttribute("aria-pressed", String(n === b)),
-        );
-        $("#ya-review").replaceChildren();
-      }
-      if (
-        (b.dataset.action && b.dataset.action !== "review") ||
-        b.id === "ya-chart-debate"
-      ) {
-        side = b.dataset.action ?? "debate";
-        $("#ya-side").innerHTML = sideMarkup(
-          current(),
-          side,
-          position,
-        ).toString();
-        schedule();
-        $("#ya-side input,#ya-side button")?.focus({ preventScroll: true });
-      }
-      if (b.dataset.action === "review") review(false);
     });
     listen(root, "input", (event) => {
       if ((event.target as HTMLElement).id === "ya-search") renderGrid();
       if ((event.target as HTMLElement).id.startsWith("ya-inline-"))
         $("#ya-inline-review")?.replaceChildren();
-      if (
-        ["ya-expectation", "ya-quantity"].includes(
-          (event.target as HTMLElement).id,
-        )
-      )
-        $("#ya-review")?.replaceChildren();
     });
     listen($<HTMLSelectElement>("#ya-sort"), "change", renderGrid);
-    listen($(".ya-ticker"), "pointerenter", schedule);
-    listen($(".ya-ticker"), "pointerleave", () => {
-      schedule();
-      flushActivity();
-    });
-    listen($(".ya-ticker"), "focusin", (event) => {
-      queueMicrotask(() => {
-        revealTickerItem(
-          (event.target as HTMLElement).closest("[data-select]")!,
-        );
-        schedule();
-      });
-    });
-    listen($(".ya-ticker"), "focusout", () => {
-      queueMicrotask(() => {
-        schedule();
-        flushActivity();
-      });
-    });
-    listen(
-      $("#ya-arguments"),
-      "wheel",
-      (event) => {
-        if (event.ctrlKey || !event.deltaY) return;
-        const unit =
-          event.deltaMode === 1
-            ? 16
-            : event.deltaMode === 2
-              ? $(".ya-arguments-window").clientHeight
-              : 1;
-        if (moveArguments(event.deltaY * unit)) event.preventDefault();
-      },
-      { passive: false },
-    );
-    listen($(".ya-arguments-window"), "keydown", (event) => {
-      const delta = (
-        {
-          ArrowDown: 60,
-          ArrowUp: -60,
-          PageDown: 240,
-          PageUp: -240,
-        } as Record<string, number>
-      )[event.key];
-      const edge =
-        event.key === "Home"
-          ? "start"
-          : event.key === "End"
-            ? "end"
-            : undefined;
-      if ((delta !== undefined || edge) && moveArguments(delta ?? 0, edge))
-        event.preventDefault();
-    });
     listen($("#ya-carousel"), "pointerenter", (e) => {
-      if (["mouse", "pen"].includes(e.pointerType)) {
-        hovered = true;
-        schedule();
-      }
+      if (["mouse", "pen"].includes(e.pointerType)) hovered = true;
     });
     listen($("#ya-carousel"), "pointerleave", () => {
       hovered = false;
-      schedule();
       flushActivity();
     });
     listen($("#ya-carousel"), "focusin", () => {
       focused = true;
-      schedule();
     });
     listen($("#ya-carousel"), "focusout", () =>
       queueMicrotask(() => {
         focused = $("#ya-carousel").contains(document.activeElement);
-        schedule();
         flushActivity();
       }),
     );
@@ -931,13 +698,7 @@ if (root) {
       if (!(e.target as HTMLElement).closest(".ya-chart,.ya-scrub-control"))
         chartReset?.();
     });
-    listen(document, "visibilitychange", schedule);
-    listen(motion, "change", () => {
-      finishSlide();
-      if (motion.matches) paused = true;
-      controls();
-      schedule();
-    });
+    listen(motion, "change", finishSlide);
     listen(window, "yap:follow", (e) => {
       const m = markets.find((m) => m.topicSlug === e.detail.slug && !m.demo);
       if (!m) return;
@@ -947,23 +708,6 @@ if (root) {
       if (nav === "following") renderGrid();
     });
     listen(window, "online", loadFollows);
-    if (typeof IntersectionObserver !== "undefined") {
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          visible = entry!.isIntersecting && entry!.intersectionRatio >= 0.2;
-          schedule();
-        },
-        { threshold: [0, 0.2] },
-      );
-      observer.observe($("#ya-carousel"));
-      observers.push(observer);
-      const tickerObserver = new IntersectionObserver(([entry]) => {
-        tickerVisible = entry!.isIntersecting;
-        schedule();
-      });
-      tickerObserver.observe($(".ya-ticker"));
-      observers.push(tickerObserver);
-    }
     if (typeof ResizeObserver !== "undefined") {
       let lastWidth = $("#ya-grid").getBoundingClientRect().width,
         lastChartWidth = $("#ya-chart").getBoundingClientRect().width;
@@ -972,7 +716,6 @@ if (root) {
         resizeFrame = requestAnimationFrame(() => {
           resizeFrame = 0;
           if (disposed) return;
-          sizeTicker();
           const width = $("#ya-grid").getBoundingClientRect().width;
           const chartWidth = $("#ya-chart").getBoundingClientRect().width;
           const gridChanged = Math.abs(width - lastWidth) > 1,
@@ -987,19 +730,15 @@ if (root) {
       });
       observer.observe($("#ya-grid"));
       observer.observe($("#ya-carousel-window"));
-      observer.observe($(".ya-ticker"));
       observers.push(observer);
     }
-    sizeTicker();
     renderMain();
     renderGrid();
     controls();
-    schedule();
     void loadFollows();
     if (!data.reference) activityTimer = window.setTimeout(pollActivity, 5000);
     dispose = () => {
       disposed = true;
-      clock.destroy();
       window.clearTimeout(activityTimer);
       finishSlide();
       mainChart?.destroy();

@@ -80,6 +80,14 @@ function initializeFollows(scope: ParentNode = document) {
     let following = false;
     function label() {
       button.setAttribute("aria-pressed", String(following));
+      // Icon buttons (Home's bookmark) keep their icon and change their name.
+      if (button.dataset.followIcon) {
+        button.setAttribute(
+          "aria-label",
+          following ? "Following this idea" : "Follow this idea",
+        );
+        return;
+      }
       button.textContent = button.dataset.followCompact
         ? following
           ? "✓ Following"

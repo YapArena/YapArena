@@ -6,7 +6,7 @@ import type {
 } from "../src/features/discovery/homepage-chart.ts";
 // SVG setAttribute accepts numeric coordinates through existing WebIDL string coercion.
 interface NumericCoordinates {
-  setAttribute(name: "x" | "cx" | "cy" | "width", value: number): void;
+  setAttribute(name: "x" | "y" | "width", value: number): void;
 }
 interface ChartOptions {
   root: HTMLElement;
@@ -101,24 +101,30 @@ export function bindHomepageChart({
 }: ChartOptions) {
   const detail = svg.id === "ya-detail-chart",
     prefix = detail ? "#ya-detail-" : "#ya-";
-  const valueEl = root.querySelector<HTMLElement>(prefix + "value")!,
+  // The trending card shows For and Against beside the chart and the metric's
+  // value in its legend; an idea with no rounds yet shows neither. The
+  // expanded idea shows the metric's value.
+  const valueEl = root.querySelector<HTMLElement>(prefix + "value"),
+    againstEl = detail ? null : root.querySelector<HTMLElement>("#ya-against"),
+    legendEl = detail ? null : root.querySelector<HTMLElement>("#ya-legend"),
+    legendName = detail
+      ? null
+      : root.querySelector<HTMLElement>("#ya-legend-name"),
     labelEl = root.querySelector<HTMLElement>(
       detail ? "#ya-detail-label" : "#ya-metric-label",
-    )!,
-    changeEl = root.querySelector<HTMLElement>(prefix + "change")!;
+    ),
+    changeEl = root.querySelector<HTMLElement>(prefix + "change");
   const tooltip = root.querySelector<HTMLElement>("#ya-chart-tooltip")!,
     clip = svg.querySelector<SVGRectElement & NumericCoordinates>(
       "[data-chart-clip]",
     ),
-    dateEl = svg.querySelector<SVGTextElement & NumericCoordinates>(
-      "[data-chart-hover-date]",
-    ),
-    marker = svg.querySelector<SVGCircleElement & NumericCoordinates>(
+    marker = svg.querySelector<SVGRectElement & NumericCoordinates>(
       "[data-chart-hover-marker]",
-    )!,
-    halo = svg.querySelector<SVGCircleElement & NumericCoordinates>(
-      "[data-chart-hover-halo]",
-    )!;
+    );
+  const outcomes = Boolean(againstEl);
+  const metricValue = (value: number | null) =>
+    formatValue(value, metric) +
+    (metric === "price" && value !== null ? " YC" : "");
   const lifecycle = new AbortController(),
     signal = lifecycle.signal;
   const stopReveal = reveal(
@@ -130,28 +136,35 @@ export function bindHomepageChart({
     pendingX = 0,
     active = false;
   function latest() {
-    valueEl.textContent = formatValue(
-      metric === "price" ? m.price : m.pct,
-      metric,
-    );
+    const latestValue = metric === "price" ? m.price : m.pct;
+    if (legendName)
+      legendName.textContent = metric === "price" ? "YES price" : "Endorsement";
+    if (legendEl) legendEl.textContent = metricValue(latestValue);
+    if (outcomes) {
+      valueEl!.textContent = formatValue(m.pct);
+      againstEl!.textContent = m.pct === null ? "—" : formatValue(100 - m.pct);
+    } else if (valueEl) valueEl.textContent = formatValue(latestValue, metric);
+    if (!labelEl || !changeEl) return;
+    // Under For and Against, the line describes the endorsement they show.
+    const shown: HomeMetric = outcomes ? "endorsement" : metric;
     labelEl.textContent = m.activity
-      ? metric === "price"
+      ? shown === "price"
         ? "Shared YES offer · synthetic simulation"
         : "Synthetic bots + shared participants · settled round"
       : m.reference
-        ? metric === "price"
+        ? shown === "price"
           ? "Last executed YES price · completed round"
           : "Participant endorsement · latest closed round"
-        : metric === "price"
+        : shown === "price"
           ? "Topic execution price history unavailable"
           : "Topic endorsement history unavailable";
     changeEl.textContent =
       m.reference || m.activity
-        ? metric === "price"
+        ? shown === "price"
           ? "YC / YES contract"
           : changeText(m, true)
         : "";
-    changeEl.classList.toggle("down", metric !== "price" && (m.delta ?? 0) < 0);
+    changeEl.classList.toggle("down", shown !== "price" && (m.delta ?? 0) < 0);
   }
   function reset() {
     cancelAnimationFrame(frame);
@@ -195,12 +208,13 @@ export function bindHomepageChart({
         ? Math.max(1, end - c.times[0]!)
         : (range === "1D" ? 1 : range === "1W" ? 7 : 30) * 86400000,
       date = new Date(end - span + fraction * span);
+    const day = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      timeZone: "UTC",
+    });
     const stamp =
-      date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        timeZone: "UTC",
-      }) +
+      day +
       " · " +
       date.toLocaleTimeString("en-GB", {
         hour: "2-digit",
@@ -208,36 +222,36 @@ export function bindHomepageChart({
         timeZone: "UTC",
       });
     clip?.setAttribute("width", chartX);
-    if (dateEl) {
-      dateEl.textContent = stamp;
-      const half = dateEl.getComputedTextLength() / 2;
-      dateEl.setAttribute(
-        "x",
-        Math.max(c.left + half, Math.min(c.w - c.right - half, chartX)),
-      );
-    }
-    [marker, halo].forEach((node) => {
-      node.setAttribute("cx", chartX);
-      node.setAttribute("cy", chartY);
-    });
+    marker?.setAttribute("x", chartX - 5);
+    marker?.setAttribute("y", chartY - 5);
     svg.classList.add("is-scrubbing");
-    valueEl.textContent = formatValue(value, metric);
-    labelEl.textContent =
-      stamp +
-      " · " +
-      (metric === "price"
-        ? m.activity
-          ? "Shared YES offer"
-          : "YES execution price"
-        : "Endorsement");
+    if (legendEl) legendEl.textContent = metricValue(value);
+    if (outcomes) {
+      if (metric === "endorsement") {
+        valueEl!.textContent = formatValue(value);
+        againstEl!.textContent = formatValue(100 - value!);
+      }
+    } else if (valueEl) valueEl.textContent = formatValue(value, metric);
+    if (labelEl)
+      labelEl.textContent =
+        stamp +
+        " · " +
+        (metric === "price"
+          ? m.activity
+            ? "Shared YES offer"
+            : "YES execution price"
+          : "Endorsement");
     const delta = value! - c.points[0]!;
-    changeEl.textContent =
-      metric === "price"
-        ? "YC / YES contract"
-        : (delta >= 0 ? "↗ " : "↘ ") + Math.abs(delta).toFixed(1) + " pp";
-    changeEl.classList.toggle("down", metric !== "price" && delta < 0);
-    tooltip.querySelector("strong")!.textContent =
-      formatValue(value, metric) + (metric === "price" ? " YC" : "");
+    if (changeEl) {
+      changeEl.textContent =
+        metric === "price"
+          ? "YC / YES contract"
+          : (delta >= 0 ? "↗ " : "↘ ") + Math.abs(delta).toFixed(1) + " pp";
+      changeEl.classList.toggle("down", metric !== "price" && delta < 0);
+    }
+    // The small label beside the marker: the day and the value.
+    tooltip.querySelector("[data-tip-date]")!.textContent = day;
+    tooltip.querySelector("strong")!.textContent = metricValue(value);
     tooltip.classList.add("is-visible");
     tooltip.setAttribute("aria-hidden", "false");
     const rect = svg.getBoundingClientRect(),

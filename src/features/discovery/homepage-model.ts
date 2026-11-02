@@ -9,6 +9,8 @@ export interface HomeDebate {
   meta: string;
   stamp: string;
   href: string | null;
+  /** When an upcoming debate starts (ISO), if it is scheduled. */
+  startsAt?: string | null;
 }
 export interface HomeIdea {
   id: string;
@@ -98,6 +100,9 @@ export function publicHomepage(
                   ? "Replay"
                   : "Upcoming",
             href: `/debates/${encodeURIComponent(debate.slug)}`,
+            startsAt: debate.scheduledAt
+              ? new Date(debate.scheduledAt).toISOString()
+              : null,
           };
         });
       return {
