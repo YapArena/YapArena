@@ -26,7 +26,6 @@ import {
   debatesMarkup,
   playerMarkup,
   dotsMarkup,
-  navMarkup,
   railMarkup,
   filtersMarkup,
 } from "../src/features/discovery/homepage-view.ts";
@@ -107,10 +106,21 @@ if (root && template) {
       $$("[data-trending]").forEach((b) =>
         b.setAttribute("aria-current", String(b.dataset.trending === selected)),
       );
-      $("#ya-carousel-nav").innerHTML = navMarkup(
-        markets,
-        selected!,
-      ).toString();
+      // Rename previous / next in place (as navMarkup names them), so a
+      // focused button keeps focus.
+      const neighbours = {
+        previous: markets[(i + markets.length - 1) % markets.length]!,
+        next: markets[(i + 1) % markets.length]!,
+      };
+      for (const [direction, m] of Object.entries(neighbours)) {
+        const button = $<HTMLButtonElement>(`[data-carousel="${direction}"]`);
+        button.setAttribute(
+          "aria-label",
+          `${direction === "next" ? "Next" : "Previous"} idea: ${m.title}`,
+        );
+        button.querySelector("span")!.textContent = m.title;
+        button.disabled = markets.length < 2;
+      }
     }
     function finishSlide() {
       animations.forEach((a) => a.cancel());

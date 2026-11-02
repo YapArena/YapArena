@@ -1,12 +1,10 @@
 # Wide homepage
 
-`/home` renders the native Express homepage modeled on the supplied
-`yaparena-wide-homepage.html` product rooted at `#ya-market-v4`. Its scoped styles
-retain the original typography, colors, full-width grids and responsive rules.
-The export shell, iframe, host bridge and visualization runtime are not shipped.
-`/live` retains its existing video discovery page; topic, debate, account and media
-routes retain their existing contracts. The homepage moved from `/` to `/home`
-when the [landing page](landing-page.md) took over `/`.
+`/home` renders the native Express homepage rooted at `#ya-market-v4`. It began as a copy of
+the supplied `yaparena-wide-homepage.html` product; since the site redesign (PR 3 of 5, see
+[site design](site-design.md#home)) it uses the site kit, header and footer like every other
+page. The homepage moved from `/` to `/home` when the [landing page](landing-page.md) took over
+`/`. `/live` is the video discovery page described under [Live](site-design.md#live).
 
 ## Data and actions
 
@@ -25,8 +23,8 @@ The separate `/live` feed retains its ranking and limit of nine playable debates
 
 Topic categories, ongoing topic markets, endorsement/price histories and individual
 argument endorsements are not implemented as real markets or human-vote histories.
-When shared simulation data is absent, their values remain `null` with stable em dashes
-and an unavailable-history chart. Topic side labels provide unrated positions.
+When shared simulation data is absent, their values remain `null`: the idea shows "No rounds
+yet" and an empty chart frame. Topic side labels provide unrated positions.
 When present, the shared feed explicitly labels its simulated histories and independent
 argument cohorts. A4's existing private per-debate settlement history is not relabeled
 as a topic market or used to infer argument endorsement. Real records are never
@@ -62,25 +60,26 @@ for the actual `/home` homepage.
 
 ## Interaction and resource contract
 
-- Trending panels move together with the original 620ms easing and direction.
-  One elapsed-time clock drives the 6,500ms advance and active-dot fill. Hover,
-  focus, visibility, intersection, touch inspection and participation attention
-  pause it without discarding elapsed time. Manual selection resets progress.
-  Rapid navigation cancels the previous transition; outgoing copies are inert,
-  hidden from accessibility and stripped of IDs and label references.
-- The argument stream loops upward in 32 seconds with hover/focus and explicit
-  pause controls. Repeated content is inert and hidden from assistive technology.
-- Both charts interpolate at the actual pointer coordinate. A frame batches only
-  guide, marker, tooltip and readout updates; scrubbing makes no requests and does
-  not rebuild the SVG or grid. Touch inspection and a labeled keyboard range
-  control provide the same history, with Escape/exit restoring the latest value.
-- An expanded idea occupies the full grid row immediately after its card's row.
-  Sorting and resizing recalculate placement while preserving selection/focus.
-  Filtering it away closes it. Trending changes never replace the expansion.
-- Reduced motion disables automatic rotation/argument flow by default and removes
-  animated transitions. Manual controls, links and all content remain usable.
-  Page exit disposes animation frames, transitions, listeners and observers;
-  back/forward restoration remounts the controller.
+- The trending card shows one idea: its pixel mark, For and Against with their share, up to
+  three arguments, the chart, and a footer with the volume, the debaters and Explore debate. It
+  never turns by itself. Dots and previous / next (named after the neighbouring ideas) move the
+  panels together with the original 620ms easing and direction; rapid navigation cancels the
+  previous transition, and outgoing copies are inert, hidden from accessibility and stripped of
+  IDs and label references. Every slide keeps the same height.
+- Both charts draw one white line left to right the first time each is seen (once per idea,
+  metric and range), ending on a square pixel that pulses. They interpolate at the actual
+  pointer coordinate; a frame batches only the clip, marker, label and readout updates, and
+  scrubbing makes no requests and does not rebuild the SVG or grid. Touch inspection and a
+  labelled keyboard range control give the same history; Escape or leaving restores the latest
+  value. On the trending card, scrubbing shows that moment's For and Against.
+- An expanded idea occupies the full grid row immediately after its card's row. Sorting and
+  resizing recalculate placement while preserving selection/focus. Filtering it away closes it.
+  Trending changes never replace the expansion. Sample ideas, which have no page, open their
+  panel from Explore debate and the rail.
+- New activity waits while someone points at or focuses the trending card or inspects a chart.
+- Reduced motion removes the slide, draw-in and pulse animations. Manual controls, links and all
+  content remain usable. Page exit disposes animation frames, transitions, listeners and
+  observers; back/forward restoration remounts the controller.
 
 The separate homepage browser bundle has no additional frontend framework/runtime dependency. It is loaded only on
 the homepage using the existing asset revision convention. Public HTML remains
@@ -109,17 +108,6 @@ The last Node command provisions disposable loopback databases and runs the full
 documented Docker mode instead where host PostgreSQL is unavailable. Neither the
 reference browser suite nor these commands need hosted credentials.
 
-For the separate original-design comparison, supply the actual export explicitly:
-
-```sh
-HOMEPAGE_REFERENCE_PATH=/absolute/path/yaparena-wide-homepage.html \
-  node scripts/verify-homepage-browser.ts --compare-reference
-```
-
-In comparison mode the browser verifier serves the original export unchanged, growing only its
-outer iframe height to capture the complete product. It compares that rendering
-with the native app under the existing CSP at 1440, 1920, 1024, 768, 390 and 320px,
-captures additional slides/hover/expansion, and exercises timing, chart, filter,
-follow, account and accessibility behavior. Synthetic integration responses are
-confined to the local verifier. The original attachment is not committed.
+The redesign departs from the supplied export on purpose, so the earlier geometry comparison
+with it (`--compare-reference`) is retired.
 See the [dated evidence and screenshots](evidence/homepage/2026-10-16.md).

@@ -85,6 +85,7 @@ body > #ya-market-v4 {
 }
 #ya-market-v4 .ya-carousel {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
   min-width: 0;
 }
@@ -471,12 +472,16 @@ body > #ya-market-v4 {
 #ya-market-v4 .trend-foot {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "stats arena"
+    "signin arena";
   align-items: center;
-  gap: var(--space-3) var(--space-4);
+  gap: 2px var(--space-4);
   padding-top: var(--space-4);
   border-top: 1px solid var(--line);
 }
 #ya-market-v4 .trend-stats {
+  grid-area: stats;
   display: flex;
   flex-wrap: wrap;
   gap: 0 var(--space-1);
@@ -488,6 +493,7 @@ body > #ya-market-v4 {
   color: var(--text);
 }
 #ya-market-v4 .trend-arena {
+  grid-area: arena;
   display: flex;
   align-items: center;
   gap: var(--space-4);
@@ -526,11 +532,10 @@ body > #ya-market-v4 {
 }
 /* Shown to visitors who are not signed in. */
 #ya-market-v4 .trend-signin {
+  grid-area: signin;
   display: none;
-  grid-column: 1 / -1;
   margin: 0;
   font-size: var(--text-14);
-  text-align: right;
 }
 #ya-market-v4 .trend-signin a {
   color: var(--muted);
@@ -646,6 +651,7 @@ body:has(.site-header[data-session="guest"]) #ya-market-v4 .trend-signin {
 /* The rail: what's live, one invitation, the popular ideas. */
 #ya-market-v4 .home-rail {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
   gap: var(--space-4);
   min-width: 0;
@@ -750,6 +756,7 @@ body:has(.site-header[data-session="member"])
 /* ---- Ideas in motion ------------------------------------------------------ */
 #ya-market-v4 .ya-discovery {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
   scroll-margin-top: var(--space-5);
 }
@@ -1193,6 +1200,11 @@ body:has(.site-header[data-session="member"])
   }
   #ya-market-v4 .trend-foot {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "stats"
+      "arena"
+      "signin";
+    row-gap: var(--space-3);
   }
   #ya-market-v4 .trend-arena {
     flex-direction: column;
@@ -1201,9 +1213,6 @@ body:has(.site-header[data-session="member"])
   }
   #ya-market-v4 .trend-cta {
     width: 100%;
-  }
-  #ya-market-v4 .trend-signin {
-    text-align: left;
   }
   #ya-market-v4 .ya-nav-pill {
     justify-content: center;

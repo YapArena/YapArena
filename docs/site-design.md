@@ -88,6 +88,43 @@ same stylesheet for its topic cards.
 - **Empty lists** show the emblem, today's words and Clear search; inside a topic or profile, a
   quieter note without the emblem.
 
+## Home
+
+`/home` (`src/features/discovery/homepage-view.ts`, `public/homepage.css`,
+`frontend/homepage.ts`; [wide homepage](wide-homepage.md)) has no headline of its own:
+
+- **Trending card**: the idea's pixel mark (`pixelMark("idea-" + id, 48)` from
+  `src/features/discovery/pixel-mark.ts`: a 5 × 5 mirrored pattern from an FNV-1a hash in one
+  of the visit colours; ideas get marks, people get their avatars), the category in Dydema, the
+  title in Forum 28 / 20 px and a bookmark to follow. From a 640 px card, For and Against with
+  their share in Forum and up to three arguments sit beside the chart, and the body keeps a
+  28rem minimum so every slide is the same height. The footer holds the volume, the debaters
+  and one white Explore debate. An idea without rounds shows "No rounds yet" and an empty frame.
+- **Chart**: one white line on five dotted guides, five dates, a square end pixel that pulses;
+  hover, a tap or the keyboard shows a square marker with "Oct 19 55%".
+- **Under the card**: dots (the current idea as three lit pixels) and previous / next named after
+  the neighbouring ideas, icons only on phones. Nothing turns by itself.
+- **Rail** (20rem from 1200 px, two columns under the card below that): Live now, Take a side
+  (Join the arena when signed out; not on phones), Popular ideas by 24-hour volume, and
+  Explore all ideas.
+- **Ideas in motion**: today's tools and cards with the idea's 24 px mark, a Forum title and
+  percentage, and a white sparkline that draws in like the chart.
+- With no ideas the page is one state: "No public ideas yet." or, when discovery fails,
+  "Discovery temporarily unavailable." with Try again.
+
+At 1440 × 900 and 1280 × 800 the card and its controls end by 800 px; on a 390 × 844 phone
+Explore debate ends by 820 px (`scripts/verify-homepage-browser.ts` checks both).
+
+## Live
+
+`/live` (`featured-web.ts`, `video-card-web.ts`, `public/live.css`): the featured debate in a
+contained 16:9 stage with rounded corners, its words beside it from 1000 px (under it below) and
+a white "Step into the debate". `frontend/hero-preview.ts` keeps the muted preview, its controls
+and staying on the video to enter. The cards are the kit's debate cards with the preview in
+their picture and the words under it; topics use topic cards; the note is small muted text.
+With nothing to watch, a Dydema headline sits beside the living emblem
+(`frontend/living-emblem.ts`, the landing's renderer, resting off screen).
+
 ## Header
 
 `src/features/discovery/site-header-web.ts`, `public/site-header.css`, `frontend/site-header.ts`.
