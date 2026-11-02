@@ -66,9 +66,10 @@ it("shows the Yap Coins balance with the pixel coin and placeholders", () => {
   const page = renderCoins("https://arena.example");
   assert.match(page, /<svg class="pixel-coin" width="64" height="64"/);
   assert.match(page, /<span class="sr-only">Yap Coins\.<\/span>/);
+  // While it loads, the balance's own line says so, so nothing moves.
   assert.match(
     page,
-    /data-coin-wallet-balances data-funds="balance"><span class="skeleton/,
+    /data-coin-wallet-balances data-funds="balance"><span class="coin-loading" role="status"><span class="pixel-loader" aria-hidden="true">(<i><\/i>){9}<\/span>Checking your balance…<\/span>/,
   );
   assert.match(page, /<dd class="num" data-funds="available">/);
   assert.match(page, /<dd class="num" data-funds="held">/);

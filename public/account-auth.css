@@ -3,6 +3,9 @@
    frontend/account-balance.ts and frontend/account-coins.ts build some of
    this markup; their classes are kept. */
 .account-shell {
+  /* The first screen is reserved, so the footer never moves into view as
+     the account loads. */
+  min-height: 100svh;
   padding-top: var(--space-4);
   padding-bottom: var(--space-8);
 }
@@ -193,13 +196,17 @@
 }
 .settings-identity h1 {
   max-width: none;
+  min-height: 1.15em;
   font-family: var(--font-number);
   font-size: var(--text-40);
   font-weight: 400;
   line-height: 1.15;
   overflow-wrap: anywhere;
 }
+/* The name and handle arrive after the account loads; their lines are kept
+   so nothing below moves. */
 .settings-identity p:not(.kicker) {
+  min-height: 1.5em;
   display: flex;
   flex-wrap: wrap;
   gap: 0 var(--space-3);
@@ -421,6 +428,14 @@
   text-underline-offset: 3px;
   overflow-wrap: anywhere;
 }
+/* The profile's address fills in on its own line after the account loads;
+   the note keeps room for it (blank for a profile that isn't public). */
+#profile-url {
+  display: block;
+}
+#profile-handle-help {
+  min-height: 3em;
+}
 .settings-error {
   color: var(--warning);
 }
@@ -635,7 +650,9 @@
 /* ---- Yap Coins (/coins) -------------------------------------------------- */
 .coin-wallet-shell {
   display: grid;
+  align-content: start;
   gap: var(--space-6);
+  min-height: 100svh;
   padding-top: var(--space-7);
   padding-bottom: var(--space-8);
 }
@@ -698,15 +715,21 @@
 }
 .coin-unit {
   color: var(--muted);
-  font-size: var(--text-28);
+  font-size: var(--text-24);
 }
-.coin-big-placeholder {
-  width: 10rem;
-  height: 3.5rem;
+/* While the balance loads, its own line says so. */
+.coin-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 4.8rem;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: var(--text-14);
 }
 .coin-stat-placeholder {
   width: 6rem;
-  height: 1.25rem;
+  height: 1.5em;
 }
 .coin-wallet .account-balances {
   display: grid;
@@ -957,8 +980,8 @@
   .coin-unit {
     font-size: var(--text-20);
   }
-  .coin-big-placeholder {
-    height: 2.25rem;
+  .coin-loading {
+    height: 3rem;
   }
   #coin-sandbox .account-balances {
     grid-template-columns: minmax(0, 1fr);

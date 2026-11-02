@@ -10476,7 +10476,14 @@ exports[`renders the coins and match pages 1`] = `
 <span class="sr-only">Your balance</span>
 <span class="ins" aria-hidden="true">yovr balance</span>
 </h2>
-<p class="coin-wallet-status" data-coin-wallet-status role="status" aria-live="polite">
+<p class="coin-wallet-status" data-coin-wallet-status role="status" aria-live="polite" hidden>
+</p>
+<div class="coin-wallet-signed-out" data-coin-wallet-signed-out hidden>
+<p>Sign in to see your balance.</p>
+<a class="btn btn-primary" href="/account?next=%2Fcoins">Sign in</a>
+</div>
+<p class="coin-big" data-coin-wallet-balances data-funds="balance">
+<span class="coin-loading" role="status">
 <span class="pixel-loader" aria-hidden="true">
 <i>
 </i>
@@ -10496,14 +10503,7 @@ exports[`renders the coins and match pages 1`] = `
 </i>
 <i>
 </i>
-</span> Checking your balance…</p>
-<div class="coin-wallet-signed-out" data-coin-wallet-signed-out hidden>
-<p>Sign in to see your balance.</p>
-<a class="btn btn-primary" href="/account?next=%2Fcoins">Sign in</a>
-</div>
-<p class="coin-big" data-coin-wallet-balances data-funds="balance">
-<span class="skeleton coin-big-placeholder">
-</span>
+</span>Checking your balance…</span>
 </p>
 </div>
 </div>
