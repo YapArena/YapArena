@@ -452,6 +452,9 @@ try {
   );
   await page.locator('[data-debate-filter="replay"]').focus();
   await page.setViewportSize({ width: 390, height: 844 });
+  // Narrowing after scrubbing at full width never widens the page.
+  await page.waitForTimeout(200);
+  assert.ok(await noOverflow(page), "390px after scrubbing: no overflow");
   await page.waitForFunction(
     () =>
       (

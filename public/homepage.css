@@ -7,6 +7,9 @@ body > #ya-market-v4 {
   --ya-coral: #fa9b8c;
   position: relative;
   isolation: isolate;
+  /* The chart's hidden label keeps its last position; nothing here may widen
+     the page when the window narrows. */
+  overflow-x: clip;
 }
 #ya-market-v4 [hidden] {
   display: none;
