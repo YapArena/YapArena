@@ -1,6 +1,7 @@
-// Live queue and challenges in the browser (Decision 0011): the header pill, the 30-second match
-// dialog, the "now" challenge dialog, the topic page's queue buttons and the banner above a
-// matched or booked debate's video. The header loads this module on pages with data-matchmaking.
+// Live queue and challenges in the browser (Decision 0011): the header pill, the full-screen queue
+// overlay with its 30-second match countdown (frontend/queue-overlay.ts, loaded on first use), the
+// "now" challenge dialog, the topic page's queue buttons and the banner above a matched or booked
+// debate's video. The header loads this module on pages with data-matchmaking.
 // A signed-in player keeps a live stream open, which also marks them online for "now"
 // challenges; polling takes over when the stream is unavailable. The server decides every outcome.
 import { api } from "./lib/api.js";
@@ -12,6 +13,7 @@ import {
   challengeNotice,
   clock,
   clockOffset,
+  closedMessages,
   dueDebate,
   isAnswering,
   isJoining,
@@ -19,6 +21,7 @@ import {
   needsLiveUpdates,
   pillDescription,
   pillHref,
+  pillParts,
   pillText,
   secondsUntil,
   shouldOpenDebate,
@@ -29,6 +32,14 @@ import {
   type Side,
   type Waiting,
 } from "./matchmaking-logic.js";
+import {
+  DEVICE_CHECK_REUSE_MS,
+  FOLD_KEY,
+  motionPlan,
+  ticketPhase,
+  wantsOverlay,
+} from "./queue-overlay-logic.js";
+import type { OverlayView, QueueOverlay } from "./queue-overlay.js";
 import { needsDebaterSettings, showSettingsPrompt } from "./settings-prompt.js";
 
 declare global {
@@ -64,12 +75,33 @@ let audio: AudioContext | undefined;
 let alertedOffer: string | null = null;
 let generation = 0;
 let deviceCheckRequired = true;
+// When this page last passed the camera and microphone check, so Queue again can reuse it.
+let deviceCheckedAt = -Infinity;
+// The queue overlay, created on first use.
+let overlay: QueueOverlay | null = null;
+let overlayLoading: Promise<void> | null = null;
+// When this page saw the current offer arrive (performance.now()); null when it opened mid-offer.
+let offerSeenAt: number | null = null;
+// Both players accepted: the overlay shows "Entering the arena" until the debate opens.
+let entering: QueueState | null = null;
+// The ticket closed while the overlay was showing; it stays until Close or Queue again.
+let closedView:
+  (NonNullable<OverlayView["closed"]> & { state: QueueState }) | null = null;
+let lastNotice = "";
+let failedRefreshes = 0;
+let reconnecting = false;
+// The ticket folded on this page, in case session storage is unavailable.
+let foldedHere: string | null = null;
+const RECONNECTING = "Reconnecting… You keep your place for about 90 seconds.";
 
 const now = () => Date.now() + offset;
 const status = document.querySelector<HTMLElement>("[data-header-status]");
 function announce(message: string) {
   if (status) status.textContent = message;
   if (panelNote) panelNote.textContent = message;
+  // The page behind the overlay is inert, so the overlay reads notices out itself.
+  lastNotice = message;
+  overlay?.note(message);
 }
 // A refusal for missing debater settings links to them; other errors show their message.
 function announceError(error: unknown) {
@@ -88,6 +120,11 @@ pill.className = "queue-pill";
 pill.hidden = true;
 const pillLabel = document.createElement("a");
 pillLabel.className = "queue-pill-label";
+const pillWords = document.createTextNode("");
+// The pill's time is set in the theme font, like the overlay's timers.
+const pillTime = document.createElement("span");
+pillTime.className = "queue-pill-time";
+pillLabel.append(pillWords, pillTime);
 const pillLeave = document.createElement("button");
 pillLeave.type = "button";
 pillLeave.className = "small-button";
@@ -98,46 +135,103 @@ pillLeave.addEventListener(
   "click",
   () => void (isQueued(state) ? leave() : withdrawChallenge()),
 );
+// While queued, the pill reopens the overlay; its link stays as the fallback without scripts.
+pillLabel.addEventListener("click", (event) => {
+  if (ticketPhase(state) !== "waiting" || !state?.ticket) return;
+  event.preventDefault();
+  storeFold(null);
+  foldedHere = null;
+  render();
+});
 
-// ---- Match dialog ------------------------------------------------------------------------
-const dialog = document.createElement("dialog");
-dialog.className = "match-dialog";
-dialog.setAttribute("aria-labelledby", "match-dialog-title");
-const dialogTitle = document.createElement("h2");
-dialogTitle.id = "match-dialog-title";
-dialogTitle.textContent = "Match found";
-const dialogTopic = document.createElement("p");
-dialogTopic.className = "match-dialog-topic";
-const dialogSide = document.createElement("p");
-const countdown = document.createElement("p");
-countdown.className = "match-countdown";
-const dialogStatus = document.createElement("p");
-dialogStatus.className = "form-note";
-dialogStatus.setAttribute("role", "status");
-const acceptButton = document.createElement("button");
-acceptButton.type = "button";
-acceptButton.className = "button";
-acceptButton.textContent = "Accept";
-const declineButton = document.createElement("button");
-declineButton.type = "button";
-declineButton.className = "small-button";
-declineButton.textContent = "Decline";
-const dialogActions = document.createElement("div");
-dialogActions.className = "match-dialog-actions";
-dialogActions.append(acceptButton, declineButton);
-dialog.append(
-  dialogTitle,
-  dialogTopic,
-  dialogSide,
-  countdown,
-  dialogStatus,
-  dialogActions,
-);
-document.body.append(dialog);
-// Escape would hide the dialog but not answer it; the countdown answers for the player.
-dialog.addEventListener("cancel", (event) => event.preventDefault());
-acceptButton.addEventListener("click", () => void answer("accept"));
-declineButton.addEventListener("click", () => void answer("decline"));
+// ---- Queue overlay ------------------------------------------------------------------------
+function folded() {
+  try {
+    return sessionStorage.getItem(FOLD_KEY);
+  } catch {
+    return null;
+  }
+}
+// Keep browsing folds this ticket's overlay into the pill on every page of the visit.
+function storeFold(ticketId: string | null) {
+  try {
+    if (ticketId) sessionStorage.setItem(FOLD_KEY, ticketId);
+    else sessionStorage.removeItem(FOLD_KEY);
+  } catch {
+    // Without storage the fold lasts until the next page.
+  }
+}
+function loadOverlay() {
+  overlayLoading ??= import("./queue-overlay.js")
+    .then(({ createQueueOverlay }) => {
+      overlay = createQueueOverlay({
+        fold,
+        leave: () => void leave(),
+        accept: () => void answer("accept"),
+        decline: () => void answer("decline"),
+        queueAgain: () => void queueAgain(),
+        close: closeOverlay,
+      });
+      render();
+      if (lastNotice) overlay.note(lastNotice);
+    })
+    .catch(() => {
+      overlayLoading = null;
+    });
+  return overlayLoading;
+}
+
+function overlayView(): OverlayView | null {
+  const base = { now: now(), offerSeenAt, closed: null };
+  if (entering) return { ...base, phase: "entering", state: entering };
+  if (closedView)
+    return {
+      ...base,
+      phase: "closed",
+      state: closedView.state,
+      offerSeenAt: null,
+      closed: { reason: closedView.reason, message: closedView.message },
+    };
+  if (!state || !wantsOverlay(state, foldedHere ?? folded())) return null;
+  return {
+    ...base,
+    phase: ticketPhase(state) === "match" ? "match" : "waiting",
+    state,
+  };
+}
+
+function renderOverlay() {
+  const view = member ? overlayView() : null;
+  if (!view) return overlay?.hide();
+  if (!overlay) return void loadOverlay();
+  overlay.update(view);
+}
+
+// Focus returns to the topic page's side button, or to the page.
+function restoreFocus(side?: Side) {
+  const target = side ? sideButtons.get(side) : undefined;
+  if (target && !target.disabled) target.focus();
+  else if (document.activeElement instanceof HTMLElement)
+    document.activeElement.blur();
+}
+
+function fold() {
+  const ticket = state?.ticket;
+  if (!ticket || ticketPhase(state) !== "waiting") return;
+  storeFold(ticket.id);
+  foldedHere = ticket.id;
+  overlay?.hide();
+  render();
+  pillLabel.focus();
+}
+
+function closeOverlay() {
+  const side = closedView?.state.ticket?.side;
+  closedView = null;
+  overlay?.hide();
+  render();
+  restoreFocus(side);
+}
 
 // ---- "Now" challenge dialog --------------------------------------------------------------
 const challengeDialog = document.createElement("dialog");
@@ -229,7 +323,38 @@ function apply(next: QueueState) {
   if (notice) announce(notice);
   if (next.offer && next.offer.id !== alertedOffer) {
     alertedOffer = next.offer.id;
+    // A page that loaded mid-offer skips the countdown's opening sweep.
+    offerSeenAt = previous ? performance.now() : null;
     alertMatch(next);
+  }
+  if (next.offer) {
+    // A match always shows; after it falls through, the waiting screen stays open.
+    storeFold(null);
+    foldedHere = null;
+    closedView = null;
+  }
+  const before = previous?.ticket;
+  const after = next.ticket;
+  if (
+    before &&
+    after &&
+    before.id === after.id &&
+    (before.status === "searching" || before.status === "offered") &&
+    after.status === "closed"
+  ) {
+    // Leaving closes the overlay; any other reason shows why in it, if it was showing.
+    closedView =
+      overlay?.phase && after.closedReason && after.closedReason !== "left"
+        ? {
+            state: next,
+            reason: after.closedReason,
+            message: closedMessages[after.closedReason],
+          }
+        : null;
+    if (after.closedReason === "left" && overlay?.phase) {
+      overlay.hide();
+      restoreFocus(after.side);
+    }
   }
   const incoming =
     next.challenge?.direction === "incoming" ? next.challenge : null;
@@ -237,8 +362,18 @@ function apply(next: QueueState) {
     alertedChallenge = incoming.id;
     alertChallenge(incoming.handle, incoming.topicTitle);
   }
-  if (shouldOpenDebate(previous, next, location.pathname) && next.debate)
-    location.assign(`/debates/${encodeURIComponent(next.debate.slug)}`);
+  if (shouldOpenDebate(previous, next, location.pathname) && next.debate) {
+    const url = `/debates/${encodeURIComponent(next.debate.slug)}`;
+    // From the match countdown, "Entering the arena" shows briefly first.
+    if (overlay?.phase === "match" && next.ticket?.status === "matched") {
+      entering = next;
+      window.setTimeout(
+        () => location.assign(url),
+        motionPlan(matchMedia("(prefers-reduced-motion: reduce)").matches)
+          .enterDelay,
+      );
+    } else location.assign(url);
+  }
   render();
   connect();
   window.dispatchEvent(new CustomEvent("yap:matchmaking", { detail: next }));
@@ -251,10 +386,24 @@ async function refresh() {
       "/api/matchmaking/presence",
       { method: "POST", timeout: 8000 },
     );
-    if (current === generation) apply(result.state);
+    if (current === generation) {
+      failedRefreshes = 0;
+      apply(result.state);
+    }
   } catch {
     // The next poll or stream message retries.
+    failedRefreshes += 1;
+    render();
   }
+}
+
+// Offline, or two check-ins in a row failed: the player keeps their place for a while.
+function showReconnecting() {
+  const next = isQueued(state) && (!navigator.onLine || failedRefreshes >= 2);
+  if (next === reconnecting) return;
+  reconnecting = next;
+  if (next) announce(RECONNECTING);
+  else if (lastNotice === RECONNECTING) overlay?.note("");
 }
 
 function stopPolling() {
@@ -304,7 +453,9 @@ function render() {
   const text = member ? pillText(state, now(), pageSlug) : null;
   pill.hidden = text === null;
   if (text) {
-    pillLabel.textContent = text;
+    const parts = pillParts(text);
+    if (pillWords.data !== parts.words) pillWords.data = parts.words;
+    if (pillTime.textContent !== parts.time) pillTime.textContent = parts.time;
     pillLabel.title = pillDescription(state);
     pillLabel.href = pillHref(state, now());
     const outgoing =
@@ -314,7 +465,8 @@ function render() {
     pillLeave.hidden = !isQueued(state) && !outgoing;
     pillLeave.textContent = outgoing ? "Cancel" : "Leave";
   }
-  renderDialog();
+  showReconnecting();
+  renderOverlay();
   renderChallengeDialog();
   renderPanel();
   if (banner) {
@@ -366,31 +518,6 @@ function renderChallengeDialog() {
     challengeDecline.disabled = false;
     challengeDialog.showModal();
     challengeAccept.focus();
-  }
-}
-
-function renderDialog() {
-  const offer = state?.offer;
-  if (!offer || !state?.ticket) {
-    if (dialog.open) dialog.close();
-    return;
-  }
-  dialogTopic.textContent = state.ticket.topicTitle;
-  dialogSide.textContent = `You argue: ${state.ticket.sideLabel}`;
-  const left = secondsUntil(offer.deadlineAt, now());
-  countdown.textContent = left ? `${left}` : "Time's up";
-  acceptButton.disabled = offer.acceptedByMe || !left;
-  declineButton.disabled = !left;
-  dialogStatus.textContent = offer.acceptedByMe
-    ? offer.acceptedByOpponent
-      ? "Both accepted. Opening your debate…"
-      : "You accepted. Waiting for the other player…"
-    : offer.acceptedByOpponent
-      ? "The other player accepted."
-      : "Accept within 30 seconds.";
-  if (!dialog.open) {
-    dialog.showModal();
-    acceptButton.focus();
   }
 }
 
@@ -479,20 +606,21 @@ function flashTitle() {
 async function answer(choice: "accept" | "decline") {
   const offer = state?.offer;
   if (!offer) return;
-  acceptButton.disabled = true;
-  declineButton.disabled = true;
+  // Accept and Decline stay disabled while the answer is sent, and come back after a failure
+  // while time remains.
+  overlay?.setAnswering(true);
   try {
-    apply(
-      (
-        await api<{ state: QueueState }>(
-          `/api/matchmaking/offers/${encodeURIComponent(offer.id)}/${choice}`,
-          { method: "POST", timeout: 8000 },
-        )
-      ).state,
-    );
+    const next = (
+      await api<{ state: QueueState }>(
+        `/api/matchmaking/offers/${encodeURIComponent(offer.id)}/${choice}`,
+        { method: "POST", timeout: 8000 },
+      )
+    ).state;
+    overlay?.setAnswering(false);
+    apply(next);
   } catch (error) {
-    dialogStatus.textContent =
-      error instanceof Error ? error.message : "Try again.";
+    overlay?.setAnswering(false);
+    overlay?.showError(error instanceof Error ? error.message : "Try again.");
     void refresh();
   }
 }
@@ -566,6 +694,7 @@ async function leave() {
 // The debate needs a working camera and microphone, so check before queueing.
 async function checkDevices() {
   if (!deviceCheckRequired) return true;
+  if (performance.now() - deviceCheckedAt < DEVICE_CHECK_REUSE_MS) return true;
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: true,
@@ -581,6 +710,7 @@ async function checkDevices() {
     json: { cameraOk: true, microphoneOk: true },
     timeout: 8000,
   });
+  deviceCheckedAt = performance.now();
   return true;
 }
 
@@ -601,26 +731,47 @@ async function choose(side: Side, button: HTMLButtonElement) {
   if (!panelTopic) return;
   if (state?.ticket && isQueued(state) && state.ticket.side === side)
     return leave();
-  prepareAlerts();
   for (const entry of sideButtons.values()) entry.disabled = true;
-  announce("Checking your camera and microphone…");
   try {
-    if (!(await checkDevices())) return;
-    apply(
-      (
-        await api<{ state: QueueState }>("/api/matchmaking/tickets", {
-          method: "POST",
-          json: { topicSlug: panelTopic, side },
-          timeout: 8000,
-        })
-      ).state,
-    );
-    announce("You're in the queue. Stay on YAP Arena to be matched.");
-    void loadWaiting();
+    await enterQueue(panelTopic, side);
   } catch (error) {
     announceError(error);
   } finally {
     renderPanel();
+  }
+}
+
+// Joins the queue on a side, after the camera and microphone check.
+async function enterQueue(topicSlug: string, side: Side) {
+  prepareAlerts();
+  // The overlay and its fonts load while the devices are checked.
+  void loadOverlay();
+  void document.fonts.load('1em "Dydema Capitals"').catch(() => {});
+  announce("Checking your camera and microphone…");
+  if (!(await checkDevices())) return;
+  closedView = null;
+  apply(
+    (
+      await api<{ state: QueueState }>("/api/matchmaking/tickets", {
+        method: "POST",
+        json: { topicSlug, side },
+        timeout: 8000,
+      })
+    ).state,
+  );
+  announce("You're in the queue. Stay on YAP Arena to be matched.");
+  void loadWaiting();
+}
+
+// Queue again after a missed or declined match: the same topic and side.
+async function queueAgain() {
+  const ticket = closedView?.state.ticket;
+  if (!ticket) return;
+  try {
+    await enterQueue(ticket.topicSlug, ticket.side);
+  } catch (error) {
+    overlay?.showError(error instanceof Error ? error.message : "Try again.");
+    announceError(error);
   }
 }
 
@@ -654,6 +805,9 @@ async function initialize() {
   stopPolling();
   state = null;
   member = false;
+  entering = null;
+  closedView = null;
+  offerSeenAt = null;
   render();
   try {
     member = Boolean(await store.me());
@@ -680,6 +834,8 @@ async function initialize() {
 }
 
 window.addEventListener("yap:account-changed", () => void initialize());
+window.addEventListener("online", () => render());
+window.addEventListener("offline", () => render());
 document.addEventListener("visibilitychange", () => {
   flashTitle();
   if (!document.hidden && member) void refresh();

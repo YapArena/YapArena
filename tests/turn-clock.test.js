@@ -128,6 +128,52 @@ describe("turn clock", () => {
     assert.notEqual(frameKey(running(60)), frameKey(running(59.8)));
   });
 
+  it("times the opening sweep from when the page saw the countdown begin", () => {
+    // The queue overlay's offer arrived 0.3 s after the server started its 30 seconds.
+    const offer = (left, sinceStart) =>
+      clockFrame({
+        phase: "running",
+        left,
+        total: 30,
+        reduced: false,
+        sinceStart,
+      });
+    assert.equal(offer(29.7, 0).refill, 0, "the sweep starts on arrival");
+    close(offer(29.4, REFILL_SECONDS / 2).refill, 0.5);
+    assert.equal(offer(29.1, REFILL_SECONDS).refill, 1);
+    // Without it the sweep is timed from the deadline, exactly as before.
+    const before = clockFrame({
+      phase: "running",
+      left: 29.7,
+      total: 30,
+      reduced: false,
+    });
+    close(before.refill, 0.5);
+    assert.deepEqual(
+      clockFrame({
+        phase: "running",
+        left: 29.7,
+        total: 30,
+        reduced: false,
+        sinceStart: undefined,
+      }),
+      before,
+    );
+    // The drain, colour and pulse still follow the deadline, and reduced motion skips the sweep.
+    close(offer(15, 0).spent, 0.5);
+    assert.equal(offer(9, 0).warn, true);
+    assert.equal(
+      clockFrame({
+        phase: "running",
+        left: 29.7,
+        total: 30,
+        reduced: true,
+        sinceStart: 0,
+      }).refill,
+      1,
+    );
+  });
+
   it("names the time left for screen readers", () => {
     assert.equal(timerLabel(42, 3), "42 seconds left in turn 3");
     assert.equal(timerLabel(41.2, 3), "42 seconds left in turn 3");

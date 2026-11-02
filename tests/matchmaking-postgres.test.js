@@ -77,6 +77,14 @@ describe(
       );
       return id;
     }
+    async function handleOf(userId) {
+      return (
+        await owner.query(
+          "SELECT handle FROM public_profiles WHERE user_id = $1",
+          [userId],
+        )
+      ).rows[0].handle;
+    }
     async function topic() {
       const slug = `queue-${randomUUID().slice(0, 12)}`;
       await owner.query(
@@ -124,6 +132,17 @@ describe(
       const deadline = new Date(offered.offer.deadlineAt).getTime();
       const now = new Date(offered.serverNow).getTime();
       assert.ok(deadline - now > 25_000 && deadline - now <= 30_000);
+      // Each player sees who they were paired with and the side that player argues.
+      assert.deepEqual(offered.offer.opponent, {
+        handle: await handleOf(a),
+        displayName: "Queue player",
+        sideLabel: "For",
+      });
+      assert.deepEqual((await queue.state(a)).offer.opponent, {
+        handle: await handleOf(b),
+        displayName: "Queue player",
+        sideLabel: "Against",
+      });
 
       const first = await queue.accept(a, offered.offer.id);
       assert.equal(first.debateId, null);
@@ -269,6 +288,12 @@ describe(
         "UPDATE public_profiles SET publication_state = 'hidden' WHERE user_id = $1",
         [b],
       );
+      // A hidden profile's name and handle are not shown, even to the paired player.
+      assert.deepEqual((await queue.state(a)).offer.opponent, {
+        handle: null,
+        displayName: null,
+        sideLabel: "Against",
+      });
       const result = await queue.accept(b, offer.id);
       assert.equal(result.debateId, null);
       assert.equal(result.state.ticket.closedReason, "unavailable");

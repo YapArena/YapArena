@@ -6,6 +6,7 @@ import {
   challengeNotice,
   clock,
   clockOffset,
+  closedMessages,
   dueDebate,
   isAnswering,
   isJoining,
@@ -13,6 +14,7 @@ import {
   needsLiveUpdates,
   pillDescription,
   pillHref,
+  pillParts,
   pillText,
   secondsSince,
   secondsUntil,
@@ -98,6 +100,34 @@ describe("live queue screens", () => {
       true,
     );
     assert.equal(needsLiveUpdates(state({ ticket: ticket("closed") })), false);
+  });
+
+  it("splits the pill's time off so it can use the theme font", () => {
+    assert.deepEqual(pillParts("In queue · 1:23"), {
+      words: "In queue · ",
+      time: "1:23",
+    });
+    assert.deepEqual(pillParts("Debate in 12:05"), {
+      words: "Debate in ",
+      time: "12:05",
+    });
+    assert.deepEqual(pillParts("Join your debate"), {
+      words: "Join your debate",
+      time: "",
+    });
+  });
+
+  it("explains every way a ticket closes", () => {
+    for (const reason of [
+      "left",
+      "declined",
+      "missed",
+      "stale",
+      "unavailable",
+      "topic_closed",
+      "booking",
+    ])
+      assert.match(closedMessages[reason], /\.$/);
   });
 
   it("labels the header pill", () => {

@@ -17,11 +17,11 @@ const state = {
   debate: null,
 };
 
-function fixture({ failure, debateId = null, streams } = {}) {
+function fixture({ failure, debateId = null, streams, current = state } = {}) {
   const calls = [];
   const actions = [];
   const run =
-    (name, value = state) =>
+    (name, value = current) =>
     async (...args) => {
       calls.push([name, ...args]);
       if (failure) throw failure;
@@ -32,7 +32,7 @@ function fixture({ failure, debateId = null, streams } = {}) {
     touch: run("touch"),
     enter: run("enter"),
     leave: run("leave"),
-    accept: run("accept", { state, debateId }),
+    accept: run("accept", { state: current, debateId }),
     decline: run("decline"),
     waiting: run("waiting", { sideA: 2, sideB: 0 }),
     deviceCheckRequired: true,
@@ -137,6 +137,40 @@ describe("live topic queue API", () => {
       f.calls.map(([name]) => name),
       ["state", "touch", "leave", "waiting"],
     );
+  });
+
+  it("sends the paired player's name, handle and side with the offer", async () => {
+    const offered = {
+      ...state,
+      ticket: {
+        id: "77777777-7777-4777-8777-777777777777",
+        topicSlug: "nuclear-power",
+        topicTitle: "Canada should expand nuclear power",
+        side: "A",
+        sideLabel: "For",
+        status: "offered",
+        closedReason: null,
+        queuedAt: "2026-10-25T11:59:00.000Z",
+      },
+      offer: {
+        id: offerId,
+        deadlineAt: "2026-10-25T12:00:30.000Z",
+        acceptedByMe: false,
+        acceptedByOpponent: true,
+        opponent: {
+          handle: "maya-chen",
+          displayName: "Maya Chen",
+          sideLabel: "Against",
+        },
+      },
+    };
+    const f = fixture({ current: offered });
+    const me = await request(f.app)
+      .get("/api/matchmaking/me")
+      .set("x-user", "7");
+    assert.equal(me.status, 200);
+    assert.deepEqual(me.body.state.offer.opponent, offered.offer.opponent);
+    assert.deepEqual(f.calls.at(-1), ["state", "7"]);
   });
 
   it("accepts and declines offers, recording a completed match", async () => {

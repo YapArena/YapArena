@@ -28,6 +28,12 @@ export interface QueueState {
     deadlineAt: string;
     acceptedByMe: boolean;
     acceptedByOpponent: boolean;
+    // The paired player; the handle and name are null if their profile is no longer published.
+    opponent: {
+      handle: string | null;
+      displayName: string | null;
+      sideLabel: string;
+    };
   } | null;
   debate: {
     id: string;
@@ -138,6 +144,17 @@ export function pillText(state: QueueState | null, now: number, pageSlug = "") {
   return null;
 }
 
+/**
+ * The pill's words and its trailing time ("In queue · " and "1:02"), so the time can be set in the
+ * theme font. A text without a time keeps it all as words.
+ */
+export function pillParts(text: string) {
+  const match = /^(.*?)(\d+:\d{2})$/.exec(text);
+  return match
+    ? { words: match[1] ?? "", time: match[2] ?? "" }
+    : { words: text, time: "" };
+}
+
 /** Where the header pill leads: the queue's topic, the debate, or the challenge list. */
 export function pillHref(state: QueueState | null, now: number) {
   if (state?.ticket && isQueued(state))
@@ -175,7 +192,7 @@ export function waitingText(waiting: Waiting, sideA: string, sideB: string) {
     .join(" · ");
 }
 
-const closedMessages: Record<ClosedReason, string> = {
+export const closedMessages: Record<ClosedReason, string> = {
   left: "You left the queue.",
   declined: "You declined the match and left the queue.",
   missed: "You didn't accept in time, so you left the queue.",

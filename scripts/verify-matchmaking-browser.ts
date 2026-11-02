@@ -58,10 +58,14 @@ interface Player {
   page: Page;
 }
 
-async function player(name: string): Promise<Player> {
+// Alice sees the queue overlay's full motion and Bob its reduced-motion version.
+async function player(
+  name: string,
+  reducedMotion: "reduce" | "no-preference",
+): Promise<Player> {
   const context = await browser!.newContext({
     viewport: { width: 1280, height: 900 },
-    reducedMotion: "reduce",
+    reducedMotion,
   });
   context.setDefaultTimeout(20_000);
   const handle = `q-${tag}-${name}`;
@@ -84,6 +88,14 @@ async function capture(page: Page, name: string) {
 }
 
 const pill = (page: Page) => page.locator(".queue-pill-label");
+const overlay = (page: Page, name: string | RegExp) =>
+  page.getByRole("dialog", { name });
+const timerSeconds = async (page: Page) =>
+  Number(
+    /^(\d+)/.exec(
+      (await page.getByRole("timer").getAttribute("aria-label")) ?? "",
+    )?.[1],
+  );
 // The header loads the queue module after the page; it fills the waiting line once it is ready.
 async function openTopic(page: Page) {
   await page.goto(`${base}/topics/${slug}`);
@@ -155,18 +167,46 @@ try {
     headless: true,
     args: ["--no-sandbox"],
   });
-  const alice = await player("alice");
-  const bob = await player("bob");
+  const alice = await player("alice", "no-preference");
+  const bob = await player("bob", "reduce");
 
   phase = "queue on opposite sides";
   await openTopic(alice.page);
   await alice.page.locator('[data-queue-side="A"]').click();
+  // Queueing opens the full-screen waiting overlay with a timer and a quote.
+  const waiting = overlay(alice.page, "Finding other humans…");
+  await waiting.waitFor();
+  assert.match(
+    (await alice.page.getByRole("timer").getAttribute("aria-label")) ?? "",
+    /^\d+ seconds? in the queue$/,
+  );
+  assert.ok(
+    ((await waiting.locator("blockquote").textContent()) ?? "").length > 20,
+    "a quote shows while waiting",
+  );
+  // Alice sees the full motion: let the opening reveal finish first.
+  await delay(1300);
+  await capture(alice.page, "queue-overlay-waiting");
+  // Keep browsing folds it into the header pill, and the pill reopens it.
+  await waiting.getByRole("button", { name: "Keep browsing" }).click();
+  await waiting.waitFor({ state: "hidden" });
   await pill(alice.page)
-    .filter({ hasText: /^In queue/ })
+    .filter({ hasText: /^In queue · \d:\d\d$/ })
     .waitFor();
+  const pillShot = join(artifactDir, "queue-pill.png");
+  await alice.page.locator(".queue-pill").screenshot({ path: pillShot });
+  screenshots.push(pillShot);
+  await pill(alice.page).click();
+  await waiting.waitFor();
+  assert.equal(new URL(alice.page.url()).pathname, `/topics/${slug}`);
+  await waiting.getByRole("button", { name: "Keep browsing" }).click();
+  await waiting.waitFor({ state: "hidden" });
   assert.equal(
     await alice.page.locator('[data-queue-side="A"]').textContent(),
     "Leave queue",
+  );
+  steps.push(
+    "the waiting overlay showed a timer and a quote, folded into the pill and reopened from it",
   );
   await openTopic(bob.page);
   await bob.page
@@ -178,12 +218,28 @@ try {
 
   phase = "accept the match within 30 seconds";
   for (const { page } of [alice, bob])
-    await page.getByRole("dialog", { name: "Match found" }).waitFor();
+    await overlay(page, "Match found").waitFor();
+  // The match appears in place, without leaving the page, and counts down.
+  for (const { page } of [alice, bob])
+    assert.equal(new URL(page.url()).pathname, `/topics/${slug}`);
+  const first = await timerSeconds(alice.page);
+  assert.ok(
+    first > 20 && first <= 30,
+    `the countdown starts near 30 (${first})`,
+  );
+  await delay(1200);
+  assert.ok(
+    (await timerSeconds(alice.page)) < first,
+    "the countdown decreases",
+  );
+  assert.match(
+    (await overlay(alice.page, "Match found").textContent()) ?? "",
+    new RegExp(`Queue bob.*@${bob.handle}`),
+  );
   await capture(alice.page, "match-found");
   for (const { page } of [alice, bob])
-    await page
-      .getByRole("dialog", { name: "Match found" })
-      .getByRole("button", { name: "Accept" })
+    await overlay(page, "Match found")
+      .getByRole("button", { name: "Accept", exact: true })
       .click();
   for (const { page } of [alice, bob]) {
     await page.waitForURL(/\/debates\/[^/]+$/);
@@ -215,6 +271,36 @@ try {
     .waitFor();
   assert.equal((await debateFor(alice.handle))?.status, "cancelled");
   steps.push("the sweep cancelled the unjoined debate and the room said so");
+
+  phase = "decline a match";
+  await openTopic(alice.page);
+  await alice.page.locator('[data-queue-side="A"]').click();
+  await overlay(alice.page, "Finding other humans…").waitFor();
+  await openTopic(bob.page);
+  await bob.page.locator('[data-queue-side="B"]').click();
+  for (const { page } of [alice, bob])
+    await overlay(page, "Match found").waitFor();
+  await overlay(bob.page, "Match found")
+    .getByRole("button", { name: "Decline" })
+    .click();
+  // The decliner sees why and can queue again; the other player is back to waiting.
+  const declined = overlay(bob.page, "Match declined");
+  await declined.waitFor();
+  await declined.getByRole("button", { name: "Queue again" }).waitFor();
+  await capture(bob.page, "match-declined");
+  await overlay(alice.page, "Finding other humans…").waitFor();
+  await declined.getByRole("button", { name: "Close" }).click();
+  await declined.waitFor({ state: "hidden" });
+  await overlay(alice.page, "Finding other humans…")
+    .getByRole("button", { name: "Leave queue" })
+    .click();
+  await overlay(alice.page, "Finding other humans…").waitFor({
+    state: "hidden",
+  });
+  await pill(alice.page).waitFor({ state: "hidden" });
+  steps.push(
+    "declining showed Match declined with Queue again, returned the other player to waiting, and Leave queue closed it",
+  );
 
   phase = "challenge to debate now";
   await alice.page.goto(`${base}/match`);
