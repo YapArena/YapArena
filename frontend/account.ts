@@ -6,6 +6,7 @@ import type {
   CollectionPage,
   AccountError,
 } from "./account-types.js";
+import { safeAuthReturn } from "./auth-return.js";
 import { api as request } from "./lib/api.js";
 import { accountErrorMessage, sessionStore } from "./lib/session.js";
 
@@ -129,18 +130,11 @@ function empty(text: string, link?: { href: string; label: string }) {
 // Sign-in is a full-page redirect through the provider. Return to the page
 // that sent the reader here, or to this account page.
 function signInReturn() {
-  const next = new URLSearchParams(window.location.search).get("next");
-  if (
-    next?.startsWith("/") &&
-    !next.startsWith("//") &&
-    !next.includes("\\") &&
-    !next.startsWith("/api/")
-  ) {
-    const destination = new URL(next, window.location.origin);
-    if (destination.origin === window.location.origin)
-      return destination.pathname + destination.search + destination.hash;
-  }
-  return "/account";
+  const next = safeAuthReturn(
+    new URLSearchParams(window.location.search).get("next"),
+    window.location.origin,
+  );
+  return next && !/^\/api(?:\/|$)/i.test(next) ? next : "/account";
 }
 for (const link of document.querySelectorAll<HTMLAnchorElement>(
   "#account-sign-in a[data-sign-in]",
