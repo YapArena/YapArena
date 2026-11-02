@@ -1,14 +1,13 @@
-import type { Browser, Page, Frame } from "playwright-core";
+import type { Browser, Page } from "playwright-core";
 import type { AddressInfo } from "node:net";
 import type {
   PublicTopic,
   PublicDebate,
 } from "../src/features/discovery/public-types.ts";
-/* global document, window, getComputedStyle, DOMMatrixReadOnly */
+/* global document, window, getComputedStyle */
 import assert from "node:assert/strict";
 import { once } from "node:events";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { createHash } from "node:crypto";
+import { mkdir, writeFile } from "node:fs/promises";
 import express from "express";
 import { chromium } from "playwright-core";
 import axe from "axe-core";
@@ -54,16 +53,6 @@ type CreateHomepageFixtureApp = (
   options: HomepageFixtureOptions,
 ) => ReturnType<typeof createApp>;
 
-const referencePath = process.env.HOMEPAGE_REFERENCE_PATH;
-const reference = referencePath ? await readFile(referencePath, "utf8") : null;
-if (referencePath)
-  assert.ok(
-    reference!.includes("ya-market-v4") && reference!.includes("data-srcdoc"),
-  );
-if (process.argv.includes("--compare-reference") && !reference)
-  throw new Error(
-    "Reference comparison requires HOMEPAGE_REFERENCE_PATH pointing to the supplied HTML export",
-  );
 const directory =
   process.env.HOMEPAGE_ARTIFACT_DIR ?? "/private/tmp/yaparena-homepage-browser";
 await mkdir(directory, { recursive: true });
@@ -105,10 +94,8 @@ const list = <T>(items: T[]) => ({
 let signedIn = false,
   followed = false,
   followWrites = 0,
-  unavailable = false,
-  tickerTrial = false;
+  unavailable = false;
 const app = express();
-if (reference) app.get("/reference", (_r, s) => s.type("html").send(reference));
 app.get("/api/auth/me", (_r, s) =>
   signedIn
     ? s.json({ user: { id: "synthetic-local-user" } })
@@ -155,19 +142,7 @@ app.use(
     discovery: {
       listTopics: async () => {
         if (unavailable) throw Error("local fixture unavailable");
-        return list(
-          tickerTrial
-            ? [
-                topic,
-                ...["Second", "Third"].map((label, i) => ({
-                  ...topic,
-                  id: `ticker-${i}`,
-                  slug: `ticker-${i}`,
-                  title: `${label} public idea`,
-                })),
-              ]
-            : [topic],
-        );
+        return list([topic]);
       },
       listWatchableDebates: async () => [debate],
       listDebates: async () => list([debate]),
@@ -202,8 +177,7 @@ const checks: Record<string, boolean> = {},
     id: string;
     impact?: string | null;
     targets: axe.UnlabelledFrameSelector[];
-  }[] = [],
-  comparisons: { width: number; maxGeometryDifference: number }[] = [];
+  }[] = [];
 try {
   browser = await chromium.launch({
     executablePath:
@@ -218,11 +192,7 @@ try {
   });
   context.setDefaultTimeout(15000);
   await context.addInitScript(() => {
-    try {
-      window.localStorage.setItem("yaparena-measurement-declined", "1");
-    } catch {
-      /* The exported reference iframe intentionally has an opaque origin. */
-    }
+    window.localStorage.setItem("yaparena-measurement-declined", "1");
     window.homeCsp = [];
     document.addEventListener("securitypolicyviolation", (e) =>
       window.homeCsp.push({
@@ -240,283 +210,85 @@ try {
     await page.goto(base + "/home?reference=1");
     await page.locator("#ya-grid [data-expand]").first().waitFor();
   }
-  async function pause(scope: Page | Frame) {
-    await scope
-      .getByRole("button", { name: "Pause trending rotation", exact: true })
-      .click();
-  }
-  async function stableShot(scope: Page | Frame, name: string) {
-    await scope.evaluate(() => {
-      for (const a of document
-        .querySelector<HTMLElement>("#ya-argument-track")!
-        .getAnimations()) {
-        a.pause();
-        a.currentTime = 0;
-      }
-      const fill = document.querySelector<HTMLElement>(
-        ".ya-carousel-dot[aria-current=true] .ya-dot-fill",
-      )!;
-      for (const a of fill?.getAnimations() ?? []) a.cancel();
-      if (fill) fill.style.transform = "scaleX(0)";
-    });
-    // Chrome clips cross-origin iframe rasterization to the outer viewport.
-    // Use matching full-product capture viewports at the original responsive
-    // width, changing only the export shell rather than its product DOM/CSS.
-    const height = await scope
-      .locator("#ya-market-v4")
-      .evaluate((n) => n.scrollHeight);
-    await page.setViewportSize({
-      width: page.viewportSize()!.width,
-      height: Math.ceil(height),
-    });
-    if ((scope as Frame).frameElement) {
-      await (
-        await (scope as Frame).frameElement()
-      ).evaluate((frame: HTMLIFrameElement, height) => {
-        frame.style.height = `${height}px`;
-      }, height);
-    }
-    await scope.evaluate(() => window.scrollTo(0, 0));
-    await page.evaluate(() => window.scrollTo(0, 0));
-    await scope
-      .locator("#ya-market-v4")
-      .screenshot({ path: `${directory}/${name}.png` });
-  }
-  async function geometry(
-    scope: Page | Frame,
-  ): Promise<Record<string, Record<string, number>>> {
-    return scope.evaluate(() => {
-      const origin = document
-        .querySelector<HTMLElement>("#ya-market-v4")!
-        .getBoundingClientRect();
-      return Object.fromEntries(
-        [
-          ".ya-top",
-          ".ya-content",
-          ".ya-heading",
-          ".ya-layout",
-          ".ya-feature",
-          ".ya-side",
-          ".ya-grid",
-          ".ya-marketcard",
-        ].map((selector) => {
-          const rect = document
-            .querySelector<HTMLElement>(selector)!
-            .getBoundingClientRect();
-          return [
-            selector,
-            {
-              x: rect.x - origin.x,
-              y: rect.y - origin.y,
-              width: rect.width,
-              height: rect.height,
-            },
-          ];
-        }),
-      );
-    });
-  }
-  async function compare(width: number) {
-    await page.setViewportSize({ width, height: 1100 });
-    await page.goto(base + "/reference");
-    const ref = page.frames().find((f) => f.parentFrame())!;
-    await ref.locator("[data-expand]").first().waitFor();
-    await pause(ref);
-    await stableShot(ref, `reference-${width}-initial`);
-    const expected = await geometry(ref);
-    await openNative();
-    await pause(page);
-    await stableShot(page, `implemented-${width}-initial`);
-    const actual = await geometry(page);
-    for (const key of Object.keys(expected))
-      for (const dimension of ["x", "y", "width", "height"])
-        assert.ok(
-          Math.abs(expected[key]![dimension]! - actual[key]![dimension]!) < 1,
-          `${width}px ${key}.${dimension}: reference ${expected[key]![dimension]!} / implementation ${actual[key]![dimension]!}`,
-        );
-    assert.ok(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth <= window.innerWidth,
-      ),
+  const settled = () =>
+    page.waitForFunction(
+      () => !document.querySelector<HTMLElement>(".ya-carousel-ghost"),
     );
-    comparisons.push({
-      width,
-      maxGeometryDifference: Math.max(
-        ...Object.keys(expected).flatMap((k) =>
-          Object.keys(expected[k]!).map((d) =>
-            Math.abs(expected[k]![d]! - actual[k]![d]!),
-          ),
-        ),
-      ),
-    });
-    if (width === 1440 || width === 390) {
-      await page.getByRole("button", { name: "Next trending idea" }).click();
-      await page.waitForFunction(
-        () => !document.querySelector<HTMLElement>(".ya-carousel-ghost")!,
-      );
-      await stableShot(page, `implemented-${width}-second`);
-      await page.locator("#ya-chart").hover({
-        position: {
-          x: Math.min(
-            180,
-            (await page.locator("#ya-chart").boundingBox())!.width * 0.4,
-          ),
-          y: 60,
-        },
-      });
-      await page.waitForFunction(
-        () =>
-          getComputedStyle(
-            document.querySelector<HTMLElement>("#ya-chart-tooltip")!,
-          ).opacity === "1",
-      );
-      await page.screenshot({
-        path: `${directory}/implemented-${width}-hover.png`,
-        fullPage: true,
-      });
-      await page.locator('[data-expand="ai"]').click();
-      await page.locator("#ya-detail").waitFor();
-      await page.waitForFunction(
-        () =>
-          document.querySelector<HTMLElement>("#ya-detail")!.getAnimations()
-            .length === 0,
-      );
-      await stableShot(page, `implemented-${width}-expanded`);
-      await page.goto(base + "/reference");
-      const r = page.frames().find((f) => f.parentFrame())!;
-      await r.locator("[data-expand]").first().waitFor();
-      await pause(r);
-      await r.getByRole("button", { name: "Next trending idea" }).click();
-      await r.waitForFunction(
-        () => !document.querySelector<HTMLElement>(".ya-carousel-ghost")!,
-      );
-      await stableShot(r, `reference-${width}-second`);
-      await r.locator("#ya-chart").hover({
-        position: {
-          x: Math.min(
-            180,
-            (await r.locator("#ya-chart").boundingBox())!.width * 0.4,
-          ),
-          y: 60,
-        },
-      });
-      await r.waitForFunction(
-        () =>
-          getComputedStyle(
-            document.querySelector<HTMLElement>("#ya-chart-tooltip")!,
-          ).opacity === "1",
-      );
-      await r
-        .locator("#ya-market-v4")
-        .screenshot({ path: `${directory}/reference-${width}-hover.png` });
-      await r.locator('[data-expand="ai"]').click();
-      await r.waitForFunction(
-        () =>
-          document.querySelector<HTMLElement>("#ya-detail")?.getAnimations()
-            .length === 0,
-      );
-      await stableShot(r, `reference-${width}-expanded`);
-    }
-  }
+  const noOverflow = (scope: Page) =>
+    scope.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    );
   for (const width of [1440, 1920, 1024, 768, 390, 320]) {
-    if (reference) await compare(width);
-    else {
-      await page.setViewportSize({ width, height: 1100 });
-      await openNative();
-      await pause(page);
-      assert.ok(
-        await page.evaluate(
-          () => document.documentElement.scrollWidth <= window.innerWidth,
-        ),
-        `${width}px: no horizontal overflow`,
-      );
-      await stableShot(page, `implemented-${width}-initial`);
-    }
+    await page.setViewportSize({ width, height: 1100 });
+    await openNative();
+    assert.ok(await noOverflow(page), `${width}px: no horizontal overflow`);
+    await page.screenshot({
+      path: `${directory}/implemented-${width}-initial.png`,
+      fullPage: true,
+    });
   }
   checks.responsiveScreenshots = true;
-  if (reference) checks.referenceGeometry = true;
   await page.setViewportSize({ width: 1440, height: 1100 });
   await openNative();
-  await pause(page);
-  // The maintained functional gate uses the checked-in deterministic concept data.
-  // The separate, explicitly requested export comparison remains available locally.
-  const expectedIdeas = referenceHomepage().ideas.map((idea) => ({
-    title: idea.title,
-    arguments: idea.arguments.map((argument) => argument.text),
-    rates: idea.arguments.map((argument) => `${argument.rate}%`),
-    debate: idea.short,
-  }));
-  if (reference) {
-    await page.goto(base + "/reference");
-    const ref = page.frames().find((f) => f.parentFrame())!;
-    await ref.locator("[data-expand]").first().waitFor();
-    await pause(ref);
-    for (const [i, id] of [
-      "ai",
-      "work",
-      "nuclear",
-      "ubi",
-      "city",
-      "growth",
-    ].entries()) {
-      await ref.locator(`[data-trending="${id}"]`).click();
-      await ref.waitForFunction(
-        () => !document.querySelector<HTMLElement>(".ya-carousel-ghost")!,
-      );
-      assert.deepEqual(
-        await ref.evaluate(() => ({
-          title: document.querySelector<HTMLElement>("#ya-title")!.textContent,
-          arguments: [
-            ...document.querySelectorAll<HTMLElement>(
-              ".ya-argument-list:first-child .ya-argument-text",
-            ),
-          ].map((n) => n.textContent),
-          rates: [
-            ...document.querySelectorAll<HTMLElement>(
-              ".ya-argument-list:first-child strong",
-            ),
-          ].map((n) => n.textContent),
-          debate: document.querySelector<HTMLElement>(
-            "#ya-side .ya-debate-title",
-          )!.textContent,
-        })),
-        expectedIdeas[i],
-      );
-    }
-  }
-  await openNative();
-  await pause(page);
-  for (const [i, id] of [
-    "ai",
-    "work",
-    "nuclear",
-    "ubi",
-    "city",
-    "growth",
-  ].entries()) {
-    await page.locator(`[data-trending="${id}"]`).click();
-    await page.waitForFunction(
-      () => !document.querySelector<HTMLElement>(".ya-carousel-ghost")!,
+  // Each slide shows its own idea, up to three of its arguments and its debaters.
+  const ideas = referenceHomepage().ideas;
+  for (const idea of ideas) {
+    await page.locator(`[data-trending="${idea.id}"]`).click();
+    await settled();
+    assert.deepEqual(
+      await page.evaluate(() => ({
+        title: document.querySelector<HTMLElement>("#ya-title")!.textContent,
+        arguments: [
+          ...document.querySelectorAll<HTMLElement>(".trend-arg-text"),
+        ].map((n) => n.textContent),
+        rates: [
+          ...document.querySelectorAll<HTMLElement>(".trend-arg-meta .num"),
+        ].map((n) => n.textContent),
+        people: [
+          ...document.querySelectorAll<HTMLElement>(
+            ".trend-people > span:not(.vs):not(.avatar-slot)",
+          ),
+        ].map((n) => n.textContent),
+      })),
+      {
+        title: idea.title,
+        arguments: idea.arguments.slice(0, 3).map((a) => a.text),
+        rates: idea.arguments.slice(0, 3).map((a) => `${a.rate}%`),
+        people: idea.debates[0]!.names.slice(0, 2),
+      },
     );
-    const actual = await page.evaluate(() => ({
-      title: document.querySelector<HTMLElement>("#ya-title")!.textContent,
-      arguments: [
-        ...document.querySelectorAll<HTMLElement>(
-          ".ya-argument-list:first-child .ya-argument-text",
-        ),
-      ].map((n) => n.textContent),
-      rates: [
-        ...document.querySelectorAll<HTMLElement>(
-          ".ya-argument-list:first-child strong",
-        ),
-      ].map((n) => n.textContent),
-      debate: document.querySelector<HTMLElement>("#ya-side .ya-debate-title")!
-        .textContent,
-    }));
-    assert.deepEqual(actual, expectedIdeas[i]);
+    assert.equal(
+      await page.locator("#ya-against").textContent(),
+      `${100 - idea.pct!}%`,
+    );
   }
   checks.everySlideHasItsOwnArgumentsAndDebate = true;
-  await page.getByRole("button", { name: "Next trending idea" }).click();
+  // Every slide keeps the same height, so the carousel never jumps.
+  const heights = new Set<number>();
+  for (const idea of ideas) {
+    await page.locator(`[data-trending="${idea.id}"]`).click();
+    await settled();
+    heights.add(
+      Math.round(
+        (await page.locator("#ya-trending-slide").boundingBox())!.height,
+      ),
+    );
+  }
+  assert.equal(heights.size, 1, `slide heights ${[...heights].join(", ")}`);
+  checks.equalSlideHeights = true;
+  await page.locator('[data-trending="ai"]').click();
+  await settled();
+  const next = page.locator('[data-carousel="next"]'),
+    previous = page.locator('[data-carousel="previous"]');
+  assert.equal(
+    await next.getAttribute("aria-label"),
+    `Next idea: ${ideas[1]!.title}`,
+  );
+  assert.equal(
+    await previous.getAttribute("aria-label"),
+    `Previous idea: ${ideas.at(-1)!.title}`,
+  );
+  await next.click();
   const animation = await page.locator("#ya-trending-slide").evaluate((n) => ({
     first: (n.getAnimations()[0]!.effect as KeyframeEffect).getKeyframes()[0]!
       .transform,
@@ -526,7 +298,7 @@ try {
   assert.equal(animation.first, "translateX(104%)");
   assert.equal(animation.duration, 620);
   assert.equal(animation.easing, "cubic-bezier(0.22, 0.68, 0.16, 1)");
-  await page.getByRole("button", { name: "Previous trending idea" }).click();
+  await previous.click();
   assert.equal(
     await page
       .locator("#ya-trending-slide")
@@ -537,8 +309,7 @@ try {
       ),
     "translateX(-104%)",
   );
-  for (let i = 0; i < 7; i++)
-    await page.getByRole("button", { name: "Next trending idea" }).click();
+  for (let i = 0; i < 7; i++) await page.keyboard.press("Enter");
   assert.equal(await page.locator(".ya-carousel-ghost").count(), 1);
   assert.deepEqual(
     await page.evaluate(() => {
@@ -552,21 +323,23 @@ try {
     }),
     [],
   );
+  // Renaming the neighbours keeps keyboard focus on the button.
   assert.equal(
     await page.evaluate(
       () => (document.activeElement as HTMLElement).dataset.carousel,
     ),
-    "next",
+    "previous",
   );
-  await page.waitForFunction(
-    () => !document.querySelector<HTMLElement>(".ya-carousel-ghost")!,
-  );
+  await settled();
+  // Nothing turns by itself any more: no pause control, and the slide stays.
+  assert.equal(await page.locator('[data-carousel="pause"]').count(), 0);
+  const shown = await page.locator("#ya-title").textContent();
+  await page.waitForTimeout(7000);
+  assert.equal(await page.locator("#ya-title").textContent(), shown);
   checks.slideDirectionsTimingAndRapidNavigation = true;
   // Both chart sizes scrub locally at the actual pointer x and restore the latest readout.
   await page.locator('[data-trending="ai"]').click();
-  await page.waitForFunction(
-    () => !document.querySelector<HTMLElement>(".ya-carousel-ghost")!,
-  );
+  await settled();
   async function scrub(selector: string, readout: string) {
     const chart = page.locator(selector),
       rect = (await chart.boundingBox())!,
@@ -586,9 +359,29 @@ try {
           .getAttribute("width"),
       ),
       width: n.getBoundingClientRect().width,
+      marker: n
+        .querySelector("[data-chart-hover-marker]")!
+        .getAttribute("width"),
     }));
     assert.ok(Math.abs(state.x - state.width * 0.37) < 1);
-    assert.notEqual(await page.locator(readout).textContent(), "68%");
+    assert.equal(state.marker, "10");
+    const value = (await page.locator(readout).textContent())!;
+    assert.notEqual(value, "68%");
+    if (readout === "#ya-value") {
+      // For and Against show that moment, and the label beside the marker too.
+      assert.equal(
+        await page.locator("#ya-against").textContent(),
+        `${100 - Number.parseInt(value)}%`,
+      );
+      assert.match(
+        (await page.locator("#ya-chart-tooltip").textContent())!,
+        /^[A-Z][a-z]{2} \d{1,2} \d+%$/,
+      );
+      assert.match(
+        (await page.locator("#ya-metric-label").textContent())!,
+        / · \d\d:\d\d · Endorsement$/,
+      );
+    }
     await page.mouse.move(rect.x + rect.width * 0.63, rect.y + 90);
     await page.waitForTimeout(40);
     assert.equal(requests.length, before);
@@ -602,7 +395,10 @@ try {
     );
     assert.equal(await page.locator(readout).textContent(), "68%");
   }
+  const outcomes = await page.locator(".trend-left").boundingBox();
   await scrub("#ya-chart", "#ya-value");
+  // Nothing shifts while scrubbing.
+  assert.deepEqual(await page.locator(".trend-left").boundingBox(), outcomes);
   await page.locator('[data-expand="ai"]').click();
   await scrub("#ya-detail-chart", "#ya-detail-value");
   const slider = page.getByRole("slider", {
@@ -624,9 +420,9 @@ try {
   );
   await page.locator("#ya-detail-chart").dispatchEvent("pointercancel");
   checks.mainExpandedPointerTouchAndKeyboardCharts = true;
-  await page.getByRole("button", { name: "Next trending idea" }).click();
+  await next.click();
   assert.equal(
-    await page.locator("#ya-detail h2").textContent(),
+    await page.locator("#ya-detail h3").textContent(),
     "AI models should be open source.",
   );
   await page.selectOption("#ya-sort", "moves");
@@ -635,10 +431,30 @@ try {
     width: n.getBoundingClientRect().width,
     grid: n.parentElement!.getBoundingClientRect().width,
   }));
-  assert.equal(placement.previous, "work");
   assert.equal(placement.width, placement.grid);
+  const columns = await page
+    .locator("#ya-grid")
+    .evaluate((n) => getComputedStyle(n).gridTemplateColumns.split(" ").length);
+  const order = await page
+    .locator("#ya-grid [data-expand]")
+    .evaluateAll((cards) =>
+      cards.map((c) => (c as HTMLElement).dataset.expand),
+    );
+  const index = order.indexOf("ai");
+  assert.equal(
+    placement.previous,
+    order[
+      Math.min(
+        order.length - 1,
+        Math.floor(index / columns) * columns + columns - 1,
+      )
+    ],
+  );
   await page.locator('[data-debate-filter="replay"]').focus();
   await page.setViewportSize({ width: 390, height: 844 });
+  // Narrowing after scrubbing at full width never widens the page.
+  await page.waitForTimeout(200);
+  assert.ok(await noOverflow(page), "390px after scrubbing: no overflow");
   await page.waitForFunction(
     () =>
       (
@@ -670,6 +486,16 @@ try {
   );
   await page.getByRole("button", { name: "Close expanded idea" }).click();
   assert.equal(await page.locator("#ya-detail").count(), 0);
+  // A sample idea's Explore debate opens its panel in the grid.
+  await page.locator('[data-trending="ai"]').click();
+  await settled();
+  await page.locator(".trend-cta").click();
+  await page.locator("#ya-detail").waitFor();
+  assert.equal(
+    await page.locator('[data-expand="ai"]').getAttribute("aria-expanded"),
+    "true",
+  );
+  await page.getByRole("button", { name: "Close expanded idea" }).click();
   checks.independentExpansionPlacementAndDebateFilters = true;
   await page.locator("#ya-search").fill("nuclear");
   assert.equal(await page.locator("[data-expand]").count(), 1);
@@ -679,210 +505,58 @@ try {
   await page.locator('[data-filter="All"]').click();
   await page.locator('[data-nav="following"]').click();
   assert.equal(await page.locator("[data-expand]").count(), 2);
+  assert.match(
+    (await page.locator("#ya-grid-title").textContent())!,
+    /Your watchlist/,
+  );
+  await page.locator("#ya-follow").click();
+  assert.equal(
+    await page.locator("#ya-follow").getAttribute("aria-label"),
+    "Following this idea",
+  );
+  assert.equal(await page.locator("[data-expand]").count(), 3);
+  await page.locator("#ya-follow").click();
   assert.equal(followWrites, 0);
-  checks.searchCategoriesSortingAndLocalDemoFollows = true;
-  // Verify actual animation direction/loop period and independent pause.
   await page.locator('[data-nav="all"]').click();
-  await page.locator('[data-trending="ai"]').click();
-  await page.waitForFunction(
-    () => !document.querySelector<HTMLElement>(".ya-carousel-ghost")!,
-  );
-  await page.getByRole("button", { name: "Play trending rotation" }).click();
-  await page.locator("#ya-search").focus();
-  await page.mouse.move(0, 0);
-  const transform = () =>
-    page
-      .locator("#ya-argument-track")
-      .evaluate(
-        (n) => new DOMMatrixReadOnly(getComputedStyle(n).transform).m42,
-      );
-  const first = await transform();
-  await page.waitForTimeout(90);
-  assert.ok((await transform()) < first);
-  const cycle = await page.locator("#ya-argument-track").evaluate((n) => ({
-    duration: n.getAnimations()[0]!.effect!.getTiming().duration as number,
-    children: n.children.length,
-    hidden: n.children[1]!.getAttribute("aria-hidden"),
-  }));
-  assert.deepEqual(cycle, { duration: 32000, children: 2, hidden: "true" });
-  await page.locator("#ya-arguments").hover();
-  const held = await transform();
-  await page.waitForTimeout(90);
-  assert.ok(Math.abs((await transform()) - held) < 1);
-  const pageTop = await page.evaluate(() => window.scrollY);
-  await page.mouse.wheel(0, 120);
-  await page.waitForTimeout(40);
-  const scrolled = await transform();
-  assert.ok(Math.abs(scrolled - held + 120) < 2);
-  await page.mouse.wheel(0, -60);
-  await page.waitForTimeout(40);
-  assert.ok(Math.abs((await transform()) - scrolled - 60) < 2);
-  assert.equal(await page.evaluate(() => window.scrollY), pageTop);
-  await page.locator("#ya-arguments").dispatchEvent("wheel", {
-    deltaY: 1,
-    deltaMode: 1,
-    cancelable: true,
-  });
-  assert.ok(Math.abs((await transform()) - scrolled - 44) < 2);
-  const inspected = await transform();
-  await page.locator("#ya-arguments").dispatchEvent("wheel", {
-    deltaY: 120,
-    ctrlKey: true,
-    cancelable: true,
-  });
-  assert.ok(Math.abs((await transform()) - inspected) < 1);
-  await page
-    .locator("#ya-arguments")
-    .screenshot({ path: directory + "/manual-argument-scroll.png" });
-  await page.mouse.move(0, 0);
-  const resumed = await transform();
-  assert.ok(Math.abs(resumed - inspected) < 6);
-  await page.waitForTimeout(90);
-  assert.ok((await transform()) < resumed);
-  const argumentWindow = page.locator(".ya-arguments-window");
-  await argumentWindow.focus();
-  await page.keyboard.press("Home");
-  assert.ok(Math.abs(await transform()) < 1);
-  await page.keyboard.press("ArrowDown");
-  assert.ok(Math.abs((await transform()) + 60) < 1);
-  await page.keyboard.press("End");
-  assert.ok((await transform()) < -60);
-  await page.locator("#ya-argument-track").evaluate((n) => {
-    n.getAnimations()[0]!.currentTime = 31990;
-  });
-  await argumentWindow.dispatchEvent("wheel", {
-    deltaY: 120,
-    cancelable: true,
-  });
-  const wrapped = await page.locator("#ya-argument-track").evaluate((n) => ({
-    time: n.getAnimations()[0]!.currentTime as number,
-    copies: n.children.length,
-  }));
-  assert.ok(wrapped.time > 0 && wrapped.time < 10000);
-  assert.equal(wrapped.copies, 2);
-  checks.manualArgumentScrollAndContinuousResume = true;
-  await page.getByRole("button", { name: "Pause argument flow" }).click();
-  assert.equal(
-    await page.locator("#ya-arguments").getAttribute("data-paused"),
-    "true",
-  );
-  checks.upwardArgumentLoopAndPause = true;
-  // Use the browser's controlled clock to inspect progress/advance over repeated cycles.
-  const timed = await context.newPage();
-  await timed.clock.install();
-  await timed.goto(base + "/home?reference=1");
-  await timed.locator("[data-expand]").first().waitFor();
-  await timed.mouse.move(0, 0);
-  const selected = () =>
-    timed
-      .locator(".ya-carousel-dot[aria-current=true]")
-      .getAttribute("data-trending");
-  await timed.clock.runFor(2000);
-  const elapsed = await timed
-    .locator(".ya-carousel-dot[aria-current=true] .ya-dot-fill")
-    .evaluate((n) => new DOMMatrixReadOnly(getComputedStyle(n).transform).m11);
-  assert.ok(elapsed > 0.28 && elapsed < 0.36);
-  await timed
-    .locator("#ya-chart")
-    .dispatchEvent("pointerenter", { pointerType: "mouse" }); // Hover the actual carousel region below.
-  await timed
-    .locator("#ya-carousel")
-    .dispatchEvent("pointerenter", { pointerType: "mouse" });
-  await timed.clock.runFor(10000);
-  assert.equal(await selected(), "ai");
-  const preserved = await timed
-    .locator(".ya-carousel-dot[aria-current=true] .ya-dot-fill")
-    .evaluate((n) => new DOMMatrixReadOnly(getComputedStyle(n).transform).m11);
-  assert.ok(Math.abs(preserved - elapsed) < 0.01);
-  await timed
-    .locator("#ya-carousel")
-    .dispatchEvent("pointerleave", { pointerType: "mouse" });
-  await timed.clock.runFor(4700);
-  assert.equal(await selected(), "work");
-  await timed.clock.runFor(6520);
-  assert.equal(await selected(), "nuclear");
-  await timed.evaluate(() => {
-    Object.defineProperty(document, "hidden", {
-      value: true,
-      configurable: true,
-    });
-    document.dispatchEvent(new Event("visibilitychange"));
-  });
-  await timed.clock.runFor(13000);
-  assert.equal(await selected(), "nuclear");
-  await timed.evaluate(() => {
-    Object.defineProperty(document, "hidden", {
-      value: false,
-      configurable: true,
-    });
-    document.dispatchEvent(new Event("visibilitychange"));
-  });
-  await timed.locator('[data-carousel="pause"]').dispatchEvent("click");
-  const savedFill = await timed
-    .locator(".ya-carousel-dot[aria-current=true] .ya-dot-fill")
-    .evaluate((n) => new DOMMatrixReadOnly(getComputedStyle(n).transform).m11);
-  await timed.clock.runFor(8000);
-  assert.equal(await selected(), "nuclear");
-  await timed.locator('[data-carousel="pause"]').dispatchEvent("click");
-  await timed.clock.runFor((1 - savedFill) * 6500 + 32);
-  assert.equal(await selected(), "ubi");
-  await timed.locator('#ya-side [data-action="trade"]').dispatchEvent("click");
-  await timed.locator("#ya-search").focus();
-  await timed.clock.runFor(13000);
-  assert.equal(await selected(), "ubi");
-  await timed.locator('#ya-side [data-action="live"]').dispatchEvent("click");
-  await timed.locator("#ya-search").focus();
-  await timed.clock.runFor(6520);
-  assert.equal(await selected(), "city");
-  await timed.close();
-  // IntersectionObserver uses the actual compositor, independently of the
-  // controlled animation clock above. Exercise offscreen suspension in real time.
-  const offscreen = await context.newPage();
-  await offscreen.setViewportSize({ width: 1440, height: 500 });
-  await offscreen.goto(base + "/home?reference=1");
-  await offscreen.locator("#ya-grid [data-expand]").first().waitFor();
-  await offscreen.mouse.move(0, 0);
-  const offscreenSelected = await offscreen
-    .locator(".ya-carousel-dot[aria-current=true]")
-    .getAttribute("data-trending");
-  await offscreen.evaluate(() =>
-    window.scrollTo({ top: document.body.scrollHeight, behavior: "instant" }),
-  );
-  await offscreen.waitForFunction(
-    () =>
-      document.querySelector<HTMLElement>("#ya-market-v4")!.dataset
-        .motionPaused === "true",
-  );
-  assert.ok(
-    await offscreen
-      .locator("#ya-carousel")
-      .evaluate((n) => n.getBoundingClientRect().bottom < 0),
-  );
-  await offscreen.waitForTimeout(6700);
-  assert.equal(
-    await offscreen
-      .locator(".ya-carousel-dot[aria-current=true]")
-      .getAttribute("data-trending"),
-    offscreenSelected,
-  );
-  await offscreen.close();
-  checks.synchronizedProgressPauseResumeAndRepeatedCycles = true;
-  checks.manualPauseAttentionAndOffscreenHold = true;
+  checks.searchCategoriesSortingAndLocalDemoFollows = true;
+  // The rail: what's live with Watch, the invitation and the popular ideas.
+  assert.equal(await page.locator(".rail-live").count(), 1);
+  assert.equal(await page.locator(".rail-popular-list li").count(), 5);
+  assert.equal(await page.locator(".rail-promo-guest").isVisible(), true);
+  assert.equal(await page.locator(".rail-promo-member").isVisible(), false);
+  await page.getByRole("link", { name: "Explore all ideas" }).click();
+  await page.waitForFunction(() => window.location.hash === "#ya-ideas");
+  checks.railLiveInvitationAndPopularIdeas = true;
   await page.emulateMedia({ reducedMotion: "reduce" });
   await openNative();
   assert.equal(
-    await page.getByRole("button", { name: "Play trending rotation" }).count(),
-    1,
-  );
-  assert.equal(
     await page
-      .locator("#ya-argument-track")
+      .locator("#ya-chart .ya-endpoint-pulse")
       .evaluate((n) => getComputedStyle(n).animationName),
     "none",
   );
-  await page.getByRole("button", { name: "Next trending idea" }).click();
+  assert.equal(
+    await page
+      .locator("#ya-chart")
+      .evaluate((n) => n.classList.contains("is-pending")),
+    false,
+  );
+  await next.click();
   assert.equal(await page.locator(".ya-carousel-ghost").count(), 0);
   checks.reducedMotionManualNavigation = true;
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  // The line draws left to right the first time it is seen, then the end pixel.
+  await openNative();
+  await page.waitForFunction(() =>
+    document.querySelector("#ya-chart")!.classList.contains("is-drawing"),
+  );
+  assert.equal(
+    await page
+      .locator("#ya-chart .ya-linepath")
+      .evaluate((n) => getComputedStyle(n).animationName),
+    "ya-draw",
+  );
+  checks.chartDrawsInOnce = true;
   const touchContext = await browser.newContext({
     viewport: { width: 390, height: 844 },
     isMobile: true,
@@ -893,11 +567,9 @@ try {
   phone.on("pageerror", (e) => errors.push(e.message));
   await phone.goto(base + "/home?reference=1");
   await phone.locator("#ya-chart").waitFor();
-  assert.ok(
-    await phone.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth,
-    ),
-  );
+  assert.ok(await noOverflow(phone));
+  // Phones keep the outcomes, the chart and the debate; arguments stay on the idea.
+  assert.equal(await phone.locator(".trend-args").isVisible(), false);
   await phone.locator("#ya-chart").scrollIntoViewIfNeeded();
   const phoneChart = (await phone.locator("#ya-chart").boundingBox())!;
   await phone.touchscreen.tap(
@@ -919,9 +591,39 @@ try {
   // Real data uses nullable histories, actual wallet/follows and canonical routes.
   await page.goto(base + "/home");
   await page.locator("#ya-grid [data-expand]").first().waitFor();
-  assert.equal(await page.locator("#ya-value").textContent(), "—");
-  assert.equal(await page.locator("#ya-price").textContent(), "—");
+  assert.equal(await page.locator("#ya-value").count(), 0);
+  assert.match(
+    (await page.locator(".trend-none").textContent())!,
+    /No rounds yet/,
+  );
   assert.equal(await page.locator("#ya-chart .ya-linepath").count(), 0);
+  assert.match(
+    (await page.locator("#ya-chart").textContent())!,
+    /The chart starts after the first closed round\./,
+  );
+  assert.equal(await page.locator(".trend-signin").isVisible(), true);
+  // The trending card fits the first screen (docs/site-design.md).
+  for (const [width, height, limit] of [
+    [1440, 900, 800],
+    [1280, 800, 800],
+  ] as const) {
+    await page.setViewportSize({ width, height });
+    await page.waitForTimeout(100);
+    const box = (await page.locator(".ya-carousel").boundingBox())!;
+    assert.ok(
+      box.y + box.height <= limit,
+      `${width}: card ends at ${box.y + box.height}`,
+    );
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(100);
+  const cta = (await page.locator(".trend-cta").boundingBox())!;
+  assert.ok(
+    cta.y + cta.height <= 820,
+    `390: Explore debate ends at ${cta.y + cta.height}`,
+  );
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  checks.trendingCardFitsTheFirstScreen = true;
   await page.locator('[data-nav="following"]').click();
   await page.waitForFunction(() =>
     document
@@ -935,12 +637,19 @@ try {
       .querySelector<HTMLElement>("[data-header-balance]")!
       .textContent.includes("1234.00"),
   );
+  assert.equal(await page.locator(".trend-signin").isVisible(), false);
+  assert.equal(await page.locator(".rail-promo-member").isVisible(), true);
+  assert.equal(await page.locator(".rail-promo-guest").isVisible(), false);
   await page.locator("#ya-follow").click();
   await page.waitForFunction(
     () =>
       document
         .querySelector<HTMLElement>("#ya-follow")!
         .getAttribute("aria-pressed") === "true",
+  );
+  assert.equal(
+    await page.locator("#ya-follow").getAttribute("aria-label"),
+    "Following this idea",
   );
   assert.equal(followWrites, 1);
   await page.locator('[data-nav="following"]').click();
@@ -1006,8 +715,8 @@ try {
     1,
   );
   assert.equal(
-    await plain.locator('#ya-side a[href="/debates/published-debate"]').count(),
-    2,
+    await plain.locator('.trend-cta[href="/debates/published-debate"]').count(),
+    1,
   );
   await plain
     .getByRole("link", { name: "Explore debate", exact: true })
@@ -1037,138 +746,22 @@ try {
   unavailable = true;
   const response = await page.goto(base + "/home");
   assert.equal(response!.status(), 503);
-  assert.match((await page.locator(".ya-empty").textContent())!, /unavailable/);
-  assert.equal(await page.locator("#ya-value").textContent(), "—");
+  assert.match(
+    (await page.locator(".home-state").textContent())!,
+    /unavailable/,
+  );
+  assert.equal(await page.locator("#ya-value").count(), 0);
+  assert.equal(await page.locator(".site-footer").count(), 1);
   unavailable = false;
   checks.unavailableNeverSubstitutesConceptData = true;
-  tickerTrial = true;
-  const tickerPage = await context.newPage();
-  tickerPage.on("pageerror", (e) => errors.push(e.message));
-  await tickerPage.goto(base + "/home");
-  const ticker = tickerPage.locator(".ya-ticker-marquee"),
-    tickerTrack = tickerPage.locator(".ya-ticker-track");
-  await tickerTrack.waitFor();
-  const tickerX = () =>
-    tickerTrack.evaluate(
-      (n) => new DOMMatrixReadOnly(getComputedStyle(n).transform).m41,
-    );
-  const startX = await tickerX();
-  await tickerPage.waitForTimeout(200);
-  assert.ok((await tickerX()) < startX);
-  const timing = await tickerTrack.evaluate((n) => ({
-    duration: n.getAnimations()[0]!.effect!.getTiming().duration as number,
-    width: n.firstElementChild!.getBoundingClientRect().width,
-    second: n.lastElementChild!.getBoundingClientRect().width,
-  }));
-  assert.ok(Math.abs(timing.width - timing.second) < 0.01);
-  assert.ok(
-    timing.duration >= 60000 && (timing.width / timing.duration) * 1000 <= 24.1,
-  );
-  assert.equal(await ticker.locator("button[data-select]").count(), 3);
-  assert.equal(await ticker.locator('[aria-hidden="true"] button').count(), 0);
-  await ticker.hover();
-  const heldX = await tickerX();
-  await tickerPage.waitForTimeout(100);
-  assert.ok(Math.abs((await tickerX()) - heldX) < 1);
-  await tickerPage.mouse.move(0, 0);
-  await tickerPage.waitForTimeout(100);
-  assert.ok((await tickerX()) < heldX);
-  const lastTickerButton = ticker.locator("button[data-select]").last();
-  await lastTickerButton.focus();
-  await tickerPage.waitForTimeout(30);
-  assert.ok(
-    await lastTickerButton.evaluate((n) => {
-      const b = n.getBoundingClientRect(),
-        p = n.closest(".ya-ticker")!.getBoundingClientRect();
-      return b.left >= p.left - 1 && b.right <= p.right + 1;
-    }),
-  );
-  await tickerPage.keyboard.press("Enter");
-  assert.equal(
-    await tickerPage
-      .locator('.ya-carousel-dot[aria-current="true"]')
-      .getAttribute("data-trending"),
-    "ticker-1",
-  );
-  await tickerPage.locator("#ya-search").focus();
-  await tickerTrack.evaluate((n) => {
-    const a = n.getAnimations()[0]!;
-    a.currentTime = Number(a.effect!.getTiming().duration) * 0.99;
-  });
-  await ticker.hover();
-  await ticker.locator('[aria-hidden="true"] [data-select]').first().click();
-  assert.equal(
-    await tickerPage
-      .locator('.ya-carousel-dot[aria-current="true"]')
-      .getAttribute("data-trending"),
-    topic.id,
-  );
-  for (const width of [1440, 390, 320]) {
-    await tickerPage.setViewportSize({ width, height: 1000 });
-    assert.ok(
-      await tickerPage.evaluate(
-        () => document.documentElement.scrollWidth <= window.innerWidth,
-      ),
-    );
-    assert.ok(
-      await ticker.locator(".ya-tick").evaluateAll((nodes) =>
-        nodes.every((n) => {
-          const s = getComputedStyle(n);
-          return s.borderRightWidth === "0px" && s.borderBottomWidth === "0px";
-        }),
-      ),
-    );
-  }
-  await ticker.screenshot({ path: directory + "/ticker-320.png" });
-  await tickerPage.locator("#ya-search").focus();
-  await tickerPage.mouse.move(0, 0);
-  await tickerPage.locator("#ya-carousel-pause").click();
-  assert.equal(
-    await tickerTrack.evaluate((n) => n.getAnimations()[0]!.playState),
-    "paused",
-  );
-  await tickerPage.locator("#ya-carousel-pause").click();
-  await tickerPage.evaluate(() => {
-    (document.activeElement as HTMLElement).blur();
-    window.scrollTo({ top: document.body.scrollHeight, behavior: "instant" });
-  });
-  await tickerPage.waitForFunction(
-    () =>
-      document.querySelector<HTMLElement>("#ya-market-v4")!.dataset
-        .tickerPaused === "true",
-  );
-  await tickerPage.emulateMedia({ reducedMotion: "reduce" });
-  assert.equal(
-    await tickerTrack.evaluate((n) => getComputedStyle(n).animationName),
-    "none",
-  );
-  assert.equal(
-    await ticker
-      .locator('[aria-hidden="true"]')
-      .evaluate((n) => getComputedStyle(n).display),
-    "none",
-  );
-  await tickerPage.close();
-  tickerTrial = false;
-  checks.slowTickerDirectionPauseKeyboardCopiesReducedMotionAndNoSeparators = true;
   assert.deepEqual(errors, []);
   const evidence = {
     result: "PASS",
-    referenceComparison: reference
-      ? "performed"
-      : "not requested; functional checks use checked-in fixtures",
-    ...(reference
-      ? {
-          referenceSha256: createHash("sha256").update(reference).digest("hex"),
-          referenceBytes: Buffer.byteLength(reference),
-        }
-      : {}),
-    comparisons,
     checks,
     errors,
     violations,
     scope:
-      "Loopback Express application with synthetic public records/auth responses and checked-in concept fixtures; optional original-export comparison is reported separately. No hosted writes or media sessions.",
+      "Loopback Express application with synthetic public records/auth responses and checked-in concept fixtures. No hosted writes or media sessions.",
   };
   await writeFile(
     directory + "/evidence.json",
@@ -1183,11 +776,8 @@ try {
       .catch(() => {});
   await writeFile(
     directory + "/evidence.json",
-    JSON.stringify(
-      { result: "FAIL", checks, errors, violations, comparisons },
-      null,
-      2,
-    ) + "\n",
+    JSON.stringify({ result: "FAIL", checks, errors, violations }, null, 2) +
+      "\n",
   );
   throw error;
 } finally {

@@ -199,7 +199,9 @@ export async function verifyPublicBotsBrowser({
       if (inspecting) {
         await home.bringToFront();
         await home.locator("#ya-carousel .ya-scrub-control input").focus();
-        await home.locator("#ya-carousel-count").hover();
+        // Point inside the carousel but off the chart, so the keyboard keeps
+        // inspecting it.
+        await home.locator("#ya-carousel-dots").hover();
         assert.equal(await home.locator("#ya-chart.is-scrubbing").count(), 1);
       }
       const created = await api<{ id: string }>("a4/runs", {
@@ -276,12 +278,9 @@ export async function verifyPublicBotsBrowser({
           carouselActive: document
             .querySelector("#ya-carousel")!
             .matches(":hover,:focus-within"),
-          tickerActive: document
-            .querySelector(".ya-ticker")!
-            .matches(":hover,:focus-within"),
           inspecting: document.querySelectorAll(".is-scrubbing").length,
         })),
-        { carouselActive: false, tickerActive: false, inspecting: 0 },
+        { carouselActive: false, inspecting: 0 },
         "live refresh observation requires an idle homepage",
       );
       await home.waitForFunction(
@@ -427,7 +426,7 @@ export async function verifyPublicBotsBrowser({
     await home.setViewportSize({ width: 1440, height: 1100 });
     await home.locator('[data-site-header] nav a[href="/live"]').click();
     assert.ok(home.url().endsWith("/live"));
-    assert.equal(await home.locator(".arena-featured").count(), 1);
+    assert.equal(await home.locator(".live-feature").count(), 1);
     assert.equal(
       await home
         .getByRole("heading", { name: "Debates to watch", exact: true })

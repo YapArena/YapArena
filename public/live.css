@@ -1,0 +1,297 @@
+/* /live on the site kit (docs/site-design.md#live). Loaded after explore.css,
+   whose cards it uses. frontend/hero-preview.ts sets data-playing, data-active
+   and .is-entering. */
+.live-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-8);
+  padding-top: var(--space-5);
+}
+.live-page > .page-section {
+  margin-top: 0;
+}
+.live-section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+.live-section-head .text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 44px;
+  font-size: var(--text-14);
+}
+
+/* The featured debate: a contained 16:9 stage, the words beside it. */
+.live-feature {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  align-items: center;
+  gap: var(--space-6);
+}
+.live-stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: #070707;
+}
+.live-panes {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  background: #050505;
+}
+.live-panes > span {
+  display: grid;
+  place-items: center;
+  background: radial-gradient(120% 90% at 50% 30%, #1b1b1b, #0a0a0a);
+}
+.live-panes .avatar-initials {
+  border-radius: var(--radius-inner);
+}
+/* The recording's still and the muted preview, over the speakers' panes. */
+.live-still,
+.live-media,
+.live-media video,
+.live-media-live {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.live-still,
+.live-media video {
+  object-fit: cover;
+}
+.live-still[hidden] {
+  display: none;
+}
+.live-media {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.live-media video {
+  display: block;
+}
+.live-media-live video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+[data-debate-preview][data-playing="true"] .live-media {
+  opacity: 1;
+}
+.live-open {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+.live-open:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: -4px;
+}
+.live-stage-tag {
+  position: absolute;
+  z-index: 2;
+  top: var(--space-4);
+  left: var(--space-4);
+  background: rgb(0 0 0 / 0.72);
+  pointer-events: none;
+}
+.live-controls,
+.live-card-controls {
+  position: absolute;
+  z-index: 2;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.live-state {
+  padding: 2px var(--space-2);
+  border-radius: 8px;
+  background: rgb(0 0 0 / 0.72);
+  font-size: var(--text-12);
+  font-weight: 700;
+}
+.live-toggle {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: rgb(0 0 0 / 0.72);
+  color: var(--acid);
+}
+.live-toggle:hover {
+  border-color: #f3f3f3;
+}
+.live-toggle svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* Staying on the video enters the debate after a short countdown. */
+.live-intent {
+  position: absolute;
+  z-index: 2;
+  left: var(--space-4);
+  bottom: var(--space-4);
+  display: grid;
+  gap: var(--space-1);
+  width: min(16rem, 50%);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-inner);
+  background: rgb(0 0 0 / 0.72);
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+  pointer-events: none;
+}
+.live-intent > span:first-child {
+  font-size: var(--text-14);
+  font-weight: 700;
+}
+.live-intent small {
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.live-intent-track {
+  display: block;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgb(248 248 248 / 0.2);
+}
+.live-intent-track > span {
+  display: block;
+  height: 100%;
+  background: var(--acid);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.live-feature.is-entering .live-intent {
+  opacity: 1;
+  transform: none;
+}
+.live-feature.is-entering .live-intent-track > span {
+  transform: scaleX(1);
+  transition: transform 2600ms linear;
+}
+
+.live-copy {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  min-width: 0;
+}
+.live-copy > * {
+  margin: 0;
+}
+.live-eyebrow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+.live-title {
+  max-width: none;
+  font-family: var(--font-number);
+  font-size: var(--text-40);
+  font-weight: 400;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.live-sides {
+  width: 100%;
+  max-width: 28rem;
+}
+.live-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.live-hint {
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.live-hint-touch {
+  display: none;
+}
+@media (hover: none) {
+  .live-hint-desktop {
+    display: none;
+  }
+  .live-hint-touch {
+    display: inline;
+  }
+}
+/* Nothing to watch: the headline beside the living emblem. */
+.live-feature-empty .living-emblem {
+  justify-self: center;
+}
+
+.live-note {
+  display: grid;
+  gap: var(--space-2);
+  max-width: 30rem;
+}
+.live-note > * {
+  margin: 0;
+}
+.live-note p {
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 1.5;
+}
+
+@media (max-width: 999px) {
+  .live-feature {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+  .live-feature-empty .living-emblem {
+    order: -1;
+    width: min(60%, 16rem);
+  }
+}
+@media (max-width: 599px) {
+  .live-page {
+    gap: var(--space-7);
+    padding-top: var(--space-4);
+  }
+  .live-title {
+    font-size: var(--text-28);
+  }
+  .live-state {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-media,
+  .live-intent {
+    transition: none;
+  }
+}

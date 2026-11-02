@@ -117,7 +117,7 @@ describe("public discovery", () => {
       home.text,
       /data-preview-thumbnail src="\/api\/media\/events\/[a-f0-9-]+\/thumbnail"/,
     );
-    assert.doesNotMatch(home.text, /<div class="arena-featured-backdrop"/);
+    assert.doesNotMatch(home.text, /live-feature-empty/);
     assert.match(home.text, /data-mode="live"/);
     assert.match(home.text, /Should &lt;cities&gt; change\?/);
     assert.match(home.text, /B &amp; C/);
@@ -129,11 +129,19 @@ describe("public discovery", () => {
     );
     selected = { ...debate, status: "replay", speakerA: null };
     const replay = await request(configured).get("/live");
-    assert.match(replay.text, /FEATURED REPLAY/);
-    assert.doesNotMatch(replay.text, /arena-featured-speakers/);
+    assert.match(replay.text, /Featured replay/);
+    // With neither speaker known, the featured words name no speakers.
+    const feature = replay.text.match(
+      /<section class="live-feature"[\s\S]*?<\/section>/,
+    )[0];
+    assert.doesNotMatch(feature, /dcard-people/);
+    assert.match(feature, /Step into the debate/);
     assert.match(replay.text, /data-card-preview/);
     assert.match(replay.text, /loading="lazy"/);
-    assert.match(replay.text, /Watch debate: Should we debate this\?/);
+    assert.match(
+      replay.text,
+      /<a data-preview-open href="\/debates\/public-debate">Should we debate this\?<\/a>/,
+    );
     assert.match(
       replay.text,
       /rel="canonical" href="https:\/\/arena\.example\/live"/,
@@ -195,7 +203,8 @@ describe("public discovery", () => {
     assert.equal(home.status, 503);
     assert.match(home.text, /id="ya-market-v4"/);
     assert.match(home.text, /Discovery temporarily unavailable/);
-    assert.match(home.text, /History unavailable/);
+    // No ideas: one state, no controller data and no sample figures.
+    assert.doesNotMatch(home.text, /ya-home-data/);
     assert.doesNotMatch(
       home.text,
       /Concept · Sample data|AI models should be open source/,

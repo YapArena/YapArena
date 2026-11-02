@@ -46,10 +46,8 @@ function layout(
   const home = bodyClass.startsWith("arena-market-home");
   const reference = bodyClass.includes("reference-home");
   const page = html`${siteHeaderMarkup(sectionFor(canonical))}${
-    home
-      ? content
-      : html`<main id="main">${content}</main>${siteFooterMarkup()}`
-  }`;
+    home ? content : html`<main id="main">${content}</main>`
+  }${siteFooterMarkup()}`;
   return html`<!doctype html><html lang="en"${emailFirst ? " data-email-first" : ""}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#000000"><title>${title} · YAP Arena</title><meta name="description" content="${description}"><link rel="canonical" href="${canonical}">${metadata}${iconLinks()}<link rel="stylesheet" href="${asset("site.css")}"><link rel="stylesheet" href="${asset("arena.css")}"><link rel="stylesheet" href="${asset("site-header.css")}">${stylesheets.map((name) => html`<link rel="stylesheet" href="${asset(name)}">`)}<script defer src="${asset("session-coordination.js")}"></script><script type="module" src="${asset("site-header.js")}"></script><script defer src="${asset("site.js")}"></script><script defer src="${asset("account-balance.js")}"></script>${reference ? "" : html`<script defer src="${asset("measurement.js")}"></script><script type="module" src="${asset("results-notice.js")}"></script>`}${home ? html`<link rel="stylesheet" href="${asset("homepage.css")}"><script defer src="${asset("homepage.bundle.js")}"></script>` : ""}</head><body class="${bodyClass}"><a class="skip-link" href="#main">Skip to content</a>${page}</body></html>`.toString();
 }
 
@@ -141,22 +139,29 @@ export function renderLive(
   debates: PublicDebate[],
   topics: PublicList<PublicTopic>,
 ) {
-  const content = html`${renderFeaturedDebate(debates[0] ?? null, assetRevision)}<section class="container section"><div class="section-heading"><div><span class="eyebrow">01 / THE CONVERSATION</span><h2>Debates to watch</h2></div><a class="text-link" href="/debates">All debates <span aria-hidden="true">↗</span></a></div>${debates.length ? html`<div class="card-grid arena-video-grid">${debates.map((debate) => renderVideoDebateCard(debate, assetRevision))}</div>` : html`<div class="empty-state"><h3>No watchable debates yet.</h3><p>Live debates and ready replays will appear here.</p></div>`}</section><section class="container section"><div class="section-heading"><div><span class="eyebrow">02 / EXPLORE IDEAS</span><h2>Topics in play</h2></div><a class="text-link" href="/topics">All topics <span aria-hidden="true">↗</span></a></div>${topics.items.length ? html`<div class="card-grid">${topics.items.map(topicCard)}</div>` : html`<div class="empty-state"><h3>No public topics yet.</h3><p>Published topics will appear here when they are ready.</p></div>`}</section><section class="container note-band"><span class="eyebrow">ABOUT YAP ARENA</span><p>YAP Arena hosts live video debates you can watch, replay or join. Yap Coins are play money with no cash value, and real funds are unavailable. Listings marked Demo are examples, not real events.</p></section>${debates.length ? html`<script type="module" src="${asset("hero-preview.js")}"></script>` : ""}`;
+  const head = (
+    kicker: string,
+    title: string,
+    id: string,
+    href: string,
+    link: string,
+  ) =>
+    html`<div class="live-section-head"><div class="section-head"><p class="kicker">${inscription(kicker)}</p><h2 class="section-title" id="${id}">${inscription(title)}</h2></div><a class="text-link" href="${href}">${link} <span aria-hidden="true">→</span></a></div>`;
+  const content = html`<div class="container live-page">${renderFeaturedDebate(debates[0] ?? null, assetRevision)}<section class="page-section" aria-labelledby="watch-title">${head("The conversation", "Debates to watch", "watch-title", "/debates", "All debates")}${debates.length ? html`<div class="list-grid live-grid">${debates.map((debate) => renderVideoDebateCard(debate, assetRevision))}</div>` : quietState("No watchable debates yet.", "Live debates and ready replays will appear here.")}</section><section class="page-section" aria-labelledby="topics-title">${head("Explore ideas", "Topics in play", "topics-title", "/topics", "All topics")}${topics.items.length ? html`<div class="list-grid">${topics.items.map(topicCard)}</div>` : quietState("No public topics yet.", "Published topics will appear here when they are ready.")}</section><section class="live-note" aria-labelledby="live-note-title"><h2 class="kicker" id="live-note-title">${inscription("About YAP Arena")}</h2><p>YAP Arena hosts live video debates you can watch, replay or join. Yap Coins are play money with no cash value, and real funds are unavailable. Listings marked Demo are examples, not real events.</p></section></div>${debates.length ? html`<script type="module" src="${asset("hero-preview.js")}"></script>` : html`<script type="module" src="${asset("living-emblem.js")}"></script>`}`;
   return layout(
     "Live",
     "Discover public debates and topics on YAP Arena.",
     `${origin}/live`,
     content,
-    shareMetadata({
+    html`${shareMetadata({
       origin,
       title: "Live debates",
       description: "Discover public debates and topics on YAP Arena.",
       url: `${origin}/live`,
-    }),
+    })}${headlineFont}`,
     "",
     false,
-    // The topic cards; the rest of Live moves onto the kit next.
-    listStyles,
+    [...listStyles, "live.css"],
   );
 }
 

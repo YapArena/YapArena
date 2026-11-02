@@ -84,12 +84,15 @@ export function chartGeometry(
   range: HomeRange,
   width = 800,
   detail = false,
+  // The trending card's chart fills its column, so the page passes its
+  // measured height.
+  height?: number,
 ) {
   const w = Math.max(190, width),
-    h = detail ? 290 : 165;
+    h = detail ? 290 : Math.max(160, Math.round(height ?? 240));
   const left = 8,
     right = 48,
-    top = 24,
+    top = 12,
     bottom = 28;
   const points = chartSeries(m, metric, range);
   const rows = historyRows(m, metric, range),
@@ -129,10 +132,14 @@ export function chartGeometry(
   const markup: SafeHtml[] = [
     html`<title>${points.length ? "Sample" : "Unavailable"} ${metric === "price" ? "YES execution prices, in Yap Coins" : "participant endorsement, in percent"}</title>`,
   ];
-  for (const v of [lo, (lo + hi) / 2, hi])
+  // Five dotted guides between the range's ends, labelled on the right when
+  // there is a line to read.
+  for (const k of [0, 1, 2, 3, 4]) {
+    const v = lo + ((hi - lo) * k) / 4;
     markup.push(
-      html`<line x1="${left}" y1="${y(v)}" x2="${w - right + 2}" y2="${y(v)}" stroke="var(--ya-line)"/><text x="${w - right + 9}" y="${y(v) + 3}">${metric === "price" ? v.toFixed(2) : Math.round(v) + "%"}</text>`,
+      html`<line class="ya-guide" x1="${left}" y1="${y(v)}" x2="${points.length ? w - right + 2 : w - left}" y2="${y(v)}"/>${points.length ? html`<text x="${w - right + 9}" y="${y(v) + 4}">${metric === "price" ? v.toFixed(2) : Math.round(v) + "%"}</text>` : ""}`,
     );
+  }
   if (points.length) {
     const path = points
       .map((v, i) => (i ? "L" : "M") + x(i) + "," + y(v))
@@ -142,31 +149,44 @@ export function chartGeometry(
     markup.push(
       html`<clipPath id="${clip}"><rect data-chart-clip x="0" y="0" width="${w}" height="${h}"/></clipPath><path class="ya-linepath" pathLength="1" d="${path}" clip-path="url(#${clip})"/>`,
     );
+    // Five dates under the line: the sample's own, or the rounds' times.
     const labels =
       range === "1D"
-        ? ["00:00", "08:00", "16:00", "Now"]
+        ? ["00:00", "06:00", "12:00", "18:00", "Now"]
         : range === "1W"
-          ? ["Oct 9", "Oct 11", "Oct 14", "Oct 16"]
-          : ["Sep 16", "Sep 26", "Oct 6", "Oct 16"];
-    [0, 1, 2, 3]
-      .map((i) => Math.round((i * (points.length - 1)) / 3))
+          ? ["Oct 9", "Oct 11", "Oct 12", "Oct 14", "Oct 16"]
+          : ["Sep 16", "Sep 23", "Sep 30", "Oct 7", "Oct 16"];
+    [0, 1, 2, 3, 4]
+      .map((i) => Math.round((i * (points.length - 1)) / 4))
       .forEach((i, j) => {
         if (m.activity)
-          labels[j] = new Date(times[i]!).toLocaleTimeString("en-GB", {
-            hour: "2-digit",
-            minute: "2-digit",
-            timeZone: "UTC",
-          });
+          labels[j] =
+            range === "1D"
+              ? new Date(times[i]!).toLocaleTimeString("en-GB", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  timeZone: "UTC",
+                })
+              : new Date(times[i]!).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  timeZone: "UTC",
+                });
         markup.push(
-          html`<text x="${x(i)}" y="${h - 4}" text-anchor="${j === 0 ? "start" : j === 3 ? "end" : "middle"}">${labels[j]}</text>`,
+          html`<text x="${x(i)}" y="${h - 4}" text-anchor="${j === 0 ? "start" : j === 4 ? "end" : "middle"}">${labels[j]}</text>`,
         );
       });
+    // The line ends on a square pixel that pulses; the marker that follows the
+    // pointer is a square too.
+    const endX = x(points.length - 1) - 4,
+      endY = y(points.at(-1)!) - 4;
     markup.push(
-      html`<g class="ya-endpoint" aria-hidden="true"><circle class="ya-endpoint-pulse" cx="${x(points.length - 1)}" cy="${y(points.at(-1)!)}" r="3.5" fill="var(--ya-chart)"/><circle cx="${x(points.length - 1)}" cy="${y(points.at(-1)!)}" r="3.5" fill="var(--ya-chart)"/></g><g class="ya-hover-group" aria-hidden="true"><text data-chart-hover-date y="12" text-anchor="middle"></text><circle data-chart-hover-halo r="9" fill="var(--ya-chart)" opacity=".18"/><circle data-chart-hover-marker r="4.5" fill="var(--ya-chart)" stroke="var(--ya-panel)" stroke-width="2"/></g><rect data-chart-hit x="${left}" y="0" width="${w - left - right}" height="${h}" fill="transparent"/>`,
+      html`<g class="ya-endpoint" aria-hidden="true"><rect class="ya-endpoint-pulse" x="${endX}" y="${endY}" width="8" height="8"/><rect x="${endX}" y="${endY}" width="8" height="8"/></g><g class="ya-hover-group" aria-hidden="true"><rect data-chart-hover-marker width="10" height="10"/></g><rect data-chart-hit x="${left}" y="0" width="${w - left - right}" height="${h}" fill="transparent"/>`,
     );
   } else
     markup.push(
-      html`<text x="${(w - right) / 2}" y="${h / 2}" text-anchor="middle">History unavailable</text>`,
+      // Between the second and third guides, clear of the lines.
+      html`<text class="ya-chart-empty" x="${w / 2}" y="${top + (h - top - bottom) * 0.375 + 5}" text-anchor="middle">The chart starts after the first closed round.</text>`,
     );
   return {
     w,

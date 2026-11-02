@@ -23,14 +23,13 @@ it("renders the shared homepage fragments", (t) => {
       view.sparkMarkup(m),
       view.cardMarkup(m),
       view.cardMarkup(m, true),
-      view.featureMarkup(m, true),
+      view.trendMarkup(m),
+      view.trendMarkup(m, true),
       view.detailMarkup(m),
       view.detailMarkup(m, true),
     ];
     for (const filter of ["all", "live", "replay", "none"])
       fragments.push(view.debatesMarkup(m, filter, m.debates[0]?.id ?? null));
-    for (const side of ["live", "debate", "trade"])
-      fragments.push(view.sideMarkup(m, side, "NO"));
     for (const d of m.debates) fragments.push(view.playerMarkup(m, d));
     snapshot(t, fragments.map(String).join("\n"));
   }
@@ -48,8 +47,9 @@ it("renders the shared homepage fragments", (t) => {
     snapshot(t, charts.map(String).join("\n"));
   }
   for (const data of Object.values(homes)) {
-    snapshot(t, view.tickerMarkup(data.ideas));
     snapshot(t, view.dotsMarkup(data.ideas, data.ideas[0]?.id ?? ""));
+    snapshot(t, view.navMarkup(data.ideas, data.ideas[0]?.id ?? ""));
+    snapshot(t, view.railMarkup(data));
     snapshot(t, view.filtersMarkup(data));
     snapshot(t, view.homepageMarkup(data));
   }

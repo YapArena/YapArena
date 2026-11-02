@@ -2867,6 +2867,48 @@ html:has(.queue-overlay[open]) {
   letter-spacing: 0.02em;
 }
 
+/* The landing's living emblem (frontend/living-emblem.ts): the image at rest
+   and three canvases that light its tiles. */
+.living-emblem {
+  position: relative;
+  width: min(100%, 22rem);
+  aspect-ratio: 2048 / 1715;
+  isolation: isolate;
+}
+.living-emblem img,
+.living-emblem canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.living-emblem img {
+  display: block;
+  z-index: 1;
+  opacity: var(--rest-opacity);
+  filter: brightness(0) invert(1);
+}
+.living-emblem canvas {
+  opacity: 0;
+  pointer-events: none;
+}
+.living-emblem .aura {
+  z-index: 0;
+  filter: blur(10px);
+}
+.living-emblem .bloom {
+  z-index: 2;
+  filter: blur(2.5px);
+}
+.living-emblem .cores {
+  z-index: 3;
+}
+@media (prefers-reduced-motion: reduce) {
+  .living-emblem canvas {
+    display: none;
+  }
+}
+
 /* Dialogs: a centred card, a bottom sheet on phones. */
 .scrim {
   position: fixed;

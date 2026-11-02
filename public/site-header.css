@@ -440,11 +440,9 @@ body.account-page:has(#signed-out:not([hidden])) [data-header-guest] {
 .header-menu-caption > .header-avatar {
   grid-row: span 2;
 }
-/* The debate page (docs/debate-page-design.md) and, until it moves onto the
-   kit, /home run wider than the site container; their header lines up with
-   them. */
-.arena-page .site-header-grid,
-.arena-market-home .site-header-grid {
+/* The debate page (docs/debate-page-design.md) runs wider than the site
+   container; its header lines up with it. */
+.arena-page .site-header-grid {
   width: min(120rem, calc(100% - 2 * var(--space-5)));
 }
 

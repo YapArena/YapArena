@@ -1,22 +1,35 @@
+// Live's featured debate (docs/site-design.md#live): a contained 16:9 stage
+// with the words beside it, or the living emblem when nothing is live.
+// frontend/hero-preview.ts drives the data-preview hooks.
 import type { PublicDebate } from "./repository.ts";
+import { asset } from "./assets.ts";
+import { avatarSlot, inscription } from "./kit-web.ts";
 import { html } from "../../platform/html.ts";
+
+const versus = html`<span class="vs"><span class="sr-only">versus</span><span aria-hidden="true">VS</span></span>`;
+
+// The landing's emblem with its three canvases (frontend/living-emblem.ts).
+export const livingEmblem = () =>
+  html`<div class="living-emblem" data-living-emblem aria-hidden="true"><canvas class="aura"></canvas><img src="${asset("landing/yaparena-emblem.png")}" width="2048" height="1715" alt=""><canvas class="bloom"></canvas><canvas class="cores"></canvas></div>`;
 
 export function renderFeaturedDebate(
   debate: PublicDebate | null,
   revision: string,
 ) {
   if (!debate)
-    return html`<section class="arena-featured arena-featured-empty" aria-labelledby="featured-title"><div class="arena-featured-backdrop" aria-hidden="true"><span>YAP</span><span>ARENA</span></div><div class="container arena-featured-copy"><span class="eyebrow accent">IDEAS UNDER PRESSURE</span><h1 id="featured-title">Every idea has<br>another side.</h1><p>The next conversation is taking shape. Discover the debates and the people behind them.</p><a class="text-link" href="/debates">Explore the arena <span aria-hidden="true">↗</span></a></div></section>`;
+    return html`<section class="live-feature live-feature-empty" aria-labelledby="featured-title"><div class="live-copy kit-reveal"><p class="kicker">${inscription("Ideas under pressure")}</p><h1 class="page-title" id="featured-title">${inscription("Every idea has", "another side.")}</h1><p class="page-lead">The next conversation is taking shape. Discover the debates and the people behind them.</p><div class="live-actions"><a class="btn btn-primary" href="/debates">Explore the arena</a></div></div>${livingEmblem()}</section>`;
   const live = debate.status === "live";
-  const speakers = [debate.speakerA?.displayName, debate.speakerB?.displayName]
-    .filter(Boolean)
-    .join(" · ");
-  return html`<section class="arena-featured" data-featured-preview data-debate-preview data-event="${debate.id}" data-mode="${live ? "live" : "replay"}" data-live-source="/assets/hero-live.bundle.js?v=${revision}" data-hls-source="/assets/replay.bundle.js?v=${revision}" aria-labelledby="featured-title">
-    <img class="arena-featured-thumbnail" data-preview-thumbnail src="/api/media/events/${debate.id}/thumbnail" alt="" aria-hidden="true" decoding="async">
-    <div class="arena-featured-media" data-preview-media aria-hidden="true"><video data-preview-video muted autoplay playsinline loop preload="none" tabindex="-1" disablepictureinpicture></video><div class="arena-featured-live" data-preview-live></div></div>
-    <a class="arena-featured-open" data-preview-open href="/debates/${encodeURIComponent(debate.slug)}" aria-label="Open debate: ${debate.proposition}" aria-describedby="featured-instruction"></a>
-    <div class="container arena-featured-copy"><div class="arena-featured-eyebrow"><span class="status status-${live ? "live" : "replay"}">${live ? "● LIVE NOW" : "FEATURED REPLAY"}</span><span>${debate.topic.title}</span></div><h1 id="featured-title">${debate.proposition}</h1>${speakers ? html`<p class="arena-featured-speakers">${speakers}</p>` : ""}<p class="arena-featured-sides"><span>${debate.topic.sideALabel}</span><span>vs.</span><span>${debate.topic.sideBLabel}</span></p><p id="featured-instruction" class="arena-featured-instruction"><span class="arena-featured-desktop-hint">Stay here to step into the debate, or click to enter.</span><span class="arena-featured-touch-hint">Tap to step into the debate.</span></p></div>
-    <div class="arena-featured-controls"><span class="arena-featured-state" data-preview-status>Muted preview</span><button type="button" class="arena-featured-toggle" data-preview-toggle aria-label="Pause video preview" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path data-preview-toggle-icon d="M8 5v14M16 5v14"/></svg></button></div>
-    <div class="arena-featured-intent" data-preview-intent aria-hidden="true"><span>Entering the arena</span><span class="arena-featured-intent-track"><span></span></span><small>Move away or press Esc to stay here</small></div>
+  const { speakerA, speakerB } = debate;
+  return html`<section class="live-feature" data-featured-preview data-debate-preview data-event="${debate.id}" data-mode="${live ? "live" : "replay"}" data-live-source="/assets/hero-live.bundle.js?v=${revision}" data-hls-source="/assets/replay.bundle.js?v=${revision}" aria-labelledby="featured-title">
+    <div class="live-stage">
+      <span class="live-panes" aria-hidden="true"><span>${avatarSlot(speakerA?.displayName, 96)}</span><span>${avatarSlot(speakerB?.displayName, 96)}</span></span>
+      <img class="live-still" data-preview-thumbnail src="/api/media/events/${debate.id}/thumbnail" alt="" aria-hidden="true" decoding="async">
+      <div class="live-media" data-preview-media aria-hidden="true"><video data-preview-video muted autoplay playsinline loop preload="none" tabindex="-1" disablepictureinpicture></video><div class="live-media-live" data-preview-live></div></div>
+      <a class="live-open" data-preview-open href="/debates/${encodeURIComponent(debate.slug)}" aria-label="Open debate: ${debate.proposition}" aria-describedby="featured-instruction"></a>
+      <span class="tag${live ? " tag-live" : ""} live-stage-tag">${live ? html`<span class="live-pixel" aria-hidden="true"></span>Live now` : "Featured replay"}</span>
+      <div class="live-controls"><span class="live-state" data-preview-status>Muted preview</span><button type="button" class="live-toggle" data-preview-toggle aria-label="Pause video preview" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path data-preview-toggle-icon d="M8 5v14M16 5v14"/></svg></button></div>
+      <div class="live-intent" data-preview-intent aria-hidden="true"><span>Entering the arena</span><span class="live-intent-track"><span></span></span><small>Move away or press Esc to stay here</small></div>
+    </div>
+    <div class="live-copy"><p class="live-eyebrow"><span class="kicker">${inscription(live ? "Live now" : "Featured replay")}</span><span>${debate.topic.title}</span></p><h1 class="live-title" id="featured-title">${debate.proposition}</h1>${speakerA || speakerB ? html`<p class="dcard-people">${avatarSlot(speakerA?.displayName, 24)}<span>${speakerA?.displayName ?? debate.topic.sideALabel}</span>${versus}${avatarSlot(speakerB?.displayName, 24)}<span>${speakerB?.displayName ?? debate.topic.sideBLabel}</span></p>` : ""}<p class="tcard-sides live-sides"><span>${debate.topic.sideALabel}</span>${versus}<span>${debate.topic.sideBLabel}</span></p><div class="live-actions"><a class="btn btn-primary" href="/debates/${encodeURIComponent(debate.slug)}">Step into the debate</a></div><p id="featured-instruction" class="live-hint"><span class="live-hint-desktop">Stay on the video to step into the debate, or click to enter.</span><span class="live-hint-touch">Tap to step into the debate.</span></p></div>
   </section>`;
 }
