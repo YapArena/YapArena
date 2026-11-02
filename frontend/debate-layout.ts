@@ -3,7 +3,7 @@
 // Outline | Chat tabs, the phone answer sheet and the visit's chat colours.
 // It only reads the media, panel and chat state; it changes none of it.
 import { inscribe } from "../src/features/discovery/inscribe.ts";
-import { COLORED_WORDS, pickHeadlineColors } from "./landing-colors.js";
+import { visitColors } from "./lib/visit-colors.js";
 import {
   liveTurnView,
   openWindow,
@@ -33,12 +33,8 @@ if (arena) {
   };
 
   // The visit's five landing colours, for chat author names (and the turn
-  // clock's ember).
-  const colors = pickHeadlineColors();
-  COLORED_WORDS.forEach((word, index) =>
-    arena.style.setProperty(`--visit-${index}`, colors[word].css),
-  );
-  arena.style.setProperty("--visit-yappers", colors.yappers.css);
+  // clock's ember). The header paints with the same set (frontend/lib/visit-colors.ts).
+  visitColors();
 
   // Dydema Capitals text: capitals with U shown as V for the eye, the real
   // spelling for screen readers.

@@ -351,7 +351,7 @@ jobs:
             | grep --fixed-strings '"isDemo":true'
           curl --fail --silent --show-error \
             http://localhost:3000/assets/site.css \
-            | grep --fixed-strings '.site-header'
+            | grep --fixed-strings '.site-footer'
           curl --fail --silent --show-error http://localhost:3000/match \
             | grep --fixed-strings 'DEBATE MATCHING'
 

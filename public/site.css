@@ -53,6 +53,20 @@
   --text-28: 1.75rem;
   --text-40: 2.5rem;
   --ease-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  /* The landing's container and side gutter (docs/site-design.md). */
+  --container: 80rem;
+  --gutter: clamp(1rem, 4.5vw, 4rem);
+}
+/* The visit's five landing colours. frontend/lib/visit-colors.ts writes a new
+   random set on every page load (pickHeadlineColors); these are only the
+   fallbacks without JavaScript. Runtime values, not design tokens. */
+:root {
+  --visit-0: rgb(238 180 80);
+  --visit-1: rgb(149 151 255);
+  --visit-2: rgb(124 225 151);
+  --visit-3: rgb(252 146 161);
+  --visit-4: rgb(27 174 211);
+  --visit-yappers: rgb(27 174 211);
 }
 /* The landing fonts, at the same URLs landing.css resolves
    (/assets/landing/fonts/…). Dydema Capitals is not committed; without it
@@ -86,6 +100,13 @@ body {
   background: var(--bg);
   color: var(--text);
   line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+body > main {
+  flex: 1 0 auto;
 }
 a {
   color: inherit;
@@ -109,33 +130,55 @@ p {
 }
 h1,
 h2,
-h3,
-.brand {
+h3 {
   font-family: Arial, Helvetica, sans-serif;
 }
+/* The base headings are the kit's sizes (docs/site-design.md); pages set
+   their headlines in Dydema or Forum with the type-role classes. */
 h1 {
-  font-size: clamp(3.1rem, 7vw, 6.4rem);
-  line-height: 0.99;
-  letter-spacing: -0.065em;
-  margin-bottom: 1.5rem;
-  max-width: 950px;
+  font-size: var(--text-40);
+  line-height: 1.15;
+  letter-spacing: 0;
+  margin-bottom: var(--space-5);
+  max-width: 40rem;
+  text-wrap: balance;
 }
 h1 em {
   font-style: normal;
   color: var(--acid);
 }
 h2 {
-  font-size: clamp(1.9rem, 3.5vw, 3rem);
-  line-height: 1.1;
-  letter-spacing: -0.045em;
+  font-size: var(--text-28);
+  line-height: 1.2;
+  letter-spacing: 0;
 }
 h3 {
-  font-size: 1.5rem;
-  line-height: 1.2;
-  letter-spacing: -0.035em;
+  font-size: var(--text-20);
+  line-height: 1.3;
+  letter-spacing: 0;
 }
+@media (max-width: 599px) {
+  h1 {
+    font-size: var(--text-28);
+  }
+  h2 {
+    font-size: var(--text-24);
+  }
+}
+/* The landing's container: 80rem with the side gutter and the phone's safe
+   areas. */
 .container {
-  width: min(1200px, calc(100% - 48px));
+  width: min(
+    calc(var(--container) - 2 * var(--gutter)),
+    calc(
+      100% - 2 *
+        max(
+          var(--gutter),
+          env(safe-area-inset-left, 0px),
+          env(safe-area-inset-right, 0px)
+        )
+    )
+  );
   margin-inline: auto;
 }
 .muted {
@@ -164,48 +207,8 @@ h3 {
   top: 12px;
 }
 :focus-visible {
-  outline: 3px solid var(--acid);
+  outline: 2px solid var(--acid);
   outline-offset: 3px;
-}
-.site-header {
-  border-bottom: 1px solid var(--line);
-  background: #101214;
-}
-.nav {
-  min-height: 78px;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px 4rem;
-}
-.brand {
-  font-size: 1.32rem;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 11px;
-  letter-spacing: -0.055em;
-  white-space: nowrap;
-}
-.brand-mark {
-  display: grid;
-  place-items: center;
-  background: var(--acid);
-  color: #111;
-  width: 32px;
-  height: 32px;
-  border-radius: 7px;
-  transform: rotate(-8deg);
-}
-.brand-light {
-  font-weight: 400;
-}
-.nav nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  font-size: 0.9rem;
-  font-weight: 600;
 }
 .preview-pill {
   margin-left: auto;
@@ -248,21 +251,25 @@ h3 {
   margin-top: 2.4rem;
   flex-wrap: wrap;
 }
+/* The landing's primary pill; .btn-primary in the kit below. */
 .button {
   display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  background: var(--acid);
-  color: #10120d;
-  padding: 15px 20px;
+  justify-content: center;
+  gap: var(--space-2);
+  background: var(--primary-gradient);
+  color: var(--on-acid);
+  padding: 0 var(--space-5);
+  font-size: 0.95rem;
   font-weight: 700;
-  border-radius: 3px;
-  min-height: 54px;
+  line-height: 1.2;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  min-height: 48px;
 }
 .button:hover {
-  background: #d6d6d6;
-  color: #10120d;
+  filter: brightness(0.88);
+  color: var(--on-acid);
 }
 .button-secondary,
 .text-link {
@@ -479,16 +486,44 @@ h3 {
   margin: 0;
 }
 .site-footer {
-  padding: 34px 0;
+  margin-top: var(--space-8);
+  border-top: 1px solid var(--line);
+  padding-block: var(--space-4)
+    max(var(--space-4), env(safe-area-inset-bottom, 0px));
 }
 .footer-inner {
   display: flex;
-  justify-content: space-between;
-  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: var(--space-5);
   color: var(--muted);
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: var(--text-14);
+}
+.footer-inner > a,
+.footer-inner > button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+.footer-inner > a:hover,
+.footer-inner > button:hover {
+  color: var(--acid);
+}
+/* frontend/measurement.ts appends Cookie settings to the row. */
+.footer-inner > .cookie-settings {
+  color: inherit;
+  text-decoration: none;
+}
+.footer-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-12);
+  text-align: center;
 }
 .page-intro {
   padding-top: 80px;
@@ -851,9 +886,6 @@ h3 {
   .detail-grid {
     grid-template-columns: 1fr;
   }
-  .nav {
-    gap: 2rem;
-  }
 }
 @media (max-width: 600px) {
   .media-videos {
@@ -862,25 +894,8 @@ h3 {
   .media-videos video {
     height: min(56vh, 420px);
   }
-  .container {
-    width: min(100% - 32px, 1200px);
-  }
-  .nav {
-    min-height: 70px;
-    gap: 16px;
-    flex-wrap: wrap;
-    padding-block: 14px;
-  }
-  .nav nav {
-    order: 3;
-    width: 100%;
-    gap: 25px;
-  }
   .preview-pill {
     font-size: 0.58rem;
-  }
-  .brand {
-    font-size: 1.12rem;
   }
   .hero-grid {
     min-height: 0;
@@ -910,9 +925,6 @@ h3 {
   }
   .note-band {
     grid-template-columns: 1fr;
-  }
-  .footer-inner {
-    flex-direction: column;
   }
   .side-panel,
   .speakers {
@@ -2667,4 +2679,430 @@ html:has(.queue-overlay[open]) {
 .challenge-propose-actions {
   display: flex;
   gap: 8px;
+}
+
+/* ---- The site kit (docs/site-design.md) -----------------------------------
+   The landing's components for every page. Values come from the tokens above;
+   the page PRs move their markup onto these classes. */
+
+/* Type roles. Dydema text is inscribed (U shown as V) in aria-hidden capitals
+   with a visually hidden real spelling (src/features/discovery/inscribe.ts). */
+.page-title {
+  margin: 0;
+  max-width: none;
+  font-family: var(--font-display);
+  font-size: var(--text-40);
+  font-weight: 400;
+  font-kerning: normal;
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+.page-title em {
+  font-style: normal;
+  color: var(--visit-1);
+}
+.kicker {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-14);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.section-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-28);
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+.title-serif {
+  margin: 0;
+  max-width: none;
+  font-family: var(--font-number);
+  font-size: var(--text-40);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+.page-lead {
+  max-width: 36rem;
+  color: var(--muted);
+  font-size: var(--text-20);
+  line-height: 1.5;
+}
+/* About 74 characters a line of 16 px Arial. */
+.measure {
+  max-width: 33rem;
+}
+.num {
+  font-family: var(--font-number);
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 599px) {
+  .page-title,
+  .title-serif {
+    font-size: var(--text-28);
+  }
+  .section-title {
+    font-size: var(--text-24);
+  }
+  .page-lead {
+    font-size: var(--text-16);
+  }
+}
+
+/* Buttons: the landing's pills. One white button per screen. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: 0 var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--acid);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition:
+    filter 0.2s,
+    border-color 0.2s;
+}
+.btn-sm {
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  font-size: var(--text-14);
+}
+.btn-primary {
+  background: var(--primary-gradient);
+  color: var(--on-acid);
+}
+.btn-primary:hover {
+  filter: brightness(0.88);
+  color: var(--on-acid);
+}
+.btn-secondary {
+  background: var(--raised);
+  border-color: var(--control-border);
+  color: var(--button-text);
+}
+.btn-outline {
+  border-color: var(--control-border);
+  color: var(--acid);
+}
+.btn-secondary:hover,
+.btn-outline:hover {
+  border-color: #f3f3f3;
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Chips: filters and toggles; pressed or current is white. */
+.chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--button-text);
+  font-size: var(--text-14);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.chip:hover {
+  border-color: #f3f3f3;
+}
+.chip[aria-current="page"],
+.chip[aria-pressed="true"],
+.chip[aria-selected="true"] {
+  background: var(--acid);
+  border-color: var(--acid);
+  color: var(--on-acid);
+}
+.chips {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+@media (pointer: coarse) {
+  .btn-sm,
+  .chip {
+    min-height: 44px;
+  }
+}
+
+/* Tags: status labels. Live has a blinking pixel. */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  color: var(--button-text);
+  font-size: var(--text-12);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.tag-live {
+  border-color: var(--acid);
+  color: var(--acid);
+}
+.live-pixel {
+  width: 6px;
+  height: 6px;
+  background: var(--acid);
+  animation: kit-blink 1.6s ease-in-out infinite;
+}
+@keyframes kit-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* Cards. */
+.card {
+  padding: var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--panel);
+}
+@media (max-width: 599px) {
+  .card {
+    padding: var(--space-4);
+  }
+}
+
+/* Fields and the search pill. */
+.field {
+  display: grid;
+  gap: var(--space-2);
+}
+.field > label {
+  font-size: var(--text-14);
+  font-weight: 700;
+}
+.input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-inner);
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+}
+.input::placeholder {
+  color: #8a8a8a;
+}
+.input:focus-visible {
+  outline-offset: 1px;
+}
+.search-pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search-pill > svg {
+  position: absolute;
+  left: 16px;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 2;
+  pointer-events: none;
+}
+.search-pill > .input {
+  padding-left: 46px;
+  border-radius: var(--radius-pill);
+}
+
+/* Empty, loading and error states share one shape. */
+.state {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  padding: var(--space-7) var(--space-5);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-card);
+  text-align: center;
+}
+.state > p {
+  max-width: 28rem;
+  margin: 0;
+  color: var(--muted);
+}
+.skeleton {
+  display: block;
+  border-radius: var(--radius-inner);
+  background: var(--raised);
+}
+/* Nine tiles lighting in the visit's colours. */
+.pixel-loader {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 6px);
+  gap: 2px;
+  vertical-align: middle;
+}
+.pixel-loader > i {
+  width: 6px;
+  height: 6px;
+  background: var(--visit-0);
+  opacity: 0.18;
+  animation: kit-tile 1.2s var(--ease-expo) infinite;
+}
+.pixel-loader > i:nth-child(3n + 2) {
+  background: var(--visit-1);
+}
+.pixel-loader > i:nth-child(3n) {
+  background: var(--visit-2);
+}
+.pixel-loader > i:nth-child(4) {
+  background: var(--visit-3);
+}
+.pixel-loader > i:nth-child(8) {
+  background: var(--visit-4);
+}
+.pixel-loader > i:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.pixel-loader > i:nth-child(3) {
+  animation-delay: 0.2s;
+}
+.pixel-loader > i:nth-child(6) {
+  animation-delay: 0.3s;
+}
+.pixel-loader > i:nth-child(9) {
+  animation-delay: 0.4s;
+}
+.pixel-loader > i:nth-child(8) {
+  animation-delay: 0.5s;
+}
+.pixel-loader > i:nth-child(7) {
+  animation-delay: 0.6s;
+}
+.pixel-loader > i:nth-child(4) {
+  animation-delay: 0.7s;
+}
+.pixel-loader > i:nth-child(5) {
+  animation-delay: 0.8s;
+}
+@keyframes kit-tile {
+  0%,
+  100% {
+    opacity: 0.18;
+  }
+  20% {
+    opacity: 1;
+  }
+}
+
+/* Avatar slots: squares at multiples of 12 px. The art (or today's initials)
+   draws its own tile; the slot adds no crop, border or background. */
+.avatar-slot {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--avatar-size, 36px);
+  height: var(--avatar-size, 36px);
+}
+.avatar-initials {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  background: var(--raised);
+  color: var(--text);
+  font-size: calc(var(--avatar-size, 36px) * 0.36);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* Dialogs: a centred card, a bottom sheet on phones. */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: max(var(--space-4), env(safe-area-inset-top, 0px))
+    max(var(--space-4), env(safe-area-inset-right, 0px))
+    max(var(--space-4), env(safe-area-inset-bottom, 0px))
+    max(var(--space-4), env(safe-area-inset-left, 0px));
+  background: rgb(0 0 0 / 0.78);
+  backdrop-filter: blur(6px);
+}
+.dialog {
+  display: grid;
+  gap: var(--space-4);
+  width: min(30rem, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: var(--space-6);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-card);
+  background: var(--panel);
+}
+@media (max-width: 599px) {
+  .scrim {
+    place-items: end stretch;
+    padding: 0;
+  }
+  .dialog {
+    width: 100%;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    padding: var(--space-5) max(var(--space-4), env(safe-area-inset-right, 0px))
+      max(var(--space-5), env(safe-area-inset-bottom, 0px))
+      max(var(--space-4), env(safe-area-inset-left, 0px));
+  }
+}
+
+/* The landing's page-load reveal, for page heads only. */
+@keyframes kit-wipe {
+  from {
+    clip-path: inset(100% -8% -8%);
+  }
+  to {
+    clip-path: inset(-8%);
+  }
+}
+@keyframes kit-fade {
+  from {
+    opacity: 0;
+  }
+}
+.kit-reveal {
+  animation:
+    kit-wipe 1.05s var(--ease-expo) var(--reveal-delay, 0s) both,
+    kit-fade 0.525s var(--ease-expo) var(--reveal-delay, 0s) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-pixel,
+  .pixel-loader > i,
+  .kit-reveal {
+    animation: none;
+  }
+  .pixel-loader > i {
+    opacity: 0.6;
+  }
 }

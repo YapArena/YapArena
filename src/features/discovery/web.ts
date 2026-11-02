@@ -1,6 +1,6 @@
 import { homepageMarkup } from "./homepage-view.ts";
 import { accountMarkup } from "./account-web.ts";
-import { siteHeaderMarkup } from "./site-header-web.ts";
+import { siteHeaderMarkup, type SiteSection } from "./site-header-web.ts";
 import type { PublicBotActivity } from "../a4/public-bots.ts";
 import { publicHomepage, type HomeData } from "./homepage-model.ts";
 import { renderVideoDebateCard } from "./video-card-web.ts";
@@ -43,6 +43,15 @@ const labels: Record<PublicDebate["status"], string> = {
   cancelled: "Cancelled",
 };
 
+// The header marks the section a page belongs to, from its canonical path.
+function sectionFor(canonical: string): SiteSection | null {
+  const path = new URL(canonical, "https://yaparena.invalid").pathname;
+  if (path === "/live") return "live";
+  if (path === "/match") return "create";
+  if (/^\/(debates|topics|people)(\/|$)/.test(path)) return "explore";
+  return null;
+}
+
 function layout(
   title: string,
   description: string,
@@ -54,12 +63,12 @@ function layout(
 ) {
   const home = bodyClass.startsWith("arena-market-home");
   const reference = bodyClass.includes("reference-home");
-  const page = html`${siteHeaderMarkup()}${
+  const page = html`${siteHeaderMarkup(sectionFor(canonical))}${
     home
       ? content
       : html`<main id="main">${content}</main>${siteFooterMarkup()}`
   }`;
-  return html`<!doctype html><html lang="en"${emailFirst ? " data-email-first" : ""}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark"><title>${title} · YAP Arena</title><meta name="description" content="${description}"><link rel="canonical" href="${canonical}">${metadata}${iconLinks()}<link rel="stylesheet" href="${asset("site.css")}"><link rel="stylesheet" href="${asset("arena.css")}"><link rel="stylesheet" href="${asset("site-header.css")}"><script defer src="${asset("session-coordination.js")}"></script><script type="module" src="${asset("site-header.js")}"></script><script defer src="${asset("site.js")}"></script><script defer src="${asset("account-balance.js")}"></script>${reference ? "" : html`<script defer src="${asset("measurement.js")}"></script><script type="module" src="${asset("results-notice.js")}"></script>`}${home ? html`<link rel="stylesheet" href="${asset("homepage.css")}"><script defer src="${asset("homepage.bundle.js")}"></script>` : ""}</head><body class="${bodyClass}"><a class="skip-link" href="#main">Skip to content</a>${page}</body></html>`.toString();
+  return html`<!doctype html><html lang="en"${emailFirst ? " data-email-first" : ""}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#000000"><title>${title} · YAP Arena</title><meta name="description" content="${description}"><link rel="canonical" href="${canonical}">${metadata}${iconLinks()}<link rel="stylesheet" href="${asset("site.css")}"><link rel="stylesheet" href="${asset("arena.css")}"><link rel="stylesheet" href="${asset("site-header.css")}"><script defer src="${asset("session-coordination.js")}"></script><script type="module" src="${asset("site-header.js")}"></script><script defer src="${asset("site.js")}"></script><script defer src="${asset("account-balance.js")}"></script>${reference ? "" : html`<script defer src="${asset("measurement.js")}"></script><script type="module" src="${asset("results-notice.js")}"></script>`}${home ? html`<link rel="stylesheet" href="${asset("homepage.css")}"><script defer src="${asset("homepage.bundle.js")}"></script>` : ""}</head><body class="${bodyClass}"><a class="skip-link" href="#main">Skip to content</a>${page}</body></html>`.toString();
 }
 
 function badge(debate: PublicDebate) {

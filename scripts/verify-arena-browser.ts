@@ -564,6 +564,8 @@ export async function verifyArenaBrowser({
     await page.emulateMedia({ reducedMotion: "no-preference" });
     checks.reducedMotionHoverCorners = true;
     phase = "search";
+    // Below 1000 px the header's search field opens from its icon.
+    await page.locator("[data-header-search-toggle]").click();
     await page.locator("#header-search").fill("walkability");
     await page.locator("#header-search").press("Enter");
     await page.waitForURL("**/debates?q=walkability");

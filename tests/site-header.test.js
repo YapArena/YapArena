@@ -36,7 +36,22 @@ it("uses one navigation and session-aware account header across normal pages", (
     assert.equal((html.match(/data-site-header/g) ?? []).length, 1);
     assert.match(
       html,
-      /href="\/live">Live<\/a><a href="\/debates">Explore<\/a><a href="\/match">Create<\/a>/,
+      /href="\/live"(?: aria-current="page")?>Live<\/a><a href="\/debates"(?: aria-current="page")?>Explore<\/a><a href="\/match"(?: aria-current="page")?>Create<\/a>/,
+    );
+    // The landing's logo, and below 1000 px a search icon that falls back
+    // to the debates search without JavaScript.
+    assert.match(
+      html,
+      /<a class="site-logo" href="\/home"><img src="\/assets\/landing\/yaparena-logo\.png\?v=[0-9a-f]{12}"[^>]* alt="YAP Arena home">/,
+    );
+    assert.match(
+      html,
+      /<a class="header-search-toggle" href="\/debates#debate-search" data-header-search-toggle aria-label="Search debates">/,
+    );
+    // The account button holds the 36 px avatar slot.
+    assert.match(
+      html,
+      /data-header-account[^>]*><span class="header-avatar" data-header-avatar>/,
     );
     assert.match(html, /data-header-member hidden/);
     // One Sign in button opens the account page, which offers both methods.
@@ -63,6 +78,14 @@ it("uses one navigation and session-aware account header across normal pages", (
     assert.match(html, /site-header\.js/);
     assert.doesNotMatch(html, /class="ya-top"/);
   }
+  // The current section is marked on its own page only.
+  const current = (html) =>
+    [...html.matchAll(/<a href="([^"]+)" aria-current="page">/g)].map(
+      ([, href]) => href,
+    );
+  assert.deepEqual(current(pages[1]), ["/live"]);
+  assert.deepEqual(current(pages[5]), ["/match"]);
+  assert.deepEqual(current(pages[2]), []);
   const home = pages[0];
   assert.match(home, /data-nav="following"/);
   assert.match(home, /id="ya-search"/);
@@ -116,4 +139,22 @@ it("versions every server-rendered asset reference with the process revision", (
     }
   }
   assert.equal(revisions.size, 1);
+});
+
+it("ends pages with the landing's footer: one row of links and the play-money note", () => {
+  const html = renderAbout("https://arena.example");
+  const footer = html.match(
+    /<footer class="site-footer">[\s\S]*?<\/footer>/,
+  )[0];
+  assert.match(
+    footer,
+    /<nav class="container footer-inner" aria-label="Site"><a href="\/topics">Topics<\/a><a href="\/coins">Yap Coins<\/a><a href="\/about">About<\/a><a href="\/privacy">Privacy<\/a><a href="\/terms">Terms<\/a><a href="\/cookies">Cookies<\/a><\/nav>/,
+  );
+  assert.match(
+    footer,
+    /<p class="footer-note">Play money · no cash value<\/p>/,
+  );
+  assert.doesNotMatch(footer, /Ideas under pressure/);
+  assert.match(html, /<meta name="theme-color" content="#000000">/);
+  assert.match(html, /viewport-fit=cover/);
 });
