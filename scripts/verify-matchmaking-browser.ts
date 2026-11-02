@@ -184,6 +184,8 @@ try {
     ((await waiting.locator("blockquote").textContent()) ?? "").length > 20,
     "a quote shows while waiting",
   );
+  // Alice sees the full motion: let the opening reveal finish first.
+  await delay(1300);
   await capture(alice.page, "queue-overlay-waiting");
   // Keep browsing folds it into the header pill, and the pill reopens it.
   await waiting.getByRole("button", { name: "Keep browsing" }).click();
@@ -191,7 +193,9 @@ try {
   await pill(alice.page)
     .filter({ hasText: /^In queue · \d:\d\d$/ })
     .waitFor();
-  await capture(alice.page, "queue-pill");
+  const pillShot = join(artifactDir, "queue-pill.png");
+  await alice.page.locator(".queue-pill").screenshot({ path: pillShot });
+  screenshots.push(pillShot);
   await pill(alice.page).click();
   await waiting.waitFor();
   assert.equal(new URL(alice.page.url()).pathname, `/topics/${slug}`);
