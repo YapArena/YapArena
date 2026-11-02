@@ -386,7 +386,10 @@ describe("landing page", () => {
       /href="\/api\/auth\/login\?return=%2Fhome">Try again</,
     );
     assert.match(expired.text, /href="\/">Back to YAP Arena</);
-    assert.match(expired.text, /<a class="brand" href="\/home"/);
+    assert.match(
+      expired.text,
+      /<a class="brand" href="\/home"><img src="\/assets\/landing\/yaparena-logo\.png"[^>]*alt="YAP Arena home">/,
+    );
   });
 });
 

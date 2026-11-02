@@ -142,7 +142,8 @@ function showCoinWallet(value: Balance | null, problem = "") {
   const signedOut = coinWallet.querySelector<HTMLElement>(
     "[data-coin-wallet-signed-out]",
   );
-  const balances = coinWallet.querySelector<HTMLElement>(
+  // The big balance and the two figures under it.
+  const balances = coinWallet.querySelectorAll<HTMLElement>(
     "[data-coin-wallet-balances]",
   );
   if (status) {
@@ -150,7 +151,7 @@ function showCoinWallet(value: Balance | null, problem = "") {
     status.hidden = !problem;
   }
   if (signedOut) signedOut.hidden = Boolean(value) || Boolean(problem);
-  if (balances) balances.hidden = !value;
+  for (const element of balances) element.hidden = !value;
   const figures =
     value?.kind === "coins"
       ? {
@@ -167,6 +168,17 @@ function showCoinWallet(value: Balance | null, problem = "") {
     "[data-funds]",
   )) {
     const kind = target.dataset.funds;
+    // The big balance: the available figure in Forum, its "YC" smaller.
+    if (kind === "balance" && figures) {
+      const number = document.createElement("span"),
+        unit = document.createElement("span");
+      number.className = "num";
+      number.textContent = figures.available.replace(/ YC$/, "");
+      unit.className = "coin-unit";
+      unit.textContent = figures.available.endsWith(" YC") ? " YC" : "";
+      target.replaceChildren(number, unit);
+      continue;
+    }
     target.textContent =
       figures && (kind === "available" || kind === "held")
         ? figures[kind]

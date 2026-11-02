@@ -125,6 +125,33 @@ their picture and the words under it; topics use topic cards; the note is small 
 With nothing to watch, a Dydema headline sits beside the living emblem
 (`frontend/living-emblem.ts`, the landing's renderer, resting off screen).
 
+## Sign-in, Settings and Yap Coins
+
+`/account` and `/coins` (`src/features/discovery/account-web.ts`, `renderCoins` in `web.ts`,
+`public/account-auth.css`):
+
+- **Sign-in** (signed out): the landing's layout. The words sit in columns 1–7: a Dydema headline
+  "Every idea deserves _a voice._" (64 / 40 / 28 px), the lead, "Join the arena" with "Sign in or
+  create an account", and 380 px Google and email buttons. The living emblem sits in columns 8–12,
+  above the words when upright under 900 px and beside them on a phone held sideways. The
+  header hides its Sign in pill here.
+- **While the account is checked**, a screen-tall space with the pixel loader holds the page, so
+  the back link and the footer don't move.
+- **Settings**: the avatar slot (`.settings-avatar`, 72 px, 48 on phones) with today's person
+  icon or initials, the name in Forum and @handle; card titles in Dydema 20 px; 48 px fields; the
+  tabs as a vertical list from 1000 px and a row of pills below, with the WAI tab keys and hash
+  links.
+- **Handle pop-up** (`frontend/profile-setup.ts`, styles in `public/site-header.css`): the kit's
+  dialog (a bottom sheet on phones), the landing logo, visible "Create your profile" and "Confirm
+  your handle", the preview in a 48 px slot (72 to confirm), 44 px tap areas for the terms tick
+  and the 20 px "i" marks, and a welcome with the living emblem after "Claim my handle".
+- **Sign-in hand-off pages** (`src/platform/auth/sign-in-pages.ts`) stay self-contained but take
+  the landing logo, a Dydema heading, the pixel loader, a 16 px card and the kit's pills.
+- **Yap Coins**: the pixel coin (`pixelCoin()` in `pixel-mark.ts`: a ring in the five visit colours
+  around a white Y), the balance in Forum 64 / 40 px with a smaller "YC", Available and In open
+  positions, then the daily claim, Grants and History. Placeholders hold the balance's size while
+  it loads.
+
 ## Header
 
 `src/features/discovery/site-header-web.ts`, `public/site-header.css`, `frontend/site-header.ts`.

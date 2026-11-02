@@ -800,57 +800,33 @@ body.account-page:has(#signed-out:not([hidden])) [data-header-guest] {
 }
 
 /* Profile setup: the pop-up every new account completes before anything else
-   (frontend/profile-setup.ts). */
+   (frontend/profile-setup.ts), as the kit's dialog: a centred card from
+   600 px, a bottom sheet below. showModal() keeps the page behind inert. */
 .profile-setup {
-  --ps-surface: #0f0f0f;
-  --ps-field: #0b0b0b;
-  --ps-acid: #f8f8f8;
-  --ps-danger: #ff8f9a;
-  width: min(480px, calc(100vw - 32px));
-  max-height: calc(100dvh - 32px);
+  width: min(30rem, calc(100vw - 2 * var(--space-4)));
+  max-height: calc(100dvh - 2 * var(--space-4));
   padding: 0;
-  border: 1px solid #414141;
-  border-radius: 28px;
-  background:
-    radial-gradient(120% 60% at 50% -12%, #303030 0%, transparent 62%),
-    var(--ps-surface);
-  color: #f4f4f4;
-  box-shadow:
-    0 40px 140px #000000cc,
-    inset 0 1px 0 #ffffff0d;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-card);
+  background: var(--panel);
+  color: var(--text);
   overflow: hidden auto;
   overscroll-behavior: contain;
 }
 .profile-setup[open] {
-  animation: ps-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: ps-in 0.32s var(--ease-expo);
 }
 .profile-setup::backdrop {
-  background: radial-gradient(circle at 50% 30%, #191919d9, #060606f0);
-  backdrop-filter: blur(10px);
-}
-/* Stays inside the frame: wider glow would make the pop-up scroll sideways
-   when a step moves focus. */
-.ps-glow {
-  position: absolute;
-  inset: -130px 0 auto;
-  height: 280px;
-  background: conic-gradient(
-    from 200deg,
-    transparent,
-    #f8f8f833,
-    #bebebe26,
-    transparent 60%
-  );
-  filter: blur(44px);
-  pointer-events: none;
+  background: rgb(0 0 0 / 0.78);
+  backdrop-filter: blur(6px);
 }
 .ps-form {
   position: relative;
-  padding: 30px 30px 28px;
+  padding: var(--space-6);
 }
 .ps-step {
   display: grid;
-  gap: 14px;
+  gap: var(--space-4);
 }
 .ps-step[hidden] {
   display: none;
@@ -858,24 +834,21 @@ body.account-page:has(#signed-out:not([hidden])) [data-header-guest] {
 .ps-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
 }
-.ps-mark {
-  width: 26px;
-  height: 30px;
-  fill: none;
-  stroke: var(--ps-acid);
-  stroke-width: 2.4;
+.ps-logo {
+  display: block;
+  width: auto;
+  height: 26px;
 }
-.profile-setup h2 {
+/* The step's heading in Dydema; it takes focus so screen readers hear it. */
+.profile-setup h2,
+.ps-title {
   margin: 0;
-  font-size: clamp(1.55rem, 5vw, 1.95rem);
-  line-height: 1.1;
-  letter-spacing: -0.045em;
+  font-family: var(--font-display);
+  font-size: var(--text-28);
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0;
   outline: none;
 }
 /* Two segments: the first fills on step 1, both on step 2. No words; the
@@ -883,26 +856,23 @@ body.account-page:has(#signed-out:not([hidden])) [data-header-guest] {
 .ps-progress {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  margin: 18px 0 22px;
+  gap: var(--space-2);
+  margin: var(--space-5) 0;
 }
 .ps-progress > span {
   position: relative;
   height: 4px;
   overflow: hidden;
-  border-radius: 999px;
-  background: #262626;
+  background: var(--raised);
 }
 .ps-progress > span::after {
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: inherit;
-  background: #fff;
-  box-shadow: 0 0 12px #ffffff80;
+  background: var(--acid);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.45s var(--ease-expo);
 }
 .ps-progress > span:first-child::after,
 .ps-progress:not([data-progress="1"]) > span:last-child::after {
@@ -916,27 +886,27 @@ body.account-page:has(#signed-out:not([hidden])) [data-header-guest] {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+/* The live preview: the initials in a 48 px square slot (72 on the confirm
+   step); the chosen avatars replace them later. */
 .ps-preview {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 4px 0;
-  padding: 12px 14px;
-  border: 1px solid #3d3d3d;
-  border-radius: 18px;
-  background: #111111b3;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-inner);
+  background: var(--raised);
 }
 .ps-avatar {
   display: grid;
+  flex: none;
   place-items: center;
-  flex: 0 0 auto;
-  width: 46px;
-  height: 46px;
-  border: 1px solid #f3f3f3;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #595959, #212121);
-  color: #fff;
-  font-size: 0.95rem;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-inner);
+  background: var(--panel);
+  color: var(--text);
+  font-size: var(--text-16);
   font-weight: 700;
 }
 .ps-preview-text {
@@ -949,68 +919,78 @@ body.account-page:has(#signed-out:not([hidden])) [data-header-guest] {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.ps-preview-text > strong {
+  font-family: var(--font-number);
+  font-size: var(--text-20);
+  font-weight: 400;
+}
 .ps-preview-text > span {
-  color: #aaa;
-  font-size: 0.82rem;
+  color: var(--muted);
+  font-size: var(--text-14);
 }
 .ps-field {
   display: grid;
-  gap: 7px;
+  gap: var(--space-2);
 }
 .ps-label-row {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
 }
 .ps-label-row label {
-  color: #e6e6e6;
-  font-size: 0.8rem;
-  font-weight: 650;
+  font-size: var(--text-14);
+  font-weight: 700;
 }
 /* The label and its info button show the handle note on hover or focus. */
 .ps-label {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-2);
 }
+/* A 20 px mark with a 44 px tap area. */
 .ps-info {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 17px;
-  height: 17px;
+  width: 20px;
+  height: 20px;
   padding: 0;
-  border: 1px solid #4a4a4a;
+  border: 1px solid var(--control-border);
   border-radius: 50%;
   background: transparent;
-  color: #a3a3a3;
+  color: var(--muted);
   font:
-    700 0.62rem/1 Arial,
+    700 var(--text-12) / 1 Arial,
     Helvetica,
     sans-serif;
   cursor: help;
 }
+.ps-info::before {
+  content: "";
+  position: absolute;
+  inset: -12px;
+}
 .ps-label:hover .ps-info,
 .ps-info:focus-visible {
-  border-color: #fff;
-  color: #fff;
+  border-color: var(--acid);
+  color: var(--acid);
 }
 /* Beside the label so it never hides the field above; above it on phones. */
 .ps-tip {
   position: absolute;
-  left: calc(100% + 10px);
+  left: calc(100% + var(--space-3));
   top: 50%;
   translate: 0 -50%;
   z-index: 3;
   width: max-content;
-  max-width: min(290px, 74vw);
-  padding: 10px 12px;
-  border: 1px solid #3a3a3a;
-  border-radius: 12px;
-  background: #1a1a1a;
-  box-shadow: 0 16px 40px #000c;
-  color: #d6d6d6;
-  font-size: 0.74rem;
+  max-width: min(18rem, 74vw);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-inner);
+  background: var(--raised);
+  color: var(--text);
+  font-size: var(--text-12);
   font-weight: 400;
   line-height: 1.5;
   opacity: 0;
@@ -1028,43 +1008,35 @@ body.account-page:has(#signed-out:not([hidden])) [data-header-guest] {
   visibility: visible;
   transform: none;
 }
-@media (max-width: 560px) {
+@media (max-width: 599px) {
   .ps-tip {
     left: 0;
     top: auto;
-    bottom: calc(100% + 10px);
+    bottom: calc(100% + var(--space-3));
     translate: none;
   }
 }
 .ps-count {
-  color: #909090;
-  font-size: 0.68rem;
+  color: var(--muted);
+  font-size: var(--text-12);
   font-variant-numeric: tabular-nums;
 }
 .profile-setup input:not([type="checkbox"]) {
   width: 100%;
-  min-height: 52px;
-  padding: 13px 15px;
-  border: 1px solid #505050;
-  border-radius: 14px;
-  background: var(--ps-field);
-  color: #f4f8fb;
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-inner);
+  background: var(--bg);
+  color: var(--text);
   font: inherit;
-  font-size: 1rem;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
+  font-size: var(--text-16);
 }
 .profile-setup input::placeholder {
-  color: #838383;
-}
-.profile-setup input:not([type="checkbox"]):focus {
-  outline: none;
-  border-color: var(--ps-acid);
-  box-shadow: 0 0 0 4px #f8f8f81f;
+  color: #8a8a8a;
 }
 .profile-setup input[aria-invalid="true"] {
-  border-color: var(--ps-danger);
+  border-color: var(--warning);
 }
 .ps-handle {
   position: relative;
@@ -1073,215 +1045,181 @@ body.account-page:has(#signed-out:not([hidden])) [data-header-guest] {
 }
 .ps-at {
   position: absolute;
-  left: 15px;
-  color: #9a9a9a;
+  left: var(--space-4);
+  color: var(--muted);
   pointer-events: none;
 }
 .profile-setup .ps-handle input {
-  padding-left: 33px;
-  padding-right: 46px;
+  padding-left: 2rem;
+  padding-right: 2.75rem;
 }
 .ps-handle-icon {
   position: absolute;
-  right: 15px;
+  right: var(--space-4);
   width: 20px;
   height: 20px;
   border-radius: 50%;
 }
 .ps-handle[data-state="checking"] .ps-handle-icon {
-  border: 2px solid #4c4c4c;
-  border-top-color: var(--ps-acid);
+  border: 2px solid var(--control-border);
+  border-top-color: var(--acid);
   animation: ps-spin 0.8s linear infinite;
 }
 .ps-handle[data-state="available"] .ps-handle-icon {
-  background: var(--ps-acid)
+  background: var(--acid)
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23131313' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 4 4L19 6'/%3E%3C/svg%3E")
     center / 12px no-repeat;
 }
 .ps-handle[data-state="taken"] .ps-handle-icon,
 .ps-handle[data-state="invalid"] .ps-handle-icon {
-  background: var(--ps-danger)
+  background: var(--warning)
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23300a10' stroke-width='3.4' stroke-linecap='round'%3E%3Cpath d='M7 7l10 10M17 7 7 17'/%3E%3C/svg%3E")
     center / 11px no-repeat;
 }
 .ps-status,
 .ps-error {
   margin: 0;
-  font-size: 0.75rem;
-  line-height: 1.45;
+  font-size: var(--text-12);
+  line-height: 1.5;
 }
 .ps-status {
-  min-height: 1.1em;
-  color: #a2a2a2;
+  min-height: 1.5em;
+  color: var(--muted);
 }
 .ps-handle[data-state="available"] + .ps-status {
-  color: var(--ps-acid);
+  color: var(--acid);
 }
 .ps-handle[data-state="taken"] + .ps-status,
 .ps-handle[data-state="invalid"] + .ps-status,
 .ps-error {
-  color: var(--ps-danger);
+  color: var(--warning);
 }
+/* The kit's pills: one white button per step. */
 .ps-primary,
 .ps-secondary {
-  min-height: 52px;
-  padding: 0 20px;
-  border-radius: 14px;
+  min-height: 48px;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-pill);
   font: inherit;
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
 }
 .ps-primary {
-  margin-top: 4px;
   border: 0;
-  background: linear-gradient(180deg, #fcfcfc, #f7f7f7);
-  color: #0c0c0c;
-  box-shadow:
-    0 10px 30px #f7f7f733,
-    inset 0 1px 0 #ffffff66;
-  transition:
-    filter 0.2s,
-    box-shadow 0.2s,
-    transform 0.12s;
+  background: var(--primary-gradient);
+  color: var(--on-acid);
+  transition: filter 0.2s;
 }
 .ps-primary:hover:not(:disabled) {
   filter: brightness(0.88);
-  box-shadow: 0 14px 38px #f7f7f752;
-}
-.ps-primary:active:not(:disabled) {
-  transform: translateY(1px);
 }
 .ps-primary:disabled,
 .ps-primary:disabled:hover {
-  background: #1d1d1d;
-  color: #838383;
-  box-shadow: none;
+  background: var(--raised);
+  color: #8a8a8a;
   cursor: not-allowed;
 }
 .ps-secondary {
-  margin-top: 4px;
-  border: 1px solid #4b4b4b;
-  background: #161616;
-  color: #e2e2e2;
+  border: 1px solid var(--control-border);
+  background: var(--raised);
+  color: var(--button-text);
 }
 .ps-secondary:hover {
   border-color: #f3f3f3;
-  background: #212121;
 }
 .ps-actions {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 10px;
+  gap: var(--space-3);
 }
 .ps-claim {
   display: grid;
   justify-items: center;
-  gap: 4px;
-  padding: 24px 18px;
-  border: 1px solid #4a4a4a;
-  border-radius: 22px;
-  background: radial-gradient(circle at 50% 0, #313131, #101010 72%);
+  gap: var(--space-1);
+  padding: var(--space-5) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-inner);
+  background: var(--raised);
   text-align: center;
   overflow-wrap: anywhere;
 }
 .ps-avatar-large {
-  width: 76px;
-  height: 76px;
-  margin-bottom: 8px;
-  font-size: 1.5rem;
-  box-shadow: 0 0 40px #f8f8f833;
+  width: 72px;
+  height: 72px;
+  margin-bottom: var(--space-2);
+  background: var(--panel);
+  font-size: var(--text-24);
 }
 .ps-claim strong {
-  font-size: 1.15rem;
+  font-family: var(--font-number);
+  font-size: var(--text-24);
+  font-weight: 400;
 }
 .ps-claim > span:last-child {
-  color: var(--ps-acid);
-  font-weight: 650;
+  color: var(--muted);
+  font-weight: 700;
 }
-/* The age and terms confirmation on the confirm step. */
+/* The age and terms confirmation (PR #139), with a 44 px tap area. */
 .ps-terms {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 44px 1fr;
   align-items: start;
-  gap: 10px;
-  padding: 12px 14px;
-  border: 1px solid #333;
-  border-radius: 14px;
-  background: var(--ps-field);
-  color: #cfcfcf;
-  font-size: 0.82rem;
-  line-height: 1.45;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3) var(--space-2) 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-inner);
+  background: var(--bg);
+  font-size: var(--text-14);
+  line-height: 1.5;
   cursor: pointer;
 }
 .ps-terms:has(input:checked) {
-  border-color: #6a6a6a;
+  border-color: var(--control-border);
 }
 .ps-terms input {
-  width: 18px;
-  height: 18px;
+  justify-self: center;
+  width: 20px;
+  height: 20px;
   margin: 1px 0 0;
-  accent-color: var(--ps-acid);
+  accent-color: var(--acid);
   cursor: pointer;
 }
-.ps-terms input:focus-visible {
-  outline: 2px solid var(--ps-acid);
-  outline-offset: 2px;
-}
 .ps-terms a {
-  color: var(--ps-acid);
+  color: var(--acid);
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
 }
 .ps-form-error {
   margin: 0;
-  padding: 10px 12px;
+  padding: var(--space-2) var(--space-3);
   border: 1px solid #6b2f3b;
-  border-radius: 12px;
+  border-radius: var(--radius-inner);
   background: #3a1820;
   color: #ffc2c8;
-  font-size: 0.8rem;
+  font-size: var(--text-14);
 }
 .ps-form-error[hidden] {
   display: none;
 }
+/* After "Claim my handle": a short welcome with the living emblem. */
 .ps-done {
-  padding: 26px 0 8px;
+  justify-items: center;
+  padding-top: var(--space-4);
   text-align: center;
   overflow-wrap: anywhere;
 }
-.ps-check {
-  display: grid;
-  justify-self: center;
-  place-items: center;
-  width: 76px;
-  height: 76px;
-  margin-bottom: 6px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #fafafa 0, #f2f2f2 72%);
-  box-shadow:
-    0 0 0 10px #f8f8f81a,
-    0 0 60px #f8f8f855;
-  animation: ps-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1);
-}
-.ps-check svg {
-  width: 34px;
-  height: 34px;
-  fill: none;
-  stroke: #0c0c0c;
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.ps-emblem {
+  width: min(60%, 12rem);
 }
 .ps-done .ps-primary {
   width: 100%;
-  margin-top: 18px;
+  margin-top: var(--space-3);
 }
 .profile-setup :focus-visible {
-  outline: 2px solid var(--ps-acid);
+  outline: 2px solid var(--acid);
   outline-offset: 3px;
 }
-/* Headings take focus only so screen readers hear the new step. */
 .profile-setup h2:focus-visible {
   outline: none;
 }
@@ -1302,42 +1240,33 @@ body.account-page:has(#signed-out:not([hidden])) [data-header-guest] {
     transform: rotate(360deg);
   }
 }
-@keyframes ps-pop {
-  from {
-    opacity: 0;
-    transform: scale(0.6);
-  }
-}
 /* Phones get a bottom sheet. */
-@media (max-width: 560px) {
+@media (max-width: 599px) {
   .profile-setup {
     width: 100%;
     max-width: 100%;
     max-height: 94dvh;
     margin: auto 0 0;
     border-bottom: 0;
-    border-radius: 26px 26px 0 0;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
   }
   .profile-setup[open] {
     animation-name: ps-up;
   }
   .ps-form {
-    padding: 24px 20px 6px;
-  }
-  .ps-form {
-    padding-bottom: calc(22px + env(safe-area-inset-bottom));
+    padding: var(--space-5) max(var(--space-4), env(safe-area-inset-right, 0px))
+      max(var(--space-5), env(safe-area-inset-bottom, 0px))
+      max(var(--space-4), env(safe-area-inset-left, 0px));
   }
 }
 @media (prefers-reduced-motion: reduce) {
   .profile-setup[open],
-  .ps-check,
   .ps-handle-icon {
     animation: none !important;
   }
   .ps-progress > span::after,
   .ps-tip,
-  .ps-primary,
-  .profile-setup input {
+  .ps-primary {
     transition: none;
   }
 }

@@ -37,7 +37,11 @@ function handleProblem(value: string) {
   return null;
 }
 
-const mark = `<svg class="ps-mark" viewBox="0 0 40 40" aria-hidden="true"><ellipse cx="20" cy="20" rx="13" ry="16" transform="rotate(30 20 20)"/><path d="M9 35 31 5"/></svg>`;
+// The landing's logo, at the header's own versioned address when it has one.
+const logo = () =>
+  document
+    .querySelector<HTMLImageElement>(".site-logo img")
+    ?.getAttribute("src") ?? "/assets/landing/yaparena-logo.png";
 
 // Shown when people hover over, tap or focus either label's info button.
 const handleTip =
@@ -45,11 +49,11 @@ const handleTip =
 const label = (id: string, text: string, count: string) =>
   `<div class="ps-label-row"><span class="ps-label"><label for="${id}">${text}</label><button type="button" class="ps-info" aria-label="About ${text.toLowerCase()}s" aria-describedby="${id}-tip">i</button><span class="ps-tip" role="tooltip" id="${id}-tip">${handleTip}</span></span><span class="ps-count" ${count} aria-hidden="true">0/${id === "ps-name" ? 80 : 40}</span></div>`;
 
-const template = `<div class="ps-glow" aria-hidden="true"></div>
-<form class="ps-form" novalidate>
-  <div class="ps-brand">${mark}<span>YAP ARENA</span></div>
+const template = () => `<form class="ps-form" novalidate>
+  <div class="ps-brand"><img class="ps-logo" src="${logo()}" width="575" height="151" alt="YAP Arena"></div>
   <div class="ps-progress" role="progressbar" aria-label="Profile setup" aria-valuemin="1" aria-valuemax="2" aria-valuenow="1" aria-valuetext="Step 1 of 2" data-progress="1"><span></span><span></span></div>
   <section class="ps-step" data-step="details">
+    <h2 class="ps-title" tabindex="-1">Create your profile</h2>
     <div class="ps-preview" aria-hidden="true">
       <span class="ps-avatar" data-ps-avatar>?</span>
       <span class="ps-preview-text"><strong data-ps-preview-name>Username</strong><span data-ps-preview-handle>@handle</span></span>
@@ -67,14 +71,14 @@ const template = `<div class="ps-glow" aria-hidden="true"></div>
     <button class="ps-primary" type="submit" data-ps-continue>Continue</button>
   </section>
   <section class="ps-step" data-step="confirm" hidden>
-    <h2 class="ps-sr" tabindex="-1">Confirm your handle</h2>
+    <h2 class="ps-title" tabindex="-1">Confirm your handle</h2>
     <div class="ps-claim"><span class="ps-avatar ps-avatar-large" data-ps-confirm-avatar></span><strong data-ps-confirm-name></strong><span data-ps-confirm-handle></span></div>
     <label class="ps-terms"><input type="checkbox" name="acceptTerms" data-ps-terms required><span>I'm 18 or older and I accept the <a href="/terms" target="_blank" rel="noopener">Terms of Use</a> and the <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span></label>
     <p class="ps-form-error" role="alert" data-ps-form-error hidden></p>
     <div class="ps-actions"><button class="ps-secondary" type="button" data-ps-back>Edit</button><button class="ps-primary" type="submit" data-ps-claim>Claim my handle</button></div>
   </section>
   <section class="ps-step ps-done" data-step="done" hidden>
-    <span class="ps-check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span>
+    <div class="living-emblem ps-emblem" data-ps-emblem aria-hidden="true"><canvas class="aura"></canvas><img src="/assets/landing/yaparena-emblem.png" width="2048" height="1715" alt=""><canvas class="bloom"></canvas><canvas class="cores"></canvas></div>
     <h2 tabindex="-1" data-ps-done-title>Welcome to the arena</h2>
     <button class="ps-primary" type="button" data-ps-finish>Start exploring</button>
   </section>
@@ -98,7 +102,7 @@ function show() {
   const dialog = document.createElement("dialog");
   dialog.className = "profile-setup";
   dialog.setAttribute("aria-label", "Create your profile");
-  dialog.innerHTML = template;
+  dialog.innerHTML = template();
   const q = <T extends Element>(selector: string) =>
     dialog.querySelector<T>(selector)!;
   const form = q<HTMLFormElement>(".ps-form");
@@ -138,9 +142,25 @@ function show() {
       next === "done" ? "Done" : `Step ${position} of 2`,
     );
     const active = steps.find((section) => section.dataset.step === next)!;
+    if (next === "done") welcome();
     if (next === "details") name.focus();
     else
       active.querySelector<HTMLElement>("h2")!.focus({ preventScroll: true });
+  }
+
+  // The welcome screen's emblem comes alive like the landing's; it rests with
+  // reduced motion, and the still image stays if it cannot load.
+  function welcome() {
+    const stage = q<HTMLElement>("[data-ps-emblem]");
+    const parts = {
+      logo: stage.querySelector<HTMLImageElement>("img")!,
+      cores: stage.querySelector<HTMLCanvasElement>(".cores")!,
+      bloom: stage.querySelector<HTMLCanvasElement>(".bloom")!,
+      aura: stage.querySelector<HTMLCanvasElement>(".aura")!,
+    };
+    void import("./pixel-emblem.js")
+      .then(({ createLivingEmblem }) => createLivingEmblem(stage, parts))
+      .catch(() => {});
   }
 
   function setHandleState(
