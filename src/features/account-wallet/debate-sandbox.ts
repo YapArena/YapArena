@@ -420,8 +420,8 @@ export const COIN_WORKER_LIMITS = Object.freeze({
 export const SETTLEMENT_BATCH = Object.freeze({
   rounds: 20,
   orders: 200,
-  // A batch also stops settling once it has run this long, whatever the
-  // database's speed, leaving the rest for the next tick.
+  // A batch also stops settling once it has held its locks this long,
+  // whatever the database's speed, leaving the rest for the next tick.
   budgetMs: 250,
   // While any live turn window is in its final seconds, when most answers
   // arrive, batches are smaller still.
@@ -476,8 +476,9 @@ export function createCoinDebateSandbox(
       outcomes: Outcome[];
     }
   >();
-  // Measured cost of settling one order, so each batch takes about as many
-  // orders as fit its time budget on this database.
+  // Measured cost of settling one order once a batch holds its locks, so
+  // each batch takes about as many orders as fit its time budget on this
+  // database.
   let perOrderMs = 2;
   const capFor = (budgetMs: number, maximum: number) =>
     Math.max(1, Math.min(maximum, Math.floor(budgetMs / perOrderMs)));
@@ -1630,8 +1631,8 @@ export function createCoinDebateSandbox(
       if (!Number.isInteger(limit) || limit < 1 || limit > 100)
         fail("invalid transition batch", 400);
       const failed: { roundId: string; error: unknown }[] = [];
-      const started = performance.now();
-      let settledOrders = 0;
+      let settledOrders = 0,
+        settlingMs = 0;
       const result = await transaction(
         async (client) => {
           const due = await dueBatch(
@@ -1639,9 +1640,13 @@ export function createCoinDebateSandbox(
             limit,
             context ? { context } : undefined,
           );
+          // The budget bounds how long the batch holds the rows it has just
+          // locked, which submits also need. Time spent waiting for a
+          // connection or for those locks doesn't count against it.
+          const locked = performance.now();
           let completed = 0;
           const deadline =
-            started + (due[0]?.quiet ? batch.quietBudgetMs : batch.budgetMs);
+            locked + (due[0]?.quiet ? batch.quietBudgetMs : batch.budgetMs);
           for (const [position, r] of due.entries()) {
             if (position > 0 && performance.now() > deadline) break;
             await client.query("SAVEPOINT coin_round");
@@ -1663,15 +1668,17 @@ export function createCoinDebateSandbox(
               failed.push({ roundId: r.id, error });
             }
           }
+          settlingMs = performance.now() - locked;
           if (context) await assertCallerSession(client, context);
           return { completed };
         },
         context ? requestLimits : workerLimits,
       );
-      // Keep the next batch's size to what fits its time budget here.
+      // Keep the next batch's size to what fits its time budget here, from
+      // the time spent settling alone: a batch that waited for its locks says
+      // nothing about how fast orders settle.
       if (settledOrders)
-        perOrderMs =
-          (perOrderMs + (performance.now() - started) / settledOrders) / 2;
+        perOrderMs = (perOrderMs + settlingMs / settledOrders) / 2;
       const now = Date.now();
       for (const { roundId, error } of failed) {
         const failures = (setAside.get(roundId)?.failures ?? 0) + 1;
