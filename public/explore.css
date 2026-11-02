@@ -1,0 +1,566 @@
+/* Explore, Topics, topic pages and profiles on the site kit
+   (docs/site-design.md). Loaded after site.css; Live loads it for its topic
+   cards. */
+
+/* ---- Page heads and list tools ------------------------------------------ */
+.page-head {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  padding-top: var(--space-7);
+}
+.page-head .page-lead {
+  margin: 0;
+}
+.list-section {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+}
+.list-tools {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.list-search {
+  display: flex;
+  gap: var(--space-3);
+  max-width: 40rem;
+  margin: 0;
+}
+.list-search .search-pill {
+  flex: 1;
+  min-width: 0;
+}
+.list-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+/* The chips scroll sideways on phones; More stays in reach beside them. */
+.list-filters .chips {
+  position: relative;
+  min-width: 0;
+}
+.more-chip {
+  position: relative;
+  flex: none;
+}
+.more-chip > summary {
+  list-style: none;
+  cursor: pointer;
+}
+.more-chip > summary::-webkit-details-marker {
+  display: none;
+}
+.more-chip > summary svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.2s;
+}
+.more-chip[open] > summary svg {
+  transform: rotate(180deg);
+}
+.chip.is-current {
+  background: var(--acid);
+  border-color: var(--acid);
+  color: var(--on-acid);
+}
+.more-menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + var(--space-2));
+  left: 0;
+  display: grid;
+  min-width: 12rem;
+  padding: var(--space-2);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-inner);
+  background: var(--panel);
+  box-shadow: 0 1rem 2rem rgb(0 0 0 / 0.6);
+}
+.more-menu a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border-radius: 8px;
+  color: var(--button-text);
+  font-size: var(--text-14);
+  font-weight: 700;
+}
+.more-menu a:hover {
+  background: var(--raised);
+  color: var(--acid);
+}
+.more-menu a[aria-current="page"] {
+  background: var(--acid);
+  color: var(--on-acid);
+}
+
+.list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  gap: var(--space-4);
+}
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+
+/* ---- Cards ------------------------------------------------------------------ */
+.vs {
+  font-family: var(--font-display);
+  font-size: var(--text-12);
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.dcard {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--panel);
+  transition: border-color 0.2s;
+}
+.dcard:hover,
+.tcard:hover {
+  border-color: var(--control-border);
+}
+/* The whole card is its title's link, and wears the kit's ring when the link
+   has keyboard focus. */
+.dcard:has(a:focus-visible),
+.tcard:has(a:focus-visible) {
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
+}
+.dcard-title a::after,
+.tcard-title a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-card);
+}
+.dcard-title a:focus-visible,
+.tcard-title a:focus-visible {
+  outline: none;
+}
+.dcard-thumb {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #070707;
+}
+/* Both speakers' panes, under the event's still when there is one. */
+.dcard-panes {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  background: #050505;
+}
+.dcard-pane {
+  display: grid;
+  place-items: center;
+  background: radial-gradient(120% 90% at 50% 30%, #1b1b1b, #0a0a0a);
+}
+.dcard-pane .avatar-initials {
+  border-radius: var(--radius-inner);
+}
+.dcard-still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.dcard-thumb .tag {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  background: rgb(0 0 0 / 0.72);
+}
+.dcard-stamp {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  padding: 2px var(--space-2);
+  border-radius: 8px;
+  background: rgb(0 0 0 / 0.72);
+  font-size: var(--text-12);
+  font-weight: 700;
+}
+.dcard-body {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  min-width: 0;
+  padding: var(--space-4) var(--space-5) var(--space-5);
+}
+.dcard-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-height: 24px;
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.dcard-title,
+.tcard-title {
+  margin: 0;
+  font-family: var(--font-number);
+  font-size: var(--text-24);
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+.dcard-people {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+.dcard-people > span:not(.vs) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.tcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  transition: border-color 0.2s;
+}
+.tcard-kicker {
+  font-family: var(--font-display);
+  font-size: var(--text-12);
+  letter-spacing: 0.06em;
+}
+.tcard-summary {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+.tcard-sides {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  margin: auto 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+  font-size: var(--text-14);
+}
+.tcard-sides > span:last-child {
+  text-align: right;
+}
+
+/* ---- Topic page and profile ----------------------------------------------- */
+.topic-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  align-items: start;
+  gap: var(--space-7);
+  padding-top: var(--space-5);
+}
+.topic-copy,
+.person-id {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  min-width: 0;
+}
+.topic-copy .page-lead {
+  margin: 0;
+}
+.title-serif {
+  overflow-wrap: anywhere;
+}
+.follow-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.follow-button.btn {
+  margin: 0;
+  padding: 0 var(--space-4);
+  border-color: var(--control-border);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--acid);
+}
+.follow-button.btn:hover {
+  border-color: #f3f3f3;
+  background: none;
+}
+.follow-button.btn[aria-pressed="true"] {
+  border-color: var(--acid);
+  background: var(--acid);
+  color: var(--on-acid);
+}
+.follow-row .follow-message {
+  font-size: var(--text-14);
+}
+
+/* Both sides in one card, each with its own queue button. */
+.queue-card {
+  display: grid;
+  gap: var(--space-5);
+}
+.queue-head {
+  display: grid;
+  gap: var(--space-2);
+}
+.queue-head > p {
+  margin: 0;
+}
+.queue-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-24);
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+.queue-help {
+  max-width: 29rem;
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 1.5;
+}
+.queue-sides {
+  display: grid;
+  gap: var(--space-3);
+}
+.queue-vs {
+  justify-self: center;
+}
+.queue-side {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-inner);
+  background: var(--raised);
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+.queue-side > p {
+  margin: 0;
+}
+.queue-side > .side-label {
+  margin-bottom: var(--space-2);
+}
+.side-label {
+  font-family: var(--font-number);
+  font-size: var(--text-24);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.queue-button {
+  width: 100%;
+}
+/* A side you queued for lights up like the queue overlay's accepted card, and
+   its button turns white. */
+.queue-side:has([aria-pressed="true"]) {
+  border-color: var(--acid);
+  box-shadow:
+    0 0 0 1px rgb(248 248 248 / 0.9),
+    0 0 1.5rem rgb(248 248 248 / 0.3);
+}
+.queue-button[aria-pressed="true"] {
+  border-color: transparent;
+  background: var(--primary-gradient);
+  color: var(--on-acid);
+}
+.queue-notes {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 1.5;
+}
+.queue-notes > p {
+  margin: 0;
+}
+/* The signed-out note and the waiting count arrive after the page loads; the
+   line is kept so nothing moves when they do. */
+.queue-notes > [data-queue-waiting] {
+  min-height: 1.5em;
+}
+
+.page-section {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-7);
+}
+.section-head {
+  display: grid;
+  gap: var(--space-2);
+}
+.section-head > * {
+  margin: 0;
+}
+
+.person {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+  padding-top: var(--space-5);
+}
+.person-hero {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-6);
+  min-width: 0;
+}
+.person-hero > .avatar-slot {
+  --avatar-size: 96px;
+}
+.person-hero .avatar-initials {
+  border-radius: var(--radius-inner);
+}
+.person-id {
+  gap: var(--space-2);
+  max-width: 40rem;
+}
+.person-id > p {
+  margin: 0;
+}
+.person-handle {
+  color: var(--muted);
+}
+.person-bio {
+  color: #d7d7d7;
+  font-size: var(--text-20);
+  line-height: 1.5;
+}
+.person-bio.muted {
+  color: var(--muted);
+}
+.person-id .follow-row {
+  margin-top: var(--space-2);
+}
+
+/* Empty lists: the emblem in a state; a quieter one inside a page. */
+.state-emblem {
+  width: 7.5rem;
+  height: auto;
+}
+.state-quiet {
+  padding: var(--space-6) var(--space-5);
+}
+.state-quiet > h3 {
+  font-size: var(--text-20);
+}
+
+@media (max-width: 999px) {
+  .topic-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+}
+@media (min-width: 600px) and (max-width: 999px) {
+  .queue-sides {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+  }
+}
+@media (max-width: 599px) {
+  .page-head {
+    gap: var(--space-2);
+    padding-top: var(--space-5);
+  }
+  .list-section {
+    margin-top: var(--space-5);
+  }
+  .list-tools {
+    gap: var(--space-3);
+  }
+  /* The chips fade at the right edge to show the row scrolls; the end
+     padding lets the last one scroll clear of the fade. */
+  .list-filters .chips {
+    padding-right: var(--space-5);
+    mask-image: linear-gradient(
+      to right,
+      #000 calc(100% - var(--space-5)),
+      transparent
+    );
+  }
+  /* Phones search from the keyboard's own key. */
+  .list-search .btn {
+    display: none;
+  }
+  .more-menu {
+    right: 0;
+    left: auto;
+  }
+  .dcard-body {
+    padding: var(--space-4);
+  }
+  .dcard-title,
+  .tcard-title,
+  .side-label {
+    font-size: var(--text-20);
+  }
+  .topic-hero,
+  .person {
+    padding-top: var(--space-4);
+  }
+  .page-section {
+    margin-top: var(--space-6);
+  }
+  .person-hero {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .person-hero > .avatar-slot {
+    --avatar-size: 72px;
+  }
+  .person-bio {
+    font-size: var(--text-16);
+  }
+}
+@media (pointer: coarse) {
+  .follow-button.btn {
+    min-height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dcard,
+  .tcard,
+  .queue-side,
+  .more-chip > summary svg {
+    transition: none;
+  }
+}

@@ -569,7 +569,7 @@ export async function verifyArenaBrowser({
     await page.locator("#header-search").fill("walkability");
     await page.locator("#header-search").press("Enter");
     await page.waitForURL("**/debates?q=walkability");
-    assert.ok(await page.locator(".debate-card").count());
+    assert.ok(await page.locator(".dcard").count());
     checks.headerSearch = true;
     phase = "replay layout and uninterrupted playback";
     await setReplay();

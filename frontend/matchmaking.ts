@@ -782,8 +782,9 @@ async function loadWaiting() {
       `/api/matchmaking/topics/${encodeURIComponent(panelTopic)}/waiting`,
       { timeout: 8000 },
     );
+    // Each button reads "Queue for this side"; the side's name is its own.
     const labels = [...sideButtons.values()].map(
-      (button) => button.dataset.queueLabel?.replace(/^Queue for /, "") ?? "",
+      (button) => button.dataset.sideLabel ?? "",
     );
     panelWaiting.textContent = waitingText(
       waiting,
@@ -816,7 +817,9 @@ async function initialize() {
   }
   if (current !== generation) return;
   if (!member) {
-    if (panelWaiting) panelWaiting.textContent = "Sign in to queue on a side.";
+    if (panelWaiting)
+      panelWaiting.textContent =
+        "You'll sign in first. It takes a few seconds.";
     return render();
   }
   try {

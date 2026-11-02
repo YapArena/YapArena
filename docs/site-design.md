@@ -62,6 +62,32 @@ All in `public/site.css`, under "The site kit":
 
 Every animation stops with reduced motion. Focus rings are 2 px `#f8f8f8` at a 3 px offset.
 
+## List pages and cards
+
+Explore (`/debates`), Topics, topic pages and profiles use the kit through
+`src/features/discovery/kit-web.ts` (`inscription()`, avatar slots, the search icon) and
+`src/features/discovery/cards-web.ts`, with their layout in `public/explore.css`. Live loads the
+same stylesheet for its topic cards.
+
+- **Page head**: a kicker, the `.page-title` with its emphasised words in `--visit-1`, and a lead.
+- **Search**: a pill field with a Search button; phones search from the keyboard's key.
+- **Status filters** on Explore: All, Live, Upcoming and Replay as chips, then More (a
+  `<details data-menu>` that closes on Escape or a click outside) with Ready, Ended, Under review,
+  Finalized and Cancelled; More shows the status in use. URLs are unchanged.
+- **Debate card** `.dcard`: a 16:9 picture with both speakers' initials in 48 px slots on two
+  panes, under the recording's still for replays and finalized debates (the media router serves
+  no still for others; `frontend/site.ts` hides one that fails), the status tag and a stamp; then
+  the topic, the proposition in Forum and both speakers in 24 px slots.
+- **Topic card** `.tcard`: the title in Forum, the summary on three lines at most, the two sides on
+  one line.
+- Both cards are links as a whole, with the focus ring on the card.
+- **Topic page**: the title in Forum beside one card holding both sides (under it below 1000 px).
+  With the queue on, each side has a "Queue for this side" button described by the side's name;
+  a side you queued for lights up and its button turns white.
+- **Profile**: the initials in a 96 px slot (72 on phones) beside the name, @handle, bio and Follow.
+- **Empty lists** show the emblem, today's words and Clear search; inside a topic or profile, a
+  quieter note without the emblem.
+
 ## Header
 
 `src/features/discovery/site-header-web.ts`, `public/site-header.css`, `frontend/site-header.ts`.
