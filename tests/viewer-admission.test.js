@@ -210,10 +210,49 @@ it("rejects tampered/expired/malformed guard values and renews them without auth
 it("bounds active identities/networks and reclaims expired buckets", () => {
   const f = fixture({ maxViewers: 2, maxNetworks: 1 });
   const first = f.call();
-  assert.equal(f.call().status, 503);
+  // The browser and room buckets are full: a new lease is still served,
+  // counted against its network and the process only.
+  const untracked = f.call();
+  assert.equal(untracked.next, true);
+  assert.ok(untracked.cookie);
+  assert.equal(f.call({ cookie: untracked.cookie }).next, true);
   assert.equal(f.call({ cookie: first.cookie, ip: "127.0.0.2" }).status, 503);
   assert.equal(f.call({ cookie: first.cookie }).next, true);
   f.advance(60000);
+  assert.equal(f.call({ ip: "127.0.0.2" }).next, true);
+  assert.deepEqual(f.refusals, ["capacity"]);
+});
+it("keeps serving new visitors while other networks churn leases", () => {
+  const f = fixture();
+  const existing = f.call({ url: "/about", ip: "198.51.100.10" });
+  // Three networks discard every cookie: each mints its own 2,000 leases
+  // and is then refused, and the counter buckets fill up.
+  for (const ip of ["203.0.113.1", "203.0.113.2", "203.0.113.3"]) {
+    for (let i = 0; i < 2000; i++)
+      assert.equal(f.call({ url: "/about", ip }).next, true);
+    assert.equal(f.call({ url: "/about", ip }).status, 429);
+  }
+  const visitor = f.call({ url: "/about", ip: "192.0.2.77" });
+  assert.equal(visitor.next, true);
+  assert.ok(visitor.cookie);
+  for (const url of ["/", "/assets/site.css", "/debates"])
+    assert.equal(
+      f.call({ url, ip: "192.0.2.77", cookie: visitor.cookie }).next,
+      true,
+    );
+  assert.equal(
+    f.call({ url: "/about", ip: "198.51.100.10", cookie: existing.cookie })
+      .next,
+    true,
+  );
+  assert.deepEqual(f.refusals, ["network", "network", "network"]);
+});
+it("keeps network budgets for requests served without per-lease counters", () => {
+  const f = fixture({ maxViewers: 0 });
+  const { cookie } = f.call();
+  for (let i = 1; i < 45000; i++) assert.equal(f.call({ cookie }).next, true);
+  assert.equal(f.call({ cookie }).status, 429);
+  assert.equal(f.refusals.at(-1), "network");
   assert.equal(f.call({ ip: "127.0.0.2" }).next, true);
 });
 it("bounds anonymous lease churn on one network", () => {

@@ -44,6 +44,10 @@ export function validBindingValue(value: unknown): value is string {
 
 // Same-origin relative paths only (point 3). API routes are never a return
 // target, so a sign-in cannot bounce into another sign-in or an action.
+// The checks run on the parsed result too: parsing removes "." and ".."
+// segments, so "/.//host" becomes "//host", which a browser reads as another
+// site; routing ignores case, so "/API/..." is an API route; and percent-
+// encoding can lengthen the path past the stored limit.
 export function safeReturnPath(value: unknown, origin: string): string | null {
   if (
     typeof value !== "string" ||
@@ -63,15 +67,19 @@ export function safeReturnPath(value: unknown, origin: string): string | null {
   } catch {
     return null;
   }
+  const path = target.pathname + target.search + target.hash;
+  const lowerPath = target.pathname.toLowerCase();
   if (
     target.origin !== new URL(origin).origin ||
     target.username ||
     target.password ||
-    target.pathname === "/api" ||
-    target.pathname.startsWith("/api/")
+    path.startsWith("//") ||
+    path.length > 2048 ||
+    lowerPath === "/api" ||
+    lowerPath.startsWith("/api/")
   )
     return null;
-  return target.pathname + target.search + target.hash;
+  return path;
 }
 
 export function createSignInState(database: Pool) {

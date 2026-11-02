@@ -4,6 +4,7 @@ import { before, after, describe, it } from "node:test";
 import pg from "pg";
 import {
   RESULTS_CHANNEL,
+  SETTLEMENT_BATCH,
   createCoinDebateSandbox,
   COIN_DEBATE_FACE,
   COIN_DEBATE_TERMS,
@@ -36,12 +37,15 @@ import {
 } from "./helpers/confirmations.js";
 // Behaviour cases hold locks on purpose, sometimes for seconds, while other
 // PostgreSQL suites run in parallel; they relax the sandbox's lock and
-// statement timeouts. Dedicated cases check the real limits.
+// statement timeouts, and the settlement batch's time budget, so a busy
+// runner can't leave part of a small round for a later batch. Dedicated
+// cases check the real limits and budget.
 const relaxed = {
   limits: {
     request: { lockTimeoutMs: 60_000, statementTimeoutMs: 120_000 },
     worker: { lockTimeoutMs: 60_000, statementTimeoutMs: 120_000 },
   },
+  settlement: { budgetMs: 10_000, quietBudgetMs: 10_000 },
 };
 const ownerUrl = process.env.A4_TEST_OWNER_URL,
   runtimeUrl = process.env.A4_TEST_DATABASE_URL;
@@ -1740,6 +1744,63 @@ describe(
         broken.id,
         "operator_cancelled",
       );
+      await reconcile();
+    });
+    // The batch budget bounds how long settlement holds its locks, not how
+    // long it waited for them: a batch that waited past its budget still
+    // settles a small round whole, and the wait doesn't shrink later batches.
+    it("settles a small round in one batch after waiting past the batch budget for its locks, and keeps full batches after", async () => {
+      // The real budget (quiet mode too, which other suites' live windows can
+      // switch on), with this file's relaxed lock timeouts.
+      const budgetMs = SETTLEMENT_BATCH.budgetMs,
+        worker = createCoinDebateSandbox(runtime, "simulation", {
+          limits: relaxed.limits,
+          settlement: { quietBudgetMs: budgetMs },
+        });
+      const one = await actor(),
+        two = await actor();
+      for (const context of [one, two]) await sandbox.initialize(context);
+      for (const purpose of ["center", "promotional"])
+        await seed(one, purpose, "1000000");
+      const twoOrders = async () => {
+        const round = await worker.create(one, await debate(), randomUUID());
+        await worker.submit(one, round.id, randomUUID(), {
+          side: "YES",
+          limit: "0.6",
+          quantity: 10,
+        });
+        await worker.submit(two, round.id, randomUUID(), {
+          side: "NO",
+          limit: "0.6",
+          quantity: 10,
+        });
+        await close(round.id);
+        return round;
+      };
+      const first = await twoOrders();
+      // Another transaction holds a participant's account for four budgets
+      // while the batch waits for it.
+      const gate = await owner.connect();
+      let advancing;
+      try {
+        await gate.query("BEGIN");
+        await gate.query("SELECT id FROM users WHERE id=$1 FOR UPDATE", [
+          one.userId,
+        ]);
+        advancing = worker.advance();
+        advancing.catch(() => {});
+        await new Promise((resolve) => setTimeout(resolve, 4 * budgetMs));
+      } finally {
+        await gate.query("ROLLBACK");
+        gate.release();
+      }
+      await advancing;
+      assert.equal(await roundState(first.id), "settled");
+      // The next small round settles in one batch too: the wait wasn't
+      // counted as the cost of settling an order.
+      const second = await twoOrders();
+      await worker.advance();
+      assert.equal(await roundState(second.id), "settled");
       await reconcile();
     });
     // PR 2 (audit item 6): reads take no account, round or ledger lock.

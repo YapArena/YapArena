@@ -145,8 +145,13 @@ describe("exact platform-currency presentation", () => {
       "/\\evil.example",
       "/account?next=/account",
       "/\n/evil.example",
+      // Parsing turns these into "//evil.example", another site.
+      "/.//evil.example",
+      "/%2e//evil.example",
+      "/a/..//evil.example",
     ])
       assert.equal(safeAuthReturn(path, origin), null);
+    assert.equal(safeAuthReturn("/./debates/test", origin), "/debates/test");
   });
   it("keeps only expiring local confirmation intent and public action locators", () => {
     const origin = "https://arena.example",

@@ -20,12 +20,15 @@ import { attachSubject, openSandbox } from "./confirmations.js";
 // voiding stay scoped to this file's own debates.
 // Behaviour cases hold locks on purpose, sometimes for seconds, while other
 // PostgreSQL suites run in parallel; they relax the sandbox's lock and
-// statement timeouts. Dedicated cases check the real limits.
+// statement timeouts, and the settlement batch's time budget, so a busy
+// runner can't leave part of a small round for a later batch. Dedicated
+// cases check the real limits and budget.
 const relaxed = {
   limits: {
     request: { lockTimeoutMs: 60_000, statementTimeoutMs: 120_000 },
     worker: { lockTimeoutMs: 60_000, statementTimeoutMs: 120_000 },
   },
+  settlement: { budgetMs: 10_000, quietBudgetMs: 10_000 },
 };
 const ownerUrl = process.env.A4_TEST_OWNER_URL,
   runtimeUrl = process.env.A4_TEST_DATABASE_URL;

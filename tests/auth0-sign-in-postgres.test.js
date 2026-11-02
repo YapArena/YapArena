@@ -251,14 +251,20 @@ describe(
       await request(context.app)
         .get("/api/auth/login?connection=github")
         .expect(400);
-      for (const unsafe of [
+      const unsafePaths = [
         "//evil.example/path",
         "https://evil.example/",
         "/\\evil.example",
         "/api/auth/logout",
         "javascript:alert(1)",
         "/%0d%0aSet-Cookie:x=y",
-      ]) {
+        // Parsing turns these into "//evil.example", another site.
+        "/.//evil.example/phish",
+        "/%2e//evil.example",
+        "/a/..//evil.example",
+        "/API/auth/logout",
+      ];
+      for (const unsafe of unsafePaths) {
         const { callback } = await signIn(context, emailIdentity(), {
           query: `connection=email&return=${encodeURIComponent(unsafe)}`,
         });
@@ -269,6 +275,16 @@ describe(
           `${unsafe} -> ${target}`,
         );
         assert.equal(new URL(target, origin).origin, origin);
+        assert.doesNotMatch(callback.text, /url=\/\//);
+      }
+      // A signed-in visitor is redirected at once, so the same paths must
+      // never produce a Location on another site.
+      const { agent } = await signIn(context, emailIdentity());
+      for (const unsafe of unsafePaths.slice(-4)) {
+        const response = await agent
+          .get(`/api/auth/login?return=${encodeURIComponent(unsafe)}`)
+          .expect(303);
+        assert.equal(response.headers.location, "/home", unsafe);
       }
     });
 
