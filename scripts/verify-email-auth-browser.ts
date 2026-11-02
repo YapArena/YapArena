@@ -138,7 +138,7 @@ try {
       await page.evaluate(() => {
         const visible = [
           ...document.querySelectorAll<HTMLElement>(
-            ".site-header .brand > *, [data-header-guest] a",
+            ".site-header .site-logo > *, [data-header-guest] a",
           ),
         ]
           .map((node) => node.getBoundingClientRect())
