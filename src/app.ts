@@ -116,7 +116,12 @@ export const handleError: ErrorRequestHandler = (
   request.log.error({ error }, "unhandled request error");
 
   if (wantsPage(request)) {
-    return response.status(500).type("html").send(renderUnavailable());
+    return response
+      .status(500)
+      .type("html")
+      .send(
+        renderUnavailable(request.method === "GET" ? request.originalUrl : "/"),
+      );
   }
 
   return response.status(500).json({

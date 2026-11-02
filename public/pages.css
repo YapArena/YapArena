@@ -1,0 +1,337 @@
+/* Create (/match), About and the 404, 400 and 503 pages on the site kit
+   (docs/site-design.md). Loaded after site.css. */
+
+/* ---- Errors: the landing's composition ---------------------------------- */
+.error-page {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: center;
+  gap: var(--space-6);
+  min-height: calc(100svh - 14rem);
+  padding-block: var(--space-6);
+}
+.error-copy {
+  display: grid;
+  grid-column: 1 / span 7;
+  gap: var(--space-4);
+  justify-items: start;
+  min-width: 0;
+}
+.error-copy > * {
+  margin: 0;
+}
+.error-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-5);
+  margin-top: var(--space-2);
+}
+.error-home,
+.match-card .text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 44px;
+  font-size: var(--text-14);
+}
+.error-emblem {
+  display: grid;
+  grid-column: 8 / span 5;
+  place-items: center;
+}
+.error-emblem .living-emblem {
+  width: min(100%, 24rem);
+}
+
+/* ---- About ------------------------------------------------------------- */
+.about-page {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  align-items: start;
+  gap: var(--space-7);
+  padding-bottom: var(--space-8);
+}
+.about-main {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
+}
+.about-copy {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+}
+.about-copy > * {
+  margin: 0;
+}
+.about-copy .section-title {
+  margin-top: var(--space-4);
+  scroll-margin-top: var(--space-5);
+}
+.about-copy p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+.about-copy a:not(.btn) {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.about-copy .btn {
+  margin-top: var(--space-2);
+}
+.about-emblem {
+  position: sticky;
+  top: var(--space-6);
+  display: grid;
+  place-items: center;
+  padding-top: var(--space-7);
+}
+.about-emblem .living-emblem {
+  width: min(100%, 24rem);
+}
+
+/* ---- Create (/match) --------------------------------------------------- */
+.match-page {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+  padding-bottom: var(--space-8);
+}
+.match-notice {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+.match-notice[hidden],
+.match-page [hidden] {
+  display: none;
+}
+.match-signin {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+  max-width: 36rem;
+}
+.match-signin p {
+  margin: 0;
+}
+/* The forms on the left, your lists in a column beside them from 1000 px. */
+.match-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22rem;
+  align-items: start;
+  gap: var(--space-6);
+}
+.match-main,
+.match-side {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+/* Start a topic | Challenge a person: a tab pair. */
+.match-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.match-tab {
+  min-height: 44px;
+  padding: 0 var(--space-5);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--button-text);
+  font-size: var(--text-14);
+  font-weight: 700;
+}
+.match-tab:hover {
+  border-color: #f3f3f3;
+}
+.match-tab[aria-selected="true"] {
+  border-color: var(--acid);
+  background: var(--acid);
+  color: var(--on-acid);
+}
+.match-panel {
+  display: grid;
+  gap: var(--space-5);
+}
+.match-panel-title,
+.match-card-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-20);
+  font-weight: 400;
+  line-height: 1.3;
+}
+.match-page .stack-form {
+  gap: var(--space-4);
+  max-width: 36rem;
+}
+.match-page .stack-form label {
+  gap: var(--space-2);
+  font-size: var(--text-14);
+}
+.match-page .stack-form input:not([type="radio"]),
+.match-page .stack-form textarea,
+.match-page .stack-form select {
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-inner);
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+}
+.match-page .stack-form textarea {
+  min-height: 112px;
+  padding-block: var(--space-3);
+  line-height: 1.5;
+}
+.match-page .stack-form .btn {
+  justify-self: start;
+}
+.match-page .form-note {
+  max-width: 29rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 1.5;
+}
+/* Now / Propose times: a two-option switch made of the radios. */
+.match-switch {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.match-switch-options {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--panel);
+}
+.match-switch legend {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-14);
+  font-weight: 700;
+}
+.stack-form .match-switch label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  color: var(--muted);
+  font-weight: 700;
+  cursor: pointer;
+}
+.stack-form .match-switch input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.stack-form .match-switch label:has(input:checked) {
+  background: var(--raised);
+  color: var(--acid);
+}
+.stack-form .match-switch label:has(input:focus-visible) {
+  outline: 2px solid var(--acid);
+  outline-offset: 2px;
+}
+.match-card {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+.match-card > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 1.5;
+}
+.match-page .account-list {
+  width: 100%;
+  margin: 0;
+}
+.match-page .account-list li {
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) 0;
+  font-size: var(--text-14);
+}
+.match-page .account-list li > a:first-child {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.match-page .account-list .match-empty,
+.match-page .account-list .match-error {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-1);
+  border-bottom: 0;
+  color: var(--text);
+}
+.match-page .account-list .form-note {
+  display: block;
+}
+.match-page .small-button {
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: var(--raised);
+  color: var(--button-text);
+  font-size: var(--text-14);
+  font-weight: 700;
+}
+.match-page .small-button:hover {
+  border-color: #f3f3f3;
+}
+
+@media (max-width: 999px) {
+  .about-page,
+  .match-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .about-emblem {
+    display: none;
+  }
+}
+@media (max-width: 899px) and (min-height: 500px) {
+  /* Upright: the emblem above the words. */
+  .error-page {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    min-height: 0;
+  }
+  .error-copy,
+  .error-emblem {
+    grid-column: 1;
+  }
+  .error-emblem {
+    grid-row: 1;
+  }
+  .error-emblem .living-emblem {
+    width: min(58vw, 16rem);
+  }
+}
+@media (pointer: coarse) {
+  .match-page .small-button,
+  .stack-form .match-switch label {
+    min-height: 44px;
+  }
+}

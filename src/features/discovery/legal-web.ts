@@ -1,13 +1,13 @@
-import { asset } from "./assets.ts";
-import { inscribe } from "./landing-web.ts";
-import { iconLinks, shareMetadata } from "./page-chrome-web.ts";
+import { inscription } from "./kit-web.ts";
+import { shareMetadata } from "./page-chrome-web.ts";
+import { layout } from "./web.ts";
 import { html, type SafeHtml } from "../../platform/html.ts";
 import { MINIMUM_AGE, TERMS_VERSION } from "../identity/terms.ts";
 
-// /privacy and /terms (production runbook step 9.1). Both follow the landing
-// page's theme: they load landing.css for its tokens, fonts, header, footer and
-// reveal, then legal.css for the long-form layout. Draft text for the founder
-// and counsel to approve; it is not legal advice.
+// /privacy, /terms and /cookies (production runbook step 9.1), with the site's
+// own header and footer like every other page (docs/site-design.md) and
+// legal.css for the long-form layout. Draft text for the founder and counsel
+// to approve; it is not legal advice.
 
 /** Text only the founder can supply or decide, visible until it is filled. */
 const todo = (text: string) => html`<mark class="legal-todo">[${text}]</mark>`;
@@ -50,13 +50,17 @@ const pageLinks = [
 function render(origin: string, page: LegalPage) {
   const current = (href: string) =>
     href === page.path ? html` aria-current="page"` : "";
-  const footer = [
-    ["/topics", "Topics"],
-    ["/coins", "Yap Coins"],
-    ["/about", "About"],
-    ...pageLinks,
-  ] as const;
-  return html`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#000000"><title>${page.title} · YAP Arena</title><meta name="description" content="${page.description}"><link rel="canonical" href="${origin}${page.path}">${iconLinks()}${shareMetadata({ origin, title: `${page.title} · YAP Arena`, description: page.description, url: `${origin}${page.path}` })}<link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="${asset("landing.css")}"><link rel="stylesheet" href="${asset("legal.css")}"></head><body class="landing legal"><a class="skip-link" href="#main">Skip to content</a><header class="landing-header landing-container legal-header"><a class="landing-brand" href="/"><img src="${asset("landing/yaparena-logo.png")}" width="575" height="151" alt="YAP Arena"></a><nav class="legal-switch" aria-label="Legal">${pageLinks.map(([href, text]) => html`<a href="${href}"${current(href)}>${text}</a>`)}</nav></header><main id="main" class="legal-main landing-container"><header class="legal-hero"><p class="legal-eyebrow reveal">YAP ARENA · LEGAL</p><h1 class="legal-title reveal reveal-2"><span class="sr-only">${page.title}</span><span aria-hidden="true">${inscribe(page.title)}</span></h1><p class="legal-lede reveal reveal-3">${page.lede}</p><dl class="legal-meta reveal reveal-4"><div><dt>Updated</dt><dd>${updated}</dd></div><div><dt>Version</dt><dd>${TERMS_VERSION}</dd></div></dl><ul class="legal-glance reveal reveal-5">${page.glance.map(([title, text]) => html`<li><strong>${title}</strong><span>${text}</span></li>`)}</ul></header><div class="legal-layout"><nav class="legal-toc" aria-labelledby="legal-toc-title"><h2 id="legal-toc-title">ON THIS PAGE</h2><ol>${page.sections.map((section) => html`<li><a href="#${section.id}">${section.title}</a></li>`)}</ol></nav><article class="legal-body">${page.sections.map((section) => html`<section id="${section.id}" aria-labelledby="${section.id}-title"><h2 id="${section.id}-title">${section.title}</h2>${section.body}</section>`)}<a class="legal-top" href="#main">Back to top <span aria-hidden="true">↑</span></a></article></div></main><footer class="landing-footer landing-container"><nav aria-label="Site">${footer.map(([href, text]) => html`<a href="${href}"${current(href)}>${text}</a>`)}<span>Play money</span></nav></footer></body></html>`.toString();
+  const content = html`<div class="container legal-main"><nav class="legal-switch chips" aria-label="Legal">${pageLinks.map(([href, text]) => html`<a class="chip" href="${href}"${current(href)}>${text}</a>`)}</nav><header class="legal-hero kit-reveal"><p class="kicker legal-eyebrow">${inscription("YAP Arena · Legal")}</p><h1 class="page-title legal-title">${inscription(page.title)}</h1><p class="legal-lede">${page.lede}</p><dl class="legal-meta"><div><dt>Updated</dt><dd>${updated}</dd></div><div><dt>Version</dt><dd>${TERMS_VERSION}</dd></div></dl><ul class="legal-glance">${page.glance.map(([title, text]) => html`<li><strong>${title}</strong><span>${text}</span></li>`)}</ul></header><div class="legal-layout"><nav class="legal-toc" aria-labelledby="legal-toc-title"><h2 id="legal-toc-title">${inscription("On this page")}</h2><ol>${page.sections.map((section) => html`<li><a href="#${section.id}">${section.title}</a></li>`)}</ol></nav><article class="legal-body">${page.sections.map((section) => html`<section id="${section.id}" aria-labelledby="${section.id}-title"><h2 id="${section.id}-title">${section.title}</h2>${section.body}</section>`)}<a class="legal-top" href="#main">Back to top <span aria-hidden="true">↑</span></a></article></div></div>`;
+  return layout(
+    page.title,
+    page.description,
+    `${origin}${page.path}`,
+    content,
+    html`${shareMetadata({ origin, title: `${page.title} · YAP Arena`, description: page.description, url: `${origin}${page.path}` })}<link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>`,
+    "legal-page",
+    false,
+    ["legal.css"],
+  );
 }
 
 // ---------------------------------------------------------------------------

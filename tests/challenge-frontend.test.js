@@ -99,7 +99,7 @@ describe("challenge screens", () => {
     });
     assert.equal(
       requestSummary(request(), challenger, now, format),
-      "To @riley · Canada should expand nuclear power · you argue For · waiting for an answer · expires <12:00>",
+      "To @riley · Canada should expand nuclear power · You argue For · Waiting for an answer · expires <12:00>",
     );
     assert.equal(
       requestSummary(
@@ -108,7 +108,7 @@ describe("challenge screens", () => {
         now,
         format,
       ),
-      "From @alex · Canada should expand nuclear power · you argue Against · waiting for an answer · now · answering · expires <12:00>",
+      "From @alex · Canada should expand nuclear power · You argue Against · Waiting for an answer · now · answering · expires <12:00>",
     );
     assert.match(
       requestSummary(
@@ -126,7 +126,7 @@ describe("challenge screens", () => {
         now,
         format,
       ),
-      "From @alex · Canada should expand nuclear power · you argue Against · booked · <15:00>",
+      "From @alex · Canada should expand nuclear power · You argue Against · Booked · <15:00>",
     );
     assert.equal(
       requestSummary(
@@ -135,7 +135,7 @@ describe("challenge screens", () => {
         now,
         format,
       ),
-      "From @alex · Canada should expand nuclear power · you argue Against · cancelled: a speaker didn't join",
+      "From @alex · Canada should expand nuclear power · You argue Against · Cancelled: a speaker didn't join",
     );
     assert.match(
       requestSummary(
@@ -144,7 +144,7 @@ describe("challenge screens", () => {
         now,
         format,
       ),
-      /live now$/,
+      /Live now$/,
     );
     assert.match(
       requestSummary(
@@ -153,7 +153,7 @@ describe("challenge screens", () => {
         now,
         format,
       ),
-      /debated$/,
+      /Debated$/,
     );
     assert.equal(
       requestSummary(
@@ -162,7 +162,7 @@ describe("challenge screens", () => {
         now,
         format,
       ),
-      "To a player · Canada should expand nuclear power · you argue For · closed: a speaker was booked at that time",
+      "To a player · Canada should expand nuclear power · You argue For · Closed: a speaker was booked at that time",
     );
     assert.equal(
       requestSummary(
@@ -171,7 +171,7 @@ describe("challenge screens", () => {
         now,
         format,
       ),
-      "Queue: Canada should expand nuclear power · you argue For · waiting for an answer · <15:00>",
+      "Queue: Canada should expand nuclear power · You argue For · Waiting for an answer · <15:00>",
     );
   });
 
