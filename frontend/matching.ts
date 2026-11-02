@@ -103,6 +103,14 @@ function action(
   });
   item.append(button);
 }
+// What each empty list will hold, under "Nothing here yet.".
+const emptyHints: Readonly<Record<string, string>> = {
+  "#my-requests": "Challenges you send or receive appear here.",
+  "#my-events":
+    "Agreed debates appear here, with a link to check your camera and join.",
+  "#match-notifications":
+    "News about your challenges and debates appears here.",
+};
 function fill<T>(
   selector: string,
   entries: T[],
@@ -110,9 +118,41 @@ function fill<T>(
 ) {
   const list = document.querySelector<HTMLElement>(selector)!;
   list.replaceChildren();
-  if (!entries.length) list.append(row("Nothing here yet."));
+  if (!entries.length) {
+    const item = row("Nothing here yet.");
+    item.classList.add("match-empty");
+    const hint = emptyHints[selector];
+    if (hint) {
+      const note = document.createElement("span");
+      note.className = "form-note";
+      note.textContent = hint;
+      item.append(note);
+    }
+    list.append(item);
+  }
   for (const entry of entries) list.append(render(entry));
 }
+const listSelectors = [
+  "#my-topics",
+  "#my-requests",
+  "#open-queue",
+  "#my-events",
+  "#match-notifications",
+];
+// When the lists can't load, each says so and offers to try again.
+function showListError() {
+  for (const selector of listSelectors) {
+    const list = document.querySelector<HTMLElement>(selector);
+    if (!list) continue;
+    const item = row("Could not load this list.");
+    item.classList.add("match-error");
+    // action() reloads the lists once its handler finishes.
+    action(item, "Try again", async () => {});
+    list.replaceChildren(item);
+  }
+}
+const capitalized = (text: string) =>
+  text.charAt(0).toUpperCase() + text.slice(1);
 function date(value: string | null) {
   return value ? formatTime(value) : "now";
 }
@@ -296,7 +336,9 @@ function refreshLater() {
   window.clearTimeout(refreshTimer);
   refreshTimer = window.setTimeout(() => {
     refresh().catch((error: unknown) => {
-      if (!(error instanceof StaleAccountResponse)) sayError(error);
+      if (error instanceof StaleAccountResponse) return;
+      sayError(error);
+      showListError();
     });
   }, 300);
 }
@@ -320,7 +362,7 @@ async function refresh() {
   if (epoch !== accountEpoch || !currentUser) return;
   fill("#my-topics", topics.topics, (topic) => {
     const item = row(
-      `${topic.title} · ${topic.publicationState}`,
+      `${topic.title} · ${capitalized(topic.publicationState)}`,
       topic.publicationState === "published"
         ? `/topics/${encodeURIComponent(topic.slug)}`
         : null,
@@ -366,13 +408,17 @@ async function refresh() {
     );
   fill("#my-events", events.events, (event) => {
     const item = row(
-      `${event.proposition} · ${event.status} · ${date(event.scheduledAt)}`,
+      `${event.proposition} · ${capitalized(event.status)} · ${date(event.scheduledAt)}`,
       `/debates/${encodeURIComponent(event.slug)}`,
     );
-    if (event.status === "scheduled" || event.status === "ready")
-      item.append(
-        document.createTextNode(" · Open event to check camera and join"),
-      );
+    // The event page checks the camera and joins.
+    if (event.status === "scheduled" || event.status === "ready") {
+      const open = document.createElement("a");
+      open.className = "btn btn-secondary btn-sm";
+      open.href = `/debates/${encodeURIComponent(event.slug)}`;
+      open.textContent = "Open event";
+      item.append(open);
+    }
     return item;
   });
   fill("#match-notifications", notifications.notifications, (entry) => {
@@ -540,6 +586,40 @@ requestForm.addEventListener("submit", async (event) => {
   }
 });
 
+// Start a topic and the other form are a tab pair (WAI tabs): click or the
+// arrow keys, Home and End.
+const tabs = [
+  ...document.querySelectorAll<HTMLButtonElement>(".match-tabs [role=tab]"),
+];
+function selectTab(tab: HTMLButtonElement, focus = false) {
+  for (const each of tabs) {
+    const selected = each === tab;
+    each.setAttribute("aria-selected", String(selected));
+    each.tabIndex = selected ? 0 : -1;
+    document.getElementById(each.getAttribute("aria-controls")!)!.hidden =
+      !selected;
+  }
+  if (focus) tab.focus();
+}
+tabs.forEach((tab, index) => {
+  tab.addEventListener("click", () => selectTab(tab));
+  tab.addEventListener("keydown", (event) => {
+    const next =
+      event.key === "ArrowRight" || event.key === "ArrowDown"
+        ? index + 1
+        : event.key === "ArrowLeft" || event.key === "ArrowUp"
+          ? index - 1
+          : event.key === "Home"
+            ? 0
+            : event.key === "End"
+              ? tabs.length - 1
+              : null;
+    if (next === null) return;
+    event.preventDefault();
+    selectTab(tabs[(next + tabs.length) % tabs.length]!, true);
+  });
+});
+
 async function initialize() {
   const epoch = ++accountEpoch;
   currentUser = null;
@@ -553,6 +633,7 @@ async function initialize() {
     "match-notifications",
   ])
     document.querySelector<HTMLElement>(`#${id}`)?.replaceChildren();
+  notice.hidden = false;
   say("Checking your account…");
   try {
     const user = (await api<{ user: { id: string } }>("/api/auth/me")).user;
@@ -569,8 +650,13 @@ async function initialize() {
     document.querySelector<HTMLElement>("#match-signed-in")!.hidden = true;
     if ((error as Error).message === "authentication required") {
       document.querySelector<HTMLElement>("#match-signed-out")!.hidden = false;
-      say("Sign in to create topics and arrange debates.");
-    } else sayError(error);
+      // The sign-in card says it all; the notice would repeat it.
+      say("");
+      notice.hidden = true;
+    } else {
+      sayError(error);
+      if (currentUser) showListError();
+    }
   }
 }
 

@@ -152,6 +152,31 @@ With nothing to watch, a Dydema headline sits beside the living emblem
   positions, then the daily claim, Grants and History. Placeholders hold the balance's size while
   it loads.
 
+## Create, About, errors, legal pages, cookie banner and offline page
+
+`public/pages.css` (Create, About, errors), `public/legal.css`, `public/offline.html`:
+
+- **Create** (`/match`): the page head. "Start a topic" and "Challenge a person" (or "Open a
+  request" without the live queue) are a WAI tab pair showing one form at a time; every field,
+  help text and hook is unchanged. Now / Propose times is a two-option switch made of the radios.
+  Live queue, Your challenges, Your events and Updates sit in a column beside the forms from
+  1000 px. Each empty list says "Nothing here yet." with a hint, and a list that cannot load offers
+  Try again. Signed out, only the sign-in card shows.
+- **About**: the page head, the text at 33rem with Dydema section headings, and the living emblem
+  beside it from 1000 px.
+- **Errors** (404, 400, 503): the landing's composition. The kicker and a `.display-title` headline
+  (64 / 40 / 28 px) sit beside the living emblem (above it upright under 900 px), with one main
+  button and "Go to Home →". The 503's Try again reloads the page that failed (a same-site path
+  only).
+- **Legal pages** (`legal-web.ts`): the shared header and footer, Privacy / Terms / Cookies as chips,
+  the title at 40 / 28 px, section numbers inline, the points at a glance as one bordered list on
+  phones, and 44 px contents and "Back to top" links on touch screens.
+- **Cookie banner** (`frontend/measurement.ts`): the kit's card with a Dydema title. Reject all and
+  Accept all are equal secondary pills; Customize is a text link (under them on phones). The bottom
+  offset follows the safe area.
+- **Offline page**: the kit's type and colours, from `site.css` alone (the service worker caches
+  only the two).
+
 ## Header
 
 `src/features/discovery/site-header-web.ts`, `public/site-header.css`, `frontend/site-header.ts`.

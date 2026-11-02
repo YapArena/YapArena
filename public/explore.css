@@ -3,15 +3,6 @@
    cards. */
 
 /* ---- Page heads and list tools ------------------------------------------ */
-.page-head {
-  display: grid;
-  gap: var(--space-3);
-  justify-items: start;
-  padding-top: var(--space-7);
-}
-.page-head .page-lead {
-  margin: 0;
-}
 .list-section {
   display: grid;
   gap: var(--space-5);
@@ -497,10 +488,6 @@
   }
 }
 @media (max-width: 599px) {
-  .page-head {
-    gap: var(--space-2);
-    padding-top: var(--space-5);
-  }
   .list-section {
     margin-top: var(--space-5);
   }

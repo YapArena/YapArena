@@ -5,6 +5,7 @@ import type { PublicBotActivity } from "../a4/public-bots.ts";
 import { publicHomepage, type HomeData } from "./homepage-model.ts";
 import { renderVideoDebateCard } from "./video-card-web.ts";
 import { renderFeaturedDebate } from "./featured-web.ts";
+import { livingEmblem } from "./emblem-web.ts";
 import { renderDebateWorkspace } from "./debate-web.ts";
 import { asset, assetRevision } from "./assets.ts";
 import {
@@ -34,7 +35,7 @@ function sectionFor(canonical: string): SiteSection | null {
   return null;
 }
 
-function layout(
+export function layout(
   title: string,
   description: string,
   canonical: string,
@@ -334,18 +335,21 @@ export function renderProfile(
 }
 
 export function renderAbout(origin: string) {
-  const content = html`<section class="container page-intro"><span class="eyebrow accent">ABOUT YAP ARENA</span><h1>Make room for<br><em>the other side.</em></h1><p>YAP Arena is a home for live debates and the ideas that connect them.</p></section><section class="container about-copy"><h2>What you can do</h2><p>Browse topics, watch live video debates and replays, and see who is debating. Sign in to pick your handle, follow people and topics, and queue on a side to debate someone live. Listings marked Demo are fictional examples.</p><p>A listing’s status does not guarantee that video is available or that a result has been decided. Yap Coins are play money with no cash value. Bot activity is synthetic and labeled. Real funds are unavailable.</p><h2 id="measurement">Cookies and usage measurement</h2><p>We set an analytics cookie only if you accept it in the cookie banner. It counts discovery pages, watch time, replay starts, matching, follows, reports and return visits, and may be linked to your signed-in account to separate founder-affiliated activity. We don't store search text, chat text or IP addresses in these measurements. Use Cookie settings in the footer to turn it off and delete your measurements. Raw events and watch sessions are kept for up to 90 days; an unused consent expires after 180 days. Debate completion is counted from public event state without a browser identifier. See the <a href="/cookies">Cookie Policy</a>.</p><a class="button" href="/debates">Explore debates ↗</a></section>`;
+  const content = html`<div class="container about-page"><div class="about-main"><header class="page-head kit-reveal"><p class="kicker">${inscription("About YAP Arena")}</p><h1 class="page-title">${inscription("Make room for", "the other side.")}</h1><p class="page-lead">YAP Arena is a home for live debates and the ideas that connect them.</p></header><section class="about-copy measure"><h2 class="section-title">${inscription("What you can do")}</h2><p>Browse topics, watch live video debates and replays, and see who is debating. Sign in to pick your handle, follow people and topics, and queue on a side to debate someone live. Listings marked Demo are fictional examples.</p><p>A listing’s status does not guarantee that video is available or that a result has been decided. Yap Coins are play money with no cash value. Bot activity is synthetic and labeled. Real funds are unavailable.</p><h2 class="section-title" id="measurement">${inscription("Cookies and usage measurement")}</h2><p>We set an analytics cookie only if you accept it in the cookie banner. It counts discovery pages, watch time, replay starts, matching, follows, reports and return visits, and may be linked to your signed-in account to separate founder-affiliated activity. We don't store search text, chat text or IP addresses in these measurements. Use Cookie settings in the footer to turn it off and delete your measurements. Raw events and watch sessions are kept for up to 90 days; an unused consent expires after 180 days. Debate completion is counted from public event state without a browser identifier. See the <a href="/cookies">Cookie Policy</a>.</p><a class="btn btn-primary" href="/debates">Explore debates</a></section></div><div class="about-emblem">${livingEmblem()}</div></div><script type="module" src="${asset("living-emblem.js")}"></script>`;
   return layout(
     "About",
     "What YAP Arena is and how it works.",
     `${origin}/about`,
     content,
-    shareMetadata({
+    html`${shareMetadata({
       origin,
       title: "About YAP Arena",
       description: "What YAP Arena is and how it works.",
       url: `${origin}/about`,
-    }),
+    })}${headlineFont}`,
+    "",
+    false,
+    ["pages.css"],
   );
 }
 
@@ -362,16 +366,40 @@ export function renderAccount(origin: string, liveOutline = false) {
 }
 
 // Decision 0011: a direct challenge, now or at one to three proposed times.
-const challengeCard = html`<section class="information-card"><span class="eyebrow">02 / CHALLENGE A PERSON</span><h2>Pick an opponent</h2><form id="challenge-create" class="stack-form"><label>Opponent<input name="targetHandle" list="people-options" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Search by handle or name" required></label><datalist id="people-options"></datalist><label>Published topic slug<input name="topicSlug" pattern="[a-z0-9][a-z0-9-]{2,79}" required></label><label>Proposition<input name="proposition" minlength="10" maxlength="240" required></label><label>Your side<select name="requestedSide"><option value="A">Side A</option><option value="B">Side B</option></select></label><fieldset class="choice-group"><legend>When</legend><label><input type="radio" name="mode" value="now" checked> Now</label><label><input type="radio" name="mode" value="scheduled"> Propose times</label></fieldset><div class="challenge-times" data-challenge-times hidden><label>First choice, your local time<input name="time1" type="datetime-local"></label><label>Second choice (optional)<input name="time2" type="datetime-local"></label><label>Third choice (optional)<input name="time3" type="datetime-local"></label></div><button class="button" type="submit">Send challenge ↗</button></form><p class="form-note">Now: if they're online, they have 2 minutes to answer; otherwise the challenge waits for them. Proposed times must be 1 hour to 90 days ahead. Unanswered challenges expire after 7 days.</p></section>`;
+// Decision 0011: a direct challenge, now or at one to three proposed times.
+const challengePanel = html`<h2 class="match-panel-title">${inscription("Pick an opponent")}</h2><form id="challenge-create" class="stack-form"><label>Opponent<input name="targetHandle" list="people-options" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Search by handle or name" required></label><datalist id="people-options"></datalist><label>Published topic slug<input name="topicSlug" pattern="[a-z0-9][a-z0-9-]{2,79}" required></label><label>Proposition<input name="proposition" minlength="10" maxlength="240" required></label><label>Your side<select name="requestedSide"><option value="A">Side A</option><option value="B">Side B</option></select></label><fieldset class="choice-group match-switch"><legend>When</legend><div class="match-switch-options"><label><input type="radio" name="mode" value="now" checked> Now</label><label><input type="radio" name="mode" value="scheduled"> Propose times</label></div></fieldset><div class="challenge-times" data-challenge-times hidden><label>First choice, your local time<input name="time1" type="datetime-local"></label><label>Second choice (optional)<input name="time2" type="datetime-local"></label><label>Third choice (optional)<input name="time3" type="datetime-local"></label></div><button class="btn btn-primary" type="submit">Send challenge</button></form><p class="form-note">Now: if they're online, they have 2 minutes to answer; otherwise the challenge waits for them. Proposed times must be 1 hour to 90 days ahead. Unanswered challenges expire after 7 days.</p>`;
+
+const requestPanel = html`<h2 class="match-panel-title">${inscription("Set the proposition")}</h2><form id="request-create" class="stack-form"><label>Type<select name="kind"><option value="queue">Open matchmaking</option><option value="direct">Direct challenge</option></select></label><label>Published topic slug<input name="topicSlug" pattern="[a-z0-9][a-z0-9-]{2,79}" required></label><label>Proposition<input name="proposition" minlength="10" maxlength="240" required></label><label>Your side<select name="requestedSide"><option value="A">Side A</option><option value="B">Side B</option></select></label><label>Opponent handle for direct challenges<input name="targetHandle" pattern="[a-z0-9][a-z0-9-]{2,39}"></label><label>Proposed start, your local time<input name="scheduledAt" type="datetime-local" required></label><button class="btn btn-primary" type="submit">Open request</button></form><p class="form-note">The same platform rules apply to every event. Start times must be 1 hour to 90 days ahead.</p>`;
+
+const sideCard = (title: string, list: SafeHtml) =>
+  html`<section class="card match-card"><h2 class="match-card-title">${inscription(title)}</h2>${list}</section>`;
 
 export function renderMatchmaking(origin: string, matchmaking = false) {
-  const content = html`<section class="container page-intro"><span class="eyebrow accent">DEBATE MATCHING</span><h1>Find the<br><em>other side.</em></h1><p>${matchmaking ? "Create a topic or challenge a person. To debate right now, open a topic and queue on a side. A challenge becomes an event when both speakers agree to its proposition, sides, and start time." : "Create a topic, challenge a person, or join an open match request. A request becomes an event when two speakers agree to its proposition, sides, and start time."}</p></section><section class="container section compact match-page"><p id="match-notice" class="notice" role="status" aria-live="polite">Checking your account…</p><div id="match-signed-out" hidden class="information-card"><p>Sign in with a public profile to open or join a debate.</p><a class="button" href="/account?next=%2Fmatch">Sign in ↗</a></div><div id="match-signed-in" hidden><div class="match-grid"><section class="information-card"><span class="eyebrow">01 / START A TOPIC</span><h2>Define both sides</h2><form id="topic-create" class="stack-form"><label>URL slug<input name="slug" pattern="[a-z0-9][a-z0-9-]{2,79}" maxlength="80" required></label><label>Title<input name="title" minlength="5" maxlength="140" required></label><label>Summary<textarea name="summary" minlength="10" maxlength="600" required></textarea></label><label>Side A label<input name="sideALabel" minlength="2" maxlength="80" required></label><label>Side B label<input name="sideBLabel" minlength="2" maxlength="80" required></label><button class="button" type="submit">Create private draft ↗</button></form><ul id="my-topics" class="account-list"></ul></section>${matchmaking ? challengeCard : html`<section class="information-card"><span class="eyebrow">02 / OPEN A REQUEST</span><h2>Set the proposition</h2><form id="request-create" class="stack-form"><label>Type<select name="kind"><option value="queue">Open matchmaking</option><option value="direct">Direct challenge</option></select></label><label>Published topic slug<input name="topicSlug" pattern="[a-z0-9][a-z0-9-]{2,79}" required></label><label>Proposition<input name="proposition" minlength="10" maxlength="240" required></label><label>Your side<select name="requestedSide"><option value="A">Side A</option><option value="B">Side B</option></select></label><label>Opponent handle for direct challenges<input name="targetHandle" pattern="[a-z0-9][a-z0-9-]{2,39}"></label><label>Proposed start, your local time<input name="scheduledAt" type="datetime-local" required></label><button class="button" type="submit">Open request ↗</button></form><p class="form-note">The same platform rules apply to every event. Start times must be 1 hour to 90 days ahead.</p></section>`}</div><div class="match-grid">${matchmaking ? html`<section class="information-card"><span class="eyebrow">DEBATE NOW</span><h2>Live queue</h2><p>Open a <a href="/topics">topic</a> and queue on a side. You are matched with someone on the other side in seconds.</p></section>` : html`<section class="information-card"><span class="eyebrow">OPEN QUEUE</span><h2>Join a debate</h2><ul id="open-queue" class="account-list"></ul></section>`}<section class="information-card"><span class="eyebrow">YOUR ${matchmaking ? "CHALLENGES" : "REQUESTS"}</span><h2>${matchmaking ? "Answer or follow up" : "Challenges and queue"}</h2><ul id="my-requests" class="account-list"></ul></section><section class="information-card"><span class="eyebrow">YOUR EVENTS</span><h2>Debate lifecycle</h2><ul id="my-events" class="account-list"></ul></section><section class="information-card"><span class="eyebrow">NOTIFICATIONS</span><h2>Updates</h2><ul id="match-notifications" class="account-list"></ul></section></div></div></section><script defer src="${asset("matching.js")}"></script>`;
+  const tab = (id: string, label: string, selected: boolean) =>
+    html`<button class="match-tab" type="button" role="tab" id="match-tab-${id}" aria-controls="match-panel-${id}" aria-selected="${String(selected)}" tabindex="${selected ? "0" : "-1"}">${label}</button>`;
+  const content = html`<header class="container page-head kit-reveal"><p class="kicker">${inscription("Debate matching")}</p><h1 class="page-title">${inscription("Find the", "other side.")}</h1><p class="page-lead">${matchmaking ? "Create a topic or challenge a person. To debate right now, open a topic and queue on a side. A challenge becomes an event when both speakers agree to its proposition, sides, and start time." : "Create a topic, challenge a person, or join an open match request. A request becomes an event when two speakers agree to its proposition, sides, and start time."}</p></header><section class="container match-page"><p id="match-notice" class="match-notice" role="status" aria-live="polite">Checking your account…</p><div id="match-signed-out" hidden class="card match-signin"><p>Sign in with a public profile to open or join a debate.</p><a class="btn btn-primary" href="/account?next=%2Fmatch">Sign in</a></div><div id="match-signed-in" hidden class="match-layout"><div class="match-main"><div class="match-tabs" role="tablist" aria-label="Create">${tab("topic", "Start a topic", true)}${tab("other", matchmaking ? "Challenge a person" : "Open a request", false)}</div><section class="card match-panel" role="tabpanel" id="match-panel-topic" aria-labelledby="match-tab-topic"><h2 class="match-panel-title">${inscription("Define both sides")}</h2><form id="topic-create" class="stack-form"><label>URL slug<input name="slug" pattern="[a-z0-9][a-z0-9-]{2,79}" maxlength="80" required></label><label>Title<input name="title" minlength="5" maxlength="140" required></label><label>Summary<textarea name="summary" minlength="10" maxlength="600" required></textarea></label><label>Side A label<input name="sideALabel" minlength="2" maxlength="80" required></label><label>Side B label<input name="sideBLabel" minlength="2" maxlength="80" required></label><button class="btn btn-primary" type="submit">Create private draft</button></form><ul id="my-topics" class="account-list"></ul></section><section class="card match-panel" role="tabpanel" id="match-panel-other" aria-labelledby="match-tab-other" hidden>${matchmaking ? challengePanel : requestPanel}</section></div><aside class="match-side" aria-label="Your matches">${matchmaking ? html`<section class="card match-card"><h2 class="match-card-title">${inscription("Live queue")}</h2><p>Open a topic and queue on a side. You are matched with someone on the other side in seconds.</p><a class="text-link" href="/topics">Browse topics <span aria-hidden="true">→</span></a></section>` : sideCard("Open queue", html`<ul id="open-queue" class="account-list"></ul>`)}${sideCard(matchmaking ? "Your challenges" : "Your requests", html`<ul id="my-requests" class="account-list"></ul>`)}${sideCard("Your events", html`<ul id="my-events" class="account-list"></ul>`)}${sideCard("Updates", html`<ul id="match-notifications" class="account-list"></ul>`)}</aside></div></section><script defer src="${asset("matching.js")}"></script>`;
   return layout(
     "Match",
     "Create topics and arrange debates on YAP Arena.",
     `${origin}/match`,
     content,
+    headlineFont,
+    "",
+    false,
+    ["pages.css"],
   );
+}
+
+// The landing's composition for the 404, 400 and 503 pages: a Dydema
+// headline beside the living emblem, one main button and a quiet way home.
+function errorPage(
+  kicker: string,
+  title: string,
+  emphasis: string,
+  text: string,
+  action: { href: string; label: string },
+) {
+  return html`<section class="container error-page"><div class="error-copy"><p class="kicker kit-reveal">${inscription(kicker)}</p><h1 class="display-title kit-reveal">${inscription(title, emphasis)}</h1><p class="page-lead">${text}</p><div class="error-actions"><a class="btn btn-primary" href="${action.href}">${action.label}</a><a class="text-link error-home" href="/home">Go to Home <span aria-hidden="true">→</span></a></div></div><div class="error-emblem">${livingEmblem()}</div></section><script type="module" src="${asset("living-emblem.js")}"></script>`;
 }
 
 export function renderNotFound(origin: string) {
@@ -379,7 +407,17 @@ export function renderNotFound(origin: string) {
     "Page not found",
     "This page could not be found.",
     `${origin}/`,
-    html`<section class="container page-intro"><span class="eyebrow accent">404 / NO SUCH PAGE</span><h1>Nothing here<br><em>yet.</em></h1><p>The page may have moved or is not public.</p><a class="button" href="/debates">Browse debates ↗</a></section>`,
+    errorPage(
+      "404 / No such page",
+      "Nothing here",
+      "yet.",
+      "The page may have moved or is not public.",
+      { href: "/debates", label: "Browse debates" },
+    ),
+    headlineFont,
+    "",
+    false,
+    ["pages.css"],
   );
 }
 
@@ -389,16 +427,38 @@ export function renderInvalidRequest(origin: string) {
     "Invalid link",
     "This link has a search, filter or page number that is not valid.",
     `${origin}/debates`,
-    html`<section class="container page-intro"><span class="eyebrow accent">400 / INVALID LINK</span><h1>Check the<br><em>link.</em></h1><p>Its search, filter or page number is not valid.</p><a class="button" href="/debates">Browse debates ↗</a></section>`,
+    errorPage(
+      "400 / Invalid link",
+      "Check the",
+      "link.",
+      "Its search, filter or page number is not valid.",
+      { href: "/debates", label: "Browse debates" },
+    ),
+    headlineFont,
+    "",
+    false,
+    ["pages.css"],
   );
 }
 
-export function renderUnavailable() {
+// Try again reloads the page that failed: a same-site path only, else Home.
+export function renderUnavailable(path = "/") {
+  const again = /^\/(?![/\\])/.test(path) ? path : "/";
   return layout(
     "Temporarily unavailable",
     "YAP Arena is temporarily unavailable.",
     "/",
-    html`<section class="container page-intro"><span class="eyebrow accent">TEMPORARILY UNAVAILABLE</span><h1>We lost the thread<br><em>for a moment.</em></h1><p>Please try again shortly.</p><a class="button" href="/">Try again ↗</a></section>`,
+    errorPage(
+      "Temporarily unavailable",
+      "We lost the thread",
+      "for a moment.",
+      "Please try again shortly.",
+      { href: again, label: "Try again" },
+    ),
+    headlineFont,
+    "",
+    false,
+    ["pages.css"],
   );
 }
 

@@ -653,7 +653,6 @@
   align-content: start;
   gap: var(--space-6);
   min-height: 100svh;
-  padding-top: var(--space-7);
   padding-bottom: var(--space-8);
 }
 .coin-wallet-intro {

@@ -412,7 +412,7 @@ describe("public discovery", () => {
     assert.match((await request(app).get("/home")).text, /href="\/account"/);
     const matching = await request(app).get("/match");
     assert.equal(matching.status, 200);
-    assert.match(matching.text, /DEBATE MATCHING/);
+    assert.match(matching.text, /Debate matching/);
     assert.match(matching.text, /id="request-create"/);
   });
 
@@ -623,7 +623,7 @@ describe("launch pages, share previews and sitemap", () => {
     assert.equal(page.status, 404);
     assert.match(page.headers["content-type"], /^text\/html/);
     assert.match(page.text, /<html lang="en" data-email-first>/);
-    assert.match(page.text, /404 \/ NO SUCH PAGE/);
+    assert.match(page.text, /404 \/ No such page/);
     assert.equal(page.headers["cache-control"], "no-store");
     for (const [path, accept] of [
       ["/no-such-page", "application/json"],
@@ -645,7 +645,7 @@ describe("launch pages, share previews and sitemap", () => {
       assert.equal(page.status, 400, path);
       assert.match(page.headers["content-type"], /^text\/html/);
       assert.match(page.text, /<html lang="en" data-email-first>/);
-      assert.match(page.text, /400 \/ INVALID LINK/);
+      assert.match(page.text, /400 \/ Invalid link/);
       assert.match(page.text, /href="\/assets\/site\.css\?v=/);
     }
     const api = await request(app).get("/api/public/debates?status=bogus");

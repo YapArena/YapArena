@@ -306,6 +306,8 @@ try {
   await alice.page.goto(`${base}/match`);
   await alice.page.locator("#match-signed-in").waitFor({ state: "visible" });
   await bob.page.goto(`${base}/match`);
+  // The challenge form is the second of the page's two tabs.
+  await bob.page.getByRole("tab", { name: "Challenge a person" }).click();
   const form = bob.page.locator("#challenge-create");
   await form.waitFor({ state: "visible" });
   await form.locator('input[name="targetHandle"]').fill(alice.handle);

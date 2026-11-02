@@ -20,7 +20,7 @@ const app = createApp({
 });
 
 describe("privacy and terms pages", () => {
-  it("serves both pages in the landing theme without scripts", async () => {
+  it("serves the pages under the site's own header and footer", async () => {
     for (const [path, title] of [
       ["/privacy", "Privacy policy"],
       ["/terms", "Terms of use"],
@@ -39,16 +39,23 @@ describe("privacy and terms pages", () => {
           `<link rel="canonical" href="https://arena.example${path}">`,
         ),
       );
-      // landing.css carries the theme; legal.css only the long-form layout.
+      // site.css carries the theme; legal.css only the long-form layout.
       assert.match(
         page.text,
-        /<link rel="stylesheet" href="\/assets\/landing\.css\?v=[0-9a-f]{12}"><link rel="stylesheet" href="\/assets\/legal\.css\?v=[0-9a-f]{12}">/,
+        /<link rel="stylesheet" href="\/assets\/site\.css\?v=[0-9a-f]{12}">/,
       );
-      assert.match(page.text, /<body class="landing legal">/);
-      assert.doesNotMatch(page.text, /<script/);
       assert.match(
         page.text,
-        new RegExp(`<a href="${path}" aria-current="page">`),
+        /<link rel="stylesheet" href="\/assets\/legal\.css\?v=[0-9a-f]{12}">/,
+      );
+      assert.match(page.text, /<body class="legal-page">/);
+      assert.equal((page.text.match(/data-site-header/g) ?? []).length, 1);
+      assert.match(page.text, /<footer class="site-footer">/);
+      assert.match(page.text, /measurement\.js\?v=/);
+      assert.doesNotMatch(page.text, /landing-header|landing-footer/);
+      assert.match(
+        page.text,
+        new RegExp(`<a class="chip" href="${path}" aria-current="page">`),
       );
       assert.match(page.text, new RegExp(`<dd>${TERMS_VERSION}</dd>`));
       // Every contents link reaches a section on the page.
@@ -124,7 +131,10 @@ describe("privacy and terms pages", () => {
     assert.match(text, /recorded on video and audio/);
     assert.match(text, /href="\/account\/moderation"/);
     // The visible headline uses the landing's inscriptional "v".
-    assert.match(text, /<span aria-hidden="true">Terms of vse<\/span>/);
+    assert.match(
+      text,
+      /<span class="ins" aria-hidden="true">terms of vse<\/span>/,
+    );
     assert.match(text, /<span class="sr-only">Terms of use<\/span>/);
   });
 

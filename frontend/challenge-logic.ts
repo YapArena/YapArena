@@ -109,15 +109,17 @@ export function requestSummary(
       : undefined) ??
     statusLabels[request.status] ??
     request.status;
+  // Status words start with a capital in the list: "Booked", "You argue".
+  const shown = status.charAt(0).toUpperCase() + status.slice(1);
   if (request.kind !== "direct")
-    return `Queue: ${request.proposition} · you argue ${label} · ${status}${request.scheduledAt ? ` · ${format(request.scheduledAt)}` : ""}`;
+    return `Queue: ${request.proposition} · You argue ${label} · ${shown}${request.scheduledAt ? ` · ${format(request.scheduledAt)}` : ""}`;
   const other = opponent(request, userId);
   const who = other.handle ? `@${other.handle}` : "a player";
   const parts = [
     `${other.incoming ? "From" : "To"} ${who}`,
     request.proposition,
-    `you argue ${label}`,
-    status,
+    `You argue ${label}`,
+    shown,
   ];
   if (status === "booked" && request.scheduledAt)
     parts.push(format(request.scheduledAt));

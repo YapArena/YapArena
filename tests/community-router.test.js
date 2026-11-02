@@ -301,7 +301,7 @@ describe("community API and share surfaces", () => {
       .get("/overlay/not-found")
       .set("Accept", "text/html");
     assert.equal(styled.status, 404);
-    assert.match(styled.text, /404 \/ NO SUCH PAGE/);
+    assert.match(styled.text, /404 \/ No such page/);
     assert.equal(
       (await request(app).get("/debates/not-found/qr.svg")).status,
       404,

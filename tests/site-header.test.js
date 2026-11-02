@@ -134,6 +134,9 @@ it("versions every server-rendered asset reference with the process revision", (
     );
     assert.ok(references.length > 0);
     for (const url of references) {
+      // The headline font preloads at the unversioned URL site.css resolves,
+      // so it downloads once (as on the debate page).
+      if (url === "/assets/landing/fonts/headline.woff2") continue;
       const match = /^\/assets\/[^?"]+\?v=([0-9a-f]{12})$/.exec(url);
       assert.ok(match, `unversioned asset reference ${url}`);
       revisions.add(match[1]);

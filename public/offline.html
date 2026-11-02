@@ -2,16 +2,42 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#000000" />
     <title>Offline · YAP Arena</title>
     <link rel="stylesheet" href="/assets/site.css" />
+    <style>
+      /* The service worker caches only this page and site.css. */
+      .offline-page {
+        display: grid;
+        gap: var(--space-4);
+        justify-items: start;
+        align-content: center;
+        min-height: 100svh;
+        padding-block: var(--space-8);
+      }
+      .offline-page > * {
+        margin: 0;
+      }
+    </style>
   </head>
   <body>
-    <main id="main" class="container page-intro">
-      <span class="eyebrow accent">OFFLINE</span>
-      <h1>The conversation<br /><em>will be here.</em></h1>
-      <p>You are offline. Reconnect, then try this page again.</p>
-      <a class="button" href="/">Try again ↗</a>
+    <main id="main" class="container offline-page">
+      <p class="kicker">OFFLINE</p>
+      <h1 class="display-title">
+        <span class="sr-only">The conversation will be here.</span
+        ><span class="ins" aria-hidden="true"
+          >the conversation <em>will be here.</em></span
+        >
+      </h1>
+      <p class="page-lead">
+        You are offline. Reconnect, then try this page again.
+      </p>
+      <a class="btn btn-primary" href="/">Try again</a>
     </main>
   </body>
 </html>

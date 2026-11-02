@@ -353,7 +353,7 @@ jobs:
             http://localhost:3000/assets/site.css \
             | grep --fixed-strings '.site-footer'
           curl --fail --silent --show-error http://localhost:3000/match \
-            | grep --fixed-strings 'DEBATE MATCHING'
+            | grep --fixed-strings 'Debate matching'
 
       - name: Verify backup and isolated restore
         env:
