@@ -46,6 +46,8 @@ it("keeps every token shared with the landing at the landing's value", () => {
     "--ease-expo",
     "--space-1",
     "--space-8",
+    "--container",
+    "--gutter",
   ])
     assert.ok(siteTokens.has(name), `site.css lacks ${name}`);
 });

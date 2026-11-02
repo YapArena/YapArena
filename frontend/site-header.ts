@@ -10,6 +10,7 @@ import type { Profile } from "./account-types.js";
 import { apiErrorStatus, apiFetch } from "./lib/api.js";
 import { sessionStore } from "./lib/session.js";
 import { formatCoins } from "./lib/coin-format.js";
+import { visitColors } from "./lib/visit-colors.js";
 import {
   claimWelcome,
   held,
@@ -33,6 +34,8 @@ const initials = (name: string) =>
 const header = document.querySelector<HTMLElement>("[data-site-header]");
 if (header) {
   header.dataset.enhanced = "true";
+  // The current page's pixels and the balance coin use the visit's colours.
+  visitColors();
   const guest = header.querySelector<HTMLElement>("[data-header-guest]")!;
   const member = header.querySelector<HTMLElement>("[data-header-member]")!;
   const checking = header.querySelector<HTMLElement>("[data-header-checking]")!;
@@ -41,7 +44,21 @@ if (header) {
   const balance = header.querySelector<HTMLElement>("[data-header-balance]")!;
   const reserved = header.querySelector<HTMLElement>("[data-header-reserved]")!;
   const avatar = header.querySelector<HTMLElement>("[data-header-account]")!;
-  const avatarIcon = [...avatar.childNodes].map((node) => node.cloneNode(true));
+  // The 36 px slot inside the account button: initials today, the chosen
+  // avatar later (docs/site-design.md).
+  const avatarSlot =
+    header.querySelector<HTMLElement>("[data-header-avatar]") ?? avatar;
+  const avatarIcon = [...avatarSlot.childNodes].map((node) =>
+    node.cloneNode(true),
+  );
+  // The balance pop-up repeats the amount in large type.
+  const balanceCopy = header.querySelector<HTMLElement>(
+    "[data-header-balance-copy]",
+  );
+  function setBalance(text: string) {
+    balance.textContent = text;
+    if (balanceCopy) balanceCopy.textContent = text;
+  }
   const emailFirst =
     document.documentElement.hasAttribute("data-email-first") ||
     Boolean(document.querySelector("#email-auth"));
@@ -60,9 +77,12 @@ if (header) {
     "[data-header-logout]",
   )!;
   function clearAccount() {
-    balance.textContent = "—";
+    setBalance("—");
     reserved.textContent = "Checking balance…";
-    avatar.replaceChildren(...avatarIcon.map((node) => node.cloneNode(true)));
+    avatarSlot.replaceChildren(
+      ...avatarIcon.map((node) => node.cloneNode(true)),
+    );
+    avatarSlot.classList.remove("has-initials");
     identity.replaceChildren(
       ...identityCaption.map((node) => node.cloneNode(true)),
     );
@@ -73,12 +93,18 @@ if (header) {
   // The menu names the account, and links to its public page once published.
   function showProfile(profile: HeaderProfile) {
     const letters = initials(profile.displayName);
-    if (letters) avatar.textContent = letters;
+    if (letters) {
+      avatarSlot.textContent = letters;
+      avatarSlot.classList.add("has-initials");
+    }
     const name = document.createElement("strong");
     const handle = document.createElement("span");
     name.textContent = profile.displayName;
     handle.textContent = `@${profile.handle}`;
-    identity.replaceChildren(name, handle);
+    const mark = avatarSlot.cloneNode(true) as HTMLElement;
+    mark.removeAttribute("data-header-avatar");
+    mark.setAttribute("aria-hidden", "true");
+    identity.replaceChildren(mark, name, handle);
     profileLink.href =
       profile.publicationState === "published"
         ? `/people/${encodeURIComponent(profile.handle)}`
@@ -125,7 +151,7 @@ if (header) {
         .padStart(6, "0")
         .slice(0, 2)} YC`;
     };
-    balance.textContent = value ? coins(value.available) : "—";
+    setBalance(value ? coins(value.available) : "—");
     reserved.textContent = value
       ? `${value.scope} · reserved ${coins(value.reserved)}`
       : "Balance unavailable. Reopen to retry.";
@@ -159,7 +185,7 @@ if (header) {
   ) {
     if (response.status === 401 || response.status === 403) return false;
     if (!response.ok) {
-      balance.textContent = "—";
+      setBalance("—");
       reserved.textContent = "Balance unavailable. Reopen to retry.";
       return true;
     }
@@ -180,13 +206,13 @@ if (header) {
         if (current !== version) return true;
       }
       // The same figures as /coins and the debate panel (frontend/lib/coins.ts).
-      balance.textContent = formatCoins(spendable(value.balances));
+      setBalance(formatCoins(spendable(value.balances)));
       reserved.textContent = `In open positions: ${formatCoins(held(value.balances))}`;
     } else if (source === "wallet") {
       const value: { available: string; reserved: string } =
         await response.json();
       if (current !== version) return true;
-      balance.textContent = `${value.available} YC`;
+      setBalance(`${value.available} YC`);
       reserved.textContent = `Reserved ${value.reserved} YC`;
     } else {
       const value: { balances: { kind: string; amount: string }[] } =
@@ -278,7 +304,7 @@ if (header) {
       })
       .catch(() => {
         if (current !== version) return;
-        balance.textContent = "—";
+        setBalance("—");
         reserved.textContent = "Balance unavailable. Reopen to retry.";
       });
   });
@@ -557,6 +583,42 @@ if (header) {
       button.disabled = false;
     }
   });
+  // Below 1000 px the search field is an icon that opens a row under the
+  // header. Without JavaScript the icon links to the debates search.
+  const searchToggle = header.querySelector<HTMLAnchorElement>(
+    "[data-header-search-toggle]",
+  );
+  const searchInput = header.querySelector<HTMLInputElement>("#header-search");
+  if (searchToggle && searchInput) {
+    searchToggle.setAttribute("role", "button");
+    searchToggle.setAttribute("aria-expanded", "false");
+    searchToggle.setAttribute("aria-controls", "header-search");
+    const openSearch = (open: boolean) => {
+      header.toggleAttribute("data-search-open", open);
+      searchToggle.setAttribute("aria-expanded", String(open));
+      searchToggle.setAttribute(
+        "aria-label",
+        open ? "Close search" : "Search debates",
+      );
+      if (open) searchInput.focus();
+    };
+    searchToggle.addEventListener("click", (event) => {
+      event.preventDefault();
+      openSearch(!header.hasAttribute("data-search-open"));
+    });
+    searchToggle.addEventListener("keydown", (event) => {
+      if (event.key === " ") {
+        event.preventDefault();
+        openSearch(!header.hasAttribute("data-search-open"));
+      }
+    });
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && header.hasAttribute("data-search-open")) {
+        openSearch(false);
+        searchToggle.focus();
+      }
+    });
+  }
   for (const menu of header.querySelectorAll<HTMLDetailsElement>("details")) {
     menu.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {

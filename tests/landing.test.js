@@ -192,7 +192,7 @@ describe("landing page", () => {
     );
     assert.match(
       home.text,
-      /<a class="brand" href="\/home" aria-label="YAP Arena home">/,
+      /<a class="site-logo" href="\/home"><img [^>]*alt="YAP Arena home">/,
     );
     assert.match(home.text, /homepage\.bundle\.js\?v=/);
   });

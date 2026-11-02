@@ -23,6 +23,9 @@ export function shareMetadata({
   return html`<meta property="og:site_name" content="YAP Arena"><meta property="og:type" content="website"><meta property="og:title" content="${title}"><meta property="og:description" content="${description}"><meta property="og:url" content="${url}"><meta property="og:image" content="${origin}${asset("icons/share.png")}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="YAP Arena"><meta name="twitter:card" content="summary_large_image">`;
 }
 
+// The landing's footer for every page (docs/site-design.md): one centred row
+// of links, then the play-money note. frontend/measurement.ts appends the
+// Cookie settings button to .footer-inner, at the end of the row.
 export function siteFooterMarkup() {
-  return html`<footer class="site-footer"><div class="container footer-inner"><span>YAP ARENA <span class="muted">/ Ideas under pressure.</span></span><span><a href="/topics">Topics</a> · <a href="/coins">Yap Coins</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/cookies">Cookies</a> · Play money</span></div></footer>`;
+  return html`<footer class="site-footer"><nav class="container footer-inner" aria-label="Site"><a href="/topics">Topics</a><a href="/coins">Yap Coins</a><a href="/about">About</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/cookies">Cookies</a></nav><p class="footer-note">Play money · no cash value</p></footer>`;
 }
