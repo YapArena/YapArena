@@ -89,6 +89,25 @@ const wantsPage = (request: Request) =>
   Boolean(request.headers?.accept?.includes("text/html")) &&
   !request.path.startsWith("/api/");
 
+// The status of an error the client caused, such as a body parser's refusal
+// of a body that is too large (413) or in an unsupported charset (415).
+function clientErrorStatus(error: unknown) {
+  if (
+    typeof error !== "object" ||
+    error === null ||
+    !("status" in error) ||
+    !("expose" in error)
+  )
+    return undefined;
+  const { status, expose } = error;
+  return expose === true &&
+    typeof status === "number" &&
+    status >= 400 &&
+    status < 500
+    ? status
+    : undefined;
+}
+
 export const handleError: ErrorRequestHandler = (
   error: unknown,
   request,
@@ -112,6 +131,16 @@ export const handleError: ErrorRequestHandler = (
       error: "request body contains invalid JSON",
     });
   }
+
+  // YA-13: a client's mistake is answered as one, not logged as a failure.
+  const clientStatus = clientErrorStatus(error);
+  if (clientStatus)
+    return response.status(clientStatus).json({
+      error:
+        clientStatus === 413
+          ? "request body is too large"
+          : "request was not accepted",
+    });
 
   request.log.error({ error }, "unhandled request error");
 
@@ -389,6 +418,14 @@ export function createApp({
     );
   app.use(express.json({ limit: requestBodyLimit }));
   app.use(cookieParser());
+  // cookie-parser turns "j:"-prefixed values into objects. No cookie here is
+  // JSON, so drop them rather than hand session code a non-string (YA-13).
+  app.use((request, _response, next) => {
+    const cookies: Record<string, unknown> = request.cookies ?? {};
+    for (const [name, value] of Object.entries(cookies))
+      if (typeof value !== "string") delete cookies[name];
+    next();
+  });
   app.use(createCsrfOriginProtection({ environment, applicationOrigin }));
   if (sharedAuthLimiter)
     app.use("/api/auth", (request, response, next) => {
