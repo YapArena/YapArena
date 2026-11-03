@@ -1,5 +1,7 @@
 export interface SseResponse {
   readonly writableLength: number;
+  // Set by the authentication middleware for the session that opened it.
+  readonly locals?: { readonly sessionTokenHash?: unknown };
   status(code: number): SseResponse;
   set(headers: Record<string, string>): SseResponse;
   set(name: string, value: string): SseResponse;

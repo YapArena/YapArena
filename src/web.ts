@@ -114,6 +114,7 @@ export function createWebServer(
           ? (userIds) => matchmaking.touchMany(userIds)
           : undefined,
         revocations: ACCOUNT_REVOKED_CHANNEL,
+        sessionActive: (tokenHashes) => sessions.activeTokenHashes(tokenHashes),
       })
     : undefined;
   const sharedLimits = abuseConfig && abuseStore;

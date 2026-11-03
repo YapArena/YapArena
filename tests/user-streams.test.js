@@ -7,6 +7,7 @@ import {
   parseNotice,
 } from "../dist/platform/user-streams.js";
 import { createPgListener } from "../dist/platform/pg-listener.js";
+import { hashSessionToken } from "../dist/platform/auth/session-tokens.js";
 import { createApp } from "../dist/app.js";
 import { createLogger } from "../dist/platform/logger.js";
 import request from "../scripts/test-http-request.ts";
@@ -74,6 +75,7 @@ function fixture(options = {}) {
     },
     logger: { warn: (_details, message) => warnings.push(message) },
     revocations: options.revocations,
+    sessionActive: options.sessionActive,
     listen: (url, _logger, callback, _count, settings) => {
       assert.equal(url, "postgresql://localhost/queue");
       assert.deepEqual(settings, {
@@ -204,6 +206,49 @@ describe("personal live update streams", () => {
     await settle();
     assert.deepEqual(f.reads, []);
     const again = new FakeResponse();
+    f.streams.subscribe("7", again);
+    assert.equal(again.statusCode, 200);
+  });
+
+  it("closes a stream at the next heartbeat once its session has ended", async () => {
+    // YA-09: signing out one device, expiry or revocation of its session.
+    let active = new Set(["a", "b"]);
+    let failing = false;
+    const f = fixture({
+      sessionActive: async (hashes) => {
+        if (failing) throw new Error("database busy");
+        return new Set(hashes.filter((hash) => active.has(hash)));
+      },
+    });
+    await f.streams.start();
+    const signedOut = Object.assign(new FakeResponse(), {
+      locals: { sessionTokenHash: "a" },
+    });
+    const stillIn = Object.assign(new FakeResponse(), {
+      locals: { sessionTokenHash: "b" },
+    });
+    const untracked = new FakeResponse();
+    f.streams.subscribe("7", signedOut);
+    f.streams.subscribe("7", stillIn);
+    f.streams.subscribe("8", untracked);
+    await settle();
+    active = new Set(["b"]);
+    // A failed check keeps every stream open and is logged.
+    failing = true;
+    f.timers.get(15_000)();
+    await settle();
+    assert.equal(signedOut.ended, false);
+    assert.ok(f.warnings.includes("live update session check failed"));
+    failing = false;
+    f.timers.get(15_000)();
+    await settle();
+    assert.equal(signedOut.ended, true);
+    assert.equal(stillIn.ended, false);
+    assert.equal(untracked.ended, false);
+    // The closed stream's slot is free again.
+    const again = Object.assign(new FakeResponse(), {
+      locals: { sessionTokenHash: "b" },
+    });
     f.streams.subscribe("7", again);
     assert.equal(again.statusCode, 200);
   });
@@ -398,11 +443,13 @@ describe("personal live update streams", () => {
 
   it("serves /api/me/stream to the signed-in player only", async () => {
     const subscribed = [];
+    const tokenHashes = [];
     const app = (signedIn) =>
       createApp({
         userStreams: {
           subscribe(userId, response) {
             subscribed.push(userId);
+            tokenHashes.push(response.locals.sessionTokenHash);
             response.status(204).end();
           },
         },
@@ -426,5 +473,7 @@ describe("personal live update streams", () => {
     assert.equal(member.status, 204);
     assert.equal(member.headers["cache-control"], "no-store");
     assert.deepEqual(subscribed, ["7"]);
+    // The stream knows its session, so it can close when that session ends.
+    assert.deepEqual(tokenHashes, [hashSessionToken("test")]);
   });
 });
