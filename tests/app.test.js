@@ -73,7 +73,7 @@ describe("yaparena API", () => {
 
   it("mounts transcriber ingest before JSON parsing and outside the API limit", async () => {
     const id = "33333333-3333-4333-8333-333333333333";
-    const { signIngest, ingestHeaders } =
+    const { signIngest, ingestHeaders, ingestPath } =
       await import("../dist/features/transcription/protocol.js");
     const secret = "synthetic-transcription-ingest-secret-32b";
     const enabled = createApp({
@@ -98,7 +98,15 @@ describe("yaparena API", () => {
         .post(`/api/internal/transcription/debates/${id}/session`)
         .set("Content-Type", "application/json")
         .set(ingestHeaders.timestamp, timestamp)
-        .set(ingestHeaders.signature, signIngest(secret, timestamp, body))
+        .set(
+          ingestHeaders.signature,
+          signIngest(secret, {
+            method: "POST",
+            path: ingestPath(id, "session"),
+            timestamp,
+            body,
+          }),
+        )
         .send(body);
       assert.equal(response.status, 200);
       assert.deepEqual(response.body, { debateId: id });

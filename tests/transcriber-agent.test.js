@@ -465,15 +465,28 @@ describe("transcriber agent settings and protocol", () => {
       "https://staging.example.test/api/internal/transcription/debates/33333333-3333-4333-8333-333333333333/updates",
     );
     const headers = calls[0].init.headers;
+    const signed = {
+      method: calls[0].init.method,
+      path: new URL(calls[0].url).pathname,
+      timestamp: headers["X-Yap-Timestamp"],
+      signature: headers["X-Yap-Signature"],
+      body: calls[0].init.body,
+    };
+    assert.match(signed.signature, /^v2=/);
+    assert.equal(
+      verifyIngest(environment.TRANSCRIPTION_INGEST_SECRET, signed, {
+        now: 1_793_000_000_000,
+      }),
+      "v2",
+    );
+    // YA-11: the signature names this debate's updates endpoint only.
     assert.equal(
       verifyIngest(
         environment.TRANSCRIPTION_INGEST_SECRET,
-        headers["X-Yap-Timestamp"],
-        headers["X-Yap-Signature"],
-        calls[0].init.body,
-        1_793_000_000_000,
+        { ...signed, path: signed.path.replace(/updates$/, "cleanup") },
+        { now: 1_793_000_000_000 },
       ),
-      true,
+      null,
     );
     assert.deepEqual(await client.session("AJ"), { debateId: "d" });
     assert.equal(await client.session("AJ"), null);

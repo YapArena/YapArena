@@ -211,7 +211,8 @@ before deploying. Its secrets live in LiveKit Cloud and Render; never in the rep
 
    `lk agent create` writes `livekit.toml` there; restaging keeps it. Later releases run
    `node scripts/stage-transcriber.ts ../yaparena-transcriber-deploy` and then
-   `lk agent deploy ../yaparena-transcriber-deploy`.
+   `lk agent deploy ../yaparena-transcriber-deploy`, after web runs the same release (see
+   [ingest signature version 2](production-rollout.md#ingest-signature-version-2-once)).
 
 3. Set the agent's secrets with `lk agent update-secrets` (each update restarts it). LiveKit injects
    `LIVEKIT_URL`, `LIVEKIT_API_KEY` and `LIVEKIT_API_SECRET`; do not set them.
