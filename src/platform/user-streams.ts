@@ -35,6 +35,7 @@ export function createUserStreams({
   channels,
   presence,
   revocations,
+  sessionActive,
   maxStreams = 2000,
   streamsPerUser = 4,
   heartbeatMs = 15_000,
@@ -52,6 +53,10 @@ export function createUserStreams({
   presence?: (userIds: readonly string[]) => Promise<unknown>;
   /** Database channel whose payload is a player whose sessions were all ended: their streams close. */
   revocations?: string;
+  /** Which of these session token hashes are still valid; the other sessions' streams close. */
+  sessionActive?: (
+    tokenHashes: readonly string[],
+  ) => Promise<ReadonlySet<string>>;
   maxStreams?: number;
   streamsPerUser?: number;
   heartbeatMs?: number;
@@ -71,6 +76,24 @@ export function createUserStreams({
   let flushing: Promise<void> | undefined;
   let heartbeat: NodeJS.Timeout | undefined;
   let presenceTimer: NodeJS.Timeout | undefined;
+  // YA-09: the session that opened each stream, re-checked every heartbeat so
+  // a stream closes soon after its session signs out, expires or is revoked.
+  const sessionOf = new Map<StreamSink, string>();
+  let checking = false;
+
+  async function closeEndedSessions() {
+    if (!sessionActive || checking || !sessionOf.size) return;
+    checking = true;
+    try {
+      const active = await sessionActive([...new Set(sessionOf.values())]);
+      for (const [sink, tokenHash] of [...sessionOf])
+        if (!active.has(tokenHash)) sink.close();
+    } catch (error) {
+      logger.warn({ error }, "live update session check failed");
+    } finally {
+      checking = false;
+    }
+  }
 
   async function push(player: string, kind: string) {
     const sinks = streams.get(player);
@@ -170,6 +193,7 @@ export function createUserStreams({
         response,
         () => {
           sinks.delete(sink);
+          sessionOf.delete(sink);
           total -= 1;
           if (!sinks.size) streams.delete(player);
         },
@@ -178,6 +202,8 @@ export function createUserStreams({
       sinks.add(sink);
       streams.set(player, sinks);
       total += 1;
+      const tokenHash = response.locals?.sessionTokenHash;
+      if (typeof tokenHash === "string") sessionOf.set(sink, tokenHash);
       void touchConnected([player]);
       for (const kind of readable)
         void Promise.resolve(kinds[kind]!.read!(player)).then(
@@ -191,6 +217,7 @@ export function createUserStreams({
       heartbeat = setIntervalFn(() => {
         for (const sinks of streams.values())
           for (const sink of [...sinks]) sink.sendFrame(HEARTBEAT);
+        void closeEndedSessions();
       }, heartbeatMs);
       heartbeat.unref();
       if (presence) {

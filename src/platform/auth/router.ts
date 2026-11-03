@@ -112,13 +112,16 @@ export function createRequireAuthentication({
       return response.status(401).json({ error: "authentication required" });
     }
 
-    const user = await sessions.findUserByTokenHash(hashSessionToken(token));
+    const tokenHash = hashSessionToken(token);
+    const user = await sessions.findUserByTokenHash(tokenHash);
 
     if (!user) {
       return response.status(401).json({ error: "authentication required" });
     }
 
     request.user = user;
+    // Long-lived streams re-check this session while they stay open (YA-09).
+    response.locals.sessionTokenHash = tokenHash;
     return next();
   };
 }

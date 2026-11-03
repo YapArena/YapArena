@@ -215,6 +215,25 @@ export function createSessionRepository(database: Pool) {
       });
     },
 
+    // YA-09: which of these sessions are still valid, in one query. Live
+    // streams opened by the others are closed.
+    async activeTokenHashes(
+      tokenHashes: readonly string[],
+    ): Promise<ReadonlySet<string>> {
+      if (!tokenHashes.length) return new Set();
+      const result = await database.query<{ tokenHash: string }>(
+        `SELECT sessions.token_hash AS "tokenHash"
+         FROM sessions
+         INNER JOIN users ON users.id = sessions.user_id
+         WHERE sessions.token_hash = ANY($1::text[])
+           AND users.account_status = 'active'
+           AND sessions.auth_generation = users.auth_generation
+           AND sessions.expires_at > clock_timestamp()`,
+        [tokenHashes],
+      );
+      return new Set(result.rows.map((row) => row.tokenHash));
+    },
+
     async deleteByTokenHash(tokenHash: string) {
       const result = await database.query(
         "DELETE FROM sessions WHERE token_hash = $1 RETURNING id",

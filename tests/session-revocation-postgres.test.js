@@ -548,6 +548,24 @@ describe(
         /cannot decrease/,
       );
     });
+    it("reports which sessions are still valid for open live streams (YA-09)", async () => {
+      const user = await account();
+      const first = await login(user);
+      const second = await login(user);
+      const hash = (cookie) => hashSessionToken(cookie.split("=")[1]);
+      const active = async (...hashes) =>
+        [...(await sessions.activeTokenHashes(hashes))].sort();
+      assert.deepEqual(
+        await active(hash(first), hash(second), "0".repeat(64)),
+        [hash(first), hash(second)].sort(),
+      );
+      assert.equal((await post(appA, "logout", first)).status, 200);
+      assert.deepEqual(await active(hash(first), hash(second)), [hash(second)]);
+      await endAllAccountSessions(firstPool, user.id);
+      assert.deepEqual(await active(hash(second)), []);
+      assert.deepEqual(await active(), []);
+    });
+
     it("runtime role can revoke but cannot edit account email or execute trigger functions directly", async () => {
       if (!process.env.REVOCATION_TEST_RUNTIME_URL) return;
       await verifyRuntimeIdentity(firstPool);
