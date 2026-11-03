@@ -1431,17 +1431,32 @@ try {
         description: "Synthetic held-account recovery quote",
       },
     });
+    // Refresh only reloads; the worker alone settles rounds.
     const beforeHeldRefresh = await moneyState(),
-      settlementRejection = page.waitForResponse(
-        posted("/api/coin-sandbox/settlements"),
+      refreshWrites: string[] = [],
+      watchRefresh = (sent: Request) => {
+        if (
+          sent.method() !== "GET" &&
+          new URL(sent.url()).pathname.startsWith("/api/coin-sandbox/")
+        )
+          refreshWrites.push(sent.url());
+      },
+      heldRefresh = page.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname === "/api/coin-sandbox/summary",
       );
+    page.on("request", watchRefresh);
     await root.locator("[data-coin-refresh]").click();
-    assert.equal((await settlementRejection).status(), 403);
+    assert.equal((await heldRefresh).status(), 200);
     phase = `${name}: correction hold refresh exposes the current quote`;
     await openDetails(root.locator("details:has([data-coin-reports])"));
     await reviewCost.waitFor();
     phase = `${name}: correction hold refresh announces its guard`;
-    await notice.filter({ hasText: /financial activity is paused/ }).waitFor();
+    await notice
+      .filter({ hasText: /paused for a correction review/ })
+      .waitFor();
+    page.off("request", watchRefresh);
+    assert.deepEqual(refreshWrites, []);
     phase = `${name}: correction hold keeps withdrawal guard and financial state`;
     assert.equal(await root.locator("[data-coin-reports] li").count(), 2);
     const heldSummary = await sandbox.summary(accountContext),
@@ -1464,7 +1479,7 @@ try {
       fullPage: true,
     });
     checks.push(
-      `${name}: an actual evidence-reviewed uncertain funding correction holds financial mutations; Refresh sandbox still loads both reports and the owner's current recovery quote after settlement 403, while new withdrawals remain 403 and reserves/journals/receipts stay unchanged`,
+      `${name}: an actual evidence-reviewed uncertain funding correction holds financial mutations; Refresh sandbox reloads both reports and the owner's current recovery quote without any write, while new withdrawals remain 403 and reserves/journals/receipts stay unchanged`,
     );
     phase = `${name}: keyboard, mobile and 200 percent layout zoom acceptance`;
     await automatedA11y(page);

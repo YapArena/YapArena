@@ -548,11 +548,7 @@ export function createCoinDebateSandbox(
       fail("sandbox debate uses unsupported terms", 503);
     return round;
   }
-  async function dueBatch(
-    client: PoolClient,
-    limit: number,
-    authorizeCaller?: { context: SandboxContext },
-  ) {
+  async function dueBatch(client: PoolClient, limit: number) {
     // Freeze the complete bounded batch before any account/book/ledger write.
     // Its union is essential: locking a later round's account after an earlier
     // round's shared ledger rows can deadlock funding or payout reconciliation.
@@ -621,12 +617,8 @@ export function createCoinDebateSandbox(
           ).rows.map((row) => row.user_id),
         ),
       });
-    const participants = chunks.flatMap((chunk) => [...chunk.users]);
     const users = [
-      ...new Set([
-        ...participants,
-        ...(authorizeCaller ? [authorizeCaller.context.userId] : []),
-      ]),
+      ...new Set(chunks.flatMap((chunk) => [...chunk.users])),
     ].sort((a, b) =>
       BigInt(a) < BigInt(b) ? -1 : BigInt(a) > BigInt(b) ? 1 : 0,
     );
@@ -634,9 +626,6 @@ export function createCoinDebateSandbox(
       "SELECT id FROM users WHERE id=ANY($1::bigint[]) ORDER BY id FOR UPDATE",
       [users],
     );
-    // An API caller must be authorized before its request may settle anybody's
-    // obligations or initialize financial books. Worker advancement has no user.
-    if (authorizeCaller) await authorize(client, authorizeCaller.context);
     // Books, then buckets, in account order, before the shared ledger rows.
     await lockSandboxBooks(client, users);
     const buckets = await sandboxBucketsFor(client, users);
@@ -1670,58 +1659,49 @@ export function createCoinDebateSandbox(
         );
       });
     },
-    // The worker's settlement step (and the sandbox's explicit
-    // POST /settlements). Each round settles in its own savepoint: one that
-    // throws is rolled back, set aside with a growing retry delay and logged,
-    // and the rest of the batch still settles. A timeout fails the batch,
-    // which the next tick retries.
-    async advance(limit = batch.rounds, context?: SandboxContext) {
+    // The worker's settlement step; no user request runs it. Each round
+    // settles in its own savepoint: one that throws is rolled back, set aside
+    // with a growing retry delay and logged, and the rest of the batch still
+    // settles. A timeout fails the batch, which the next tick retries.
+    async advance(limit = batch.rounds) {
       if (!Number.isInteger(limit) || limit < 1 || limit > 100)
         fail("invalid transition batch", 400);
       const failed: { roundId: string; error: unknown }[] = [];
       let settledOrders = 0,
         settlingMs = 0;
-      const result = await transaction(
-        async (client) => {
-          const due = await dueBatch(
-            client,
-            limit,
-            context ? { context } : undefined,
-          );
-          // The budget bounds how long the batch holds the rows it has just
-          // locked, which submits also need. Time spent waiting for a
-          // connection or for those locks doesn't count against it.
-          const locked = performance.now();
-          let completed = 0;
-          const deadline =
-            locked + (due[0]?.quiet ? batch.quietBudgetMs : batch.budgetMs);
-          for (const [position, r] of due.entries()) {
-            if (position > 0 && performance.now() > deadline) break;
-            await client.query("SAVEPOINT coin_round");
-            try {
-              const done = await settle(
-                client,
-                r.id,
-                r.users,
-                deadline,
-                r.buckets,
-              );
-              if (done.revealed) completed++;
-              settledOrders += done.settled;
-              await client.query("RELEASE SAVEPOINT coin_round");
-            } catch (error) {
-              if (databaseFailure(error) === "busy") throw error;
-              await client.query("ROLLBACK TO SAVEPOINT coin_round");
-              await client.query("RELEASE SAVEPOINT coin_round");
-              failed.push({ roundId: r.id, error });
-            }
+      const result = await transaction(async (client) => {
+        const due = await dueBatch(client, limit);
+        // The budget bounds how long the batch holds the rows it has just
+        // locked, which submits also need. Time spent waiting for a
+        // connection or for those locks doesn't count against it.
+        const locked = performance.now();
+        let completed = 0;
+        const deadline =
+          locked + (due[0]?.quiet ? batch.quietBudgetMs : batch.budgetMs);
+        for (const [position, r] of due.entries()) {
+          if (position > 0 && performance.now() > deadline) break;
+          await client.query("SAVEPOINT coin_round");
+          try {
+            const done = await settle(
+              client,
+              r.id,
+              r.users,
+              deadline,
+              r.buckets,
+            );
+            if (done.revealed) completed++;
+            settledOrders += done.settled;
+            await client.query("RELEASE SAVEPOINT coin_round");
+          } catch (error) {
+            if (databaseFailure(error) === "busy") throw error;
+            await client.query("ROLLBACK TO SAVEPOINT coin_round");
+            await client.query("RELEASE SAVEPOINT coin_round");
+            failed.push({ roundId: r.id, error });
           }
-          settlingMs = performance.now() - locked;
-          if (context) await assertCallerSession(client, context);
-          return { completed };
-        },
-        context ? requestLimits : workerLimits,
-      );
+        }
+        settlingMs = performance.now() - locked;
+        return { completed };
+      }, workerLimits);
       // Keep the next batch's size to what fits its time budget here, from
       // the time spent settling alone: a batch that waited for its locks says
       // nothing about how fast orders settle.

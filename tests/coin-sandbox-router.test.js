@@ -111,6 +111,26 @@ describe("simulated Yap Coins purchases and withdrawals", () => {
   });
 });
 
+describe("coin settlement", () => {
+  it("is not a user route: only the worker settles rounds", async () => {
+    let advanced = 0;
+    const { server, calls } = app(
+      { transfersEnabled: true },
+      {
+        async advance() {
+          advanced++;
+          return { completed: 0, setAside: [roundId] };
+        },
+      },
+    );
+    const response = await post(server, "/coins/settlements");
+    assert.equal(response.status, 404);
+    assert.equal(JSON.stringify(response.body).includes(roundId), false);
+    assert.equal(advanced, 0);
+    assert.deepEqual(calls, []);
+  });
+});
+
 describe("Yap Coins refusals", () => {
   const submit = (server) =>
     post(server, `/coins/rounds/${roundId}/submit`, {

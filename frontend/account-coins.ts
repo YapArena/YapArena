@@ -607,18 +607,11 @@ if (container) {
       list.append(p);
     }
   }
+  // Refresh only reloads: the worker settles rounds on its own schedule.
   select<HTMLButtonElement>("[data-coin-refresh]").onclick = () =>
     void action(async (g) => {
-      let settlementError: unknown;
-      try {
-        await api("/settlements", "POST", {});
-      } catch (error) {
-        settlementError = error;
-      }
-      if (g !== version) return;
       await load(g);
       await loadRounds(g);
-      if (g === version && settlementError) throw settlementError;
     });
   // Finishes the action a confirmation was started for, once, when the
   // provider returns here with ?confirmed=<operation>.

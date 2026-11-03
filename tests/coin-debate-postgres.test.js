@@ -748,13 +748,6 @@ describe(
           target,
           "processing the later gain first would incorrectly hit the permanent target",
         );
-        await assert.rejects(
-          a4.advance(20, {
-            ...context,
-            expectedSessionId: "999999999999999999",
-          }),
-          /account context changed/,
-        );
         assert.equal(
           (
             await owner.query(
