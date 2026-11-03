@@ -107,20 +107,20 @@ Auth0 tenant, LiveKit project, R2 bucket and edge.
 
 **Values you'll fill in:**
 
-| Placeholder                                                  | What it is                                                                                     | Where you get it  |
-| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- | ----------------- |
-| `<COMMIT_SHA>`, `<RUN_ID>`                                   | The launch release's commit (40 characters) and its CI run                                     | Step 1.1          |
-| `<WEB_IMAGE>`, `<ENCODER_IMAGE>`                             | `ghcr.io/yaparena/yaparena@sha256:…` and `ghcr.io/yaparena/yaparena-encoder@sha256:…`          | Step 1.1          |
-| `<MAC_HOME>`                                                 | Your home folder, for example `/Users/yourname`                                                | `echo $HOME`      |
-| `<YOUR_EMAIL>`                                               | An address you read, for reports and support                                                   | You               |
-| `<AUTH0_CNAME_TARGET>`                                       | The host Auth0 gives for `auth.yaparena.com`                                                   | Step 5.2          |
-| `<PROJECT_REF>`, `<POOLER_HOST>`                             | The production Supabase project ID and its session pooler host                                 | Step 6.2          |
-| `<ADMIN_PASSWORD>`, `<OWNER_PASSWORD>`, `<RUNTIME_PASSWORD>` | The production `postgres`, `yaparena_owner` and `yaparena_runtime` passwords                   | Steps 6.1 and 6.3 |
-| `<LIVEKIT_HOST>`                                             | The production LiveKit project's host, `yaparena-production-….livekit.cloud`                   | Step 7.1          |
-| `<R2_ACCOUNT_ID>`                                            | Your Cloudflare account ID                                                                     | Step 7.2          |
-| `<SIGNING_SECRET>`, `<INGEST_SECRET>`                        | The replay edge secret and the transcriber ingest secret, both new                             | Steps 7.3 and 7.5 |
-| `<RENDER_HOST>`                                              | `yaparena-web`'s own address, for example `yaparena-web.onrender.com` (Render may add letters) | Step 8.3          |
-| `<handle-a>`, `<handle-b>`, `<topic-slug>`, `<debate-slug>`  | Your production accounts' handles, the first topic and a debate's address                      | Step 11           |
+| Placeholder                                                                        | What it is                                                                                       | Where you get it  |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------- |
+| `<COMMIT_SHA>`, `<RUN_ID>`                                                         | The launch release's commit (40 characters) and its CI run                                       | Step 1.1          |
+| `<WEB_IMAGE>`, `<ENCODER_IMAGE>`                                                   | `ghcr.io/yaparena/yaparena@sha256:…` and `ghcr.io/yaparena/yaparena-encoder@sha256:…`            | Step 1.1          |
+| `<MAC_HOME>`                                                                       | Your home folder, for example `/Users/yourname`                                                  | `echo $HOME`      |
+| `<YOUR_EMAIL>`                                                                     | An address you read, for reports and support                                                     | You               |
+| `<AUTH0_CNAME_TARGET>`                                                             | The host Auth0 gives for `auth.yaparena.com`                                                     | Step 5.2          |
+| `<PROJECT_REF>`, `<POOLER_HOST>`                                                   | The production Supabase project ID and its session pooler host                                   | Step 6.2          |
+| `<ADMIN_PASSWORD>`, `<OWNER_PASSWORD>`, `<RUNTIME_PASSWORD>`, `<ENCODER_PASSWORD>` | The production `postgres`, `yaparena_owner`, `yaparena_runtime` and `yaparena_encoder` passwords | Steps 6.1 and 6.3 |
+| `<LIVEKIT_HOST>`                                                                   | The production LiveKit project's host, `yaparena-production-….livekit.cloud`                     | Step 7.1          |
+| `<R2_ACCOUNT_ID>`                                                                  | Your Cloudflare account ID                                                                       | Step 7.2          |
+| `<SIGNING_SECRET>`, `<INGEST_SECRET>`                                              | The replay edge secret and the transcriber ingest secret, both new                               | Steps 7.3 and 7.5 |
+| `<RENDER_HOST>`                                                                    | `yaparena-web`'s own address, for example `yaparena-web.onrender.com` (Render may add letters)   | Step 8.3          |
+| `<handle-a>`, `<handle-b>`, `<topic-slug>`, `<debate-slug>`                        | Your production accounts' handles, the first topic and a debate's address                        | Step 11           |
 
 **DNS records production adds** in Cloudflare (all **DNS only**, the grey cloud):
 
@@ -253,6 +253,9 @@ node --env-file="$HOME/yaparena-private/owner.env" scripts/migrate-database.ts
 ```
 
 - Check: `Database migrations completed with the migration identity.`
+- If it prints `Database migration failed (P0001).` and staging has no `yaparena_encoder` role yet,
+  follow [the encoder role steps](render-staging.md#give-the-encoder-its-own-database-role), which
+  include this migration, and set the encoder URL on `yaparena-replay-worker` in 1.4.
 
 ### 1.4 Switch staging's three services to images
 
@@ -570,30 +573,35 @@ transaction pooler on 6543). The string reads
 `postgresql://postgres.<PROJECT_REF>:[YOUR-PASSWORD]@<POOLER_HOST>:5432/postgres`. Note the two
 values.
 
-### 6.3 Create the two application identities
+### 6.3 Create the three application identities
 
-Time: 15 minutes.
+Time: 15 minutes. `yaparena_owner` runs migrations, `yaparena_runtime` is web and the jobs worker,
+and `yaparena_encoder` is the replay encoder, which can reach only the replay queue and the rows a
+replay's publication changes.
 
-1. Make the two passwords. Terminal:
+1. Make the three passwords. Terminal:
 
    ```sh
    openssl rand -hex 32
    openssl rand -hex 32
+   openssl rand -hex 32
    ```
 
-   Save the first as "Supabase production yaparena_owner" (`<OWNER_PASSWORD>`) and the second as
-   "Supabase production yaparena_runtime" (`<RUNTIME_PASSWORD>`). Hex passwords never need encoding.
+   Save the first as "Supabase production yaparena_owner" (`<OWNER_PASSWORD>`), the second as
+   "Supabase production yaparena_runtime" (`<RUNTIME_PASSWORD>`) and the third as "Supabase
+   production yaparena_encoder" (`<ENCODER_PASSWORD>`). Hex passwords never need encoding.
 
 2. If `<ADMIN_PASSWORD>` has characters other than letters, digits, `-`, `_`, `.` and `~`, encode it
    with the helper in [step 0.4 of the staging rollout](staging-rollout.md#04-make-your-private-folder)
    and use the printed value below.
-3. Run `nano ~/yaparena-private/production/admin.env`, type these three lines, save (Ctrl+O, Return)
+3. Run `nano ~/yaparena-private/production/admin.env`, type these four lines, save (Ctrl+O, Return)
    and quit (Ctrl+X):
 
    ```text
    DATABASE_ADMIN_URL='postgresql://postgres.<PROJECT_REF>:<ADMIN_PASSWORD>@<POOLER_HOST>:5432/postgres?sslmode=verify-full&sslrootcert=<MAC_HOME>/yaparena-private/production/supabase-ca.crt'
    DATABASE_OWNER_PASSWORD=<OWNER_PASSWORD>
    DATABASE_RUNTIME_PASSWORD=<RUNTIME_PASSWORD>
+   DATABASE_ENCODER_PASSWORD=<ENCODER_PASSWORD>
    ```
 
 4. Terminal:
@@ -615,7 +623,7 @@ Time: 15 minutes.
 - If it prints `Database provisioning failed (28P01).`, the admin password is wrong or needs
   encoding. `(ENOTFOUND)`: the pooler host is wrong.
 
-### 6.4 The owner and runtime files
+### 6.4 The owner, runtime and encoder files
 
 Time: 5 minutes.
 
@@ -633,17 +641,25 @@ Time: 5 minutes.
    DATABASE_URL='postgresql://yaparena_runtime.<PROJECT_REF>:<RUNTIME_PASSWORD>@<POOLER_HOST>:5432/postgres?sslmode=verify-full&sslrootcert=<MAC_HOME>/yaparena-private/production/supabase-ca.crt'
    ```
 
-3. `chmod 600 ~/yaparena-private/production/*.env`
+3. `nano ~/yaparena-private/production/encoder.env`:
 
-- Check: these print `yaparena_owner`, then `yaparena_runtime`:
+   ```text
+   DATABASE_URL='postgresql://yaparena_encoder.<PROJECT_REF>:<ENCODER_PASSWORD>@<POOLER_HOST>:5432/postgres?sslmode=verify-full&sslrootcert=<MAC_HOME>/yaparena-private/production/supabase-ca.crt'
+   ```
+
+4. `chmod 600 ~/yaparena-private/production/*.env`
+
+- Check: these print `yaparena_owner`, `yaparena_runtime`, then `yaparena_encoder`:
 
   ```sh
   (set -a; source ~/yaparena-private/production/owner.env; psql "$DATABASE_URL" -tAc 'SELECT current_user')
   (set -a; source ~/yaparena-private/production/runtime.env; psql "$DATABASE_URL" -tAc 'SELECT current_user')
+  (set -a; source ~/yaparena-private/production/encoder.env; psql "$DATABASE_URL" -tAc 'SELECT current_user')
   ```
 
 - If it prints `Tenant or user not found`, the user part must be `yaparena_owner.<PROJECT_REF>` (or
-  `yaparena_runtime.<PROJECT_REF>`).
+  `yaparena_runtime.<PROJECT_REF>`, `yaparena_encoder.<PROJECT_REF>`): the Supabase session pooler
+  wants the role name, a dot and the project ID.
 
 ### 6.5 Apply the migrations
 
@@ -665,7 +681,9 @@ ls migrations | grep -c '^[0-9].*\.js$'
   returns `applied` equal to the number the `ls` line printed (65 at `740254d`), and `newest` equal
   to the last file in `~/yaparena-release/migrations`.
 
-- If it prints `Database migration failed (…)`, use the table in
+- If it prints `Database migration failed (P0001).` and the database has no `yaparena_encoder` role
+  yet, run step 6.3 with `DATABASE_ENCODER_PASSWORD` set, then this step again. For any other
+  `Database migration failed (…)`, use the table in
   [step 1 of the staging rollout](staging-rollout.md#1-apply-the-owner-migrations).
 
 ### 6.6 The first backup
@@ -681,16 +699,24 @@ pg_restore --list ~/yaparena-private/production/initial.dump | head -3
 - Check: the first command prints nothing; the second prints lines starting with `;` and today's
   date. The next day, **Database → Backups** lists a backup.
 
-### 6.7 The runtime URL for Render
+### 6.7 The runtime and encoder URLs for Render
 
-Render reads the certificate from a secret file, so its URL ends differently from `runtime.env`.
-Save this in the password manager as "Supabase production runtime URL (Render)":
+Render reads the certificate from a secret file, so these URLs end differently from the files in
+6.4. Save the first in the password manager as "Supabase production runtime URL (Render)", for web
+and the jobs worker:
 
 ```text
 postgresql://yaparena_runtime.<PROJECT_REF>:<RUNTIME_PASSWORD>@<POOLER_HOST>:5432/postgres?sslmode=verify-full&sslrootcert=/etc/secrets/supabase-ca.crt
 ```
 
-Never give Render the owner or admin URL; the app refuses to start with either.
+and the second as "Supabase production encoder URL (Render)", for the encoder only:
+
+```text
+postgresql://yaparena_encoder.<PROJECT_REF>:<ENCODER_PASSWORD>@<POOLER_HOST>:5432/postgres?sslmode=verify-full&sslrootcert=/etc/secrets/supabase-ca.crt
+```
+
+Never give Render the owner or admin URL; the app refuses to start with either. The encoder refuses
+the runtime URL, and web and the jobs worker refuse the encoder URL.
 
 ## 7. Video: LiveKit, R2, replay edge and transcriber
 
@@ -970,7 +996,9 @@ Time: 15 minutes. Step 6.5 migrated the database for this release. Then:
   - `yaparena-web`: `server started` with `"auth0":true`, and `landing font loaded`.
   - `yaparena-jobs`: `background worker started` with `"media":true`, then `background job ran`
     lines, one with `"job":"matchmaking"`.
-  - `yaparena-encoder`: `Automatic replay worker started`.
+  - `yaparena-encoder`: `Automatic replay worker started`. If it logs
+    `database encoder identity violates the replay-only boundary` instead, its `DATABASE_URL` is
+    not the encoder URL from 6.7.
   - Neither `yaparena-jobs` nor `yaparena-encoder` logs `unused_secrets`. If one does, remove the
     variables it names from that service and deploy it again.
 - If web logs `database migrations are pending`, run step 6.5 with this release. If it logs
@@ -995,7 +1023,7 @@ it from staging, and never reuse it there.
 | `COMMUNITY_STREAM_ENABLED`                                 | ✓   |      |         | `false` (Blueprint)                                                   | Same                        |
 | `PRODUCTION_SERVICE`                                       | ✓   |      |         | `true` (Blueprint)                                                    | Production web only         |
 | `APP_ORIGIN`                                               | ✓   | ✓    | ✓       | `https://yaparena.com`                                                | Differs                     |
-| `DATABASE_URL`                                             | ✓   | ✓    | ✓       | Runtime URL from step 6.7                                             | Own                         |
+| `DATABASE_URL`                                             | ✓   | ✓    | ✓       | Web and jobs: the runtime URL; encoder: the encoder URL (6.7)         | Own                         |
 | `METRICS_TOKEN`                                            | ✓   |      |         | Generated by the Blueprint                                            | Own                         |
 | `MEDIA_ADMISSION_SECRET`                                   | ✓   |      |         | Generated by the Blueprint                                            | Own                         |
 | `AUTH0_ISSUER_BASE_URL`                                    | ✓   |      |         | `https://auth.yaparena.com` (Blueprint)                               | Differs                     |
@@ -1026,14 +1054,15 @@ Secret files: `supabase-ca.crt` on all three; `landing-headline-font.b64` on web
 The jobs worker and the encoder still start with a secret they don't use, but log `unused_secrets`
 with its name; remove it from that service. Web works with the read-only key because
 `MEDIA_REPLAY_PACKAGING_ENABLED=true`: the encoder publishes captions. With packaging off, web
-writes captions itself and needs a key that can write. The encoder still connects as the runtime
-database role; a role limited to the replay tables is a follow-up.
+writes captions itself and needs a key that can write. The encoder connects as its own database
+role, `yaparena_encoder`, which reaches only the replay queue and the rows a replay's publication
+changes; it checks this at startup and refuses the runtime URL.
 
 **Never set in production**, on any service:
 
 - `DATABASE_MIGRATION_URL`, `DATABASE_ADMIN_URL`, `DATABASE_OWNER_PASSWORD`,
-  `DATABASE_RUNTIME_PASSWORD`, `COIN_SANDBOX_OWNER_DATABASE_URL`: owner and admin credentials. The
-  app refuses to start with any of them.
+  `DATABASE_RUNTIME_PASSWORD`, `DATABASE_ENCODER_PASSWORD`, `COIN_SANDBOX_OWNER_DATABASE_URL`:
+  owner, admin and provisioning credentials. The app refuses to start with any of them.
 - `AUTH0_*` and `PRODUCTION_SERVICE` on the jobs worker or the encoder: web only.
 - `MEDIA_REPLAY_SIGNING_SECRET`, `MEDIA_ADMISSION_SECRET` and `TRANSCRIPTION_INGEST_SECRET` on the
   jobs worker or the encoder, and `LIVEKIT_*` or `MEDIA_EGRESS_S3_*` on the encoder: they don't
@@ -1382,6 +1411,29 @@ versions for now.
    then, version 1 matters only while an old agent runs, because every signature expires after
    30 seconds.
 
+### Encoder database role (once)
+
+The release with the encoder's own database role (audit YA-15) moves the encoder from
+`yaparena_runtime` to `yaparena_encoder`. The first release with
+`migrations/1793675904690_add-replay-encoder-role.js` needs one extra step
+on each database provisioned before it, staging and, if step 6.3 ran with only two passwords,
+production. Its migration stops with `Database migration failed (P0001).` until the role exists.
+Neither the old web nor the old encoder is affected by the new role or its migration.
+
+1. **Staging, before item 3:** follow
+   [the encoder role steps](render-staging.md#give-the-encoder-its-own-database-role). They create
+   `yaparena_encoder` and its URL; item 4 then sets that URL on `yaparena-replay-worker`.
+2. **Production, before item 6:** make `<ENCODER_PASSWORD>` and an `admin.env` with
+   `DATABASE_ADMIN_URL` and `DATABASE_ENCODER_PASSWORD` only (6.3, items 1 to 4: the existing owner
+   and runtime roles need no password). Make `encoder.env` (6.4) and check it prints
+   `yaparena_encoder`, and save the encoder URL for Render (6.7).
+3. **Production, item 7:** on `yaparena-encoder`, first **Environment** → `DATABASE_URL` → the
+   encoder URL → **Save only**; then change its image. The old encoder image refuses the encoder
+   URL and the new one refuses the runtime URL, so change both before it deploys. Until then the
+   encoder may restart; queued replays wait and nothing is lost.
+4. **Check:** `yaparena-encoder` logs `Automatic replay worker started`, and a finished debate's
+   replay still publishes (11.7).
+
 Keep the production Blueprint's **Auto Sync** off. If you ever sync it, first make sure
 `render.production.yaml` names the image production runs, and check afterwards that the Render
 subdomain is still disabled.
@@ -1391,7 +1443,8 @@ subdomain is still disabled.
 - **Code:** on each production service, **Settings** → **Image URL** → **Edit**, paste the previous
   release's image, **Save Changes**: jobs, then web, then the encoder. The previous images are in
   the earlier lines of step 1.1's list. Migrations stay: they're additive and never rolled back. If
-  the previous release can't run on the newer schema, fix forward instead.
+  the previous release can't run on the newer schema, fix forward instead. An encoder image from
+  before its own database role needs the runtime URL in its `DATABASE_URL` again.
 - **Feature flags:** set the flag to `false` on web and the jobs worker, **Save and deploy**.
 - **Agent:** with production as the default project, in `~/yaparena-transcriber-production`,
   `lk agent versions`, then `lk agent rollback --version <previous version>`. If web goes back to

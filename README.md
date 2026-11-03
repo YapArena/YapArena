@@ -145,7 +145,7 @@ docker compose --profile release run --rm migrate
 - `docker compose up --detach --wait db` downloads the PostgreSQL image if needed, creates the local
   database container, leaves it running in the background, and waits until its health check passes.
   Its data remains in a Docker volume between restarts.
-- `provision` creates/adopts separate owner and runtime identities in a one-off administrative
+- `provision` creates/adopts separate owner, runtime and replay encoder identities in a one-off administrative
   container. `migrate` applies pending migrations in a different container using only the owner login. A migration is a
   versioned code change that creates or alters database tables. `--rm` removes only the temporary
   migration container after it exits; it does not remove the database or its stored data.
@@ -288,7 +288,9 @@ with FFmpeg installed to verify the synthetic adaptive recording ladder.
 
 The separate encoder starts with `npm run start:replay-worker` after building, applying the
 additive migration, configuring the private replay edge and enabling
-`MEDIA_REPLAY_PACKAGING_ENABLED=true`. Runtime credentials alone belong in its environment.
+`MEDIA_REPLAY_PACKAGING_ENABLED=true`. Its `DATABASE_URL` uses the `yaparena_encoder` login
+(locally `postgresql://yaparena_encoder:local-encoder-only@127.0.0.1:5433/yaparena`), which reaches
+only the replay queue and the rows a publication changes; the encoder refuses the runtime login.
 For native disposable PostgreSQL checks, run `REPLAY_POSTGRES_MODE=host npm run verify:replay-pipeline`;
 the default verifier uses disposable Docker PostgreSQL. See
 [delivery controls](docs/media-delivery-controls.md) for shared-IP budgets, clock ownership,

@@ -139,6 +139,7 @@ async function applicationFixture(
     postgres: randomBytes(24).toString("hex"),
     yaparena_owner: randomBytes(24).toString("hex"),
     yaparena_runtime: randomBytes(24).toString("hex"),
+    yaparena_encoder: randomBytes(24).toString("hex"),
   };
   const databaseName = "revocation_test_media_cloud";
   const quiet = { info() {}, warn() {}, error() {} };

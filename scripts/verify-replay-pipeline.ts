@@ -23,7 +23,10 @@ import {
   createReplayThumbnailTask,
   replayThumbnailKey,
 } from "../dist/features/media/replay-thumbnail.js";
-import { verifyRuntimeIdentity } from "../dist/platform/database.js";
+import {
+  verifyEncoderIdentity,
+  verifyRuntimeIdentity,
+} from "../dist/platform/database.js";
 import { replayStorageFixture } from "../tests/helpers/replay-storage.ts";
 import { provisionDatabase } from "./provision-database.ts";
 
@@ -35,15 +38,17 @@ const directory = await mkdtemp("/tmp/yaparena-replay-trial-");
 const container = `yaparena-replay-${randomUUID().slice(0, 8)}`;
 const hostMode = process.env.REPLAY_POSTGRES_MODE === "host";
 const passwords = Object.fromEntries(
-  ["postgres", "yaparena_owner", "yaparena_runtime"].map((role) => [
-    role,
-    randomBytes(24).toString("hex"),
-  ]),
+  ["postgres", "yaparena_owner", "yaparena_runtime", "yaparena_encoder"].map(
+    (role) => [role, randomBytes(24).toString("hex")],
+  ),
 );
 let started = false;
+// pool is the encoder's own login; runtime stands in for web and the jobs
+// worker changing the same events while the encoder works.
 let admin: pg.Client | undefined,
   owner: pg.Client | undefined,
-  pool: pg.Pool | undefined;
+  pool: pg.Pool | undefined,
+  runtime: pg.Pool | undefined;
 let peakEncoderRssKiB = 0;
 let samples: Promise<void>[] = [];
 const spawned = (command: string, args: string[], options: SpawnOptions) => {
@@ -204,8 +209,12 @@ try {
   await admin.query(
     "CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN",
   );
-  pool = new pg.Pool({ ...config("yaparena_runtime"), max: 8 });
-  await verifyRuntimeIdentity(pool);
+  pool = new pg.Pool({ ...config("yaparena_encoder"), max: 8 });
+  runtime = new pg.Pool({ ...config("yaparena_runtime"), max: 2 });
+  await verifyEncoderIdentity(pool);
+  await verifyRuntimeIdentity(runtime);
+  await assert.rejects(verifyRuntimeIdentity(pool), /violates/);
+  await assert.rejects(verifyEncoderIdentity(runtime), /violates/);
   const jobs = createReplayJobs(pool);
   const topic = (
     await owner!.query<{
@@ -370,7 +379,7 @@ try {
   await jobs.reconcile();
   const lossJob = (await jobs.claim())!;
   await jobs.bindSource(lossJob, '"loss-source"');
-  const blocker = await pool!.connect();
+  const blocker = await runtime.connect();
   await blocker.query("BEGIN");
   await blocker.query(
     "SELECT debate_id FROM debate_media WHERE debate_id=$1 FOR UPDATE",
@@ -428,7 +437,7 @@ try {
   assert.equal(lossCleanup.packageKey, lossJob.packageKey);
   await jobs.finishCleanup(lossCleanup, true);
   console.log(
-    "Runtime publication backend termination: error handled, rollback complete, ready pointer absent PASS",
+    "Encoder publication backend termination: error handled, rollback complete, ready pointer absent PASS",
   );
 
   // A removal transaction holds the domain lock while a completion starts.
@@ -437,7 +446,7 @@ try {
   await jobs.reconcile();
   const removedJob = (await jobs.claim())!;
   await jobs.bindSource(removedJob, '"fixed"');
-  const remover = await pool!.connect();
+  const remover = await runtime.connect();
   await remover.query("BEGIN");
   await remover.query(
     "UPDATE debates SET publication_state='hidden' WHERE id=$1",
@@ -599,6 +608,24 @@ try {
     ),
     (error: NodeJS.ErrnoException) => error.code === "42501",
   );
+  // The encoder's login reaches only its queue and the rows publication
+  // touches; tests/replay-encoder-role-postgres.test.js covers the rest.
+  for (const [sql, values] of [
+    ["SELECT id FROM sessions LIMIT 1", []],
+    ["SELECT id FROM users LIMIT 1", []],
+    ["SELECT * FROM coin_accounts LIMIT 1", []],
+    ["SELECT id FROM event_chat_messages LIMIT 1", []],
+    [
+      "UPDATE debates SET publication_state='hidden' WHERE id=$1",
+      [initial.room],
+    ],
+    ["DELETE FROM community_room_events WHERE room_id=$1", [initial.room]],
+  ] as const)
+    await assert.rejects(
+      pool.query(sql, [...values]),
+      (error: NodeJS.ErrnoException) => error.code === "42501",
+      sql,
+    );
   const tables = (
     await admin.query<{ relname: string; relrowsecurity: boolean }>(
       "SELECT relname,relrowsecurity FROM pg_class WHERE relname IN('media_replay_jobs','media_replay_attempts')",
@@ -615,7 +642,7 @@ try {
   );
   assert.ok(await jobs.prune());
   console.log(
-    "Runtime-only RLS/grants, immutable binding columns and bounded tombstone retention PASS",
+    "Encoder-only RLS/grants, immutable binding columns and bounded tombstone retention PASS",
   );
 
   await owner!.query(
@@ -768,7 +795,7 @@ try {
       thumbnailBytes: image.length,
       packageBytes: marker.bytes,
       scope:
-        "real PostgreSQL runtime transactions + FFmpeg, synthetic in-memory object adapter; no hosted storage/edge or physical-device evidence",
+        "real PostgreSQL encoder-role transactions + FFmpeg, synthetic in-memory object adapter; no hosted storage/edge or physical-device evidence",
     }),
   );
 
@@ -777,7 +804,7 @@ try {
   const stalled = await event("replay-shutdown-db-stall");
   storage.put(stalled.sourceKey, await readFile(input));
   const stalledPool = new pg.Pool({
-    ...config("yaparena_runtime"),
+    ...config("yaparena_encoder"),
     max: 2,
     query_timeout: 1500,
     connectionTimeoutMillis: 1500,
@@ -785,7 +812,7 @@ try {
       "-c search_path=pg_catalog,yaparena,pg_temp -c statement_timeout=1500 -c lock_timeout=1000",
   });
   try {
-    await verifyRuntimeIdentity(stalledPool);
+    await verifyEncoderIdentity(stalledPool);
     const stalledJobs = createReplayJobs(stalledPool);
     let began!: () => void;
     const queryStarted = new Promise<void>((resolve) => {
@@ -849,6 +876,7 @@ try {
   }
 } finally {
   await pool?.end();
+  await runtime?.end();
   await owner?.end();
   await admin?.end();
   if (started && hostMode)

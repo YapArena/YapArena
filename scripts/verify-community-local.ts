@@ -21,10 +21,9 @@ const exec = promisify(execFile);
 const setupOnly = process.argv.includes("--setup-only");
 const container = `yaparena-chat-${randomUUID().slice(0, 8)}`;
 const passwords = Object.fromEntries(
-  ["postgres", "yaparena_owner", "yaparena_runtime"].map((role) => [
-    role,
-    randomBytes(24).toString("hex"),
-  ]),
+  ["postgres", "yaparena_owner", "yaparena_runtime", "yaparena_encoder"].map(
+    (role) => [role, randomBytes(24).toString("hex")],
+  ),
 );
 const quiet = { info() {}, warn() {}, error() {} };
 let started = false;

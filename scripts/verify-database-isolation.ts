@@ -49,9 +49,16 @@ import {
   runtimeGrants,
   up as isolationMigrationUp,
 } from "../migrations/1791158400000_isolate_server_database.js";
+import {
+  encoderGrants,
+  encoderSequences,
+  up as encoderMigrationUp,
+  type EncoderGrant,
+} from "../migrations/1793675904690_add-replay-encoder-role.js";
 import { createApp } from "../dist/app.js";
 import {
   createDatabase,
+  verifyEncoderIdentity,
   verifyRuntimeIdentity,
 } from "../dist/platform/database.js";
 import { verifyDatabaseState } from "../dist/platform/migrations.js";
@@ -145,7 +152,11 @@ if (!/^postgres:(17|18)(\.\d+)?-bookworm$/.test(postgresImage))
 const secret = () => randomBytes(24).toString("hex");
 const adminPassword = secret();
 const bootstrapPassword = secret();
-const passwords = { yaparena_owner: secret(), yaparena_runtime: secret() };
+const passwords = {
+  yaparena_owner: secret(),
+  yaparena_runtime: secret(),
+  yaparena_encoder: secret(),
+};
 const logger = pino({ level: "silent" });
 const inventorySql = await readFile(
   new URL("./database-privilege-inventory.sql", import.meta.url),
@@ -155,7 +166,11 @@ let port: string | undefined;
 let hostDirectory: string | undefined;
 let started = false;
 type Role =
-  "postgres" | "fixture_admin" | "yaparena_owner" | "yaparena_runtime";
+  | "postgres"
+  | "fixture_admin"
+  | "yaparena_owner"
+  | "yaparena_runtime"
+  | "yaparena_encoder";
 const url = (database: string, role: Role = "postgres") => {
   const connection = new URL(`postgresql://127.0.0.1:${port}/${database}`);
   connection.username = role;
@@ -439,6 +454,7 @@ async function browserChecks(admin: pg.Client) {
         "isolation_definer_probe",
         "capture_community_change",
         "capture_submission_receipt",
+        "guard_encoder_publication",
       ]) {
         await admin.query("SAVEPOINT probe");
         await denied(admin, `SELECT yaparena.${routine}()`);
@@ -460,52 +476,62 @@ async function membershipChecks(
 ) {
   const bootstrap = await connect(database, "fixture_admin");
   const login = await connect(database, "yaparena_runtime");
+  const encoderLogin = await connect(database, "yaparena_encoder");
   let phase: string | undefined;
   const results = [];
   try {
-    const creator = await admin.query<{
-      member: string;
-      admin_option: boolean;
-      inherit_option: boolean;
-      set_option: boolean;
-    }>(
-      "SELECT pg_get_userbyid(member) AS member, admin_option, inherit_option, set_option FROM pg_auth_members WHERE roleid='yaparena_runtime'::regrole",
-    );
-    assert.deepEqual(creator.rows, [
-      {
-        member: "postgres",
-        admin_option: true,
-        inherit_option: false,
-        set_option: false,
-      },
-    ]);
+    for (const role of ["yaparena_runtime", "yaparena_encoder"]) {
+      const creator = await admin.query<{
+        member: string;
+        admin_option: boolean;
+        inherit_option: boolean;
+        set_option: boolean;
+      }>(
+        "SELECT pg_get_userbyid(member) AS member, admin_option, inherit_option, set_option FROM pg_auth_members WHERE roleid=$1::regrole",
+        [role],
+      );
+      assert.deepEqual(creator.rows, [
+        {
+          member: "postgres",
+          admin_option: true,
+          inherit_option: false,
+          set_option: false,
+        },
+      ]);
+    }
     const identity = (
       await admin.query<{ rolsuper: boolean; rolcreaterole: boolean }>(
         "SELECT rolsuper, rolcreaterole FROM pg_roles WHERE rolname=current_user",
       )
     ).rows[0];
     assert.deepEqual(identity, { rolsuper: false, rolcreaterole: true });
-    const builder = new (
-      MigrationBuilder as new (
-        database: Pick<
-          ConstructorParameters<typeof MigrationBuilder>[0],
-          "query"
-        >,
-        ...options: [object, boolean, typeof quiet]
-      ) => MigrationBuilder
-    )(
-      {
-        query() {
-          throw new Error("Offline guard compilation");
+    const compileGuard = (up: (builder: MigrationBuilder) => void) => {
+      const builder = new (
+        MigrationBuilder as new (
+          database: Pick<
+            ConstructorParameters<typeof MigrationBuilder>[0],
+            "query"
+          >,
+          ...options: [object, boolean, typeof quiet]
+        ) => MigrationBuilder
+      )(
+        {
+          query() {
+            throw new Error("Offline guard compilation");
+          },
         },
-      },
-      {},
-      false,
-      quiet,
-    );
-    isolationMigrationUp(builder);
-    const guard = builder.getSqlSteps()[0]!;
+        {},
+        false,
+        quiet,
+      );
+      up(builder);
+      return builder.getSqlSteps()[0]!;
+    };
+    const guard = compileGuard(isolationMigrationUp);
+    const encoderGuard = compileGuard(encoderMigrationUp);
     await owner.query(guard);
+    await owner.query(encoderGuard);
+    await verifyEncoderIdentity(encoderLogin);
     await verifyRuntimeIdentity(login);
     const negative = async (name: string, install: string, undo: string) => {
       phase = name;
@@ -564,6 +590,60 @@ async function membershipChecks(
       "deny other privileged administrator inbound grant",
       "GRANT yaparena_runtime TO outside_admin WITH ADMIN TRUE, INHERIT FALSE, SET FALSE",
       "REVOKE yaparena_runtime FROM outside_admin",
+    );
+    // The encoder login has the same boundary, enforced by provisioning, its
+    // own migration guard and its startup check.
+    const encoderNegative = async (
+      name: string,
+      install: string,
+      undo: string,
+    ) => {
+      phase = name;
+      await bootstrap.query(install);
+      try {
+        await assert.rejects(
+          provisionDatabase(admin),
+          /Unsafe pre-existing database identities/,
+        );
+        await assert.rejects(verifyEncoderIdentity(encoderLogin), /violates/);
+        await assert.rejects(
+          owner.query(encoderGuard),
+          (error) => (error as { code?: string }).code === "P0001",
+        );
+        results.push({
+          case: name,
+          pass: true,
+          guards: ["provision", "migration", "encoder"],
+        });
+      } finally {
+        await bootstrap.query(undo);
+      }
+      await verifyEncoderIdentity(encoderLogin);
+    };
+    await encoderNegative(
+      "deny outbound encoder membership in owner",
+      "GRANT yaparena_owner TO yaparena_encoder WITH ADMIN FALSE, INHERIT FALSE, SET FALSE",
+      "REVOKE yaparena_owner FROM yaparena_encoder",
+    );
+    await encoderNegative(
+      "deny outbound encoder membership in runtime",
+      "GRANT yaparena_runtime TO yaparena_encoder WITH ADMIN FALSE, INHERIT FALSE, SET FALSE",
+      "REVOKE yaparena_runtime FROM yaparena_encoder",
+    );
+    await encoderNegative(
+      "deny browser inbound encoder delegation",
+      "GRANT yaparena_encoder TO anon WITH ADMIN FALSE, INHERIT FALSE, SET FALSE",
+      "REVOKE yaparena_encoder FROM anon",
+    );
+    await encoderNegative(
+      "deny unrelated inbound encoder member",
+      "GRANT yaparena_encoder TO outside_reader WITH ADMIN FALSE, INHERIT FALSE, SET FALSE",
+      "REVOKE yaparena_encoder FROM outside_reader",
+    );
+    await encoderNegative(
+      "deny encoder row security bypass",
+      "ALTER ROLE yaparena_encoder BYPASSRLS",
+      "ALTER ROLE yaparena_encoder NOBYPASSRLS",
     );
     const mediatorNegative = async (
       name: string,
@@ -661,6 +741,7 @@ async function membershipChecks(
     );
   } finally {
     await login.end();
+    await encoderLogin.end();
     await bootstrap.end();
   }
 }
@@ -1130,6 +1211,106 @@ async function runtimeChecks(
   }
 }
 
+// The replay encoder's own login (YA-15): its startup check, no DDL or role
+// escalation, nothing outside its replay manifest, and a hand-made grant
+// stops it at startup.
+async function encoderChecks(
+  database: string,
+  owner: pg.Client,
+  admin: pg.Client,
+) {
+  const pool = createDatabase(url(database, "yaparena_encoder"), logger);
+  const login = await connect(database, "yaparena_encoder");
+  const runtime = await connect(database, "yaparena_runtime");
+  try {
+    assert.equal(
+      (await login.query<{ name: string }>("SELECT session_user AS name"))
+        .rows[0]!.name,
+      "yaparena_encoder",
+    );
+    await verifyDatabaseState(
+      pool,
+      new URL("../migrations", import.meta.url),
+      verifyEncoderIdentity,
+    );
+    await assert.rejects(verifyRuntimeIdentity(login), /violates/);
+    await assert.rejects(verifyEncoderIdentity(runtime), /violates/);
+    await assert.rejects(verifyEncoderIdentity(owner), /violates/);
+    for (const sql of [
+      "CREATE TABLE yaparena.forbidden (id int)",
+      "ALTER TABLE yaparena.media_replay_jobs ADD COLUMN forbidden int",
+      "ALTER TABLE yaparena.media_replay_jobs DISABLE ROW LEVEL SECURITY",
+      "DROP POLICY encoder_queue ON yaparena.media_replay_jobs",
+      "DROP TRIGGER encoder_publication_guard ON yaparena.debates",
+      "CREATE FUNCTION yaparena.forbidden() RETURNS int LANGUAGE SQL AS 'SELECT 1'",
+      "GRANT yaparena_runtime TO yaparena_encoder",
+      "SET ROLE yaparena_runtime",
+      "SET ROLE yaparena_owner",
+      "CREATE ROLE isolation_escalation",
+      "UPDATE yaparena_migrations.pgmigrations SET name = name",
+      "SELECT setval('yaparena.event_history_id_seq',1)",
+      "SELECT yaparena.guard_encoder_publication()",
+      "SELECT yaparena.isolation_definer_probe()",
+      "SELECT * FROM yaparena.future_probe",
+      "SELECT yaparena.future_routine()",
+      "TRUNCATE yaparena.media_replay_jobs",
+      "UPDATE yaparena.debates SET publication_state = publication_state",
+      "DELETE FROM yaparena.community_room_events",
+    ])
+      await denied(login, sql);
+    const tables = (
+      await admin.query<{ name: string }>(
+        "SELECT relname AS name FROM pg_class WHERE relnamespace='yaparena'::regnamespace AND relkind='r'",
+      )
+    ).rows.map(({ name }) => name);
+    for (const table of applicationTables) assert.ok(tables.includes(table));
+    for (const table of tables)
+      if (!Object.hasOwn(encoderGrants, table)) {
+        await denied(login, `SELECT * FROM yaparena.${table}`);
+        await denied(login, `INSERT INTO yaparena.${table} DEFAULT VALUES`);
+        await denied(login, `DELETE FROM yaparena.${table}`);
+      }
+    // A grant made by hand stops the encoder before it claims jobs.
+    for (const [grant, revoke] of [
+      [
+        "GRANT SELECT ON yaparena.sessions TO yaparena_encoder",
+        "REVOKE SELECT ON yaparena.sessions FROM yaparena_encoder",
+      ],
+      [
+        "GRANT UPDATE (cursor) ON yaparena.community_rooms TO yaparena_encoder; GRANT DELETE ON yaparena.community_rooms TO yaparena_encoder",
+        "REVOKE DELETE ON yaparena.community_rooms FROM yaparena_encoder",
+      ],
+      [
+        "GRANT TRUNCATE ON yaparena.media_replay_jobs TO yaparena_encoder",
+        "REVOKE TRUNCATE ON yaparena.media_replay_jobs FROM yaparena_encoder",
+      ],
+      [
+        "GRANT USAGE ON SEQUENCE yaparena.users_id_seq TO yaparena_encoder",
+        "REVOKE USAGE ON SEQUENCE yaparena.users_id_seq FROM yaparena_encoder",
+      ],
+      [
+        "GRANT EXECUTE ON FUNCTION yaparena.guard_encoder_publication() TO yaparena_encoder",
+        "REVOKE EXECUTE ON FUNCTION yaparena.guard_encoder_publication() FROM yaparena_encoder",
+      ],
+    ]) {
+      await owner.query(grant!);
+      try {
+        await assert.rejects(verifyEncoderIdentity(login), /violates/, grant);
+      } finally {
+        await owner.query(revoke!);
+      }
+      await verifyEncoderIdentity(login);
+    }
+    console.log(
+      "Encoder login: startup identity, DDL/role denial, replay-only manifest and hand-grant refusal PASS.",
+    );
+  } finally {
+    await runtime.end();
+    await login.end();
+    await pool.end();
+  }
+}
+
 async function scenario(database: string, upgrade: boolean) {
   const admin = await connect(database);
   let owner;
@@ -1446,11 +1627,31 @@ async function scenario(database: string, upgrade: boolean) {
       ).rows.map(({ section, evidence }) => [section, evidence]),
     ) as {
       relations: { schema: string; kind: string }[];
-      policies: { schema: string; roles: string[] }[];
+      policies: {
+        schema: string;
+        table: string;
+        name: string;
+        roles: string[];
+      }[];
       effectiveRelations: {
         identity: string;
         schema: string;
+        name: string;
         privileges: Record<string, boolean>;
+      }[];
+      effectiveSequences: {
+        identity: string;
+        schema: string;
+        name: string;
+        usage: boolean;
+        select: boolean;
+        update: boolean;
+      }[];
+      effectiveRoutines: {
+        identity: string;
+        schema: string;
+        routine: string;
+        execute: boolean;
       }[];
       effectiveSchemas: { identity: string; schema: string; create: boolean }[];
       defaultPrivileges: { creator: string; schema: string }[];
@@ -1466,10 +1667,70 @@ async function scenario(database: string, upgrade: boolean) {
       ).length,
       applicationTables.length,
     );
-    assert.ok(
-      inventory.policies
-        .filter((p) => p.schema === "yaparena")
-        .every((p) => p.roles.includes("yaparena_runtime")),
+    // Each policy names the runtime, or only the encoder on a table its
+    // migration grants; none names PUBLIC or a browser role.
+    for (const policy of inventory.policies.filter(
+      (p) => p.schema === "yaparena",
+    ))
+      assert.ok(
+        policy.roles.includes("yaparena_runtime") ||
+          (policy.roles.length === 1 &&
+            policy.roles[0] === "yaparena_encoder" &&
+            Object.hasOwn(encoderGrants, policy.table)),
+        `${policy.table}.${policy.name}`,
+      );
+    // The encoder's effective privileges are exactly its manifest.
+    for (const relation of inventory.effectiveRelations.filter(
+      (r) =>
+        r.identity === "yaparena_encoder" &&
+        ["yaparena", "yaparena_migrations"].includes(r.schema),
+    )) {
+      const spec: EncoderGrant =
+        relation.schema === "yaparena_migrations"
+          ? relation.name === "pgmigrations"
+            ? { select: "*" }
+            : {}
+          : (encoderGrants[relation.name] ?? {});
+      assert.deepEqual(
+        relation.privileges,
+        {
+          select: spec.select === "*",
+          insert: spec.insert === "*",
+          update: false,
+          delete: spec.delete === true,
+          truncate: false,
+          references: false,
+          trigger: false,
+          columnSelect: spec.select !== undefined,
+          columnInsert: spec.insert !== undefined,
+          columnUpdate: spec.update !== undefined,
+        },
+        `encoder privileges on ${relation.schema}.${relation.name}`,
+      );
+    }
+    for (const sequence of inventory.effectiveSequences.filter(
+      (r) =>
+        r.identity === "yaparena_encoder" &&
+        ["yaparena", "yaparena_migrations"].includes(r.schema),
+    ))
+      assert.deepEqual(
+        [sequence.usage, sequence.select, sequence.update],
+        [
+          sequence.schema === "yaparena" &&
+            encoderSequences.includes(sequence.name),
+          false,
+          false,
+        ],
+        `encoder sequence ${sequence.name}`,
+      );
+    assert.equal(
+      inventory.effectiveRoutines.some(
+        (r) =>
+          r.identity === "yaparena_encoder" &&
+          ["yaparena", "yaparena_migrations"].includes(r.schema) &&
+          r.execute,
+      ),
+      false,
     );
     assert.equal(
       inventory.effectiveRelations
@@ -1484,7 +1745,7 @@ async function scenario(database: string, upgrade: boolean) {
     assert.equal(
       inventory.effectiveSchemas.some(
         (s) =>
-          s.identity === "yaparena_runtime" &&
+          ["yaparena_runtime", "yaparena_encoder"].includes(s.identity) &&
           s.schema.startsWith("yaparena") &&
           s.create,
       ),
@@ -1505,6 +1766,7 @@ async function scenario(database: string, upgrade: boolean) {
     );
     await browserChecks(admin);
     await runtimeChecks(database, owner, admin);
+    await encoderChecks(database, owner, admin);
     if (process.env.ACCOUNT_SECURITY_VERIFY === "true") {
       const result = await exec(
         process.execPath,
@@ -1519,6 +1781,7 @@ async function scenario(database: string, upgrade: boolean) {
           "tests/coin-debate-postgres.test.js",
           "tests/coin-reports-postgres.test.js",
           "tests/media-account-revocation-postgres.test.js",
+          "tests/replay-encoder-role-postgres.test.js",
         ],
         {
           env: {
@@ -1529,6 +1792,7 @@ async function scenario(database: string, upgrade: boolean) {
             WALLET_TEST_OWNER_DATABASE_URL: url(database, "yaparena_owner"),
             REVOCATION_TEST_DATABASE_URL: url(database, "yaparena_owner"),
             REVOCATION_TEST_RUNTIME_URL: url(database, "yaparena_runtime"),
+            ENCODER_TEST_DATABASE_URL: url(database, "yaparena_encoder"),
           },
           maxBuffer: 8 * 1024 * 1024,
         },
@@ -1578,6 +1842,7 @@ async function scenario(database: string, upgrade: boolean) {
           WALLET_TEST_OWNER_DATABASE_URL: url(database, "yaparena_owner"),
           REVOCATION_TEST_DATABASE_URL: url(database, "yaparena_owner"),
           REVOCATION_TEST_RUNTIME_URL: url(database, "yaparena_runtime"),
+          ENCODER_TEST_DATABASE_URL: url(database, "yaparena_encoder"),
           COIN_TREASURY_TEST_DATABASE_URL: url(
             "revocation_test_coin_treasury_fresh",
             "yaparena_runtime",
@@ -1659,7 +1924,7 @@ async function scenario(database: string, upgrade: boolean) {
     await provisionDatabase(admin);
     await migrate(owner); // repeated operator steps preserve isolation and migration history
     console.log(
-      `${upgrade ? "Upgrade" : "Fresh installation"}: inventory, browser denial, runtime login, backend journeys, worker, triggers and future defaults PASS.`,
+      `${upgrade ? "Upgrade" : "Fresh installation"}: inventory, browser denial, runtime and encoder logins, backend journeys, worker, triggers and future defaults PASS.`,
     );
   } finally {
     if (owner) await owner.end();

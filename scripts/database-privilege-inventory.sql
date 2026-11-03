@@ -5,7 +5,7 @@ schemas AS (
   SELECT * FROM pg_namespace WHERE nspname NOT LIKE 'pg_%' AND nspname <> 'information_schema'
 ),
 identities AS (
-  SELECT * FROM pg_roles WHERE rolname IN ('anon','authenticated','service_role','authenticator','yaparena_runtime','yaparena_owner')
+  SELECT * FROM pg_roles WHERE rolname IN ('anon','authenticated','service_role','authenticator','yaparena_runtime','yaparena_encoder','yaparena_owner')
 ),
 relations AS (
   SELECT c.*, n.nspname FROM pg_class c JOIN schemas n ON n.oid = c.relnamespace

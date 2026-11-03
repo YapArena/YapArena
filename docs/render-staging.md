@@ -58,11 +58,13 @@ pause after a week of low activity. Do not use this environment for promised liv
    uses its own Express API and direct PostgreSQL queries; its tables are not designed for public
    access through Supabase REST or GraphQL.
 3. Follow the [database isolation runbook](security/database-isolation.md) to inventory the project
-   and provision distinct `yaparena_owner` and `yaparena_runtime` identities in an administrative
-   operator process. Keep that process and its secrets outside Render web/worker environments.
+   and provision distinct `yaparena_owner`, `yaparena_runtime` and `yaparena_encoder` identities in
+   an administrative operator process. Keep that process and its secrets outside Render web/worker
+   environments.
 4. In the project's **Connect** dialog, construct a **Session pooler** PostgreSQL URL (port 5432)
-   for each custom login. Verify the custom-role username/project suffix supported by the actual
-   pooler using a real connection; do not assume the default `postgres` URL authenticates the new role.
+   for each custom login. The session pooler's username is the role, a dot and the project ID, for
+   example `yaparena_encoder.<PROJECT_REF>`. Verify it with a real connection; do not assume the
+   default `postgres` URL authenticates the new role.
    This supports the app's persistent `pg` pool on an IPv4 network. Do not use the transaction
    pooler URL (port 6543) for this deployment. Replace the password placeholder without its square
    brackets, URL-encode reserved password characters, and use certificate-verified TLS with
@@ -336,8 +338,9 @@ per-recording operations or evidence that the Blueprint creates a worker.
    `node dist/replay-worker.js`. That image already contains FFmpeg and ffprobe. A worker built
    from source instead needs `MEDIA_WORKER_TOOLS=true`, which Render maps to a Docker build
    argument; web images keep the default `false`. Never reference secrets in build arguments.
-3. Give the worker only runtime database credentials, strict DB TLS/search-path settings and
-   private bucket credentials (`MEDIA_S3_ENDPOINT`, `MEDIA_S3_REGION`, `MEDIA_S3_BUCKET`,
+3. Give the worker only the encoder database URL (`yaparena_encoder`; see
+   [give the encoder its own database role](#give-the-encoder-its-own-database-role)), strict DB
+   TLS/search-path settings and private bucket credentials (`MEDIA_S3_ENDPOINT`, `MEDIA_S3_REGION`, `MEDIA_S3_BUCKET`,
    `MEDIA_S3_ACCESS_KEY`, `MEDIA_S3_SECRET_KEY`). Match the canary `MEDIA_REPLAY_EDGE_ROOMS` with
    the web service. The encoder needs no `LIVEKIT_*`, `MEDIA_REPLAY_EDGE_URL` or
    `MEDIA_REPLAY_SIGNING_SECRET`; with a secret it doesn't use, it starts but logs
@@ -345,7 +348,7 @@ per-recording operations or evidence that the Blueprint creates a worker.
    either service.
 4. Enable `MEDIA_REPLAY_PACKAGING_ENABLED=true` on worker and web for the synthetic canary.
    Start with `MEDIA_REPLAY_CONCURRENCY=1` and the bounded defaults in `.env.example`.
-   The worker checks tools/codecs and runtime identity before claiming jobs.
+   The worker checks tools/codecs and its encoder identity before claiming jobs.
 5. Complete a synthetic recording and observe automatic verification, durable claim, conversion,
    immutable upload, validation and ended-to-replay publication. Kill/restart the encoder during
    a second job; confirm automatic lease recovery, no duplicate publication and cleanup of
@@ -360,6 +363,36 @@ service configuration and incident response remain deployment operations, not a 
 approval step. Existing eligible MP4 replay remains the fallback until a verified package is ready.
 See [replay automation](replay-automation.md) and [delivery controls](media-delivery-controls.md)
 for queue invariants, limits, rollback and the unverified hosting/physical-device acceptance gates.
+
+### Give the encoder its own database role
+
+Since migration `1793675904690_add-replay-encoder-role` (security audit finding YA-15), the encoder
+logs in as `yaparena_encoder`, not `yaparena_runtime`. That role uses the replay queue
+(`media_replay_jobs`, `media_replay_attempts`), reads published, finished events, their topics and
+ready recordings, moves an ended event to `replay` with its `event_history` row, and advances the
+community delivery cursor that publication signals. It cannot read or change sessions, accounts,
+Yap Coins, chat, likes or moderation, and it starts only if it holds nothing more. Web and the jobs
+worker keep the runtime URL.
+
+A database provisioned before that release needs these steps once:
+
+1. Make a password with `openssl rand -hex 32` and save it as the staging `yaparena_encoder`
+   password.
+2. In the administrative operator process, run `node scripts/provision-database.ts` from the
+   release checkout with only `DATABASE_ADMIN_URL` (the `postgres` Session pooler URL) and
+   `DATABASE_ENCODER_PASSWORD`. The existing roles need no password; provisioning creates the
+   missing role, its CONNECT grant and its search path, and changes nothing else.
+3. Migrate with the release's web digest as in step 2 of [deploy the web service](#deploy-the-web-service).
+   Without step 2 the migration stops with `Database migration failed (P0001).` and changes nothing.
+4. Build the encoder's Session pooler URL like the runtime one, with the username
+   `yaparena_encoder.<PROJECT_REF>` and the new password. Check it:
+   `psql "<URL>" -tAc 'SELECT current_user'` prints `yaparena_encoder`.
+5. On the encoder service, **Environment** → `DATABASE_URL` → the encoder URL → **Save only**,
+   then switch its image to the release's encoder digest. The old image refuses the encoder URL and
+   the new image refuses the runtime URL, so change both before it deploys; until then the encoder
+   may restart, and queued replays wait. Confirm `Automatic replay worker started`. If the log reads
+   `database encoder identity violates the replay-only boundary`, the URL still names
+   `yaparena_runtime`.
 
 ## Deploy the CI-published images
 
@@ -421,7 +454,7 @@ worker. This has not yet been tried on these services.
    Command `node dist/worker.js`. Confirm its `background worker started` log line.
 5. Switch the encoder to `ghcr.io/yaparena/yaparena-encoder@sha256:ENCODER_DIGEST` from the same CI
    run and keep Docker Command `node dist/replay-worker.js`. `MEDIA_WORKER_TOOLS` only affected
-   source builds and can be removed. Confirm the worker passes its tool, codec and runtime
+   source builds and can be removed. Confirm the worker passes its tool, codec and encoder
    identity checks before it claims jobs.
 6. If Render does not offer an image source for an existing service, create new image-backed
    services of the same type and plan instead. Copy every environment variable and set the Docker
@@ -433,6 +466,8 @@ worker. This has not yet been tried on these services.
 1. Copy the web and encoder digests from a `main` commit whose CI run passed every job. Check
    that both are signed for that commit as in [verify an image signature](operations.md#verify-an-image-signature).
 2. Migrate with the web digest as in step 2 of [deploy the web service](#deploy-the-web-service).
+   The first release with the encoder's own role needs
+   [its one-time steps](#give-the-encoder-its-own-database-role) around this migration.
 3. Change each service's image URL to its new digest and save. Use digests from one CI run so web,
    the jobs worker (web digest) and the encoder match. Confirm `/ready`, the jobs worker's startup
    log and the encoder startup checks.

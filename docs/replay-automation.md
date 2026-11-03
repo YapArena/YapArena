@@ -46,7 +46,8 @@ See [LiveKit output options](https://docs.livekit.io/transport/media/ingress-egr
 and [FFmpeg HLS muxing](https://ffmpeg.org/ffmpeg-formats.html#hls-2).
 
 The web service never starts FFmpeg. A separate worker requires Node 24, FFmpeg/ffprobe
-with libx264/AAC, runtime PostgreSQL credentials, private bucket credentials, and an
+with libx264/AAC, its own `yaparena_encoder` PostgreSQL login (never the runtime one; see
+[the database isolation runbook](security/database-isolation.md)), private bucket credentials, and an
 available authenticated replay edge/signing configuration. It requires no database-owner
 credential or Cloudflare deployment token. Worker provisioning is separate from the web Blueprint;
 the hosted report records the existing service. Main process/configuration/CI wiring is merged.
