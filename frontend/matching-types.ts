@@ -7,7 +7,8 @@ export interface MatchingTopic {
 }
 export interface MatchingRequest {
   id: string;
-  initiatorUserId: string;
+  // Only the signed-in player's own account id is sent; the other player's is null.
+  initiatorUserId: string | null;
   targetUserId: string | null;
   requestedSide: "A" | "B";
   sideALabel: string;
@@ -33,7 +34,8 @@ export interface MatchingRequest {
 }
 export interface MatchingProposal {
   id: string;
-  proposedBy: string;
+  // The signed-in player's account id for their own times, otherwise null.
+  proposedBy: string | null;
   startsAt: string;
 }
 export interface MatchingPerson {

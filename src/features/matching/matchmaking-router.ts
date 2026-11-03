@@ -3,7 +3,10 @@ import type { Request, Response } from "express";
 import type { createMatchmaking } from "./matchmaking.ts";
 import type { createIdentityRepository } from "../identity/repository.ts";
 import type { ProductActionRecorder } from "../measurement/router.ts";
-import { createRequireRole } from "../identity/router.ts";
+import {
+  createRequireRole,
+  createRequireUnrestricted,
+} from "../identity/router.ts";
 import type { SseResponse } from "../../platform/sse.ts";
 import { MatchConflictError, MatchNotFoundError } from "./repository.ts";
 import { DebaterSettingsRequiredError } from "../transcription/debater-settings.ts";
@@ -64,6 +67,8 @@ export function createMatchmakingRouter({
 }) {
   const router = Router();
   const participant = createRequireRole(identity, ["participant"]);
+  // A restricted account can leave the queue or decline, but not queue or accept (YA-07).
+  const unrestricted = createRequireUnrestricted(identity);
   router.use((_request, response, next) => {
     response.set("Cache-Control", "no-store");
     next();
@@ -87,36 +92,48 @@ export function createMatchmakingRouter({
   router.post("/presence", async (request, response) =>
     response.json({ state: await matchmaking.touch(request.user!.id) }),
   );
-  router.post("/tickets", participant, async (request, response) => {
-    const input = ticketInput(request.body);
-    if (!input)
-      return response.status(400).json({ error: "choose a topic and a side" });
-    try {
-      return response
-        .status(201)
-        .json({ state: await matchmaking.enter(request.user!.id, input) });
-    } catch (error) {
-      return errorResponse(response, error);
-    }
-  });
+  router.post(
+    "/tickets",
+    participant,
+    unrestricted,
+    async (request, response) => {
+      const input = ticketInput(request.body);
+      if (!input)
+        return response
+          .status(400)
+          .json({ error: "choose a topic and a side" });
+      try {
+        return response
+          .status(201)
+          .json({ state: await matchmaking.enter(request.user!.id, input) });
+      } catch (error) {
+        return errorResponse(response, error);
+      }
+    },
+  );
   router.delete("/tickets/current", participant, async (request, response) =>
     response.json({ state: await matchmaking.leave(request.user!.id) }),
   );
-  router.post("/offers/:id/accept", participant, async (request, response) => {
-    const id = offerId(request);
-    if (!id) return response.status(404).json({ error: "match not found" });
-    try {
-      const result = await matchmaking.accept(request.user!.id, id);
-      if (result.debateId)
-        await recordProductAction?.(request, {
-          type: "match_accepted",
-          debateId: result.debateId,
-        });
-      return response.json({ state: result.state });
-    } catch (error) {
-      return errorResponse(response, error);
-    }
-  });
+  router.post(
+    "/offers/:id/accept",
+    participant,
+    unrestricted,
+    async (request, response) => {
+      const id = offerId(request);
+      if (!id) return response.status(404).json({ error: "match not found" });
+      try {
+        const result = await matchmaking.accept(request.user!.id, id);
+        if (result.debateId)
+          await recordProductAction?.(request, {
+            type: "match_accepted",
+            debateId: result.debateId,
+          });
+        return response.json({ state: result.state });
+      } catch (error) {
+        return errorResponse(response, error);
+      }
+    },
+  );
   router.post("/offers/:id/decline", participant, async (request, response) => {
     const id = offerId(request);
     if (!id) return response.status(404).json({ error: "match not found" });

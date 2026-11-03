@@ -5,6 +5,7 @@ import {
   withTransaction,
 } from "../../platform/transaction.ts";
 import { createCommunityDelivery, publicFrame } from "./delivery.ts";
+import { activeRestriction } from "./restrictions.ts";
 
 export class CommunityNotFoundError extends Error {}
 export class CommunityConflictError extends Error {
@@ -31,6 +32,8 @@ export type ReasonCode =
   "harassment" | "hate" | "threat" | "spam" | "privacy" | "other";
 export type CaseAction =
   "dismiss" | "remove_chat" | "restrict_account" | "pause_chat";
+export type ContentType = "topic" | "profile" | "debate";
+type PublicationState = "draft" | "published" | "hidden";
 
 interface EventRow {
   id: string;
@@ -173,15 +176,83 @@ async function eventFor(client: PoolClient, id: string, lock = false) {
 }
 
 async function assertWritable(client: PoolClient, userId: string) {
-  const restricted = await client.query(
-    `SELECT 1 FROM community_restrictions
-     WHERE user_id = $1 AND revoked_at IS NULL AND expires_at > CURRENT_TIMESTAMP
-     LIMIT 1`,
-    [userId],
-  );
-  if (restricted.rowCount)
+  if (await activeRestriction(client, userId))
     throw new CommunityForbiddenError("community activity is restricted");
 }
+
+const contentTables = {
+  topic: "topics",
+  profile: "public_profiles",
+  debate: "debates",
+} as const satisfies Record<ContentType, string>;
+const uuidKey =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+// A topic by slug, a profile by handle, a debate by slug or id, locked for a visibility change.
+// Its owners hear about the change: a topic's creator, a profile's owner, a debate's speakers.
+// They and, for a topic, everyone who debated on it are involved and cannot decide it.
+async function contentFor(client: PoolClient, type: ContentType, key: string) {
+  const query =
+    type === "topic"
+      ? `SELECT id, slug AS key, publication_state AS state FROM topics WHERE slug = $1`
+      : type === "profile"
+        ? `SELECT id, handle AS key, publication_state AS state FROM public_profiles WHERE handle = $1`
+        : `SELECT id, slug AS key, publication_state AS state FROM debates
+           WHERE ${uuidKey.test(key) ? "id = $1::uuid" : "slug = $1"}`;
+  const found = await client.query<{
+    id: string;
+    key: string;
+    state: PublicationState;
+  }>(`${query} FOR UPDATE`, [key]);
+  const item = found.rows[0];
+  if (!item) throw new CommunityNotFoundError(`${type} not found`);
+  const accounts = async (sql: string) =>
+    (await client.query<{ userId: string }>(sql, [item.id])).rows.map(
+      (row) => row.userId,
+    );
+  const owners = await accounts(
+    type === "topic"
+      ? `SELECT creator_user_id AS "userId" FROM topics WHERE id = $1 AND creator_user_id IS NOT NULL`
+      : type === "profile"
+        ? `SELECT user_id AS "userId" FROM public_profiles WHERE id = $1 AND user_id IS NOT NULL`
+        : `SELECT user_id AS "userId" FROM event_participants WHERE debate_id = $1`,
+  );
+  const debaters =
+    type === "topic"
+      ? await accounts(
+          `SELECT DISTINCT p.user_id AS "userId" FROM event_participants p
+           JOIN debates d ON d.id = p.debate_id WHERE d.topic_id = $1`,
+        )
+      : [];
+  return { ...item, owners, involved: [...owners, ...debaters] };
+}
+
+// Restoring returns an item to the state its latest hide replaced. An item hidden outside the
+// app returns to draft if it is a profile, which only its owner publishes, and otherwise to
+// published.
+async function restoredState(
+  client: PoolClient,
+  type: ContentType,
+  id: string,
+): Promise<"draft" | "published"> {
+  const latest = await client.query<{
+    action: "hide" | "unhide";
+    fromState: "draft" | "published";
+  }>(
+    `SELECT action, from_state AS "fromState" FROM content_moderation_actions
+     WHERE target_type = $1 AND target_id = $2 ORDER BY created_at DESC, id DESC LIMIT 1`,
+    [type, id],
+  );
+  const action = latest.rows[0];
+  if (action?.action === "hide") return action.fromState;
+  return type === "profile" ? "draft" : "published";
+}
+
+const contentNotices = {
+  topic: ["one of your topics", "your topic"],
+  profile: ["your public profile", "your public profile"],
+  debate: ["one of your debates", "your debate"],
+} as const satisfies Record<ContentType, readonly [string, string]>;
 
 async function caseFor(client: PoolClient, id: string, lock = false) {
   const result = await client.query<CaseRow>(
@@ -893,6 +964,99 @@ export function createCommunityRepository(database: Pool) {
       });
     },
 
+    // Moderators hide a topic, profile or debate from public pages, or restore it (YA-07). The
+    // accounts the item involves cannot decide it, as with cases.
+    async setContentVisibility(
+      type: ContentType,
+      key: string,
+      moderatorId: string,
+      hidden: boolean,
+      reasonCode: ReasonCode | null,
+      note: string,
+    ) {
+      return withTransaction(database, async (client) => {
+        const item = await contentFor(client, type, key);
+        if (item.involved.includes(moderatorId))
+          throw new CommunityForbiddenError(
+            "cannot moderate your own content or debates",
+          );
+        if (hidden === (item.state === "hidden"))
+          throw new CommunityConflictError(
+            hidden ? `${type} is already hidden` : `${type} is not hidden`,
+          );
+        const state = hidden
+          ? "hidden"
+          : await restoredState(client, type, item.id);
+        await client.query(
+          `UPDATE ${contentTables[type]} SET publication_state = $2,
+             updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+          [item.id, state],
+        );
+        const action = await client.query<{ id: string }>(
+          `INSERT INTO content_moderation_actions
+             (target_type, target_id, action, from_state, to_state, reason_code)
+           VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+          [
+            type,
+            item.id,
+            hidden ? "hide" : "unhide",
+            item.state,
+            state,
+            hidden ? reasonCode : null,
+          ],
+        );
+        await client.query(
+          `INSERT INTO community_audit_events (content_action_id, actor_user_id, action, note)
+           VALUES ($1, $2, $3, $4)`,
+          [
+            action.rows[0]!.id,
+            moderatorId,
+            hidden ? "content_hidden" : "content_restored",
+            note,
+          ],
+        );
+        const [hiddenNotice, restoredNotice] = contentNotices[type];
+        for (const userId of item.owners)
+          await client.query(
+            `INSERT INTO account_notifications (user_id, event_type, message, debate_id)
+             VALUES ($1, 'community_moderation', $2, $3)`,
+            [
+              userId,
+              hidden
+                ? `A moderator hid ${hiddenNotice} from public pages.`
+                : `A moderator restored ${restoredNotice}.`,
+              type === "debate" ? item.id : null,
+            ],
+          );
+        return {
+          id: action.rows[0]!.id,
+          targetType: type,
+          target: item.key,
+          publicationState: state,
+        };
+      });
+    },
+
+    async listContentActions() {
+      const result = await database.query(
+        `SELECT a.id, a.target_type AS "targetType", a.target_id AS "targetId",
+           COALESCE(t.slug, p.handle, d.slug) AS target,
+           COALESCE(t.title, p.display_name, d.proposition) AS label,
+           COALESCE(t.publication_state, p.publication_state, d.publication_state)
+             AS "publicationState",
+           a.action, a.from_state AS "fromState", a.to_state AS "toState",
+           a.reason_code AS "reasonCode", e.note, e.actor_user_id AS "actorUserId",
+           a.created_at AS "createdAt"
+         FROM content_moderation_actions a
+         JOIN community_audit_events e ON e.content_action_id = a.id
+         LEFT JOIN topics t ON a.target_type = 'topic' AND t.id = a.target_id
+         LEFT JOIN public_profiles p ON a.target_type = 'profile' AND p.id = a.target_id
+         LEFT JOIN debates d ON a.target_type = 'debate' AND d.id = a.target_id
+         ORDER BY a.created_at DESC, a.id DESC LIMIT 50`,
+      );
+      return result.rows;
+    },
+
     async pruneExpired() {
       const totals = await withTransaction(database, async (client) => {
         const cases =
@@ -905,8 +1069,18 @@ export function createCommunityRepository(database: Pool) {
           await client.query(`DELETE FROM event_like_changes WHERE id IN (
           SELECT id FROM event_like_changes WHERE changed_at < CURRENT_TIMESTAMP - INTERVAL '365 days'
           ORDER BY id LIMIT 500 FOR UPDATE SKIP LOCKED)`);
+        // An item's latest hide stays while it is hidden: restoring reads the state it replaced.
+        const contentActions =
+          await client.query(`DELETE FROM content_moderation_actions WHERE id IN (
+          SELECT a.id FROM content_moderation_actions a
+          WHERE a.created_at < CURRENT_TIMESTAMP - INTERVAL '365 days'
+            AND (a.action = 'unhide' OR EXISTS (SELECT 1 FROM content_moderation_actions b
+              WHERE b.target_type = a.target_type AND b.target_id = a.target_id
+                AND (b.created_at, b.id) > (a.created_at, a.id)))
+          ORDER BY a.created_at, a.id LIMIT 500 FOR UPDATE SKIP LOCKED)`);
         return {
           cases: cases.rowCount ?? 0,
+          contentActions: contentActions.rowCount ?? 0,
           chat: 0,
           likes: 0,
           likeChanges: likeChanges.rowCount ?? 0,

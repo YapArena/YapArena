@@ -38,6 +38,7 @@ function fixture({
   participant = true,
   publicationState = "published",
   debateAutoStart,
+  restricted = null,
 } = {}) {
   const calls = [];
   const event = {
@@ -101,7 +102,10 @@ function fixture({
   const app = createApp({
     matching,
     debateAutoStart,
-    identity: { getRoles: async () => roles },
+    identity: {
+      getRoles: async () => roles,
+      restriction: async () => (restricted ? { expiresAt: restricted } : null),
+    },
     sessions: {
       findUserByTokenHash: async () => (signedIn ? user : null),
       create: async () => {},
@@ -526,7 +530,10 @@ describe("matching API with the live queue on", () => {
               return { id };
             },
           },
-          identity: { getRoles: async () => ["participant"] },
+          identity: {
+            getRoles: async () => ["participant"],
+            restriction: async () => null,
+          },
           liveQueue: true,
         }),
       );
@@ -575,7 +582,10 @@ describe("direct challenge routes", () => {
               return [{ handle: "riley", displayName: "Riley" }];
             },
           },
-          identity: { getRoles: async () => ["participant"] },
+          identity: {
+            getRoles: async () => ["participant"],
+            restriction: async () => null,
+          },
         }),
       );
     return { app, calls };
@@ -677,5 +687,157 @@ describe("direct challenge routes", () => {
         ["propose", 1],
       ],
     );
+  });
+});
+
+describe("matching moderation and privacy", () => {
+  const ended = {
+    id,
+    slug: `debate-${id}`,
+    status: "void_review",
+    publicationState: "published",
+    endedReason: "Operator note about this debate",
+  };
+  const later = (hoursAhead) =>
+    new Date(Date.now() + hoursAhead * 60 * 60 * 1000).toISOString();
+  const challenge = {
+    id,
+    kind: "direct",
+    status: "open",
+    initiatorUserId: "7",
+    targetUserId: "8",
+    proposals: [
+      { id: "p1", proposedBy: "8", startsAt: later(3) },
+      { id: "p2", proposedBy: "7", startsAt: later(4) },
+    ],
+  };
+  function routes({ restricted = false, roles = ["participant"], owned } = {}) {
+    const calls = [];
+    const record =
+      (name, value) =>
+      async (...args) => {
+        calls.push([name, ...args]);
+        return value;
+      };
+    const app = express()
+      .use(express.json())
+      .use((req, _res, next) => {
+        req.user = { id: "7" };
+        next();
+      })
+      .use(
+        createMatchingRouter({
+          matching: {
+            createTopic: record("createTopic", { slug: "civil-ai" }),
+            publishTopic: record("publishTopic", { slug: "civil-ai" }),
+            listRequests: record("listRequests", [challenge]),
+            listQueue: record("listQueue", [
+              { ...challenge, kind: "queue", initiatorUserId: "9" },
+            ]),
+            createRequest: record("createRequest", challenge),
+            acceptRequest: record("acceptRequest", ended),
+            proposeTimes: record("proposeTimes", challenge),
+            joinQueue: record("joinQueue", ended),
+            closeRequest: record("closeRequest", challenge),
+            markReady: record("markReady", ended),
+            getEvent: async () => ended,
+            isParticipant: async () => owned === true,
+            getEventHistory: async () => [{ action: "void_review" }],
+          },
+          identity: {
+            getRoles: async () => roles,
+            restriction: async () =>
+              restricted ? { expiresAt: new Date("2026-11-09") } : null,
+          },
+        }),
+      );
+    return { app, calls };
+  }
+
+  it("refuses topics, requests, answers and seats to a restricted account", async () => {
+    const { app, calls } = routes({ restricted: true });
+    for (const [path, body] of [
+      ["/topics", topicInput],
+      ["/topics/civil-ai/publish", {}],
+      ["/requests", requestInput],
+      [`/requests/${id}/accept`, {}],
+      [`/requests/${id}/proposals`, { times: [later(3)] }],
+      [`/queue/${id}/join`, {}],
+      [`/events/${id}/ready`, {}],
+    ]) {
+      const response = await request(app).post(path).send(body);
+      assert.equal(response.status, 403, path);
+      assert.equal(response.body.code, "account_restricted");
+    }
+    assert.deepEqual(calls, []);
+    // Declining and withdrawing only end activity, so they stay open.
+    for (const action of ["declined", "withdrawn"])
+      assert.equal(
+        (await request(app).post(`/requests/${id}/${action}`)).status,
+        200,
+      );
+  });
+
+  it("refuses hidden characters in topics and propositions", async () => {
+    const { app, calls } = routes();
+    for (const body of [
+      { ...topicInput, title: "Civil use of AI‮" },
+      { ...topicInput, summary: "Should cities\u0000 use AI?" },
+      { ...topicInput, sideALabel: "F​or" },
+    ])
+      assert.equal((await request(app).post("/topics").send(body)).status, 400);
+    assert.equal(
+      (
+        await request(app)
+          .post("/requests")
+          .send({ ...requestInput, proposition: "Should cities use AI\u0000?" })
+      ).status,
+      400,
+    );
+    assert.deepEqual(calls, []);
+    // Line breaks in a summary still become single spaces.
+    const created = await request(app)
+      .post("/topics")
+      .send({ ...topicInput, summary: "Should cities\nuse AI?" });
+    assert.equal(created.status, 201);
+    assert.equal(calls[0][2].summary, "Should cities use AI?");
+  });
+
+  it("keeps an operator's ended reason with the players and operators", async () => {
+    const viewer = await request(routes().app).get(`/events/${id}`);
+    assert.equal(viewer.status, 200);
+    assert.equal(viewer.body.event.status, "void_review");
+    assert.equal("endedReason" in viewer.body.event, false);
+    assert.deepEqual(viewer.body.history, []);
+    for (const app of [
+      routes({ owned: true }).app,
+      routes({ roles: ["operator"] }).app,
+    ]) {
+      const response = await request(app).get(`/events/${id}`);
+      assert.equal(response.body.event.endedReason, ended.endedReason);
+      assert.equal(response.body.history.length, 1);
+    }
+  });
+
+  it("shows each player only their own account id", async () => {
+    const { app } = routes();
+    const listed = (await request(app).get("/requests")).body.requests[0];
+    assert.equal(listed.initiatorUserId, "7");
+    assert.equal(listed.targetUserId, null);
+    assert.deepEqual(
+      listed.proposals.map((proposal) => proposal.proposedBy),
+      [null, "7"],
+    );
+    const queued = (await request(app).get("/queue")).body.requests[0];
+    assert.equal(queued.initiatorUserId, null);
+    for (const [path, body] of [
+      ["/requests", requestInput],
+      [`/requests/${id}/proposals`, { times: [later(3)] }],
+      [`/requests/${id}/declined`, {}],
+    ]) {
+      const sent = (await request(app).post(path).send(body)).body.request;
+      assert.equal(sent.initiatorUserId, "7", path);
+      assert.equal(sent.targetUserId, null, path);
+    }
   });
 });

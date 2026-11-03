@@ -118,6 +118,20 @@ function fixture({
       return { chatState: "open" };
     },
     listAppeals: async () => [],
+    listContentActions: async () => {
+      calls.push(["listContentActions"]);
+      return [{ id: caseId, targetType: "topic", action: "hide" }];
+    },
+    setContentVisibility: async (...args) => {
+      calls.push(["setContentVisibility", ...args]);
+      if (failure) throw failure;
+      return {
+        id: caseId,
+        targetType: args[0],
+        target: args[1],
+        publicationState: args[3] ? "hidden" : "published",
+      };
+    },
     decideAppeal: async (...args) => {
       calls.push(["decideAppeal", ...args]);
       if (failure) throw failure;
@@ -583,6 +597,101 @@ describe("community API and share surfaces", () => {
       ).status,
       200,
     );
+  });
+
+  it("refuses chat with hidden or control characters but keeps line breaks", async () => {
+    const { auth, calls } = fixture();
+    const post = (body) =>
+      auth("post", `/api/community/events/${eventId}/chat`).send({ body });
+    for (const body of ["Hi\u0000", "evil\u202Etext", "zero\u200Bwidth"]) {
+      const response = await post(body);
+      assert.equal(response.status, 400);
+      assert.equal(response.body.code, "CHAT_INVALID_BODY");
+      assert.match(response.body.error, /hidden or control characters/);
+    }
+    assert.ok(!calls.some(([name]) => name === "postChat"));
+    assert.equal((await post("First line\nsecond 🏳️‍🌈")).status, 201);
+  });
+
+  it("lets only moderators hide and restore topics, profiles and debates", async () => {
+    const path = "/api/community/moderation/visibility";
+    const hide = {
+      targetType: "topic",
+      target: "civil-ai",
+      hidden: true,
+      reasonCode: "spam",
+      note: "Promotional topic with no debate",
+    };
+    const member = fixture();
+    assert.equal((await member.auth("get", path)).status, 403);
+    assert.equal((await member.auth("post", path).send(hide)).status, 403);
+    assert.ok(!member.calls.some(([name]) => name === "setContentVisibility"));
+
+    const mod = fixture({ roles: ["moderator"] });
+    assert.equal((await mod.auth("get", path)).body[0].action, "hide");
+    const hidden = await mod.auth("post", path).send(hide);
+    assert.equal(hidden.status, 200);
+    assert.equal(hidden.body.publicationState, "hidden");
+    assert.deepEqual(mod.calls.at(-1), [
+      "setContentVisibility",
+      "topic",
+      "civil-ai",
+      "7",
+      true,
+      "spam",
+      "Promotional topic with no debate",
+    ]);
+    for (const [targetType, target, key] of [
+      ["profile", " @Maya-Chen ", "maya-chen"],
+      ["debate", eventId.toUpperCase(), eventId],
+      ["debate", "debate-community-test", "debate-community-test"],
+    ]) {
+      const restored = await mod.auth("post", path).send({
+        targetType,
+        target,
+        hidden: false,
+        note: "Reviewed again and restored",
+      });
+      assert.equal(restored.status, 200, target);
+      assert.deepEqual(mod.calls.at(-1).slice(1, 6), [
+        targetType,
+        key,
+        "7",
+        false,
+        null,
+      ]);
+    }
+    const before = mod.calls.length;
+    for (const body of [
+      { ...hide, targetType: "chat" },
+      { ...hide, target: "Bad Slug!" },
+      { ...hide, targetType: "profile", target: "x".repeat(41) },
+      { ...hide, hidden: "yes" },
+      { ...hide, reasonCode: undefined },
+      { ...hide, reasonCode: "boring" },
+      { ...hide, hidden: false },
+      { ...hide, note: "short" },
+      { ...hide, target: 7 },
+    ])
+      assert.equal(
+        (await mod.auth("post", path).send(body)).status,
+        400,
+        JSON.stringify(body),
+      );
+    assert.equal(mod.calls.length, before);
+    for (const [failure, status] of [
+      [new CommunityForbiddenError("cannot moderate your own content"), 403],
+      [new CommunityNotFoundError("topic not found"), 404],
+      [new CommunityConflictError("topic is already hidden"), 409],
+    ])
+      assert.equal(
+        (
+          await fixture({ roles: ["moderator"], failure })
+            .auth("post", path)
+            .send(hide)
+        ).status,
+        status,
+      );
   });
 
   it("requires a valid appeal and a different moderator decision", async () => {

@@ -5,6 +5,7 @@ import { runExclusiveDatabaseJob } from "../../platform/database-jobs.ts";
 import { assertDebaterSettings } from "../transcription/debater-settings.ts";
 import {
   activeRules,
+  assertNotRestricted,
   remindScheduledDebate,
   settleUnansweredNowChallenges,
   retireOpenQueueRequests,
@@ -221,7 +222,8 @@ async function pairOldest(
   return true;
 }
 
-// A player who no longer qualifies (already seated, profile unpublished) cannot be matched.
+// A player who no longer qualifies (already seated, profile unpublished, restricted) cannot be
+// matched.
 async function unavailableSides(client: PoolClient, offer: OfferRow) {
   const sides: Side[] = [];
   const now = reservationFor(
@@ -236,6 +238,7 @@ async function unavailableSides(client: PoolClient, offer: OfferRow) {
     try {
       await ensureAvailable(client, userId, now);
       await profileFor(client, userId);
+      await assertNotRestricted(client, userId);
     } catch (error) {
       if (!(error instanceof MatchConflictError)) throw error;
       sides.push(side);

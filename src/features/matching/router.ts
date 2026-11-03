@@ -5,7 +5,11 @@ import type { createIdentityRepository } from "../identity/repository.ts";
 import type { createMediaRepository } from "../media/repository.ts";
 import type { ProductActionRecorder } from "../measurement/router.ts";
 import { MediaConflictError } from "../media/repository.ts";
-import { createRequireRole } from "../identity/router.ts";
+import {
+  createRequireRole,
+  createRequireUnrestricted,
+} from "../identity/router.ts";
+import { hasHiddenCharacters } from "../community/user-text.ts";
 import { MatchConflictError, MatchNotFoundError } from "./repository.ts";
 import { DebaterSettingsRequiredError } from "../transcription/debater-settings.ts";
 import { PROPOSAL_MIN_LEAD_MINUTES } from "./timings.ts";
@@ -22,10 +26,14 @@ function object(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
+// Runs of whitespace, line breaks included, become one space. Other control and invisible
+// formatting characters are refused (YA-22).
 function text(value: unknown, max: number, min = 1): string | null {
   if (typeof value !== "string") return null;
   const normalized = value.trim().replace(/\s+/g, " ");
-  return normalized.length >= min && normalized.length <= max
+  return normalized.length >= min &&
+    normalized.length <= max &&
+    !hasHiddenCharacters(normalized)
     ? normalized
     : null;
 }
@@ -172,6 +180,29 @@ function errorResponse(response: Response, error: unknown) {
   throw error;
 }
 
+// Each player sees only their own account id in a request; the other player is known by
+// handle (YA-17). The browser compares these ids with the signed-in account's.
+function forViewer<
+  T extends {
+    initiatorUserId: string;
+    targetUserId: string | null;
+    proposals?: readonly { proposedBy: string }[];
+  },
+>(request: T, viewerId: string) {
+  const own = (id: string | null) => (id === viewerId ? id : null);
+  return {
+    ...request,
+    initiatorUserId: own(request.initiatorUserId),
+    targetUserId: own(request.targetUserId),
+    ...(request.proposals && {
+      proposals: request.proposals.map((proposal) => ({
+        ...proposal,
+        proposedBy: own(proposal.proposedBy),
+      })),
+    }),
+  };
+}
+
 function idFrom(request: Request) {
   const id = request.params.id;
   return typeof id === "string" && uuidPattern.test(id) ? id : null;
@@ -196,6 +227,8 @@ export function createMatchingRouter({
 }) {
   const router = Router();
   const participant = createRequireRole(identity, ["participant"]);
+  // Topics, requests, answers and seats are closed to a restricted account (YA-07).
+  const unrestricted = createRequireUnrestricted(identity);
   const operator = createRequireRole(identity, ["operator"]);
   router.use((_request, response, next) => {
     response.set("Cache-Control", "no-store");
@@ -208,21 +241,27 @@ export function createMatchingRouter({
   router.get("/topics/mine", async (request, response) =>
     response.json({ topics: await matching.listOwnTopics(request.user!.id) }),
   );
-  router.post("/topics", participant, async (request, response) => {
-    const input = topicInput(request.body);
-    if (!input)
-      return response.status(400).json({ error: "invalid topic fields" });
-    try {
-      return response
-        .status(201)
-        .json({ topic: await matching.createTopic(request.user!.id, input) });
-    } catch (error) {
-      return errorResponse(response, error);
-    }
-  });
+  router.post(
+    "/topics",
+    participant,
+    unrestricted,
+    async (request, response) => {
+      const input = topicInput(request.body);
+      if (!input)
+        return response.status(400).json({ error: "invalid topic fields" });
+      try {
+        return response
+          .status(201)
+          .json({ topic: await matching.createTopic(request.user!.id, input) });
+      } catch (error) {
+        return errorResponse(response, error);
+      }
+    },
+  );
   router.post(
     "/topics/:slug/publish",
     participant,
+    unrestricted,
     async (request, response) => {
       const slug = request.params.slug;
       if (typeof slug !== "string" || !slugPattern.test(slug))
@@ -235,35 +274,51 @@ export function createMatchingRouter({
   );
 
   router.get("/requests", async (request, response) =>
-    response.json({ requests: await matching.listRequests(request.user!.id) }),
+    response.json({
+      requests: (await matching.listRequests(request.user!.id)).map((item) =>
+        forViewer(item, request.user!.id),
+      ),
+    }),
   );
-  router.get("/queue", async (_request, response) =>
-    response.json({ requests: liveQueue ? [] : await matching.listQueue() }),
+  router.get("/queue", async (request, response) =>
+    response.json({
+      requests: liveQueue
+        ? []
+        : (await matching.listQueue()).map((item) =>
+            forViewer(item, request.user!.id),
+          ),
+    }),
   );
-  router.post("/requests", participant, async (request, response) => {
-    const input = requestInput(request.body);
-    if (!input)
-      return response.status(400).json({ error: "invalid debate request" });
-    if (liveQueue && input.kind === "queue")
-      return response.status(400).json({
-        error: "open a topic and queue on a side to be matched live",
-      });
-    try {
-      const created = await matching.createRequest(request.user!.id, input);
-      await recordProductAction?.(request, {
-        type: "match_requested",
-        requestId: created.id,
-      });
-      return response.status(201).json({
-        request: created,
-      });
-    } catch (error) {
-      return errorResponse(response, error);
-    }
-  });
+  router.post(
+    "/requests",
+    participant,
+    unrestricted,
+    async (request, response) => {
+      const input = requestInput(request.body);
+      if (!input)
+        return response.status(400).json({ error: "invalid debate request" });
+      if (liveQueue && input.kind === "queue")
+        return response.status(400).json({
+          error: "open a topic and queue on a side to be matched live",
+        });
+      try {
+        const created = await matching.createRequest(request.user!.id, input);
+        await recordProductAction?.(request, {
+          type: "match_requested",
+          requestId: created.id,
+        });
+        return response.status(201).json({
+          request: forViewer(created, request.user!.id),
+        });
+      } catch (error) {
+        return errorResponse(response, error);
+      }
+    },
+  );
   router.post(
     "/requests/:id/accept",
     participant,
+    unrestricted,
     async (request, response) => {
       const id = idFrom(request);
       if (!id) return response.status(404).json({ error: "request not found" });
@@ -293,6 +348,7 @@ export function createMatchingRouter({
   router.post(
     "/requests/:id/proposals",
     participant,
+    unrestricted,
     async (request, response) => {
       const id = idFrom(request);
       if (!id) return response.status(404).json({ error: "request not found" });
@@ -307,7 +363,10 @@ export function createMatchingRouter({
         });
       try {
         return response.json({
-          request: await matching.proposeTimes(request.user!.id, id, times),
+          request: forViewer(
+            await matching.proposeTimes(request.user!.id, id, times),
+            request.user!.id,
+          ),
         });
       } catch (error) {
         return errorResponse(response, error);
@@ -322,21 +381,26 @@ export function createMatchingRouter({
       people: await matching.searchPeople(request.user!.id, query),
     });
   });
-  router.post("/queue/:id/join", participant, async (request, response) => {
-    const id = idFrom(request);
-    if (!id)
-      return response.status(404).json({ error: "queue entry not found" });
-    try {
-      const event = await matching.joinQueue(request.user!.id, id);
-      await recordProductAction?.(request, {
-        type: "match_accepted",
-        debateId: event.id,
-      });
-      return response.status(201).json({ event });
-    } catch (error) {
-      return errorResponse(response, error);
-    }
-  });
+  router.post(
+    "/queue/:id/join",
+    participant,
+    unrestricted,
+    async (request, response) => {
+      const id = idFrom(request);
+      if (!id)
+        return response.status(404).json({ error: "queue entry not found" });
+      try {
+        const event = await matching.joinQueue(request.user!.id, id);
+        await recordProductAction?.(request, {
+          type: "match_accepted",
+          debateId: event.id,
+        });
+        return response.status(201).json({ event });
+      } catch (error) {
+        return errorResponse(response, error);
+      }
+    },
+  );
   for (const action of ["declined", "withdrawn"] as const) {
     router.post(
       `/requests/:id/${action}`,
@@ -347,7 +411,10 @@ export function createMatchingRouter({
           return response.status(404).json({ error: "request not found" });
         try {
           return response.json({
-            request: await matching.closeRequest(request.user!.id, id, action),
+            request: forViewer(
+              await matching.closeRequest(request.user!.id, id, action),
+              request.user!.id,
+            ),
           });
         } catch (error) {
           return errorResponse(response, error);
@@ -370,29 +437,41 @@ export function createMatchingRouter({
     );
     if (!owned && !operator && event.publicationState !== "published")
       return response.status(404).json({ error: "event not found" });
+    if (!owned && !operator) {
+      // An operator's reason for ending, voiding or cancelling stays with the players (YA-17).
+      return response.json({
+        event: { ...event, endedReason: undefined },
+        history: [],
+      });
+    }
     return response.json({
       event,
-      history: owned || operator ? await matching.getEventHistory(id) : [],
+      history: await matching.getEventHistory(id),
     });
   });
-  router.post("/events/:id/ready", participant, async (request, response) => {
-    const id = idFrom(request);
-    if (!id) return response.status(404).json({ error: "event not found" });
-    try {
-      if (media) await media.assertDeviceReady(id, request.user!.id);
-      const event = await matching.markReady(request.user!.id, id);
-      if (debateAutoStart && event.status === "ready")
-        try {
-          await debateAutoStart.tryStart(id);
-        } catch (error) {
-          // The jobs worker retries every second until the join window closes.
-          request.log.error({ error, id }, "automatic debate start failed");
-        }
-      return response.json({ event });
-    } catch (error) {
-      return errorResponse(response, error);
-    }
-  });
+  router.post(
+    "/events/:id/ready",
+    participant,
+    unrestricted,
+    async (request, response) => {
+      const id = idFrom(request);
+      if (!id) return response.status(404).json({ error: "event not found" });
+      try {
+        if (media) await media.assertDeviceReady(id, request.user!.id);
+        const event = await matching.markReady(request.user!.id, id);
+        if (debateAutoStart && event.status === "ready")
+          try {
+            await debateAutoStart.tryStart(id);
+          } catch (error) {
+            // The jobs worker retries every second until the join window closes.
+            request.log.error({ error, id }, "automatic debate start failed");
+          }
+        return response.json({ event });
+      } catch (error) {
+        return errorResponse(response, error);
+      }
+    },
+  );
   router.post("/events/:id/transition", operator, async (request, response) => {
     const id = idFrom(request);
     const body = object(request.body);

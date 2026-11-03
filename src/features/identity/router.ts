@@ -4,6 +4,7 @@ import type { createIdentityRepository } from "./repository.ts";
 import type { ProductActionRecorder } from "../measurement/router.ts";
 import { MINIMUM_AGE, TERMS_VERSION } from "./terms.ts";
 import { isAvatarId, type AvatarId } from "./avatars.ts";
+import { hasHiddenCharacters, isReservedName } from "../community/user-text.ts";
 
 type Repository = ReturnType<typeof createIdentityRepository>;
 const handlePattern = /^[a-z0-9][a-z0-9-]{2,39}$/;
@@ -35,11 +36,27 @@ const problems = {
     message:
       "Use 3 to 40 lowercase letters, numbers or hyphens, starting with a letter or number.",
   },
+  handleReserved: {
+    field: "handle",
+    message: "That handle is reserved. Try another.",
+  },
   displayName: {
     field: "displayName",
     message: "Enter a username between 1 and 80 characters.",
   },
+  displayNameHidden: {
+    field: "displayName",
+    message: "Remove hidden or control characters from your username.",
+  },
+  displayNameReserved: {
+    field: "displayName",
+    message: "Choose a username that doesn't look like YAP Arena staff.",
+  },
   bio: { field: "bio", message: "Keep your bio to 500 characters or fewer." },
+  bioHidden: {
+    field: "bio",
+    message: "Remove hidden or control characters from your bio.",
+  },
   publicationState: {
     field: "publicationState",
     message: "Choose a public or private profile.",
@@ -96,6 +113,7 @@ function profileInput(body: unknown):
   const avatarId = value.avatarId ?? null;
   if (typeof handle !== "string" || !handlePattern.test(handle))
     return { problem: problems.handle };
+  if (isReservedName(handle)) return { problem: problems.handleReserved };
   if (
     typeof displayName !== "string" ||
     displayName.trim().length < 1 ||
@@ -104,6 +122,8 @@ function profileInput(body: unknown):
     return { problem: problems.displayName };
   if (bio !== null && (typeof bio !== "string" || bio.length > 500))
     return { problem: problems.bio };
+  const content = textProblem({ displayName: displayName.trim(), bio });
+  if (content) return { problem: content };
   if (publicationState !== "draft" && publicationState !== "published")
     return { problem: problems.publicationState };
   if (avatarId !== null && !isAvatarId(avatarId))
@@ -120,6 +140,26 @@ function profileInput(body: unknown):
       acceptTerms: value.acceptTerms === true,
     },
   };
+}
+
+// Names and bios are public: no hidden characters and no staff look-alike names (YA-22). A field
+// saved before these rules is checked again only when it changes.
+function textProblem(
+  changes: { displayName?: string; bio?: string | null },
+  current?: { displayName: string; bio: string | null },
+): FieldProblem | null {
+  const { displayName, bio } = changes;
+  if (displayName !== undefined && displayName !== current?.displayName) {
+    if (hasHiddenCharacters(displayName)) return problems.displayNameHidden;
+    if (isReservedName(displayName)) return problems.displayNameReserved;
+  }
+  if (
+    typeof bio === "string" &&
+    bio !== current?.bio &&
+    hasHiddenCharacters(bio, { multiline: true })
+  )
+    return problems.bioHidden;
+  return null;
 }
 
 function profileChanges(body: unknown):
@@ -217,6 +257,7 @@ export function createIdentityRouter({
 }) {
   const router = Router();
   const requireParticipant = createRequireRole(identity, ["participant"]);
+  const requireUnrestricted = createRequireUnrestricted(identity);
   router.use((_request, response, next) => {
     response.set("Cache-Control", "no-store");
     next();
@@ -228,38 +269,43 @@ export function createIdentityRouter({
       ? response.json({ profile })
       : response.status(404).json({ error: "profile not found" });
   });
-  router.post("/profile", requireParticipant, async (request, response) => {
-    const input = profileInput(request.body);
-    if ("problem" in input) return invalid(response, input.problem);
-    // A new account confirms the minimum age and accepts the terms first.
-    if (!input.value.acceptTerms) return invalid(response, problems.terms);
-    try {
-      const profile = await identity.createProfile(
-        request.user!.id,
-        input.value.handle,
-        input.value.displayName,
-        input.value.bio,
-        input.value.publicationState,
-        { version: TERMS_VERSION, minimumAge: MINIMUM_AGE },
-        input.value.avatarId,
-      );
-      return response.status(201).json({ profile });
-    } catch (error) {
-      const duplicate = uniqueViolation(error);
-      if (duplicate === "handle")
-        return response.status(409).json({
-          error: "That handle is taken. Try another.",
-          code: "handle_taken",
-          field: "handle",
-        });
-      if (duplicate === "profile")
-        return response.status(409).json({
-          error: "You already have a profile.",
-          code: "profile_exists",
-        });
-      throw error;
-    }
-  });
+  router.post(
+    "/profile",
+    requireParticipant,
+    requireUnrestricted,
+    async (request, response) => {
+      const input = profileInput(request.body);
+      if ("problem" in input) return invalid(response, input.problem);
+      // A new account confirms the minimum age and accepts the terms first.
+      if (!input.value.acceptTerms) return invalid(response, problems.terms);
+      try {
+        const profile = await identity.createProfile(
+          request.user!.id,
+          input.value.handle,
+          input.value.displayName,
+          input.value.bio,
+          input.value.publicationState,
+          { version: TERMS_VERSION, minimumAge: MINIMUM_AGE },
+          input.value.avatarId,
+        );
+        return response.status(201).json({ profile });
+      } catch (error) {
+        const duplicate = uniqueViolation(error);
+        if (duplicate === "handle")
+          return response.status(409).json({
+            error: "That handle is taken. Try another.",
+            code: "handle_taken",
+            field: "handle",
+          });
+        if (duplicate === "profile")
+          return response.status(409).json({
+            error: "You already have a profile.",
+            code: "profile_exists",
+          });
+        throw error;
+      }
+    },
+  );
   router.patch("/profile", requireParticipant, async (request, response) => {
     const changes = profileChanges(request.body);
     if ("problem" in changes) return invalid(response, changes.problem);
@@ -271,6 +317,14 @@ export function createIdentityRouter({
         error:
           "Your profile is restricted by moderation. Contact support before changing it.",
       });
+    // A restricted account can still make its profile private, and nothing else.
+    const keys = Object.keys(changes.value);
+    if (keys.length !== 1 || changes.value.publicationState !== "draft") {
+      const restriction = await identity.restriction(request.user!.id);
+      if (restriction) return restricted(response, restriction);
+    }
+    const content = textProblem(changes.value, current);
+    if (content) return invalid(response, content);
     const profile = await identity.updateProfile(
       request.user!.id,
       changes.value,
@@ -288,6 +342,8 @@ export function createIdentityRouter({
     const handle = request.params.handle;
     if (typeof handle !== "string" || !handlePattern.test(handle))
       return response.json({ handle, available: false, reason: "invalid" });
+    if (isReservedName(handle))
+      return response.json({ handle, available: false, reason: "reserved" });
     const taken = await identity.isHandleTaken(handle);
     return response.json({
       handle,
@@ -373,6 +429,7 @@ export function createIdentityRouter({
     router.put(
       `/follows${route}`,
       requireParticipant,
+      requireUnrestricted,
       async (request, response) => {
         const slug = request.params.slug;
         if (
@@ -412,6 +469,31 @@ export function createIdentityRouter({
     );
   }
   return router;
+}
+
+function restricted(response: Response, restriction: { expiresAt: Date }) {
+  return response.status(403).json({
+    error:
+      "Your account is restricted by moderation for now. See My reports and appeals.",
+    code: "account_restricted",
+    restrictedUntil: restriction.expiresAt,
+  });
+}
+
+/**
+ * Refuses a write while the account has an active community restriction (YA-07). Chat, likes and
+ * reports check the same restriction inside their own transactions.
+ */
+export function createRequireUnrestricted(
+  identity: Pick<Repository, "restriction">,
+) {
+  return async (request: Request, response: Response, next: NextFunction) => {
+    if (!request.user)
+      return response.status(401).json({ error: "authentication required" });
+    const restriction = await identity.restriction(request.user.id);
+    if (restriction) return restricted(response, restriction);
+    return next();
+  };
 }
 
 export function createRequireRole(

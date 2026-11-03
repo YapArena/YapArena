@@ -138,10 +138,16 @@ function show() {
   let finished = false;
   let handleEdited = false;
   let suggested = "";
-  let available: { handle: string; value: boolean | null } = {
-    handle: "",
-    value: null,
-  };
+  // A handle can be unavailable because it is taken or reserved for staff names.
+  let available: { handle: string; value: boolean | null; reserved?: boolean } =
+    {
+      handle: "",
+      value: null,
+    };
+  const unavailable = (value: string) =>
+    available.reserved
+      ? `@${value} is reserved. Try another.`
+      : `@${value} is taken. Try another.`;
   let timer: number | undefined;
   let check: AbortController | undefined;
   let created: Profile | null = null;
@@ -223,15 +229,15 @@ function show() {
       const body: { available: boolean; reason?: string } =
         await response.json();
       if (handle.value !== value) return;
-      available = { handle: value, value: body.available };
+      available = {
+        handle: value,
+        value: body.available,
+        reserved: body.reason === "reserved",
+      };
       if (body.available) setHandleState("available", `@${value} is free.`);
-      else
-        setHandleState(
-          body.reason === "taken" ? "taken" : "invalid",
-          body.reason === "taken"
-            ? `@${value} is taken. Try another.`
-            : handleHelp,
-        );
+      else if (body.reason === "taken" || body.reason === "reserved")
+        setHandleState("taken", unavailable(value));
+      else setHandleState("invalid", handleHelp);
     } catch {
       if (handle.value !== value || request.signal.aborted) return;
       available = { handle: value, value: null };
@@ -255,9 +261,7 @@ function show() {
       // Back to a handle already checked: show that answer again.
       setHandleState(
         available.value ? "available" : "taken",
-        available.value
-          ? `@${value} is free.`
-          : `@${value} is taken. Try another.`,
+        available.value ? `@${value} is free.` : unavailable(value),
       );
     } else {
       setHandleState("checking", `Checking @${value}…`);
