@@ -1,6 +1,6 @@
 import type { Pool, PoolClient } from "pg";
 import { withTransaction } from "../../platform/transaction.ts";
-import { containsBlockedTerm } from "./moderation.ts";
+import { acceptOutlineText } from "./moderation.ts";
 import { resolveCleanup } from "./cleanup.ts";
 import { CLEANUP_ACCEPT_MS } from "../transcription/protocol.ts";
 import {
@@ -194,7 +194,7 @@ export async function applyProposal(
   const resolved = resolveEdits(current, input.proposal.edits, {
     span: input.proposal.span,
     known,
-    accept: (text) => !containsBlockedTerm(text),
+    accept: acceptOutlineText,
   });
   if (
     !resolved.edits.length ||
@@ -485,7 +485,7 @@ export function createOutlineRepository(database: Pool) {
           live,
           cleanup.arguments,
           earlier,
-          (text) => !containsBlockedTerm(text),
+          acceptOutlineText,
         );
         if (!resolved) return refuse(422, "empty");
         if (outlineBytes(resolved.outline) > SNAPSHOT_MAX_BYTES)
