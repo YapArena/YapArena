@@ -257,6 +257,62 @@ Deploy the auth fixes with a coordinated restart. The additive F03 migration sig
 legacy sessions and consumes pending challenges. Its schema guards must stay installed
 through application rollback; restored session rows must be retired before reopening traffic.
 
+### Suspend or reinstate an account
+
+`scripts/suspend-account.ts` is an owner command. The owner runs it from a built checkout of
+the deployed release with the owner environment file, never from CI, an agent or a runtime
+service:
+
+```sh
+npm run build
+node --env-file="$HOME/yaparena-private/production/owner.env" scripts/suspend-account.ts suspend 123 "Reason for the record"
+node --env-file="$HOME/yaparena-private/production/owner.env" scripts/suspend-account.ts suspend 123 "Reason for the record" --execute
+```
+
+Without `--execute` it previews the change and rolls it back. It refuses any login but the
+dedicated `yaparena_owner`, and the reason must be 5–500 characters. A suspension:
+
+- sets `users.account_status` to `suspended`: the database deletes every session, advances the
+  account's generation, queues the disconnection of any live speaker grant, and sign-in
+  refuses the account;
+- runs the incident revocation (`sessions.incident`), which closes the account's open live
+  streams (`/api/me/stream`, `/api/matchmaking/stream`) on every web process when the
+  transaction commits;
+- records `account.suspended` in `identity_audit_events` with the owner role, the previous
+  status and the reason.
+
+`reinstate` sets the status back to `active` and records `account.reinstated`; the person then
+signs in again. Neither changes Auth0: block the user there too if new sign-in attempts should
+not reach the provider. Changing `account_status` with raw SQL also ends sessions, but open
+streams then stay up until they disconnect, so use the command.
+
+### Delete an account
+
+There is no in-app deletion. To act on a deletion request, the owner first suspends the account
+with the command above, then opens an interactive owner session from the repository checkout
+and runs `scripts/delete-account.sql` in it:
+
+```sh
+(set -a; source ~/yaparena-private/production/owner.env; psql "$DATABASE_URL" -v id=123)
+```
+
+```text
+\i scripts/delete-account.sql
+```
+
+It stops unless the account is suspended. It prints the account's Auth0 subjects, deletes its
+sign-in identities and their email addresses, replaces its public profile (a profile that
+appears in a debate cannot be deleted) with a hidden "Deleted account" under a random handle,
+records `account.deleted`, and deletes the account row. Sessions, settings, follows,
+notifications, consents, measurement events, transcript segments and the other personal rows
+go with it. It ends without `COMMIT`: review the output, then type `COMMIT;` or `ROLLBACK;`.
+Afterwards, delete the printed subjects' users in the Auth0 dashboard.
+
+What remains is keyed only by the numeric account id: Yap Coins ledger rows (append-only),
+debate seats, moderation records, the audit trail (90-day retention) and debate recordings and
+replays. Removing a recording or replay is a separate decision for each debate, which also
+involves the other speaker.
+
 ## Diagnose an incident
 
 1. Check container state and health: `docker compose ps`.
