@@ -54,9 +54,12 @@ All in `public/site.css`, under "The site kit":
 - **Fields** `.field`, `.input` (48 px, 12 px corners), `.search-pill`.
 - **States** `.state` for empty and error, `.skeleton` blocks and the `.pixel-loader` (nine tiles
   lighting in the visit colours) for loading.
-- **Avatar slots** `.avatar-slot` (square, `--avatar-size` a multiple of 12: 24, 36, 48, 72, 96) with
-  today's `.avatar-initials`. The chosen avatars ship later and draw their own tile, so slots add
-  no crop, border or background.
+- **Avatar slots** `.avatar-slot` (square, `--avatar-size` a multiple of 12: 24, 36, 48, 72, 96)
+  with the person's Pixel Yapper (`.avatar-img`, [Decision 0014](decisions/0014-user-avatars.md)),
+  or `.avatar-initials` where avatars haven't reached yet. The avatars draw their own tile, so
+  slots add no crop, border or background.
+- **Avatar picker** `.avatar-picker` (`frontend/avatar.ts`): a radio per Yapper drawn as a 48 px
+  tile, the chosen one ringed, in the handle pop-up and Settings.
 - **Dialogs** `.scrim` and `.dialog`: a centred card, a bottom sheet on phones.
 - **Reveal** `.kit-reveal`: the landing's page-load wipe, for page heads only.
 
@@ -84,7 +87,7 @@ same stylesheet for its topic cards.
 - **Topic page**: the title in Forum beside one card holding both sides (under it below 1000 px).
   With the queue on, each side has a "Queue for this side" button described by the side's name;
   a side you queued for lights up and its button turns white.
-- **Profile**: the initials in a 96 px slot (72 on phones) beside the name, @handle, bio and Follow.
+- **Profile**: the avatar in a 96 px slot (72 on phones) beside the name, @handle, bio and Follow.
 - **Empty lists** show the emblem, today's words and Clear search; inside a topic or profile, a
   quieter note without the emblem.
 
@@ -137,13 +140,15 @@ With nothing to watch, a Dydema headline sits beside the living emblem
   header hides its Sign in pill here.
 - **While the account is checked**, a screen-tall space with the pixel loader holds the page, so
   the back link and the footer don't move.
-- **Settings**: the avatar slot (`.settings-avatar`, 72 px, 48 on phones) with today's person
-  icon or initials, the name in Forum and @handle; card titles in Dydema 20 px; 48 px fields; the
+- **Settings**: the avatar slot (`.settings-avatar`, 72 px, 48 on phones) with the person's avatar
+  (the person icon until the profile loads), the name in Forum and @handle; the avatar picker in
+  the public profile form; card titles in Dydema 20 px; 48 px fields; the
   tabs as a vertical list from 1000 px and a row of pills below, with the WAI tab keys and hash
   links.
 - **Handle pop-up** (`frontend/profile-setup.ts`, styles in `public/site-header.css`): the kit's
   dialog (a bottom sheet on phones), the landing logo, visible "Create your profile" and "Confirm
-  your handle", the preview in a 48 px slot (72 to confirm), 44 px tap areas for the terms tick
+  your handle", the preview in a 48 px slot (72 to confirm) showing the avatar chosen in the
+  picker under the handle field (it starts on a random Yapper), 44 px tap areas for the terms tick
   and the 20 px "i" marks, and a welcome with the living emblem after "Claim my handle".
 - **Sign-in hand-off pages** (`src/platform/auth/sign-in-pages.ts`) stay self-contained but take
   the landing logo, a Dydema heading, the pixel loader, a 16 px card and the kit's pills.
@@ -192,8 +197,8 @@ With nothing to watch, a Dydema headline sits beside the living emblem
 - Signed out: Sign in is an outline pill, hidden on the signed-out account page, which has its own
   sign-in buttons. While the account loads, nine tiles hold the account group's width.
 - Signed in: the queue pill (queue overlay), the balance pill (a small pixel coin, the amount in
-  Forum) and the account button, a 44 px target around a 36 px square avatar slot with the
-  initials. The balance pop-up repeats the amount in Forum 40 px with "In open positions" and
+  Forum) and the account button, a 44 px target around a 36 px square slot with the person's
+  avatar. The balance pop-up repeats the amount in Forum 40 px with "In open positions" and
   "Play money · no cash value"; the account menu starts with the avatar, name and @handle.
 - On the debate page, and on `/home` until it moves onto the kit, the header lines up with their
   wider layouts (up to 120rem).

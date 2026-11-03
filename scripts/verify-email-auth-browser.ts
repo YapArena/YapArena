@@ -249,6 +249,13 @@ try {
   await setup.getByText(`@${suggested} is free.`).waitFor({ timeout: 1000 });
   await setup.getByLabel("Handle", { exact: true }).fill(handle);
   await setup.getByText(`@${handle} is free.`).waitFor();
+  // Every account starts on an avatar and can pick another (Decision 0014).
+  assert.equal(
+    await setup.getByRole("radio", { checked: true }).count(),
+    1,
+    "the pop-up starts with one avatar chosen",
+  );
+  await setup.getByRole("radio", { name: "Owl", exact: true }).check();
   await setup.getByRole("button", { name: "Continue" }).click();
   await setup.getByRole("button", { name: "Claim my handle" }).waitFor();
   assert.equal(
@@ -267,12 +274,15 @@ try {
   await first.screenshot({ path: `${artifactDir}/profile-setup-done.png` });
   await setup.getByRole("button", { name: "Start exploring" }).click();
   await setup.waitFor({ state: "detached" });
-  assert.equal(
-    (await first.locator("[data-header-account]").textContent())?.trim(),
-    "BP",
+  assert.match(
+    (await first
+      .locator("[data-header-account] img.avatar-img")
+      .getAttribute("src")) ?? "",
+    /^\/assets\/avatars\/yap-owl\.svg\?v=[0-9a-f]{12}$/,
+    "the header shows the chosen avatar",
   );
   checks.push(
-    "a new account must pick a username and permanent handle in the pop-up (Escape keeps it open, a progress bar shows the step, hovering a label explains handles); the email suggests a handle, the username never rewrites it, input normalizes, availability shows, and the profile is public",
+    "a new account must pick a username, a permanent handle and an avatar in the pop-up (Escape keeps it open, a progress bar shows the step, hovering a label explains handles); the email suggests a handle, the username never rewrites it, input normalizes, availability shows, the header shows the chosen avatar, and the profile is public",
   );
   const accountId = await account(first);
   assert.ok(accountId, "the strict session cookie arrives after the provider");

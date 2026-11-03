@@ -1,4 +1,5 @@
 import type { Pool } from "pg";
+import { resolveAvatarId } from "../identity/avatars.ts";
 
 import type {
   DebateStatus,
@@ -16,7 +17,9 @@ export type {
 } from "./public-types.ts";
 
 type TopicRow = PublicTopic;
-type ProfileRow = PublicProfile;
+type ProfileRow = Omit<PublicProfile, "avatarId"> & {
+  avatarId: string | null;
+};
 interface DebateRow extends Omit<
   PublicDebate,
   "topic" | "speakerA" | "speakerB" | "sponsor" | "timing"
@@ -188,12 +191,15 @@ export function createDiscoveryRepository(database: Pick<Pool, "query">) {
     async getProfile(handle: string): Promise<PublicProfile | null> {
       const result = await database.query<ProfileRow>(
         `SELECT id, handle, display_name AS "displayName", bio,
-                is_demo AS "isDemo"
+                is_demo AS "isDemo", avatar_id AS "avatarId"
          FROM public_profiles
          WHERE handle = $1 AND publication_state = 'published'`,
         [handle],
       );
-      return result.rows[0] ?? null;
+      const row = result.rows[0];
+      return row
+        ? { ...row, avatarId: resolveAvatarId(row.avatarId, row.handle) }
+        : null;
     },
 
     async listDebates({

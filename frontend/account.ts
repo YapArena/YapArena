@@ -7,6 +7,7 @@ import type {
   AccountError,
 } from "./account-types.js";
 import { safeAuthReturn } from "./auth-return.js";
+import { avatarImage, createAvatarPicker } from "./avatar.js";
 import { api as request } from "./lib/api.js";
 import { accountErrorMessage, sessionStore } from "./lib/session.js";
 
@@ -31,7 +32,9 @@ interface AccountNotification {
   readAt: string | null;
   createdAt: string;
 }
-type ProfileChanges = Partial<Pick<Profile, "displayName" | "bio">>;
+type ProfileChanges = Partial<
+  Pick<Profile, "displayName" | "bio" | "avatarId">
+>;
 
 /* global window, document */
 const notice = document.querySelector<HTMLElement>("#account-notice")!;
@@ -58,6 +61,15 @@ const publishButton =
 const avatarIcon = [
   ...document.querySelector<HTMLElement>("#account-avatar")!.childNodes,
 ].map((node) => node.cloneNode(true));
+const avatarPicker = createAvatarPicker({
+  name: "avatarId",
+  legend: "Avatar",
+  selected: null,
+  onChange: () => updateSaveButton(),
+});
+document
+  .querySelector<HTMLElement>("[data-profile-avatar]")!
+  .prepend(avatarPicker.element);
 const store = sessionStore();
 let currentProfile: Profile | null = null;
 let accountVersion = 0;
@@ -74,15 +86,6 @@ function say(message: string, quiet = false) {
 function api<T = void>(path: string, method = "GET", json?: unknown) {
   return request<T>(path, { method, json, errorMessage: accountErrorMessage });
 }
-
-const initials = (name: string) =>
-  name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => [...part][0] ?? "")
-    .join("")
-    .toUpperCase();
 
 const relative = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
 function when(value: string) {
@@ -199,8 +202,7 @@ for (const tab of tabs)
 
 function showIdentity(profile: Profile | null, email: string) {
   const avatar = document.querySelector<HTMLElement>("#account-avatar")!;
-  const letters = profile ? initials(profile.displayName) : "";
-  if (letters) avatar.textContent = letters;
+  if (profile) avatar.replaceChildren(avatarImage(profile.avatarId));
   document.querySelector<HTMLElement>("#account-display-name")!.textContent =
     profile?.displayName || "Your account";
   document.querySelector<HTMLElement>("#account-handle")!.textContent = profile
@@ -239,6 +241,9 @@ function profileChanges(): ProfileChanges {
   if (displayName !== currentProfile.displayName)
     changes.displayName = displayName;
   if (bio !== (currentProfile.bio ?? "")) changes.bio = bio || null;
+  const avatarId = avatarPicker.value();
+  if (avatarId && avatarId !== currentProfile.avatarId)
+    changes.avatarId = avatarId;
   return changes;
 }
 function updateSaveButton() {
@@ -252,6 +257,7 @@ function updateSaveButton() {
 function setFormEnabled(enabled: boolean) {
   for (const control of [fields.displayName, fields.bio])
     control.disabled = !enabled;
+  avatarPicker.setDisabled(!enabled);
 }
 
 function fillProfile(profile: Profile | null) {
@@ -259,6 +265,7 @@ function fillProfile(profile: Profile | null) {
   fields.handle.value = profile?.handle ?? "";
   fields.displayName.value = profile?.displayName ?? "";
   fields.bio.value = profile?.bio ?? "";
+  avatarPicker.set(profile?.avatarId ?? null);
   for (const input of [fields.displayName, fields.bio]) setCount(input);
   fieldError("displayName");
   fieldError("bio");

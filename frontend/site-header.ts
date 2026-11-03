@@ -7,6 +7,7 @@ import {
 } from "./auth-return.js";
 import type { AuthRequest } from "./auth-events.js";
 import type { Profile } from "./account-types.js";
+import { avatarImage, isAvatarId } from "./avatar.js";
 import { apiErrorStatus, apiFetch } from "./lib/api.js";
 import { sessionStore } from "./lib/session.js";
 import { formatCoins } from "./lib/coin-format.js";
@@ -20,7 +21,7 @@ import {
 
 type HeaderProfile = Pick<
   Profile,
-  "handle" | "displayName" | "publicationState"
+  "handle" | "displayName" | "publicationState" | "avatarId"
 >;
 const initials = (name: string) =>
   name
@@ -44,8 +45,8 @@ if (header) {
   const balance = header.querySelector<HTMLElement>("[data-header-balance]")!;
   const reserved = header.querySelector<HTMLElement>("[data-header-reserved]")!;
   const avatar = header.querySelector<HTMLElement>("[data-header-account]")!;
-  // The 36 px slot inside the account button: initials today, the chosen
-  // avatar later (docs/site-design.md).
+  // The 36 px slot inside the account button: the person's avatar, or the
+  // person icon until the profile loads (docs/site-design.md).
   const avatarSlot =
     header.querySelector<HTMLElement>("[data-header-avatar]") ?? avatar;
   const avatarIcon = [...avatarSlot.childNodes].map((node) =>
@@ -92,8 +93,12 @@ if (header) {
   }
   // The menu names the account, and links to its public page once published.
   function showProfile(profile: HeaderProfile) {
+    // A response from before avatars shipped has none: show the initials.
     const letters = initials(profile.displayName);
-    if (letters) {
+    if (isAvatarId(profile.avatarId)) {
+      avatarSlot.replaceChildren(avatarImage(profile.avatarId));
+      avatarSlot.classList.remove("has-initials");
+    } else if (letters) {
       avatarSlot.textContent = letters;
       avatarSlot.classList.add("has-initials");
     }

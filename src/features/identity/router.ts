@@ -3,6 +3,7 @@ import type { NextFunction, Request, Response } from "express";
 import type { createIdentityRepository } from "./repository.ts";
 import type { ProductActionRecorder } from "../measurement/router.ts";
 import { MINIMUM_AGE, TERMS_VERSION } from "./terms.ts";
+import { isAvatarId, type AvatarId } from "./avatars.ts";
 
 type Repository = ReturnType<typeof createIdentityRepository>;
 const handlePattern = /^[a-z0-9][a-z0-9-]{2,39}$/;
@@ -23,7 +24,7 @@ function pagination(query: Record<string, unknown>) {
 }
 
 type ProfileField =
-  "handle" | "displayName" | "bio" | "publicationState" | "terms";
+  "handle" | "displayName" | "bio" | "publicationState" | "avatarId" | "terms";
 type FieldProblem = { field?: ProfileField; message: string };
 
 // People see these messages next to the field they describe.
@@ -43,6 +44,7 @@ const problems = {
     field: "publicationState",
     message: "Choose a public or private profile.",
   },
+  avatarId: { field: "avatarId", message: "Choose one of the avatars." },
   terms: {
     field: "terms",
     message: `Confirm you're ${MINIMUM_AGE} or older and accept the Terms of Use and Privacy Policy.`,
@@ -64,6 +66,7 @@ function profileInput(body: unknown):
         displayName: string;
         bio: string | null;
         publicationState: "draft" | "published";
+        avatarId: AvatarId | null;
         acceptTerms: boolean;
       };
     }
@@ -79,6 +82,7 @@ function profileInput(body: unknown):
           "displayName",
           "bio",
           "publicationState",
+          "avatarId",
           "acceptTerms",
         ].includes(key),
     )
@@ -88,6 +92,8 @@ function profileInput(body: unknown):
   const displayName = value.displayName;
   const bio = value.bio ?? null;
   const publicationState = value.publicationState ?? "draft";
+  // Without a choice the profile shows the handle's default avatar.
+  const avatarId = value.avatarId ?? null;
   if (typeof handle !== "string" || !handlePattern.test(handle))
     return { problem: problems.handle };
   if (
@@ -100,6 +106,8 @@ function profileInput(body: unknown):
     return { problem: problems.bio };
   if (publicationState !== "draft" && publicationState !== "published")
     return { problem: problems.publicationState };
+  if (avatarId !== null && !isAvatarId(avatarId))
+    return { problem: problems.avatarId };
   if (value.acceptTerms !== undefined && typeof value.acceptTerms !== "boolean")
     return { problem: problems.terms };
   return {
@@ -108,6 +116,7 @@ function profileInput(body: unknown):
       displayName: displayName.trim(),
       bio,
       publicationState,
+      avatarId,
       acceptTerms: value.acceptTerms === true,
     },
   };
@@ -119,6 +128,7 @@ function profileChanges(body: unknown):
         displayName?: string;
         bio?: string | null;
         publicationState?: "draft" | "published";
+        avatarId?: AvatarId;
       };
     }
   | { problem: FieldProblem } {
@@ -129,7 +139,8 @@ function profileChanges(body: unknown):
   if (
     !keys.length ||
     keys.some(
-      (key) => !["displayName", "bio", "publicationState"].includes(key),
+      (key) =>
+        !["displayName", "bio", "publicationState", "avatarId"].includes(key),
     )
   )
     return { problem: problems.body };
@@ -137,6 +148,7 @@ function profileChanges(body: unknown):
     displayName?: string;
     bio?: string | null;
     publicationState?: "draft" | "published";
+    avatarId?: AvatarId;
   } = {};
   if ("displayName" in value) {
     if (
@@ -162,6 +174,10 @@ function profileChanges(body: unknown):
     )
       return { problem: problems.publicationState };
     changes.publicationState = value.publicationState;
+  }
+  if ("avatarId" in value) {
+    if (!isAvatarId(value.avatarId)) return { problem: problems.avatarId };
+    changes.avatarId = value.avatarId;
   }
   return { value: changes };
 }
@@ -225,6 +241,7 @@ export function createIdentityRouter({
         input.value.bio,
         input.value.publicationState,
         { version: TERMS_VERSION, minimumAge: MINIMUM_AGE },
+        input.value.avatarId,
       );
       return response.status(201).json({ profile });
     } catch (error) {

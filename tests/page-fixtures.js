@@ -34,6 +34,7 @@ export const profile = {
   displayName: "Alex Public",
   bio: "Public speaker",
   isDemo: false,
+  avatarId: "yap-owl",
 };
 export const debate = {
   id: "33333333-3333-4333-8333-333333333333",

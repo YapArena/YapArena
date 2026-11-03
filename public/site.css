@@ -2921,6 +2921,70 @@ html:has(.queue-overlay[open]) {
   font-weight: 700;
   letter-spacing: 0.02em;
 }
+/* A chosen avatar (Decision 0014) fills its slot. Its art draws its own
+   stepped tile, so the slots that tile initials drop theirs. */
+.avatar-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.header-avatar:has(> .avatar-img),
+.ps-avatar:has(> .avatar-img),
+.settings-avatar:has(> .avatar-img) {
+  border-radius: 0;
+  background: none;
+}
+
+/* The avatar picker (frontend/avatar.ts) in the handle pop-up and Settings:
+   one 48 px tile per avatar; the chosen one is ringed. */
+.avatar-picker {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.avatar-picker legend {
+  margin-bottom: var(--space-2);
+  padding: 0;
+  font-size: var(--text-14);
+  font-weight: 700;
+}
+.avatar-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 48px);
+  gap: var(--space-3);
+}
+.avatar-choice {
+  position: relative;
+  display: block;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+}
+.avatar-choice input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.avatar-choice:has(input:checked) {
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
+}
+.avatar-choice:has(input:focus-visible) {
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
+}
+.avatar-picker:disabled .avatar-choice {
+  cursor: default;
+  opacity: 0.5;
+}
+.avatar-picker:disabled .avatar-choice input {
+  cursor: default;
+}
 
 /* The landing's living emblem (frontend/living-emblem.ts): the image at rest
    and three canvases that light its tiles. */
