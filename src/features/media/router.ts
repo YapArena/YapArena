@@ -511,6 +511,8 @@ export function createMediaWebhookRouter({
         request.body.toString("utf8"),
         request.header("Authorization"),
       );
+      // The signature checked out: the webhook limiter does not count it.
+      response.locals.webhookVerified = true;
       if (
         event.event === "participant_joined" &&
         event.room?.name &&
