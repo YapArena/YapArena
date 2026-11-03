@@ -59,10 +59,14 @@ function pathId(request: Request, key = "id") {
   const value = request.params[key];
   return typeof value === "string" && uuid.test(value) ? value : null;
 }
+// Chat, report details, appeals and moderator notes keep their line breaks; other control and
+// invisible formatting characters, NUL included, are refused (YA-22).
 function text(value: unknown, minimum: number, maximum: number) {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
-  return trimmed.length >= minimum && trimmed.length <= maximum
+  return trimmed.length >= minimum &&
+    trimmed.length <= maximum &&
+    !hasHiddenCharacters(trimmed, { multiline: true })
     ? trimmed
     : null;
 }
@@ -311,16 +315,19 @@ export function createCommunityRouter({
     async (request, response) => {
       const id = pathId(request);
       if (!id) return response.status(404).json({ error: "event not found" });
-      const body = text(request.body?.body, 1, 500);
+      const raw: unknown = request.body?.body;
+      if (
+        typeof raw === "string" &&
+        hasHiddenCharacters(raw.trim(), { multiline: true })
+      )
+        return response.status(400).json({
+          error: "chat can't include hidden or control characters",
+          code: "CHAT_INVALID_BODY",
+        });
+      const body = text(raw, 1, 500);
       if (!body)
         return response.status(400).json({
           error: "chat must be 1–500 characters",
-          code: "CHAT_INVALID_BODY",
-        });
-      // Line breaks stay; other control and invisible formatting characters do not (YA-22).
-      if (hasHiddenCharacters(body, { multiline: true }))
-        return response.status(400).json({
-          error: "chat can't include hidden or control characters",
           code: "CHAT_INVALID_BODY",
         });
       const key = request.body?.clientMessageId;

@@ -611,6 +611,24 @@ describe("community API and share surfaces", () => {
     }
     assert.ok(!calls.some(([name]) => name === "postChat"));
     assert.equal((await post("First line\nsecond 🏳️‍🌈")).status, 201);
+    // Report details and appeal reasons get the same rule.
+    for (const [path, body] of [
+      [
+        "/api/community/reports",
+        {
+          targetType: "event",
+          targetId: eventId,
+          reasonCode: "spam",
+          detail: "Spam\u0000 everywhere in chat",
+        },
+      ],
+      [
+        `/api/community/cases/${caseId}/appeal`,
+        { reason: "Please review\u202E this decision" },
+      ],
+    ])
+      assert.equal((await auth("post", path).send(body)).status, 400, path);
+    assert.ok(!calls.some(([name]) => ["report", "appeal"].includes(name)));
   });
 
   it("lets only moderators hide and restore topics, profiles and debates", async () => {
