@@ -1978,11 +1978,33 @@ describe(
       }
       assert.equal(await count(round.id), capacity + 1);
       await close(round.id);
-      for (let batch = 0; batch < 20; batch++) {
-        const { setAside } = await a4.advance();
+      // Batches of at most 100 orders, even beside a closing live window, so
+      // the round settles over several batches. Each one must make progress
+      // without setting the round aside; other suites' due rounds may share
+      // the batches, so the loop is bounded by time, not by a batch count.
+      const settler = createCoinDebateSandbox(runtime, "simulation", {
+        ...relaxed,
+        settlement: { ...relaxed.settlement, orders: 100, quietOrders: 100 },
+      });
+      const unsettled = async () =>
+        (
+          await owner.query(
+            "SELECT count(*)::int n FROM coin_sandbox_requests q JOIN coin_debate_orders o ON o.request_id=q.id WHERE o.round_id=$1 AND q.status='reserved'",
+            [round.id],
+          )
+        ).rows[0].n;
+      const deadline = Date.now() + 120_000;
+      let batches = 0;
+      while ((await roundState(round.id)) === "open") {
+        assert.ok(Date.now() < deadline, "the round kept settling too long");
+        const before = await unsettled();
+        const { setAside } = await settler.advance();
+        batches++;
         assert.ok(!setAside.includes(round.id));
-        if ((await roundState(round.id)) === "settled") break;
+        if ((await roundState(round.id)) === "open")
+          assert.ok((await unsettled()) <= before);
       }
+      assert.ok(batches > 1, "an over-capacity round settles over batches");
       assert.equal(await roundState(round.id), "settled");
       const result = (
         await owner.query("SELECT result FROM coin_debate_rounds WHERE id=$1", [
