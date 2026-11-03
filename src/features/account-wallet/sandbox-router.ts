@@ -252,10 +252,6 @@ export function createCoinSandboxRouter(options: {
       }),
     );
   });
-  router.post("/settlements", async (r, s) => {
-    body(r.body, []);
-    s.json(await debates.advance(20, context(r)));
-  });
   if (options.reports) {
     const reports = options.reports;
     router.get("/reports", async (r, s) =>
