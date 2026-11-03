@@ -117,7 +117,10 @@ describe("configuration", () => {
       rateLimitWindowMs: 900000,
       sessionDurationMs: 604800000,
       media: undefined,
+      mediaAdmissionSecret: undefined,
       replayPackaging,
+      replayEncoder: undefined,
+      unusedSecrets: [],
       backgroundJobs: true,
       communityStream,
       matchmaking: { enabled: false, liveDebateCapacity: 2 },
@@ -173,7 +176,10 @@ describe("configuration", () => {
         rateLimitWindowMs: 60000,
         sessionDurationMs: 3600000,
         media: undefined,
+        mediaAdmissionSecret: undefined,
         replayPackaging,
+        replayEncoder: undefined,
+        unusedSecrets: [],
         backgroundJobs: true,
         communityStream,
         matchmaking: { enabled: false, liveDebateCapacity: 2 },
@@ -770,4 +776,268 @@ it("validates a bounded room allowlist for incremental replay rollout", () => {
       }),
     /replay edge rooms/,
   );
+});
+
+describe("per-process secrets", () => {
+  const id = "33333333-3333-4333-8333-333333333333";
+  const base = {
+    NODE_ENV: "production",
+    APP_ORIGIN: "https://arena.example",
+    DATABASE_URL: "postgresql://user:password@localhost:5432/database",
+  };
+  const storage = {
+    MEDIA_S3_ENDPOINT: "https://account.r2.cloudflarestorage.com",
+    MEDIA_S3_REGION: "auto",
+    MEDIA_S3_BUCKET: "synthetic",
+    MEDIA_S3_ACCESS_KEY: "synthetic-access",
+    MEDIA_S3_SECRET_KEY: "synthetic-storage-secret",
+  };
+  const media = {
+    ...storage,
+    MEDIA_S3_PUBLIC_ENDPOINT: "https://account.r2.cloudflarestorage.com",
+    LIVEKIT_URL: "https://live.example",
+    LIVEKIT_PUBLIC_URL: "wss://live.example",
+    LIVEKIT_API_KEY: "synthetic-key",
+    LIVEKIT_API_SECRET: "synthetic-livekit-secret-of-32-characters",
+  };
+  const replay = {
+    MEDIA_REPLAY_EDGE_URL: "https://replay.example",
+    MEDIA_REPLAY_SIGNING_SECRET: "synthetic-replay-signing-secret-32-bytes",
+    MEDIA_REPLAY_PACKAGING_ENABLED: "true",
+  };
+  const ingest = {
+    LIVE_OUTLINE_ENABLED: "true",
+    TRANSCRIPTION_INGEST_SECRET: "synthetic-transcription-ingest-secret-32b",
+  };
+  const jobs = (environment) => loadConfig(environment, { service: "jobs" });
+  const encoder = (environment) =>
+    loadConfig(environment, { service: "encoder" });
+
+  it("loads the jobs worker without the replay signing or ingest secrets", () => {
+    const config = jobs({
+      ...base,
+      ...media,
+      LIVE_OUTLINE_ENABLED: "true",
+      MATCHMAKING_ENABLED: "true",
+    });
+    assert.equal(config.media.livekitSecret, media.LIVEKIT_API_SECRET);
+    assert.equal(config.media.replaySigningSecret, undefined);
+    assert.deepEqual(config.liveOutline, {
+      enabled: true,
+      agentName: "yaparena-transcriber",
+      ingestSecret: undefined,
+    });
+    assert.equal(config.mediaAdmissionSecret, undefined);
+    assert.deepEqual(config.unusedSecrets, []);
+    // The replay edge address alone is enough; the jobs worker signs nothing.
+    assert.equal(
+      jobs({
+        ...base,
+        ...media,
+        MEDIA_REPLAY_EDGE_URL: replay.MEDIA_REPLAY_EDGE_URL,
+      }).media.replayEdgeUrl,
+      replay.MEDIA_REPLAY_EDGE_URL,
+    );
+    // Web still requires them.
+    assert.throws(
+      () => loadConfig({ ...base, ...media, LIVE_OUTLINE_ENABLED: "true" }),
+      /TRANSCRIPTION_INGEST_SECRET/,
+    );
+    assert.throws(
+      () =>
+        loadConfig({
+          ...base,
+          ...media,
+          MEDIA_REPLAY_EDGE_URL: replay.MEDIA_REPLAY_EDGE_URL,
+        }),
+      /configured together/,
+    );
+  });
+
+  it("still requires complete LiveKit media on the jobs worker", () => {
+    assert.throws(
+      () => jobs({ ...base, ...storage }),
+      /media configuration requires/,
+    );
+    assert.throws(
+      () => jobs({ ...base, LIVE_OUTLINE_ENABLED: "true" }),
+      /requires LiveKit media/,
+    );
+    assert.throws(
+      () => jobs({ ...base, ...media, MEDIA_REPLAY_EDGE_ROOMS: id }),
+      /replay edge rooms/,
+    );
+  });
+
+  it("accepts and names secrets the jobs worker doesn't use", () => {
+    const config = jobs({
+      ...base,
+      ...media,
+      ...replay,
+      ...ingest,
+      MEDIA_ADMISSION_SECRET: "synthetic-admission-secret-of-32-bytes",
+      AUTH0_CLIENT_SECRET: "synthetic-auth0-secret",
+    });
+    assert.equal(config.media.replaySigningSecret, undefined);
+    assert.equal(config.liveOutline.ingestSecret, undefined);
+    assert.equal(config.mediaAdmissionSecret, undefined);
+    assert.deepEqual(config.unusedSecrets, [
+      "AUTH0_CLIENT_SECRET",
+      "TRANSCRIPTION_INGEST_SECRET",
+      "MEDIA_REPLAY_SIGNING_SECRET",
+      "MEDIA_ADMISSION_SECRET",
+    ]);
+    assert.equal(Object.isFrozen(config.unusedSecrets), true);
+  });
+
+  it("loads the encoder with only storage and automatic packaging", () => {
+    const config = encoder({
+      ...base,
+      ...storage,
+      MEDIA_REPLAY_PACKAGING_ENABLED: "true",
+      MEDIA_REPLAY_EDGE_ROOMS: `${id},${id}`,
+    });
+    assert.deepEqual(config.replayEncoder, {
+      endpoint: storage.MEDIA_S3_ENDPOINT,
+      region: "auto",
+      bucket: "synthetic",
+      accessKey: "synthetic-access",
+      secretKey: "synthetic-storage-secret",
+      replayEdgeRooms: [id],
+    });
+    assert.equal(Object.isFrozen(config.replayEncoder), true);
+    assert.equal(config.media, undefined);
+    assert.equal(config.replayPackaging.enabled, true);
+    assert.deepEqual(config.unusedSecrets, []);
+    assert.equal(
+      encoder({
+        ...base,
+        ...storage,
+        MEDIA_S3_ENDPOINT: undefined,
+        MEDIA_S3_REGION: "us-east-1",
+        MEDIA_REPLAY_PACKAGING_ENABLED: "true",
+      }).replayEncoder.region,
+      "us-east-1",
+    );
+  });
+
+  it("accepts today's full encoder environment and names its unused secrets", () => {
+    const config = encoder({ ...base, ...media, ...replay, ...ingest });
+    assert.equal(config.media, undefined);
+    assert.equal(config.replayEncoder.secretKey, "synthetic-storage-secret");
+    assert.equal(config.liveOutline.ingestSecret, undefined);
+    assert.deepEqual(config.unusedSecrets, [
+      "TRANSCRIPTION_INGEST_SECRET",
+      "MEDIA_REPLAY_SIGNING_SECRET",
+      "LIVEKIT_API_SECRET",
+    ]);
+  });
+
+  it("refuses an encoder without packaging or complete storage", () => {
+    assert.throws(
+      () => encoder({ ...base, ...storage }),
+      /requires MEDIA_REPLAY_PACKAGING_ENABLED=true/,
+    );
+    for (const name of Object.keys(storage).slice(1))
+      assert.throws(
+        () =>
+          encoder({
+            ...base,
+            ...storage,
+            [name]: undefined,
+            MEDIA_REPLAY_PACKAGING_ENABLED: "true",
+          }),
+        /the replay encoder requires MEDIA_S3_REGION/,
+      );
+    assert.throws(
+      () =>
+        encoder({
+          ...base,
+          ...storage,
+          MEDIA_S3_ENDPOINT: "http://storage.example",
+          MEDIA_REPLAY_PACKAGING_ENABLED: "true",
+        }),
+      /invalid media S3 endpoint/,
+    );
+    assert.throws(
+      () =>
+        encoder({
+          ...base,
+          ...storage,
+          MEDIA_REPLAY_PACKAGING_ENABLED: "true",
+          MEDIA_REPLAY_EDGE_ROOMS: "*",
+        }),
+      /replay edge rooms/,
+    );
+  });
+
+  it("signs viewer admission with a dedicated secret or the LiveKit secret", () => {
+    const admission = "synthetic-admission-secret-of-32-bytes";
+    assert.equal(
+      loadConfig({ ...base, ...media }).mediaAdmissionSecret,
+      media.LIVEKIT_API_SECRET,
+    );
+    assert.equal(
+      loadConfig({ ...base, ...media, MEDIA_ADMISSION_SECRET: admission })
+        .mediaAdmissionSecret,
+      admission,
+    );
+    assert.equal(
+      loadConfig({ ...base, MEDIA_ADMISSION_SECRET: admission })
+        .mediaAdmissionSecret,
+      admission,
+    );
+    assert.equal(
+      loadConfig({ ...base, ...media, MEDIA_ADMISSION_SECRET: "" })
+        .mediaAdmissionSecret,
+      media.LIVEKIT_API_SECRET,
+    );
+    assert.throws(
+      () => loadConfig({ ...base, MEDIA_ADMISSION_SECRET: "short" }),
+      /MEDIA_ADMISSION_SECRET must be at least 32 bytes/,
+    );
+    assert.deepEqual(
+      loadConfig({
+        ...base,
+        ...media,
+        ...replay,
+        ...ingest,
+        MEDIA_ADMISSION_SECRET: admission,
+      }).unusedSecrets,
+      [],
+    );
+  });
+
+  it("accepts a separate recording upload key for LiveKit Egress", () => {
+    const egress = {
+      MEDIA_EGRESS_S3_ACCESS_KEY: "synthetic-egress-access",
+      MEDIA_EGRESS_S3_SECRET_KEY: "synthetic-egress-secret",
+    };
+    const config = jobs({ ...base, ...media, ...egress });
+    assert.equal(config.media.s3AccessKey, "synthetic-access");
+    assert.equal(config.media.s3EgressAccessKey, "synthetic-egress-access");
+    assert.equal(config.media.s3EgressSecretKey, "synthetic-egress-secret");
+    assert.equal(
+      loadConfig({ ...base, ...media }).media.s3EgressAccessKey,
+      undefined,
+    );
+    for (const name of Object.keys(egress))
+      assert.throws(
+        () => loadConfig({ ...base, ...media, ...egress, [name]: undefined }),
+        /must be configured together/,
+      );
+    assert.throws(
+      () => loadConfig({ ...base, ...egress }),
+      /recording upload keys require media configuration/,
+    );
+    assert.deepEqual(
+      encoder({
+        ...base,
+        ...storage,
+        ...egress,
+        MEDIA_REPLAY_PACKAGING_ENABLED: "true",
+      }).unusedSecrets,
+      ["MEDIA_EGRESS_S3_SECRET_KEY"],
+    );
+  });
 });

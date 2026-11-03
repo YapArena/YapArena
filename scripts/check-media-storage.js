@@ -27,13 +27,15 @@ export async function probeMediaStorage(storage, bucket, key) {
 async function main() {
   const config = loadConfig().media;
   if (!config) return;
+  // Probes the key LiveKit Egress uploads recordings with: the separate
+  // recording upload key when set, so the app's own key can be read-only.
   const storage = new S3Client({
     endpoint: config.s3Endpoint,
     region: config.s3Region,
     forcePathStyle: Boolean(config.s3Endpoint),
     credentials: {
-      accessKeyId: config.s3AccessKey,
-      secretAccessKey: config.s3SecretKey,
+      accessKeyId: config.s3EgressAccessKey ?? config.s3AccessKey,
+      secretAccessKey: config.s3EgressSecretKey ?? config.s3SecretKey,
     },
     maxAttempts: 1,
   });

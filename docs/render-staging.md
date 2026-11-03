@@ -149,9 +149,13 @@ The Free hosting plan does not become an approved live-event plan by enabling SS
 | `MEDIA_S3_BUCKET`                               | Private R2 bucket name                                                                                        |
 | `MEDIA_S3_ACCESS_KEY`, `MEDIA_S3_SECRET_KEY`    | R2 bucket-scoped S3 credentials                                                                               |
 
-The current media provider sends the same S3 key to LiveKit Egress and uses it for playback. A
-single bucket-scoped key therefore needs write and read permissions. Split those permissions and
-rotate staging credentials before a public launch. A new event under `prototype-media-1` is needed
+With only `MEDIA_S3_*`, the app sends the same S3 key to LiveKit Egress and uses it for playback,
+so that key needs write and read permissions. To split them, give web and the jobs worker a read
+key in `MEDIA_S3_*` and a separate write key for Egress in `MEDIA_EGRESS_S3_ACCESS_KEY` and
+`MEDIA_EGRESS_S3_SECRET_KEY`, and give the encoder its own write key, as the
+[production rollout](production-rollout.md#72-private-r2-bucket) does. A read key on web needs
+`MEDIA_REPLAY_PACKAGING_ENABLED=true`, because web otherwise writes captions. Rotate staging
+credentials before a public launch. A new event under `prototype-media-1` is needed
 for a live media trial. Use two test speakers on separate networks and verify join, turn changes,
 pause/resume, recording completion, replay playback, captions, and reconnects.
 
@@ -265,7 +269,10 @@ URL, and deploys the release SHA to it after web. Its `deploy` mode accepts
 1. Create the worker from the `yaparena-staging-jobs` Blueprint entry (Starter or larger) and deploy
    the same reviewed commit as web, after its migrations. Give it the runtime `DATABASE_URL` and DB
    TLS settings used by web, never an owner/migration URL, plus web's `A4_MODE`/`A4_*`,
-   `COIN_SANDBOX_ENABLED`, `TURN_WINDOWS_ENABLED`, `LIVE_OUTLINE_ENABLED`, `TRANSCRIPTION_INGEST_SECRET` and all `LIVEKIT_*`/`MEDIA_*` media and replay variables. Never give it
+   `COIN_SANDBOX_ENABLED`, `TURN_WINDOWS_ENABLED`, `LIVE_OUTLINE_ENABLED`, `LIVEKIT_*` and the
+   `MEDIA_S3_*`/`MEDIA_EGRESS_S3_*` storage variables. It doesn't need
+   `MEDIA_REPLAY_SIGNING_SECRET`, `MEDIA_ADMISSION_SECRET` or `TRANSCRIPTION_INGEST_SECRET`; with
+   any of them set it starts but logs `unused_secrets`. Never give it
    `AUTH0_*`: Auth0 settings belong to web only, and the worker reads no `REDIS_*`. Keep
    `LOG_LEVEL` at `info` or more verbose, and keep web's `RUN_BACKGROUND_JOBS=true` until step 3.
    A new environment created from `render.yaml` starts web with `false`: set it to `true` first,
@@ -328,10 +335,13 @@ per-recording operations or evidence that the Blueprint creates a worker.
    `node dist/replay-worker.js`. That image already contains FFmpeg and ffprobe. A worker built
    from source instead needs `MEDIA_WORKER_TOOLS=true`, which Render maps to a Docker build
    argument; web images keep the default `false`. Never reference secrets in build arguments.
-3. Give the worker only runtime database credentials, strict DB TLS/search-path settings,
-   LiveKit credentials and private bucket credentials. Match `MEDIA_REPLAY_EDGE_URL`,
-   `MEDIA_REPLAY_SIGNING_SECRET` and canary `MEDIA_REPLAY_EDGE_ROOMS` with the web service.
-   No owner/migration/admin URL or Cloudflare deployment token belongs in either service.
+3. Give the worker only runtime database credentials, strict DB TLS/search-path settings and
+   private bucket credentials (`MEDIA_S3_ENDPOINT`, `MEDIA_S3_REGION`, `MEDIA_S3_BUCKET`,
+   `MEDIA_S3_ACCESS_KEY`, `MEDIA_S3_SECRET_KEY`). Match the canary `MEDIA_REPLAY_EDGE_ROOMS` with
+   the web service. The encoder needs no `LIVEKIT_*`, `MEDIA_REPLAY_EDGE_URL` or
+   `MEDIA_REPLAY_SIGNING_SECRET`; with a secret it doesn't use, it starts but logs
+   `unused_secrets`. No owner/migration/admin URL or Cloudflare deployment token belongs in
+   either service.
 4. Enable `MEDIA_REPLAY_PACKAGING_ENABLED=true` on worker and web for the synthetic canary.
    Start with `MEDIA_REPLAY_CONCURRENCY=1` and the bounded defaults in `.env.example`.
    The worker checks tools/codecs and runtime identity before claiming jobs.

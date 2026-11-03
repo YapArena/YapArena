@@ -58,8 +58,10 @@ services:
   # HTTP. Web sets RUN_BACKGROUND_JOBS=false, so keep this worker running:
   # suspended or missing, no process runs the jobs. Copy the web service's
   # A4/coin sandbox and media settings so both build the same jobs; never copy
-  # AUTH0_* (web only). It reads no REDIS_*; see the cut-over in
-  # docs/render-staging.md.
+  # AUTH0_* (web only). It needs LIVEKIT_* and MEDIA_S3_*/MEDIA_EGRESS_S3_*, not
+  # MEDIA_REPLAY_SIGNING_SECRET, MEDIA_ADMISSION_SECRET or
+  # TRANSCRIPTION_INGEST_SECRET (web only). It reads no REDIS_*; see the
+  # cut-over in docs/render-staging.md.
   - type: worker
     name: yaparena-staging-jobs
     runtime: docker

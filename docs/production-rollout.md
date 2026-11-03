@@ -718,16 +718,29 @@ Time: 15 minutes.
    ]
    ```
 
-4. **R2 Object Storage** → **Overview** → **Account Details** → **API Tokens** → **Manage** →
-   **Create Account API token**. Name `yaparena-production-media`, permission **Object Read &
-   Write**, applied to the bucket `yaparena-production-media` only, TTL **Forever**. **Create
-   Account API token**.
-5. Copy the **Access Key ID**, the **Secret Access Key** and the S3 endpoint
-   (`https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com`) into the password manager as "R2 production
-   media". The secret is shown once.
+4. Make three keys, so each service holds only the access it uses and each can be replaced on its
+   own. **R2 Object Storage** → **Overview** → **Account Details** → **API Tokens** → **Manage** →
+   **Create Account API token**, three times. Apply each to the bucket `yaparena-production-media`
+   only, and give each a TTL of one year rather than **Forever**:
+
+   | Token name                          | Permission              | Used by                                                          |
+   | ----------------------------------- | ----------------------- | ---------------------------------------------------------------- |
+   | `yaparena-production-media-read`    | **Object Read only**    | Web and jobs: playback links and recording checks                |
+   | `yaparena-production-media-egress`  | **Object Read & Write** | LiveKit, which uploads recordings with it (web and jobs pass it) |
+   | `yaparena-production-media-encoder` | **Object Read & Write** | The encoder, which writes replay packages                        |
+
+   R2 has no write-only permission, so the egress key can also read; keeping it separate means the
+   one key that leaves Render can be revoked without touching playback or the encoder.
+
+5. For each, copy the **Access Key ID** and the **Secret Access Key** into the password manager as
+   "R2 production media read", "R2 production media egress" and "R2 production media encoder", and
+   note the expiry date. Save the S3 endpoint (`https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com`)
+   once. Each secret is shown once.
 
 - Check: the bucket's **Settings** shows public access disabled and the CORS rule with
-  `https://yaparena.com`.
+  `https://yaparena.com`. **API Tokens** lists the three tokens, each on this bucket only.
+- Before the expiry date, make a new token with the same permission, replace that service's two
+  variables, deploy it, then delete the old token.
 
 ### 7.3 Replay edge on `replay.yaparena.com`
 
@@ -790,8 +803,8 @@ Time: 20 minutes, mostly LiveKit building the agent.
    openssl rand -hex 32
    ```
 
-   Save it as "Transcriber production ingest secret" (`<INGEST_SECRET>`). Web, the jobs worker and
-   the agent get this same value; staging's is different.
+   Save it as "Transcriber production ingest secret" (`<INGEST_SECRET>`). Web and the agent get this
+   same value; the jobs worker doesn't need it. Staging's is different.
 
 2. `nano ~/yaparena-private/production/transcriber-secrets.env` (no quotes, no spaces around `=`):
 
@@ -943,6 +956,8 @@ Time: 15 minutes. Step 6.5 migrated the database for this release. Then:
   - `yaparena-jobs`: `background worker started` with `"media":true`, then `background job ran`
     lines, one with `"job":"matchmaking"`.
   - `yaparena-encoder`: `Automatic replay worker started`.
+  - Neither `yaparena-jobs` nor `yaparena-encoder` logs `unused_secrets`. If one does, remove the
+    variables it names from that service and deploy it again.
 - If web logs `database migrations are pending`, run step 6.5 with this release. If it logs
   `production requires AUTH0_ISSUER_BASE_URL…` or `the production service requires an Auth0 custom
 domain`, check the Auth0 variables. A `landing font unavailable` warning means the font file is
@@ -956,39 +971,48 @@ Each service reads only what it lists. "Blueprint" values come from `render.prod
 "dashboard" values are added in 8.3 or 8.4. **Own** means production's own new secret: never copy
 it from staging, and never reuse it there.
 
-| Variable                                        | Web | Jobs | Encoder | Production value or source                                           | Compared with staging       |
-| ----------------------------------------------- | --- | ---- | ------- | -------------------------------------------------------------------- | --------------------------- |
-| `NODE_ENV`                                      | ✓   | ✓    | ✓       | `production` (Blueprint; encoder: dashboard)                         | Same                        |
-| `NODE_OPTIONS`                                  | ✓   | ✓    | ✓       | `--max-semi-space-size=4`                                            | Same                        |
-| `PORT`, `TRUST_PROXY`                           | ✓   |      |         | `10000`, `1` (Blueprint)                                             | Same                        |
-| `RUN_BACKGROUND_JOBS`                           | ✓   |      |         | `false` (Blueprint); `yaparena-jobs` runs the jobs                   | Same                        |
-| `COMMUNITY_STREAM_ENABLED`                      | ✓   |      |         | `false` (Blueprint)                                                  | Same                        |
-| `PRODUCTION_SERVICE`                            | ✓   |      |         | `true` (Blueprint)                                                   | Production web only         |
-| `APP_ORIGIN`                                    | ✓   | ✓    | ✓       | `https://yaparena.com`                                               | Differs                     |
-| `DATABASE_URL`                                  | ✓   | ✓    | ✓       | Runtime URL from step 6.7                                            | Own                         |
-| `METRICS_TOKEN`                                 | ✓   |      |         | Generated by the Blueprint                                           | Own                         |
-| `AUTH0_ISSUER_BASE_URL`                         | ✓   |      |         | `https://auth.yaparena.com` (Blueprint)                              | Differs                     |
-| `AUTH0_CLIENT_ID`                               | ✓   |      |         | Step 5.7                                                             | Differs                     |
-| `AUTH0_CLIENT_SECRET`                           | ✓   |      |         | Step 5.7                                                             | Own                         |
-| `LANDING_FONT_FILE`                             | ✓   |      |         | `/etc/secrets/landing-headline-font.b64` (Blueprint)                 | Same                        |
-| `COIN_SANDBOX_ENABLED`                          | ✓   | ✓    |         | `true` (dashboard)                                                   | Same                        |
-| `TURN_WINDOWS_ENABLED`                          | ✓   | ✓    |         | `true` (dashboard)                                                   | Same                        |
-| `LIVE_OUTLINE_ENABLED`                          | ✓   | ✓    |         | `true` (dashboard)                                                   | Same                        |
-| `TRANSCRIPTION_INGEST_SECRET`                   | ✓   | ✓    |         | `<INGEST_SECRET>` from 7.5 (dashboard)                               | Own                         |
-| `MATCHMAKING_ENABLED`                           | ✓   | ✓    |         | `true` (dashboard)                                                   | Same                        |
-| `LIVE_DEBATE_CAPACITY`                          | ✓   | ✓    |         | `10` (dashboard): LiveKit Ship with the outline on                   | Differs (staging: 2)        |
-| `LIVEKIT_URL`                                   | ✓   | ✓    | ✓       | `https://<LIVEKIT_HOST>` (dashboard)                                 | Differs                     |
-| `LIVEKIT_PUBLIC_URL`                            | ✓   | ✓    | ✓       | `wss://<LIVEKIT_HOST>` (dashboard)                                   | Differs                     |
-| `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`         | ✓   | ✓    | ✓       | Step 7.1 (dashboard)                                                 | Own                         |
-| `MEDIA_S3_ENDPOINT`, `MEDIA_S3_PUBLIC_ENDPOINT` | ✓   | ✓    | ✓       | `https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com`, both (dashboard) | Same account, so same value |
-| `MEDIA_S3_REGION`                               | ✓   | ✓    | ✓       | `auto` (dashboard)                                                   | Same                        |
-| `MEDIA_S3_BUCKET`                               | ✓   | ✓    | ✓       | `yaparena-production-media` (dashboard)                              | Differs                     |
-| `MEDIA_S3_ACCESS_KEY`, `MEDIA_S3_SECRET_KEY`    | ✓   | ✓    | ✓       | Step 7.2 (dashboard)                                                 | Own                         |
-| `MEDIA_REPLAY_EDGE_URL`                         | ✓   | ✓    | ✓       | `https://replay.yaparena.com` (dashboard)                            | Differs                     |
-| `MEDIA_REPLAY_SIGNING_SECRET`                   | ✓   | ✓    | ✓       | `<SIGNING_SECRET>` from 7.3 (dashboard)                              | Own                         |
-| `MEDIA_REPLAY_PACKAGING_ENABLED`                | ✓   | ✓    | ✓       | `true` (dashboard)                                                   | Same                        |
+| Variable                                                   | Web | Jobs | Encoder | Production value or source                                            | Compared with staging       |
+| ---------------------------------------------------------- | --- | ---- | ------- | --------------------------------------------------------------------- | --------------------------- |
+| `NODE_ENV`                                                 | ✓   | ✓    | ✓       | `production` (Blueprint; encoder: dashboard)                          | Same                        |
+| `NODE_OPTIONS`                                             | ✓   | ✓    | ✓       | `--max-semi-space-size=4`                                             | Same                        |
+| `PORT`, `TRUST_PROXY`                                      | ✓   |      |         | `10000`, `1` (Blueprint)                                              | Same                        |
+| `RUN_BACKGROUND_JOBS`                                      | ✓   |      |         | `false` (Blueprint); `yaparena-jobs` runs the jobs                    | Same                        |
+| `COMMUNITY_STREAM_ENABLED`                                 | ✓   |      |         | `false` (Blueprint)                                                   | Same                        |
+| `PRODUCTION_SERVICE`                                       | ✓   |      |         | `true` (Blueprint)                                                    | Production web only         |
+| `APP_ORIGIN`                                               | ✓   | ✓    | ✓       | `https://yaparena.com`                                                | Differs                     |
+| `DATABASE_URL`                                             | ✓   | ✓    | ✓       | Runtime URL from step 6.7                                             | Own                         |
+| `METRICS_TOKEN`                                            | ✓   |      |         | Generated by the Blueprint                                            | Own                         |
+| `MEDIA_ADMISSION_SECRET`                                   | ✓   |      |         | Generated by the Blueprint                                            | Own                         |
+| `AUTH0_ISSUER_BASE_URL`                                    | ✓   |      |         | `https://auth.yaparena.com` (Blueprint)                               | Differs                     |
+| `AUTH0_CLIENT_ID`                                          | ✓   |      |         | Step 5.7                                                              | Differs                     |
+| `AUTH0_CLIENT_SECRET`                                      | ✓   |      |         | Step 5.7                                                              | Own                         |
+| `LANDING_FONT_FILE`                                        | ✓   |      |         | `/etc/secrets/landing-headline-font.b64` (Blueprint)                  | Same                        |
+| `COIN_SANDBOX_ENABLED`                                     | ✓   | ✓    |         | `true` (dashboard)                                                    | Same                        |
+| `TURN_WINDOWS_ENABLED`                                     | ✓   | ✓    |         | `true` (dashboard)                                                    | Same                        |
+| `LIVE_OUTLINE_ENABLED`                                     | ✓   | ✓    |         | `true` (dashboard)                                                    | Same                        |
+| `TRANSCRIPTION_INGEST_SECRET`                              | ✓   |      |         | `<INGEST_SECRET>` from 7.5 (dashboard)                                | Own                         |
+| `MATCHMAKING_ENABLED`                                      | ✓   | ✓    |         | `true` (dashboard)                                                    | Same                        |
+| `LIVE_DEBATE_CAPACITY`                                     | ✓   | ✓    |         | `10` (dashboard): LiveKit Ship with the outline on                    | Differs (staging: 2)        |
+| `LIVEKIT_URL`                                              | ✓   | ✓    |         | `https://<LIVEKIT_HOST>` (dashboard)                                  | Differs                     |
+| `LIVEKIT_PUBLIC_URL`                                       | ✓   | ✓    |         | `wss://<LIVEKIT_HOST>` (dashboard)                                    | Differs                     |
+| `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`                    | ✓   | ✓    |         | Step 7.1 (dashboard)                                                  | Own                         |
+| `MEDIA_S3_ENDPOINT`                                        | ✓   | ✓    | ✓       | `https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com` (dashboard)        | Same account, so same value |
+| `MEDIA_S3_PUBLIC_ENDPOINT`                                 | ✓   | ✓    |         | The same value as `MEDIA_S3_ENDPOINT` (dashboard)                     | Same account, so same value |
+| `MEDIA_S3_REGION`                                          | ✓   | ✓    | ✓       | `auto` (dashboard)                                                    | Same                        |
+| `MEDIA_S3_BUCKET`                                          | ✓   | ✓    | ✓       | `yaparena-production-media` (dashboard)                               | Differs                     |
+| `MEDIA_S3_ACCESS_KEY`, `MEDIA_S3_SECRET_KEY`               | ✓   | ✓    | ✓       | Web and jobs: the read key; encoder: the encoder key (7.2, dashboard) | Own                         |
+| `MEDIA_EGRESS_S3_ACCESS_KEY`, `MEDIA_EGRESS_S3_SECRET_KEY` | ✓   | ✓    |         | The egress key from 7.2 (dashboard)                                   | Own                         |
+| `MEDIA_REPLAY_EDGE_URL`                                    | ✓   |      |         | `https://replay.yaparena.com` (dashboard)                             | Differs                     |
+| `MEDIA_REPLAY_SIGNING_SECRET`                              | ✓   |      |         | `<SIGNING_SECRET>` from 7.3 (dashboard)                               | Own                         |
+| `MEDIA_REPLAY_PACKAGING_ENABLED`                           | ✓   |      | ✓       | `true` (dashboard)                                                    | Same                        |
 
 Secret files: `supabase-ca.crt` on all three; `landing-headline-font.b64` on web only.
+
+The jobs worker and the encoder still start with a secret they don't use, but log `unused_secrets`
+with its name; remove it from that service. Web works with the read-only key because
+`MEDIA_REPLAY_PACKAGING_ENABLED=true`: the encoder publishes captions. With packaging off, web
+writes captions itself and needs a key that can write. The encoder still connects as the runtime
+database role; a role limited to the replay tables is a follow-up.
 
 **Never set in production**, on any service:
 
@@ -996,6 +1020,9 @@ Secret files: `supabase-ca.crt` on all three; `landing-headline-font.b64` on web
   `DATABASE_RUNTIME_PASSWORD`, `COIN_SANDBOX_OWNER_DATABASE_URL`: owner and admin credentials. The
   app refuses to start with any of them.
 - `AUTH0_*` and `PRODUCTION_SERVICE` on the jobs worker or the encoder: web only.
+- `MEDIA_REPLAY_SIGNING_SECRET`, `MEDIA_ADMISSION_SECRET` and `TRANSCRIPTION_INGEST_SECRET` on the
+  jobs worker or the encoder, and `LIVEKIT_*` or `MEDIA_EGRESS_S3_*` on the encoder: they don't
+  use them.
 - `HOMEPAGE_REFERENCE_ENABLED`: refused in production.
 - `COIN_SANDBOX_TRANSFERS_ENABLED`: simulated purchases and withdrawals. The production web service
   refuses to start with it.

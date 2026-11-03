@@ -5,8 +5,13 @@ import { createMetrics } from "./platform/metrics.ts";
 import { exitOnCrash } from "./platform/process-crash.ts";
 import { createBackgroundWorker } from "./services.ts";
 
-const config = loadConfig();
+const config = loadConfig(process.env, { service: "jobs" });
 const logger = createLogger({ level: config.logLevel });
+if (config.unusedSecrets.length > 0)
+  logger.warn(
+    { event: "unused_secrets", names: config.unusedSecrets },
+    "this process does not use these secrets; remove them from its environment",
+  );
 const metrics = createMetrics();
 const database = createDatabase(config.databaseUrl, logger, (seconds) =>
   metrics.poolWait.observe(seconds),
