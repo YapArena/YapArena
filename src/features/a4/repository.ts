@@ -104,6 +104,25 @@ const toOrder = (r: StoredSubmission): Order => ({
   limit: r.limit_value,
   quantity: r.quantity,
 });
+// A revealed book row's outcome as any viewer sees it. It names its fields
+// so the participant it belongs to, for a person their account id, never
+// leaves the server.
+const bookOutcome = (o: Outcome, state: Round["state"]) => ({
+  accepted: o.accepted,
+  executed: o.executed,
+  status: state === "settled" && o.executed ? "settled" : o.status,
+  premium: o.premium,
+  fee: o.fee,
+  payout: o.payout,
+  net: o.net,
+  reservation: o.reservation,
+  released: o.released,
+  premiumExact: o.premiumExact,
+  feeExact: o.feeExact,
+  payoutExact: o.payoutExact,
+  premiumDust: o.premiumDust,
+  payoutDust: o.payoutDust,
+});
 const scopeOf = (s: Session) => (s.mode === "human" ? "global" : s.id);
 const available = (s: Session, participant: string, userId: string | null) =>
   account(scopeOf(s), participant, "available", userId, s.asset);
@@ -1133,6 +1152,8 @@ export function createA4Repository(
                 BigInt(t.premium) - BigInt(t.payout) + BigInt(t.fee),
               ),
               noTrade: t.executed === 0,
+              // Humans stay anonymous: "Participant N", and their stored
+              // outcome's participant ("user:<id>") is left out.
               book: all.rows.slice(0, limit).map((o, i) => ({
                 label:
                   o.kind === "bot"
@@ -1142,15 +1163,7 @@ export function createA4Repository(
                 side: o.side,
                 limit: o.limit_value,
                 quantity: o.quantity,
-                outcome: o.outcome
-                  ? {
-                      ...o.outcome,
-                      status:
-                        r.state === "settled" && o.outcome.executed
-                          ? "settled"
-                          : o.outcome.status,
-                    }
-                  : null,
+                outcome: o.outcome ? bookOutcome(o.outcome, r.state) : null,
               })),
               pagination: { offset, limit, hasMore: all.rows.length > limit },
               snapshotHash: r.snapshot_hash,

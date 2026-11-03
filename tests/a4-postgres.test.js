@@ -152,9 +152,12 @@ async function retiredHumanRun(creator, { label, orders = [], open = false }) {
         order.side,
         order.limit,
         key(),
+        // The engine stores each outcome with its participant.
         JSON.stringify({
+          participant: `user:${order.actor.userId}`,
           executed: true,
           accepted: true,
+          status: "pending",
           premium: order.premium,
         }),
       ],
@@ -1119,6 +1122,49 @@ describe(
       );
       assert.equal((await a4.refill(a, key(), bots.id)).issued, true);
       await terminal(a, bots.id);
+    });
+    it("never shows another person's account id in a revealed human run", async () => {
+      const a = await actor(),
+        b = await actor(),
+        c = await actor(),
+        api = app();
+      const { session } = await retiredHumanRun(a, {
+        label: "Anonymous book",
+        orders: [
+          { actor: a, side: "YES", limit: "1", premium: "500001" },
+          { actor: b, side: "NO", limit: "0", premium: "500000" },
+        ],
+      });
+      // The stored outcomes still name each person; only the view drops it.
+      assert.equal(
+        (
+          await owner.query(
+            "SELECT count(*)::int AS n FROM a4_submissions o JOIN a4_rounds r ON r.id=o.round_id WHERE r.session_id=$1 AND o.outcome->>'participant' LIKE 'user:%'",
+            [session],
+          )
+        ).rows[0].n,
+        2,
+      );
+      const response = await request(api)
+        .get(`/api/a4/runs/${session}`)
+        .set("Cookie", c.cookie);
+      assert.equal(response.status, 200);
+      for (const view of [await a4.view(c, session), response.body]) {
+        assert.equal(JSON.stringify(view).includes('"user:'), false);
+        const { book } = view.rounds[0].diagnostics;
+        assert.deepEqual(
+          book.map((row) => row.label),
+          ["Participant 1", "Participant 2"],
+        );
+        assert.deepEqual(book.map((row) => row.outcome.premium).sort(), [
+          "500000",
+          "500001",
+        ]);
+        for (const row of book) {
+          assert.equal(Object.hasOwn(row.outcome, "participant"), false);
+          assert.equal(row.outcome.status, "settled");
+        }
+      }
     });
     it("applies configured play grants without reissuing prior business references", async () => {
       const a = await actor(),
