@@ -3,6 +3,7 @@ import { Router } from "express";
 import type { Request, RequestHandler } from "express";
 import type { createSessionRepository } from "../../platform/auth/sessions.ts";
 import { hashSessionToken } from "../../platform/auth/session-tokens.ts";
+import { createApiRateLimiter } from "../../platform/security.ts";
 import type { createIdentityRepository } from "../identity/repository.ts";
 import { createRequireRole } from "../identity/router.ts";
 import type {
@@ -97,33 +98,48 @@ export function createMeasurementRouter({
     return (await sessions.findUserByTokenHash(hash))?.id ?? null;
   }
 
+  const consentGrants = createApiRateLimiter({
+    windowMs: 60 * 60_000,
+    limit: 60,
+  });
   router.get("/api/measurement/consent", async (request, response) => {
     const hash = tokenHash(request, environment);
     return response.json({
       consented: hash ? await measurement.hasConsent(hash) : false,
     });
   });
-  router.post("/api/measurement/consent", async (request, response) => {
-    if (
-      !request.body ||
-      request.body.consent !== true ||
-      Object.keys(request.body).length !== 1
-    )
-      return response.status(400).json({ error: "explicit consent required" });
-    const existing = tokenHash(request, environment);
-    if (existing && (await measurement.hasConsent(existing)))
-      return response.json({ consented: true });
-    const token = randomBytes(32).toString("hex");
-    await measurement.grant(createHash("sha256").update(token).digest("hex"));
-    response.cookie(cookieName, token, {
-      httpOnly: true,
-      secure,
-      sameSite: "strict",
-      path: "/",
-      maxAge: 180 * 24 * 60 * 60 * 1000,
-    });
-    return response.status(201).json({ consented: true });
-  });
+  router.post(
+    "/api/measurement/consent",
+    async (request, response, next) => {
+      if (
+        !request.body ||
+        request.body.consent !== true ||
+        Object.keys(request.body).length !== 1
+      )
+        return response
+          .status(400)
+          .json({ error: "explicit consent required" });
+      const existing = tokenHash(request, environment);
+      if (existing && (await measurement.hasConsent(existing)))
+        return response.json({ consented: true });
+      next();
+    },
+    // Each new consent stores a row, so new grants are capped per network
+    // (YA-14); a browser that already consented is answered above.
+    consentGrants,
+    async (_request, response) => {
+      const token = randomBytes(32).toString("hex");
+      await measurement.grant(createHash("sha256").update(token).digest("hex"));
+      response.cookie(cookieName, token, {
+        httpOnly: true,
+        secure,
+        sameSite: "strict",
+        path: "/",
+        maxAge: 180 * 24 * 60 * 60 * 1000,
+      });
+      return response.status(201).json({ consented: true });
+    },
+  );
   router.delete("/api/measurement/consent", async (request, response) => {
     const hash = tokenHash(request, environment);
     if (hash) await measurement.withdraw(hash);

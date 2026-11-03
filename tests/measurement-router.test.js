@@ -80,6 +80,22 @@ function fixture({
 }
 
 describe("product measurement API", () => {
+  it("caps new consents per network but answers a returning browser (YA-14)", async () => {
+    const { app } = fixture();
+    const returning = request.agent(app);
+    const consent = (client) =>
+      client.post("/api/measurement/consent").send({ consent: true });
+    assert.equal((await consent(returning)).status, 201);
+    for (let i = 1; i < 60; i++)
+      assert.equal((await consent(request(app))).status, 201);
+    const capped = await consent(request(app));
+    assert.equal(capped.status, 429);
+    // A browser that already consented is answered without a new row.
+    const again = await consent(returning);
+    assert.equal(again.status, 200);
+    assert.deepEqual(again.body, { consented: true });
+  });
+
   it("requires explicit consent and deletes consented data on withdrawal", async () => {
     const { app, calls, consents } = fixture();
     const agent = request.agent(app);

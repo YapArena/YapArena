@@ -565,11 +565,14 @@ export function createApp({
         });
       },
     );
-  app.use(
-    "/api/messages",
-    createRequireAuthentication({ sessions, environment }),
-    createMessageRouter({ messages }),
-  );
+  // A development scaffold that local checks and the database isolation
+  // verifier still use; production has no use for it (YA-14).
+  if (environment !== "production")
+    app.use(
+      "/api/messages",
+      createRequireAuthentication({ sessions, environment }),
+      createMessageRouter({ messages }),
+    );
   // Personal live updates for the signed-in player, one stream per tab (interface 10).
   if (userStreams)
     app.get(
