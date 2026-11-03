@@ -54,6 +54,7 @@ const profile = {
   displayName: "Alex Public",
   bio: null,
   isDemo: true,
+  avatarId: "yap-owl",
 };
 const empty = {
   items: [],
@@ -268,11 +269,11 @@ describe("Explore, topic and profile pages", () => {
     );
   });
 
-  it("shows a person's initials beside their name, and a quiet note without a bio", () => {
+  it("shows a person's avatar beside their name, and a quiet note without a bio", () => {
     const page = renderProfile(origin, profile, empty);
     assert.match(
       page,
-      /<header class="person-hero"><span class="avatar-slot" aria-hidden="true"><span class="avatar-initials">AP<\/span><\/span>/,
+      /<header class="person-hero"><span class="avatar-slot" aria-hidden="true"><img class="avatar-img" src="\/assets\/avatars\/yap-owl\.svg\?v=[0-9a-f]{12}" alt=""><\/span>/,
     );
     assert.match(page, /<span class="sr-only">Participant · Demo<\/span>/);
     assert.match(

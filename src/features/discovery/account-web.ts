@@ -53,6 +53,9 @@ const profilePanel = (
                 <div class="settings-handle"><span aria-hidden="true">@</span><input id="profile-handle" name="handle" readonly aria-describedby="profile-handle-help"></div>
                 <p class="settings-help" id="profile-handle-help">Handles never change, so links to you never break. <a id="profile-url" href="/account#profile"></a></p>
               </div>
+              <div class="settings-field" data-profile-avatar>
+                <p class="settings-help">Shown next to your username across YAP Arena.</p>
+              </div>
               <div class="settings-field">
                 <div class="settings-label-row"><label for="profile-bio">Bio</label><span class="settings-count" data-count-for="profile-bio" aria-hidden="true">0/500</span></div>
                 <textarea id="profile-bio" name="bio" maxlength="500" rows="4" placeholder="A little about you and the ideas you care about." aria-describedby="profile-bio-error"></textarea>

@@ -2,6 +2,12 @@
 // permanent handle before anything else. The header opens it on every page
 // while a signed-in account has no profile, so it cannot be skipped.
 import type { Profile } from "./account-types.js";
+import {
+  avatarImage,
+  createAvatarPicker,
+  randomAvatarId,
+  type AvatarId,
+} from "./avatar.js";
 import { apiFetch } from "./lib/api.js";
 
 const handlePattern = /^[a-z0-9][a-z0-9-]{2,39}$/;
@@ -18,16 +24,6 @@ export function normalizeHandle(value: string) {
     .replace(/-{2,}/g, "-")
     .replace(/^-+/, "")
     .slice(0, 40);
-}
-
-export function initials(name: string) {
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => [...part][0] ?? "")
-    .join("")
-    .toUpperCase();
 }
 
 function handleProblem(value: string) {
@@ -55,7 +51,7 @@ const template = () => `<form class="ps-form" novalidate>
   <section class="ps-step" data-step="details">
     <h2 class="ps-title" tabindex="-1">Create your profile</h2>
     <div class="ps-preview" aria-hidden="true">
-      <span class="ps-avatar" data-ps-avatar>?</span>
+      <span class="ps-avatar" data-ps-avatar></span>
       <span class="ps-preview-text"><strong data-ps-preview-name>Username</strong><span data-ps-preview-handle>@handle</span></span>
     </div>
     <div class="ps-field">
@@ -67,6 +63,10 @@ const template = () => `<form class="ps-form" novalidate>
       ${label("ps-handle", "Handle", "data-ps-handle-count")}
       <div class="ps-handle" data-state="idle"><span class="ps-at" aria-hidden="true">@</span><input id="ps-handle" name="handle" maxlength="40" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="your-handle" required aria-describedby="ps-handle-status ps-handle-tip"><span class="ps-handle-icon" aria-hidden="true"></span></div>
       <p class="ps-status" id="ps-handle-status" aria-live="polite">${handleHelp}</p>
+    </div>
+    <div class="ps-field" data-ps-avatar-field>
+      <p class="ps-status">You can change it anytime in Settings.</p>
+      <p class="ps-error" id="ps-avatar-error" role="alert" hidden></p>
     </div>
     <button class="ps-primary" type="submit" data-ps-continue>Continue</button>
   </section>
@@ -116,7 +116,23 @@ function show() {
   const claimButton = q<HTMLButtonElement>("[data-ps-claim]");
   const terms = q<HTMLInputElement>("[data-ps-terms]");
   const formError = q<HTMLElement>("[data-ps-form-error]");
+  const avatarError = q<HTMLElement>("#ps-avatar-error");
   const steps = [...dialog.querySelectorAll<HTMLElement>("[data-step]")];
+
+  // Everyone starts on a random Yapper and can pick another.
+  let avatarId: AvatarId = randomAvatarId();
+  const picker = createAvatarPicker({
+    name: "avatarId",
+    legend: "Avatar",
+    selected: avatarId,
+    onChange: (id) => {
+      avatarId = id;
+      avatarError.hidden = true;
+      q<HTMLElement>("[data-ps-avatar]").replaceChildren(avatarImage(id));
+    },
+  });
+  q<HTMLElement>("[data-ps-avatar-field]").prepend(picker.element);
+  q<HTMLElement>("[data-ps-avatar]").replaceChildren(avatarImage(avatarId));
 
   let step = "details";
   let finished = false;
@@ -178,8 +194,6 @@ function show() {
   function render() {
     const displayName = name.value.trim();
     const value = handle.value;
-    q<HTMLElement>("[data-ps-avatar]").textContent =
-      initials(displayName) || "?";
     q<HTMLElement>("[data-ps-preview-name]").textContent =
       displayName || "Username";
     q<HTMLElement>("[data-ps-preview-handle]").textContent =
@@ -314,6 +328,7 @@ function show() {
           displayName: name.value.trim(),
           // Every profile is public (founder, 2026-10-24).
           publicationState: "published",
+          avatarId,
           acceptTerms: terms.checked,
         },
         timeout: 15000,
@@ -353,6 +368,13 @@ function show() {
         showNameError(body.error ?? "Enter a username.");
         return;
       }
+      if (body.field === "avatarId") {
+        goTo("details");
+        avatarError.textContent = body.error ?? "Choose one of the avatars.";
+        avatarError.hidden = false;
+        picker.focus();
+        return;
+      }
       if (body.field === "terms") {
         terms.checked = false;
         terms.focus();
@@ -386,8 +408,8 @@ function show() {
     event.preventDefault();
     if (step === "details") {
       if (!detailsReady()) return;
-      q<HTMLElement>("[data-ps-confirm-avatar]").textContent = initials(
-        name.value,
+      q<HTMLElement>("[data-ps-confirm-avatar]").replaceChildren(
+        avatarImage(avatarId),
       );
       q<HTMLElement>("[data-ps-confirm-name]").textContent = name.value.trim();
       q<HTMLElement>("[data-ps-confirm-handle]").textContent =

@@ -19,6 +19,7 @@ const inPlaceBundles = [
   "outline-panel",
   "debate-layout",
   "queue-overlay-logic",
+  "avatar",
 ];
 // Classic (non-module) page scripts that use frontend/lib/ or another frontend
 // module keep their URL and script scope as IIFE bundles with their own copy of

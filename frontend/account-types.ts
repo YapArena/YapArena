@@ -1,8 +1,12 @@
+import type { AvatarId } from "../src/features/identity/avatars.ts";
+
 export interface Profile {
   handle: string;
   displayName: string;
   bio: string | null;
   publicationState: "draft" | "published" | "hidden";
+  /** The chosen avatar, or the handle's default (Decision 0014). */
+  avatarId: AvatarId;
 }
 export interface AccountUser {
   id: string;

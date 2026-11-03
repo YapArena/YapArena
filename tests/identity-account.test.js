@@ -69,6 +69,7 @@ describe("profile setup", () => {
       handle: "maya-chen",
       displayName: " Maya Chen ",
       publicationState: "published",
+      avatarId: "yap-owl",
       acceptTerms: true,
     });
     assert.equal(response.status, 201);
@@ -81,14 +82,57 @@ describe("profile setup", () => {
       null,
       "published",
       { version: TERMS_VERSION, minimumAge: MINIMUM_AGE },
+      "yap-owl",
     ]);
-    // Without a choice a profile still starts as a private draft.
+    // Without a choice a profile still starts as a private draft, and with
+    // no avatar stored it shows the handle's default.
     await session("post", "/api/me/profile").send({
       handle: "second-try",
       displayName: "Second",
       acceptTerms: true,
     });
     assert.equal(calls.at(-1)[5], "draft");
+    assert.equal(calls.at(-1)[7], null);
+  });
+
+  it("accepts only avatars from the set, on claim and on edit", async () => {
+    const { calls, session } = setup();
+    for (const avatarId of ["yap-unknown", "../x", 7, ""]) {
+      const claim = await session("post", "/api/me/profile").send({
+        handle: "maya-chen",
+        displayName: "Maya",
+        avatarId,
+        acceptTerms: true,
+      });
+      assert.equal(claim.status, 400);
+      assert.equal(claim.body.field, "avatarId");
+      assert.equal(claim.body.code, "invalid_profile");
+      assert.match(claim.body.error, /Choose one of the avatars/);
+    }
+    assert.equal(calls.filter(([name]) => name === "createProfile").length, 0);
+    for (const avatarId of ["yap-unknown", null]) {
+      const patch = await session("patch", "/api/me/profile").send({
+        avatarId,
+      });
+      assert.equal(patch.status, 400);
+      assert.equal(patch.body.field, "avatarId");
+    }
+    const saved = await session("patch", "/api/me/profile").send({
+      avatarId: "yap-crab",
+    });
+    assert.equal(saved.status, 200);
+    assert.equal(saved.body.profile.avatarId, "yap-crab");
+    const hidden = setup({
+      getProfile: async () => ({ ...owned, publicationState: "hidden" }),
+    });
+    assert.equal(
+      (
+        await hidden
+          .session("patch", "/api/me/profile")
+          .send({ avatarId: "yap-crab" })
+      ).status,
+      403,
+    );
   });
 
   it("requires the age and terms confirmation before creating a profile", async () => {
@@ -452,7 +496,7 @@ describe("readable account activity", () => {
       /^WITH accepted AS \(\s*INSERT INTO terms_acceptances/,
     );
     assert.match(created.sql, /INSERT INTO public_profiles/);
-    assert.deepEqual(created.values.slice(5), ["2026-10-30", 18]);
+    assert.deepEqual(created.values.slice(5), [null, "2026-10-30", 18]);
     assert.doesNotMatch(queries.at(-2).sql, /terms_acceptances/);
     assert.equal(await repository.isHandleTaken("alex-rivera"), true);
     assert.equal(await repository.isHandleTaken("maya-chen"), false);

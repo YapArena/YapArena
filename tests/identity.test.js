@@ -332,6 +332,45 @@ describe("owned profiles and follows", () => {
 });
 
 describe("identity SQL boundaries", () => {
+  it("returns the chosen avatar, or the handle's default without one", async () => {
+    const queries = [];
+    const stored = { "my-profile": "yap-owl", "maya-chen": null };
+    const repository = createIdentityRepository({
+      query: async (sql, values) => {
+        queries.push({ sql, values });
+        if (!/public_profiles (WHERE|\(|SET)/.test(sql)) return { rows: [] };
+        const handle = values[1] === "maya-chen" ? "maya-chen" : "my-profile";
+        return { rows: [{ ...owned, handle, avatarId: stored[handle] }] };
+      },
+    });
+    assert.equal((await repository.getProfile("7")).avatarId, "yap-owl");
+    assert.equal(
+      (await repository.createProfile("7", "maya-chen", "Maya", null)).avatarId,
+      "yap-critter",
+    );
+    assert.equal(queries.at(-1).values[5], null);
+    await repository.createProfile(
+      "7",
+      "maya-chen",
+      "Maya",
+      null,
+      "published",
+      undefined,
+      "yap-frog",
+    );
+    assert.equal(queries.at(-1).values[5], "yap-frog");
+    await repository.updateProfile("7", { avatarId: "yap-crab" });
+    assert.match(
+      queries.at(-1).sql,
+      /avatar_id = CASE WHEN \$8 THEN \$9 ELSE avatar_id END/,
+    );
+    assert.deepEqual(queries.at(-1).values.slice(7), [true, "yap-crab"]);
+    assert.equal(
+      (await repository.exportData("7")).profile.avatarId,
+      "yap-owl",
+    );
+  });
+
   it("limits private profile reads and writes to the owner", async () => {
     const queries = [];
     const repository = createIdentityRepository({
@@ -410,6 +449,8 @@ describe("identity SQL boundaries", () => {
       null,
       true,
       "published",
+      false,
+      null,
     ]);
     assert.equal(
       (await repository.listFollows("7", 1, 0)).pagination.hasMore,
