@@ -34,6 +34,7 @@ export function createUserStreams({
   kinds,
   channels,
   presence,
+  revocations,
   maxStreams = 2000,
   streamsPerUser = 4,
   heartbeatMs = 15_000,
@@ -49,6 +50,8 @@ export function createUserStreams({
   channels: Readonly<Record<string, string>>;
   /** Marks the connected players as present. */
   presence?: (userIds: readonly string[]) => Promise<unknown>;
+  /** Database channel whose payload is a player whose sessions were all ended: their streams close. */
+  revocations?: string;
   maxStreams?: number;
   streamsPerUser?: number;
   heartbeatMs?: number;
@@ -120,12 +123,22 @@ export function createUserStreams({
     }
   }
 
+  // A suspended or incident-revoked account keeps no open stream.
+  function close(player: string) {
+    pending.delete(player);
+    for (const sink of [...(streams.get(player) ?? [])]) sink.close();
+  }
+
   const listener = listen(
     databaseUrl,
     logger,
     (payload, channel) => {
       // No payload: the listener (re)connected, so every player is read again.
       if (payload === undefined) return schedule();
+      if (revocations !== undefined && channel === revocations) {
+        if (userId.test(payload)) close(payload);
+        return;
+      }
       const notice = parseNotice(
         payload,
         channels[channel ?? ""] ?? "",
@@ -134,7 +147,13 @@ export function createUserStreams({
       if (notice) schedule(notice.user, notice.kind);
     },
     () => {},
-    { channels: Object.keys(channels), name: "user-streams" },
+    {
+      channels: [
+        ...Object.keys(channels),
+        ...(revocations === undefined ? [] : [revocations]),
+      ],
+      name: "user-streams",
+    },
   );
 
   return Object.freeze({

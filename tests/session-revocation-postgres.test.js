@@ -7,12 +7,18 @@ import { createApp } from "../dist/app.js";
 import { verifyRuntimeIdentity } from "../dist/platform/database.js";
 import { createLogger } from "../dist/platform/logger.js";
 import {
+  ACCOUNT_REVOKED_CHANNEL,
   createSessionRepository,
   insertSession,
   lockAccount,
   revokeAccountSessions,
   SessionUnavailableError,
 } from "../dist/platform/auth/sessions.js";
+import {
+  AccountStatusError,
+  changeAccountStatus,
+} from "../dist/platform/auth/account-status.js";
+import { runCommand } from "../scripts/suspend-account.ts";
 import { createAuth0Client } from "../dist/platform/auth/auth0.js";
 import {
   createAuth0Accounts,
@@ -562,6 +568,125 @@ describe(
       await login(user);
       await endAllAccountSessions(firstPool, user.id);
       assert.equal(await sessionCount(user), 0);
+    });
+
+    it("the owner suspension command ends sessions and streams with a recorded reason; reinstating allows sign-in", async () => {
+      // YA-08. The command and the module both require the dedicated owner login.
+      if (new URL(connectionString).username !== "yaparena_owner") return;
+      const user = await account();
+      const cookie = await login(user);
+      const listener = await firstPool.connect();
+      const notices = [];
+      listener.on("notification", (message) => {
+        if (message.channel === ACCOUNT_REVOKED_CHANNEL)
+          notices.push(message.payload);
+      });
+      await listener.query(`LISTEN ${ACCOUNT_REVOKED_CHANNEL}`);
+      const command = (...argv) => runCommand({ argv, connectionString });
+      try {
+        // Without --execute the command previews and changes nothing.
+        assert.deepEqual(
+          await command("suspend", user.id, "Synthetic preview only"),
+          {
+            changed: true,
+            status: "suspended",
+            endedSessions: 1,
+            executed: false,
+          },
+        );
+        assert.equal(await sessionCount(user), 1);
+        assert.equal((await me(appA, cookie)).status, 200);
+        assert.deepEqual(
+          await command(
+            "suspend",
+            user.id,
+            "Synthetic abuse report",
+            "--execute",
+          ),
+          {
+            changed: true,
+            status: "suspended",
+            endedSessions: 1,
+            executed: true,
+          },
+        );
+        assert.equal(await sessionCount(user), 0);
+        assert.equal((await me(appA, cookie)).status, 401);
+        await assert.rejects(login(user));
+        const deadline = Date.now() + 5000;
+        while (!notices.length && Date.now() < deadline)
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        // Only the committed suspension reached the web processes' streams.
+        assert.deepEqual(notices, [user.id]);
+        const audit = async () =>
+          (
+            await owner.query(
+              "SELECT event_type, metadata FROM identity_audit_events WHERE user_id=$1 ORDER BY id",
+              [user.id],
+            )
+          ).rows;
+        const suspended = await audit();
+        assert.deepEqual(
+          suspended.slice(-2).map((event) => event.event_type),
+          ["sessions.incident", "account.suspended"],
+        );
+        assert.deepEqual(suspended.at(-1).metadata, {
+          actorDatabaseRole: "yaparena_owner",
+          outcome: "success",
+          previousStatus: "active",
+          reason: "Synthetic abuse report",
+        });
+        assert.equal(
+          (
+            await command(
+              "suspend",
+              user.id,
+              "Synthetic repeat request",
+              "--execute",
+            )
+          ).changed,
+          false,
+        );
+        await assert.rejects(
+          command("suspend", user.id, "no", "--execute"),
+          AccountStatusError,
+        );
+        if (process.env.REVOCATION_TEST_RUNTIME_URL) {
+          const client = await firstPool.connect();
+          try {
+            await client.query("BEGIN");
+            await assert.rejects(
+              changeAccountStatus(client, {
+                userId: user.id,
+                change: "reinstate",
+                reason: "Runtime cannot do this",
+              }),
+              AccountStatusError,
+            );
+          } finally {
+            await client.query("ROLLBACK");
+            client.release();
+          }
+        }
+        assert.equal(
+          (
+            await command(
+              "reinstate",
+              user.id,
+              "Synthetic appeal upheld",
+              "--execute",
+            )
+          ).status,
+          "active",
+        );
+        assert.equal((await audit()).at(-1).event_type, "account.reinstated");
+        const fresh = await login(user);
+        assert.equal((await me(appA, fresh)).status, 200);
+        assert.deepEqual(notices, [user.id]);
+      } finally {
+        await listener.query(`UNLISTEN ${ACCOUNT_REVOKED_CHANNEL}`);
+        listener.release();
+      }
     });
   },
 );

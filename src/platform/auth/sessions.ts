@@ -61,9 +61,14 @@ export async function insertSession(
   return result.rows[0];
 }
 
+// Carries the id of an account whose sessions were all ended; each web
+// process closes that account's open live streams when it hears it.
+export const ACCOUNT_REVOKED_CHANNEL = "yaparena_account_revoked_v1";
+
 // Caller owns the account lock and the transaction. The generation advance is
 // the ordering point; commit makes it visible on every application instance.
 // Only security incidents end every session; signing out ends one session.
+// The notice is delivered on commit, so a rollback closes no stream.
 export async function revokeAccountSessions(
   client: PoolClient,
   userId: string,
@@ -94,6 +99,10 @@ export async function revokeAccountSessions(
       }),
     ],
   );
+  await client.query("SELECT pg_notify($1, $2)", [
+    ACCOUNT_REVOKED_CHANNEL,
+    userId,
+  ]);
   return authGeneration;
 }
 

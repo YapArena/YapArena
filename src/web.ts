@@ -25,6 +25,7 @@ import { createMetrics } from "./platform/metrics.ts";
 import { createCommunityStreams } from "./features/community/streams.ts";
 import { createServices } from "./services.ts";
 import { createUserStreams } from "./platform/user-streams.ts";
+import { ACCOUNT_REVOKED_CHANNEL } from "./platform/auth/sessions.ts";
 import { RESULTS_CHANNEL } from "./features/account-wallet/debate-sandbox.ts";
 import { treasuryStatus } from "./features/account-wallet/treasury-monitor.ts";
 
@@ -112,6 +113,7 @@ export function createWebServer(
         presence: matchmaking
           ? (userIds) => matchmaking.touchMany(userIds)
           : undefined,
+        revocations: ACCOUNT_REVOKED_CHANNEL,
       })
     : undefined;
   const sharedLimits = abuseConfig && abuseStore;

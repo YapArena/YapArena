@@ -73,10 +73,15 @@ function fixture(options = {}) {
       if (options.failTouch) throw new Error("database busy");
     },
     logger: { warn: (_details, message) => warnings.push(message) },
+    revocations: options.revocations,
     listen: (url, _logger, callback, _count, settings) => {
       assert.equal(url, "postgresql://localhost/queue");
       assert.deepEqual(settings, {
-        channels: ["yaparena_user_v1", "yaparena_results_v1"],
+        channels: [
+          "yaparena_user_v1",
+          "yaparena_results_v1",
+          ...(options.revocations ? [options.revocations] : []),
+        ],
         name: "user-streams",
       });
       wake = callback;
@@ -176,6 +181,31 @@ describe("personal live update streams", () => {
     f.wake("7");
     await settle();
     assert.deepEqual(f.reads, []);
+  });
+
+  it("closes a player's streams when all their sessions are revoked", async () => {
+    // YA-08: a suspension or incident revocation must not leave streams open.
+    const f = fixture({ revocations: "yaparena_account_revoked_v1" });
+    const first = new FakeResponse();
+    const second = new FakeResponse();
+    const other = new FakeResponse();
+    f.streams.subscribe("7", first);
+    f.streams.subscribe("7", second);
+    f.streams.subscribe("8", other);
+    await settle();
+    f.wake("not-a-user", "yaparena_account_revoked_v1");
+    f.wake("7", "yaparena_account_revoked_v1");
+    assert.equal(first.ended, true);
+    assert.equal(second.ended, true);
+    assert.equal(other.ended, false);
+    // Nothing is read for the closed player, and their slots are free again.
+    f.reads.length = 0;
+    f.wake("7");
+    await settle();
+    assert.deepEqual(f.reads, []);
+    const again = new FakeResponse();
+    f.streams.subscribe("7", again);
+    assert.equal(again.statusCode, 200);
   });
 
   it("sends heartbeats, refreshes presence and closes everything on stop", async () => {

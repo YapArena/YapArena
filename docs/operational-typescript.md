@@ -37,6 +37,10 @@ Its inbox drain and reconciliation run separately from
 runtime. See [the sandbox operating guide](coin-sandbox-operations.md) for command
 schemas, secret variable names, physical rail isolation and release boundaries.
 
+`suspend-account.ts` is also checked in the database-tools project. It is an explicit
+owner-only command that suspends or reinstates one account, with no `.env` loading or
+HTTP listener; see [suspending an account](operations.md#suspend-or-reinstate-an-account).
+
 `verify-coin-testnet.ts` and `verify-coin-testnet-ledger.ts` are checked in the same
 project. Their fixed Base Sepolia/Circle test-asset paths use private disposable
 operator keys and distinguish standalone chain receipts from integrated
