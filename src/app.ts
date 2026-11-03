@@ -326,6 +326,10 @@ export function createApp({
   const streamRead = (request: Request) =>
     request.method === "GET" &&
     /^\/api\/community\/events\/[^/]+\/stream$/.test(request.path);
+  // LiveKit's webhooks come from a few addresses that every room event shares,
+  // so they have their own limit below that counts only unverified requests.
+  const mediaWebhook = (request: Request) =>
+    Boolean(media && mediaProvider) && request.path === "/api/media/webhook";
   app.use(
     createViewerAdmission({
       secret: mediaAdmissionSecret,
@@ -353,6 +357,7 @@ export function createApp({
         liveRead(request) ||
         streamRead(request) ||
         internalIngest(request) ||
+        mediaWebhook(request) ||
         Boolean(mediaDeliveryLane(request)),
       shared: sharedRateLimits?.("api", "open"),
     }),
@@ -360,6 +365,13 @@ export function createApp({
   if (media && mediaProvider) {
     app.use(
       "/api/media/webhook",
+      createApiRateLimiter({
+        windowMs: rateLimitWindowMs,
+        limit: apiRateLimit,
+        uncountedWhen: (_request, response) =>
+          response.locals.webhookVerified === true,
+        shared: sharedRateLimits?.("media-webhook", "open"),
+      }),
       express.raw({ type: "application/webhook+json", limit: "256kb" }),
       createMediaWebhookRouter({
         media,

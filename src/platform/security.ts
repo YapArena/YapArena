@@ -12,12 +12,16 @@ export function createApiRateLimiter({
   limit,
   skip,
   keyGenerator,
+  uncountedWhen,
   shared,
 }: {
   windowMs: number;
   limit: number;
   skip?: (request: Request) => boolean;
   keyGenerator?: (request: Request) => string;
+  // A request for which this returns true when its response finishes is taken
+  // back off the count, so only the others use up the limit.
+  uncountedWhen?: (request: Request, response: Response) => boolean;
   // Without a shared store the limiter keeps its in-memory, per-process count.
   shared?: SharedRateLimit;
 }) {
@@ -26,6 +30,12 @@ export function createApiRateLimiter({
     limit,
     skip,
     keyGenerator,
+    ...(uncountedWhen
+      ? {
+          skipSuccessfulRequests: true,
+          requestWasSuccessful: uncountedWhen,
+        }
+      : {}),
     standardHeaders: "draft-8",
     legacyHeaders: false,
     ...shared,

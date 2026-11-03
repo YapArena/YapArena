@@ -120,6 +120,42 @@ describe("yaparena API", () => {
     assert.equal(response.headers["www-authenticate"], undefined);
   });
 
+  it("never throttles verified media webhooks and still limits unverified ones", async () => {
+    // YA-12: LiveKit sends every room event from a few addresses.
+    const webhookApp = createApp({
+      messages,
+      users,
+      sessions,
+      logger,
+      apiRateLimit: 5,
+      rateLimitWindowMs: 60_000,
+      media: { get: async () => null },
+      mediaProvider: {
+        publicUrl: "ws://localhost:7880",
+        playbackOrigin: "http://localhost:8333",
+        async webhook(_body, authorization) {
+          if (authorization !== "signed") throw new Error("invalid signature");
+          return { event: "room_started" };
+        },
+      },
+    });
+    const webhook = (authorization) => {
+      const call = request(webhookApp)
+        .post("/api/media/webhook")
+        .set("Content-Type", "application/webhook+json");
+      return (authorization ? call.set("Authorization", authorization) : call)
+        .send("{}")
+        .then((response) => response.status);
+    };
+    for (let i = 0; i < 50; i++) assert.equal(await webhook("signed"), 204);
+    // The signed burst used none of the ordinary API budget either.
+    const api = await request(webhookApp).get("/api/unknown");
+    assert.match(api.headers.ratelimit, /r=4;/);
+    for (let i = 0; i < 5; i++) assert.equal(await webhook(), 400);
+    assert.equal(await webhook(), 429);
+    assert.equal(await webhook("forged"), 429);
+  });
+
   it("allows only configured media origins in the browser policy", async () => {
     const mediaProvider = {
       publicUrl: "ws://localhost:7880",
