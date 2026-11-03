@@ -156,22 +156,6 @@ describe("yaparena API", () => {
     assert.equal(await webhook("forged"), 429);
   });
 
-  it("serves the development message scaffold outside production only (YA-14)", async () => {
-    const productionApp = createApp({
-      messages,
-      users,
-      sessions,
-      logger,
-      environment: "production",
-      applicationOrigin: "https://arena.example",
-    });
-    const response = await request(productionApp)
-      .get("/api/messages")
-      .set("Cookie", "__Host-session=test-token");
-    assert.equal(response.status, 404);
-    assert.equal((await authenticated("get", "/api/messages")).status, 200);
-  });
-
   it("allows only configured media origins in the browser policy", async () => {
     const mediaProvider = {
       publicUrl: "ws://localhost:7880",
@@ -207,6 +191,22 @@ describe("yaparena API", () => {
     assert.match(productionPolicy, /connect-src 'self' wss:\/\/media.example/);
     assert.match(productionPolicy, /https:\/\/media.example/);
     assert.match(productionPolicy, /upgrade-insecure-requests/);
+  });
+
+  it("serves the development message scaffold outside production only (YA-14)", async () => {
+    const productionApp = createApp({
+      messages,
+      users,
+      sessions,
+      logger,
+      environment: "production",
+      applicationOrigin: "https://arena.example",
+    });
+    const response = await request(productionApp)
+      .get("/api/messages")
+      .set("Cookie", "__Host-session=test-token");
+    assert.equal(response.status, 404);
+    assert.equal((await authenticated("get", "/api/messages")).status, 200);
   });
 
   it("reports that it is ready for traffic", async () => {
