@@ -668,8 +668,11 @@
   max-width: 48rem;
   padding: var(--space-6);
 }
+/* The balance sits beside the coin, and drops below it only when the card is
+   too narrow for both (a small phone zoomed to 200%). */
 .coin-total {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-5);
 }
@@ -678,6 +681,7 @@
 }
 .coin-total-text {
   display: grid;
+  flex: 1 1 10rem;
   gap: var(--space-1);
   min-width: 0;
 }
@@ -730,9 +734,10 @@
   width: 6rem;
   height: 1.5em;
 }
+/* Two equal columns, stacked when each would be narrower than 7rem. */
 .coin-wallet .account-balances {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 7rem), 1fr));
   gap: var(--space-3);
   margin: 0;
 }
@@ -787,6 +792,10 @@
 .coin-wallet .form-note {
   color: var(--muted);
   font-size: var(--text-14);
+}
+/* A long label wraps instead of widening the whole sandbox past the screen. */
+.coin-wallet .button-secondary {
+  white-space: normal;
 }
 #coin-sandbox {
   display: grid;
