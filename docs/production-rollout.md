@@ -208,6 +208,21 @@ they are `<WEB_IMAGE>` and `<ENCODER_IMAGE>`.
 
 - Check: both lines start with `ghcr.io/yaparena/` (older pages say `ghcr.io/boufe/`; the images
   moved with the repository).
+- Check that CI signed both images for `<COMMIT_SHA>`:
+
+  ```sh
+  for image in <WEB_IMAGE> <ENCODER_IMAGE>; do
+    gh attestation verify "oci://$image" --repo YapArena/YapArena \
+      --signer-workflow YapArena/YapArena/.github/workflows/reusable-publish.yml \
+      --source-ref refs/heads/main --source-digest <COMMIT_SHA> --deny-self-hosted-runners
+  done
+  ```
+
+  Each image prints `✓ Verification succeeded!`. If one prints an HTTP 404 or
+  `No attestations found`, its run is older than image signing: take a later run. For any other
+  error, see [verify an image signature](operations.md#verify-an-image-signature), and don't use
+  the release until both pass.
+
 - The privacy and terms pages ([9.1](#91-privacy-and-terms-pages)) come in a later release, through
   [Releasing from now on](#releasing-from-now-on).
 
@@ -1330,7 +1345,7 @@ Every release goes through staging first, as one pair of images. Production neve
 staging hasn't run, hotfixes included.
 
 1. **Choose:** step 1.1, a `main` commit whose CI run passed every job. Note `<WEB_IMAGE>` and
-   `<ENCODER_IMAGE>` from that one run.
+   `<ENCODER_IMAGE>` from that one run, and run step 1.1's signature check on both.
 2. **Prepare:** step 1.2's commands with the new `<COMMIT_SHA>`.
 3. **Migrate staging:** step 1.3.
 4. **Deploy to staging:** on `yaparena-staging-web`, `yaparena-staging-jobs` and

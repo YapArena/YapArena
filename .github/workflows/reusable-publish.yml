@@ -1,8 +1,14 @@
 name: Reusable image publication
 
 # Builds one production image variant with SBOM and provenance, pushes it by digest without a
-# tag, scans that pushed digest, and only then adds the tags. A tag therefore always names a
-# digest that passed the scan. An existing first tag is reported and never rebuilt or moved.
+# tag, scans that pushed digest, signs it, and only then adds the tags. A tag therefore always
+# names a digest that passed the scan and carries this workflow's signature. An existing first
+# tag is never rebuilt or moved; the run only checks that its digest carries that signature.
+#
+# The signature is a keyless Sigstore attestation (SLSA build provenance) stored with the
+# repository's attestations. If signing or its check fails, the job fails before tagging: the
+# pushed digest stays untagged, nothing deployable is published, and a rerun builds again.
+# docs/operations.md#verify-an-image-signature describes the check to run before deploying.
 
 on:
   workflow_call:
@@ -33,6 +39,10 @@ jobs:
     permissions:
       contents: read
       packages: write
+      # Keyless signing: the OIDC token proves this workflow's identity to Sigstore, and the
+      # attestation is stored with the repository.
+      id-token: write
+      attestations: write
     defaults:
       run:
         shell: bash
@@ -177,6 +187,56 @@ jobs:
               "${IMAGE}@${DIGEST}"
           done
 
+      - name: Sign the scanned digest
+        if: steps.existing.outputs.digest == ''
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: ${{ steps.metadata.outputs.name }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+
+      - name: Verify the image signature
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IMAGE: ${{ steps.metadata.outputs.name }}
+          FIRST_TAG: ${{ steps.metadata.outputs.first-tag }}
+          EXISTING_DIGEST: ${{ steps.existing.outputs.digest }}
+          BUILT_DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          digest="${EXISTING_DIGEST:-$BUILT_DIGEST}"
+          if [[ ! "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "No published digest to verify" >&2
+            exit 1
+          fi
+
+          # The check docs/operations.md gives operators: signed by this reusable workflow on a
+          # GitHub-hosted runner, for this repository, ref and commit. Update the path if the
+          # workflow file is renamed.
+          verify() {
+            gh attestation verify "oci://${IMAGE}@${digest}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --signer-workflow "${GITHUB_REPOSITORY}/.github/workflows/reusable-publish.yml" \
+              --source-ref "$GITHUB_REF" \
+              --source-digest "$GITHUB_SHA" \
+              --deny-self-hosted-runners
+          }
+
+          # A new attestation can take a few seconds to appear in the attestations API.
+          for attempt in 1 2 3; do
+            if verify; then
+              exit 0
+            fi
+            if (( attempt < 3 )); then
+              sleep 10
+            fi
+          done
+
+          if [[ -n "$EXISTING_DIGEST" ]]; then
+            echo "::error title=Unsigned existing image::${IMAGE}:${FIRST_TAG} names ${digest}, which has no signature from this workflow for ${GITHUB_SHA}. It was published before signing or by someone else. Do not deploy it."
+          else
+            echo "::error title=Image not signed::Signing or its check failed, so ${IMAGE}@${digest} was not tagged. Do not deploy it. Rerun the failed job to build, scan and sign a new digest."
+          fi
+          exit 1
+
       - name: Tag the scanned digest
         if: steps.existing.outputs.digest == ''
         env:
@@ -233,9 +293,11 @@ jobs:
             echo '```'
             echo "Platforms: ${PLATFORMS}. Tags: $(paste -sd ' ' <<< "$TAGS")."
             if [[ -n "$EXISTING_DIGEST" ]]; then
-              echo "An earlier run already published and scanned this tag; this run changed nothing."
+              echo "An earlier run already published, scanned and signed this tag; this run changed nothing."
             else
               echo "Trivy found no fixable HIGH or CRITICAL vulnerabilities in this pushed digest."
             fi
-            echo "Deploy the digest above, not a mutable tag."
+            echo "Signed by reusable-publish.yml for commit ${GITHUB_SHA} on ${GITHUB_REF}."
+            echo "Deploy the digest above, not a mutable tag, after checking its signature as in"
+            echo "[Verify an image signature](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/main/docs/operations.md#verify-an-image-signature)."
           } >> "$GITHUB_STEP_SUMMARY"
