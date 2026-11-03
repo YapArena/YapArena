@@ -86,6 +86,8 @@ interface Round {
     pricing: ReturnType<typeof priceRound>;
     outcomes: Outcome[];
     voidReason?: VoidReason;
+    // YA-04: participants whose orders arrived past capacity, refunded unfilled.
+    overCapacity?: string[];
   } | null;
   revealed_at: Date | null;
 }
@@ -192,6 +194,7 @@ interface StoredOrder {
   promotional_reservation: string;
   // F10: the replay position of a replay viewer's order; null when live.
   replay_position_ms: number | null;
+  created_at: Date;
 }
 // An order with its request's status: "reserved" until its round settles it.
 interface PendingOrder extends StoredOrder {
@@ -240,6 +243,11 @@ const guardRefusals: Readonly<
     status: 403,
     code: "debater",
     message: "debaters cannot take a position in their own debate",
+  },
+  "sandbox round is full": {
+    status: 409,
+    code: "window_full",
+    message: "sandbox round is full",
   },
 };
 function guardRefusal(error: unknown) {
@@ -474,6 +482,8 @@ export function createCoinDebateSandbox(
       key: string;
       pricing: ReturnType<typeof priceRound>;
       outcomes: Outcome[];
+      byParticipant: ReadonlyMap<string, Outcome>;
+      overCapacity: string[];
     }
   >();
   // Measured cost of settling one order once a batch holds its locks, so
@@ -649,7 +659,7 @@ export function createCoinDebateSandbox(
       await client.query<PendingOrder>(ordersWithStatus, [roundId])
     ).rows;
     const pending = orders
-      .map((order, index) => ({ order, index }))
+      .map((order) => ({ order }))
       .filter(({ order }) => order.request_status === "reserved");
     const settling = chunk
       ? pending.filter(({ order }) => chunk.has(order.user_id))
@@ -668,16 +678,33 @@ export function createCoinDebateSandbox(
       )
     ).rows[0]!.due;
     if (!due) return { revealed: false, settled: 0 };
-    const snapshot: Order[] = orders.map((o) => ({
+    // YA-04: the round prices at most its capacity, the earliest orders by
+    // arrival. Any order past it, which admission now refuses, settles
+    // unfilled and is refunded rather than failing every batch.
+    const admitted = new Set(
+      [...orders]
+        .sort(
+          (a, b) =>
+            a.created_at.getTime() - b.created_at.getTime() ||
+            (BigInt(a.user_id) < BigInt(b.user_id) ? -1 : 1),
+        )
+        .slice(0, round.terms.capacity)
+        .map((o) => o.user_id),
+    );
+    const asOrder = (o: PendingOrder): Order => ({
       participant: o.user_id,
       kind: "human",
       side: o.side,
       limit: o.limit_value,
       quantity: o.quantity,
-    }));
+    });
+    const snapshot = orders.filter((o) => admitted.has(o.user_id)).map(asOrder);
+    const overflow = orders
+      .filter((o) => !admitted.has(o.user_id))
+      .map(asOrder);
     if (digest(round.seed) !== round.seed_commitment)
       fail("sandbox seed commitment mismatch", 503);
-    const key = digest([round.seed, snapshot]);
+    const key = digest([round.seed, snapshot, overflow]);
     let price = priced.get(roundId);
     if (price?.key !== key) {
       const pricing = priceRound(
@@ -686,20 +713,32 @@ export function createCoinDebateSandbox(
         randomWord(round.seed, "branch"),
         randomWord(round.seed, "price"),
       );
+      const outcomes = [
+        ...executeRound(snapshot, round.terms, pricing, COIN_DEBATE_FACE),
+        // No price: none of these fills, so each is released in full.
+        ...executeRound(
+          overflow,
+          round.terms,
+          priceRound([], round.terms, 0n, 0n),
+          COIN_DEBATE_FACE,
+        ),
+      ];
       price = {
         key,
         pricing,
-        outcomes: executeRound(
-          snapshot,
-          round.terms,
-          pricing,
-          COIN_DEBATE_FACE,
-        ),
+        outcomes,
+        byParticipant: new Map(outcomes.map((o) => [o.participant, o])),
+        overCapacity: overflow.map((o) => o.participant),
       };
+      if (overflow.length)
+        options.logger?.error(
+          { roundId, overCapacity: overflow.length },
+          "coin round over capacity; later orders refunded unfilled",
+        );
       priced.set(roundId, price);
       if (priced.size > 50) priced.delete(priced.keys().next().value!);
     }
-    const { pricing, outcomes } = price;
+    const { pricing, outcomes, byParticipant, overCapacity } = price;
     const books = await lockSandboxBooks(
       client,
       settling.map(({ order }) => order.user_id),
@@ -718,11 +757,11 @@ export function createCoinDebateSandbox(
       )
     ).rows[0]!.now.toISOString();
     let settled = 0;
-    for (const [position, { order, index }] of settling.entries()) {
+    for (const [position, { order }] of settling.entries()) {
       // Past the batch's time budget, the rest wait for the next batch.
       if (position > 0 && performance.now() > deadline) break;
       settled++;
-      const outcome = outcomes[index]!,
+      const outcome = byParticipant.get(order.user_id)!,
         before = snapshots[position]!,
         bucket = buckets[position]!;
       const committed = commitStakeCost(
@@ -890,6 +929,7 @@ export function createCoinDebateSandbox(
       }),
       pricing,
       outcomes,
+      ...(overCapacity.length ? { overCapacity } : {}),
     };
     await client.query(
       "UPDATE coin_debate_rounds SET state='settled',result=$2::jsonb,revealed_at=clock_timestamp() WHERE id=$1",
@@ -1313,20 +1353,28 @@ export function createCoinDebateSandbox(
           ).rowCount
         )
           fail("your first commitment is final", 409, "already_answered");
-        if (
-          Number(
-            (
-              await client.query<{ count: string }>(
-                "SELECT count(*)::text FROM coin_debate_orders WHERE round_id=$1",
-                [roundId],
-              )
-            ).rows[0]!.count,
-          ) >= round.terms.capacity
-        )
-          fail("sandbox round is full", 409, "window_full");
+        const refuseWhenFull = async () => {
+          if (
+            Number(
+              (
+                await client.query<{ count: string }>(
+                  "SELECT count(*)::text FROM coin_debate_orders WHERE round_id=$1",
+                  [roundId],
+                )
+              ).rows[0]!.count,
+            ) >= round.terms.capacity
+          )
+            fail("sandbox round is full", 409, "window_full");
+        };
+        // Refuse early while the round is plainly full, then count again
+        // below once the ledger lock has serialized submits (YA-04).
+        await refuseWhenFull();
         const before = await lockSandboxBook(client, context.userId),
           buckets = await ensureSandboxBuckets(client, context.userId);
         await lockLedger(client, [buckets]);
+        // Every submit locks the shared treasury rows above, one at a time, so
+        // this count includes every order committed before this one.
+        await refuseWhenFull();
         // This transaction now holds every ledger row it can touch, so these
         // balances stay put until it commits.
         const balance = async (...ids: string[]) =>

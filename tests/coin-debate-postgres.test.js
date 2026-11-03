@@ -1865,6 +1865,171 @@ describe(
         before.balances,
       );
     });
+    it("holds window capacity under concurrent submits, refuses past it in the database and settles an over-capacity round (YA-04)", async () => {
+      const capacity = COIN_DEBATE_TERMS.capacity;
+      const host = await actor();
+      await sandbox.initialize(host);
+      await seed(host, "center", String(4n * BigInt(capacity) * 10_000n));
+      await seed(host, "promotional", String(4n * BigInt(capacity) * 10_000n));
+      const debateId = await debate();
+      const round = await a4.create(host, debateId, randomUUID());
+      const count = async (roundId) =>
+        (
+          await owner.query(
+            "SELECT count(*)::int n FROM coin_debate_orders WHERE round_id=$1",
+            [roundId],
+          )
+        ).rows[0].n;
+      const participant = async () => {
+        const context = await actor();
+        await sandbox.initialize(context);
+        return context;
+      };
+      const answer = (context, roundId, side = "YES") =>
+        a4.submit(context, roundId, randomUUID(), {
+          side,
+          limit: side === "YES" ? "0.9" : "0.1",
+          quantity: 1,
+        });
+      // Fill the window to one below capacity, a few submits at a time.
+      for (let filled = 0; filled < capacity - 1; filled += 25)
+        await Promise.all(
+          Array.from(
+            { length: Math.min(25, capacity - 1 - filled) },
+            async (_, i) =>
+              answer(
+                await participant(),
+                round.id,
+                (filled + i) % 2 ? "NO" : "YES",
+              ),
+          ),
+        );
+      assert.equal(await count(round.id), capacity - 1);
+      // Three submits pass the early count, then wait behind held treasury
+      // rows; only one may take the last place once they are released.
+      const racers = await Promise.all([
+        participant(),
+        participant(),
+        participant(),
+      ]);
+      const gate = await runtime.connect();
+      let results;
+      try {
+        await gate.query("BEGIN");
+        await gate.query("SELECT id FROM users WHERE id=$1 FOR UPDATE", [
+          host.userId,
+        ]);
+        await lockLedger(gate, [await ensureSandboxBuckets(gate, host.userId)]);
+        const pid = (await gate.query("SELECT pg_backend_pid() AS pid")).rows[0]
+          .pid;
+        const pending = racers.map((context) =>
+          answer(context, round.id).then(
+            () => null,
+            (error) => error,
+          ),
+        );
+        await waitForBlocked(pid, racers.length);
+        await gate.query("ROLLBACK");
+        results = await Promise.all(pending);
+      } finally {
+        gate.release();
+      }
+      assert.equal(results.filter((error) => error === null).length, 1);
+      for (const error of results.filter(Boolean)) {
+        assert.equal(error.status, 409);
+        assert.equal(error.code, "window_full");
+      }
+      assert.equal(await count(round.id), capacity);
+      // The database refuses an order past capacity even without the
+      // application's check.
+      await assert.rejects(
+        owner.query(
+          `INSERT INTO coin_debate_orders(round_id,user_id,request_id,side,limit_value,quantity,funding,center_reservation,promotional_reservation)
+           VALUES($1,$2,$3,'YES','0.5',1,'{}'::jsonb,0,0)`,
+          [round.id, racers[0].userId, randomUUID()],
+        ),
+        { code: "23514", message: "sandbox round is full" },
+      );
+      // A round that already holds more than its capacity (privileged fixture:
+      // one real order from another round, arriving last) settles with the
+      // latecomer unfilled and refunded instead of failing every batch.
+      const late = await participant();
+      const other = await a4.create(late, await debate(), randomUUID());
+      await answer(late, other.id);
+      const fixture = await owner.connect();
+      try {
+        await fixture.query("BEGIN");
+        await fixture.query(
+          "ALTER TABLE coin_debate_orders DISABLE TRIGGER coin_debate_order_history",
+        );
+        await fixture.query(
+          "UPDATE coin_debate_orders SET round_id=$1,created_at=clock_timestamp() WHERE round_id=$2",
+          [round.id, other.id],
+        );
+        await fixture.query(
+          "ALTER TABLE coin_debate_orders ENABLE TRIGGER coin_debate_order_history",
+        );
+        await fixture.query("COMMIT");
+      } catch (error) {
+        await fixture.query("ROLLBACK");
+        throw error;
+      } finally {
+        fixture.release();
+      }
+      assert.equal(await count(round.id), capacity + 1);
+      await close(round.id);
+      // Batches of at most 100 orders, even beside a closing live window, so
+      // the round settles over several batches. Each one must make progress
+      // without setting the round aside; other suites' due rounds may share
+      // the batches, so the loop is bounded by time, not by a batch count.
+      const settler = createCoinDebateSandbox(runtime, "simulation", {
+        ...relaxed,
+        settlement: { ...relaxed.settlement, orders: 100, quietOrders: 100 },
+      });
+      const unsettled = async () =>
+        (
+          await owner.query(
+            "SELECT count(*)::int n FROM coin_sandbox_requests q JOIN coin_debate_orders o ON o.request_id=q.id WHERE o.round_id=$1 AND q.status='reserved'",
+            [round.id],
+          )
+        ).rows[0].n;
+      const deadline = Date.now() + 120_000;
+      let batches = 0;
+      while ((await roundState(round.id)) === "open") {
+        assert.ok(Date.now() < deadline, "the round kept settling too long");
+        const before = await unsettled();
+        const { setAside } = await settler.advance();
+        batches++;
+        assert.ok(!setAside.includes(round.id));
+        if ((await roundState(round.id)) === "open")
+          assert.ok((await unsettled()) <= before);
+      }
+      assert.ok(batches > 1, "an over-capacity round settles over batches");
+      assert.equal(await roundState(round.id), "settled");
+      const result = (
+        await owner.query("SELECT result FROM coin_debate_rounds WHERE id=$1", [
+          round.id,
+        ])
+      ).rows[0].result;
+      assert.equal(result.snapshot.length, capacity);
+      assert.deepEqual(result.overCapacity, [String(late.userId)]);
+      const lateOutcome = result.outcomes.find(
+        (outcome) => outcome.participant === String(late.userId),
+      );
+      assert.equal(lateOutcome.executed, false);
+      assert.equal(lateOutcome.premium, "0");
+      assert.equal(lateOutcome.payout, "0");
+      assert.equal(
+        (
+          await owner.query(
+            "SELECT count(*)::int n FROM coin_sandbox_requests q JOIN coin_debate_orders o ON o.request_id=q.id WHERE o.round_id=$1 AND q.status<>'settled'",
+            [round.id],
+          )
+        ).rows[0].n,
+        0,
+      );
+      await reconcile();
+    });
   },
 );
 
