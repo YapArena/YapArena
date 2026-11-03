@@ -178,7 +178,7 @@ export function createWebServer(
     media,
     mediaProvider,
     mediaAccountRevocation,
-    mediaAdmissionSecret: config.media?.livekitSecret,
+    mediaAdmissionSecret: config.mediaAdmissionSecret,
     community,
     communityStreams,
     metrics,

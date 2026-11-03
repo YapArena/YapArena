@@ -9,12 +9,17 @@ import { createReplayWorker } from "./features/media/replay-worker.ts";
 import { verifyReplayTools } from "./features/media/replay-packaging.ts";
 import { createReplayThumbnailTask } from "./features/media/replay-thumbnail.ts";
 
-const config = loadConfig();
-if (!config.replayPackaging.enabled || !config.media)
-  throw new Error(
-    "Enable automatic packaging with complete private media configuration before starting this worker",
-  );
+// Requires automatic packaging and private storage only: the encoder never
+// needs LiveKit, the replay signing secret or the transcription ingest secret.
+const config = loadConfig(process.env, { service: "encoder" });
+const encoder = config.replayEncoder;
+if (!encoder) throw new Error("replay encoder configuration is missing");
 const logger = createLogger({ level: config.logLevel });
+if (config.unusedSecrets.length > 0)
+  logger.warn(
+    { event: "unused_secrets", names: config.unusedSecrets },
+    "this process does not use these secrets; remove them from its environment",
+  );
 // This process runs encoding only. It never competes with clock/HTTP work in
 // the web pool, starts listeners, or receives migration/deployment credentials.
 const database = createDatabase(config.databaseUrl, logger, undefined, {
@@ -22,13 +27,13 @@ const database = createDatabase(config.databaseUrl, logger, undefined, {
   timeoutMs: 1500,
 });
 const storage = createReplayStorage({
-  bucket: config.media.s3Bucket,
-  region: config.media.s3Region,
-  endpoint: config.media.s3Endpoint,
-  accessKey: config.media.s3AccessKey,
-  secretKey: config.media.s3SecretKey,
+  bucket: encoder.bucket,
+  region: encoder.region,
+  endpoint: encoder.endpoint,
+  accessKey: encoder.accessKey,
+  secretKey: encoder.secretKey,
 });
-const jobs = createReplayJobs(database, config.media.replayEdgeRooms);
+const jobs = createReplayJobs(database, encoder.replayEdgeRooms);
 const worker = createReplayWorker({
   jobs,
   storage,

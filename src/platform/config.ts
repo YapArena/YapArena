@@ -39,32 +39,71 @@ function parseMetricsToken(value: string | undefined) {
   return value;
 }
 
-function parseMedia(environment: NodeJS.ProcessEnv, nodeEnvironment: string) {
-  const names = [
-    "LIVEKIT_URL",
-    "LIVEKIT_PUBLIC_URL",
-    "LIVEKIT_API_KEY",
-    "LIVEKIT_API_SECRET",
-    "MEDIA_S3_REGION",
-    "MEDIA_S3_BUCKET",
-    "MEDIA_S3_ACCESS_KEY",
-    "MEDIA_S3_SECRET_KEY",
-  ] as const;
+// The process that loads the configuration. Each one requires only the secrets
+// it uses. Variables a process doesn't use are still accepted, so existing
+// deployments keep starting, and the jobs worker and the encoder name them in
+// a startup warning so they can be removed.
+export type ConfigService = "web" | "jobs" | "encoder";
+
+// Secret-bearing variables and the processes that read them.
+const secretReaders: Readonly<Record<string, readonly ConfigService[]>> = {
+  AUTH0_CLIENT_SECRET: ["web"],
+  METRICS_TOKEN: ["web"],
+  REDIS_SECURITY_URL: ["web"],
+  REDIS_KEY_SECRET: ["web"],
+  COIN_SANDBOX_WEBHOOK_SECRET: ["web"],
+  TRANSCRIPTION_INGEST_SECRET: ["web"],
+  MEDIA_REPLAY_SIGNING_SECRET: ["web"],
+  MEDIA_ADMISSION_SECRET: ["web"],
+  LIVEKIT_API_SECRET: ["web", "jobs"],
+  MEDIA_EGRESS_S3_SECRET_KEY: ["web", "jobs"],
+  MEDIA_S3_SECRET_KEY: ["web", "jobs", "encoder"],
+};
+
+function unusedSecrets(
+  environment: NodeJS.ProcessEnv,
+  service: ConfigService,
+): readonly string[] {
+  return Object.freeze(
+    Object.entries(secretReaders)
+      .filter(
+        ([name, readers]) =>
+          Boolean(environment[name]) && !readers.includes(service),
+      )
+      .map(([name]) => name),
+  );
+}
+
+const storageNames = [
+  "MEDIA_S3_REGION",
+  "MEDIA_S3_BUCKET",
+  "MEDIA_S3_ACCESS_KEY",
+  "MEDIA_S3_SECRET_KEY",
+] as const;
+
+// Only web signs replay links. The jobs worker ignores the signing secret, and
+// the encoder reads only the optional room allowlist.
+function parseReplayEdge(
+  environment: NodeJS.ProcessEnv,
+  service: ConfigService,
+) {
+  const signs = service === "web";
   if (
+    signs &&
     Boolean(environment.MEDIA_REPLAY_EDGE_URL) !==
-    Boolean(environment.MEDIA_REPLAY_SIGNING_SECRET)
+      Boolean(environment.MEDIA_REPLAY_SIGNING_SECRET)
   )
     throw new Error(
       "replay edge URL and signing secret must be configured together",
     );
-  if (environment.MEDIA_REPLAY_EDGE_URL) {
+  if (environment.MEDIA_REPLAY_EDGE_URL && service !== "encoder") {
     const edge = new URL(environment.MEDIA_REPLAY_EDGE_URL);
     if (
       edge.protocol !== "https:" ||
       edge.origin !== environment.MEDIA_REPLAY_EDGE_URL ||
       edge.username ||
       edge.password ||
-      environment.MEDIA_REPLAY_SIGNING_SECRET!.length < 32
+      (signs && environment.MEDIA_REPLAY_SIGNING_SECRET!.length < 32)
     )
       throw new Error(
         "replay edge requires an HTTPS origin and a secret of at least 32 characters",
@@ -74,7 +113,7 @@ function parseMedia(environment: NodeJS.ProcessEnv, nodeEnvironment: string) {
   if (environment.MEDIA_REPLAY_EDGE_ROOMS) {
     const rooms = environment.MEDIA_REPLAY_EDGE_ROOMS.split(",");
     if (
-      !environment.MEDIA_REPLAY_EDGE_URL ||
+      (!environment.MEDIA_REPLAY_EDGE_URL && service !== "encoder") ||
       rooms.length > 100 ||
       rooms.some(
         (id) =>
@@ -88,10 +127,83 @@ function parseMedia(environment: NodeJS.ProcessEnv, nodeEnvironment: string) {
       );
     replayEdgeRooms = Object.freeze([...new Set(rooms)]);
   }
+  return {
+    replayEdgeUrl: environment.MEDIA_REPLAY_EDGE_URL,
+    replaySigningSecret: signs
+      ? environment.MEDIA_REPLAY_SIGNING_SECRET
+      : undefined,
+    replayEdgeRooms,
+  };
+}
+
+// The S3 region, forced to "auto" for an R2 endpoint, after checking the
+// optional custom endpoint.
+function parseStorageRegion(
+  environment: NodeJS.ProcessEnv,
+  nodeEnvironment: string,
+) {
+  if (!environment.MEDIA_S3_ENDPOINT) return environment.MEDIA_S3_REGION!;
+  const endpoint = new URL(environment.MEDIA_S3_ENDPOINT);
+  if (
+    !["http:", "https:"].includes(endpoint.protocol) ||
+    (nodeEnvironment === "production" && endpoint.protocol !== "https:")
+  )
+    throw new Error("invalid media S3 endpoint");
+  return endpoint.hostname.endsWith(".r2.cloudflarestorage.com")
+    ? "auto"
+    : environment.MEDIA_S3_REGION!;
+}
+
+// The encoder reads recordings and writes replay packages: it needs private
+// storage and never LiveKit, the replay edge or its signing secret.
+function parseReplayEncoder(
+  environment: NodeJS.ProcessEnv,
+  nodeEnvironment: string,
+  replayEdgeRooms: readonly string[] | undefined,
+) {
+  if (environment.MEDIA_REPLAY_PACKAGING_ENABLED !== "true")
+    throw new Error(
+      "the replay encoder requires MEDIA_REPLAY_PACKAGING_ENABLED=true",
+    );
+  if (storageNames.some((name) => !environment[name]))
+    throw new Error(`the replay encoder requires ${storageNames.join(", ")}`);
+  return Object.freeze({
+    endpoint: environment.MEDIA_S3_ENDPOINT,
+    region: parseStorageRegion(environment, nodeEnvironment),
+    bucket: environment.MEDIA_S3_BUCKET!,
+    accessKey: environment.MEDIA_S3_ACCESS_KEY!,
+    secretKey: environment.MEDIA_S3_SECRET_KEY!,
+    replayEdgeRooms,
+  });
+}
+
+function parseMedia(
+  environment: NodeJS.ProcessEnv,
+  nodeEnvironment: string,
+  replayEdge: ReturnType<typeof parseReplayEdge>,
+) {
+  const names = [
+    "LIVEKIT_URL",
+    "LIVEKIT_PUBLIC_URL",
+    "LIVEKIT_API_KEY",
+    "LIVEKIT_API_SECRET",
+    ...storageNames,
+  ] as const;
+  // Optional key that LiveKit Egress uploads recordings with, so the app's own
+  // storage key can be read-only. Without it, Egress gets MEDIA_S3_*.
+  if (
+    Boolean(environment.MEDIA_EGRESS_S3_ACCESS_KEY) !==
+    Boolean(environment.MEDIA_EGRESS_S3_SECRET_KEY)
+  )
+    throw new Error(
+      "MEDIA_EGRESS_S3_ACCESS_KEY and MEDIA_EGRESS_S3_SECRET_KEY must be configured together",
+    );
   const set = names.filter((name) => Boolean(environment[name]));
   if (set.length === 0) {
     if (environment.MEDIA_REPLAY_EDGE_URL)
       throw new Error("replay edge requires media configuration");
+    if (environment.MEDIA_EGRESS_S3_ACCESS_KEY)
+      throw new Error("recording upload keys require media configuration");
     return undefined;
   }
   if (set.length !== names.length)
@@ -108,21 +220,11 @@ function parseMedia(environment: NodeJS.ProcessEnv, nodeEnvironment: string) {
     (livekitUrl.protocol !== "https:" || livekitPublicUrl.protocol !== "wss:")
   )
     throw new Error("production media requires HTTPS and WSS");
-  let s3Region = environment.MEDIA_S3_REGION!;
-  if (environment.MEDIA_S3_ENDPOINT) {
-    if (!environment.MEDIA_S3_PUBLIC_ENDPOINT)
-      throw new Error(
-        "custom media S3 endpoint requires a public playback endpoint",
-      );
-    const endpoint = new URL(environment.MEDIA_S3_ENDPOINT);
-    if (
-      !["http:", "https:"].includes(endpoint.protocol) ||
-      (nodeEnvironment === "production" && endpoint.protocol !== "https:")
-    )
-      throw new Error("invalid media S3 endpoint");
-    if (endpoint.hostname.endsWith(".r2.cloudflarestorage.com"))
-      s3Region = "auto";
-  }
+  if (environment.MEDIA_S3_ENDPOINT && !environment.MEDIA_S3_PUBLIC_ENDPOINT)
+    throw new Error(
+      "custom media S3 endpoint requires a public playback endpoint",
+    );
+  const s3Region = parseStorageRegion(environment, nodeEnvironment);
   if (environment.MEDIA_S3_PUBLIC_ENDPOINT) {
     const endpoint = new URL(environment.MEDIA_S3_PUBLIC_ENDPOINT);
     if (
@@ -142,16 +244,22 @@ function parseMedia(environment: NodeJS.ProcessEnv, nodeEnvironment: string) {
     s3Bucket: environment.MEDIA_S3_BUCKET!,
     s3AccessKey: environment.MEDIA_S3_ACCESS_KEY!,
     s3SecretKey: environment.MEDIA_S3_SECRET_KEY!,
-    replayEdgeUrl: environment.MEDIA_REPLAY_EDGE_URL,
-    replaySigningSecret: environment.MEDIA_REPLAY_SIGNING_SECRET,
-    replayEdgeRooms,
+    s3EgressAccessKey: environment.MEDIA_EGRESS_S3_ACCESS_KEY || undefined,
+    s3EgressSecretKey: environment.MEDIA_EGRESS_S3_SECRET_KEY || undefined,
+    ...replayEdge,
   });
 }
 
 // Decision 0012: live transcription, captions and the AI outline. The
 // transcriber agent runs on LiveKit Cloud, so the server needs media
 // configured, and the agent authenticates to ingest with its own secret.
-function parseLiveOutline(environment: NodeJS.ProcessEnv, media: boolean) {
+// Only web receives the agent's requests; the jobs worker dispatches the agent
+// with LiveKit credentials and never reads the ingest secret.
+function parseLiveOutline(
+  environment: NodeJS.ProcessEnv,
+  media: boolean,
+  service: ConfigService,
+) {
   const enabled = environment.LIVE_OUTLINE_ENABLED ?? "false";
   if (!["true", "false"].includes(enabled))
     throw new Error("LIVE_OUTLINE_ENABLED must be true or false");
@@ -162,24 +270,26 @@ function parseLiveOutline(environment: NodeJS.ProcessEnv, media: boolean) {
       "TRANSCRIBER_AGENT_NAME must be lowercase letters, digits and dashes",
     );
   const ingestSecret = environment.TRANSCRIPTION_INGEST_SECRET;
-  if (enabled === "true") {
-    if (!media)
-      throw new Error(
-        "LIVE_OUTLINE_ENABLED requires LiveKit media configuration",
-      );
-    if (!ingestSecret || Buffer.byteLength(ingestSecret) < 32)
-      throw new Error(
-        "LIVE_OUTLINE_ENABLED requires TRANSCRIPTION_INGEST_SECRET of at least 32 bytes",
-      );
-  }
+  const ingests = enabled === "true" && service === "web";
+  if (enabled === "true" && service !== "encoder" && !media)
+    throw new Error(
+      "LIVE_OUTLINE_ENABLED requires LiveKit media configuration",
+    );
+  if (ingests && (!ingestSecret || Buffer.byteLength(ingestSecret) < 32))
+    throw new Error(
+      "LIVE_OUTLINE_ENABLED requires TRANSCRIPTION_INGEST_SECRET of at least 32 bytes",
+    );
   return Object.freeze({
     enabled: enabled === "true",
     agentName,
-    ingestSecret: enabled === "true" ? ingestSecret! : undefined,
+    ingestSecret: ingests ? ingestSecret! : undefined,
   });
 }
 
-export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
+export function loadConfig(
+  environment: NodeJS.ProcessEnv = process.env,
+  { service = "web" }: { service?: ConfigService } = {},
+) {
   const nodeEnvironment = environment.NODE_ENV ?? "development";
   const homepageReference = environment.HOMEPAGE_REFERENCE_ENABLED ?? "false";
   const coinSandbox = environment.COIN_SANDBOX_ENABLED ?? "false";
@@ -264,15 +374,41 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     "SESSION_DURATION_MS",
     { minimum: 60_000, maximum: 31_536_000_000 },
   );
-  const media = parseMedia(environment, nodeEnvironment);
+  const replayEdge = parseReplayEdge(environment, service);
+  // The encoder never talks to LiveKit; it gets replayEncoder below instead.
+  const media =
+    service === "encoder"
+      ? undefined
+      : parseMedia(environment, nodeEnvironment, replayEdge);
   const packagingEnabled =
     environment.MEDIA_REPLAY_PACKAGING_ENABLED ?? "false";
   if (!["true", "false"].includes(packagingEnabled))
     throw new Error("MEDIA_REPLAY_PACKAGING_ENABLED must be true or false");
-  if (packagingEnabled === "true" && !media?.replayEdgeUrl)
+  // Web serves packaged replays through the edge. The jobs worker doesn't use
+  // packaging, and the encoder needs only storage.
+  if (packagingEnabled === "true" && service === "web" && !media?.replayEdgeUrl)
     throw new Error(
       "automatic replay packaging requires configured media and private replay edge",
     );
+  const replayEncoder =
+    service === "encoder"
+      ? parseReplayEncoder(
+          environment,
+          nodeEnvironment,
+          replayEdge.replayEdgeRooms,
+        )
+      : undefined;
+  // Signs viewer-admission cookies. A dedicated secret keeps the LiveKit
+  // project secret to LiveKit; without one, web keeps using that secret.
+  const admissionSecret = environment.MEDIA_ADMISSION_SECRET || undefined;
+  if (
+    service === "web" &&
+    admissionSecret &&
+    Buffer.byteLength(admissionSecret) < 32
+  )
+    throw new Error("MEDIA_ADMISSION_SECRET must be at least 32 bytes");
+  const mediaAdmissionSecret =
+    service === "web" ? (admissionSecret ?? media?.livekitSecret) : undefined;
   const replayPackaging = Object.freeze({
     enabled: packagingEnabled === "true",
     concurrency: parseInteger(
@@ -328,7 +464,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     }),
   });
   const backgroundJobs = environment.RUN_BACKGROUND_JOBS ?? "true";
-  const liveOutline = parseLiveOutline(environment, Boolean(media));
+  const liveOutline = parseLiveOutline(environment, Boolean(media), service);
   const streamEnabled = environment.COMMUNITY_STREAM_ENABLED ?? "false";
   if (!["true", "false"].includes(streamEnabled))
     throw new Error("COMMUNITY_STREAM_ENABLED must be true or false");
@@ -453,7 +589,10 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
     rateLimitWindowMs,
     sessionDurationMs,
     media,
+    mediaAdmissionSecret,
     replayPackaging,
+    replayEncoder,
+    unusedSecrets: unusedSecrets(environment, service),
     backgroundJobs: backgroundJobs === "true",
     communityStream,
     matchmaking,

@@ -381,3 +381,27 @@ it("authorizes only the current immutable package, and keeps MP4 available durin
     "https://storage.example",
   ]);
 });
+it("uploads recordings with the separate Egress key when one is configured", async (t) => {
+  const uploads = [];
+  t.mock.method(
+    EgressClient.prototype,
+    "startRoomCompositeEgress",
+    async (_room, output) => {
+      uploads.push(output.output.value);
+      return { egressId: "synthetic-egress" };
+    },
+  );
+  await createMediaProvider(config).beginRecording(id);
+  await createMediaProvider({
+    ...config,
+    s3EgressAccessKey: "synthetic-egress-key",
+    s3EgressSecretKey: "synthetic-egress-secret",
+  }).beginRecording(id);
+  assert.deepEqual(
+    uploads.map(({ accessKey, secret }) => [accessKey, secret]),
+    [
+      ["synthetic-key", "synthetic-secret"],
+      ["synthetic-egress-key", "synthetic-egress-secret"],
+    ],
+  );
+});

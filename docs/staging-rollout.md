@@ -681,8 +681,8 @@ openssl rand -hex 32
 ```
 
 It prints 64 characters: `<INGEST_SECRET>`. Save it in your password manager, for example as
-"YapArena staging transcription ingest secret". The agent, web and the jobs worker all get this
-same value.
+"YapArena staging transcription ingest secret". The agent and web get this same value; the jobs
+worker doesn't need it.
 
 ### 5.2 Create the ElevenLabs key (for the trial)
 
@@ -787,7 +787,9 @@ Time: 30 minutes, including a 10-minute test debate.
 1. Render → `yaparena-staging-web` → **Environment**. Add (or edit) `LIVE_OUTLINE_ENABLED` with
    value `true` and `TRANSCRIPTION_INGEST_SECRET` with value `<INGEST_SECRET>`, then choose **Save
    and deploy**.
-2. Do the same on `yaparena-staging-jobs`: it sends the agent to debates.
+2. On `yaparena-staging-jobs`, add only `LIVE_OUTLINE_ENABLED` with value `true`: it sends the
+   agent to debates and doesn't need the secret. A worker that already has the secret still
+   starts, and logs `unused_secrets`; remove it there.
 3. Wait for "Deploy live" in both services' **Events**.
 4. In A's and B's browser profiles, open `https://yaparena-staging-web.onrender.com/account`,
    **Profile** tab, **Debating** card. Choose **Language you debate in** (`Français` for A and

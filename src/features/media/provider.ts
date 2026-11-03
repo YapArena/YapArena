@@ -32,6 +32,10 @@ export interface MediaProviderConfig {
   s3Bucket: string;
   s3AccessKey: string;
   s3SecretKey: string;
+  // Optional key that LiveKit Egress uploads recordings with, so the key above
+  // can be read-only. Egress uses the key above when these are unset.
+  s3EgressAccessKey?: string;
+  s3EgressSecretKey?: string;
   replayEdgeUrl?: string;
   replaySigningSecret?: string;
   replayEdgeRooms?: readonly string[];
@@ -232,8 +236,8 @@ export function createMediaProvider(
             region: config.s3Region,
             endpoint: config.s3Endpoint ?? "",
             forcePathStyle: Boolean(config.s3Endpoint),
-            accessKey: config.s3AccessKey,
-            secret: config.s3SecretKey,
+            accessKey: config.s3EgressAccessKey ?? config.s3AccessKey,
+            secret: config.s3EgressSecretKey ?? config.s3SecretKey,
           }),
         },
       });
