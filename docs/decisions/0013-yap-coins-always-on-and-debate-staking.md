@@ -76,7 +76,8 @@ is an A4 endorsement in one turn's 60-second window; there is no winner (F09).
   has any, labelled from each turn's final AI outline through S's `windowArgumentLabel` contract
   (Decision 0012). Revealed windows' aggregate pricing is public (coordinator, option A): the chart
   reads it from the public window list, so every viewer sees the same results, and the founder
-  decided every revealed window shows its results, whatever its size.
+  decided every revealed window shows its results, whatever its size. Amended 2026-11-02 (below):
+  the turns show as bars, and on a replay under the scoreboard.
 - Staged (founder, 2026-10-26): the YAP human-run and refill controls were removed first, with the
   Bots sandbox behind a tab next to Info. Bots mode then moved to `/coins` entirely: the debate
   page keeps the shared bot history chart and an info card linking to `/coins?debate=…`. On
@@ -110,3 +111,26 @@ amendment where they differ:
 - The speaking debater's video gets a lit frame, and each debater's name and handle show over
   their video on hover.
 - From 960 px wide the page fits one screen and doesn't scroll.
+
+## Amendment, 2026-11-02 (founder, replay board)
+
+The founder approved the BC1 replay board (design canvas, "BC1 · Desktop replay") and with it the
+change to the debate chart's code:
+
+- On a replay, a timeline split into turns sits under the video. Each turn's segment fills as it
+  plays, and choosing one plays the replay from that turn's start. It needs the turns' places in
+  the recording; until the window list gives them it keeps its space, unseen.
+- Results by turn replaces the line chart for turn windows: one bar per turn around a dashed 50%
+  line, rising for a yes majority and dropping for a no majority, with its value above or below
+  it and the turn number and speaker under it. The chosen turn is filled and the playing turn
+  outlined, and a line above the bars names the turn, its argument and its result. A turn not yet
+  revealed shows an empty column, and before a five-day reveal the line says when results come.
+  Choosing a turn on a replay plays it.
+- On a replay, Results by turn sits under the scoreboard, below the first screen, and the rail
+  panel has no Results tab. On live and upcoming debates it stays the rail panel's Results tab,
+  with a column for every turn of the debate.
+- The drawn price and typical limits, with their turn picker, move into a "Price and typical
+  limits" disclosure under the bars, closed at first. With Bots mode on, the bot history keeps its
+  line chart and price inspector until a turn is revealed, as before.
+- What a chart shows is unchanged: revealed windows only, from the public window list, labelled
+  from each turn's final AI outline.

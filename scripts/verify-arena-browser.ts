@@ -578,6 +578,25 @@ export async function verifyArenaBrowser({
     await page
       .getByRole("region", { name: "Debate replay", exact: true })
       .waitFor();
+    // The replay board (direction BC1): Results by turn sits under the
+    // scoreboard instead of in the rail's tabs, and a turn timeline sits
+    // under the video (shown once the turns' places in the recording load).
+    assert.deepEqual(
+      await page.evaluate(() => {
+        const results = document.querySelector("#arena-results")!;
+        return {
+          resultsTab: document.querySelectorAll("#arena-tab-results").length,
+          inStage: results.parentElement!.matches(".arena-watch"),
+          afterScoreboard:
+            results.previousElementSibling!.matches(".arena-scoreboard"),
+          timeline: document.querySelectorAll(
+            ".arena-watch > [data-replay-timeline]",
+          ).length,
+        };
+      }),
+      { resultsTab: 0, inStage: true, afterScoreboard: true, timeline: 1 },
+    );
+    checks.replayResultsUnderScoreboard = true;
     await page.evaluate(async () => {
       const canvas = document.createElement("canvas");
       canvas.width = 640;

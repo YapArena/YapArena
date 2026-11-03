@@ -3,16 +3,18 @@
 `/debates/<slug>` follows direction **BC1**, chosen by the founder on 2026-10-30 from the round 2
 design canvas and revised in review the same day: a large stage with chat over the video, the
 debaters in match cards under it with the emblem turn clock between them, and a right rail with
-the answer panel above a panel of tabs (AI outline, Results, About). It amends
-[Decision 0013](decisions/0013-yap-coins-always-on-and-debate-staking.md) (see its two 2026-10-30
-amendments). Everything else in Decisions 0012 and 0013 stands. Behaviour and data flow are in
+the answer panel above a panel of tabs (AI outline, Results, About). On a replay, a turn timeline
+sits under the video and Results by turn under the scoreboard (the founder's replay board,
+2026-11-02). It amends [Decision 0013](decisions/0013-yap-coins-always-on-and-debate-staking.md)
+(see its 2026-10-30 and 2026-11-02 amendments). Everything else in Decisions 0012 and 0013 stands. Behaviour and data flow are in
 [the debate workspace](debate-workspace.md).
 
 The founder asked for the emblem clock in review, so it landed with the layout instead of in a
 pull request of its own. `frontend/pixel-emblem.ts` has the countdown mode only; the queue overlay
 adds the landing's living mode when it moves `startEmblem` out of `frontend/landing.ts`. The
-replay timeline with per-turn results still needs S's clearance for `frontend/arena-chart.ts`;
-until then the replay keeps the existing chart, restyled.
+replay timeline and Results by turn are new modules (`frontend/replay-timeline.ts`,
+`frontend/turn-results.ts`, rules in `frontend/turn-results-model.ts`); `frontend/arena-chart.ts`
+still draws the bot history's line chart, unchanged.
 
 ## Tokens
 
@@ -81,6 +83,14 @@ sideways.
   ended"). The media status stays in its row under the video.
 - **Captions:** a 44 px `#0f0f0f` pill under the video, cut at the start with an ellipsis, with a
   36 px toggle. Live only.
+- **Replay timeline (replays):** under the video, one segment per turn with 4 px gaps: a 6 px
+  track (`#262626`) that fills white as the turn plays, a 16 px white thumb ringed in black on the
+  playing turn, and a 44 px target around each. Choosing a turn seeks the replay to its start, or
+  presses Play replay first and seeks once the recording loads. One tab stop; the arrow keys,
+  Home and End move between turns. Its 44 px stay reserved while the window list loads, and stay
+  empty if the turns have no places in the recording.
+- **Results by turn (replays, under the scoreboard; the Results tab elsewhere):** see Results
+  below.
 - **Scoreboard:** two cards (48 px initials, name, "@handle · speaking / listening / next", the
   side pill, filled white while that side has the floor) and the turn clock between them, with
   "Turn 3 of 10" below. Cards are white and grey only.
@@ -114,8 +124,21 @@ sideways.
   updates. Earlier turns arrive as labels only, so their cards show points only if the page saw
   that turn live. "Listening for the next argument…" fills the next slot while live; "Written by
   AI…" sits under the list. A debater's own cards open to their flag buttons.
-- **Results:** the chart restyled with CSS only (Yes green, No red, landing type, no gradient
-  panel), its labels scaled up for the narrow panel.
+- **Results by turn:** "Results by turn" in Dydema 16 px beside "Share who said yes in each
+  60-second window · bars rise for a yes majority and drop for a no majority" (14 px muted). A
+  two-line caption (15/24) names the turn and speaker, the argument in bold and the result, for the
+  turn under the pointer or focus, else the chosen turn (the latest revealed one at first), else
+  when results come. Below it, one 184 px column per turn on a dashed 50% line 88 px down, with
+  "50%" in a gutter on the right: a 32 px bar (4 px radius) in Yes green rising from the line or
+  No red dropping from it, at 4 px per percentage point (less when a share is far from 50%, so
+  bars keep within 56 px), its value in Forum 18 px beyond it, then the turn number and the
+  speaker's first name ("playing" under the playing turn). The chosen column is filled
+  `--raised`, the playing one outlined in `--control-border`; unrevealed turns are empty. In a
+  narrow chart (under 36rem: the rail panel and phones) values are 14 px and speakers are
+  initials. Bars are buttons with one tab stop; hover or focus previews a turn in the caption,
+  choosing it fills it and, on a replay, plays it. "Price and typical limits" (the price
+  inspector and its turn picker) is a disclosure under the bars, closed at first. With Bots mode
+  on, the bot history keeps its line chart, restyled with CSS only, until a turn is revealed.
 - **About:** "About this debate" with the latest result, then the event, moderation and site
   links (Topics, Yap Coins, About YAP Arena).
 - **Chat as a tab (< 1200 px, or a smaller video):** the panel grows to at least 26rem while Chat is open (the rail scrolls on short screens). The connection pill and a 44 px "⋯" menu (like, copy link, check

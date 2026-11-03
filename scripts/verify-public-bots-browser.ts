@@ -1,4 +1,4 @@
-import type { BrowserContext, Response } from "playwright-core";
+import type { BrowserContext, Page, Response } from "playwright-core";
 import type { Pool } from "pg";
 import type { PublicBotActivity } from "../src/features/a4/public-bot-types.ts";
 import type { HomeData } from "../src/features/discovery/homepage-model.ts";
@@ -12,6 +12,14 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { setTimeout as delay } from "node:timers/promises";
 import axe from "axe-core";
 import { retryOnReset, signInForTest } from "./browser-sign-in.ts";
+
+// The chart is the rail panel's Results tab (debate page direction BC1),
+// except on a replay, where Results by turn sits under the scoreboard.
+async function showResults(page: Page) {
+  const tab = page.locator("#arena-tab-results");
+  if (await tab.count()) await tab.click();
+  else await page.locator(".arena-watch > #arena-results").waitFor();
+}
 
 export async function verifyPublicBotsBrowser({
   base,
@@ -149,8 +157,7 @@ export async function verifyPublicBotsBrowser({
     checks.separateCreatorKeepsWorkspaceRoundsPrivate = true;
     await home.goto(base + "/home");
     await watch.goto(base + "/debates/" + debateSlug);
-    // The chart is in the rail panel's Results tab (debate page direction BC1).
-    await watch.locator("#arena-tab-results").click();
+    await showResults(watch);
     home.setDefaultTimeout(20000);
     watch.setDefaultTimeout(20000);
     await home.bringToFront();
@@ -370,7 +377,7 @@ export async function verifyPublicBotsBrowser({
     const publicWatch = await anonymous.newPage();
     publicWatch.on("pageerror", (e) => errors.push(e.message));
     await publicWatch.goto(base + "/debates/" + debateSlug);
-    await publicWatch.locator("#arena-tab-results").click();
+    await showResults(publicWatch);
     await publicWatch.locator(`[data-chart-round="${mixed}"]`).waitFor();
     for (const selector of [
       "[data-inline-access]",
