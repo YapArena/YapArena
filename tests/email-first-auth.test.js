@@ -311,11 +311,7 @@ describe("Auth0 account routes", () => {
   const fail = () => {
     throw new Error("this route must not call the sign-in provider");
   };
-  function setup({
-    active = false,
-    configured = true,
-    sharedAuthLimiter,
-  } = {}) {
+  function setup({ active = false, configured = true } = {}) {
     const auth0 = {
       client: {
         authorizationUrl: async () =>
@@ -352,7 +348,6 @@ describe("Auth0 account routes", () => {
       applicationOrigin: "https://arena.example",
       auth0: configured ? auth0 : undefined,
       authRateLimit: 100,
-      sharedAuthLimiter,
     });
   }
   it("pairs the sign-in methods with the authenticated account in one response", async () => {
@@ -371,11 +366,8 @@ describe("Auth0 account routes", () => {
       ],
     });
   });
-  it("keeps sign-in, logout and session reads usable when shared abuse protection is unavailable", async () => {
-    const app = setup({
-      active: true,
-      sharedAuthLimiter: (_request, response) => response.sendStatus(503),
-    });
+  it("serves session reads, sign-out and sign-in", async () => {
+    const app = setup({ active: true });
     assert.equal(
       (
         await request(app)
@@ -393,9 +385,9 @@ describe("Auth0 account routes", () => {
       logout.body.redirectTo,
       /^https:\/\/tenant\.example\.test\/v2\/logout\?returnTo=https%3A%2F%2Farena\.example%2F$/,
     );
-    const login = await request(
-      setup({ sharedAuthLimiter: (_r, s) => s.sendStatus(503) }),
-    ).get("/api/auth/login?connection=google");
+    const login = await request(setup()).get(
+      "/api/auth/login?connection=google",
+    );
     assert.equal(login.status, 303);
     assert.match(
       login.headers["set-cookie"][0],

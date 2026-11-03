@@ -172,7 +172,6 @@ export function createApp({
   transcriptionIngest,
   dispatchTranscriber,
   outlines,
-  sharedAuthLimiter,
   sharedAccountLimiter,
   sharedRateLimits,
   accountWallet,
@@ -227,7 +226,6 @@ export function createApp({
   // Sensitive operations confirmed by a fresh sign-in (Decision 0009,
   // point 8).
   accountSecurity?: { operations: AccountOperations };
-  sharedAuthLimiter?: RequestHandler;
   sharedAccountLimiter?: RequestHandler;
   // Backs the general, auth and account-security API limiters with the shared
   // Redis abuse store.
@@ -318,11 +316,6 @@ export function createApp({
   // The transcriber agent's private ingest has its own per-debate limit.
   const internalIngest = (request: Request) =>
     request.path.startsWith("/api/internal/transcription/");
-  const liveRead = (request: Request) =>
-    request.method === "GET" &&
-    /^\/api\/community\/events\/[0-9a-f-]{36}(?:\/my-like|\/chat\/sync|\/updates)?$/i.test(
-      request.path,
-    );
   const streamRead = (request: Request) =>
     request.method === "GET" &&
     /^\/api\/community\/events\/[^/]+\/stream$/.test(request.path);
@@ -340,21 +333,10 @@ export function createApp({
   );
   app.use(
     createApiRateLimiter({
-      windowMs: 60_000,
-      limit: 600,
-      skip: (request) =>
-        !liveRead(request) ||
-        streamRead(request) ||
-        Boolean(mediaDeliveryLane(request)),
-      shared: sharedRateLimits?.("api-live", "open"),
-    }),
-  );
-  app.use(
-    createApiRateLimiter({
       windowMs: rateLimitWindowMs,
       limit: apiRateLimit,
+      // Live community reads are viewer-admission delivery lanes (YA-17).
       skip: (request) =>
-        liveRead(request) ||
         streamRead(request) ||
         internalIngest(request) ||
         mediaWebhook(request) ||
@@ -390,13 +372,6 @@ export function createApp({
   app.use(express.json({ limit: requestBodyLimit }));
   app.use(cookieParser());
   app.use(createCsrfOriginProtection({ environment, applicationOrigin }));
-  if (sharedAuthLimiter)
-    app.use("/api/auth", (request, response, next) => {
-      // An abuse-store outage must never prevent logout or session inspection.
-      if (request.method !== "POST" || request.path === "/logout")
-        return next();
-      return sharedAuthLimiter(request, response, next);
-    });
 
   app.get("/health", (_request, response) => {
     response.json({ status: "ok" });

@@ -156,6 +156,24 @@ describe("yaparena API", () => {
     assert.equal(await webhook("forged"), 429);
   });
 
+  it("counts live community reads only in viewer admission, not the API limit (YA-17)", async () => {
+    const limited = createApp({
+      messages,
+      users,
+      sessions,
+      logger,
+      apiRateLimit: 1,
+    });
+    const live = `/api/community/events/${"3".repeat(8)}-3333-4333-8333-${"3".repeat(12)}/updates`;
+    for (let i = 0; i < 3; i++) {
+      const response = await request(limited).get(live);
+      assert.notEqual(response.status, 429);
+      assert.equal(response.headers.ratelimit, undefined);
+    }
+    assert.equal((await request(limited).get("/health")).status, 200);
+    assert.equal((await request(limited).get("/health")).status, 429);
+  });
+
   it("allows only configured media origins in the browser policy", async () => {
     const mediaProvider = {
       publicUrl: "ws://localhost:7880",
