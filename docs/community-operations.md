@@ -143,6 +143,14 @@ moderation evidence policies below.
    restriction. Upholding it leaves the action in place. The appellant receives an account
    notification. A repeated or late appeal is rejected.
 
+6. To hide a topic, profile or debate from public pages, a moderator uses **Content
+   visibility** on `/moderation`: choose the item, enter its slug, handle, or the debate's slug
+   or ID, a reason and a note, then **Hide from public pages**. **Restore** returns the state
+   the hide replaced. Recent changes are listed below the form, and owners receive an account
+   notification. Ask another moderator when you created, own or debated in the item. A
+   restricted account cannot change its profile, create topics, challenge, queue or take a
+   debate seat until the restriction ends (Decision 0005, 2026-11-02).
+
 Case and appeal decisions are serialized by database row locks. Account writes use a per-account
 transaction lock, so parallel chat, like, and report requests cannot bypass account limits.
 The moderator API has no event-result or future-settlement method.

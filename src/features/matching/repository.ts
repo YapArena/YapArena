@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
 import { withTransaction } from "../../platform/transaction.ts";
 import { assertDebaterSettings } from "../transcription/debater-settings.ts";
+import { activeRestriction } from "../community/restrictions.ts";
 import {
   BOOKING_LEAD_SECONDS,
   CHALLENGE_PENDING_DAYS,
@@ -104,6 +105,13 @@ export async function profileFor(client: PoolClient, userId: string) {
   if (!result.rows[0])
     throw new MatchConflictError("a published participant profile is required");
   return result.rows[0].id;
+}
+
+// A community restriction keeps an account out of every new debate (YA-07), including one another
+// player accepts or completes. The routes refuse the restricted account's own actions first.
+export async function assertNotRestricted(client: PoolClient, userId: string) {
+  if (await activeRestriction(client, userId))
+    throw new MatchConflictError("the other player can't take this debate now");
 }
 
 export interface Reservation {
@@ -261,6 +269,8 @@ export async function createPairedEvent(
   );
   await ensureAvailable(client, aUser, reservation);
   await ensureAvailable(client, bUser, reservation);
+  await assertNotRestricted(client, aUser);
+  await assertNotRestricted(client, bUser);
   const [aProfile, bProfile] = await Promise.all([
     profileFor(client, aUser),
     profileFor(client, bUser),

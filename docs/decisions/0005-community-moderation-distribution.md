@@ -97,6 +97,30 @@ Keyboard sending respects Shift+Enter and IME composition; asynchronous response
 focus to the composer. Automated accessibility and viewport checks supplement physical-device,
 assistive-technology and staging review; they cannot close those release gates.
 
+## Restriction scope, content visibility and names — 2026-11-02
+
+Security audit findings YA-07 and YA-22 widen this decision; the rest stands.
+
+- An active restriction now also refuses, with HTTP 403 and code `account_restricted`: creating
+  a profile; changing a username, bio, avatar or publication state, except making the profile
+  private; following; creating or publishing a topic; opening, accepting or proposing times for
+  a challenge; joining an open request; entering the live queue or accepting a queue match; and
+  marking ready for a debate. Unliking, unfollowing, leaving the queue, declining and
+  withdrawing stay open. No new debate seats a restricted account, even when the other player
+  accepts; a queue match is cancelled and the other player requeued.
+- Moderators hide a topic, profile or debate from public pages, and restore it, at
+  `/moderation`. Hiding needs a reason code; both need a 10–500 character note. Restoring returns
+  the state the latest hide replaced (an item hidden outside the app returns to draft if it is a
+  profile and to published otherwise). Each change is a content action with an audit event in
+  the community audit trail, and its owners receive an account notification. A topic's creator
+  and everyone who debated on it, a profile's owner, and a debate's speakers cannot decide it.
+  Hiding changes publication only; it does not end, void or settle a debate.
+- Handles and usernames that name staff or the service (`admin`, `moderator`, `support`,
+  `yaparena` and similar) are refused when written, as are control and invisible formatting
+  characters in names, bios, topics, propositions and chat (line breaks stay in bios and chat;
+  emoji joiners stay). Rows saved earlier are unchanged until edited. Chat still shows the
+  username without the handle, as [Decision 0014](0014-user-avatars.md) records.
+
 ## Abuse, retention, and release
 
 [Decision 0006](0006-durable-community-delivery.md) adds a gated durable public SSE transport with
@@ -112,6 +136,8 @@ restricted account cannot post, like, or report until the restriction expires or
 Global API and origin protections also apply; they do not replace account limits.
 
 Visible chat, likes, resolved cases, appeals, and their audit events are retained for 365 days.
+Content visibility actions and their audit events are too, except the latest hide of an item
+that is still hidden, which restoring needs.
 Open cases and appeals are held until resolved; the hourly cleanup then purges eligible older
 records. Operators must export a redacted case summary before expiry if a longer legal hold is
 approved. Do not put private case text, signed replay URLs, or account identifiers in public

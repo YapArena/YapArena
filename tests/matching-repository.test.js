@@ -40,6 +40,9 @@ function fake(options = {}) {
     queries.push([sql, values]);
     if (["BEGIN", "COMMIT", "ROLLBACK"].includes(sql)) return row();
     if (sql.includes("pg_advisory_xact_lock")) return row([{}]);
+    // No account here is under a community restriction.
+    if (sql.includes("FROM community_restrictions"))
+      return row([{ expiresAt: null }]);
     if (sql.startsWith("SELECT id FROM public_profiles WHERE user_id"))
       return row(
         options.profileMissing ? [] : [{ id: `profile-${values[0]}` }],

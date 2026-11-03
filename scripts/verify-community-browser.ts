@@ -88,6 +88,7 @@ async function axeViolations(page: Page, selector: string) {
   }, selector);
 }
 
+// Names avoid staff words such as "moderator": handles and usernames that use them are refused.
 async function register(name: string, publishProfile = false) {
   const email = `community-browser-${name}-${suffix}@example.test`;
   const context = await browser.newContext({ bypassCSP: true });
@@ -309,7 +310,7 @@ try {
     .waitFor();
   await closeChatMenu(reporter.page);
 
-  const moderatorA = await register("moderator-a");
+  const moderatorA = await register("reviewer-a");
   await grantModerator(moderatorA.userId);
   await moderatorA.page.goto(`${base}/moderation`);
   await moderatorA.page
@@ -378,7 +379,7 @@ try {
   await appealForm.getByRole("button", { name: "Submit appeal" }).click();
   await author.page.getByText("Appeal: open").waitFor();
 
-  const moderatorB = await register("moderator-b");
+  const moderatorB = await register("reviewer-b");
   await grantModerator(moderatorB.userId);
   await moderatorB.page.goto(`${base}/moderation`);
   const fixtureCase = (

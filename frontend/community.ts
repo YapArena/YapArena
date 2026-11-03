@@ -9,6 +9,7 @@ import type {
   CommunityCase,
   CommunityAppeal,
   CaseDetail,
+  ContentVisibilityChange,
   DeliveryError,
 } from "./community-types.js";
 interface ChatForm extends HTMLFormElement {
@@ -1325,13 +1326,20 @@ function initModeration(root: HTMLElement) {
   const filter = root.querySelector<HTMLSelectElement>(
     "[data-community-case-filter]",
   )!;
+  const visibilityForm = root.querySelector<HTMLFormElement>(
+    "[data-community-visibility]",
+  )!;
+  const visibilityLog = root.querySelector<HTMLElement>(
+    "[data-community-visibility-log]",
+  )!;
   async function refresh() {
     try {
-      const [cases, appeals] = await Promise.all([
+      const [cases, appeals, visibility] = await Promise.all([
         api<CommunityCase[]>(
           `/api/community/moderation/cases?status=${filter.value}`,
         ),
         api<CommunityAppeal[]>("/api/community/moderation/appeals"),
+        api<ContentVisibilityChange[]>("/api/community/moderation/visibility"),
       ]);
       casesList.replaceChildren();
       appealsList.replaceChildren();
@@ -1340,6 +1348,16 @@ function initModeration(root: HTMLElement) {
       if (!appeals.length) appealsList.append(element("p", "No open appeals."));
       for (const item of cases) casesList.append(caseCard(item));
       for (const item of appeals) appealsList.append(appealCard(item));
+      visibilityLog.replaceChildren(
+        ...visibility.map((change) =>
+          element(
+            "li",
+            `${date(change.createdAt)} · ${change.action === "hide" ? "hid" : "restored"} ${change.targetType} ${change.target ?? change.targetId} (${change.fromState} → ${change.toState}, now ${change.publicationState ?? "deleted"})${change.reasonCode ? ` · ${change.reasonCode}` : ""} · ${change.note}`,
+          ),
+        ),
+      );
+      if (!visibility.length)
+        visibilityLog.append(element("li", "No visibility changes yet."));
       status.textContent = `${cases.length} cases and ${appeals.length} open appeals shown.`;
     } catch (error) {
       status.textContent = (error as DeliveryError).message;
@@ -1488,6 +1506,46 @@ function initModeration(root: HTMLElement) {
     card.append(form);
     return card;
   }
+  visibilityForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const field = <T extends HTMLElement>(name: string) =>
+      visibilityForm.querySelector<T>(`[name="${name}"]`)!;
+    const targetType = field<HTMLSelectElement>("targetType").value;
+    const target = field<HTMLInputElement>("target").value.trim();
+    const reasonCode = field<HTMLSelectElement>("reasonCode").value;
+    const note = field<HTMLTextAreaElement>("note");
+    const hidden = !(
+      event.submitter instanceof HTMLButtonElement &&
+      event.submitter.value === "restore"
+    );
+    if (hidden && !reasonCode) {
+      status.textContent = "Choose a reason to hide this item.";
+      return;
+    }
+    void submit(
+      visibilityForm,
+      async () => {
+        const result = await api<{ target: string; publicationState: string }>(
+          "/api/community/moderation/visibility",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              targetType,
+              target,
+              hidden,
+              ...(hidden ? { reasonCode } : {}),
+              note: note.value,
+            }),
+          },
+        );
+        status.textContent = `${targetType} ${result.target} is now ${result.publicationState}.`;
+        note.value = "";
+        await refresh();
+      },
+      status,
+    );
+  });
   root
     .querySelector<HTMLElement>("[data-community-refresh]")!
     .addEventListener("click", () => {

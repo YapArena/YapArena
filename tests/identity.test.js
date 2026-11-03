@@ -35,6 +35,7 @@ function setup(overrides = {}, authenticated = true) {
       calls.push(["getRoles", userId]);
       return ["participant"];
     },
+    restriction: async () => null,
     follow: async (userId, type, slug) => {
       calls.push(["follow", userId, type, slug]);
       return "created";
@@ -184,6 +185,22 @@ describe("owned profiles and follows", () => {
     assert.deepEqual((await session("get", "/api/me/roles")).body.roles, [
       "participant",
     ]);
+  });
+
+  it("refuses a new follow while restricted, but still allows unfollowing", async () => {
+    const { app, calls } = setup({
+      restriction: async () => ({ expiresAt: new Date("2026-11-09") }),
+    });
+    const session = (method, path) =>
+      request(app)[method](path).set("Cookie", "session=token");
+    const follow = await session("put", "/api/me/follows/topics/public-topic");
+    assert.equal(follow.status, 403);
+    assert.equal(follow.body.code, "account_restricted");
+    assert.ok(!calls.some(([name]) => name === "follow"));
+    assert.equal(
+      (await session("delete", "/api/me/follows/topics/public-topic")).status,
+      204,
+    );
   });
 
   it("returns safe follow outcomes and bounded history pages", async () => {

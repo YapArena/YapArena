@@ -1,6 +1,7 @@
 import type { Pool } from "pg";
 import { activityLabel, hiddenActivityTypes } from "./activity.ts";
 import { resolveAvatarId, type AvatarId } from "./avatars.ts";
+import { activeRestriction } from "../community/restrictions.ts";
 
 export interface OwnedProfile {
   id: string;
@@ -162,6 +163,11 @@ export function createIdentityRepository(database: Pool) {
         [handle],
       );
       return result.rows[0]?.taken ?? false;
+    },
+
+    // Checked before every write a restricted account may not make (YA-07).
+    async restriction(userId: string) {
+      return activeRestriction(database, userId);
     },
 
     async getRoles(userId: string): Promise<string[]> {

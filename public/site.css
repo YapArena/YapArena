@@ -1096,6 +1096,7 @@ h3 {
 .community-grid select,
 .community-inline-form textarea,
 .community-inline-form select,
+.community-inline-form input,
 [data-community-moderation] > label select {
   width: 100%;
   border: 1px solid #676b67;
