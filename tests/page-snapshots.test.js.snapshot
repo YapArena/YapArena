@@ -290,7 +290,9 @@ exports[`renders a debate 1`] = `
 <p class="sr-only" role="status" aria-live="polite" data-turn-announce>
 </p>
 <div class="arena-side" data-side="A">
-<span class="arena-avatar" aria-hidden="true">AP</span>
+<span class="arena-avatar" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+</span>
 <span class="arena-side-who">
 <a class="arena-side-name" href="/people/alex-public">Alex Public</a>
 <span class="arena-side-meta">
@@ -920,7 +922,9 @@ exports[`renders a debate 10`] = `
 <p class="sr-only" role="status" aria-live="polite" data-turn-announce>
 </p>
 <div class="arena-side" data-side="A">
-<span class="arena-avatar" aria-hidden="true">AP</span>
+<span class="arena-avatar" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+</span>
 <span class="arena-side-who">
 <a class="arena-side-name" href="/people/alex-public">Alex Public</a>
 <span class="arena-side-meta">
@@ -1550,7 +1554,9 @@ exports[`renders a debate 2`] = `
 <p class="sr-only" role="status" aria-live="polite" data-turn-announce>
 </p>
 <div class="arena-side" data-side="A">
-<span class="arena-avatar" aria-hidden="true">AP</span>
+<span class="arena-avatar" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+</span>
 <span class="arena-side-who">
 <a class="arena-side-name" href="/people/alex-public">Alex Public</a>
 <span class="arena-side-meta">
@@ -2181,7 +2187,9 @@ exports[`renders a debate 3`] = `
 <p class="sr-only" role="status" aria-live="polite" data-turn-announce>
 </p>
 <div class="arena-side" data-side="A">
-<span class="arena-avatar" aria-hidden="true">AP</span>
+<span class="arena-avatar" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+</span>
 <span class="arena-side-who">
 <a class="arena-side-name" href="/people/alex-public">Alex Public</a>
 <span class="arena-side-meta">
@@ -2816,7 +2824,9 @@ exports[`renders a debate 4`] = `
 <p class="sr-only" role="status" aria-live="polite" data-turn-announce>
 </p>
 <div class="arena-side" data-side="A">
-<span class="arena-avatar" aria-hidden="true">AP</span>
+<span class="arena-avatar" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+</span>
 <span class="arena-side-who">
 <a class="arena-side-name" href="/people/alex-public">Alex Public</a>
 <span class="arena-side-meta">
@@ -3445,7 +3455,9 @@ exports[`renders a debate 5`] = `
 <p class="sr-only" role="status" aria-live="polite" data-turn-announce>
 </p>
 <div class="arena-side" data-side="A">
-<span class="arena-avatar" aria-hidden="true">AP</span>
+<span class="arena-avatar" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+</span>
 <span class="arena-side-who">
 <a class="arena-side-name" href="/people/alex-public">Alex Public</a>
 <span class="arena-side-meta">
@@ -4072,7 +4084,9 @@ exports[`renders a debate 6`] = `
 <p class="sr-only" role="status" aria-live="polite" data-turn-announce>
 </p>
 <div class="arena-side" data-side="A">
-<span class="arena-avatar" aria-hidden="true">AP</span>
+<span class="arena-avatar" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+</span>
 <span class="arena-side-who">
 <a class="arena-side-name" href="/people/alex-public">Alex Public</a>
 <span class="arena-side-meta">
@@ -4724,7 +4738,9 @@ exports[`renders a debate 7`] = `
 </span>
 </div>
 <div class="arena-side" data-side="B">
-<span class="arena-avatar" aria-hidden="true">ML</span>
+<span class="arena-avatar" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
+</span>
 <span class="arena-side-who">
 <a class="arena-side-name" href="/people/morgan-lee">Morgan Lee</a>
 <span class="arena-side-meta">
@@ -5336,7 +5352,9 @@ exports[`renders a debate 8`] = `
 <p class="sr-only" role="status" aria-live="polite" data-turn-announce>
 </p>
 <div class="arena-side" data-side="A">
-<span class="arena-avatar" aria-hidden="true">N&lt;</span>
+<span class="arena-avatar" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
+</span>
 <span class="arena-side-who">
 <a class="arena-side-name" href="/people/hostile-person">Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</a>
 <span class="arena-side-meta">
@@ -5358,7 +5376,9 @@ exports[`renders a debate 8`] = `
 </span>
 </div>
 <div class="arena-side" data-side="B">
-<span class="arena-avatar" aria-hidden="true">M&lt;</span>
+<span class="arena-avatar" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
+</span>
 <span class="arena-side-who">
 <a class="arena-side-name" href="/people/morgan-lee">Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</a>
 <span class="arena-side-meta">
@@ -6032,7 +6052,9 @@ exports[`renders a debate 9`] = `
 <p class="sr-only" role="status" aria-live="polite" data-turn-announce>
 </p>
 <div class="arena-side" data-side="A">
-<span class="arena-avatar" aria-hidden="true">AP</span>
+<span class="arena-avatar" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+</span>
 <span class="arena-side-who">
 <a class="arena-side-name" href="/people/alex-public">Alex Public</a>
 <span class="arena-side-meta">
@@ -6817,12 +6839,12 @@ exports[`renders a profile 2`] = `
 <span class="dcard-panes" aria-hidden="true">
 <span class="dcard-pane">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">N&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
 </span>
 </span>
 <span class="dcard-pane">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -6841,7 +6863,7 @@ exports[`renders a profile 2`] = `
 </h3>
 <p class="dcard-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">N&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
 </span>
 <span>Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 <span class="vs">
@@ -6849,7 +6871,7 @@ exports[`renders a profile 2`] = `
 <span aria-hidden="true">VS</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 <span>Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 </p>
@@ -7492,12 +7514,12 @@ exports[`renders a topic 2`] = `
 <span class="dcard-panes" aria-hidden="true">
 <span class="dcard-pane">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">N&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
 </span>
 </span>
 <span class="dcard-pane">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -7516,7 +7538,7 @@ exports[`renders a topic 2`] = `
 </h3>
 <p class="dcard-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">N&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
 </span>
 <span>Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 <span class="vs">
@@ -7524,7 +7546,7 @@ exports[`renders a topic 2`] = `
 <span aria-hidden="true">VS</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 <span>Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 </p>
@@ -7535,7 +7557,7 @@ exports[`renders a topic 2`] = `
 <span class="dcard-panes" aria-hidden="true">
 <span class="dcard-pane">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AP</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 </span>
 <span class="dcard-pane">
@@ -7556,7 +7578,7 @@ exports[`renders a topic 2`] = `
 </h3>
 <p class="dcard-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">AP</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span>Alex Public</span>
 <span class="vs">
@@ -11272,7 +11294,7 @@ exports[`renders the debate list 2`] = `
 <span class="dcard-panes" aria-hidden="true">
 <span class="dcard-pane">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AP</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 </span>
 <span class="dcard-pane">
@@ -11293,7 +11315,7 @@ exports[`renders the debate list 2`] = `
 </h3>
 <p class="dcard-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">AP</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span>Alex Public</span>
 <span class="vs">
@@ -11312,12 +11334,12 @@ exports[`renders the debate list 2`] = `
 <span class="dcard-panes" aria-hidden="true">
 <span class="dcard-pane">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">N&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
 </span>
 </span>
 <span class="dcard-pane">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -11336,7 +11358,7 @@ exports[`renders the debate list 2`] = `
 </h3>
 <p class="dcard-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">N&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
 </span>
 <span>Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 <span class="vs">
@@ -11344,7 +11366,7 @@ exports[`renders the debate list 2`] = `
 <span aria-hidden="true">VS</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 <span>Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 </p>
@@ -11577,7 +11599,7 @@ exports[`renders the debate list 3`] = `
 <span class="dcard-panes" aria-hidden="true">
 <span class="dcard-pane">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AP</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 </span>
 <span class="dcard-pane">
@@ -11598,7 +11620,7 @@ exports[`renders the debate list 3`] = `
 </h3>
 <p class="dcard-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">AP</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span>Alex Public</span>
 <span class="vs">
@@ -11839,12 +11861,12 @@ exports[`renders the debate list 4`] = `
 <span class="dcard-panes" aria-hidden="true">
 <span class="dcard-pane">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">N&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
 </span>
 </span>
 <span class="dcard-pane">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -11863,7 +11885,7 @@ exports[`renders the debate list 4`] = `
 </h3>
 <p class="dcard-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">N&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
 </span>
 <span>Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 <span class="vs">
@@ -11871,7 +11893,7 @@ exports[`renders the debate list 4`] = `
 <span aria-hidden="true">VS</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 <span>Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 </p>
@@ -12645,7 +12667,7 @@ exports[`renders the home page 4`] = `
 <p class="trend-match">
 <span class="trend-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span>Alex Rivera</span>
 <span class="vs">
@@ -12818,7 +12840,7 @@ exports[`renders the home page 4`] = `
 </div>\\n  <noscript>
 <p class="ya-endnote">Idea links open their public topic pages. Enable JavaScript for inline charts, filters and previews.</p>
 </noscript>
-</main>\\n</div>\\n<template id="ya-home-data">{&quot;reference&quot;:false,&quot;available&quot;:true,&quot;following&quot;:[],&quot;ideas&quot;:[{&quot;id&quot;:&quot;11111111-1111-4111-8111-111111111111&quot;,&quot;topicSlug&quot;:&quot;public-idea&quot;,&quot;href&quot;:&quot;/topics/public-idea&quot;,&quot;cat&quot;:&quot;Ideas&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;short&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;reference&quot;:false,&quot;demo&quot;:false,&quot;pct&quot;:null,&quot;delta&quot;:null,&quot;vol&quot;:null,&quot;people&quot;:null,&quot;price&quot;:null,&quot;points&quot;:[],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;no&quot;:&quot;Against &amp; questioning&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;rate&quot;:null},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against &amp; questioning&quot;,&quot;rate&quot;:null}],&quot;debates&quot;:[{&quot;id&quot;:&quot;22222222-2222-4222-8222-222222222222&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;replay&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Speaker A&quot;,&quot;Morgan B&quot;,&quot;SA&quot;,&quot;MB&quot;],&quot;meta&quot;:&quot;Replay debate&quot;,&quot;stamp&quot;:&quot;Replay&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;upcoming&quot;,&quot;kind&quot;:&quot;upcoming&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;meta&quot;:&quot;Upcoming / awaiting media&quot;,&quot;stamp&quot;:&quot;Upcoming&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null}]}]}</template>
+</main>\\n</div>\\n<template id="ya-home-data">{&quot;reference&quot;:false,&quot;available&quot;:true,&quot;following&quot;:[],&quot;ideas&quot;:[{&quot;id&quot;:&quot;11111111-1111-4111-8111-111111111111&quot;,&quot;topicSlug&quot;:&quot;public-idea&quot;,&quot;href&quot;:&quot;/topics/public-idea&quot;,&quot;cat&quot;:&quot;Ideas&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;short&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;reference&quot;:false,&quot;demo&quot;:false,&quot;pct&quot;:null,&quot;delta&quot;:null,&quot;vol&quot;:null,&quot;people&quot;:null,&quot;price&quot;:null,&quot;points&quot;:[],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;no&quot;:&quot;Against &amp; questioning&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;rate&quot;:null},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against &amp; questioning&quot;,&quot;rate&quot;:null}],&quot;debates&quot;:[{&quot;id&quot;:&quot;22222222-2222-4222-8222-222222222222&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;replay&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Speaker A&quot;,&quot;Morgan B&quot;,&quot;SA&quot;,&quot;MB&quot;],&quot;avatars&quot;:[null,&quot;/assets/avatars/yap-frog.svg?v=0123456789ab&quot;],&quot;meta&quot;:&quot;Replay debate&quot;,&quot;stamp&quot;:&quot;Replay&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;upcoming&quot;,&quot;kind&quot;:&quot;upcoming&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;meta&quot;:&quot;Upcoming / awaiting media&quot;,&quot;stamp&quot;:&quot;Upcoming&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null}]}]}</template>
 <footer class="site-footer">
 <nav class="container footer-inner" aria-label="Site">
 <a href="/topics">Topics</a>
@@ -13101,7 +13123,7 @@ exports[`renders the home page 5`] = `
 <p class="trend-match">
 <span class="trend-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">N&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
 </span>
 <span>Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 <span class="vs">
@@ -13109,7 +13131,7 @@ exports[`renders the home page 5`] = `
 <span aria-hidden="true">VS</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 <span>Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 </span>
@@ -13334,7 +13356,7 @@ exports[`renders the home page 5`] = `
 </div>\\n  <noscript>
 <p class="ya-endnote">Idea links open their public topic pages. Enable JavaScript for inline charts, filters and previews.</p>
 </noscript>
-</main>\\n</div>\\n<template id="ya-home-data">{&quot;reference&quot;:false,&quot;available&quot;:true,&quot;following&quot;:[&quot;44444444-4444-4444-8444-444444444444&quot;],&quot;ideas&quot;:[{&quot;id&quot;:&quot;44444444-4444-4444-8444-444444444444&quot;,&quot;topicSlug&quot;:&quot;hostile-topic&quot;,&quot;href&quot;:&quot;/topics/hostile-topic&quot;,&quot;cat&quot;:&quot;Category &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;title&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;short&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;reference&quot;:false,&quot;demo&quot;:true,&quot;pct&quot;:47,&quot;delta&quot;:-5,&quot;vol&quot;:5,&quot;people&quot;:500,&quot;price&quot;:null,&quot;points&quot;:[52,47],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;Side A &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;no&quot;:&quot;Side B &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:61,&quot;endorsed&quot;:305,&quot;population&quot;:500},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:39,&quot;endorsed&quot;:195,&quot;population&quot;:500}],&quot;debates&quot;:[{&quot;id&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;names&quot;:[&quot;Name &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;N&lt;&quot;,&quot;M&lt;&quot;],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/hostile-debate&quot;,&quot;startsAt&quot;:&quot;2026-10-01T17:00:00.000Z&quot;}],&quot;activity&quot;:{&quot;scope&quot;:&quot;shared&quot;,&quot;synthetic&quot;:true,&quot;revision&quot;:&quot;fixture-revision&quot;,&quot;hasMore&quot;:false,&quot;window&quot;:30,&quot;items&quot;:[{&quot;id&quot;:&quot;round-1&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:1,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;52&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:{&quot;n&quot;:&quot;40&quot;,&quot;d&quot;:&quot;100&quot;},&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;},{&quot;id&quot;:&quot;round-2&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:2,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;47&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:null,&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;}],&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:61,&quot;endorsed&quot;:305,&quot;population&quot;:500},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:39,&quot;endorsed&quot;:195,&quot;population&quot;:500}],&quot;category&quot;:&quot;Category &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;totals&quot;:{&quot;premium&quot;:&quot;5000000000&quot;,&quot;humanCommitments&quot;:4,&quot;botCommitments&quot;:996,&quot;executed&quot;:240}}},{&quot;id&quot;:&quot;11111111-1111-4111-8111-111111111111&quot;,&quot;topicSlug&quot;:&quot;public-idea&quot;,&quot;href&quot;:&quot;/topics/public-idea&quot;,&quot;cat&quot;:&quot;Ideas&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;short&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;reference&quot;:false,&quot;demo&quot;:false,&quot;pct&quot;:null,&quot;delta&quot;:null,&quot;vol&quot;:null,&quot;people&quot;:null,&quot;price&quot;:null,&quot;points&quot;:[],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;no&quot;:&quot;Against &amp; questioning&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;rate&quot;:null},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against &amp; questioning&quot;,&quot;rate&quot;:null}],&quot;debates&quot;:[{&quot;id&quot;:&quot;22222222-2222-4222-8222-222222222222&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;replay&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Speaker A&quot;,&quot;Morgan B&quot;,&quot;SA&quot;,&quot;MB&quot;],&quot;meta&quot;:&quot;Replay debate&quot;,&quot;stamp&quot;:&quot;Replay&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;upcoming&quot;,&quot;kind&quot;:&quot;upcoming&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;meta&quot;:&quot;Upcoming / awaiting media&quot;,&quot;stamp&quot;:&quot;Upcoming&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null}]}]}</template>
+</main>\\n</div>\\n<template id="ya-home-data">{&quot;reference&quot;:false,&quot;available&quot;:true,&quot;following&quot;:[&quot;44444444-4444-4444-8444-444444444444&quot;],&quot;ideas&quot;:[{&quot;id&quot;:&quot;44444444-4444-4444-8444-444444444444&quot;,&quot;topicSlug&quot;:&quot;hostile-topic&quot;,&quot;href&quot;:&quot;/topics/hostile-topic&quot;,&quot;cat&quot;:&quot;Category &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;title&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;short&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;reference&quot;:false,&quot;demo&quot;:true,&quot;pct&quot;:47,&quot;delta&quot;:-5,&quot;vol&quot;:5,&quot;people&quot;:500,&quot;price&quot;:null,&quot;points&quot;:[52,47],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;Side A &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;no&quot;:&quot;Side B &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:61,&quot;endorsed&quot;:305,&quot;population&quot;:500},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:39,&quot;endorsed&quot;:195,&quot;population&quot;:500}],&quot;debates&quot;:[{&quot;id&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;names&quot;:[&quot;Name &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;N&lt;&quot;,&quot;M&lt;&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-crab.svg?v=0123456789ab&quot;,&quot;/assets/avatars/yap-frog.svg?v=0123456789ab&quot;],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/hostile-debate&quot;,&quot;startsAt&quot;:&quot;2026-10-01T17:00:00.000Z&quot;}],&quot;activity&quot;:{&quot;scope&quot;:&quot;shared&quot;,&quot;synthetic&quot;:true,&quot;revision&quot;:&quot;fixture-revision&quot;,&quot;hasMore&quot;:false,&quot;window&quot;:30,&quot;items&quot;:[{&quot;id&quot;:&quot;round-1&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:1,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;52&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:{&quot;n&quot;:&quot;40&quot;,&quot;d&quot;:&quot;100&quot;},&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;},{&quot;id&quot;:&quot;round-2&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:2,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;47&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:null,&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;}],&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:61,&quot;endorsed&quot;:305,&quot;population&quot;:500},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:39,&quot;endorsed&quot;:195,&quot;population&quot;:500}],&quot;category&quot;:&quot;Category &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;totals&quot;:{&quot;premium&quot;:&quot;5000000000&quot;,&quot;humanCommitments&quot;:4,&quot;botCommitments&quot;:996,&quot;executed&quot;:240}}},{&quot;id&quot;:&quot;11111111-1111-4111-8111-111111111111&quot;,&quot;topicSlug&quot;:&quot;public-idea&quot;,&quot;href&quot;:&quot;/topics/public-idea&quot;,&quot;cat&quot;:&quot;Ideas&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;short&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;reference&quot;:false,&quot;demo&quot;:false,&quot;pct&quot;:null,&quot;delta&quot;:null,&quot;vol&quot;:null,&quot;people&quot;:null,&quot;price&quot;:null,&quot;points&quot;:[],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;no&quot;:&quot;Against &amp; questioning&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;rate&quot;:null},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against &amp; questioning&quot;,&quot;rate&quot;:null}],&quot;debates&quot;:[{&quot;id&quot;:&quot;22222222-2222-4222-8222-222222222222&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;replay&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Speaker A&quot;,&quot;Morgan B&quot;,&quot;SA&quot;,&quot;MB&quot;],&quot;avatars&quot;:[null,&quot;/assets/avatars/yap-frog.svg?v=0123456789ab&quot;],&quot;meta&quot;:&quot;Replay debate&quot;,&quot;stamp&quot;:&quot;Replay&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;upcoming&quot;,&quot;kind&quot;:&quot;upcoming&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;meta&quot;:&quot;Upcoming / awaiting media&quot;,&quot;stamp&quot;:&quot;Upcoming&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null}]}]}</template>
 <footer class="site-footer">
 <nav class="container footer-inner" aria-label="Site">
 <a href="/topics">Topics</a>
@@ -14344,7 +14366,7 @@ exports[`renders the home page 7`] = `
 <p class="trend-match">
 <span class="trend-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span>Alex Rivera</span>
 <span class="vs">
@@ -14517,7 +14539,7 @@ exports[`renders the home page 7`] = `
 </div>\\n  <noscript>
 <p class="ya-endnote">Idea links open their public topic pages. Enable JavaScript for inline charts, filters and previews.</p>
 </noscript>
-</main>\\n</div>\\n<template id="ya-home-data">{&quot;reference&quot;:false,&quot;available&quot;:true,&quot;following&quot;:[],&quot;ideas&quot;:[{&quot;id&quot;:&quot;11111111-1111-4111-8111-111111111111&quot;,&quot;topicSlug&quot;:&quot;public-idea&quot;,&quot;href&quot;:&quot;/topics/public-idea&quot;,&quot;cat&quot;:&quot;Ideas&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;short&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;reference&quot;:false,&quot;demo&quot;:false,&quot;pct&quot;:null,&quot;delta&quot;:null,&quot;vol&quot;:null,&quot;people&quot;:null,&quot;price&quot;:null,&quot;points&quot;:[],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;no&quot;:&quot;Against &amp; questioning&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;rate&quot;:null},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against &amp; questioning&quot;,&quot;rate&quot;:null}],&quot;debates&quot;:[{&quot;id&quot;:&quot;22222222-2222-4222-8222-222222222222&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;replay&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Speaker A&quot;,&quot;Morgan B&quot;,&quot;SA&quot;,&quot;MB&quot;],&quot;meta&quot;:&quot;Replay debate&quot;,&quot;stamp&quot;:&quot;Replay&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;upcoming&quot;,&quot;kind&quot;:&quot;upcoming&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;meta&quot;:&quot;Upcoming / awaiting media&quot;,&quot;stamp&quot;:&quot;Upcoming&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null}]}]}</template>
+</main>\\n</div>\\n<template id="ya-home-data">{&quot;reference&quot;:false,&quot;available&quot;:true,&quot;following&quot;:[],&quot;ideas&quot;:[{&quot;id&quot;:&quot;11111111-1111-4111-8111-111111111111&quot;,&quot;topicSlug&quot;:&quot;public-idea&quot;,&quot;href&quot;:&quot;/topics/public-idea&quot;,&quot;cat&quot;:&quot;Ideas&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;short&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;reference&quot;:false,&quot;demo&quot;:false,&quot;pct&quot;:null,&quot;delta&quot;:null,&quot;vol&quot;:null,&quot;people&quot;:null,&quot;price&quot;:null,&quot;points&quot;:[],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;no&quot;:&quot;Against &amp; questioning&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;rate&quot;:null},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against &amp; questioning&quot;,&quot;rate&quot;:null}],&quot;debates&quot;:[{&quot;id&quot;:&quot;22222222-2222-4222-8222-222222222222&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;replay&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Speaker A&quot;,&quot;Morgan B&quot;,&quot;SA&quot;,&quot;MB&quot;],&quot;avatars&quot;:[null,&quot;/assets/avatars/yap-frog.svg?v=0123456789ab&quot;],&quot;meta&quot;:&quot;Replay debate&quot;,&quot;stamp&quot;:&quot;Replay&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;upcoming&quot;,&quot;kind&quot;:&quot;upcoming&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;meta&quot;:&quot;Upcoming / awaiting media&quot;,&quot;stamp&quot;:&quot;Upcoming&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null}]}]}</template>
 <footer class="site-footer">
 <nav class="container footer-inner" aria-label="Site">
 <a href="/topics">Topics</a>
@@ -14922,7 +14944,7 @@ exports[`renders the live page 2`] = `
 <section class="live-feature" data-featured-preview data-debate-preview data-event="33333333-3333-4333-8333-333333333333" data-mode="live" data-live-source="/assets/hero-live.bundle.js?v=0123456789ab" data-hls-source="/assets/replay.bundle.js?v=0123456789ab" aria-labelledby="featured-title">\\n    <div class="live-stage">\\n      <span class="live-panes" aria-hidden="true">
 <span>
 <span class="avatar-slot" style="--avatar-size:96px" aria-hidden="true">
-<span class="avatar-initials">AP</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 </span>
 <span>
@@ -14963,7 +14985,7 @@ exports[`renders the live page 2`] = `
 <h1 class="live-title" id="featured-title">Should we debate this?</h1>
 <p class="dcard-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">AP</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span>Alex Public</span>
 <span class="vs">
@@ -15010,7 +15032,7 @@ exports[`renders the live page 2`] = `
 <article class="dcard live-card" data-card-preview data-debate-preview data-event="33333333-3333-4333-8333-333333333333" data-mode="live" data-live-source="/assets/hero-live.bundle.js?v=0123456789ab" data-hls-source="/assets/replay.bundle.js?v=0123456789ab">\\n    <div class="dcard-thumb">\\n      <span class="dcard-panes" aria-hidden="true">
 <span class="dcard-pane">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AP</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 </span>
 <span class="dcard-pane">
@@ -15041,7 +15063,7 @@ exports[`renders the live page 2`] = `
 </h3>
 <p class="dcard-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">AP</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span>Alex Public</span>
 <span class="vs">
@@ -15062,7 +15084,7 @@ exports[`renders the live page 2`] = `
 </span>
 <span class="dcard-pane">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>\\n      <img class="live-still" data-preview-thumbnail src="/api/media/events/55555555-5555-4555-8555-555555555555/thumbnail" alt="" aria-hidden="true" loading="lazy" decoding="async">\\n      <div class="live-media" data-preview-media aria-hidden="true">
@@ -15095,7 +15117,7 @@ exports[`renders the live page 2`] = `
 <span aria-hidden="true">VS</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 <span>Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 </p>

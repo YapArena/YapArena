@@ -81,8 +81,16 @@ try {
     isDemo: false,
     createdAt: new Date(),
     topic,
-    speakerA: { handle: "alex", displayName: "Alex Rivera" },
-    speakerB: { handle: "morgan", displayName: "Morgan Lee" },
+    speakerA: {
+      handle: "alex",
+      displayName: "Alex Rivera",
+      avatarId: "yap-owl",
+    },
+    speakerB: {
+      handle: "morgan",
+      displayName: "Morgan Lee",
+      avatarId: "yap-frog",
+    },
     sponsor: null,
   };
   const catalog = [

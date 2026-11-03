@@ -2,6 +2,7 @@ import type { PublicDebate } from "./repository.ts";
 import type { PublicBotActivity } from "../a4/public-bots.ts";
 import { html } from "../../platform/html.ts";
 import { inscribe } from "./inscribe.ts";
+import { avatarAsset } from "./assets.ts";
 
 const icon = (name: "expand" | "send" | "chat" | "more" | "play" | "back") => {
   const paths = {
@@ -20,14 +21,6 @@ const icon = (name: "expand" | "send" | "chat" | "more" | "play" | "back") => {
 // spelling for them.
 const inscription = (text: string) =>
   html`<span class="sr-only">${text}</span><span class="ins" aria-hidden="true">${inscribe(text.toLowerCase())}</span>`;
-
-const initials = (name: string | undefined) =>
-  (name ?? "?")
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0]!.toUpperCase())
-    .join("") || "?";
 
 const clock = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
@@ -120,7 +113,7 @@ export function renderDebateWorkspace(
     const profile = side === "A" ? debate.speakerA : debate.speakerB;
     const label =
       side === "A" ? debate.topic.sideALabel : debate.topic.sideBLabel;
-    return html`<div class="arena-side" data-side="${side}"><span class="arena-avatar" aria-hidden="true">${initials(profile?.displayName)}</span><span class="arena-side-who">${profile ? html`<a class="arena-side-name" href="/people/${encodeURIComponent(profile.handle)}">${profile.displayName}</a>` : html`<span class="arena-side-name">Speaker to be announced</span>`}<span class="arena-side-meta">${profile ? html`<span class="arena-side-handle">@${profile.handle}</span>` : ""}<span class="arena-side-state" data-side-state></span></span></span><span class="arena-side-pill">${label}</span></div>`;
+    return html`<div class="arena-side" data-side="${side}"><span class="arena-avatar" aria-hidden="true">${profile ? html`<img class="avatar-img" src="${avatarAsset(profile.avatarId)}" alt="">` : "?"}</span><span class="arena-side-who">${profile ? html`<a class="arena-side-name" href="/people/${encodeURIComponent(profile.handle)}">${profile.displayName}</a>` : html`<span class="arena-side-name">Speaker to be announced</span>`}<span class="arena-side-meta">${profile ? html`<span class="arena-side-handle">@${profile.handle}</span>` : ""}<span class="arena-side-state" data-side-state></span></span></span><span class="arena-side-pill">${label}</span></div>`;
   };
   // Over each debater's video: a frame that lights up while they have the
   // floor, and their name and handle, shown on hover. The scoreboard names

@@ -64,8 +64,8 @@ const debate: PublicDebate = {
   isDemo: false,
   createdAt: new Date(),
   topic,
-  speakerA: { handle: "maya", displayName: "Maya" },
-  speakerB: { handle: "jonah", displayName: "Jonah" },
+  speakerA: { handle: "maya", displayName: "Maya", avatarId: "yap-owl" },
+  speakerB: { handle: "jonah", displayName: "Jonah", avatarId: "yap-frog" },
   sponsor: null,
 };
 const span = { startMs: 0, endMs: 1000 };

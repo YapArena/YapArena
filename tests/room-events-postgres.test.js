@@ -66,6 +66,7 @@ const publicKeys = new Set([
   "id",
   "debateId",
   "authorName",
+  "authorAvatarId",
   "body",
   "state",
   "createdAt",
@@ -516,6 +517,41 @@ describe(
       ])
         assert.ok(!text.includes(secret), secret);
       assertPublic(publicFrame(room, null, value));
+      delivery.stop();
+    });
+
+    it("resets a room when a chat author's avatar changes, and frames carry only its id", async () => {
+      const room = await debate("scheduled");
+      const author = await user();
+      const handle = `avatar-${randomUUID().slice(0, 8)}`;
+      await pool.query(
+        "INSERT INTO public_profiles(user_id,handle,display_name,publication_state) VALUES($1,$2,'Avatar author','published')",
+        [author, handle],
+      );
+      await pool.query(
+        "INSERT INTO event_chat_messages(debate_id,author_user_id,body,created_at) VALUES($1,$2,'Avatar chat',clock_timestamp())",
+        [room, author],
+      );
+      const start = await head(room);
+      await pool.query(
+        "UPDATE public_profiles SET avatar_id='yap-owl' WHERE user_id=$1",
+        [author],
+      );
+      assert.deepEqual(kinds(await events(room, start)), ["reset"]);
+      // Setting the same avatar again, with another change, signals nothing.
+      const same = await head(room);
+      await pool.query(
+        "UPDATE public_profiles SET avatar_id='yap-owl', bio='Still me' WHERE user_id=$1",
+        [author],
+      );
+      assert.deepEqual(await events(room, same), []);
+      const delivery = createCommunityDelivery(pool);
+      const value = await delivery.read(room, start);
+      const message = value.items.find((item) => item.body === "Avatar chat");
+      assert.equal(message.authorAvatarId, "yap-owl");
+      const frame = publicFrame(room, null, value);
+      assertPublic(frame);
+      assert.ok(!JSON.stringify(frame).includes(handle), "no handle in chat");
       delivery.stop();
     });
 

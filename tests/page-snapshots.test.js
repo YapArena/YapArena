@@ -133,7 +133,11 @@ it("renders a debate", (t) => {
       isDemo: true,
       scheduledAt: null,
       speakerA: null,
-      speakerB: { handle: "morgan-lee", displayName: "Morgan Lee" },
+      speakerB: {
+        handle: "morgan-lee",
+        displayName: "Morgan Lee",
+        avatarId: "yap-frog",
+      },
       sponsor: { name: "Example Sponsor", disclosure: "Sponsored listing" },
     }),
   );

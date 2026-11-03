@@ -91,7 +91,8 @@ sideways.
   empty if the turns have no places in the recording.
 - **Results by turn (replays, under the scoreboard; the Results tab elsewhere):** see Results
   below.
-- **Scoreboard:** two cards (48 px initials, name, "@handle · speaking / listening / next", the
+- **Scoreboard:** two cards (48 px avatar, or "?" before a speaker is named; name, "@handle ·
+  speaking / listening / next", the
   side pill, filled white while that side has the floor) and the turn clock between them, with
   "Turn 3 of 10" below. Cards are white and grey only.
 - **Turn clock:** the landing emblem's tiles on a canvas (`frontend/turn-clock.ts`, rules in

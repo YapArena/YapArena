@@ -44,7 +44,11 @@ const debate = {
     sideALabel: topic.sideALabel,
     sideBLabel: topic.sideBLabel,
   },
-  speakerA: { handle: "alex-public", displayName: "Alex Public" },
+  speakerA: {
+    handle: "alex-public",
+    displayName: "Alex Public",
+    avatarId: "yap-owl",
+  },
   speakerB: null,
   sponsor: null,
 };
@@ -99,10 +103,15 @@ describe("debate and topic cards", () => {
       card,
       /<h3 class="dcard-title"><a href="\/debates\/public-debate">Should we &lt;debate&gt; this\?<\/a><\/h3>/,
     );
-    // A missing speaker keeps the side's name and an unknown avatar.
+    // A named speaker shows their avatar; a missing one keeps the side's
+    // name and an unknown avatar.
     assert.match(
       card,
-      /<span class="avatar-initials">AP<\/span><\/span><span>Alex Public<\/span>/,
+      /<img class="avatar-img" src="\/assets\/avatars\/yap-owl\.svg\?v=[0-9a-f]{12}" alt=""><\/span><span>Alex Public<\/span>/,
+    );
+    assert.match(
+      card,
+      /<span class="dcard-pane"><span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true"><img class="avatar-img" src="\/assets\/avatars\/yap-owl\.svg/,
     );
     assert.match(
       card,

@@ -32,6 +32,7 @@ import {
   shouldSendOnEnter,
 } from "./community-state.js";
 import { authorTint } from "./debate-layout-model.js";
+import { avatarImage, isAvatarId } from "./avatar.js";
 const reasons = ["harassment", "hate", "threat", "spam", "privacy", "other"];
 let mutationAccountEpoch = 0;
 window.addEventListener("yap:account-changed", () => mutationAccountEpoch++);
@@ -368,6 +369,10 @@ function initEvent(root: HTMLElement) {
 
   function messageNode(item: MessageView, record?: SubmissionRecord) {
     const line = element("li", undefined, "community-message");
+    // A 24 px slot before the name, empty until the author's avatar is known,
+    // so names line up (Decision 0014).
+    const avatar = element("span", undefined, "community-message-avatar");
+    avatar.setAttribute("aria-hidden", "true");
     const author = element(
       "strong",
       item.authorName || "You",
@@ -376,7 +381,7 @@ function initEvent(root: HTMLElement) {
     const timestamp = element("time");
     const body = element("span", item.body, "community-message-body");
     const content = element("p", undefined, "community-message-content");
-    content.append(author, document.createTextNode(" "), body);
+    content.append(avatar, author, document.createTextNode(" "), body);
     const meta = element("div", undefined, "community-message-meta");
     const delivery = element("span", undefined, "community-message-delivery");
     const actions = element("div", undefined, "community-message-actions");
@@ -397,6 +402,14 @@ function initEvent(root: HTMLElement) {
       ".community-message-author",
     )!;
     author.textContent = item.authorName || "You";
+    const avatar = line.querySelector<HTMLElement>(
+      ".community-message-avatar",
+    )!;
+    const avatarId = isAvatarId(item.authorAvatarId) ? item.authorAvatarId : "";
+    if (avatar.dataset.avatar !== avatarId) {
+      avatar.dataset.avatar = avatarId;
+      avatar.replaceChildren(...(avatarId ? [avatarImage(avatarId)] : []));
+    }
     // The debate page colours names from the visit's palette.
     author.dataset.tint = String(authorTint(author.textContent));
     line.querySelector<HTMLElement>(".community-message-body")!.textContent =

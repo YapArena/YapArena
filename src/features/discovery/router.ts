@@ -1,5 +1,6 @@
 import { publicHomepage } from "./homepage-model.ts";
 import { referenceHomepage } from "./homepage-reference.ts";
+import { avatarAsset } from "./assets.ts";
 import type { createPublicBotRepository } from "../a4/public-bots.ts";
 import { digest } from "../a4/engine.ts";
 import { Router } from "express";
@@ -218,7 +219,7 @@ export function createDiscoveryRouter({
             debates.some((d) => d.topic.slug === t.slug),
           )
         : topics.items;
-    return publicHomepage(visible, debates, activity);
+    return publicHomepage(visible, debates, activity, avatarAsset);
   }
   router.get("/api/public/homepage", async (request, response) => {
     try {

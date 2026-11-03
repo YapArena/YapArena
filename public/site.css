@@ -1134,6 +1134,14 @@ h3 {
   color: var(--acid);
   margin-inline-end: 4px;
 }
+/* The author's 24 px avatar sits on the first line, before the name. */
+.community-message-avatar {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  margin-inline-end: 6px;
+  vertical-align: -7px;
+}
 .community-message-body {
   white-space: pre-wrap;
 }
@@ -2049,6 +2057,15 @@ html:has(.queue-overlay[open]) {
   font-size: 0.9375rem;
   font-weight: 700;
 }
+/* A player's avatar fills a 48 px square; its art draws its own tile.
+   Initials keep the circle (Decision 0014). */
+.qo-initials:has(> .avatar-img) {
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
 .qo-who-block {
   display: grid;
   flex: 1;
@@ -2401,6 +2418,10 @@ html:has(.queue-overlay[open]) {
     width: 2.125rem;
     height: 2.125rem;
     font-size: 0.8125rem;
+  }
+  .qo-initials:has(> .avatar-img) {
+    width: 36px;
+    height: 36px;
   }
   .qo-who-block {
     display: flex;

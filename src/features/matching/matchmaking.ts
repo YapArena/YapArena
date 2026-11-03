@@ -1,5 +1,6 @@
 import type { Pool, PoolClient } from "pg";
 import { withTransaction } from "../../platform/transaction.ts";
+import { resolveAvatarId, type AvatarId } from "../identity/avatars.ts";
 import { runExclusiveDatabaseJob } from "../../platform/database-jobs.ts";
 import { assertDebaterSettings } from "../transcription/debater-settings.ts";
 import {
@@ -94,11 +95,12 @@ export interface MatchmakingState {
     acceptedByMe: boolean;
     acceptedByOpponent: boolean;
     // Who the player was paired with, for the match screen. Sent only on the player's private
-    // stream (Decision 0006). The handle and name are null if the opponent's profile is no longer
-    // published.
+    // stream (Decision 0006). The handle, name and avatar are null if the opponent's profile is
+    // no longer published.
     opponent: {
       handle: string | null;
       displayName: string | null;
+      avatarId: AvatarId | null;
       sideLabel: string;
     };
   } | null;
@@ -444,12 +446,13 @@ export function createMatchmaking(
         theirs: Date | null;
         handle: string | null;
         displayName: string | null;
+        avatarId: string | null;
         opponentSideLabel: string;
       }>(
         `SELECT o.id, o.deadline_at AS "deadlineAt",
              CASE WHEN o.ticket_a_id = $1 THEN o.accepted_a_at ELSE o.accepted_b_at END AS mine,
              CASE WHEN o.ticket_a_id = $1 THEN o.accepted_b_at ELSE o.accepted_a_at END AS theirs,
-             p.handle, p.display_name AS "displayName",
+             p.handle, p.display_name AS "displayName", p.avatar_id AS "avatarId",
              CASE WHEN o.ticket_a_id = $1 THEN tp.side_b_label ELSE tp.side_a_label END
                AS "opponentSideLabel"
            FROM match_offers o JOIN topics tp ON tp.id = o.topic_id
@@ -468,6 +471,9 @@ export function createMatchmaking(
           opponent: {
             handle: entry.handle,
             displayName: entry.displayName,
+            avatarId: entry.handle
+              ? resolveAvatarId(entry.avatarId, entry.handle)
+              : null,
             sideLabel: entry.opponentSideLabel,
           },
         };

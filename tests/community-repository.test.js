@@ -217,6 +217,32 @@ function fake(options = {}) {
 }
 
 describe("community repository policy", () => {
+  it("shows each chat author's avatar without sending their handle", async () => {
+    const { community } = fake({
+      chatRows: [
+        { ...chat, id: "3", authorHandle: "alice-a", authorAvatar: "yap-owl" },
+        { ...chat, id: "2", authorHandle: "maya-chen", authorAvatar: null },
+        {
+          ...chat,
+          id: "1",
+          authorName: "Participant",
+          authorHandle: null,
+          authorAvatar: null,
+        },
+      ],
+    });
+    const { items } = await community.listChat(eventId);
+    assert.deepEqual(
+      items.map((item) => item.authorAvatarId),
+      // Oldest first: none for "Participant", a handle's default, a choice.
+      [null, "yap-critter", "yap-owl"],
+    );
+    for (const item of items) {
+      assert.equal("authorHandle" in item, false);
+      assert.equal("authorAvatar" in item, false);
+    }
+  });
+
   it("reconciles only the authenticated sender's accepted keys and redacts removal", async () => {
     const db = fake({ accepted: [{ ...chat, state: "removed" }] });
     const items = await db.community.reconcileSubmissions(eventId, "1", [

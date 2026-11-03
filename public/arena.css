@@ -1502,7 +1502,8 @@ textarea::placeholder {
   border-radius: var(--radius-card);
   transition: border-color 0.4s;
 }
-.arena-page .arena-avatar {
+/* Scoped to the player cards: the header's account button shares the class. */
+.arena-page .arena-side .arena-avatar {
   grid-area: avatar;
   display: grid;
   place-items: center;
@@ -1513,6 +1514,13 @@ textarea::placeholder {
   background: var(--raised);
   font-size: 0.9375rem;
   font-weight: 700;
+}
+/* A speaker's avatar fills the square; its art draws its own tile
+   (Decision 0014). "?" keeps the circle until a speaker is named. */
+.arena-page .arena-side .arena-avatar:has(> .avatar-img) {
+  border: 0;
+  border-radius: 0;
+  background: none;
 }
 .arena-page .arena-side-who {
   grid-area: who;
@@ -3607,7 +3615,7 @@ textarea::placeholder {
   .arena-page .arena-side[data-side="B"] {
     text-align: right;
   }
-  .arena-page .arena-avatar {
+  .arena-page .arena-side .arena-avatar {
     display: none;
   }
   .arena-page .arena-side-name {
