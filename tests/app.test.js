@@ -228,6 +228,22 @@ describe("yaparena API", () => {
     assert.match(productionPolicy, /upgrade-insecure-requests/);
   });
 
+  it("serves the development message scaffold outside production only (YA-14)", async () => {
+    const productionApp = createApp({
+      messages,
+      users,
+      sessions,
+      logger,
+      environment: "production",
+      applicationOrigin: "https://arena.example",
+    });
+    const response = await request(productionApp)
+      .get("/api/messages")
+      .set("Cookie", "__Host-session=test-token");
+    assert.equal(response.status, 404);
+    assert.equal((await authenticated("get", "/api/messages")).status, 200);
+  });
+
   it("reports that it is ready for traffic", async () => {
     database.query.mock.resetCalls();
     messages.isReady.mock.resetCalls();

@@ -39,7 +39,9 @@ describe("search indexing", () => {
         ["/health", 200],
         ["/robots.txt", 200],
         ["/no-such-page", 404],
-        ["/api/messages", 401],
+        // The message scaffold is development-only (YA-14); staging runs
+        // as production.
+        ["/api/messages", app === staging ? 404 : 401],
       ]) {
         const response = await request(app).get(path);
         assert.equal(response.status, status, path);
