@@ -3,11 +3,14 @@ import type { Pool } from "pg";
 import { verifyRuntimeIdentity } from "./database.ts";
 import { OperatorError } from "./operator-error.ts";
 
+// Web and the jobs worker run as yaparena_runtime; the replay encoder passes
+// verifyEncoderIdentity for its own role.
 export async function verifyDatabaseState(
   database: Pool,
   migrationsDirectory: URL,
+  verifyIdentity: (database: Pool) => Promise<void> = verifyRuntimeIdentity,
 ) {
-  await verifyRuntimeIdentity(database);
+  await verifyIdentity(database);
 
   const files = await readdir(migrationsDirectory);
   const expected = files

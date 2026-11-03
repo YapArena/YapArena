@@ -78,6 +78,7 @@ const passwords = {
   postgres: secret(),
   yaparena_owner: secret(),
   yaparena_runtime: secret(),
+  yaparena_encoder: secret(),
 };
 const databaseName = "revocation_test_coin_browser",
   clientId = "coin-browser-client-0123456789",

@@ -85,3 +85,22 @@ declare module "*1791385198189_automatic-replay-packaging.js" {
   export const up: (pgm: MigrationBuilder) => void;
   export const down: (pgm: MigrationBuilder) => void;
 }
+
+declare module "*1793675904690_add-replay-encoder-role.js" {
+  import type { MigrationBuilder } from "node-pg-migrate";
+
+  type Columns = "*" | readonly string[];
+  export type EncoderGrant = {
+    readonly select?: Columns;
+    readonly insert?: Columns;
+    readonly update?: readonly string[];
+    readonly delete?: boolean;
+  };
+  export const shorthands: undefined;
+  export const encoderRole: "yaparena_encoder";
+  export const encoderGrants: Readonly<Record<string, EncoderGrant>>;
+  export const encoderSequences: readonly string[];
+  export function encoderGrantClauses(spec: EncoderGrant): string;
+  export const up: (pgm: MigrationBuilder) => void;
+  export const down: (pgm: MigrationBuilder) => void;
+}

@@ -9,7 +9,13 @@ const identifier = (value: string) => `"${value.replaceAll('"', '""')}"`;
 
 // Administrative operator step, separate from ordinary node-pg-migrate migrations.
 // No passwords in SQL artifacts, command arguments, output, or migration history.
-type Role = "yaparena_owner" | "yaparena_runtime";
+// The replay encoder logs in as yaparena_encoder, never as yaparena_runtime.
+const roles = [
+  "yaparena_owner",
+  "yaparena_runtime",
+  "yaparena_encoder",
+] as const;
+type Role = (typeof roles)[number];
 type ProvisionClient = pg.Client & {
   connectionParameters: {
     password: string | (() => string | Promise<string>) | null;
@@ -22,18 +28,17 @@ export async function provisionDatabase(
 ) {
   await client.query("BEGIN");
   try {
-    if (
-      passwords.yaparena_owner &&
-      passwords.yaparena_owner === passwords.yaparena_runtime
-    )
-      throw new Error("Owner and runtime passwords must be distinct");
-    if (
-      passwords.yaparena_runtime &&
-      passwords.yaparena_runtime ===
-        (client as ProvisionClient).connectionParameters.password
-    )
-      throw new Error("Administrator and runtime passwords must be distinct");
-    for (const role of ["yaparena_owner", "yaparena_runtime"] as const) {
+    const supplied = roles.flatMap((role) => passwords[role] ?? []);
+    if (new Set(supplied).size !== supplied.length)
+      throw new Error("Owner, runtime and encoder passwords must be distinct");
+    const administrator = (client as ProvisionClient).connectionParameters
+      .password;
+    for (const role of ["yaparena_runtime", "yaparena_encoder"] as const)
+      if (passwords[role] && passwords[role] === administrator)
+        throw new Error(
+          "Administrator and application passwords must be distinct",
+        );
+    for (const role of roles) {
       const existing = await client.query(
         "SELECT * FROM pg_roles WHERE rolname = $1",
         [role],
@@ -49,13 +54,14 @@ export async function provisionDatabase(
       }
     }
     // PostgreSQL 16+ gives the role creator an ADMIN-only grant. It grants no
-    // privileges to runtime; accept only postgres with INHERIT and SET disabled.
+    // privileges to runtime or encoder; accept only postgres with INHERIT and
+    // SET disabled.
     const unsafe = await client.query(`SELECT rolname FROM pg_roles
-      WHERE rolname IN ('yaparena_owner', 'yaparena_runtime')
+      WHERE rolname IN ('yaparena_owner', 'yaparena_runtime', 'yaparena_encoder')
         AND (rolsuper OR rolbypassrls OR rolcreatedb OR rolcreaterole OR rolreplication OR NOT rolcanlogin)
       UNION ALL SELECT 'membership' FROM pg_auth_members m
-        WHERE m.member IN ('yaparena_runtime'::regrole, 'yaparena_owner'::regrole)
-          OR (m.roleid = 'yaparena_runtime'::regrole AND NOT EXISTS (SELECT 1 FROM pg_roles administrator
+        WHERE m.member IN ('yaparena_runtime'::regrole, 'yaparena_owner'::regrole, 'yaparena_encoder'::regrole)
+          OR (m.roleid IN ('yaparena_runtime'::regrole, 'yaparena_encoder'::regrole) AND NOT EXISTS (SELECT 1 FROM pg_roles administrator
             WHERE administrator.oid = m.member AND administrator.rolname = 'postgres'
               AND (administrator.rolsuper OR administrator.rolcreaterole)
               AND m.admin_option
@@ -65,21 +71,19 @@ export async function provisionDatabase(
       throw new Error(
         "Unsafe pre-existing database identities; inspect inventory first",
       );
-    const administrator = (
+    const operator = (
       await client.query<{ name: string; database: string }>(
         "SELECT current_user AS name, current_database() AS database",
       )
     ).rows[0]!;
-    // An administrative operator may assume owner; runtime/browser roles may never do so.
-    await client.query(
-      `GRANT yaparena_owner TO ${identifier(administrator.name)}`,
-    );
+    // An administrative operator may assume owner; application/browser roles may never do so.
+    await client.query(`GRANT yaparena_owner TO ${identifier(operator.name)}`);
     const browserEscalation =
       await client.query(`SELECT b.rolname FROM pg_roles b
       WHERE b.rolname IN ('anon','authenticated','authenticator') AND (
         b.rolsuper OR b.rolbypassrls OR b.rolcreaterole OR
         EXISTS (SELECT 1 FROM pg_roles privileged WHERE
-          (privileged.rolname IN ('yaparena_owner','yaparena_runtime') OR
+          (privileged.rolname IN ('yaparena_owner','yaparena_runtime','yaparena_encoder') OR
             privileged.rolsuper OR privileged.rolbypassrls OR privileged.rolcreaterole)
           AND b.oid <> privileged.oid AND pg_has_role(b.oid,privileged.oid,'MEMBER')
           AND NOT (b.rolname = 'authenticator' AND NOT b.rolinherit
@@ -185,12 +189,12 @@ export async function provisionDatabase(
       throw new Error(
         "External routines reference application data; operator review required",
       );
-    for (const role of ["yaparena_owner", "yaparena_runtime"] as const) {
+    for (const role of roles) {
       await client.query(
-        `GRANT CONNECT ON DATABASE ${identifier(administrator.database)} TO ${role}`,
+        `GRANT CONNECT ON DATABASE ${identifier(operator.database)} TO ${role}`,
       );
       await client.query(
-        `ALTER ROLE ${role} IN DATABASE ${identifier(administrator.database)} SET search_path = pg_catalog, yaparena, pg_temp`,
+        `ALTER ROLE ${role} IN DATABASE ${identifier(operator.database)} SET search_path = pg_catalog, yaparena, pg_temp`,
       );
     }
     await client.query("COMMIT");
@@ -214,6 +218,7 @@ if (
     await provisionDatabase(client, {
       yaparena_owner: process.env.DATABASE_OWNER_PASSWORD,
       yaparena_runtime: process.env.DATABASE_RUNTIME_PASSWORD,
+      yaparena_encoder: process.env.DATABASE_ENCODER_PASSWORD,
     });
     console.log(
       "Application identities and ownership provisioned; run the separate migration job next.",

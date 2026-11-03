@@ -1,5 +1,5 @@
 import { loadConfig } from "./platform/config.ts";
-import { createDatabase } from "./platform/database.ts";
+import { createDatabase, verifyEncoderIdentity } from "./platform/database.ts";
 import { createLogger } from "./platform/logger.ts";
 import { verifyDatabaseState } from "./platform/migrations.ts";
 import { exitOnCrash } from "./platform/process-crash.ts";
@@ -22,6 +22,8 @@ if (config.unusedSecrets.length > 0)
   );
 // This process runs encoding only. It never competes with clock/HTTP work in
 // the web pool, starts listeners, or receives migration/deployment credentials.
+// It connects as yaparena_encoder, which can use only the replay queue and the
+// rows publication touches (YA-15).
 const database = createDatabase(config.databaseUrl, logger, undefined, {
   max: 2,
   timeoutMs: 1500,
@@ -72,7 +74,11 @@ function shutdown() {
 // A failed start reaches the crash handler, which logs it, releases the
 // worker, storage and pool through shutdown, and exits with status 1.
 exitOnCrash({ logger, stop: shutdown });
-await verifyDatabaseState(database, new URL("../migrations", import.meta.url));
+await verifyDatabaseState(
+  database,
+  new URL("../migrations", import.meta.url),
+  verifyEncoderIdentity,
+);
 await verifyReplayTools();
 worker.start();
 logger.info(

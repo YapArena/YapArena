@@ -537,6 +537,7 @@ export function loadConfig(
     environment.DATABASE_ADMIN_URL ||
     environment.DATABASE_OWNER_PASSWORD ||
     environment.DATABASE_RUNTIME_PASSWORD ||
+    environment.DATABASE_ENCODER_PASSWORD ||
     environment.DATABASE_FIXTURE_URL ||
     environment.DATABASE_INSPECTION_URL ||
     environment.COIN_SANDBOX_OWNER_DATABASE_URL

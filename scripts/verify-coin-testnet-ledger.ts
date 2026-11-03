@@ -77,6 +77,7 @@ type PrivateState = {
     postgres: string;
     yaparena_owner: string;
     yaparena_runtime: string;
+    yaparena_encoder: string;
   };
   token: string;
   userId?: string;
@@ -156,6 +157,13 @@ function parseState(value: unknown): PrivateState {
       postgres: passwords.postgres,
       yaparena_owner: passwords.yaparena_owner,
       yaparena_runtime: passwords.yaparena_runtime,
+      // This verifier never logs in as the encoder. State saved before the
+      // encoder role existed has no password for it; provisioning creates
+      // the role once with a fresh one.
+      yaparena_encoder:
+        typeof passwords.yaparena_encoder === "string"
+          ? passwords.yaparena_encoder
+          : randomBytes(24).toString("hex"),
     },
     ...(value.userId === undefined ? {} : { userId: value.userId }),
   };
@@ -278,6 +286,7 @@ try {
         postgres: secret(),
         yaparena_owner: secret(),
         yaparena_runtime: secret(),
+        yaparena_encoder: secret(),
       },
     };
     await persist(statePath, state);

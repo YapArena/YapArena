@@ -20,7 +20,17 @@ rejected. Missing option fields on older PostgreSQL versions fail closed.
 Startup checks the real session/current user, ownership, membership, schema
 CREATE, and read-only migration metadata access before accepting traffic. Web and worker processes
 receive **only this identity's `DATABASE_URL`**. They reject known provisioning, migration,
-inspection and fixture secrets in their environment. This guard does not discover arbitrary secret
+inspection and fixture secrets in their environment.
+
+`yaparena_encoder` is the replay encoder's login (security audit finding YA-15), under the same
+attribute, membership, ownership and CREATE rules as runtime. Migration
+`1793675904690_add-replay-encoder-role` grants it the replay queue, column reads of published,
+finished events, their topics and ready recordings, the `ended` to `replay` status change with its
+`event_history` row, and the community delivery cursor that publication's triggers advance. Its
+policies name only this role; lock-only UPDATE grants on `topics` and `debate_media` pair with
+policies that refuse every write, and a trigger limits its status change to `ended` to `replay`.
+At startup the encoder also refuses any privilege outside that set, so the runtime URL or a grant
+made by hand stops it before it claims jobs. It receives only its own `DATABASE_URL`. This guard does not discover arbitrary secret
 names: operators must also inspect the actual service secret configuration and mounted files.
 
 Repository application tables, their owned sequences/indexes and trigger functions live
@@ -108,7 +118,8 @@ objects and migration history before migrations run; old application binaries th
 cannot run through this transition. Keep the application stopped until hardening and checks pass.
 
 Use a privileged administrative **operator process**, separate from the migration job and web/worker.
-Supply `DATABASE_ADMIN_URL`, `DATABASE_OWNER_PASSWORD` and `DATABASE_RUNTIME_PASSWORD` through its
+Supply `DATABASE_ADMIN_URL`, `DATABASE_OWNER_PASSWORD`, `DATABASE_RUNTIME_PASSWORD` and
+`DATABASE_ENCODER_PASSWORD` through its
 secret manager, and run `node scripts/provision-database.ts`. Passwords must be distinct, strong and
 URL-encoded when constructing connection URLs outside this script. PostgreSQL statement/audit
 logging must redact provisioning passwords; use the provider's approved password-setting procedure
@@ -117,7 +128,7 @@ nor rotates existing ones. Existing unsafe identities cause failure; inspect and
 separate authorization. New login creation is required only on first provision.
 
 The provisioning transaction creates the private schemas, transfers exact application ownership,
-moves legacy public tables/history/functions, and configures the two logins' database search paths.
+moves legacy public tables/history/functions, and configures the three logins' database search paths.
 It does not delete rows, rewrite applied migrations, reassign all provider-owned objects or grant
 runtime membership. A fresh database has no existing tables; node-pg-migrate subsequently creates
 them directly in the private schemas. Existing migration names/history and synthetic upgrade rows
@@ -129,7 +140,8 @@ transactional migrations and advisory lock, with application schema `yaparena` a
 `yaparena_migrations`. It validates the migration identity and logs a sanitized completion/failure.
 Never execute the raw migration CLI with runtime credentials or its default public schema.
 
-Finally, give web/worker only the runtime URL and start the reviewed new application image. Inspect
+Finally, give web/worker only the runtime URL, and the encoder only its own URL, and start the
+reviewed new application image. Inspect
 service environment/mounts to ensure owner/admin passwords, migration URLs and combined operator
 files are absent. Record startup, `/ready`, real account journeys and an after-change inventory.
 
