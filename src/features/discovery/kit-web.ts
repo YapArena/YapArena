@@ -19,10 +19,14 @@ export const initials = (name: string | null | undefined) =>
     .map((word) => word[0]!.toUpperCase())
     .join("") || "?";
 
-// A square avatar slot at a multiple of 12 px. Today it holds the person's
-// initials; the chosen avatars replace them later without moving anything.
-// Without a size, the page's stylesheet sets one per screen width.
-export const avatarSlot = (name: string | null | undefined, size?: number) =>
-  html`<span class="avatar-slot"${size ? html` style="--avatar-size:${size}px"` : ""} aria-hidden="true"><span class="avatar-initials">${initials(name)}</span></span>`;
+// A square avatar slot at a multiple of 12 px. It shows the person's avatar
+// when the caller passes its address, otherwise their initials. Without a
+// size, the page's stylesheet sets one per screen width.
+export const avatarSlot = (
+  name: string | null | undefined,
+  size?: number,
+  avatarSrc?: string,
+) =>
+  html`<span class="avatar-slot"${size ? html` style="--avatar-size:${size}px"` : ""} aria-hidden="true">${avatarSrc ? html`<img class="avatar-img" src="${avatarSrc}" alt="">` : html`<span class="avatar-initials">${initials(name)}</span>`}</span>`;
 
 export const searchIcon = html`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>`;

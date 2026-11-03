@@ -1,3 +1,5 @@
+import type { AvatarId } from "../identity/avatars.ts";
+
 export type DebateStatus =
   | "draft"
   | "accepted"
@@ -27,6 +29,8 @@ export interface PublicProfile {
   displayName: string;
   bio: string | null;
   isDemo: boolean;
+  /** The chosen avatar, or the handle's default (Decision 0014). */
+  avatarId: AvatarId;
 }
 
 export interface PublicDebate {

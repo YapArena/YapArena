@@ -1,5 +1,6 @@
 import type { Pool } from "pg";
 import { activityLabel, hiddenActivityTypes } from "./activity.ts";
+import { resolveAvatarId, type AvatarId } from "./avatars.ts";
 
 export interface OwnedProfile {
   id: string;
@@ -7,9 +8,18 @@ export interface OwnedProfile {
   displayName: string;
   bio: string | null;
   publicationState: "draft" | "published" | "hidden";
+  /** The chosen avatar, or the handle's default when none was chosen. */
+  avatarId: AvatarId;
   createdAt: Date;
   updatedAt: Date;
 }
+
+type ProfileRow = Omit<OwnedProfile, "avatarId"> & { avatarId: string | null };
+
+const ownedProfile = (row: ProfileRow): OwnedProfile => ({
+  ...row,
+  avatarId: resolveAvatarId(row.avatarId, row.handle),
+});
 
 export interface FollowItem {
   id: string;
@@ -49,8 +59,8 @@ function page<T>(rows: T[], limit: number, offset: number) {
 }
 
 const profileFields = `id, handle, display_name AS "displayName", bio,
-  publication_state AS "publicationState", created_at AS "createdAt",
-  updated_at AS "updatedAt"`;
+  publication_state AS "publicationState", avatar_id AS "avatarId",
+  created_at AS "createdAt", updated_at AS "updatedAt"`;
 
 // Role and sign-in method events name the role or method in subject_id; other
 // subjects are record IDs and stay private to the database.
@@ -71,11 +81,11 @@ const exportLimit = 5000;
 export function createIdentityRepository(database: Pool) {
   return Object.freeze({
     async getProfile(userId: string): Promise<OwnedProfile | null> {
-      const result = await database.query<OwnedProfile>(
+      const result = await database.query<ProfileRow>(
         `SELECT ${profileFields} FROM public_profiles WHERE user_id = $1`,
         [userId],
       );
-      return result.rows[0] ?? null;
+      return result.rows[0] ? ownedProfile(result.rows[0]) : null;
     },
 
     // The handle pop-up passes the terms the account accepted. One statement
@@ -87,21 +97,29 @@ export function createIdentityRepository(database: Pool) {
       bio: string | null,
       publicationState: "draft" | "published" = "draft",
       terms?: { version: string; minimumAge: number },
+      avatarId: AvatarId | null = null,
     ) {
-      const insert = `INSERT INTO public_profiles (user_id, handle, display_name, bio, publication_state)
-         VALUES ($1, $2, $3, $4, $5) RETURNING ${profileFields}`;
-      const values = [userId, handle, displayName, bio, publicationState];
-      const result = await database.query<OwnedProfile>(
+      const insert = `INSERT INTO public_profiles (user_id, handle, display_name, bio, publication_state, avatar_id)
+         VALUES ($1, $2, $3, $4, $5, $6) RETURNING ${profileFields}`;
+      const values = [
+        userId,
+        handle,
+        displayName,
+        bio,
+        publicationState,
+        avatarId,
+      ];
+      const result = await database.query<ProfileRow>(
         terms
           ? `WITH accepted AS (
                INSERT INTO terms_acceptances (user_id, terms_version, minimum_age)
-               VALUES ($1, $6, $7) ON CONFLICT (user_id, terms_version) DO NOTHING
+               VALUES ($1, $7, $8) ON CONFLICT (user_id, terms_version) DO NOTHING
              ) ${insert}`
           : insert,
         terms ? [...values, terms.version, terms.minimumAge] : values,
       );
       if (!result.rows[0]) throw new Error("created profile was not returned");
-      return result.rows[0];
+      return ownedProfile(result.rows[0]);
     },
 
     async updateProfile(
@@ -110,13 +128,15 @@ export function createIdentityRepository(database: Pool) {
         displayName?: string;
         bio?: string | null;
         publicationState?: "draft" | "published";
+        avatarId?: AvatarId;
       },
     ): Promise<OwnedProfile | null> {
-      const result = await database.query<OwnedProfile>(
+      const result = await database.query<ProfileRow>(
         `UPDATE public_profiles SET
            display_name = CASE WHEN $2 THEN $3 ELSE display_name END,
            bio = CASE WHEN $4 THEN $5 ELSE bio END,
            publication_state = CASE WHEN $6 THEN $7 ELSE publication_state END,
+           avatar_id = CASE WHEN $8 THEN $9 ELSE avatar_id END,
            updated_at = CURRENT_TIMESTAMP
          WHERE user_id = $1 AND publication_state <> 'hidden' AND is_demo = false
          RETURNING ${profileFields}`,
@@ -128,9 +148,11 @@ export function createIdentityRepository(database: Pool) {
           changes.bio ?? null,
           "publicationState" in changes,
           changes.publicationState ?? null,
+          "avatarId" in changes,
+          changes.avatarId ?? null,
         ],
       );
-      return result.rows[0] ?? null;
+      return result.rows[0] ? ownedProfile(result.rows[0]) : null;
     },
 
     // Drafts, hidden and demo profiles hold their handles too.
@@ -250,7 +272,7 @@ export function createIdentityRepository(database: Pool) {
     // The account's own nonfinancial records for a download (Decision 0002).
     async exportData(userId: string) {
       const [profile, follows, activity, notifications] = await Promise.all([
-        database.query<OwnedProfile>(
+        database.query<ProfileRow>(
           `SELECT ${profileFields} FROM public_profiles WHERE user_id = $1`,
           [userId],
         ),
@@ -282,7 +304,7 @@ export function createIdentityRepository(database: Pool) {
         ),
       ]);
       return {
-        profile: profile.rows[0] ?? null,
+        profile: profile.rows[0] ? ownedProfile(profile.rows[0]) : null,
         follows: follows.rows.map(({ targetType, slug, title, createdAt }) => ({
           targetType,
           slug,

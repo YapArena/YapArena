@@ -33,6 +33,7 @@ const profile = {
   displayName: "Alex Public",
   bio: "Public speaker",
   isDemo: false,
+  avatarId: "yap-owl",
 };
 const debate = {
   id: "33333333-3333-4333-8333-333333333333",
@@ -703,6 +704,14 @@ describe("launch pages, share previews and sitemap", () => {
     assert.equal(meta(topicPage, "og:description"), topic.summary);
     const profilePage = (await request(app).get("/people/alex-public")).text;
     assert.equal(meta(profilePage, "og:title"), "Alex Public (@alex-public)");
+    assert.match(
+      profilePage,
+      /<header class="person-hero"><span class="avatar-slot" aria-hidden="true"><img class="avatar-img" src="\/assets\/avatars\/yap-owl\.svg\?v=[0-9a-f]{12}" alt=""><\/span>/,
+    );
+    assert.equal(
+      (await request(app).get("/api/public/people/alex-public")).body.avatarId,
+      "yap-owl",
+    );
     assert.equal(
       meta(profilePage, "og:url"),
       "https://arena.example/people/alex-public",
@@ -841,6 +850,20 @@ describe("discovery repository visibility", () => {
     assert.equal(
       (await repository.getProfile(profile.handle)).handle,
       profile.handle,
+    );
+    assert.equal(
+      (await repository.getProfile(profile.handle)).avatarId,
+      "yap-owl",
+    );
+    // A profile that never chose shows its handle's default.
+    const unchosen = createDiscoveryRepository({
+      query: async () => ({
+        rows: [{ ...profile, handle: "maya-chen", avatarId: null }],
+      }),
+    });
+    assert.equal(
+      (await unchosen.getProfile("maya-chen")).avatarId,
+      "yap-critter",
     );
     const anonymousRepository = createDiscoveryRepository({
       query: async () => ({

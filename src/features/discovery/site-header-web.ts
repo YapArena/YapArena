@@ -1,4 +1,4 @@
-import { asset } from "./assets.ts";
+import { asset, avatarTemplate } from "./assets.ts";
 import { html } from "../../platform/html.ts";
 
 /** The header's destinations; the current one is marked (docs/site-design.md). */
@@ -22,7 +22,7 @@ export function siteHeaderMarkup(current: SiteSection | null = null) {
     ([key, href, label]) =>
       html`<a href="${href}"${key === current ? html` aria-current="page"` : ""}>${label}</a>`,
   );
-  return html`<header class="site-header" data-site-header data-session="checking">
+  return html`<header class="site-header" data-site-header data-session="checking" data-avatar-src="${avatarTemplate}">
     <div class="container site-header-grid">
       <a class="site-logo" href="/home"><img src="${asset("landing/yaparena-logo.png")}" width="575" height="151" alt="YAP Arena home"></a>
       <nav class="site-nav" aria-label="Main navigation">${nav}</nav>
