@@ -326,7 +326,7 @@ describe("live outline call", () => {
     assert.deepEqual(body.system[0].cache_control, { type: "ephemeral" });
     const [prefix, volatile] = body.messages[0].content;
     assert.match(prefix.text, /Faut-il garder le nucléaire/);
-    assert.match(prefix.text, /t1a1 \(turn 1, side B\): Les renouvelables/);
+    assert.match(prefix.text, /t1a1 \(turn 1, side B\): "Les renouvelables"/);
     assert.deepEqual(prefix.cache_control, { type: "ephemeral" });
     assert.equal(volatile.cache_control, undefined);
     assert.match(volatile.text, /t2a1 "Le nucléaire" \(rebuts t1a1\)/);

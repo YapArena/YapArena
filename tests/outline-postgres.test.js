@@ -153,6 +153,10 @@ describe("live AI outline storage", { skip: !ownerUrl || !runtimeUrl }, () => {
             argument: "k",
             text: "Quel connard ce type",
           }),
+          proposal("add_point", {
+            argument: "k",
+            text: "Appelez le 06 12 34 56 78",
+          }),
         ],
       }),
     );
@@ -162,7 +166,11 @@ describe("live AI outline storage", { skip: !ownerUrl || !runtimeUrl }, () => {
     assert.equal(answer.version, 1);
     assert.equal(answer.side, "A");
     assert.equal(answer.language, "fr");
-    assert.equal(answer.rejected, 1, "the insult never enters the outline");
+    assert.equal(
+      answer.rejected,
+      2,
+      "the insult and the phone number never enter the outline (YA-05)",
+    );
     assert.deepEqual(
       answer.edits.map((e) => [e.op, e.id]),
       [
@@ -550,6 +558,7 @@ describe("live AI outline storage", { skip: !ownerUrl || !runtimeUrl }, () => {
         "Il produit à la demande",
         "Espèce d'idiot",
         "Peu d'accidents graves",
+        "Preuves sur https://exemple.invalid",
       ]),
       item(null, "Les renouvelables ne suffisent pas", [], { rebuts: "t9a9" }),
     ]);
@@ -562,7 +571,11 @@ describe("live AI outline storage", { skip: !ownerUrl || !runtimeUrl }, () => {
     const before = await signals(debateId);
     const accepted = await outlines.applyCleanup(debateId, rewrite);
     assert.equal(accepted.status, 201);
-    assert.equal(accepted.body.dropped, 1, "the insult never becomes final");
+    assert.equal(
+      accepted.body.dropped,
+      2,
+      "the insult and the link never become final (YA-05)",
+    );
     assert.deepEqual(accepted.body.turn, {
       turnNumber: 1,
       side: "A",
