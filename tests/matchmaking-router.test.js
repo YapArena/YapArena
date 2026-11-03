@@ -37,9 +37,13 @@ function fixture({ failure, debateId = null, streams, current = state } = {}) {
     waiting: run("waiting", { sideA: 2, sideB: 0 }),
     deviceCheckRequired: true,
   };
+  // Account 9 is a participant under a community restriction.
   const identity = {
     async getRoles(user) {
-      return user === "7" ? ["participant"] : [];
+      return user === "7" || user === "9" ? ["participant"] : [];
+    },
+    async restriction(user) {
+      return user === "9" ? { expiresAt: new Date("2026-11-09") } : null;
     },
   };
   const app = express();
@@ -95,6 +99,38 @@ describe("live topic queue API", () => {
       "7",
       { topicSlug: "nuclear-power", side: "B" },
     ]);
+  });
+
+  it("keeps a restricted player out of the queue and offers, but lets them leave", async () => {
+    const f = fixture();
+    const as9 = (method, path) =>
+      request(f.app)[method](path).set("x-user", "9");
+    const offer = "11111111-1111-4111-8111-111111111111";
+    for (const [method, path, body] of [
+      [
+        "post",
+        "/api/matchmaking/tickets",
+        { topicSlug: "nuclear-power", side: "A" },
+      ],
+      ["post", `/api/matchmaking/offers/${offer}/accept`, {}],
+    ]) {
+      const response = await as9(method, path).send(body);
+      assert.equal(response.status, 403, path);
+      assert.equal(response.body.code, "account_restricted");
+    }
+    assert.deepEqual(f.calls, []);
+    assert.equal(
+      (await as9("delete", "/api/matchmaking/tickets/current")).status,
+      200,
+    );
+    assert.equal(
+      (await as9("post", `/api/matchmaking/offers/${offer}/decline`)).status,
+      200,
+    );
+    assert.deepEqual(
+      f.calls.map(([name]) => name),
+      ["leave", "decline"],
+    );
   });
 
   it("opens the live stream for the signed-in player, or tells clients to poll", async () => {

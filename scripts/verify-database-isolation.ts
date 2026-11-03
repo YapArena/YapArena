@@ -138,6 +138,8 @@ const applicationTables = [
   "matchmaking_presence",
   "terms_acceptances",
   "job_heartbeats",
+  // YA-07: moderators hide and restore topics, profiles and debates.
+  "content_moderation_actions",
 ];
 const container = `yaparena-isolation-${randomUUID().slice(0, 8)}`;
 const evidenceDirectory = `/tmp/${container}-evidence`;

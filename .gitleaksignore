@@ -1,0 +1,8 @@
+# Reviewed gitleaks findings that are not secrets. Each line is a finding's
+# fingerprint (commit:file:rule:line); see .gitleaks.toml for the rules.
+# A synthetic recording object key in a test double.
+71aebb01e4b151289bb3d14692442700c123fc81:tests/media-debate-start.test.js:generic-api-key:31
+# SHA-256 digests of built files in a status note.
+5f5e4a9cd31f17dc06482606e5dd59d0da3d3514:docs/email-first-resume.md:generic-api-key:81
+# A descriptive idempotency key label in a testnet verifier.
+5f5e4a9cd31f17dc06482606e5dd59d0da3d3514:scripts/verify-coin-testnet-ledger.ts:generic-api-key:448

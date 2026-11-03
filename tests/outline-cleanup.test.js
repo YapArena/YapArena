@@ -11,6 +11,7 @@ import { containsBlockedTerm } from "../dist/features/outline/moderation.js";
 import {
   CLEANUP_ACCEPT_MS,
   ingestHeaders,
+  ingestPath,
   parseOutlineCleanup,
   signIngest,
 } from "../dist/features/transcription/protocol.js";
@@ -705,7 +706,15 @@ describe("cleanup, timeline and correlation routes", () => {
         .post(`/api/internal/transcription/debates/${id}/cleanup`)
         .set("Content-Type", "application/json")
         .set(ingestHeaders.timestamp, timestamp)
-        .set(ingestHeaders.signature, signIngest(secret, timestamp, body))
+        .set(
+          ingestHeaders.signature,
+          signIngest(secret, {
+            method: "POST",
+            path: ingestPath(id, "cleanup"),
+            timestamp,
+            body,
+          }),
+        )
         .send(body);
     };
     const cleanup = {
@@ -735,7 +744,15 @@ describe("cleanup, timeline and correlation routes", () => {
           .post(`/x/debates/${id}/cleanup`)
           .set("Content-Type", "application/json")
           .set(ingestHeaders.timestamp, timestamp)
-          .set(ingestHeaders.signature, signIngest(secret, timestamp, body))
+          .set(
+            ingestHeaders.signature,
+            signIngest(secret, {
+              method: "POST",
+              path: ingestPath(id, "cleanup"),
+              timestamp,
+              body,
+            }),
+          )
           .send(body)
       ).status,
       400,

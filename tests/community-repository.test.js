@@ -127,7 +127,16 @@ function fake(options = {}) {
       sql.includes("FROM community_restrictions") &&
       sql.includes("WHERE user_id")
     )
-      return rows(value("restricted", false) ? [{}] : []);
+      // The shared lookup reads the latest expiry; a case decision checks for any row.
+      return sql.includes("max(expires_at)")
+        ? rows([
+            {
+              expiresAt: value("restricted", false)
+                ? new Date(Date.now() + 60_000)
+                : null,
+            },
+          ])
+        : rows(value("restricted", false) ? [{}] : []);
     if (sql.includes("FROM public_profiles WHERE user_id"))
       return rows(value("hasProfile", true) ? [{ authorName: "Alice" }] : []);
     if (sql.includes("SELECT state FROM event_chat_controls"))
@@ -887,6 +896,7 @@ describe("community repository policy", () => {
     );
     assert.deepEqual(await fake().community.pruneExpired(), {
       cases: 1,
+      contentActions: 1,
       chat: 1,
       likes: 1,
       likeChanges: 1,

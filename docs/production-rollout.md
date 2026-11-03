@@ -1376,13 +1376,31 @@ staging hasn't run, hotfixes included.
    - Agent: restage and deploy to staging (`~/yaparena-transcriber-deploy`, staging the default
      project), test, then production (`~/yaparena-transcriber-production`, production the default,
      then back to staging): `node scripts/stage-transcriber.ts <folder>`, then `lk agent deploy .`
-     in that folder.
+     in that folder. Deploy it only after that environment's web runs the same release: an
+     agent can sign in a way an older web refuses (see the next section).
    - Edge: deploy staging's edge as before, test a replay, then
      `npx wrangler@4.151.1 deploy --config edge/wrangler.production.toml`.
 
-### Once: the release that adds the encoder's own database role
+### Ingest signature version 2 (once)
 
-The first release with `migrations/1793675904690_add-replay-encoder-role.js` needs one extra step
+The release with ingest signature version 2 (audit YA-11) changes how the agent signs its calls
+to web: the signature now covers the debate and the endpoint, not only the body. Web accepts both
+versions for now.
+
+1. Release web and the jobs worker to staging, then production, as usual (items 1–8).
+2. Then deploy the agent from the same release: staging, test a debate, then production (item 9).
+3. In each web service's **Logs**, search for `version 1 signature`. Web logs it at most once a
+   minute while an agent from an earlier release still signs; it stops after the agent deploy.
+4. Once neither environment has logged it for a day, a follow-up change removes version 1:
+   `signIngestV1` and the `acceptV1Signatures` option in `src/features/transcription/`. Until
+   then, version 1 matters only while an old agent runs, because every signature expires after
+   30 seconds.
+
+### Encoder database role (once)
+
+The release with the encoder's own database role (audit YA-15) moves the encoder from
+`yaparena_runtime` to `yaparena_encoder`. The first release with
+`migrations/1793675904690_add-replay-encoder-role.js` needs one extra step
 on each database provisioned before it, staging and, if step 6.3 ran with only two passwords,
 production. Its migration stops with `Database migration failed (P0001).` until the role exists.
 Neither the old web nor the old encoder is affected by the new role or its migration.
@@ -1410,10 +1428,13 @@ subdomain is still disabled.
 - **Code:** on each production service, **Settings** → **Image URL** → **Edit**, paste the previous
   release's image, **Save Changes**: jobs, then web, then the encoder. The previous images are in
   the earlier lines of step 1.1's list. Migrations stay: they're additive and never rolled back. If
-  the previous release can't run on the newer schema, fix forward instead.
+  the previous release can't run on the newer schema, fix forward instead. An encoder image from
+  before its own database role needs the runtime URL in its `DATABASE_URL` again.
 - **Feature flags:** set the flag to `false` on web and the jobs worker, **Save and deploy**.
 - **Agent:** with production as the default project, in `~/yaparena-transcriber-production`,
-  `lk agent versions`, then `lk agent rollback --version <previous version>`.
+  `lk agent versions`, then `lk agent rollback --version <previous version>`. If web goes back to
+  a release before ingest signature version 2, roll the agent back too, or captions and the AI
+  outline stop.
 - **Edge:** `npx wrangler@4.151.1 deployments list --config edge/wrangler.production.toml`, then
   `npx wrangler@4.151.1 rollback <version ID> --config edge/wrangler.production.toml`.
 - **Take the site offline:** Render → `yaparena-web` → **Settings** → **Maintenance Mode** →

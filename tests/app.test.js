@@ -73,7 +73,7 @@ describe("yaparena API", () => {
 
   it("mounts transcriber ingest before JSON parsing and outside the API limit", async () => {
     const id = "33333333-3333-4333-8333-333333333333";
-    const { signIngest, ingestHeaders } =
+    const { signIngest, ingestHeaders, ingestPath } =
       await import("../dist/features/transcription/protocol.js");
     const secret = "synthetic-transcription-ingest-secret-32b";
     const enabled = createApp({
@@ -98,7 +98,15 @@ describe("yaparena API", () => {
         .post(`/api/internal/transcription/debates/${id}/session`)
         .set("Content-Type", "application/json")
         .set(ingestHeaders.timestamp, timestamp)
-        .set(ingestHeaders.signature, signIngest(secret, timestamp, body))
+        .set(
+          ingestHeaders.signature,
+          signIngest(secret, {
+            method: "POST",
+            path: ingestPath(id, "session"),
+            timestamp,
+            body,
+          }),
+        )
         .send(body);
       assert.equal(response.status, 200);
       assert.deepEqual(response.body, { debateId: id });
@@ -253,6 +261,24 @@ describe("yaparena API", () => {
     assert.deepEqual(response.body, { status: "ready" });
     assert.deepEqual(database.query.mock.calls[0].arguments, ["SELECT 1"]);
     assert.equal(messages.isReady.mock.callCount(), 0);
+  });
+
+  it("counts live community reads only in viewer admission, not the API limit (YA-17)", async () => {
+    const limited = createApp({
+      messages,
+      users,
+      sessions,
+      logger,
+      apiRateLimit: 1,
+    });
+    const live = `/api/community/events/${"3".repeat(8)}-3333-4333-8333-${"3".repeat(12)}/updates`;
+    for (let i = 0; i < 3; i++) {
+      const response = await request(limited).get(live);
+      assert.notEqual(response.status, 429);
+      assert.equal(response.headers.ratelimit, undefined);
+    }
+    assert.equal((await request(limited).get("/health")).status, 200);
+    assert.equal((await request(limited).get("/health")).status, 429);
   });
 
   it("bounds the readiness database ping with a short deadline", async () => {

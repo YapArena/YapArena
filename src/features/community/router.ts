@@ -5,6 +5,7 @@ import type { createIdentityRepository } from "../identity/repository.ts";
 import type {
   createCommunityRepository,
   CaseAction,
+  ContentType,
   ReasonCode,
 } from "./repository.ts";
 import {
@@ -19,6 +20,7 @@ import type { ProductActionRecorder } from "../measurement/router.ts";
 import type { createCommunityStreams } from "./streams.ts";
 import { parseRoomCursor } from "./delivery.ts";
 import { createPlaybackPresence } from "./presence.ts";
+import { hasHiddenCharacters } from "./user-text.ts";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const submissionUuid =
@@ -27,6 +29,14 @@ const integer = /^[1-9]\d{0,18}$/;
 const validCursor = (value: string) =>
   integer.test(value) && BigInt(value) <= 9223372036854775807n;
 const slug = /^[a-z0-9][a-z0-9-]{2,99}$/;
+// How a moderator names an item to hide or restore: a topic's slug, a profile's handle, or a
+// debate's slug or id.
+const contentKeys: Record<ContentType, RegExp> = {
+  topic: /^[a-z0-9][a-z0-9-]{2,79}$/,
+  profile: /^[a-z0-9][a-z0-9-]{2,39}$/,
+  debate:
+    /^(?:[a-z0-9][a-z0-9-]{2,99}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/,
+};
 const reasons = new Set<ReasonCode>([
   "harassment",
   "hate",
@@ -42,14 +52,21 @@ const actions = new Set<CaseAction>([
   "pause_chat",
 ]);
 
+const isContentType = (value: unknown): value is ContentType =>
+  value === "topic" || value === "profile" || value === "debate";
+
 function pathId(request: Request, key = "id") {
   const value = request.params[key];
   return typeof value === "string" && uuid.test(value) ? value : null;
 }
+// Chat, report details, appeals and moderator notes keep their line breaks; other control and
+// invisible formatting characters, NUL included, are refused (YA-22).
 function text(value: unknown, minimum: number, maximum: number) {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
-  return trimmed.length >= minimum && trimmed.length <= maximum
+  return trimmed.length >= minimum &&
+    trimmed.length <= maximum &&
+    !hasHiddenCharacters(trimmed, { multiline: true })
     ? trimmed
     : null;
 }
@@ -298,7 +315,16 @@ export function createCommunityRouter({
     async (request, response) => {
       const id = pathId(request);
       if (!id) return response.status(404).json({ error: "event not found" });
-      const body = text(request.body?.body, 1, 500);
+      const raw: unknown = request.body?.body;
+      if (
+        typeof raw === "string" &&
+        hasHiddenCharacters(raw.trim(), { multiline: true })
+      )
+        return response.status(400).json({
+          error: "chat can't include hidden or control characters",
+          code: "CHAT_INVALID_BODY",
+        });
+      const body = text(raw, 1, 500);
       if (!body)
         return response.status(400).json({
           error: "chat must be 1–500 characters",
@@ -454,6 +480,48 @@ export function createCommunityRouter({
           .json({ error: "resume note must be 10–500 characters" });
       return attempt(response, () =>
         community.resumeChat(id, request.user!.id, note),
+      );
+    },
+  );
+  router.get(
+    "/api/community/moderation/visibility",
+    requireAuth,
+    moderator,
+    async (_request, response) =>
+      attempt(response, () => community.listContentActions()),
+  );
+  router.post(
+    "/api/community/moderation/visibility",
+    requireAuth,
+    moderator,
+    async (request, response) => {
+      const { targetType, target, hidden, reasonCode } = request.body ?? {};
+      const note = text(request.body?.note, 10, 500);
+      const key =
+        typeof target === "string"
+          ? target.trim().replace(/^@/, "").toLowerCase()
+          : "";
+      if (
+        !isContentType(targetType) ||
+        !contentKeys[targetType].test(key) ||
+        typeof hidden !== "boolean" ||
+        (hidden
+          ? !reasons.has(reasonCode)
+          : reasonCode !== undefined && reasonCode !== null) ||
+        !note
+      )
+        return response
+          .status(400)
+          .json({ error: "invalid visibility change" });
+      return attempt(response, () =>
+        community.setContentVisibility(
+          targetType,
+          key,
+          request.user!.id,
+          hidden,
+          hidden ? reasonCode : null,
+          note,
+        ),
       );
     },
   );

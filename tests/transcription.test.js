@@ -14,9 +14,10 @@ import { createDebaterSettingsRouter } from "../dist/features/transcription/sett
 import { parseDebaterSettings } from "../dist/features/transcription/debater-settings.js";
 import { createMediaProvider } from "../dist/features/media/provider.js";
 
-const { ingestHeaders, signIngest } = serverProtocol;
+const { ingestHeaders, ingestPath, signIngest, signIngestV1 } = serverProtocol;
 
 const id = "33333333-3333-4333-8333-333333333333";
+const otherId = "44444444-4444-4444-8444-444444444444";
 const secret = "synthetic-transcription-ingest-secret-32b";
 const now = 1_793_000_000_000;
 const segment = (overrides = {}) => ({
@@ -51,9 +52,11 @@ for (const [build, protocol] of [
 ]) {
   const {
     INGEST_MAX_SKEW_MS,
+    ingestPath,
     parseSessionRequest,
     parseTranscriptUpdate,
     signIngest,
+    signIngestV1,
     verifyIngest,
   } = protocol;
   describe(`transcription ingest protocol (${build} build)`, () => {
@@ -105,44 +108,102 @@ for (const [build, protocol] of [
       assert.equal(parseSessionRequest("AJ"), null);
     });
 
-    it("verifies HMAC signatures within the clock skew", () => {
+    it("verifies version 2 signatures bound to the method, path, timestamp and body", () => {
       const body = JSON.stringify(update()),
-        timestamp = String(now),
-        signature = signIngest(secret, timestamp, body);
-      assert.equal(verifyIngest(secret, timestamp, signature, body, now), true);
+        timestamp = String(now);
+      const signed = {
+        method: "POST",
+        path: ingestPath(id, "updates"),
+        timestamp,
+        body,
+      };
+      const signature = signIngest(secret, signed);
+      assert.match(signature, /^v2=[a-f0-9]{64}$/);
+      const check = (changes = {}, options = {}) =>
+        verifyIngest(
+          secret,
+          { ...signed, signature, ...changes },
+          { now, ...options },
+        );
+      assert.equal(check(), "v2");
+      assert.equal(check({ method: "post" }), "v2");
+      // YA-11: the same body, timestamp and signature fail anywhere else.
+      for (const changes of [
+        { body: `${body} ` },
+        { path: ingestPath(otherId, "updates") },
+        { path: ingestPath(id, "cleanup") },
+        { path: ingestPath(id, "session") },
+        { method: "PUT" },
+        { timestamp: String(now + 1) },
+        { timestamp: undefined },
+        { timestamp: "12" },
+        { signature: undefined },
+        { signature: "nothex" },
+        { signature: "v2=nothex" },
+        { signature: `v3=${signature.slice(3)}` },
+        // The bare hex is not a version 1 signature of this body.
+        { signature: signature.slice(3) },
+      ])
+        assert.equal(check(changes), null, JSON.stringify(changes));
+      assert.equal(check({}, { acceptV1: true }), "v2");
       assert.equal(
-        verifyIngest(secret, timestamp, signature, `${body} `, now),
-        false,
+        check({ signature: signature.slice(3) }, { acceptV1: true }),
+        null,
       );
       assert.equal(
-        verifyIngest(`${secret}x`, timestamp, signature, body, now),
-        false,
+        verifyIngest(`${secret}x`, { ...signed, signature }, { now }),
+        null,
       );
+      assert.equal(check({}, { now: now + INGEST_MAX_SKEW_MS + 1 }), null);
+    });
+
+    it("accepts a version 1 body-only signature only while allowed", () => {
+      const body = JSON.stringify(update()),
+        timestamp = String(now);
+      const signed = {
+        method: "POST",
+        path: ingestPath(id, "updates"),
+        timestamp,
+        body,
+        signature: signIngestV1(secret, timestamp, body),
+      };
+      assert.match(signed.signature, /^[a-f0-9]{64}$/);
+      assert.equal(verifyIngest(secret, signed, { now }), null);
+      assert.equal(verifyIngest(secret, signed, { now, acceptV1: true }), "v1");
       assert.equal(
         verifyIngest(
           secret,
-          timestamp,
-          signature,
-          body,
-          now + INGEST_MAX_SKEW_MS + 1,
+          { ...signed, body: `${body} ` },
+          { now, acceptV1: true },
         ),
-        false,
+        null,
       );
-      for (const [t, s] of [
-        [undefined, signature],
-        ["12", signature],
-        [timestamp, undefined],
-        [timestamp, "nothex"],
-      ])
-        assert.equal(verifyIngest(secret, t, s, body, now), false);
+      assert.equal(
+        verifyIngest(secret, signed, {
+          now: now + INGEST_MAX_SKEW_MS + 1,
+          acceptV1: true,
+        }),
+        null,
+      );
     });
   });
 }
 
 describe("transcription ingest routes", () => {
-  function app({ allow = () => true, ingest, session } = {}) {
-    const calls = [];
+  function app({
+    allow = () => true,
+    ingest,
+    session,
+    acceptV1Signatures,
+  } = {}) {
+    const calls = [],
+      warnings = [];
     const server = express();
+    // Stands in for pino-http's request logger.
+    server.use((request, _response, next) => {
+      request.log = { warn: (...args) => warnings.push(args) };
+      next();
+    });
     server.use(
       "/api/internal/transcription",
       express.raw({ type: "application/json", limit: "32kb" }),
@@ -159,24 +220,57 @@ describe("transcription ingest routes", () => {
             return session === undefined ? { debateId, jobId } : session;
           },
         },
+        outlines: {
+          async applyCleanup(debateId, value) {
+            calls.push(["cleanup", debateId, value]);
+            return { status: 201, body: { accepted: true } };
+          },
+        },
         secret,
         allow,
         now: () => now,
+        ...(acceptV1Signatures === undefined ? {} : { acceptV1Signatures }),
       }),
     );
-    return { server, calls };
+    return { server, calls, warnings };
   }
-  const post = (server, path, value, { sign = true, raw } = {}) => {
+  /**
+   * Posts to `endpoint` of `debateId`; signs with version 2 for that path,
+   * or for `signedFor`, or with version 1 when `v1` is set.
+   */
+  const post = (
+    server,
+    endpoint,
+    value,
+    { sign = true, raw, debateId = id, signedFor, v1 = false } = {},
+  ) => {
     const body = raw ?? JSON.stringify(value),
       timestamp = String(now);
+    const path = ingestPath(debateId, endpoint);
     const test = request(server)
-      .post(`/api/internal/transcription/debates/${id}/${path}`)
+      .post(path)
       .set("Content-Type", "application/json");
     if (sign)
-      test
-        .set(ingestHeaders.timestamp, timestamp)
-        .set(ingestHeaders.signature, signIngest(secret, timestamp, body));
+      test.set(ingestHeaders.timestamp, timestamp).set(
+        ingestHeaders.signature,
+        v1
+          ? signIngestV1(secret, timestamp, body)
+          : signIngest(secret, {
+              method: "POST",
+              path: signedFor ?? path,
+              timestamp,
+              body,
+            }),
+      );
     return test.send(body);
+  };
+  const cleanupBody = {
+    jobId: "AJ_1",
+    turnNumber: 1,
+    model: "claude-sonnet-5-5",
+    arguments: [
+      { id: null, label: "Label", points: [], rebuts: null, continues: null },
+    ],
   };
 
   it("accepts signed updates and passes parsed values to the repository", async () => {
@@ -229,6 +323,64 @@ describe("transcription ingest routes", () => {
     assert.equal(refused.status, 429);
     assert.equal(refused.headers["retry-after"], "1");
     assert.equal(calls.length, 0);
+  });
+
+  it("refuses a body signed for one debate or endpoint at any other (YA-11)", async () => {
+    const { server, calls } = app();
+    const bodies = {
+      updates: update(),
+      cleanup: cleanupBody,
+      session: { jobId: "AJ_1" },
+    };
+    for (const [endpoint, value] of Object.entries(bodies)) {
+      const signedFor = ingestPath(id, endpoint);
+      assert.equal(
+        (await post(server, endpoint, value, { debateId: otherId, signedFor }))
+          .status,
+        401,
+        `${endpoint} replayed to another debate`,
+      );
+      for (const target of Object.keys(bodies).filter((e) => e !== endpoint))
+        assert.equal(
+          (await post(server, target, value, { signedFor })).status,
+          401,
+          `${endpoint} replayed to ${target}`,
+        );
+    }
+    assert.equal(calls.length, 0);
+    // Each one is accepted where it was signed.
+    for (const [endpoint, value] of Object.entries(bodies))
+      assert.ok(
+        [200, 201].includes((await post(server, endpoint, value)).status),
+      );
+    assert.deepEqual(
+      calls.map(([kind, debateId]) => [kind, debateId]),
+      [
+        ["ingest", id],
+        ["cleanup", id],
+        ["session", id],
+      ],
+    );
+  });
+
+  it("accepts version 1 signatures during the rollout, logging them, until turned off", async () => {
+    const { server, calls, warnings } = app();
+    for (let attempt = 0; attempt < 2; attempt++)
+      assert.equal(
+        (await post(server, "updates", update(), { v1: true })).status,
+        200,
+      );
+    assert.equal(calls.length, 2);
+    assert.equal(warnings.length, 1, "at most once a minute");
+    assert.deepEqual(warnings[0][0], { debateId: id, endpoint: "updates" });
+    assert.equal((await post(server, "updates", update())).status, 200);
+    assert.equal(warnings.length, 1, "version 2 is not logged");
+    const strict = app({ acceptV1Signatures: false });
+    assert.equal(
+      (await post(strict.server, "updates", update(), { v1: true })).status,
+      401,
+    );
+    assert.equal((await post(strict.server, "updates", update())).status, 200);
   });
 
   it("returns the session state for a restarting job", async () => {

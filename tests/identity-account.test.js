@@ -36,6 +36,7 @@ function setup(overrides = {}) {
     },
     updateProfile: async (_userId, changes) => ({ ...owned, ...changes }),
     getRoles: async () => ["participant"],
+    restriction: async () => null,
     isHandleTaken: async (handle) => {
       calls.push(["isHandleTaken", handle]);
       return handle === "taken-name";
@@ -505,5 +506,114 @@ describe("readable account activity", () => {
       query: async () => ({ rows: [] }),
     });
     assert.equal(await none.isHandleTaken("maya-chen"), false);
+  });
+});
+
+describe("profile names and moderation restrictions", () => {
+  const claim = (session, fields) =>
+    session("post", "/api/me/profile").send({
+      handle: "maya-chen",
+      displayName: "Maya Chen",
+      acceptTerms: true,
+      ...fields,
+    });
+
+  it("refuses reserved handles and says so when checking one", async () => {
+    const { calls, session } = setup();
+    for (const handle of ["moderator", "admin", "yaparena", "yap-arena"]) {
+      const response = await claim(session, { handle });
+      assert.equal(response.status, 400);
+      assert.equal(response.body.field, "handle");
+      assert.match(response.body.error, /reserved/);
+      const check = await session("get", `/api/me/handles/${handle}`);
+      assert.deepEqual(check.body, {
+        handle,
+        available: false,
+        reason: "reserved",
+      });
+    }
+    assert.equal(calls.filter(([name]) => name === "createProfile").length, 0);
+    assert.equal(calls.filter(([name]) => name === "isHandleTaken").length, 0);
+  });
+
+  it("refuses hidden characters and staff names in usernames and bios", async () => {
+    const { calls, session } = setup();
+    for (const displayName of ["Maya\u0000", "YAP Arena Team‮", "Ma​ya"]) {
+      const response = await claim(session, { displayName });
+      assert.equal(response.status, 400);
+      assert.equal(response.body.field, "displayName");
+      assert.match(response.body.error, /hidden or control characters/);
+    }
+    for (const displayName of ["YAP Arena Team", "Official Moderator"]) {
+      const response = await claim(session, { displayName });
+      assert.equal(response.status, 400);
+      assert.match(response.body.error, /look like YAP Arena staff/);
+    }
+    const bio = await claim(session, { bio: "Hi\u0000there" });
+    assert.equal(bio.status, 400);
+    assert.equal(bio.body.field, "bio");
+    assert.equal(calls.filter(([name]) => name === "createProfile").length, 0);
+    // A bio keeps its line breaks, and a joined emoji is not a hidden character.
+    const saved = await claim(session, {
+      displayName: "Maya 🏳️‍🌈",
+      bio: "Line one\nLine two",
+    });
+    assert.equal(saved.status, 201);
+    for (const changes of [
+      { displayName: "Maya⁦" },
+      { displayName: "moderator" },
+      { bio: "‮reversed" },
+    ]) {
+      const patch = await session("patch", "/api/me/profile").send(changes);
+      assert.equal(patch.status, 400, JSON.stringify(changes));
+    }
+  });
+
+  it("leaves a username saved before these rules alone until it changes", async () => {
+    const { session } = setup({
+      getProfile: async () => ({ ...owned, displayName: "Staff Pick" }),
+    });
+    const kept = await session("patch", "/api/me/profile").send({
+      displayName: "Staff Pick",
+      bio: "New bio",
+    });
+    assert.equal(kept.status, 200);
+    const changed = await session("patch", "/api/me/profile").send({
+      displayName: "Staff Picks",
+    });
+    assert.equal(changed.status, 400);
+  });
+
+  it("refuses profile changes and follows while restricted, but allows going private", async () => {
+    const expiresAt = new Date("2026-11-09T00:00:00Z");
+    const { calls, session } = setup({
+      restriction: async () => ({ expiresAt }),
+    });
+    const refused = [
+      await claim(session, {}),
+      await session("patch", "/api/me/profile").send({ displayName: "New" }),
+      await session("patch", "/api/me/profile").send({ bio: "New bio" }),
+      await session("patch", "/api/me/profile").send({
+        publicationState: "published",
+      }),
+      await session("patch", "/api/me/profile").send({
+        publicationState: "draft",
+        bio: "Sneaky",
+      }),
+    ];
+    for (const response of refused) {
+      assert.equal(response.status, 403);
+      assert.equal(response.body.code, "account_restricted");
+      assert.equal(response.body.restrictedUntil, expiresAt.toISOString());
+    }
+    assert.ok(
+      !calls.some(([name]) =>
+        ["createProfile", "updateProfile"].includes(name),
+      ),
+    );
+    const privateProfile = await session("patch", "/api/me/profile").send({
+      publicationState: "draft",
+    });
+    assert.equal(privateProfile.status, 200);
   });
 });

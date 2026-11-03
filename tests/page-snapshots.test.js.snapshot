@@ -8128,7 +8128,7 @@ exports[`renders community moderation and the broadcast overlay 2`] = `
 <main id="main" class="container section">
 <section data-community-moderation>
 <h1>Moderation review</h1>
-<p>Review reports and appeals. Actions here affect community activity only.</p>
+<p>Review reports and appeals, and hide or restore public topics, profiles and debates.</p>
 <label>Case status <select data-community-case-filter>
 <option value="open">Open</option>
 <option value="actioned">Actioned</option>
@@ -8147,6 +8147,38 @@ exports[`renders community moderation and the broadcast overlay 2`] = `
 <h2>Open appeals</h2>
 <div data-community-appeals>
 </div>
+</section>
+<section>
+<h2>Content visibility</h2>
+<p>Hide a topic, profile or debate from public pages, or restore it. Someone else decides items you created, own or debated in.</p>
+<form class="community-inline-form" data-community-visibility>
+<label>Item <select name="targetType" required>
+<option value="topic">Topic (slug)</option>
+<option value="profile">Profile (handle)</option>
+<option value="debate">Debate (slug or ID)</option>
+</select>
+</label>
+<label>Slug, handle or ID <input name="target" required maxlength="100" autocomplete="off" spellcheck="false">
+</label>
+<label>Reason to hide <select name="reasonCode">
+<option value="">Choose a reason</option>
+<option value="harassment">harassment</option>
+<option value="hate">hate</option>
+<option value="threat">threat</option>
+<option value="spam">spam</option>
+<option value="privacy">privacy</option>
+<option value="other">other</option>
+</select>
+</label>
+<label>Review note <textarea name="note" required minlength="10" maxlength="500" rows="3">
+</textarea>
+</label>
+<button type="submit" value="hide">Hide from public pages</button>
+<button type="submit" value="restore">Restore</button>
+</form>
+<h3>Recent visibility changes</h3>
+<ol data-community-visibility-log>
+</ol>
 </section>
 </div>
 </section>
@@ -8442,7 +8474,7 @@ exports[`renders community moderation and the broadcast overlay 4`] = `
 <main id="main" class="container section">
 <section data-community-moderation>
 <h1>Moderation review</h1>
-<p>Review reports and appeals. Actions here affect community activity only.</p>
+<p>Review reports and appeals, and hide or restore public topics, profiles and debates.</p>
 <label>Case status <select data-community-case-filter>
 <option value="open">Open</option>
 <option value="actioned">Actioned</option>
@@ -8461,6 +8493,38 @@ exports[`renders community moderation and the broadcast overlay 4`] = `
 <h2>Open appeals</h2>
 <div data-community-appeals>
 </div>
+</section>
+<section>
+<h2>Content visibility</h2>
+<p>Hide a topic, profile or debate from public pages, or restore it. Someone else decides items you created, own or debated in.</p>
+<form class="community-inline-form" data-community-visibility>
+<label>Item <select name="targetType" required>
+<option value="topic">Topic (slug)</option>
+<option value="profile">Profile (handle)</option>
+<option value="debate">Debate (slug or ID)</option>
+</select>
+</label>
+<label>Slug, handle or ID <input name="target" required maxlength="100" autocomplete="off" spellcheck="false">
+</label>
+<label>Reason to hide <select name="reasonCode">
+<option value="">Choose a reason</option>
+<option value="harassment">harassment</option>
+<option value="hate">hate</option>
+<option value="threat">threat</option>
+<option value="spam">spam</option>
+<option value="privacy">privacy</option>
+<option value="other">other</option>
+</select>
+</label>
+<label>Review note <textarea name="note" required minlength="10" maxlength="500" rows="3">
+</textarea>
+</label>
+<button type="submit" value="hide">Hide from public pages</button>
+<button type="submit" value="restore">Restore</button>
+</form>
+<h3>Recent visibility changes</h3>
+<ol data-community-visibility-log>
+</ol>
 </section>
 </div>
 </section>

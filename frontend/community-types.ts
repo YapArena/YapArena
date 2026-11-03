@@ -99,3 +99,19 @@ export interface CommunityAppeal {
 export interface CaseDetail {
   history: { occurredAt: string; action: string; note?: string | null }[];
 }
+// A moderator's hide or restore of a topic, profile or debate (YA-07).
+export interface ContentVisibilityChange {
+  id: string;
+  targetType: "topic" | "profile" | "debate";
+  targetId: string;
+  // The item's slug or handle today, and its title or name; empty once it is deleted.
+  target: string | null;
+  label: string | null;
+  publicationState: string | null;
+  action: "hide" | "unhide";
+  fromState: string;
+  toState: string;
+  reasonCode: string | null;
+  note: string;
+  createdAt: string;
+}

@@ -2,10 +2,12 @@ import { Router, type Request, type Response } from "express";
 import {
   INGEST_MAX_BYTES,
   ingestHeaders,
+  ingestPath,
   parseOutlineCleanup,
   parseSessionRequest,
   parseTranscriptUpdate,
   verifyIngest,
+  type IngestEndpoint,
 } from "./protocol.ts";
 import type { createTranscriptionRepository } from "./repository.ts";
 import type { createOutlineRepository } from "../outline/repository.ts";
@@ -45,14 +47,16 @@ export function createDebateRateLimit({
 }
 
 // Private endpoints for the transcriber agent, authenticated by HMAC-SHA256
-// over "<timestamp>.<raw body>" with a dedicated secret. Mounted with a raw
-// body parser before JSON parsing, cookies and same-origin protection.
+// over the method, path, timestamp and raw body with a dedicated secret
+// (signature version 2, protocol.ts). Mounted with a raw body parser before
+// JSON parsing, cookies and same-origin protection.
 export function createTranscriptionIngestRouter({
   repository,
   outlines,
   secret,
   allow = createDebateRateLimit(),
   now = Date.now,
+  acceptV1Signatures = true,
 }: {
   repository: Pick<
     ReturnType<typeof createTranscriptionRepository>,
@@ -63,14 +67,24 @@ export function createTranscriptionIngestRouter({
   secret: string;
   allow?: (debateId: string) => boolean;
   now?: () => number;
+  /**
+   * YA-11 rollout: also accept version 1 (body-only) signatures from an agent
+   * deployed before version 2. Remove once every agent signs version 2.
+   */
+  acceptV1Signatures?: boolean;
 }) {
   const router = Router();
   router.use((_request, response, next) => {
     response.set("Cache-Control", "no-store");
     next();
   });
+  let warnedV1At = -Infinity;
   // Returns the parsed body, or answers the request and returns undefined.
-  function authenticated(request: Request, response: Response) {
+  function authenticated(
+    request: Request,
+    response: Response,
+    endpoint: IngestEndpoint,
+  ) {
     const id = request.params.id;
     if (typeof id !== "string" || !uuid.test(id)) {
       response.status(404).json({ error: "debate not found" });
@@ -82,17 +96,31 @@ export function createTranscriptionIngestRouter({
       return undefined;
     }
     const body = raw.toString("utf8");
-    if (
-      !verifyIngest(
-        secret,
-        request.get(ingestHeaders.timestamp),
-        request.get(ingestHeaders.signature),
+    // The path is rebuilt from the checked debate ID and this route's
+    // endpoint, so a signature binds the request to both.
+    const version = verifyIngest(
+      secret,
+      {
+        method: "POST",
+        path: ingestPath(id, endpoint),
+        timestamp: request.get(ingestHeaders.timestamp),
+        signature: request.get(ingestHeaders.signature),
         body,
-        now(),
-      )
-    ) {
+      },
+      { now: now(), acceptV1: acceptV1Signatures },
+    );
+    if (!version) {
       response.status(401).json({ error: "invalid signature" });
       return undefined;
+    }
+    if (version === "v1" && now() - warnedV1At >= 60_000) {
+      // At most once a minute: shows that an agent from an earlier release
+      // still signs, so the owner knows when version 1 can go.
+      warnedV1At = now();
+      request.log?.warn(
+        { debateId: id, endpoint },
+        "transcription ingest accepted a version 1 signature",
+      );
     }
     if (!allow(id)) {
       response.set("Retry-After", "1").status(429).json({ error: "slow down" });
@@ -106,7 +134,7 @@ export function createTranscriptionIngestRouter({
     }
   }
   router.post("/debates/:id/updates", async (request, response) => {
-    const input = authenticated(request, response);
+    const input = authenticated(request, response, "updates");
     if (!input) return;
     const update = parseTranscriptUpdate(input.value);
     if (!update)
@@ -115,7 +143,7 @@ export function createTranscriptionIngestRouter({
     return response.status(result.status).json(result.body);
   });
   router.post("/debates/:id/cleanup", async (request, response) => {
-    const input = authenticated(request, response);
+    const input = authenticated(request, response, "cleanup");
     if (!input) return;
     const cleanup = parseOutlineCleanup(input.value);
     if (!cleanup || !outlines)
@@ -124,7 +152,7 @@ export function createTranscriptionIngestRouter({
     return response.status(result.status).json(result.body);
   });
   router.post("/debates/:id/session", async (request, response) => {
-    const input = authenticated(request, response);
+    const input = authenticated(request, response, "session");
     if (!input) return;
     const session = parseSessionRequest(input.value);
     if (!session)

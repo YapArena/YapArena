@@ -186,8 +186,11 @@ turnDeadlineAt}` to room metadata, after permissions and best effort. The agent 
 - **Captions.** Interim (at most four a second) and final text on LiveKit's `lk.transcription` text
   stream, one stream per update with the speaker as sender. Browsers show one line under the video,
   toggleable; the choice is remembered per browser.
-- **Ingest** (`POST /api/internal/transcription/debates/:id/updates`): HMAC-SHA256 over
-  `timestamp.body`, at most 30 s of skew, 32 KB, ten updates per debate in a burst then five a second.
+- **Ingest** (`POST /api/internal/transcription/debates/:id/updates`): HMAC-SHA256 over the
+  method, the path (debate and endpoint), the timestamp and the body's SHA-256, sent as `v2=<hex>`
+  (signature version 2, audit YA-11; web accepts version 1 over `timestamp.body` only during the
+  rollout in `docs/production-rollout.md`), at most 30 s of skew, 32 KB, ten updates per debate in
+  a burst then five a second.
   One transaction: the debate is live and the turn current (or the turn that ended in the last 15 s,
   for its final flush), segment sides match the turn, the speaker consented. Each segment maps to
   its turn's window by spoken end time; speech after the cutoff has no window. Agent clock drift
@@ -231,12 +234,15 @@ Also behind `LIVE_OUTLINE_ENABLED`; the agent writes outlines only when it has a
   server-side refusal fallback). The cached prefix is the stable instructions, with French and
   English examples (over the model's 512-token cache minimum), then the proposition and
   debate-wide argument map; the current outline, new text and about 20 s of context follow
-  uncached. Each call logs latency and cache read and write tokens.
+  uncached. Each call logs latency and cache read and write tokens. The proposition, map,
+  outline and speech are untrusted, so each sits in its own tagged data section that it cannot
+  close (`prompt-data.ts`), and both prompts say that tagged text is data, never instructions
+  (audit YA-05).
 - **Ingest.** A transcript update may carry a proposal (`baseVersion`, `span`, `edits`, `model`).
   The ingest transaction resolves it under the debate's outline head lock: a stale base answers
   with the latest version and outline so the agent resynchronizes; edits that cannot apply, text
-  with French or English slurs or insults (`moderation.ts`), and an outline over 8 KB are
-  dropped. An accepted proposal becomes the next live version (`outline_versions`, contiguous per
+  with French or English slurs or insults, links, email addresses, phone numbers or control and
+  format characters (`moderation.ts`), and an outline over 8 KB are dropped. An accepted proposal becomes the next live version (`outline_versions`, contiguous per
   debate). Its segments are stored either way.
 - **Delivery.** The agent publishes each accepted version as `{v, type: "edits", debateId, version,
 turnNumber, side, language, edits}` on the reliable LiveKit topic `yap.outline.v1`. Browsers
@@ -274,7 +280,8 @@ behind `LIVE_OUTLINE_ENABLED` and the agent's `ANTHROPIC_API_KEY`.
   accepts one cleanup per window, until 60 s after the window froze (`not_frozen` makes the agent
   retry every 3 s, eight times). The server resolves it (`src/features/outline/cleanup.ts`): live
   IDs, spans and unchanged points are kept; new items are numbered above every live one; links
-  must name earlier arguments; slurs drop their item; 8 KB at most. It becomes the window's final
+  must name earlier arguments; text the ingest refuses (slurs, links, contact details, hidden
+  characters) drops its item; 8 KB at most. It becomes the window's final
   outline (`final_source='cleanup'`), and the agent publishes `{v, type: "final", debateId, turn}` on
   `yap.outline.v1`, which pages apply to that earlier turn. A window with no cleanup 60 s after its
   freeze keeps its frozen outline as final (`final_source='frozen'`, jobs loop). Finalizing sends the

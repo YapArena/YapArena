@@ -229,17 +229,6 @@ export function createWebServer(
           observe: (outcome) => metrics.redisOutcome.inc({ outcome }),
         })
       : undefined,
-    sharedAuthLimiter: sharedLimits
-      ? createSharedAbuseLimiter({
-          store: abuseStore,
-          namespace: abuseConfig.namespace,
-          secret: abuseConfig.keySecret,
-          scope: "auth",
-          limit: 120,
-          windowMs: 15 * 60 * 1_000,
-          observe: (outcome) => metrics.redisOutcome.inc({ outcome }),
-        })
-      : undefined,
   });
 
   if (coinDebates)
