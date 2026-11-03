@@ -36,6 +36,11 @@ speed; while any live turn window is in its final 15 seconds, when most answers
 arrive, at most 50 orders and 100 ms. Both the budget and the measured cost count
 only the time a batch spends settling once it holds its locks: waiting for them
 neither cuts the batch short nor shrinks the next ones.
+A round takes at most 1,001 orders. A submit counts the round's orders again after the
+ledger lock that serializes submits, and a database trigger refuses any order past
+capacity. A round that still holds more prices its earliest 1,001 orders by arrival;
+the later ones settle unfilled and are refunded, listed in the result's
+`overCapacity`, and the worker logs an error.
 A larger round settles over several batches: each prices the whole round the same
 way, from its complete and fixed set of orders, and settles the next orders by
 account; the last one reveals the round and sends the results notice. A later round
