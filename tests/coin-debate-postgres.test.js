@@ -1438,6 +1438,45 @@ describe(
       await a4.voidUnavailable(20, [debateId]);
       await reconcile();
     });
+    it("lists a debate's rounds only while the debate and its topic are published", async () => {
+      const creator = await actor(),
+        viewer = await actor();
+      const debateId = await debate();
+      await sandbox.initialize(creator);
+      const round = await a4.create(creator, debateId, randomUUID());
+      const listed = async () =>
+        (await a4.view(viewer, debateId)).map((r) => r.id);
+      assert.deepEqual(await listed(), [round.id]);
+      const topicId = (
+        await owner.query("SELECT topic_id FROM debates WHERE id=$1", [
+          debateId,
+        ])
+      ).rows[0].topic_id;
+      for (const [table, id] of [
+        ["debates", debateId],
+        ["topics", topicId],
+      ])
+        for (const state of ["draft", "hidden"]) {
+          await owner.query(
+            `UPDATE ${table} SET publication_state=$2 WHERE id=$1`,
+            [id, state],
+          );
+          try {
+            assert.deepEqual(await listed(), [], `${table} ${state}`);
+            assert.deepEqual(
+              await a4.view(creator, debateId),
+              [],
+              `${table} ${state}`,
+            );
+          } finally {
+            await owner.query(
+              `UPDATE ${table} SET publication_state='published' WHERE id=$1`,
+              [id],
+            );
+          }
+        }
+      assert.deepEqual(await listed(), [round.id]);
+    });
     it("signals and lists each participant's revealed and voided rounds (interface 10)", async () => {
       const listener = await owner.connect();
       const heard = [];

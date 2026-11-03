@@ -1537,7 +1537,9 @@ export function createCoinDebateSandbox(
       });
     },
     // A read: no round, account or ledger lock, so viewers refreshing at a
-    // window boundary never wait behind admissions or settlement.
+    // window boundary never wait behind admissions or settlement. Like
+    // publicWindows, it lists nothing unless the debate and its topic are
+    // published.
     async view(context: SandboxContext, debateId: string) {
       resource(debateId);
       return transaction(async (client) => {
@@ -1559,8 +1561,11 @@ export function createCoinDebateSandbox(
               ${replayable("r", "d", "c")} AS replayable,
               ${laterWindowJoined("r", "$3::bigint")} AS later
             FROM coin_debate_rounds r JOIN debates d ON d.id=r.debate_id
+            JOIN topics t ON t.id=d.topic_id
             LEFT JOIN recording_clocks c ON c.debate_id=r.debate_id
-            WHERE r.debate_id=$1 AND r.rail=$2 ORDER BY r.opens_at DESC,r.id LIMIT 20`,
+            WHERE r.debate_id=$1 AND r.rail=$2
+              AND d.publication_state='published' AND t.publication_state='published'
+            ORDER BY r.opens_at DESC,r.id LIMIT 20`,
             [debateId, rail, context.userId],
           )
         ).rows;
