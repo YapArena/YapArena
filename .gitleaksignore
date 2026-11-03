@@ -6,3 +6,5 @@
 5f5e4a9cd31f17dc06482606e5dd59d0da3d3514:docs/email-first-resume.md:generic-api-key:81
 # A descriptive idempotency key label in a testnet verifier.
 5f5e4a9cd31f17dc06482606e5dd59d0da3d3514:scripts/verify-coin-testnet-ledger.ts:generic-api-key:448
+# A synthetic admission secret in a configuration test.
+5814c1d1e67feb8f299d5f0c92461efffd68566d:tests/config.test.js:generic-api-key:878
