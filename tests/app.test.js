@@ -156,6 +156,41 @@ describe("yaparena API", () => {
     assert.equal(await webhook("forged"), 429);
   });
 
+  it("answers malformed requests as client errors, not server failures", async () => {
+    // YA-13: an oversized body, an unsupported charset and a JSON cookie.
+    const tooLarge = await request(app)
+      .post("/api/unknown")
+      .set("Content-Type", "application/json")
+      .send(JSON.stringify({ name: "x".repeat(20_000) }));
+    assert.equal(tooLarge.status, 413);
+    assert.deepEqual(tooLarge.body, { error: "request body is too large" });
+    const charset = await request(app)
+      .post("/api/unknown")
+      .set("Content-Type", "application/json; charset=latin1")
+      .send("{}");
+    assert.equal(charset.status, 415);
+    assert.deepEqual(charset.body, { error: "request was not accepted" });
+    const streamApp = createApp({
+      messages,
+      users,
+      sessions,
+      logger,
+      userStreams: {
+        subscribe(_userId, response) {
+          response.status(204).end();
+        },
+      },
+    });
+    const jsonCookie = await request(streamApp)
+      .get("/api/me/stream")
+      .set("Cookie", 'session=j:{"a":1}');
+    assert.equal(jsonCookie.status, 401);
+    const plain = await request(streamApp)
+      .get("/api/me/stream")
+      .set("Cookie", "session=test-token");
+    assert.equal(plain.status, 204);
+  });
+
   it("allows only configured media origins in the browser policy", async () => {
     const mediaProvider = {
       publicUrl: "ws://localhost:7880",

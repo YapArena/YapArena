@@ -245,10 +245,14 @@ export function createHttpLogger(logger: Logger) {
       },
     },
     genReqId(request, response) {
+      // A client's id is kept only when it is short and plain, since it goes
+      // into logs and audit metadata (YA-13).
       const incomingId = request.headers["x-request-id"];
-      const requestId = Array.isArray(incomingId)
-        ? (incomingId[0] ?? randomUUID())
-        : incomingId || randomUUID();
+      const candidate = Array.isArray(incomingId) ? incomingId[0] : incomingId;
+      const requestId =
+        candidate && /^[A-Za-z0-9._:-]{1,64}$/.test(candidate)
+          ? candidate
+          : randomUUID();
 
       response.setHeader("X-Request-Id", requestId);
       return requestId;

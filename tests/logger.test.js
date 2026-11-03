@@ -408,6 +408,33 @@ function credentialError(signature = "synthetic-wallet-signature") {
 }
 
 describe("credential-safe HTTP logs", () => {
+  it("keeps only short plain request ids and logs a refused body as a warning (YA-13)", async () => {
+    const { app, capture } = fixture();
+    for (const unsafe of ["a".repeat(65), "<script>", "id with spaces"]) {
+      const response = await request(app)
+        .get("/health")
+        .set("X-Request-Id", unsafe);
+      assert.match(
+        response.headers["x-request-id"],
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+      );
+    }
+    const requestId = "body-too-large-warning";
+    const response = await request(app)
+      .post("/api/unknown")
+      .set("X-Request-Id", requestId)
+      .set("Content-Type", "application/json")
+      .send(JSON.stringify({ a: "x".repeat(20_000) }));
+    assert.equal(response.status, 413);
+    assert.equal(response.headers["x-request-id"], requestId);
+    await capture.completion(requestId, 413, 40);
+    assert.equal(
+      capture.records.some(
+        (record) => record.msg === "unhandled request error",
+      ),
+      false,
+    );
+  });
   it("omits account OAuth query credentials from HTTP completion logs", async () => {
     const { app, capture } = fixture();
     const requestId = "logger-oauth-return";
