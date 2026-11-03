@@ -7,6 +7,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Version updates wait a week after a release, so a compromised release is more
+    # likely to be caught and pulled first. Security updates are not delayed.
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
     groups:
       npm-minor-and-patch:
@@ -17,10 +21,16 @@ updates:
       - dependency-name: "@types/node"
         versions: [">=25"]
 
+  # Both Dockerfiles pin node:24-bookworm-slim by digest; each new digest of that tag
+  # arrives as a pull request.
   - package-ecosystem: docker
-    directory: /
+    directories: ["/", "/deploy/transcriber"]
     schedule:
       interval: weekly
+    # Version updates wait a week after a release, so a compromised release is more
+    # likely to be caught and pulled first. Security updates are not delayed.
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
     groups:
       docker-minor-and-patch:
@@ -32,6 +42,10 @@ updates:
     directories: ["/", "/.github/actions/*"]
     schedule:
       interval: weekly
+    # Version updates wait a week after a release, so a compromised release is more
+    # likely to be caught and pulled first. Security updates are not delayed.
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
     groups:
       github-actions-minor-and-patch:

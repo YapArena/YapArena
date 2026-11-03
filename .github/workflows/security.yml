@@ -1,0 +1,93 @@
+name: Security
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  merge_group:
+  # Weekly on main, so a new advisory or CodeQL query reaches unchanged code too.
+  schedule:
+    - cron: "23 6 * * 1"
+
+permissions:
+  contents: read
+
+# Same grouping as CI: a new push to a pull request cancels its older run.
+concurrency:
+  group: security-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # npm's advisory database against the lockfile; nothing is installed. The production tree
+  # fails on high or critical advisories. The full tree adds build and test tools and the
+  # transcriber agent's packages, and fails on critical ones.
+  dependency-audit:
+    name: "security: dependency audit"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "24"
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Audit all dependencies
+        run: npm audit --audit-level=critical
+
+  # gitleaks over every commit in this change's history. .gitleaks.toml and .gitleaksignore
+  # list the reviewed false positives; --redact keeps any value out of the log.
+  secret-scan:
+    name: "security: secret scan"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download repository with its history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Scan the history for secrets
+        run: >-
+          docker run --rm
+          --volume "${GITHUB_WORKSPACE}:/repo:ro"
+          ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+          git --redact --no-banner --exit-code 1 --log-opts=HEAD
+          --config /repo/.gitleaks.toml --gitleaks-ignore-path /repo/.gitleaksignore
+          /repo
+
+  # Static analysis of the TypeScript and JavaScript sources. Results go to the repository's
+  # code scanning alerts; pull requests get a "CodeQL" check that reports new alerts.
+  codeql:
+    name: "security: CodeQL"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Download repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+        with:
+          languages: javascript-typescript
+          build-mode: none
+          config-file: ./.github/codeql/codeql-config.yml
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+        with:
+          category: /language:javascript-typescript

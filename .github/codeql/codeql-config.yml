@@ -1,0 +1,8 @@
+# CodeQL code scanning (the Security workflow). The default query suite runs on
+# every handwritten TypeScript and JavaScript source in the repository. Served
+# browser JavaScript under public/ is build output and is not committed.
+name: YapArena CodeQL
+
+paths-ignore:
+  # Documentation and committed evidence only.
+  - docs

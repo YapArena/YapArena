@@ -41,7 +41,9 @@ jobs:
 
     steps:
       - name: Download repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Prepare image metadata
         id: metadata
@@ -89,9 +91,9 @@ jobs:
           image="ghcr.io/$(printf '%s' "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')${suffix}"
           {
             echo "name=${image}"
-            # Shared with the CI container job, which builds the same image first on main.
+            # Only publication reads and writes this scope; test jobs cache under image-*.
             # A new scope each UTC day reruns the base image's apt-get upgrade at least daily.
-            echo "cache-scope=image-${VARIANT}-$(date -u +%Y%m%d)"
+            echo "cache-scope=publish-${VARIANT}-$(date -u +%Y%m%d)"
             echo "media-worker-tools=${media_worker_tools}"
             echo "first-tag=${tag_list[0]}"
             echo "tags<<EOF"

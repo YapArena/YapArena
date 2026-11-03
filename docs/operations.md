@@ -172,10 +172,12 @@ CI keeps two caches. Both are speed-ups only: a miss is slower, never less teste
 
 - **Docker layers.** The `container` job builds the web and encoder images with the GitHub
   Actions cache, scopes `image-web-YYYYMMDD` and `image-encoder-YYYYMMDD` (UTC day). The
-  Compose-stack integration job reads the web scope, and the main-only `publish` job reads and
-  writes the same scopes. A new scope each day reruns the base image's `apt-get upgrade` at
-  least daily, so the Trivy scans see current Debian fixes. The first run of a day therefore
-  builds cold and takes several minutes longer.
+  Compose-stack integration job reads the web scope. The main-only `publish` job and releases use
+  their own scopes, `publish-web-YYYYMMDD` and `publish-encoder-YYYYMMDD`, which test jobs never
+  read or write. A new scope each day reruns the base image's
+  `apt-get upgrade` at least daily, so the Trivy scans see current Debian fixes. The first run of
+  a day therefore builds cold and takes several minutes longer, and the first publication of a
+  day builds without any cache.
 - **apt packages.** `.github/actions/apt-packages` saves the `.deb` files for FFmpeg and
   PostgreSQL 17 under a key made of the runner image version and the package list, and
   installs them from that cache when they match. Otherwise it downloads them with retries, and
@@ -184,8 +186,9 @@ CI keeps two caches. Both are speed-ups only: a miss is slower, never less teste
 GitHub scopes caches by branch: a pull request reads its own caches and main's, and caches
 written by a pull request never reach main or another pull request. If a failure might come from
 a cache, rerun the job first. To discard one, list it with
-`gh cache list --repo YapArena/YapArena --key apt-` (apt packages) or `--key index-image-` (one
-entry per Docker scope; the `buildkit-blob-` entries are shared layer data), then remove it with
+`gh cache list --repo YapArena/YapArena --key apt-` (apt packages), `--key index-image-` or
+`--key index-publish-` (one entry per Docker scope; the `buildkit-blob-` entries are shared layer
+data), then remove it with
 `gh cache delete <id>`. The next run rebuilds it.
 
 ## Account credential and session incidents

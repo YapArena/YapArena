@@ -1,0 +1,17 @@
+# Secret scanning (gitleaks), run by the Security workflow over the history of
+# every change. It extends gitleaks' default rules; .gitleaksignore lists single
+# reviewed findings.
+
+[extend]
+useDefault = true
+
+# Committed evidence records SHA-256 digests of source files, images and test
+# runs, and public testnet contract addresses. Both look like API keys to the
+# generic rule but are not secrets. Only values of exactly those shapes under
+# docs/evidence/ are allowed; anything else there is still reported.
+[[allowlists]]
+description = "SHA-256 digests and public addresses in committed evidence"
+condition = "AND"
+regexTarget = "secret"
+paths = ['''^docs/evidence/''']
+regexes = ['''^[0-9a-f]{64}$''', '''^0x[0-9a-fA-F]{40}$''']

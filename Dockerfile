@@ -1,26 +1,28 @@
  # syntax=docker/dockerfile:1
 
-  FROM node:24-bookworm-slim AS base
-  RUN apt-get update && apt-get upgrade -y && \
-      rm -rf /var/lib/apt/lists/*
-  WORKDIR /app
+# Pinned by digest; Dependabot proposes each new digest of this tag.
+FROM node:24-bookworm-slim@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c AS base
+RUN apt-get update && apt-get upgrade -y && \
+    rm -rf /var/lib/apt/lists/*
+WORKDIR /app
 
-  FROM base AS development
-  COPY package.json package-lock.json ./
-  RUN npm ci
-  COPY . .
-  CMD ["npm", "run", "dev"]
+FROM base AS development
+# .npmrc makes npm refuse dependency install scripts that allowScripts hasn't reviewed.
+COPY package.json package-lock.json .npmrc ./
+RUN npm ci
+COPY . .
+CMD ["npm", "run", "dev"]
 
-  FROM development AS test
-  RUN npm run check
+FROM development AS test
+RUN npm run check
 
-  FROM development AS build
-  RUN npm run build
+FROM development AS build
+RUN npm run build
 
-  FROM base AS production-dependencies
-  ENV NODE_ENV=production
-  COPY package.json package-lock.json ./
-  RUN npm ci --omit=dev && npm cache clean --force
+FROM base AS production-dependencies
+ENV NODE_ENV=production
+COPY package.json package-lock.json .npmrc ./
+RUN npm ci --omit=dev && npm cache clean --force
 
 FROM base AS production
 ARG MEDIA_WORKER_TOOLS=false
@@ -50,6 +52,6 @@ COPY --chown=node:node scripts/provision-database.ts ./scripts/provision-databas
 COPY --chown=node:node scripts/check-media-storage.js ./scripts/check-media-storage.js
 COPY --from=build --chown=node:node /app/public ./public
 COPY --from=build --chown=node:node /app/dist ./dist
-  USER node
-  EXPOSE 3000
-  CMD ["node", "dist/server.js"]
+USER node
+EXPOSE 3000
+CMD ["node", "dist/server.js"]

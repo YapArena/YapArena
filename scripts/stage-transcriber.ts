@@ -4,8 +4,8 @@ import { fileURLToPath } from "node:url";
 
 // Decision 0012: prepares the build context for `lk agent deploy`. LiveKit
 // Cloud builds the directory it is given, so it receives only the agent's
-// sources, the TypeScript projects, the root manifest and lockfile and the
-// agent Dockerfile. An existing livekit.toml (written by `lk agent create`) is
+// sources, the TypeScript projects, the root manifest, lockfile and .npmrc and
+// the agent Dockerfile. An existing livekit.toml (written by `lk agent create`) is
 // kept; everything else in the directory is replaced.
 //
 //   node scripts/stage-transcriber.ts ../yaparena-transcriber-deploy
@@ -23,6 +23,7 @@ const files: [string, string][] = [
   ["deploy/transcriber/Dockerfile", "Dockerfile"],
   ["package.json", "package.json"],
   ["package-lock.json", "package-lock.json"],
+  [".npmrc", ".npmrc"],
   ["tsconfig.json", "tsconfig.json"],
   ["tsconfig.transcriber.json", "tsconfig.transcriber.json"],
   [
