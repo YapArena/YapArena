@@ -29,7 +29,11 @@ button next to Enlarge hides it.
 A frame over each debater's video lights up while they have the floor and shows their name and
 @handle on hover. The right rail holds the answer panel and, under it, a panel of tabs: the AI
 outline (argument cards that open to their points and rebuttals), Results ("Results by turn") and
-"About this debate"; below 1200 px or on a smaller video chat joins them as a tab. From 960 to 1199 px the rail narrows
+"About this debate"; below 1200 px or on a smaller video chat joins them as a tab. On a replay (Decision 0013's 2026-11-02 amendment), a timeline
+split into turns sits under the video (`frontend/replay-timeline.ts`) and Results by turn under
+the scoreboard instead of in the tabs; choosing a turn in either plays the replay from its start
+(`frontend/replay-seek.ts` sets the replay video's position, or presses Play replay first). From
+960 to 1199 px the rail narrows
 to 340 px. Below 960 px the page is one column that scrolls: stage, answer panel, then the tabs.
 On phones the video is full-bleed and the answer panel is a bar pinned to the bottom of the screen
 that opens into a sheet when Yes or No is picked. The question appears in the video's top-left
@@ -63,10 +67,14 @@ there.
 - Header search submits to the existing published-debate search. Navigation opens
   actual discovery/matching/account routes. The header shows the Yap Coins balance
   from authenticated runtime data.
-- Once a debate has revealed Yap Coins turn windows (Decision 0013, item d), the chart
-  shows them instead of the bot history: one point per settled window with its share,
-  drawn price and medians. Locked, open and voided windows never appear; every revealed
-  window shows its results, whatever its size (founder). The windows come from the betting
+- A debate with Yap Coins turn windows (Decision 0013, item d) shows Results by turn
+  (`frontend/turn-results.ts`, rules in `frontend/turn-results-model.ts`), once a window
+  is revealed or straight away without bot history: one bar per turn around a 50% line,
+  rising for a yes majority and dropping for a no majority. Only revealed windows show a
+  share; locked and open turns are empty columns, a voided turn says so, and every
+  revealed window shows its results, whatever its size (founder). Live and upcoming
+  debates get a column for every turn of the debate. The drawn price and medians are in
+  the "Price and typical limits" disclosure under the bars (the price inspector). The windows come from the betting
   panel's read of the public `GET /api/public/debates/:id/windows` list, whose `pricing` is
   null until a window is revealed (#128), through a `yap:stake-windows` page event, so the
   chart makes no second read and signed-out viewers see the same results. Labels follow

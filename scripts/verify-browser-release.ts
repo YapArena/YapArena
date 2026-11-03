@@ -197,6 +197,11 @@ try {
     process.execPath,
     ["scripts/verify-outline-browser.ts"],
   );
+  await run(
+    "Replay turn timeline and Results by turn with synthetic playback",
+    process.execPath,
+    ["scripts/verify-replay-timeline-browser.ts"],
+  );
   assert.equal(interrupted, false, "verification interrupted");
   console.log(`Browser release gate PASS. Synthetic evidence: ${directory}`);
 } catch (error) {

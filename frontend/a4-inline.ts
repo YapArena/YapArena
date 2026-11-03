@@ -1,15 +1,28 @@
-// The debate page's chart (Decision 0013). It shows revealed Yap Coins turn
-// windows once a debate has any (item d), labelled from each turn's final AI
-// outline; otherwise the public bot history: the shared synthetic activity
-// chart, price inspector, sentiment and argument endorsements. Bots mode
-// itself (runs, commitments, receipts) lives on /coins; this module reads
-// only public, already revealed aggregates.
+// The debate page's chart (Decision 0013). A debate with Yap Coins turn
+// windows shows "Results by turn": one bar per turn, filled in as each
+// window is revealed (item d), labelled from each turn's final AI outline
+// (direction BC1's replay board). Otherwise, with Bots mode on, it shows the
+// public bot history: the shared synthetic activity chart, price inspector,
+// sentiment and argument endorsements. Bots mode itself (runs, commitments,
+// receipts) lives on /coins; this module reads only public, already
+// revealed aggregates.
 import type { OutlineTimeline } from "../src/features/outline/public-types.ts";
 import type { RoundPoint, SharedActivity, Timeline } from "./arena-types.js";
 /* global document, window */
 import { createRoundChart, sharePercent } from "./arena-chart.js";
 import { createPriceInspector } from "./arena-price.js";
 import { watchRoom } from "./community-stream.js";
+import { seekReplay } from "./replay-seek.js";
+import { createTurnBars } from "./turn-results.js";
+import {
+  isTurnWindow,
+  latestRevealed,
+  playingAt,
+  revealNote,
+  turnColumns,
+  type Names,
+  type TurnColumn,
+} from "./turn-results-model.js";
 import {
   pointsRevision,
   windowPoints,
@@ -57,13 +70,67 @@ if (root) {
     sharedSelected = item.id;
     renderShared();
   };
+  const status = root.dataset.debateStatus;
+  const replay = status === "replay" || status === "finalized";
+  const total = Number(root.dataset.turnCount) || null;
+  const panel = root.querySelector<HTMLElement>("[data-stake-panel]");
+  const names: Names = {
+    A: panel?.dataset.speakerA ?? "Speaker A",
+    B: panel?.dataset.speakerB ?? "Speaker B",
+  };
+  // The bot history's line chart renders only with Bots mode on.
+  const lineChart = root.querySelector<HTMLElement>("[data-line-chart]");
+  const plot = root.querySelector<HTMLElement>(".arena-chart-plot");
+  const turnEmpty = root.querySelector<HTMLElement>("[data-turn-empty]");
+  const priceDetails = root.querySelector<HTMLElement>("[data-price-details]");
+  const inspector = root.querySelector<HTMLElement>(".arena-price-inspector");
+  let mode: "bars" | "line" | "empty" = lineChart ? "line" : "empty";
+  let columns: TurnColumn[] = [];
+  let selectedTurn: number | null = null;
+  let position: number | null = null;
+  let playingTurn: number | null = null;
+  const bars = createTurnBars(root, (column) => {
+    selectedTurn = column.turnNumber;
+    renderShared();
+    // On a replay, choosing a turn plays it.
+    if (replay && column.recording) seekReplay(column.recording.startSeconds);
+  });
   const prices = createPriceInspector(root, (item) => {
-    chart.preview(item.id);
+    if (mode === "bars") {
+      selectedTurn = item.number;
+      renderShared();
+      return;
+    }
+    chart?.preview(item.id);
     selectRound(item);
   });
-  const chart = createRoundChart(root, selectRound, (point) => {
-    prices.show(point ?? defaultPrice);
-  });
+  const chart = plot
+    ? createRoundChart(root, selectRound, (point) => {
+        prices.show(point ?? defaultPrice);
+      })
+    : null;
+  // The price inspector sits under the line chart's plot, or in a
+  // disclosure under the bars.
+  function setMode(next: typeof mode) {
+    mode = next;
+    if (lineChart) lineChart.hidden = next === "bars";
+    if (turnEmpty) turnEmpty.hidden = next !== "empty" || Boolean(lineChart);
+    if (next !== "bars") {
+      bars.hide();
+      columns = [];
+      playingTurn = null;
+    }
+    if (inspector && priceDetails) {
+      if (next === "bars") {
+        if (inspector.parentElement !== priceDetails)
+          priceDetails.append(inspector);
+      } else {
+        if (plot && inspector.previousElementSibling !== plot)
+          plot.after(inspector);
+        priceDetails.hidden = true;
+      }
+    }
+  }
   function renderSentiment(point: RoundPoint, caption: string, kind: string) {
     const pct = sharePercent(point.share);
     ui("yes").textContent = pct === null ? "—" : pct.toFixed(1) + "%";
@@ -78,8 +145,28 @@ if (root) {
     );
     ui("sentiment-bar").style.setProperty("--yes-share", (pct ?? 0) + "%");
   }
-  // Item d: revealed turn windows replace the bot history on this chart.
-  function renderWindows(points: RoundPoint[]) {
+  // Item d: the turn windows replace the bot history on this chart once one
+  // is revealed, or straight away without bot history. Each turn is a bar;
+  // only revealed turns show a result.
+  function renderTurns(points: RoundPoint[]) {
+    const turnWindows = windows.filter(isTurnWindow);
+    setMode("bars");
+    columns = turnColumns(turnWindows, timeline, total, !replay);
+    if (!columns.some((column) => column.turnNumber === selectedTurn))
+      selectedTurn = null;
+    const selected = selectedTurn ?? latestRevealed(columns);
+    playingTurn = replay ? playingAt(columns, position) : null;
+    bars.render({
+      columns,
+      names,
+      selected,
+      playing: playingTurn,
+      note: revealNote(turnWindows, Date.now()),
+    });
+    root.querySelector<HTMLElement>("[data-shared-arguments]")!.hidden = true;
+    if (volume) volume.hidden = true;
+    if (priceDetails) priceDetails.hidden = !points.length;
+    if (!points.length) return;
     const latest = points.at(-1)!;
     const data: Timeline = {
       revision: `windows:${pointsRevision(points)}`,
@@ -88,24 +175,22 @@ if (root) {
       totals: { premium: "0", humanCommitments: 0, botCommitments: 0 },
     };
     defaultPrice = latest;
-    root.querySelector<HTMLElement>("[data-shared-arguments]")!.hidden = true;
-    if (volume) volume.hidden = true;
     prices.update(data);
-    chart.render(data, sharedSelected);
+    prices.show(points.find((point) => point.number === selected) ?? null);
     ui("scope").textContent = "Yap Coins · revealed turn windows";
-    ui("sync").textContent =
-      "● Revealed results · updates when a turn's results are revealed";
     renderSentiment(latest, `Yap Coins · turn ${latest.number}`, "Revealed");
-    ui("round-label").textContent = `Turn ${latest.number}`;
-    ui("round-state").textContent = "revealed";
-    ui("countdown").textContent = "Revealed Yap Coins results";
   }
   function renderShared() {
     const revealed = windowPoints(windows, timeline);
-    if (revealed.length) return renderWindows(revealed);
+    if (
+      revealed.length ||
+      (!shared?.items.length && windows.some(isTurnWindow))
+    )
+      return renderTurns(revealed);
+    setMode(lineChart ? "line" : "empty");
     const args = root.querySelector<HTMLElement>("[data-shared-arguments]")!;
     args.hidden = !shared?.arguments.length;
-    if (!shared?.items.length) return;
+    if (!shared?.items.length || !chart) return;
     if (volume) volume.hidden = false;
     defaultPrice = shared.items.at(-1);
     prices.update(shared);
@@ -176,6 +261,13 @@ if (root) {
       void loadTimeline();
     renderShared();
   });
+  // The replay's playing turn is outlined in Results by turn.
+  window.addEventListener("yap:playback", (event) => {
+    if (event.detail.debateId !== debateId || !replay) return;
+    position = event.detail.positionSeconds;
+    if (mode === "bars" && playingAt(columns, position) !== playingTurn)
+      renderShared();
+  });
   async function loadShared() {
     if (
       !botHistory ||
@@ -197,7 +289,7 @@ if (root) {
         shared = null;
         root.querySelector<HTMLElement>("[data-shared-arguments]")!.hidden =
           true;
-        if (had) {
+        if (had && chart) {
           chart.clear("Shared history is unavailable.");
           prices.clear();
           ui("volume").textContent = "— Yap Coins";

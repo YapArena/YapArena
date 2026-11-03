@@ -2842,6 +2842,304 @@ textarea::placeholder {
   min-height: 24px;
   line-height: 24px;
 }
+
+/* The replay's timeline under the video (direction BC1's replay board): one
+   segment per turn, white as it plays, a thumb on the playing turn. Each
+   segment is a 44px target around a 6px track. Its space is kept while the
+   turns load, so the video doesn't move. */
+.arena-page .arena-timeline {
+  --track: #262626;
+  margin-top: var(--space-2);
+}
+.arena-page .arena-timeline[data-waiting] {
+  visibility: hidden;
+}
+.arena-page .arena-timeline-list {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: var(--space-1);
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.arena-page .arena-workspace .arena-timeline-turn button {
+  display: grid;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  cursor: pointer;
+}
+.arena-page .arena-workspace .arena-timeline-turn button:disabled {
+  cursor: default;
+}
+.arena-page .arena-timeline-track {
+  position: relative;
+  display: block;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(
+    90deg,
+    var(--acid) calc(var(--progress, 0) * 100%),
+    var(--track) 0
+  );
+}
+.arena-page .arena-timeline-turn button:not(:disabled):hover {
+  --track: #383838;
+}
+.arena-page .arena-timeline-thumb {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--progress, 0) * 100%);
+  display: none;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  background: var(--acid);
+  box-shadow: 0 0 0 4px var(--bg);
+}
+.arena-page .arena-timeline-turn[data-playing] .arena-timeline-thumb {
+  display: block;
+}
+
+/* Results by turn (the replay board): a bar per turn around a dashed 50%
+   line, rising for a yes majority and dropping for a no majority. The chosen
+   turn is filled, the playing one outlined. Each column is 184px: the line
+   sits 88px down, with 56px of bar room each way and the value beyond. */
+.arena-page .arena-watch > .arena-results {
+  margin-top: var(--space-6);
+}
+.arena-page .arena-results-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-4);
+}
+.arena-page .arena-workspace .arena-results-head h2 {
+  margin: 0;
+  font-size: var(--text-16);
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+.arena-page .arena-results-sub {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 20px;
+}
+/* Two lines at most, kept even when shorter, so the bars stay put as the
+   caption changes. */
+.arena-page .arena-turn-caption {
+  display: -webkit-box;
+  min-height: 48px;
+  margin: var(--space-3) 0 0;
+  overflow: hidden;
+  font-size: 0.9375rem;
+  line-height: 24px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.arena-page .arena-turn-caption:empty {
+  display: none;
+}
+.arena-page
+  :is(
+    .arena-turn-caption-lead,
+    .arena-turn-caption-result,
+    .arena-turn-caption-note
+  ) {
+  color: var(--muted);
+}
+.arena-page .arena-turn-caption-lead::after {
+  content: " ·";
+}
+.arena-page .arena-turn-caption-label {
+  color: var(--text);
+}
+.arena-page .arena-turn-caption-label::after {
+  content: " ·";
+  color: var(--muted);
+  font-weight: 400;
+}
+.arena-page .arena-turns {
+  container: turns / inline-size;
+  position: relative;
+  margin-top: var(--space-2);
+  padding-right: var(--space-7);
+}
+.arena-page .arena-turns::before {
+  content: "";
+  position: absolute;
+  top: 88px;
+  right: 0;
+  left: 0;
+  border-top: 1px dashed var(--control-border);
+}
+.arena-page .arena-turns-even {
+  position: absolute;
+  top: 68px;
+  right: 0;
+  color: var(--muted);
+  font-size: var(--text-12);
+  line-height: 16px;
+}
+.arena-page .arena-turns-list {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.arena-page .arena-workspace .arena-turn-bar button {
+  display: grid;
+  gap: var(--space-1);
+  width: 100%;
+  min-height: 0;
+  padding: 0 0 var(--space-1);
+  border: 0;
+  border-radius: var(--radius-inner);
+  background: none;
+  color: var(--muted);
+  font: 400 var(--text-12) / 16px var(--font-body);
+  cursor: pointer;
+}
+.arena-page .arena-turn-bar-plot {
+  position: relative;
+  display: block;
+  height: 184px;
+  border-radius: var(--radius-inner);
+}
+.arena-page .arena-turn-bar button:hover .arena-turn-bar-plot {
+  background: rgb(255 255 255 / 4%);
+}
+.arena-page .arena-turn-bar[data-selected] .arena-turn-bar-plot {
+  background: var(--raised);
+}
+.arena-page .arena-turn-bar[data-playing] .arena-turn-bar-plot {
+  box-shadow: inset 0 0 0 1px var(--control-border);
+}
+.arena-page .arena-turn-bar-fill {
+  position: absolute;
+  left: 50%;
+  width: min(32px, 70%);
+  height: var(--bar-size, 2px);
+  border-radius: 4px;
+  transform: translateX(-50%);
+}
+.arena-page .arena-turn-bar[data-direction="up"] .arena-turn-bar-fill {
+  bottom: 96px;
+  background: var(--answer-yes);
+}
+.arena-page .arena-turn-bar[data-direction="down"] .arena-turn-bar-fill {
+  top: 88px;
+  background: var(--answer-no);
+}
+.arena-page .arena-turn-bar[data-direction="even"] .arena-turn-bar-fill {
+  top: 87px;
+  background: var(--muted);
+}
+.arena-page .arena-turn-bar-value {
+  position: absolute;
+  top: 78px;
+  right: 0;
+  left: 0;
+  color: var(--muted);
+  font: 400 1.125rem / 20px var(--font-number);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.arena-page .arena-turn-bar[data-direction] .arena-turn-bar-value {
+  color: var(--text);
+}
+.arena-page .arena-turn-bar[data-direction="up"] .arena-turn-bar-value,
+.arena-page .arena-turn-bar[data-direction="even"] .arena-turn-bar-value {
+  top: auto;
+  bottom: calc(96px + var(--bar-size, 2px) + var(--space-1));
+}
+.arena-page .arena-turn-bar[data-direction="down"] .arena-turn-bar-value {
+  top: calc(88px + var(--bar-size, 2px) + var(--space-1));
+}
+/* Room for the turn, the name and "playing", so the chart keeps its height
+   when playback starts. */
+.arena-page .arena-turn-bar-who {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  min-height: 48px;
+}
+.arena-page .arena-turn-bar-number {
+  color: var(--button-text);
+  font-size: 0.8125rem;
+}
+.arena-page .arena-turn-bar[data-selected] .arena-turn-bar-number {
+  color: var(--text);
+}
+.arena-page .arena-turn-bar-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.arena-page :is(.arena-turn-bar-playing, .arena-turn-bar-initials) {
+  display: none;
+}
+.arena-page .arena-turn-bar[data-playing] .arena-turn-bar-playing {
+  display: block;
+}
+/* Narrow charts (the rail panel, phones): smaller values, and the playing
+   turn shown by its outline alone (its name says so to screen readers). */
+@container turns (max-width: 36rem) {
+  .arena-page .arena-turn-bar-value {
+    font-size: var(--text-14);
+  }
+  .arena-page .arena-turn-bar[data-playing] .arena-turn-bar-playing,
+  .arena-page .arena-turn-bar-name {
+    display: none;
+  }
+  .arena-page .arena-turn-bar-initials {
+    display: block;
+  }
+  .arena-page .arena-turn-bar-who {
+    min-height: 32px;
+  }
+}
+.arena-page .arena-turns-empty {
+  margin: var(--space-4) 0 0;
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+/* The price inspector under the bars, closed until asked for. */
+.arena-page .arena-price-details {
+  margin-top: var(--space-4);
+  border-top: 1px solid var(--line);
+}
+.arena-page .arena-price-details > summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--button-text);
+  font-size: var(--text-14);
+  font-weight: 700;
+  cursor: pointer;
+}
+.arena-page .arena-price-details #arena-price-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 @media (prefers-reduced-motion: reduce) {
   .arena-page .arena-video-overlay,
   .arena-page .arena-workspace .arena-video-expand {
@@ -2930,6 +3228,10 @@ textarea::placeholder {
     overflow-y: auto;
   }
   .arena-page .arena-watch:has(.live-captions) {
+    --stage-rest: calc(28px + var(--space-3) + 151px + 52px);
+  }
+  /* A replay's turn timeline: 44px plus its gap. */
+  .arena-page .arena-watch:has(.arena-timeline) {
     --stage-rest: calc(28px + var(--space-3) + 151px + 52px);
   }
   /* A size container would hold the enlarged video's fixed position. */
