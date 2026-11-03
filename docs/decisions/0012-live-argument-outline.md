@@ -186,8 +186,11 @@ turnDeadlineAt}` to room metadata, after permissions and best effort. The agent 
 - **Captions.** Interim (at most four a second) and final text on LiveKit's `lk.transcription` text
   stream, one stream per update with the speaker as sender. Browsers show one line under the video,
   toggleable; the choice is remembered per browser.
-- **Ingest** (`POST /api/internal/transcription/debates/:id/updates`): HMAC-SHA256 over
-  `timestamp.body`, at most 30 s of skew, 32 KB, ten updates per debate in a burst then five a second.
+- **Ingest** (`POST /api/internal/transcription/debates/:id/updates`): HMAC-SHA256 over the
+  method, the path (debate and endpoint), the timestamp and the body's SHA-256, sent as `v2=<hex>`
+  (signature version 2, audit YA-11; web accepts version 1 over `timestamp.body` only during the
+  rollout in `docs/production-rollout.md`), at most 30 s of skew, 32 KB, ten updates per debate in
+  a burst then five a second.
   One transaction: the debate is live and the turn current (or the turn that ended in the last 15 s,
   for its final flush), segment sides match the turn, the speaker consented. Each segment maps to
   its turn's window by spoken end time; speech after the cutoff has no window. Agent clock drift

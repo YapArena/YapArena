@@ -2,7 +2,9 @@ import { setTimeout as delay } from "node:timers/promises";
 import type { TurnOutline } from "../../outline/reducer.ts";
 import {
   ingestHeaders,
+  ingestPath,
   signIngest,
+  type IngestEndpoint,
   type DebaterLanguage,
   type OutlineCleanup,
   type Side,
@@ -60,12 +62,13 @@ export function createIngestClient({
   attempts?: number;
   timeoutMs?: number;
 }) {
-  async function post(path: string, value: unknown): Promise<IngestAnswer> {
+  async function post(
+    endpoint: IngestEndpoint,
+    value: unknown,
+  ): Promise<IngestAnswer> {
     const body = JSON.stringify(value);
-    const url = new URL(
-      `/api/internal/transcription/debates/${debateId}/${path}`,
-      origin,
-    );
+    const path = ingestPath(debateId, endpoint);
+    const url = new URL(path, origin);
     let failure: unknown;
     for (let attempt = 0; attempt < attempts; attempt++) {
       if (attempt) await wait(250 * 2 ** attempt);
@@ -76,7 +79,13 @@ export function createIngestClient({
           headers: {
             "Content-Type": "application/json",
             [ingestHeaders.timestamp]: timestamp,
-            [ingestHeaders.signature]: signIngest(secret, timestamp, body),
+            // Version 2 binds the signature to this debate and endpoint.
+            [ingestHeaders.signature]: signIngest(secret, {
+              method: "POST",
+              path,
+              timestamp,
+              body,
+            }),
           },
           body,
           signal: AbortSignal.timeout(timeoutMs),

@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import {
   parseCleanupArguments,
   type CleanupArgument,
@@ -322,36 +322,94 @@ export function parseSessionRequest(value: unknown): SessionRequest | null {
     : null;
 }
 
-/** HMAC-SHA256 over "<timestamp>.<body>", hex. */
-export function signIngest(secret: string, timestamp: string, body: string) {
-  return createHmac("sha256", secret)
-    .update(`${timestamp}.${body}`)
-    .digest("hex");
+/** The agent's endpoints on the server, each a POST under ingestPath. */
+export const ingestEndpoints = ["updates", "cleanup", "session"] as const;
+export type IngestEndpoint = (typeof ingestEndpoints)[number];
+/** The path the agent posts to and the server checks the signature against. */
+export function ingestPath(debateId: string, endpoint: IngestEndpoint) {
+  return `/api/internal/transcription/debates/${debateId}/${endpoint}`;
 }
 
+// YA-11: version 2 signs the request, not only its body: HMAC-SHA256 over
+// "yap-ingest-v2", the method, the path (debate and endpoint), the timestamp
+// and the body's SHA-256, one per line, sent as "v2=<hex>". A body signed for
+// one debate or endpoint fails at any other. Version 1 (plain hex over
+// "<timestamp>.<body>") stays accepted only until every deployed agent signs
+// version 2; docs/production-rollout.md says when to remove it.
+export interface IngestRequest {
+  method: string;
+  path: string;
+  /** Epoch milliseconds, as sent in the timestamp header. */
+  timestamp: string;
+  body: string;
+}
+export type IngestSignatureVersion = "v1" | "v2";
+
+function mac(secret: string, text: string) {
+  return createHmac("sha256", secret).update(text).digest("hex");
+}
+
+/** The version 2 signature header value: "v2=<hex>". */
+export function signIngest(secret: string, request: IngestRequest) {
+  const digest = createHash("sha256").update(request.body).digest("hex");
+  return `v2=${mac(
+    secret,
+    [
+      "yap-ingest-v2",
+      request.method.toUpperCase(),
+      request.path,
+      request.timestamp,
+      digest,
+    ].join("\n"),
+  )}`;
+}
+
+/** Version 1, the body only. Remove with version 1 acceptance. */
+export function signIngestV1(secret: string, timestamp: string, body: string) {
+  return mac(secret, `${timestamp}.${body}`);
+}
+
+const sameHex = (a: string, b: string) =>
+  timingSafeEqual(Buffer.from(a, "hex"), Buffer.from(b, "hex"));
+
 /**
- * Checks the signature headers against the raw body. The timestamp is epoch
+ * Checks the signature headers against the request. The timestamp is epoch
  * milliseconds and may differ from `now` by at most INGEST_MAX_SKEW_MS.
+ * Returns the version that matched, or null. A version 1 signature matches
+ * only when `acceptV1` is set.
  */
 export function verifyIngest(
   secret: string,
-  timestamp: string | undefined,
-  signature: string | undefined,
-  body: string,
-  now = Date.now(),
-) {
+  request: Omit<IngestRequest, "timestamp"> & {
+    timestamp: string | undefined;
+    signature: string | undefined;
+  },
+  {
+    now = Date.now(),
+    acceptV1 = false,
+  }: { now?: number; acceptV1?: boolean } = {},
+): IngestSignatureVersion | null {
+  const { timestamp, signature } = request;
   if (
     !timestamp ||
     !/^\d{13}$/.test(timestamp) ||
     Math.abs(now - Number(timestamp)) > INGEST_MAX_SKEW_MS ||
-    !signature ||
-    !/^[a-f0-9]{64}$/.test(signature)
+    !signature
   )
-    return false;
-  return timingSafeEqual(
-    Buffer.from(signature, "hex"),
-    Buffer.from(signIngest(secret, timestamp, body), "hex"),
-  );
+    return null;
+  const v2 = /^v2=([a-f0-9]{64})$/.exec(signature);
+  if (v2)
+    return sameHex(
+      v2[1]!,
+      signIngest(secret, { ...request, timestamp }).slice(3),
+    )
+      ? "v2"
+      : null;
+  if (acceptV1 && /^[a-f0-9]{64}$/.test(signature))
+    return sameHex(signature, signIngestV1(secret, timestamp, request.body))
+      ? "v1"
+      : null;
+  return null;
 }
 
 export const ingestHeaders = {
