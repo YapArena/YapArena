@@ -1070,6 +1070,8 @@ export function createCommunityRepository(database: Pool) {
           SELECT id FROM event_like_changes WHERE changed_at < CURRENT_TIMESTAMP - INTERVAL '365 days'
           ORDER BY id LIMIT 500 FOR UPDATE SKIP LOCKED)`);
         // An item's latest hide stays while it is hidden: restoring reads the state it replaced.
+        // The runtime cannot update these records, so this batch takes no row locks; a row
+        // another cleanup already deleted is simply skipped.
         const contentActions =
           await client.query(`DELETE FROM content_moderation_actions WHERE id IN (
           SELECT a.id FROM content_moderation_actions a
@@ -1077,7 +1079,7 @@ export function createCommunityRepository(database: Pool) {
             AND (a.action = 'unhide' OR EXISTS (SELECT 1 FROM content_moderation_actions b
               WHERE b.target_type = a.target_type AND b.target_id = a.target_id
                 AND (b.created_at, b.id) > (a.created_at, a.id)))
-          ORDER BY a.created_at, a.id LIMIT 500 FOR UPDATE SKIP LOCKED)`);
+          ORDER BY a.created_at, a.id LIMIT 500)`);
         return {
           cases: cases.rowCount ?? 0,
           contentActions: contentActions.rowCount ?? 0,
