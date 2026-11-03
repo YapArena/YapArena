@@ -4,7 +4,7 @@
 # with `lk agent deploy <dir>`. LiveKit injects LIVEKIT_URL, LIVEKIT_API_KEY and
 # LIVEKIT_API_SECRET at runtime; the other settings are agent secrets.
 # Pinned by digest; Dependabot proposes each new digest of this tag.
-FROM node:24-bookworm-slim@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c AS base
+FROM node:25-bookworm-slim@sha256:81db02c4b671288a03915da9534dbd54f96d0e7c24d80ccc54f5b36b2e684370 AS base
 # The agent's Rust core reads the system trust store.
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install --no-install-recommends -y ca-certificates && \
