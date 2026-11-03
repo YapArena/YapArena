@@ -54,6 +54,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
+      attestations: write
     uses: ./.github/workflows/reusable-publish.yml
     with:
       variant: web

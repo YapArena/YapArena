@@ -531,7 +531,8 @@ release tags in GitHub when that setting is available, since anyone allowed to c
 a publication run. Make sure the release workflow has reached `main` before tagging.
 
 The `Release container` workflow publishes Linux AMD64 and ARM64 images to GHCR with OCI build
-provenance and an SBOM. Copy the `image@sha256:...` reference from the workflow summary. Version
+provenance and an SBOM, and signs each digest. Copy the `image@sha256:...` reference from the
+workflow summary and [verify its signature](#verify-an-image-signature) before deploying it. Version
 and commit tags are convenient discovery pointers, but deployments must use the digest.
 After the first release, verify the registry manifest lists both platforms, the provenance and SBOM
 are attached to the published image, and the summary digest resolves to that manifest. Confirm the
@@ -541,8 +542,11 @@ Releases and the `CI` workflow's `main`-only `publish` jobs share `reusable-publ
 push to `main` publishes `linux/amd64` web and encoder images tagged `sha-<full commit SHA>`, which
 the [Render staging runbook](render-staging.md#deploy-the-ci-published-images) deploys. The shared
 workflow pushes by digest without a tag, scans every platform of that pushed digest with the
-`container` job's Trivy settings, and tags it only after the scan passes. It never moves an
-existing tag; if the first requested tag exists, the run reports its digest and publishes nothing.
+`container` job's Trivy settings, signs the digest, checks that signature, and tags it only after
+all three pass. A failed scan or signature leaves the digest untagged and fails the run; rerunning
+the failed job builds, scans and signs a new digest. The workflow never moves an existing tag; if
+the first requested tag exists, the run checks that its digest carries this workflow's signature
+for the same commit, reports it and publishes nothing.
 
 On the deployment host, provide the immutable image reference and production database URL through
 an access-controlled environment file. Apply migrations as a separate release step:
@@ -602,6 +606,46 @@ store `DATABASE_URL`, registry tokens, or other production secrets in the reposi
 This Compose flow is a single-host reference, not universal CD. A hosted product should translate the
 same contract—digest, migration, health gate, and rollback digest—into its platform's deployment
 mechanism and protect production with environment approvals or an equivalent control.
+
+### Verify an image signature
+
+Each digest is signed with a keyless [Sigstore](https://www.sigstore.dev/) attestation of SLSA build
+provenance, made by [`actions/attest`](https://github.com/actions/attest). No signing key exists:
+GitHub Actions proves the publishing workflow's identity with a short-lived certificate, and the
+attestation is stored with the repository's
+[attestations](https://github.com/YapArena/YapArena/attestations). Before deploying a digest, check
+that `reusable-publish.yml` signed it for the commit you chose. The GitHub CLI needs only to be
+signed in:
+
+```sh
+gh attestation verify oci://ghcr.io/yaparena/yaparena@sha256:DIGEST \
+  --repo YapArena/YapArena \
+  --signer-workflow YapArena/YapArena/.github/workflows/reusable-publish.yml \
+  --source-ref refs/heads/main --source-digest COMMIT_SHA \
+  --deny-self-hosted-runners
+```
+
+Replace the image with the `image@sha256:...` line from the run summary
+(`ghcr.io/yaparena/yaparena-encoder@sha256:...` for the encoder) and `COMMIT_SHA` with that run's
+full commit. For a release image, use `--source-ref refs/tags/vX.Y.Z` and the tagged commit.
+Success prints `Verification succeeded`. The options require, in order: an attestation from this
+repository, signed by the publishing workflow rather than any other workflow in it, built from
+`main` (or the release tag) at that exact commit, on a GitHub-hosted runner.
+
+- `No attestations found`, or an HTTP 404 from `api.github.com`: this repository never signed the
+  digest. Images published before signing was added (audit YA-16) have no signature; choose a later
+  run. Otherwise do not deploy the digest.
+- A policy mismatch, such as a different source ref or commit: the digest was signed for another
+  build. Recheck the digest and commit you copied; do not deploy a digest that still fails.
+- `remote registry authorization failed`: `gh` reads the digest's manifest from GHCR, and the
+  package is private. Make it public as
+  [the staging guide recommends](render-staging.md#registry-access), or sign Docker in to `ghcr.io`
+  with a token that has `read:packages`, such as the one in Render's registry credential:
+  `docker login ghcr.io --username GITHUB_USERNAME`.
+
+The publish job runs the same check before it tags a digest, so a tagged digest was already
+verified once. The check before a deploy protects against a digest copied from the wrong run and
+against a tag moved by someone with write access to the package.
 
 ## Auth regression gate
 

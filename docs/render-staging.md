@@ -373,9 +373,11 @@ images separately.
 | `ghcr.io/yaparena/yaparena-encoder` | Same build with `MEDIA_WORKER_TOOLS=true` | Replay encoder worker                   |
 
 The `publish` jobs push each image by digest without a tag, scan that pushed digest with the
-`container` job's Trivy settings, and only then tag it `sha-<full commit SHA>`. A failed scan
-leaves no tag, and an existing tag is never moved. The CI run summary lists each
-`image@sha256:...`; both images carry SBOM and provenance attestations. `publish` does not wait
+`container` job's Trivy settings, sign it, and only then tag it `sha-<full commit SHA>`. A failed
+scan or signature leaves no tag, and an existing tag is never moved. The CI run summary lists each
+`image@sha256:...`; both images carry SBOM and provenance attestations, and GitHub keeps a signed
+provenance attestation for each digest that you can [verify](operations.md#verify-an-image-signature).
+`publish` does not wait
 for `integration`, so deploy only a commit whose whole CI run passed.
 
 ### Registry access
@@ -428,7 +430,8 @@ worker. This has not yet been tried on these services.
 
 ### Deploy a later commit
 
-1. Copy the web and encoder digests from a `main` commit whose CI run passed every job.
+1. Copy the web and encoder digests from a `main` commit whose CI run passed every job. Check
+   that both are signed for that commit as in [verify an image signature](operations.md#verify-an-image-signature).
 2. Migrate with the web digest as in step 2 of [deploy the web service](#deploy-the-web-service).
 3. Change each service's image URL to its new digest and save. Use digests from one CI run so web,
    the jobs worker (web digest) and the encoder match. Confirm `/ready`, the jobs worker's startup
