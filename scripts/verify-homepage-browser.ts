@@ -83,8 +83,12 @@ const debate: PublicDebate = {
     sideALabel: topic.sideALabel,
     sideBLabel: topic.sideBLabel,
   },
-  speakerA: { handle: "alex", displayName: "Alex Public" },
-  speakerB: { handle: "morgan", displayName: "Morgan Public" },
+  speakerA: { handle: "alex", displayName: "Alex Public", avatarId: "yap-owl" },
+  speakerB: {
+    handle: "morgan",
+    displayName: "Morgan Public",
+    avatarId: "yap-frog",
+  },
   sponsor: null,
 };
 const list = <T>(items: T[]) => ({

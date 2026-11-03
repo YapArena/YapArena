@@ -68,6 +68,24 @@ it("adapts public topics/debates without manufacturing market histories or argum
     "SB",
   ]);
   assert.deepEqual(m.debates[1].names, ["Speaker A", "Morgan B", "SA", "MB"]);
+  // Without the server's avatar addresses, the slots keep initials.
+  assert.deepEqual(m.debates[0].avatars, [null, null]);
+  const withAvatars = publicHomepage(
+    [topic],
+    [
+      {
+        ...debate,
+        speakerA: { displayName: "Alex Rivera", avatarId: "yap-owl" },
+      },
+    ],
+    {},
+    (id) => `/assets/avatars/${id}.svg?v=0123456789ab`,
+  ).ideas[0].debates[0];
+  // A named speaker gets their avatar; the missing one keeps initials.
+  assert.deepEqual(withAvatars.avatars, [
+    "/assets/avatars/yap-owl.svg?v=0123456789ab",
+    null,
+  ]);
   for (const key of ["pct", "delta", "vol", "people", "price", "viewers"])
     assert.equal(m[key], null);
   assert.deepEqual(m.points, []);

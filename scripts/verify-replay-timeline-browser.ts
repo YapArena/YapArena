@@ -57,8 +57,16 @@ const base: PublicDebate = {
   isDemo: false,
   createdAt: new Date(),
   topic,
-  speakerA: { handle: "mayachen", displayName: "Maya Chen" },
-  speakerB: { handle: "leot", displayName: "Léo Tremblay" },
+  speakerA: {
+    handle: "mayachen",
+    displayName: "Maya Chen",
+    avatarId: "yap-owl",
+  },
+  speakerB: {
+    handle: "leot",
+    displayName: "Léo Tremblay",
+    avatarId: "yap-frog",
+  },
   sponsor: null,
   timing: { turnCount: 10, turnSeconds: 60 },
 };

@@ -1,8 +1,12 @@
+import type { AvatarId } from "../src/features/identity/avatars.ts";
+
 /** JSON shapes consumed by the existing community browser modules. */
 export interface CommunityMessage {
   id: string;
   debateId?: string;
   authorName?: string;
+  /** The author's avatar; null for the "Participant" placeholder. */
+  authorAvatarId?: AvatarId | null;
   body: string | null;
   state: "visible" | "removed";
   createdAt: string;

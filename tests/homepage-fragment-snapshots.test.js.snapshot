@@ -1355,7 +1355,7 @@ exports[`renders the shared homepage fragments 10`] = `
 <p class="trend-match">
 <span class="trend-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span>Alex Rivera</span>
 <span class="vs">
@@ -1469,7 +1469,7 @@ exports[`renders the shared homepage fragments 10`] = `
 <p class="trend-match">
 <span class="trend-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span>Alex Rivera</span>
 <span class="vs">
@@ -1566,7 +1566,7 @@ exports[`renders the shared homepage fragments 10`] = `
 </span>Live</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -1591,7 +1591,7 @@ exports[`renders the shared homepage fragments 10`] = `
 <span class="avatar-initials">SA</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">MB</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -1610,7 +1610,7 @@ exports[`renders the shared homepage fragments 10`] = `
 <span class="tag">Upcoming</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -1705,7 +1705,7 @@ exports[`renders the shared homepage fragments 10`] = `
 </span>Live</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -1730,7 +1730,7 @@ exports[`renders the shared homepage fragments 10`] = `
 <span class="avatar-initials">SA</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">MB</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -1749,7 +1749,7 @@ exports[`renders the shared homepage fragments 10`] = `
 <span class="tag">Upcoming</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -1777,7 +1777,7 @@ exports[`renders the shared homepage fragments 10`] = `
 </span>Live</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -1802,7 +1802,7 @@ exports[`renders the shared homepage fragments 10`] = `
 <span class="avatar-initials">SA</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">MB</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -1821,7 +1821,7 @@ exports[`renders the shared homepage fragments 10`] = `
 <span class="tag">Upcoming</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -1844,7 +1844,7 @@ exports[`renders the shared homepage fragments 10`] = `
 </span>Live</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -1868,7 +1868,7 @@ exports[`renders the shared homepage fragments 10`] = `
 <span class="avatar-initials">SA</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">MB</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -4469,7 +4469,7 @@ exports[`renders the shared homepage fragments 29`] = `
 <p class="trend-match">
 <span class="trend-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span>Alex Rivera</span>
 <span class="vs">
@@ -4642,7 +4642,7 @@ exports[`renders the shared homepage fragments 29`] = `
 </div>\\n  <noscript>
 <p class="ya-endnote">Idea links open their public topic pages. Enable JavaScript for inline charts, filters and previews.</p>
 </noscript>
-</main>\\n</div>\\n<template id="ya-home-data">{&quot;reference&quot;:false,&quot;available&quot;:true,&quot;following&quot;:[],&quot;ideas&quot;:[{&quot;id&quot;:&quot;11111111-1111-4111-8111-111111111111&quot;,&quot;topicSlug&quot;:&quot;public-idea&quot;,&quot;href&quot;:&quot;/topics/public-idea&quot;,&quot;cat&quot;:&quot;Ideas&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;short&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;reference&quot;:false,&quot;demo&quot;:false,&quot;pct&quot;:null,&quot;delta&quot;:null,&quot;vol&quot;:null,&quot;people&quot;:null,&quot;price&quot;:null,&quot;points&quot;:[],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;no&quot;:&quot;Against &amp; questioning&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;rate&quot;:null},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against &amp; questioning&quot;,&quot;rate&quot;:null}],&quot;debates&quot;:[{&quot;id&quot;:&quot;22222222-2222-4222-8222-222222222222&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;replay&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Speaker A&quot;,&quot;Morgan B&quot;,&quot;SA&quot;,&quot;MB&quot;],&quot;meta&quot;:&quot;Replay debate&quot;,&quot;stamp&quot;:&quot;Replay&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;upcoming&quot;,&quot;kind&quot;:&quot;upcoming&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;meta&quot;:&quot;Upcoming / awaiting media&quot;,&quot;stamp&quot;:&quot;Upcoming&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null}]}]}</template>
+</main>\\n</div>\\n<template id="ya-home-data">{&quot;reference&quot;:false,&quot;available&quot;:true,&quot;following&quot;:[],&quot;ideas&quot;:[{&quot;id&quot;:&quot;11111111-1111-4111-8111-111111111111&quot;,&quot;topicSlug&quot;:&quot;public-idea&quot;,&quot;href&quot;:&quot;/topics/public-idea&quot;,&quot;cat&quot;:&quot;Ideas&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;short&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;reference&quot;:false,&quot;demo&quot;:false,&quot;pct&quot;:null,&quot;delta&quot;:null,&quot;vol&quot;:null,&quot;people&quot;:null,&quot;price&quot;:null,&quot;points&quot;:[],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;no&quot;:&quot;Against &amp; questioning&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;rate&quot;:null},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against &amp; questioning&quot;,&quot;rate&quot;:null}],&quot;debates&quot;:[{&quot;id&quot;:&quot;22222222-2222-4222-8222-222222222222&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;replay&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Speaker A&quot;,&quot;Morgan B&quot;,&quot;SA&quot;,&quot;MB&quot;],&quot;avatars&quot;:[null,&quot;/assets/avatars/yap-frog.svg?v=0123456789ab&quot;],&quot;meta&quot;:&quot;Replay debate&quot;,&quot;stamp&quot;:&quot;Replay&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;upcoming&quot;,&quot;kind&quot;:&quot;upcoming&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;meta&quot;:&quot;Upcoming / awaiting media&quot;,&quot;stamp&quot;:&quot;Upcoming&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null}]}]}</template>
 `;
 
 exports[`renders the shared homepage fragments 3`] = `
@@ -5827,7 +5827,7 @@ exports[`renders the shared homepage fragments 34`] = `
 <p class="trend-match">
 <span class="trend-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">N&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
 </span>
 <span>Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 <span class="vs">
@@ -5835,7 +5835,7 @@ exports[`renders the shared homepage fragments 34`] = `
 <span aria-hidden="true">VS</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 <span>Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 </span>
@@ -6060,7 +6060,7 @@ exports[`renders the shared homepage fragments 34`] = `
 </div>\\n  <noscript>
 <p class="ya-endnote">Idea links open their public topic pages. Enable JavaScript for inline charts, filters and previews.</p>
 </noscript>
-</main>\\n</div>\\n<template id="ya-home-data">{&quot;reference&quot;:false,&quot;available&quot;:true,&quot;following&quot;:[&quot;44444444-4444-4444-8444-444444444444&quot;],&quot;ideas&quot;:[{&quot;id&quot;:&quot;44444444-4444-4444-8444-444444444444&quot;,&quot;topicSlug&quot;:&quot;hostile-topic&quot;,&quot;href&quot;:&quot;/topics/hostile-topic&quot;,&quot;cat&quot;:&quot;Category &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;title&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;short&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;reference&quot;:false,&quot;demo&quot;:true,&quot;pct&quot;:47,&quot;delta&quot;:-5,&quot;vol&quot;:5,&quot;people&quot;:500,&quot;price&quot;:null,&quot;points&quot;:[52,47],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;Side A &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;no&quot;:&quot;Side B &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:61,&quot;endorsed&quot;:305,&quot;population&quot;:500},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:39,&quot;endorsed&quot;:195,&quot;population&quot;:500}],&quot;debates&quot;:[{&quot;id&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;names&quot;:[&quot;Name &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;N&lt;&quot;,&quot;M&lt;&quot;],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/hostile-debate&quot;,&quot;startsAt&quot;:&quot;2026-10-01T17:00:00.000Z&quot;}],&quot;activity&quot;:{&quot;scope&quot;:&quot;shared&quot;,&quot;synthetic&quot;:true,&quot;revision&quot;:&quot;fixture-revision&quot;,&quot;hasMore&quot;:false,&quot;window&quot;:30,&quot;items&quot;:[{&quot;id&quot;:&quot;round-1&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:1,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;52&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:{&quot;n&quot;:&quot;40&quot;,&quot;d&quot;:&quot;100&quot;},&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;},{&quot;id&quot;:&quot;round-2&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:2,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;47&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:null,&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;}],&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:61,&quot;endorsed&quot;:305,&quot;population&quot;:500},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:39,&quot;endorsed&quot;:195,&quot;population&quot;:500}],&quot;category&quot;:&quot;Category &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;totals&quot;:{&quot;premium&quot;:&quot;5000000000&quot;,&quot;humanCommitments&quot;:4,&quot;botCommitments&quot;:996,&quot;executed&quot;:240}}},{&quot;id&quot;:&quot;11111111-1111-4111-8111-111111111111&quot;,&quot;topicSlug&quot;:&quot;public-idea&quot;,&quot;href&quot;:&quot;/topics/public-idea&quot;,&quot;cat&quot;:&quot;Ideas&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;short&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;reference&quot;:false,&quot;demo&quot;:false,&quot;pct&quot;:null,&quot;delta&quot;:null,&quot;vol&quot;:null,&quot;people&quot;:null,&quot;price&quot;:null,&quot;points&quot;:[],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;no&quot;:&quot;Against &amp; questioning&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;rate&quot;:null},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against &amp; questioning&quot;,&quot;rate&quot;:null}],&quot;debates&quot;:[{&quot;id&quot;:&quot;22222222-2222-4222-8222-222222222222&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;replay&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Speaker A&quot;,&quot;Morgan B&quot;,&quot;SA&quot;,&quot;MB&quot;],&quot;meta&quot;:&quot;Replay debate&quot;,&quot;stamp&quot;:&quot;Replay&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;upcoming&quot;,&quot;kind&quot;:&quot;upcoming&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;meta&quot;:&quot;Upcoming / awaiting media&quot;,&quot;stamp&quot;:&quot;Upcoming&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null}]}]}</template>
+</main>\\n</div>\\n<template id="ya-home-data">{&quot;reference&quot;:false,&quot;available&quot;:true,&quot;following&quot;:[&quot;44444444-4444-4444-8444-444444444444&quot;],&quot;ideas&quot;:[{&quot;id&quot;:&quot;44444444-4444-4444-8444-444444444444&quot;,&quot;topicSlug&quot;:&quot;hostile-topic&quot;,&quot;href&quot;:&quot;/topics/hostile-topic&quot;,&quot;cat&quot;:&quot;Category &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;title&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;short&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;reference&quot;:false,&quot;demo&quot;:true,&quot;pct&quot;:47,&quot;delta&quot;:-5,&quot;vol&quot;:5,&quot;people&quot;:500,&quot;price&quot;:null,&quot;points&quot;:[52,47],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;Side A &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;no&quot;:&quot;Side B &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:61,&quot;endorsed&quot;:305,&quot;population&quot;:500},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:39,&quot;endorsed&quot;:195,&quot;population&quot;:500}],&quot;debates&quot;:[{&quot;id&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;names&quot;:[&quot;Name &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;N&lt;&quot;,&quot;M&lt;&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-crab.svg?v=0123456789ab&quot;,&quot;/assets/avatars/yap-frog.svg?v=0123456789ab&quot;],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/hostile-debate&quot;,&quot;startsAt&quot;:&quot;2026-10-01T17:00:00.000Z&quot;}],&quot;activity&quot;:{&quot;scope&quot;:&quot;shared&quot;,&quot;synthetic&quot;:true,&quot;revision&quot;:&quot;fixture-revision&quot;,&quot;hasMore&quot;:false,&quot;window&quot;:30,&quot;items&quot;:[{&quot;id&quot;:&quot;round-1&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:1,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;52&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:{&quot;n&quot;:&quot;40&quot;,&quot;d&quot;:&quot;100&quot;},&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;},{&quot;id&quot;:&quot;round-2&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:2,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;47&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:null,&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;}],&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:61,&quot;endorsed&quot;:305,&quot;population&quot;:500},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:39,&quot;endorsed&quot;:195,&quot;population&quot;:500}],&quot;category&quot;:&quot;Category &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;totals&quot;:{&quot;premium&quot;:&quot;5000000000&quot;,&quot;humanCommitments&quot;:4,&quot;botCommitments&quot;:996,&quot;executed&quot;:240}}},{&quot;id&quot;:&quot;11111111-1111-4111-8111-111111111111&quot;,&quot;topicSlug&quot;:&quot;public-idea&quot;,&quot;href&quot;:&quot;/topics/public-idea&quot;,&quot;cat&quot;:&quot;Ideas&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;short&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;reference&quot;:false,&quot;demo&quot;:false,&quot;pct&quot;:null,&quot;delta&quot;:null,&quot;vol&quot;:null,&quot;people&quot;:null,&quot;price&quot;:null,&quot;points&quot;:[],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;no&quot;:&quot;Against &amp; questioning&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;rate&quot;:null},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against &amp; questioning&quot;,&quot;rate&quot;:null}],&quot;debates&quot;:[{&quot;id&quot;:&quot;22222222-2222-4222-8222-222222222222&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;replay&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Speaker A&quot;,&quot;Morgan B&quot;,&quot;SA&quot;,&quot;MB&quot;],&quot;avatars&quot;:[null,&quot;/assets/avatars/yap-frog.svg?v=0123456789ab&quot;],&quot;meta&quot;:&quot;Replay debate&quot;,&quot;stamp&quot;:&quot;Replay&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;upcoming&quot;,&quot;kind&quot;:&quot;upcoming&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;meta&quot;:&quot;Upcoming / awaiting media&quot;,&quot;stamp&quot;:&quot;Upcoming&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null}]}]}</template>
 `;
 
 exports[`renders the shared homepage fragments 35`] = `
@@ -9986,7 +9986,7 @@ exports[`renders the shared homepage fragments 7`] = `
 <p class="trend-match">
 <span class="trend-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span>Alex Rivera</span>
 <span class="vs">
@@ -10102,7 +10102,7 @@ exports[`renders the shared homepage fragments 7`] = `
 <p class="trend-match">
 <span class="trend-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span>Alex Rivera</span>
 <span class="vs">
@@ -10201,7 +10201,7 @@ exports[`renders the shared homepage fragments 7`] = `
 </span>Live</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -10226,7 +10226,7 @@ exports[`renders the shared homepage fragments 7`] = `
 <span class="avatar-initials">SA</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">MB</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -10245,7 +10245,7 @@ exports[`renders the shared homepage fragments 7`] = `
 <span class="tag">Upcoming</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -10342,7 +10342,7 @@ exports[`renders the shared homepage fragments 7`] = `
 </span>Live</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -10367,7 +10367,7 @@ exports[`renders the shared homepage fragments 7`] = `
 <span class="avatar-initials">SA</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">MB</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -10386,7 +10386,7 @@ exports[`renders the shared homepage fragments 7`] = `
 <span class="tag">Upcoming</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -10414,7 +10414,7 @@ exports[`renders the shared homepage fragments 7`] = `
 </span>Live</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -10439,7 +10439,7 @@ exports[`renders the shared homepage fragments 7`] = `
 <span class="avatar-initials">SA</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">MB</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -10458,7 +10458,7 @@ exports[`renders the shared homepage fragments 7`] = `
 <span class="tag">Upcoming</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -10481,7 +10481,7 @@ exports[`renders the shared homepage fragments 7`] = `
 </span>Live</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -10505,7 +10505,7 @@ exports[`renders the shared homepage fragments 7`] = `
 <span class="avatar-initials">SA</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">MB</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -10832,7 +10832,7 @@ exports[`renders the shared homepage fragments 8`] = `
 <p class="trend-match">
 <span class="trend-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">N&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
 </span>
 <span>Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 <span class="vs">
@@ -10840,7 +10840,7 @@ exports[`renders the shared homepage fragments 8`] = `
 <span aria-hidden="true">VS</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 <span>Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 </span>
@@ -10978,7 +10978,7 @@ exports[`renders the shared homepage fragments 8`] = `
 <p class="trend-match">
 <span class="trend-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">N&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
 </span>
 <span>Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 <span class="vs">
@@ -10986,7 +10986,7 @@ exports[`renders the shared homepage fragments 8`] = `
 <span aria-hidden="true">VS</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 <span>Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 </span>
@@ -11095,10 +11095,10 @@ exports[`renders the shared homepage fragments 8`] = `
 </span>Live</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">N&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -11210,10 +11210,10 @@ exports[`renders the shared homepage fragments 8`] = `
 </span>Live</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">N&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -11238,10 +11238,10 @@ exports[`renders the shared homepage fragments 8`] = `
 </span>Live</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">N&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -11261,10 +11261,10 @@ exports[`renders the shared homepage fragments 8`] = `
 </span>Live</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">N&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">M&lt;</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -11478,7 +11478,7 @@ exports[`renders the shared homepage fragments 9`] = `
 <p class="trend-match">
 <span class="trend-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span>Alex Rivera</span>
 <span class="vs">
@@ -11594,7 +11594,7 @@ exports[`renders the shared homepage fragments 9`] = `
 <p class="trend-match">
 <span class="trend-people">
 <span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span>Alex Rivera</span>
 <span class="vs">
@@ -11693,7 +11693,7 @@ exports[`renders the shared homepage fragments 9`] = `
 </span>Live</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -11718,7 +11718,7 @@ exports[`renders the shared homepage fragments 9`] = `
 <span class="avatar-initials">SA</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">MB</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -11737,7 +11737,7 @@ exports[`renders the shared homepage fragments 9`] = `
 <span class="tag">Upcoming</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -11834,7 +11834,7 @@ exports[`renders the shared homepage fragments 9`] = `
 </span>Live</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -11859,7 +11859,7 @@ exports[`renders the shared homepage fragments 9`] = `
 <span class="avatar-initials">SA</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">MB</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -11878,7 +11878,7 @@ exports[`renders the shared homepage fragments 9`] = `
 <span class="tag">Upcoming</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -11906,7 +11906,7 @@ exports[`renders the shared homepage fragments 9`] = `
 </span>Live</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -11931,7 +11931,7 @@ exports[`renders the shared homepage fragments 9`] = `
 <span class="avatar-initials">SA</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">MB</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>
@@ -11950,7 +11950,7 @@ exports[`renders the shared homepage fragments 9`] = `
 <span class="tag">Upcoming</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -11973,7 +11973,7 @@ exports[`renders the shared homepage fragments 9`] = `
 </span>Live</span>
 <span class="ya-thumb-people" aria-hidden="true">
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">AR</span>
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <span class="avatar-initials">SB</span>
@@ -11997,7 +11997,7 @@ exports[`renders the shared homepage fragments 9`] = `
 <span class="avatar-initials">SA</span>
 </span>
 <span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
-<span class="avatar-initials">MB</span>
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
 </span>
 </span>
 </span>

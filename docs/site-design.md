@@ -56,8 +56,9 @@ All in `public/site.css`, under "The site kit":
   lighting in the visit colours) for loading.
 - **Avatar slots** `.avatar-slot` (square, `--avatar-size` a multiple of 12: 24, 36, 48, 72, 96)
   with the person's Pixel Yapper (`.avatar-img`, [Decision 0014](decisions/0014-user-avatars.md)),
-  or `.avatar-initials` where avatars haven't reached yet. The avatars draw their own tile, so
-  slots add no crop, border or background.
+  or `.avatar-initials` ("?") where nobody is named yet. The avatars draw their own tile, so
+  slots add no crop, border or background. Server pages fill them with `personSlot()`
+  (`src/features/discovery/avatar-web.ts`).
 - **Avatar picker** `.avatar-picker` (`frontend/avatar.ts`): a radio per Yapper drawn as a 48 px
   tile, the chosen one ringed, in the handle pop-up and Settings.
 - **Dialogs** `.scrim` and `.dialog`: a centred card, a bottom sheet on phones.
@@ -77,7 +78,7 @@ same stylesheet for its topic cards.
 - **Status filters** on Explore: All, Live, Upcoming and Replay as chips, then More (a
   `<details data-menu>` that closes on Escape or a click outside) with Ready, Ended, Under review,
   Finalized and Cancelled; More shows the status in use. URLs are unchanged.
-- **Debate card** `.dcard`: a 16:9 picture with both speakers' initials in 48 px slots on two
+- **Debate card** `.dcard`: a 16:9 picture with both speakers' avatars in 48 px slots on two
   panes, under the recording's still for replays and finalized debates (the media router serves
   no still for others; `frontend/site.ts` hides one that fails), the status tag and a stamp; then
   the topic, the proposition in Forum and both speakers in 24 px slots.

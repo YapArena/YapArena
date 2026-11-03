@@ -1,7 +1,8 @@
 // The debate and topic cards of the site kit (docs/site-design.md#cards).
 // Explore, Topics, topic pages and profiles list them; Home and Live follow.
 import { html } from "../../platform/html.ts";
-import { avatarSlot, inscription } from "./kit-web.ts";
+import { inscription } from "./kit-web.ts";
+import { personSlot } from "./avatar-web.ts";
 import type { PublicDebate, PublicTopic } from "./repository.ts";
 
 export const statusLabels: Record<PublicDebate["status"], string> = {
@@ -55,7 +56,7 @@ export function debateCard(debate: PublicDebate) {
         : "Debate archive";
   const nameA = speakerA?.displayName ?? topic.sideALabel;
   const nameB = speakerB?.displayName ?? topic.sideBLabel;
-  return html`<article class="dcard"><div class="dcard-thumb"><span class="dcard-panes" aria-hidden="true"><span class="dcard-pane">${avatarSlot(speakerA?.displayName, 48)}</span><span class="dcard-pane">${avatarSlot(speakerB?.displayName, 48)}</span></span>${still ? html`<img class="dcard-still" src="/api/media/events/${debate.id}/thumbnail" alt="" loading="lazy" decoding="async">` : ""}${statusTag(debate.status)}<span class="dcard-stamp">${stamp}</span></div><div class="dcard-body"><p class="dcard-meta"><span>${topic.title}</span>${demoTag(debate.isDemo)}</p><h3 class="dcard-title"><a href="/debates/${path(debate.slug)}">${debate.proposition}</a></h3><p class="dcard-people">${avatarSlot(speakerA?.displayName, 24)}<span>${nameA}</span>${versus}${avatarSlot(speakerB?.displayName, 24)}<span>${nameB}</span></p></div></article>`;
+  return html`<article class="dcard"><div class="dcard-thumb"><span class="dcard-panes" aria-hidden="true"><span class="dcard-pane">${personSlot(speakerA, 48)}</span><span class="dcard-pane">${personSlot(speakerB, 48)}</span></span>${still ? html`<img class="dcard-still" src="/api/media/events/${debate.id}/thumbnail" alt="" loading="lazy" decoding="async">` : ""}${statusTag(debate.status)}<span class="dcard-stamp">${stamp}</span></div><div class="dcard-body"><p class="dcard-meta"><span>${topic.title}</span>${demoTag(debate.isDemo)}</p><h3 class="dcard-title"><a href="/debates/${path(debate.slug)}">${debate.proposition}</a></h3><p class="dcard-people">${personSlot(speakerA, 24)}<span>${nameA}</span>${versus}${personSlot(speakerB, 24)}<span>${nameB}</span></p></div></article>`;
 }
 
 // A topic: the title in Forum, the summary (three lines at most) and its two

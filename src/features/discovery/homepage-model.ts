@@ -1,4 +1,5 @@
 import type { PublicDebate, PublicTopic } from "./public-types.ts";
+import type { AvatarId } from "../identity/avatars.ts";
 import type { PublicBotActivity } from "../a4/public-bot-types.ts";
 
 export interface HomeDebate {
@@ -6,6 +7,8 @@ export interface HomeDebate {
   kind: "live" | "replay" | "upcoming";
   title: string;
   names: string[];
+  /** Each speaker's avatar address; null shows their initials (Decision 0014). */
+  avatars?: [string | null, string | null];
   meta: string;
   stamp: string;
   href: string | null;
@@ -55,6 +58,8 @@ export function publicHomepage(
   topics: PublicTopic[],
   playable: PublicDebate[],
   activity: Record<string, PublicBotActivity> = {},
+  // The server passes the versioned avatar address; without it, initials show.
+  avatarUrl?: (id: AvatarId) => string,
 ): HomeData {
   return {
     reference: false,
@@ -87,6 +92,14 @@ export function publicHomepage(
                   : "upcoming",
             title: debate.proposition,
             names: [a, b, initials(a), initials(b)],
+            avatars: [
+              debate.speakerA && avatarUrl
+                ? avatarUrl(debate.speakerA.avatarId)
+                : null,
+              debate.speakerB && avatarUrl
+                ? avatarUrl(debate.speakerB.avatarId)
+                : null,
+            ],
             meta:
               debate.status === "live"
                 ? "Live debate"

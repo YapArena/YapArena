@@ -5,6 +5,7 @@
 // players' cards. frontend/matchmaking.ts loads this module on first use and
 // decides when it shows; the rules live in frontend/queue-overlay-logic.ts.
 import { api } from "./lib/api.js";
+import { avatarImage, isAvatarId } from "./avatar.js";
 import type { Profile } from "./account-types.js";
 import { pickHeadlineColors } from "./landing-colors.js";
 import {
@@ -92,6 +93,21 @@ function shown(text = "") {
 }
 function setText(node: HTMLElement, text: string) {
   if (node.textContent !== text) node.textContent = text;
+}
+// A player's avatar in the card's slot (Decision 0014), or their initials
+// when there is none, as for a profile that is no longer published.
+function setAvatar(
+  node: HTMLElement,
+  avatarId: string | null | undefined,
+  fallback: string,
+) {
+  if (!isAvatarId(avatarId)) {
+    delete node.dataset.avatar;
+    setText(node, fallback);
+  } else if (node.dataset.avatar !== avatarId) {
+    node.dataset.avatar = avatarId;
+    node.replaceChildren(avatarImage(avatarId));
+  }
 }
 
 export function createQueueOverlay(actions: OverlayActions) {
@@ -291,7 +307,7 @@ export function createQueueOverlay(actions: OverlayActions) {
   let lastSpent = 0;
   let frame = 0;
   let drawn = "";
-  let me: Pick<Profile, "handle" | "displayName"> | null = null;
+  let me: Pick<Profile, "handle" | "displayName" | "avatarId"> | null = null;
   // When the view's server time was taken, to keep counting between updates.
   let paintedAt = Date.now();
   let ringPalette: EmblemColors | null = null;
@@ -459,19 +475,27 @@ export function createQueueOverlay(actions: OverlayActions) {
     setText(themCard.name, them.displayName ?? "Your opponent");
     setText(themCard.handle, them.handle ? `@${them.handle}` : "");
     themCard.handle.hidden = !them.handle;
-    setText(themCard.letters, initials(them.displayName));
+    setAvatar(themCard.letters, them.avatarId, initials(them.displayName));
     setText(themCard.side, them.sideLabel);
     setText(meCard.side, sideLabelText);
     setText(meCard.handle, me ? `@${me.handle}` : "");
     meCard.handle.hidden = !me;
-    setText(meCard.letters, me ? initials(me.displayName) : "Y");
+    setAvatar(
+      meCard.letters,
+      me?.avatarId,
+      me ? initials(me.displayName) : "Y",
+    );
   }
   function loadProfile() {
     profileRequest ??= api<{ profile: Profile }>("/api/me/profile", {
       timeout: 8000,
     })
       .then(({ profile }) => {
-        me = { handle: profile.handle, displayName: profile.displayName };
+        me = {
+          handle: profile.handle,
+          displayName: profile.displayName,
+          avatarId: profile.avatarId,
+        };
         if (lastOffer && view?.state.ticket)
           paintPeople(lastOffer, view.state.ticket.sideLabel);
       })

@@ -45,8 +45,8 @@ export interface PublicDebate {
   isDemo: boolean;
   createdAt: Date;
   topic: Pick<PublicTopic, "slug" | "title" | "sideALabel" | "sideBLabel">;
-  speakerA: Pick<PublicProfile, "handle" | "displayName"> | null;
-  speakerB: Pick<PublicProfile, "handle" | "displayName"> | null;
+  speakerA: Pick<PublicProfile, "handle" | "displayName" | "avatarId"> | null;
+  speakerB: Pick<PublicProfile, "handle" | "displayName" | "avatarId"> | null;
   sponsor: { name: string; disclosure: string } | null;
   /**
    * The debate's turn timing from its rules version, read with a single

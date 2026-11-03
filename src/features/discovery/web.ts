@@ -7,14 +7,15 @@ import { renderVideoDebateCard } from "./video-card-web.ts";
 import { renderFeaturedDebate } from "./featured-web.ts";
 import { livingEmblem } from "./emblem-web.ts";
 import { renderDebateWorkspace } from "./debate-web.ts";
-import { asset, assetRevision, avatarAsset } from "./assets.ts";
+import { asset, assetRevision } from "./assets.ts";
 import {
   iconLinks,
   shareMetadata,
   siteFooterMarkup,
 } from "./page-chrome-web.ts";
 import { debateCard, statusLabels as labels, topicCard } from "./cards-web.ts";
-import { avatarSlot, inscription, searchIcon } from "./kit-web.ts";
+import { inscription, searchIcon } from "./kit-web.ts";
+import { personSlot } from "./avatar-web.ts";
 import { pixelCoin } from "./pixel-mark.ts";
 import { html, raw, type SafeHtml } from "../../platform/html.ts";
 import type {
@@ -313,7 +314,7 @@ export function renderProfile(
   profile: PublicProfile,
   debates: PublicList<PublicDebate>,
 ) {
-  const content = html`<div class="container person">${backLink("/debates", "All debates")}<header class="person-hero">${avatarSlot(profile.displayName, undefined, avatarAsset(profile.avatarId))}<div class="person-id"><p class="kicker">${inscription(`Participant${profile.isDemo ? " · Demo" : ""}`)}</p><h1 class="title-serif">${profile.displayName}</h1><p class="person-handle">@${profile.handle}</p><p class="person-bio${profile.bio ? "" : " muted"}">${profile.bio ? profile.bio : "No public bio yet."}</p>${followButton("people", profile.handle)}</div></header></div><section class="container page-section" aria-labelledby="appearances"><div class="section-head"><p class="kicker">${inscription("Public appearances")}</p><h2 class="section-title" id="appearances">${inscription("Debates")}</h2></div>${debates.items.length ? html`<div class="list-grid">${debates.items.map(debateCard)}</div>` : quietState("No public debates yet.")}${pagination(`/people/${path(profile.handle)}`, debates)}</section>`;
+  const content = html`<div class="container person">${backLink("/debates", "All debates")}<header class="person-hero">${personSlot(profile)}<div class="person-id"><p class="kicker">${inscription(`Participant${profile.isDemo ? " · Demo" : ""}`)}</p><h1 class="title-serif">${profile.displayName}</h1><p class="person-handle">@${profile.handle}</p><p class="person-bio${profile.bio ? "" : " muted"}">${profile.bio ? profile.bio : "No public bio yet."}</p>${followButton("people", profile.handle)}</div></header></div><section class="container page-section" aria-labelledby="appearances"><div class="section-head"><p class="kicker">${inscription("Public appearances")}</p><h2 class="section-title" id="appearances">${inscription("Debates")}</h2></div>${debates.items.length ? html`<div class="list-grid">${debates.items.map(debateCard)}</div>` : quietState("No public debates yet.")}${pagination(`/people/${path(profile.handle)}`, debates)}</section>`;
   const description =
     profile.bio ?? `Public profile for ${profile.displayName}.`;
   const canonical = `${origin}${listPath(`/people/${path(profile.handle)}`, debates)}`;

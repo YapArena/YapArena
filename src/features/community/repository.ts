@@ -1,4 +1,5 @@
 import type { Pool, PoolClient } from "pg";
+import { resolveAvatarId } from "../identity/avatars.ts";
 import {
   type TransactionOptions,
   withTransaction,
@@ -43,6 +44,9 @@ interface ChatRow {
   debateId: string;
   authorUserId: string;
   authorName: string;
+  // Read only to resolve the author's avatar; never sent (Decision 0014).
+  authorHandle?: string | null;
+  authorAvatar?: string | null;
   body: string;
   state: "visible" | "removed";
   createdAt: Date;
@@ -87,6 +91,7 @@ export interface AppealRow {
 const chatFields = `m.id, m.debate_id AS "debateId",
   m.author_user_id AS "authorUserId",
   COALESCE(p.display_name, 'Participant') AS "authorName",
+  p.handle AS "authorHandle", p.avatar_id AS "authorAvatar",
   m.body, m.state, m.created_at AS "createdAt",
   m.client_message_id AS "clientMessageId", m.revision::text AS revision,
   m.stream_revision::text AS "streamRevision"`;
@@ -98,7 +103,7 @@ const chatJoin = `FROM event_chat_messages m
 // only be acknowledged as removed; this path never recreates its content.
 const receiptFields = `r.message_id AS id, r.debate_id AS "debateId",
   r.author_user_id AS "authorUserId", COALESCE(p.display_name, 'Participant') AS "authorName",
-  m.body, COALESCE(m.state, 'removed') AS state, r.created_at AS "createdAt",
+  p.handle AS "authorHandle", p.avatar_id AS "authorAvatar", m.body, COALESCE(m.state, 'removed') AS state, r.created_at AS "createdAt",
   r.client_message_id AS "clientMessageId", COALESCE(m.revision,r.revision)::text AS revision,
   COALESCE(m.stream_revision,r.stream_revision)::text AS "streamRevision"`;
 const receiptJoin = `FROM community_submission_receipts r
@@ -110,6 +115,10 @@ function publicMessage(item: ChatRow, viewerId?: string) {
     id: item.id,
     debateId: item.debateId,
     authorName: item.authorName,
+    // The placeholder "Participant" has no avatar.
+    authorAvatarId: item.authorHandle
+      ? resolveAvatarId(item.authorAvatar, item.authorHandle)
+      : null,
     body: item.state === "removed" ? null : item.body,
     state: item.state,
     createdAt: item.createdAt,
@@ -385,8 +394,13 @@ export function createCommunityRepository(database: Pool) {
             "chat is available only during a live event",
             "CHAT_CLOSED",
           );
-        const profile = await client.query<{ authorName: string }>(
-          `SELECT display_name AS "authorName" FROM public_profiles WHERE user_id = $1
+        const profile = await client.query<{
+          authorName: string;
+          authorHandle: string;
+          authorAvatar: string | null;
+        }>(
+          `SELECT display_name AS "authorName", handle AS "authorHandle",
+             avatar_id AS "authorAvatar" FROM public_profiles WHERE user_id = $1
              AND publication_state = 'published' AND is_demo = false`,
           [userId],
         );
@@ -446,7 +460,7 @@ export function createCommunityRepository(database: Pool) {
           [id, userId, body, clientMessageId ?? null],
         );
         return publicMessage(
-          { ...result.rows[0]!, authorName: profile.rows[0]!.authorName },
+          { ...result.rows[0]!, ...profile.rows[0]! },
           userId,
         );
       });

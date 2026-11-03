@@ -30,8 +30,10 @@ interface DebateRow extends Omit<
   sideBLabel: string;
   speakerAHandle: string | null;
   speakerADisplayName: string | null;
+  speakerAAvatarId?: string | null;
   speakerBHandle: string | null;
   speakerBDisplayName: string | null;
+  speakerBAvatarId?: string | null;
 }
 
 function page<T>(rows: T[], limit: number, offset: number): PublicList<T> {
@@ -81,11 +83,19 @@ function mapDebate(row: DebateRow): PublicDebate {
     },
     speakerA:
       row.speakerAHandle && row.speakerADisplayName
-        ? { handle: row.speakerAHandle, displayName: row.speakerADisplayName }
+        ? {
+            handle: row.speakerAHandle,
+            displayName: row.speakerADisplayName,
+            avatarId: resolveAvatarId(row.speakerAAvatarId, row.speakerAHandle),
+          }
         : null,
     speakerB:
       row.speakerBHandle && row.speakerBDisplayName
-        ? { handle: row.speakerBHandle, displayName: row.speakerBDisplayName }
+        ? {
+            handle: row.speakerBHandle,
+            displayName: row.speakerBDisplayName,
+            avatarId: resolveAvatarId(row.speakerBAvatarId, row.speakerBHandle),
+          }
         : null,
     sponsor: null,
   };
@@ -102,7 +112,9 @@ const debateColumns = `d.id, d.slug, d.proposition, d.status,
   t.slug AS "topicSlug", t.title AS "topicTitle",
   t.side_a_label AS "sideALabel", t.side_b_label AS "sideBLabel",
   pa.handle AS "speakerAHandle", pa.display_name AS "speakerADisplayName",
-  pb.handle AS "speakerBHandle", pb.display_name AS "speakerBDisplayName"`;
+  pa.avatar_id AS "speakerAAvatarId",
+  pb.handle AS "speakerBHandle", pb.display_name AS "speakerBDisplayName",
+  pb.avatar_id AS "speakerBAvatarId"`;
 
 const debateJoins = `FROM debates d
   INNER JOIN topics t ON t.id = d.topic_id AND t.publication_state = 'published'

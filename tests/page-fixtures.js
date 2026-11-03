@@ -53,7 +53,11 @@ export const debate = {
     sideALabel: topic.sideALabel,
     sideBLabel: topic.sideBLabel,
   },
-  speakerA: { handle: profile.handle, displayName: profile.displayName },
+  speakerA: {
+    handle: profile.handle,
+    displayName: profile.displayName,
+    avatarId: profile.avatarId,
+  },
   speakerB: null,
   sponsor: null,
 };
@@ -96,8 +100,13 @@ export const hostileDebate = {
   speakerA: {
     handle: hostileProfile.handle,
     displayName: hostileProfile.displayName,
+    avatarId: "yap-crab",
   },
-  speakerB: { handle: "morgan-lee", displayName: hostileText("Morgan") },
+  speakerB: {
+    handle: "morgan-lee",
+    displayName: hostileText("Morgan"),
+    avatarId: "yap-frog",
+  },
 };
 
 export const list = (items, pagination = {}) => ({
@@ -179,7 +188,7 @@ const homeDebate = {
   proposition: "A real <question>?",
   status: "live",
   topic: { slug: homeTopic.slug },
-  speakerA: { displayName: "Alex Rivera" },
+  speakerA: { displayName: "Alex Rivera", avatarId: "yap-owl" },
   speakerB: null,
 };
 const homeDebates = [
@@ -189,15 +198,23 @@ const homeDebates = [
     id: "replay",
     status: "finalized",
     speakerA: null,
-    speakerB: { displayName: "Morgan B" },
+    speakerB: { displayName: "Morgan B", avatarId: "yap-frog" },
   },
   { ...homeDebate, id: "upcoming", status: "scheduled" },
 ];
-export const publicHome = publicHomepage([homeTopic], homeDebates);
+// The router passes the versioned avatar address (Decision 0014).
+const avatarUrl = (id) => `/assets/avatars/${id}.svg?v=0123456789ab`;
+export const publicHome = publicHomepage(
+  [homeTopic],
+  homeDebates,
+  {},
+  avatarUrl,
+);
 const syntheticHome = publicHomepage(
   [hostileTopic, homeTopic],
   [{ ...hostileDebate, topic: { slug: hostileTopic.slug } }, ...homeDebates],
   { [hostileTopic.id]: activity },
+  avatarUrl,
 );
 export const homes = {
   empty: publicHomepage([], []),

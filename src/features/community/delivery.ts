@@ -1,4 +1,5 @@
 import type { Pool, PoolClient } from "pg";
+import { resolveAvatarId, type AvatarId } from "../identity/avatars.ts";
 import {
   runTransaction,
   type TransactionOptions,
@@ -27,6 +28,8 @@ export interface PublicChat {
   id: string;
   debateId: string;
   authorName: string;
+  /** The author's avatar; null for the "Participant" placeholder. */
+  authorAvatarId: AvatarId | null;
   body: string | null;
   state: "visible" | "removed";
   createdAt: Date | string;
@@ -34,6 +37,22 @@ export interface PublicChat {
   streamRevision: string;
   clientMessageId: null;
 }
+// The handle is read only to resolve the default avatar; it is never sent.
+type ChatSource = Omit<PublicChat, "authorAvatarId"> & {
+  authorHandle: string | null;
+  authorAvatar: string | null;
+};
+const publicChat = ({
+  authorHandle,
+  authorAvatar,
+  ...chat
+}: ChatSource): PublicChat => ({
+  ...chat,
+  authorAvatarId: authorHandle
+    ? resolveAvatarId(authorAvatar, authorHandle)
+    : null,
+});
+
 export interface PublicSummary {
   eventId: string;
   likes: string;
@@ -213,12 +232,13 @@ export function createCommunityDelivery(database: Pool) {
           };
         const fields = `m.id::text AS id, m.debate_id AS "debateId",
           COALESCE(p.display_name,'Participant') AS "authorName",
+          p.handle AS "authorHandle", p.avatar_id AS "authorAvatar",
           CASE WHEN m.state='visible' THEN m.body ELSE NULL END AS body,
           m.state, m.created_at AS "createdAt", m.revision::text AS revision,
           m.stream_revision::text AS "streamRevision", NULL::text AS "clientMessageId"`;
         const join = `LEFT JOIN public_profiles p ON p.user_id=m.author_user_id
           AND p.publication_state='published'`;
-        const latest = await client.query<PublicChat>(
+        const latest = await client.query<ChatSource>(
           `SELECT ${fields}
           FROM event_chat_messages m ${join} WHERE m.debate_id=$1 AND m.state='visible'
           ORDER BY m.id DESC LIMIT 11`,
@@ -244,19 +264,19 @@ export function createCommunityDelivery(database: Pool) {
           ),
         ];
         const messages = ids.length
-          ? await client.query<PublicChat>(
+          ? await client.query<ChatSource>(
               `SELECT ${fields}
           FROM event_chat_messages m ${join} WHERE m.debate_id=$1 AND m.id=ANY($2::bigint[])`,
               [room, ids],
             )
-          : { rows: [] as PublicChat[] };
-        const byId = new Map(messages.rows.map((m) => [m.id, m]));
+          : { rows: [] as ChatSource[] };
+        const byId = new Map(messages.rows.map((m) => [m.id, publicChat(m)]));
         return {
           head: row.head,
           floor: row.floor,
           eligible: true,
           summary,
-          items: latest.rows.slice(0, 10).reverse(),
+          items: latest.rows.slice(0, 10).reverse().map(publicChat),
           hasMore: latest.rows.length > 10,
           events: log.rows.map((e) => ({
             cursor: e.cursor,
@@ -268,6 +288,7 @@ export function createCommunityDelivery(database: Pool) {
                   id: e.messageId,
                   debateId: room,
                   authorName: "Participant",
+                  authorAvatarId: null,
                   body: null,
                   state: "removed",
                   createdAt: e.occurredAt,

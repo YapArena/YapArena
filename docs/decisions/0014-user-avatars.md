@@ -31,5 +31,11 @@ profiles) and the slots in the [site design](../site-design.md).
 
 8. Avatar PR A: the header's account button and menu, Settings, the handle pop-up and the public
    profile page.
-9. Avatar PR B: the debate page's player cards, debate cards, Home's featured footer, the queue
-   overlay's cards and chat. Until then those keep the initials.
+9. Avatar PR B: the debate page's player cards (48 px), debate and video cards (48 px panes and
+   24 px speakers), the featured card (96 px), Home's featured footer (24 px) and debate cards
+   (48 px), the queue overlay's cards (48 px, 36 on phones) and chat (24 px, before the name).
+10. Where nobody is named (a debate waiting for a speaker, the "Participant" placeholder in chat,
+    a hidden opponent in the queue) the slot keeps today's "?", initials or nothing. Chat
+    payloads carry only the resolved `authorAvatarId`, never the handle it comes from, and a
+    changed avatar resets the author's chat rooms as a changed username does (migration
+    `1793669005732`).

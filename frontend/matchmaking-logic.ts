@@ -1,5 +1,6 @@
 // Rules for the live queue and challenge screens (Decision 0011). frontend/matchmaking.ts draws
 // them; the server decides every outcome, and these only describe its state to the player.
+import type { AvatarId } from "../src/features/identity/avatars.ts";
 
 export type Side = "A" | "B";
 export type ClosedReason =
@@ -28,10 +29,12 @@ export interface QueueState {
     deadlineAt: string;
     acceptedByMe: boolean;
     acceptedByOpponent: boolean;
-    // The paired player; the handle and name are null if their profile is no longer published.
+    // The paired player; the handle, name and avatar are null if their profile is no longer
+    // published.
     opponent: {
       handle: string | null;
       displayName: string | null;
+      avatarId?: AvatarId | null;
       sideLabel: string;
     };
   } | null;

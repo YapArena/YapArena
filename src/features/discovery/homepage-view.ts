@@ -117,7 +117,7 @@ function footerMarkup(m: HomeIdea) {
     : m.href
       ? html`href="${m.href}"`
       : html`href="#idea-${m.id}" data-open-idea="${m.id}"`;
-  return html`<footer class="trend-foot"><p class="trend-stats">${stats}</p><div class="trend-arena">${d ? html`<p class="trend-match"><span class="trend-people">${avatarSlot(d.names[0], 24)}<span>${d.names[0]}</span>${versus}${avatarSlot(d.names[1], 24)}<span>${d.names[1]}</span></span><span class="trend-when">${debateWhen(m, d)}</span></p>` : ""}<a class="btn btn-primary btn-sm trend-cta" ${cta}>${d ? "Explore debate" : "Explore topic"}</a></div><p class="trend-signin"><a href="/account">Sign in to take part</a></p></footer>`;
+  return html`<footer class="trend-foot"><p class="trend-stats">${stats}</p><div class="trend-arena">${d ? html`<p class="trend-match"><span class="trend-people">${avatarSlot(d.names[0], 24, d.avatars?.[0] ?? undefined)}<span>${d.names[0]}</span>${versus}${avatarSlot(d.names[1], 24, d.avatars?.[1] ?? undefined)}<span>${d.names[1]}</span></span><span class="trend-when">${debateWhen(m, d)}</span></p>` : ""}<a class="btn btn-primary btn-sm trend-cta" ${cta}>${d ? "Explore debate" : "Explore topic"}</a></div><p class="trend-signin"><a href="/account">Sign in to take part</a></p></footer>`;
 }
 
 // The trending slide's content; the slide element itself stays in place.
@@ -140,7 +140,7 @@ export function debatesMarkup(
   );
   const cards = entries.map(
     (d) =>
-      html`<${d.href ? html`a href="${d.href}"` : html`button type="button"`} class="ya-debatecard" ${d.href ? "" : html`data-open-debate="${d.id}" aria-pressed="${String(active === d.id)}"`}><span class="ya-thumbnail"><span class="tag${d.kind === "live" ? " tag-live" : ""}">${d.kind === "live" ? livePixel : ""}${d.kind === "live" ? "Live" : d.kind === "replay" ? "Replay" : "Upcoming"}</span><span class="ya-thumb-people" aria-hidden="true">${avatarSlot(d.names[0], 48)}${avatarSlot(d.names[1], 48)}</span></span><span class="ya-debatecopy"><strong>${d.title}</strong><small>${d.names[0]} vs. ${d.names[1]}</small><small>${d.meta}</small><span class="ya-debate-cta"><span>${d.kind === "live" ? "Open live debate" : d.kind === "replay" ? "Open replay" : "View debate"}</span><span aria-hidden="true">→</span></span></span></${d.href ? "a" : "button"}>`,
+      html`<${d.href ? html`a href="${d.href}"` : html`button type="button"`} class="ya-debatecard" ${d.href ? "" : html`data-open-debate="${d.id}" aria-pressed="${String(active === d.id)}"`}><span class="ya-thumbnail"><span class="tag${d.kind === "live" ? " tag-live" : ""}">${d.kind === "live" ? livePixel : ""}${d.kind === "live" ? "Live" : d.kind === "replay" ? "Replay" : "Upcoming"}</span><span class="ya-thumb-people" aria-hidden="true">${avatarSlot(d.names[0], 48, d.avatars?.[0] ?? undefined)}${avatarSlot(d.names[1], 48, d.avatars?.[1] ?? undefined)}</span></span><span class="ya-debatecopy"><strong>${d.title}</strong><small>${d.names[0]} vs. ${d.names[1]}</small><small>${d.meta}</small><span class="ya-debate-cta"><span>${d.kind === "live" ? "Open live debate" : d.kind === "replay" ? "Open replay" : "View debate"}</span><span aria-hidden="true">→</span></span></span></${d.href ? "a" : "button"}>`,
   );
   return cards.length
     ? html`${cards}`

@@ -4,6 +4,7 @@ import { after, afterEach, before, describe, it } from "node:test";
 import pg from "pg";
 
 import { createMatchmaking } from "../dist/features/matching/matchmaking.js";
+import { defaultAvatarId } from "../dist/features/identity/avatars.js";
 import {
   createMatchingRepository,
   MatchConflictError,
@@ -132,15 +133,22 @@ describe(
       const deadline = new Date(offered.offer.deadlineAt).getTime();
       const now = new Date(offered.serverNow).getTime();
       assert.ok(deadline - now > 25_000 && deadline - now <= 30_000);
-      // Each player sees who they were paired with and the side that player argues.
+      // Each player sees who they were paired with, their avatar (the chosen
+      // one, or the handle's default) and the side that player argues.
       assert.deepEqual(offered.offer.opponent, {
         handle: await handleOf(a),
         displayName: "Queue player",
+        avatarId: defaultAvatarId(await handleOf(a)),
         sideLabel: "For",
       });
+      await owner.query(
+        "UPDATE public_profiles SET avatar_id = 'yap-owl' WHERE user_id = $1",
+        [b],
+      );
       assert.deepEqual((await queue.state(a)).offer.opponent, {
         handle: await handleOf(b),
         displayName: "Queue player",
+        avatarId: "yap-owl",
         sideLabel: "Against",
       });
 
@@ -288,10 +296,12 @@ describe(
         "UPDATE public_profiles SET publication_state = 'hidden' WHERE user_id = $1",
         [b],
       );
-      // A hidden profile's name and handle are not shown, even to the paired player.
+      // A hidden profile's name, handle and avatar are not shown, even to the
+      // paired player.
       assert.deepEqual((await queue.state(a)).offer.opponent, {
         handle: null,
         displayName: null,
+        avatarId: null,
         sideLabel: "Against",
       });
       const result = await queue.accept(b, offer.id);

@@ -139,7 +139,7 @@ describe("live topic queue API", () => {
     );
   });
 
-  it("sends the paired player's name, handle and side with the offer", async () => {
+  it("sends the paired player's name, handle, avatar and side with the offer", async () => {
     const offered = {
       ...state,
       ticket: {
@@ -160,6 +160,7 @@ describe("live topic queue API", () => {
         opponent: {
           handle: "maya-chen",
           displayName: "Maya Chen",
+          avatarId: "yap-critter",
           sideLabel: "Against",
         },
       },

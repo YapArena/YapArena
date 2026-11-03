@@ -52,7 +52,11 @@ const debate = {
     sideALabel: topic.sideALabel,
     sideBLabel: topic.sideBLabel,
   },
-  speakerA: { handle: profile.handle, displayName: profile.displayName },
+  speakerA: {
+    handle: profile.handle,
+    displayName: profile.displayName,
+    avatarId: profile.avatarId,
+  },
   speakerB: null,
   sponsor: null,
 };
@@ -99,7 +103,7 @@ describe("public discovery", () => {
       ...debate,
       status: "live",
       proposition: "Should <cities> change?",
-      speakerB: { displayName: "B & C", handle: "other" },
+      speakerB: { displayName: "B & C", handle: "other", avatarId: "yap-frog" },
     };
     const featured = {
       ...discovery,
@@ -533,7 +537,11 @@ describe("public discovery", () => {
         isDemo: true,
         scheduledAt: null,
         speakerA: null,
-        speakerB: { handle: "morgan-lee", displayName: "Morgan Lee" },
+        speakerB: {
+          handle: "morgan-lee",
+          displayName: "Morgan Lee",
+          avatarId: "yap-frog",
+        },
         sponsor: { name: "Example Sponsor", disclosure: "Sponsored listing" },
       }),
       /Sponsored listing/,
@@ -817,6 +825,7 @@ describe("discovery repository visibility", () => {
       sideBLabel: topic.sideBLabel,
       speakerAHandle: profile.handle,
       speakerADisplayName: profile.displayName,
+      speakerAAvatarId: "yap-owl",
       speakerBHandle: null,
       speakerBDisplayName: null,
       sponsorName: "Example Sponsor",
@@ -837,6 +846,7 @@ describe("discovery repository visibility", () => {
     assert.deepEqual(list.items[0].speakerA, {
       handle: profile.handle,
       displayName: profile.displayName,
+      avatarId: "yap-owl",
     });
     assert.equal(list.items[0].speakerB, null);
     assert.equal(list.items[0].sponsor, null);
@@ -882,9 +892,11 @@ describe("discovery repository visibility", () => {
     });
     const anonymous = await anonymousRepository.getDebate(debate.slug);
     assert.equal(anonymous.speakerA, null);
+    // No stored choice: the speaker shows their handle's default avatar.
     assert.deepEqual(anonymous.speakerB, {
       handle: "morgan-lee",
       displayName: "Morgan Lee",
+      avatarId: "yap-blob",
     });
     assert.equal(anonymous.sponsor, null);
   });
