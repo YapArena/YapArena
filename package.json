@@ -51,6 +51,7 @@
   },
   "allowScripts": {
     "esbuild@0.28.2": true,
+    "@livekit/blingfire@1.2.0": false,
     "@livekit/local-inference@0.2.7": false
   },
   "dependencies": {

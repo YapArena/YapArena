@@ -72,7 +72,10 @@ implementing it. Do not treat a passing backend quality gate as permission to ac
    [auth regression gate](docs/operations.md#auth-regression-gate) or a focused verifier.
 
    CI is the full gate. Every pull request runs the database-backed quality gate with coverage,
-   the container builds and scans, and every integration check. Run the full local gate only to
+   the container builds and scans, and every integration check. The separate Security workflow
+   audits the lockfile with `npm audit`, scans the history for secrets with gitleaks and runs
+   CodeQL. A gitleaks false positive is fixed by changing the value, or recorded with its
+   fingerprint and reason in `.gitleaksignore`. Run the full local gate only to
    debug a CI failure, for migration work, or when a prompt asks for it:
    `A4_QUALITY=true npm run verify:database-isolation` (Docker, or `DATABASE_TEST_MODE=host` with
    PostgreSQL 17/18 tools on PATH) runs `npm run check` with disposable A4, wallet and revocation
@@ -123,7 +126,9 @@ security problems using [SECURITY.md](SECURITY.md), not a public issue.
 
 Dependency install scripts are reviewed and pinned in the `allowScripts` policy in `package.json`.
 Review the package, exact version, published provenance, and required lifecycle behavior before
-changing that policy. Supported npm versions report or enforce unreviewed scripts during install.
+changing that policy. The committed `.npmrc` turns on `strict-allow-scripts`, so npm 11.17 or later
+(bundled with Node.js 24.19 and later) fails an install when a dependency has an unreviewed install
+script. After review, add its exact version with `true` to run the script or `false` to skip it.
 
 See the [glossary](docs/glossary.md) for terms such as branch, pull request, migration, image, and CI.
 
