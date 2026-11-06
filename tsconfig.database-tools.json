@@ -21,6 +21,7 @@
     "scripts/release-account-render.ts",
     "scripts/coin-sandbox-operator.ts",
     "scripts/suspend-account.ts",
+    "scripts/set-topic-category.ts",
     "scripts/measure-coin-load.ts",
     "scripts/reset-test-accounts.ts",
     "scripts/provision-database.ts",

@@ -285,6 +285,28 @@ describe("matching repository transaction boundaries", () => {
     );
   });
 
+  it("stores a new topic's category, other when none is given", async () => {
+    const { repository, queries } = fake();
+    const input = {
+      slug: "civil-ai",
+      title: "Civil AI",
+      summary: "A topic",
+      sideALabel: "For",
+      sideBLabel: "Against",
+    };
+    await repository.createTopic("1", { ...input, category: "work" });
+    await repository.createTopic("1", input);
+    const inserts = queries.filter(([sql]) =>
+      sql.startsWith("INSERT INTO topics"),
+    );
+    assert.match(inserts[0][0], /side_b_label, category\)/);
+    assert.match(inserts[0][0], /RETURNING .*category/s);
+    assert.equal(inserts[0][1][6], "work");
+    assert.equal(inserts[1][1][6], "other");
+    await repository.listOwnTopics("1");
+    assert.match(queries.at(-1)[0], /"sideBLabel", category,/);
+  });
+
   it("opens a direct challenge under an account lock and creates a mapped event", async () => {
     const { repository, queries, state } = fake({
       conflicted: [{ id: "other", initiatorUserId: "3", targetUserId: "2" }],

@@ -1,6 +1,7 @@
 import type { Pool } from "pg";
 import { resolveAvatarId } from "../identity/avatars.ts";
 
+import type { TopicCategory } from "./topic-categories.ts";
 import type {
   DebateStatus,
   PublicTopic,
@@ -102,7 +103,7 @@ function mapDebate(row: DebateRow): PublicDebate {
 }
 
 const topicColumns = `id, slug, title, summary,
-  side_a_label AS "sideALabel", side_b_label AS "sideBLabel",
+  side_a_label AS "sideALabel", side_b_label AS "sideBLabel", category,
   is_demo AS "isDemo", created_at AS "createdAt"`;
 
 const debateColumns = `d.id, d.slug, d.proposition, d.status,
@@ -171,10 +172,12 @@ export function createDiscoveryRepository(database: Pick<Pool, "query">) {
     },
     async listTopics({
       query = "",
+      category,
       limit = 12,
       offset = 0,
     }: {
       query?: string;
+      category?: TopicCategory;
       limit?: number;
       offset?: number;
     }): Promise<PublicList<PublicTopic>> {
@@ -184,9 +187,12 @@ export function createDiscoveryRepository(database: Pick<Pool, "query">) {
          WHERE publication_state = 'published'
            AND ($1 = '' OR to_tsvector('simple', title || ' ' || summary)
              @@ websearch_to_tsquery('simple', $1))
+           ${category ? "AND category = $4" : ""}
          ORDER BY created_at DESC, id DESC
          LIMIT $2 OFFSET $3`,
-        [query, limit + 1, offset],
+        category
+          ? [query, limit + 1, offset, category]
+          : [query, limit + 1, offset],
       );
       return page(result.rows, limit, offset);
     },
