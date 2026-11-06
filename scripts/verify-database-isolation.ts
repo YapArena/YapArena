@@ -142,6 +142,8 @@ const applicationTables = [
   "content_moderation_actions",
   // Decision 0003: the owner's topic category changes.
   "topic_category_changes",
+  // First-run build plan PR 9: "Notify me" on a scheduled debate.
+  "debate_notify_requests",
 ];
 const container = `yaparena-isolation-${randomUUID().slice(0, 8)}`;
 const evidenceDirectory = `/tmp/${container}-evidence`;

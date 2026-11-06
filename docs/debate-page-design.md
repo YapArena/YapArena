@@ -78,7 +78,8 @@ sideways.
   the composer. "Load earlier messages" has its own row above the messages. A chat button next to Enlarge
   hides it; the choice is kept on the device (`yaparena-chat-overlay`).
 - **Empty states:** upcoming (emblem at rest, "Starts Nov 4 · 3:00 PM EST", "Video appears here
-  when the debate begins."), live before joining ("The debate is live", the turn summary, Join as
+  when the debate begins.", and with the live queue on a "Notify me" button with a bell that
+  turns into an outlined "Notifying you"; see [the workspace](debate-workspace.md)), live before joining ("The debate is live", the turn summary, Join as
   viewer), replay before Play (emblem, Play replay, "10 turns · 10:00") and ended ("Debate
   ended"). The media status stays in its row under the video.
 - **Captions:** a 44 px `#0f0f0f` pill under the video, cut at the start with an ellipsis, with a
