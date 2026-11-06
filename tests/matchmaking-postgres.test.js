@@ -3,7 +3,10 @@ import { randomUUID } from "node:crypto";
 import { after, afterEach, before, describe, it } from "node:test";
 import pg from "pg";
 
-import { createMatchmaking } from "../dist/features/matching/matchmaking.js";
+import {
+  createMatchmaking,
+  WAITING_TOPICS_LIMIT,
+} from "../dist/features/matching/matchmaking.js";
 import { defaultAvatarId } from "../dist/features/identity/avatars.js";
 import {
   createMatchingRepository,
@@ -369,6 +372,84 @@ describe(
       await sweepOnce(queue);
       assert.equal((await ticket(b)).status, "offered");
       assert.equal((await ticket(c)).status, "offered");
+    });
+
+    it("lists topics with someone waiting, most waiting first, by the per-topic rule", async () => {
+      // Capacity 0 keeps both sides waiting; the other PostgreSQL suites sweep at capacity 0 too.
+      const full = createMatchmaking(runtime, { liveDebateCapacity: 0 });
+      const [busy, recent, older, hidden, absent, paired] = [
+        await topic(),
+        await topic(),
+        await topic(),
+        await topic(),
+        await topic(),
+        await topic(),
+      ];
+      const enter = async (slug, side, instance = full) => {
+        const id = await player();
+        await instance.enter(id, { topicSlug: slug, side });
+        return id;
+      };
+      await enter(busy, "A");
+      await enter(busy, "A");
+      await enter(busy, "B");
+      const first = await enter(older, "B");
+      await enter(recent, "A");
+      // The tie between `recent` and `older` goes to the more recent queue time.
+      await owner.query(
+        "UPDATE matchmaking_tickets SET priority_at = priority_at - interval '1 minute' WHERE user_id = $1",
+        [first],
+      );
+      await enter(hidden, "A");
+      await owner.query(
+        "UPDATE topics SET publication_state = 'hidden' WHERE slug = $1",
+        [hidden],
+      );
+      const gone = await enter(absent, "B");
+      await owner.query(
+        "UPDATE matchmaking_tickets SET last_seen_at = CURRENT_TIMESTAMP - interval '2 minutes' WHERE user_id = $1",
+        [gone],
+      );
+      await enter(paired, "A", queue);
+      await enter(paired, "B", queue);
+
+      const listed = await full.waitingTopics();
+      assert.ok(listed.length <= WAITING_TOPICS_LIMIT);
+      // Other suites share this database, so look only at this test's topics.
+      const mine = listed.filter((item) =>
+        [busy, recent, older, hidden, absent, paired].includes(item.slug),
+      );
+      const row = (slug, sideA, sideB) => ({
+        slug,
+        title: "Canada should expand nuclear power",
+        sideALabel: "For",
+        sideBLabel: "Against",
+        waiting: { sideA, sideB },
+      });
+      assert.deepEqual(mine, [
+        row(busy, 2, 1),
+        row(recent, 1, 0),
+        row(older, 0, 1),
+      ]);
+      for (const slug of [busy, recent, older, hidden, absent, paired]) {
+        const item = mine.find((entry) => entry.slug === slug);
+        assert.deepEqual(
+          item?.waiting ?? { sideA: 0, sideB: 0 },
+          await full.waiting(slug),
+          slug,
+        );
+      }
+    });
+
+    it("shows at most twenty topics with someone waiting", async () => {
+      const full = createMatchmaking(runtime, { liveDebateCapacity: 0 });
+      for (let index = 0; index <= WAITING_TOPICS_LIMIT; index += 1)
+        await full.enter(await player(), {
+          topicSlug: await topic(),
+          side: "A",
+        });
+      assert.equal(WAITING_TOPICS_LIMIT, 20);
+      assert.equal((await full.waitingTopics()).length, WAITING_TOPICS_LIMIT);
     });
 
     it("prunes resolved queue history after its retention period", async () => {

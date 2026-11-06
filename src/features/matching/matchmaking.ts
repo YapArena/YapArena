@@ -44,6 +44,8 @@ const RETENTION_DAYS = 30;
 const SWEEP_TOPICS = 25;
 const SWEEP_OFFERS = 100;
 const SWEEP_NO_SHOWS = 50;
+// The public "someone's waiting" list shows at most this many topics.
+export const WAITING_TOPICS_LIMIT = 20;
 
 type Side = "A" | "B";
 type TicketStatus = "searching" | "offered" | "matched" | "closed";
@@ -76,6 +78,15 @@ interface OfferRow {
   acceptedBAt: Date | null;
   debateId: string | null;
   open: boolean;
+}
+
+// A published topic with someone in its live queue. Counts only, never who (Decision 0011).
+export interface WaitingTopic {
+  slug: string;
+  title: string;
+  sideALabel: string;
+  sideBLabel: string;
+  waiting: { sideA: number; sideB: number };
 }
 
 export interface MatchmakingState {
@@ -793,6 +804,41 @@ export function createMatchmaking(
       const count = (side: Side) =>
         result.rows.find((row) => row.side === side)?.count ?? 0;
       return { sideA: count("A"), sideB: count("B") };
+    },
+
+    // Every topic with someone waiting, by the same rule as waiting(): the most people waiting
+    // first, then the most recent queue time (Decision 0011's fix for split queues).
+    async waitingTopics(): Promise<WaitingTopic[]> {
+      const result = await database.query<{
+        slug: string;
+        title: string;
+        sideALabel: string;
+        sideBLabel: string;
+        sideA: number;
+        sideB: number;
+      }>(
+        `SELECT tp.slug, tp.title, tp.side_a_label AS "sideALabel",
+           tp.side_b_label AS "sideBLabel",
+           count(*) FILTER (WHERE t.side = 'A')::int AS "sideA",
+           count(*) FILTER (WHERE t.side = 'B')::int AS "sideB"
+         FROM matchmaking_tickets t
+         JOIN topics tp ON tp.id = t.topic_id
+         WHERE tp.publication_state = 'published'
+           AND t.status = 'searching' AND t.${fresh}
+         GROUP BY tp.id
+         ORDER BY count(*) DESC, max(t.priority_at) DESC, tp.slug
+         LIMIT $1`,
+        [WAITING_TOPICS_LIMIT],
+      );
+      return result.rows.map(
+        ({ slug, title, sideALabel, sideBLabel, sideA, sideB }) => ({
+          slug,
+          title,
+          sideALabel,
+          sideBLabel,
+          waiting: { sideA, sideB },
+        }),
+      );
     },
 
     // One pass of the 1-second job: expire offers, cancel no-shows, drop absent players, then pair
