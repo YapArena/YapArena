@@ -353,7 +353,7 @@ jobs:
           curl --fail --silent --show-error http://localhost:3000/ \
             | grep --fixed-strings 'data-pixel-logo'
           curl --fail --silent --show-error http://localhost:3000/home \
-            | grep --fixed-strings 'id="ya-market-v4"'
+            | grep --fixed-strings 'data-home-list'
           curl --fail --silent --show-error http://localhost:3000/live \
             | grep --fixed-strings '/topics/ai-and-human-creativity'
           curl --fail --silent --show-error http://localhost:3000/debates \

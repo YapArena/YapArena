@@ -549,6 +549,12 @@ const storageList = table(
       cell("Until you clear site data"),
     ],
     [
+      cell("yaparena-home-intro"),
+      cell("Strictly necessary"),
+      cell("Remembers that you closed the introduction on Home."),
+      cell("Until you clear site data"),
+    ],
+    [
       cell("yaparena-stake-defaults, -review, -explained"),
       cell("Strictly necessary"),
       cell(

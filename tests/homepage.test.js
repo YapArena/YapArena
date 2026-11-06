@@ -16,7 +16,6 @@ import {
 } from "../dist/features/discovery/homepage-chart.js";
 import { pixelMark, fnv1a } from "../dist/features/discovery/pixel-mark.js";
 import * as view from "../dist/features/discovery/homepage-view.js";
-import { renderHome } from "../dist/features/discovery/web.js";
 import { loadConfig } from "../dist/platform/config.js";
 const topic = {
   id: "11111111-1111-4111-8111-111111111111",
@@ -93,16 +92,14 @@ it("adapts public topics/debates without manufacturing market histories or argum
     m.arguments.every((a) => a.rate === null),
     true,
   );
-  const html = renderHome("https://arena.example", data);
+  // The old trending view stays until first-run plan PR 7 removes it; /home
+  // shows the debate list (tests/home-list.test.js).
+  const html = String(view.homepageMarkup(data));
   assert.ok(html.includes("/topics/public-idea"));
   assert.ok(html.includes("/debates/real-debate"));
   assert.ok(html.includes("A real &lt;question&gt;?"));
   assert.ok(!html.includes("A real <question>"));
   assert.ok(!html.includes('class="ya-heading"'));
-  assert.ok(html.includes('href="#main"'));
-  assert.ok(html.includes('rel="canonical" href="https://arena.example/home"'));
-  assert.ok(html.includes("data-header-balance"));
-  assert.ok(html.includes("measurement.js?v="));
   assert.ok(
     !/iframe|srcdoc|unpkg|viewer-token|replay\.bundle|hero-preview/.test(html),
   );
@@ -112,7 +109,7 @@ it("adapts public topics/debates without manufacturing market histories or argum
   assert.ok(!embedded.includes("<"));
   assert.ok(embedded.includes("&lt;question&gt;"));
 });
-it("gates reference data explicitly and never falls back to it on a real request failure", async () => {
+it("retires the reference sample with the old home and never falls back to it on a real request failure", async () => {
   const app = (enabled) =>
     express().use(
       createDiscoveryRouter({
@@ -133,13 +130,14 @@ it("gates reference data explicitly and never falls back to it on a real request
     (await request(app(true)).get("/home?reference=yes")).status,
     404,
   );
+  // The sample showed the trending home, which the debate list replaced
+  // (first-run plan PR 6): the flag no longer changes /home.
   const demo = await request(app(true)).get("/home?reference=1");
-  assert.equal(demo.status, 200);
+  assert.equal(demo.status, 404);
   assert.equal(demo.headers["cache-control"], "no-store");
-  assert.ok(demo.text.includes("Concept · Sample data"));
-  assert.ok(demo.text.includes("68%"));
-  assert.ok(!demo.text.includes("measurement.js"));
-  // The reference view moved with the homepage; / is the landing page.
+  assert.ok(!demo.text.includes("Concept · Sample data"));
+  assert.ok(!demo.text.includes("68%"));
+  // / is the landing page.
   assert.ok(
     !(await request(app(true)).get("/?reference=1")).text.includes("68%"),
   );
@@ -340,4 +338,24 @@ it("reproduces both chart geometries/ranges and interpolates the actual pointer 
   assert.equal(interpolate([10, 20, 40], 0.625), 25);
   assert.equal(interpolate([10, 20], -1), 10);
   assert.equal(interpolate([10, 20], 2), 20);
+});
+it("keeps the old homepage feed working until first-run plan PR 7 removes it", async () => {
+  // /home no longer reads this feed; GET /api/public/homepage still serves it.
+  const feed = (mediaEnabled) =>
+    express().use(
+      createDiscoveryRouter({
+        discovery: {
+          listTopics: async () => ({ items: [topic] }),
+          listWatchableDebates: async () => [debate],
+        },
+        mediaEnabled,
+        applicationOrigin: "https://arena.example",
+      }),
+    );
+  const withMedia = await request(feed(true)).get("/api/public/homepage");
+  assert.equal(withMedia.status, 200);
+  assert.equal(withMedia.body.ideas[0].debates[0].href, "/debates/real-debate");
+  const without = await request(feed(false)).get("/api/public/homepage");
+  assert.equal(without.status, 200);
+  assert.deepEqual(without.body.ideas[0].debates, []);
 });

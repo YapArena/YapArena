@@ -1,9 +1,14 @@
-import type { Browser, Page } from "playwright-core";
+import type { Browser, BrowserContext, Page } from "playwright-core";
 import type { AddressInfo } from "node:net";
 import type {
   PublicTopic,
   PublicDebate,
 } from "../src/features/discovery/public-types.ts";
+import type {
+  PublicBotActivity,
+  PublicBotRound,
+} from "../src/features/a4/public-bot-types.ts";
+import type { WaitingTopic } from "../src/features/discovery/home-list-model.ts";
 /* global document, window, getComputedStyle */
 import assert from "node:assert/strict";
 import { once } from "node:events";
@@ -13,21 +18,24 @@ import { chromium } from "playwright-core";
 import axe from "axe-core";
 import { createApp } from "../dist/app.js";
 import { createLogger } from "../dist/platform/logger.js";
-import { referenceHomepage } from "../dist/features/discovery/homepage-reference.js";
 
-// These component fixtures exercise discovery/account rendering and the mocked
+// The home as a debate list (first-run plan PR 6) and the endorsement chart
+// that moved to topic pages. These component fixtures exercise discovery
+// rendering, the public waiting list, the public turn windows and the mocked
 // auth, wallet and follow routes above the application. Services omitted here
-// are only captured by unrelated route handlers; no fixture calls those methods.
-// Keep each supplied method tied to its production signature without inventing
-// implementations for unused fixture services.
+// are only captured by unrelated route handlers; no fixture calls those
+// methods. Keep each supplied method tied to its production signature without
+// inventing implementations for unused fixture services.
 type ApplicationOptions = Parameters<typeof createApp>[0];
 type FixtureServices =
   | "discovery"
   | "identity"
   | "matching"
+  | "matchmaking"
   | "media"
   | "mediaProvider"
   | "messages"
+  | "publicBots"
   | "users"
   | "sessions";
 type HomepageFixtureOptions = Omit<ApplicationOptions, FixtureServices> & {
@@ -41,12 +49,17 @@ type HomepageFixtureOptions = Omit<ApplicationOptions, FixtureServices> & {
   >;
   identity: Pick<NonNullable<ApplicationOptions["identity"]>, never>;
   matching: Pick<NonNullable<ApplicationOptions["matching"]>, never>;
+  matchmaking: Pick<
+    NonNullable<ApplicationOptions["matchmaking"]>,
+    "waitingTopics"
+  >;
   media: Pick<NonNullable<ApplicationOptions["media"]>, never>;
   mediaProvider: Pick<
     NonNullable<ApplicationOptions["mediaProvider"]>,
     "publicUrl" | "playbackOrigin" | "playbackOrigins"
   >;
   messages: Pick<ApplicationOptions["messages"], "isReady">;
+  publicBots: Pick<NonNullable<ApplicationOptions["publicBots"]>, "topics">;
   sessions: Pick<ApplicationOptions["sessions"], "findUserByTokenHash">;
 };
 type CreateHomepageFixtureApp = (
@@ -56,49 +69,167 @@ type CreateHomepageFixtureApp = (
 const directory =
   process.env.HOMEPAGE_ARTIFACT_DIR ?? "/private/tmp/yaparena-homepage-browser";
 await mkdir(directory, { recursive: true });
-const topic: PublicTopic = {
-  id: "11111111-1111-4111-8111-111111111111",
-  slug: "published-idea",
-  title: "Published public idea",
+const HOUR = 3_600_000;
+const started = Date.now();
+const at = (hours: number) => new Date(started + hours * HOUR);
+const topic = (slug: string, title: string, index: number): PublicTopic => ({
+  id: `11111111-1111-4111-8111-${String(index).padStart(12, "0")}`,
+  slug,
+  title,
   summary: "Synthetic local integration fixture.",
   sideALabel: "Support",
   sideBLabel: "Oppose",
   isDemo: false,
   createdAt: new Date("2026-10-01"),
+});
+const idea = topic("published-idea", "Published public idea", 1);
+const work = topic("future-of-work", "The future of work", 2);
+let count = 0;
+const debate = (
+  on: PublicTopic,
+  proposition: string,
+  fields: Partial<PublicDebate>,
+): PublicDebate => {
+  count++;
+  return {
+    id: `22222222-2222-4222-8222-${String(count).padStart(12, "0")}`,
+    slug: `published-debate-${count}`,
+    proposition,
+    status: "replay",
+    rulesVersion: "prototype-media-1",
+    scheduledAt: null,
+    liveStartedAt: null,
+    liveEndedAt: null,
+    isDemo: false,
+    createdAt: new Date("2026-10-01"),
+    topic: {
+      slug: on.slug,
+      title: on.title,
+      sideALabel: on.sideALabel,
+      sideBLabel: on.sideBLabel,
+    },
+    speakerA: {
+      handle: "alex",
+      displayName: "Alex Public",
+      avatarId: "yap-owl",
+    },
+    speakerB: {
+      handle: "morgan",
+      displayName: "Morgan Public",
+      avatarId: "yap-frog",
+    },
+    sponsor: null,
+    ...fields,
+  };
 };
-const debate: PublicDebate = {
-  id: "22222222-2222-4222-8222-222222222222",
-  slug: "published-debate",
-  proposition: "A public debate for the idea",
-  status: "replay",
-  rulesVersion: "prototype-media-1",
-  scheduledAt: null,
-  liveStartedAt: new Date("2026-10-01"),
-  liveEndedAt: new Date("2026-10-01"),
-  isDemo: false,
-  createdAt: new Date("2026-10-01"),
-  topic: {
-    slug: topic.slug,
-    title: topic.title,
-    sideALabel: topic.sideALabel,
-    sideBLabel: topic.sideBLabel,
+const liveDebate = debate(idea, "Should the idea go live?", {
+  status: "live",
+  liveStartedAt: at(-0.2),
+});
+const otherLive = debate(work, "Should the four-day week become standard?", {
+  status: "live",
+  liveStartedAt: at(-0.1),
+});
+const soon = debate(work, "Can a shorter week work for everyone?", {
+  status: "scheduled",
+  scheduledAt: at(2.25),
+});
+// Staging showed "Starts Oct 27" long after Oct 27; neither this nor a debate
+// more than a day away is on the home.
+const pastStart = debate(idea, "A start that already passed", {
+  status: "scheduled",
+  scheduledAt: new Date("2026-10-27T17:00:00Z"),
+});
+const later = debate(idea, "A debate in three days", {
+  status: "scheduled",
+  scheduledAt: at(72),
+});
+const answerable = debate(idea, "A replay still taking answers", {
+  liveStartedAt: at(-27),
+  liveEndedAt: at(-26),
+});
+// Within 120 hours, but its turn windows have no open one: finished.
+const closedEarly = debate(work, "A replay whose answers closed", {
+  liveStartedAt: at(-51),
+  liveEndedAt: at(-50),
+});
+const finished = debate(idea, "A finished debate", {
+  status: "finalized",
+  liveStartedAt: at(-201),
+  liveEndedAt: at(-200),
+});
+const waiting: WaitingTopic[] = [
+  {
+    slug: work.slug,
+    title: work.title,
+    sideALabel: work.sideALabel,
+    sideBLabel: work.sideBLabel,
+    waiting: { sideA: 1, sideB: 0 },
   },
-  speakerA: { handle: "alex", displayName: "Alex Public", avatarId: "yap-owl" },
-  speakerB: {
-    handle: "morgan",
-    displayName: "Morgan Public",
-    avatarId: "yap-frog",
+];
+const scenarios = {
+  busy: [
+    liveDebate,
+    otherLive,
+    soon,
+    pastStart,
+    later,
+    answerable,
+    closedEarly,
+    finished,
+  ],
+  quiet: [answerable, finished],
+  empty: [],
+};
+let scenario: keyof typeof scenarios = "busy";
+const visible = () => scenarios[scenario];
+// A day of shared, labelled rounds for the topic page's chart.
+const round = (index: number): PublicBotRound => ({
+  id: `round-${index}`,
+  runId: null,
+  debateId: answerable.id,
+  debateSlug: answerable.slug,
+  number: index,
+  period: 1,
+  settledAt: new Date(started - (40 - index) * 0.5 * HOUR).toISOString(),
+  closesAt: new Date(started - (40 - index) * 0.5 * HOUR).toISOString(),
+  mode: "seed",
+  share: { n: String(50 + Math.round(10 * Math.sin(index / 4))), d: "100" },
+  offer: { n: String(40 + (index % 7)), d: "100" },
+  medianNo: null,
+  medianYes: null,
+  branch: null,
+  argumentLabel: "Opening case",
+  ownLimit: null,
+  humans: 2,
+  bots: 498,
+  executed: 120,
+  premium: "2500000000",
+  quantity: "500",
+});
+const activity: PublicBotActivity = {
+  scope: "shared",
+  synthetic: true,
+  revision: "fixture",
+  hasMore: false,
+  window: 30,
+  items: Array.from({ length: 40 }, (_, index) => round(index)),
+  arguments: [],
+  category: "Ideas",
+  totals: {
+    premium: "1",
+    humanCommitments: 1,
+    botCommitments: 1,
+    executed: 1,
   },
-  sponsor: null,
 };
 const list = <T>(items: T[]) => ({
   items,
   pagination: { limit: 12, offset: 0, hasMore: false },
 });
 let signedIn = false,
-  followed = false,
-  followWrites = 0,
   unavailable = false;
+const follows: string[] = [];
 const app = express();
 app.get("/api/auth/me", (_r, s) =>
   signedIn
@@ -122,42 +253,79 @@ app.get("/api/account-wallet", (_r, s) =>
       })
     : s.sendStatus(401),
 );
-app
-  .route("/api/me/follows/topics/:slug")
-  .get((_r, s) =>
-    signedIn
-      ? s.json({ following: followed })
-      : s.status(401).json({ error: "authentication required" }),
-  )
-  .put((_r, s) => {
-    if (!signedIn) return s.sendStatus(401);
-    followWrites++;
-    followed = true;
-    return s.json({ following: true });
-  })
-  .delete((_r, s) => {
-    if (!signedIn) return s.sendStatus(401);
-    followWrites++;
-    followed = false;
-    return s.json({ following: false });
+app.get("/api/me/follows", (_r, s) =>
+  signedIn
+    ? s.json({
+        items: follows.map((slug, index) => ({
+          id: String(index),
+          targetType: "topic",
+          slug,
+          title: slug,
+          createdAt: new Date("2026-10-01"),
+        })),
+        pagination: { limit: 50, offset: 0, hasMore: false },
+      })
+    : s.status(401).json({ error: "authentication required" }),
+);
+app.get("/api/me/follows/topics/:slug", (r, s) =>
+  signedIn
+    ? s.json({ following: follows.includes(r.params.slug) })
+    : s.status(401).json({ error: "authentication required" }),
+);
+// Each debate's public turn windows: open while a replay takes answers,
+// revealed with a share afterwards.
+app.get("/api/public/debates/:id/windows", (r, s) => {
+  const found = visible().find((d) => d.id === r.params.id);
+  if (!found?.liveEndedAt)
+    return s.status(404).json({ error: "debate not found" });
+  const open = found.id === answerable.id;
+  return s.json({
+    debateId: found.id,
+    eventStatus: found.status,
+    serverNow: new Date().toISOString(),
+    revealMode: "five_day",
+    revealAt: new Date(found.liveEndedAt.getTime() + 120 * HOUR).toISOString(),
+    windows: [1, 2, 3, 4, 5, 6].map((turnNumber) => ({
+      id: `${found.id}-${turnNumber}`,
+      turnNumber,
+      side: turnNumber % 2 ? "A" : "B",
+      state: open ? "open" : "settled",
+      pricing: open
+        ? null
+        : { share: { n: String(48 + turnNumber * 2), d: "100" } },
+    })),
   });
+});
 app.use(
   (createApp as CreateHomepageFixtureApp)({
     discovery: {
       listTopics: async () => {
         if (unavailable) throw Error("local fixture unavailable");
-        return list([topic]);
+        return list([idea, work]);
       },
-      listWatchableDebates: async () => [debate],
-      listDebates: async () => list([debate]),
-      getDebate: async (slug) => (slug === debate.slug ? debate : null),
-      getTopic: async (slug) => (slug === topic.slug ? topic : null),
+      listWatchableDebates: async () =>
+        visible().filter((d) => d.status === "live"),
+      listDebates: async ({ status, topicSlug }) => {
+        if (unavailable) throw Error("local fixture unavailable");
+        return list(
+          visible().filter(
+            (d) =>
+              (!status || d.status === status) &&
+              (!topicSlug || d.topic.slug === topicSlug),
+          ),
+        );
+      },
+      getDebate: async (slug) => visible().find((d) => d.slug === slug) ?? null,
+      getTopic: async (slug) =>
+        [idea, work].find((t) => t.slug === slug) ?? null,
     },
-    homepageReferenceEnabled: true,
-    // Configure the existing media boundary only to select its public playable list.
-    // No provider connection is used by homepage cards.
     identity: {},
     matching: {},
+    matchmaking: {
+      waitingTopics: async () => (scenario === "empty" ? [] : waiting),
+    },
+    // Configure the existing media boundary only to select its public playable list.
+    // No provider connection is used by the home.
     media: {},
     mediaProvider: {
       publicUrl: "wss://media.example.test",
@@ -165,6 +333,15 @@ app.use(
       playbackOrigins: ["https://media.example.test"],
     },
     messages: { isReady: async () => {} },
+    publicBots: {
+      topics: async (ids) =>
+        Object.fromEntries(
+          ids.map((id) => [
+            id,
+            id === idea.id ? activity : { ...activity, items: [] },
+          ]),
+        ),
+    },
     sessions: { findUserByTokenHash: async () => null },
     logger: createLogger({ enabled: false }),
     applicationOrigin: "http://localhost",
@@ -190,378 +367,368 @@ try {
     headless: true,
     args: ["--no-sandbox"],
   });
-  const context = await browser.newContext({
+  async function newContext(options: Parameters<Browser["newContext"]>[0]) {
+    const context = await browser!.newContext(options);
+    context.setDefaultTimeout(15000);
+    await context.addInitScript(() => {
+      window.localStorage.setItem("yaparena-measurement-declined", "1");
+      window.homeCsp = [];
+      document.addEventListener("securitypolicyviolation", (e) =>
+        window.homeCsp.push({
+          directive: e.violatedDirective,
+          uri: e.blockedURI,
+        }),
+      );
+    });
+    return context;
+  }
+  const context = await newContext({
     viewport: { width: 1440, height: 1100 },
     reducedMotion: "no-preference",
-  });
-  context.setDefaultTimeout(15000);
-  await context.addInitScript(() => {
-    window.localStorage.setItem("yaparena-measurement-declined", "1");
-    window.homeCsp = [];
-    document.addEventListener("securitypolicyviolation", (e) =>
-      window.homeCsp.push({
-        directive: e.violatedDirective,
-        uri: e.blockedURI,
-      }),
-    );
   });
   const page = await context.newPage();
   page.on("pageerror", (e) => errors.push(e.message));
   const requests: string[] = [];
   page.on("request", (r) => requests.push(r.url()));
-  async function openNative() {
-    await page.mouse.move(0, 0);
-    await page.goto(base + "/home?reference=1");
-    await page.locator("#ya-grid [data-expand]").first().waitFor();
+  // The browser's second render (follows, waiting list, turn windows) is done
+  // once the finished debate shows its result.
+  async function openHome(target: Page = page, name = scenario) {
+    scenario = name;
+    await target.goto(base + "/home");
+    await target.locator("[data-home-feed]").waitFor();
+    if (name !== "empty")
+      await target.waitForFunction(() =>
+        document
+          .querySelector("[data-home-feed]")!
+          .textContent.includes("said yes"),
+      );
   }
-  const settled = () =>
-    page.waitForFunction(
-      () => !document.querySelector<HTMLElement>(".ya-carousel-ghost"),
-    );
   const noOverflow = (scope: Page) =>
     scope.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
     );
+  const text = (selector: string, target: Page = page) =>
+    target
+      .locator(selector)
+      .evaluateAll((nodes) =>
+        nodes.map((n) =>
+          (n as HTMLElement).innerText.replace(/\s+/g, " ").trim(),
+        ),
+      );
+  // Section titles by their real spelling (the visible Dydema capitals show
+  // U as V).
+  const titles = (target: Page = page) =>
+    target
+      .locator(".home-section-title > .sr-only")
+      .evaluateAll((nodes) => nodes.map((n) => n.textContent));
+  async function axeCheck(target: Page) {
+    await target.evaluate(axe.source);
+    const found = await target.evaluate(async () =>
+      (
+        await window.axe.run(document, {
+          runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
+        })
+      ).violations.map((v) => ({
+        id: v.id,
+        impact: v.impact,
+        targets: v.nodes.map((n) => n.target),
+      })),
+    );
+    violations.push(...found);
+  }
+
   for (const width of [1440, 1920, 1024, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 1100 });
-    await openNative();
+    await openHome();
     assert.ok(await noOverflow(page), `${width}px: no horizontal overflow`);
     await page.screenshot({
-      path: `${directory}/implemented-${width}-initial.png`,
+      path: `${directory}/home-${width}.png`,
       fullPage: true,
     });
   }
   checks.responsiveScreenshots = true;
+
   await page.setViewportSize({ width: 1440, height: 1100 });
-  await openNative();
-  // Each slide shows its own idea, up to three of its arguments and its debaters.
-  const ideas = referenceHomepage().ideas;
-  for (const idea of ideas) {
-    await page.locator(`[data-trending="${idea.id}"]`).click();
-    await settled();
-    assert.deepEqual(
-      await page.evaluate(() => ({
-        title: document.querySelector<HTMLElement>("#ya-title")!.textContent,
-        arguments: [
-          ...document.querySelectorAll<HTMLElement>(".trend-arg-text"),
-        ].map((n) => n.textContent),
-        rates: [
-          ...document.querySelectorAll<HTMLElement>(".trend-arg-meta .num"),
-        ].map((n) => n.textContent),
-        people: [
-          ...document.querySelectorAll<HTMLElement>(
-            ".trend-people > span:not(.vs):not(.avatar-slot)",
-          ),
-        ].map((n) => n.textContent),
-      })),
-      {
-        title: idea.title,
-        arguments: idea.arguments.slice(0, 3).map((a) => a.text),
-        rates: idea.arguments.slice(0, 3).map((a) => `${a.rate}%`),
-        people: idea.debates[0]!.names.slice(0, 2),
-      },
-    );
-    assert.equal(
-      await page.locator("#ya-against").textContent(),
-      `${100 - idea.pct!}%`,
-    );
-  }
-  checks.everySlideHasItsOwnArgumentsAndDebate = true;
-  // Every slide keeps the same height, so the carousel never jumps.
-  const heights = new Set<number>();
-  for (const idea of ideas) {
-    await page.locator(`[data-trending="${idea.id}"]`).click();
-    await settled();
-    heights.add(
-      Math.round(
-        (await page.locator("#ya-trending-slide").boundingBox())!.height,
-      ),
-    );
-  }
-  assert.equal(heights.size, 1, `slide heights ${[...heights].join(", ")}`);
-  checks.equalSlideHeights = true;
-  await page.locator('[data-trending="ai"]').click();
-  await settled();
-  const next = page.locator('[data-carousel="next"]'),
-    previous = page.locator('[data-carousel="previous"]');
-  assert.equal(
-    await next.getAttribute("aria-label"),
-    `Next idea: ${ideas[1]!.title}`,
-  );
-  assert.equal(
-    await previous.getAttribute("aria-label"),
-    `Previous idea: ${ideas.at(-1)!.title}`,
-  );
-  await next.click();
-  const animation = await page.locator("#ya-trending-slide").evaluate((n) => ({
-    first: (n.getAnimations()[0]!.effect as KeyframeEffect).getKeyframes()[0]!
-      .transform,
-    duration: n.getAnimations()[0]!.effect!.getTiming().duration as number,
-    easing: n.getAnimations()[0]!.effect!.getTiming().easing,
-  }));
-  assert.equal(animation.first, "translateX(104%)");
-  assert.equal(animation.duration, 620);
-  assert.equal(animation.easing, "cubic-bezier(0.22, 0.68, 0.16, 1)");
-  await previous.click();
+  await openHome();
+  // Signed out: the intro, the chips and the lists, in the confirmed order.
+  assert.equal(await page.locator("[data-home-intro]").isVisible(), true);
+  assert.deepEqual(await text("[data-home-filter]"), [
+    "All",
+    "Soon · 1",
+    "Replays · 3",
+  ]);
+  assert.deepEqual(await titles(), [
+    "Live now",
+    "Starting soon",
+    "Someone's waiting",
+    "Replays you can still answer",
+    "Finished debates",
+  ]);
+  const top = page.locator(".home-top .home-feature");
+  assert.equal(await top.getAttribute("href"), `/debates/${liveDebate.slug}`);
+  assert.match((await top.innerText()).replace(/\s+/g, " "), /LIVE .*Watch$/);
+  assert.equal(await page.locator(".btn-primary:visible").count(), 1);
   assert.equal(
     await page
-      .locator("#ya-trending-slide")
-      .evaluate(
-        (n) =>
-          (n.getAnimations()[0]!.effect as KeyframeEffect).getKeyframes()[0]!
-            .transform,
-      ),
-    "translateX(-104%)",
+      .locator(`.home-top .home-row[href="/debates/${otherLive.slug}"]`)
+      .count(),
+    1,
   );
-  for (let i = 0; i < 7; i++) await page.keyboard.press("Enter");
-  assert.equal(await page.locator(".ya-carousel-ghost").count(), 1);
+  const soonRows = await text('[data-home-section="soon"] .home-row');
+  assert.equal(soonRows.length, 1);
+  assert.match(
+    soonRows[0]!,
+    /Can a shorter week work for everyone\? .* in 2 h 1[45]$/,
+  );
+  const feed = (await page.locator("[data-home-feed]").innerText()).replace(
+    /\s+/g,
+    " ",
+  );
+  for (const hidden of [pastStart.proposition, later.proposition, "Oct 27"])
+    assert.ok(!feed.includes(hidden), `${hidden} is not on the home`);
+  assert.doesNotMatch(feed, /voted|winner/i);
+  const wait = page.locator('[data-home-section="waiting"] .home-row');
+  assert.equal(
+    await wait.getAttribute("href"),
+    `/topics/${work.slug}#queue-side-b`,
+  );
+  assert.match(
+    (await wait.innerText()).replace(/\s+/g, " "),
+    /The future of work 1 person waiting to argue Support Take the other side: Oppose Argue against/,
+  );
   assert.deepEqual(
-    await page.evaluate(() => {
-      const seen = new Set<string>(),
-        duplicates: string[] = [];
-      document.querySelectorAll<HTMLElement>("[id]").forEach((n) => {
-        if (seen.has(n.id)) duplicates.push(n.id);
-        seen.add(n.id);
-      });
-      return duplicates;
-    }),
-    [],
+    await text('[data-home-section="replays"] .home-row-meta + .home-row-meta'),
+    ["Answers close in 3 days"],
   );
-  // Renaming the neighbours keeps keyboard focus on the button.
-  assert.equal(
-    await page.evaluate(
-      () => (document.activeElement as HTMLElement).dataset.carousel,
+  assert.match(
+    await page.locator('[data-home-section="replays"] .home-row').innerText(),
+    /Answer$/,
+  );
+  // The replay whose turn windows have no open one is finished, with its result.
+  assert.deepEqual(
+    await text(
+      '[data-home-section="finished"] .home-row-meta + .home-row-meta',
     ),
-    "previous",
-  );
-  await settled();
-  // Nothing turns by itself any more: no pause control, and the slide stays.
-  assert.equal(await page.locator('[data-carousel="pause"]').count(), 0);
-  const shown = await page.locator("#ya-title").textContent();
-  await page.waitForTimeout(7000);
-  assert.equal(await page.locator("#ya-title").textContent(), shown);
-  checks.slideDirectionsTimingAndRapidNavigation = true;
-  // Both chart sizes scrub locally at the actual pointer x and restore the latest readout.
-  await page.locator('[data-trending="ai"]').click();
-  await settled();
-  async function scrub(selector: string, readout: string) {
-    const chart = page.locator(selector),
-      rect = (await chart.boundingBox())!,
-      before = requests.length;
-    await chart.hover({ position: { x: rect.width * 0.37, y: 70 } });
-    await page.waitForFunction(
-      (s) =>
-        document
-          .querySelector<HTMLElement>(s)!
-          .classList.contains("is-scrubbing"),
-      selector,
-    );
-    const state = await chart.evaluate((n) => ({
-      x: Number(
-        n
-          .querySelector<HTMLElement>("[data-chart-clip]")!
-          .getAttribute("width"),
-      ),
-      width: n.getBoundingClientRect().width,
-      marker: n
-        .querySelector("[data-chart-hover-marker]")!
-        .getAttribute("width"),
-    }));
-    assert.ok(Math.abs(state.x - state.width * 0.37) < 1);
-    assert.equal(state.marker, "10");
-    const value = (await page.locator(readout).textContent())!;
-    assert.notEqual(value, "68%");
-    if (readout === "#ya-value") {
-      // For and Against show that moment, and the label beside the marker too.
-      assert.equal(
-        await page.locator("#ya-against").textContent(),
-        `${100 - Number.parseInt(value)}%`,
-      );
-      assert.match(
-        (await page.locator("#ya-chart-tooltip").textContent())!,
-        /^[A-Z][a-z]{2} \d{1,2} \d+%$/,
-      );
-      assert.match(
-        (await page.locator("#ya-metric-label").textContent())!,
-        / · \d\d:\d\d · Endorsement$/,
-      );
-    }
-    await page.mouse.move(rect.x + rect.width * 0.63, rect.y + 90);
-    await page.waitForTimeout(40);
-    assert.equal(requests.length, before);
-    await page.mouse.move(0, 0);
-    await page.waitForFunction(
-      (s) =>
-        !document
-          .querySelector<HTMLElement>(s)!
-          .classList.contains("is-scrubbing"),
-      selector,
-    );
-    assert.equal(await page.locator(readout).textContent(), "68%");
-  }
-  const outcomes = await page.locator(".trend-left").boundingBox();
-  await scrub("#ya-chart", "#ya-value");
-  // Nothing shifts while scrubbing.
-  assert.deepEqual(await page.locator(".trend-left").boundingBox(), outcomes);
-  await page.locator('[data-expand="ai"]').click();
-  await scrub("#ya-detail-chart", "#ya-detail-value");
-  const slider = page.getByRole("slider", {
-    name: "Explore expanded idea chart history",
-  });
-  await slider.focus();
-  await slider.press("ArrowLeft");
-  assert.notEqual(await page.locator("#ya-detail-value").textContent(), "68%");
-  await slider.press("Escape");
-  assert.equal(await page.locator("#ya-detail-value").textContent(), "68%");
-  await page.locator("#ya-detail-chart").dispatchEvent("pointerdown", {
-    pointerType: "touch",
-    clientX: (await page.locator("#ya-detail-chart").boundingBox())!.x + 140,
-  });
-  await page.waitForFunction(() =>
-    document
-      .querySelector<SVGSVGElement>("#ya-detail-chart")!
-      .classList.contains("is-scrubbing"),
-  );
-  await page.locator("#ya-detail-chart").dispatchEvent("pointercancel");
-  checks.mainExpandedPointerTouchAndKeyboardCharts = true;
-  await next.click();
-  assert.equal(
-    await page.locator("#ya-detail h3").textContent(),
-    "AI models should be open source.",
-  );
-  await page.selectOption("#ya-sort", "moves");
-  const placement = await page.locator("#ya-detail").evaluate((n) => ({
-    previous: (n.previousElementSibling as HTMLElement).dataset.expand,
-    width: n.getBoundingClientRect().width,
-    grid: n.parentElement!.getBoundingClientRect().width,
-  }));
-  assert.equal(placement.width, placement.grid);
-  const columns = await page
-    .locator("#ya-grid")
-    .evaluate((n) => getComputedStyle(n).gridTemplateColumns.split(" ").length);
-  const order = await page
-    .locator("#ya-grid [data-expand]")
-    .evaluateAll((cards) =>
-      cards.map((c) => (c as HTMLElement).dataset.expand),
-    );
-  const index = order.indexOf("ai");
-  assert.equal(
-    placement.previous,
-    order[
-      Math.min(
-        order.length - 1,
-        Math.floor(index / columns) * columns + columns - 1,
-      )
+    [
+      "Ended 2 days ago · Turn 6: 60% said yes",
+      "Ended 8 days ago · Turn 6: 60% said yes",
     ],
   );
-  await page.locator('[data-debate-filter="replay"]').focus();
-  await page.setViewportSize({ width: 390, height: 844 });
-  // Narrowing after scrubbing at full width never widens the page.
-  await page.waitForTimeout(200);
-  assert.ok(await noOverflow(page), "390px after scrubbing: no overflow");
-  await page.waitForFunction(
-    () =>
-      (
-        document.querySelector<HTMLElement>("#ya-detail")!
-          .previousElementSibling as HTMLElement
-      ).dataset.expand === "ai",
+  assert.equal(
+    requests.filter((u) => u.endsWith("/windows")).length >= 3,
+    true,
   );
   assert.equal(
-    await page.evaluate(
-      () => (document.activeElement as HTMLElement).dataset.debateFilter,
+    requests.some((u) =>
+      /viewer-token|\/replay\?|livekit|media\.bundle|replay\.bundle|homepage\.bundle|\/api\/public\/homepage/.test(
+        u,
+      ),
     ),
-    "replay",
+    false,
   );
-  await page.setViewportSize({ width: 1440, height: 1100 });
-  await page.locator('[data-debate-filter="replay"]').click();
-  assert.equal(await page.locator("[data-open-debate]").count(), 2);
-  await page.locator("[data-open-debate]").first().click();
-  assert.equal(await page.locator("#ya-player-preview").isVisible(), true);
-  await page.getByRole("button", { name: "Close debate preview" }).click();
-  await page.locator('[data-debate-filter="live"]').click();
-  assert.equal(await page.locator("[data-open-debate]").count(), 3);
-  await page.locator("[data-open-debate]").first().click();
-  await page.getByRole("button", { name: "Enter this round" }).click();
-  await page.locator("#ya-inline-expectation").fill("72");
-  await page.getByRole("button", { name: "Preview position" }).click();
-  assert.match(
-    (await page.locator("#ya-inline-review").textContent())!,
-    /No coins spent/,
-  );
-  await page.getByRole("button", { name: "Close expanded idea" }).click();
-  assert.equal(await page.locator("#ya-detail").count(), 0);
-  // A sample idea's Explore debate opens its panel in the grid.
-  await page.locator('[data-trending="ai"]').click();
-  await settled();
-  await page.locator(".trend-cta").click();
-  await page.locator("#ya-detail").waitFor();
-  assert.equal(
-    await page.locator('[data-expand="ai"]').getAttribute("aria-expanded"),
-    "true",
-  );
-  await page.getByRole("button", { name: "Close expanded idea" }).click();
-  checks.independentExpansionPlacementAndDebateFilters = true;
-  await page.locator("#ya-search").fill("nuclear");
-  assert.equal(await page.locator("[data-expand]").count(), 1);
-  await page.locator("#ya-search").fill("");
-  await page.locator('[data-filter="Climate"]').click();
-  assert.equal(await page.locator("[data-expand]").count(), 1);
-  await page.locator('[data-filter="All"]').click();
-  await page.locator('[data-nav="following"]').click();
-  assert.equal(await page.locator("[data-expand]").count(), 2);
-  assert.match(
-    (await page.locator("#ya-grid-title").textContent())!,
-    /Your watchlist/,
-  );
-  await page.locator("#ya-follow").click();
-  assert.equal(
-    await page.locator("#ya-follow").getAttribute("aria-label"),
-    "Following this idea",
-  );
-  assert.equal(await page.locator("[data-expand]").count(), 3);
-  await page.locator("#ya-follow").click();
-  assert.equal(followWrites, 0);
-  await page.locator('[data-nav="all"]').click();
-  checks.searchCategoriesSortingAndLocalDemoFollows = true;
-  // The rail: what's live with Watch, the invitation and the popular ideas.
-  assert.equal(await page.locator(".rail-live").count(), 1);
-  assert.equal(await page.locator(".rail-popular-list li").count(), 5);
-  assert.equal(await page.locator(".rail-promo-guest").isVisible(), true);
-  assert.equal(await page.locator(".rail-promo-member").isVisible(), false);
-  await page.getByRole("link", { name: "Explore all ideas" }).click();
-  await page.waitForFunction(() => window.location.hash === "#ya-ideas");
-  checks.railLiveInvitationAndPopularIdeas = true;
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await openNative();
+  checks.busyHomeListsInOrderWithResultsAndWaiting = true;
+
+  // The chips filter the list and say what they show.
+  await page.getByRole("button", { name: "Soon · 1" }).click();
   assert.equal(
     await page
-      .locator("#ya-chart .ya-endpoint-pulse")
+      .getByRole("button", { name: "Soon · 1" })
+      .getAttribute("aria-pressed"),
+    "true",
+  );
+  assert.deepEqual(await titles(), ["Starting soon"]);
+  assert.equal(
+    await page.locator("[data-home-status]").textContent(),
+    "Showing Soon · 1.",
+  );
+  await page.getByRole("button", { name: "Replays · 3" }).click();
+  assert.deepEqual(await titles(), [
+    "Replays you can still answer",
+    "Finished debates",
+  ]);
+  await page.getByRole("button", { name: "All", exact: true }).click();
+  assert.equal(await page.locator(".home-top").count(), 1);
+  checks.chipsFilterSoonAndReplays = true;
+
+  // The intro closes, gives focus to the chips and stays closed.
+  await page.getByRole("button", { name: "Close the introduction" }).click();
+  assert.equal(await page.locator("[data-home-intro]").isVisible(), false);
+  assert.equal(
+    await page.evaluate(
+      () => (document.activeElement as HTMLElement).dataset.homeFilter,
+    ),
+    "all",
+  );
+  await openHome();
+  assert.equal(await page.locator("[data-home-intro]").isVisible(), false);
+  await page.evaluate(() =>
+    window.localStorage.removeItem("yaparena-home-intro"),
+  );
+  checks.introClosesAndStaysClosed = true;
+
+  // Signed in, following a topic: its soon debate leads, the live debates
+  // follow as "Live in other topics", and the intro is gone.
+  signedIn = true;
+  follows.push(work.slug);
+  // The live debate on the followed topic leads.
+  await openHome();
+  assert.equal(
+    await page.locator(".home-top .home-feature").getAttribute("href"),
+    `/debates/${otherLive.slug}`,
+  );
+  assert.deepEqual((await titles()).slice(0, 2), [
+    "Live in your topics",
+    "Live in other topics",
+  ]);
+  assert.equal(await page.locator("[data-home-intro]").isVisible(), false);
+  await page.waitForFunction(() =>
+    document
+      .querySelector<HTMLElement>("[data-header-balance]")!
+      .textContent.includes("1234.00"),
+  );
+  follows.length = 0;
+  follows.push(idea.slug);
+  scenario = "quiet";
+  await openHome(page, "quiet");
+  assert.match(
+    await page.locator(".home-quiet").innerText(),
+    /^Nothing live right now\. Live debates show here first\.$/,
+  );
+  assert.equal((await titles())[0], "From your topics");
+  signedIn = false;
+  follows.length = 0;
+  checks.followedTopicsLeadAndLiveIsNeverHidden = true;
+
+  // A quiet day: nothing live, so the replay still taking answers leads.
+  await openHome(page, "quiet");
+  assert.deepEqual((await titles()).slice(0, 2), [
+    "You can still answer",
+    "Someone's waiting",
+  ]);
+  assert.match(
+    await page.locator(".home-top .home-feature").innerText(),
+    /Answer$/,
+  );
+  assert.equal(await page.locator("[data-home-feed] svg.ya-chart").count(), 0);
+  // Nothing at all: start the first debate, never an empty card or chart.
+  await openHome(page, "empty");
+  assert.deepEqual(await titles(), ["Start the first debate"]);
+  assert.match(
+    (await page.locator(".home-top .home-feature").innerText()).replace(
+      /\s+/g,
+      " ",
+    ),
+    /^Open a topic and queue on a side\. .* Pick a topic$/,
+  );
+  assert.equal(
+    await page.locator(".home-top a").getAttribute("href"),
+    "/topics",
+  );
+  checks.quietAndEmptyDaysFillTheTop = true;
+
+  // The top slot and its button fit the first screen on a phone.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openHome(page, "busy");
+  assert.ok(await noOverflow(page));
+  const button = (await page.locator(".home-top .btn-primary").boundingBox())!;
+  assert.ok(
+    button.y + button.height <= 787,
+    `390: Watch ends at ${button.y + button.height}`,
+  );
+  await axeCheck(page);
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  await openHome();
+  await axeCheck(page);
+  assert.deepEqual(violations, []);
+  assert.deepEqual(await page.evaluate(() => window.homeCsp), []);
+  checks.firstScreenAccessibilityAndCsp = true;
+
+  // Reduced motion stops the live pixel.
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await openHome();
+  assert.equal(
+    await page
+      .locator(".home-top .live-pixel")
+      .first()
       .evaluate((n) => getComputedStyle(n).animationName),
     "none",
   );
-  assert.equal(
-    await page
-      .locator("#ya-chart")
-      .evaluate((n) => n.classList.contains("is-pending")),
-    false,
-  );
-  await next.click();
-  assert.equal(await page.locator(".ya-carousel-ghost").count(), 0);
-  checks.reducedMotionManualNavigation = true;
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  // The line draws left to right the first time it is seen, then the end pixel.
-  await openNative();
+  checks.reducedMotion = true;
+
+  // The chart moved to the topic page, with the home's inspection.
+  async function openTopic(target: Page) {
+    await target.goto(`${base}/topics/${idea.slug}`);
+    await target.locator("#ya-chart .ya-linepath").waitFor();
+  }
+  await openTopic(page);
+  assert.equal(
+    await page.locator("#ya-chart").getAttribute("data-latest-round"),
+    "round-39",
+  );
+  const chart = page.locator("#ya-chart");
+  await chart.scrollIntoViewIfNeeded();
   await page.waitForFunction(() =>
     document.querySelector("#ya-chart")!.classList.contains("is-drawing"),
   );
+  const rect = (await chart.boundingBox())!;
+  const before = requests.length;
+  await chart.hover({ position: { x: rect.width * 0.37, y: 70 } });
+  await page.waitForFunction(() =>
+    document.querySelector("#ya-chart")!.classList.contains("is-scrubbing"),
+  );
+  const state = await chart.evaluate((n) => ({
+    x: Number(n.querySelector("[data-chart-clip]")!.getAttribute("width")),
+    width: n.getBoundingClientRect().width,
+  }));
+  assert.ok(Math.abs(state.x - state.width * 0.37) < 1);
+  assert.match(
+    (await page.locator("#ya-chart-tooltip").textContent())!,
+    /^[A-Z][a-z]{2} \d{1,2} \d+%$/,
+  );
+  assert.match(
+    (await page.locator("#ya-metric-label").textContent())!,
+    / · \d\d:\d\d · Endorsement$/,
+  );
+  assert.equal(requests.length, before);
+  await page.mouse.move(0, 0);
+  await page.waitForFunction(
+    () =>
+      !document.querySelector("#ya-chart")!.classList.contains("is-scrubbing"),
+  );
+  const latest = await page.locator("#ya-legend").textContent();
+  const slider = page.getByRole("slider", {
+    name: "Explore trending idea chart history",
+  });
+  await slider.focus();
+  await slider.press("ArrowLeft");
+  assert.match(
+    (await slider.getAttribute("aria-valuetext"))!,
+    /\d+% endorsement$/,
+  );
+  await slider.press("Escape");
+  assert.equal(await page.locator("#ya-legend").textContent(), latest);
+  await page.getByRole("button", { name: "Price" }).click();
   assert.equal(
     await page
-      .locator("#ya-chart .ya-linepath")
-      .evaluate((n) => getComputedStyle(n).animationName),
-    "ya-draw",
+      .getByRole("button", { name: "Price" })
+      .getAttribute("aria-pressed"),
+    "true",
   );
-  checks.chartDrawsInOnce = true;
-  const touchContext = await browser.newContext({
+  assert.match((await page.locator("#ya-legend").textContent())!, /YC$/);
+  await page.getByRole("button", { name: "1W" }).click();
+  assert.equal(
+    await page.getByRole("button", { name: "1D" }).getAttribute("aria-pressed"),
+    "false",
+  );
+  await axeCheck(page);
+  assert.deepEqual(violations, []);
+  // A topic without rounds shows no chart.
+  await page.goto(`${base}/topics/${work.slug}`);
+  assert.equal(await page.locator("[data-topic-history]").count(), 0);
+  checks.topicPageChartPointerKeyboardAndControls = true;
+
+  const touchContext = await newContext({
     viewport: { width: 390, height: 844 },
     isMobile: true,
     hasTouch: true,
@@ -569,11 +736,14 @@ try {
   });
   const phone = await touchContext.newPage();
   phone.on("pageerror", (e) => errors.push(e.message));
-  await phone.goto(base + "/home?reference=1");
-  await phone.locator("#ya-chart").waitFor();
+  await openTopic(phone);
   assert.ok(await noOverflow(phone));
-  // Phones keep the outcomes, the chart and the debate; arguments stay on the idea.
-  assert.equal(await phone.locator(".trend-args").isVisible(), false);
+  assert.equal(
+    await phone
+      .locator("#ya-chart .ya-endpoint-pulse")
+      .evaluate((n) => getComputedStyle(n).animationName),
+    "none",
+  );
   await phone.locator("#ya-chart").scrollIntoViewIfNeeded();
   const phoneChart = (await phone.locator("#ya-chart").boundingBox())!;
   await phone.touchscreen.tap(
@@ -581,159 +751,39 @@ try {
     phoneChart.y + 50,
   );
   await phone.waitForFunction(() =>
-    document
-      .querySelector<SVGSVGElement>("#ya-chart")!
-      .classList.contains("is-scrubbing"),
+    document.querySelector("#ya-chart")!.classList.contains("is-scrubbing"),
   );
-  await phone.locator("#ya-search").tap();
-  assert.equal(
-    await phone.locator("#ya-chart").getAttribute("class"),
-    "ya-chart",
+  await phone.locator(".topic-copy h1").tap();
+  await phone.waitForFunction(
+    () =>
+      !document.querySelector("#ya-chart")!.classList.contains("is-scrubbing"),
   );
+  await phone.screenshot({
+    path: `${directory}/topic-390.png`,
+    fullPage: true,
+  });
+  await openHome(phone, "busy");
+  assert.ok(await noOverflow(phone));
   await touchContext.close();
-  checks.coarsePointerMobileTouchInspection = true;
-  // Real data uses nullable histories, actual wallet/follows and canonical routes.
-  await page.goto(base + "/home");
-  await page.locator("#ya-grid [data-expand]").first().waitFor();
-  assert.equal(await page.locator("#ya-value").count(), 0);
-  assert.match(
-    (await page.locator(".trend-none").textContent())!,
-    /No rounds yet/,
-  );
-  assert.equal(await page.locator("#ya-chart .ya-linepath").count(), 0);
-  assert.match(
-    (await page.locator("#ya-chart").textContent())!,
-    /The chart starts after the first closed round\./,
-  );
-  assert.equal(await page.locator(".trend-signin").isVisible(), true);
-  // The trending card fits the first screen (docs/site-design.md).
-  for (const [width, height, limit] of [
-    [1440, 900, 800],
-    [1280, 800, 800],
-  ] as const) {
-    await page.setViewportSize({ width, height });
-    await page.waitForTimeout(100);
-    const box = (await page.locator(".ya-carousel").boundingBox())!;
-    assert.ok(
-      box.y + box.height <= limit,
-      `${width}: card ends at ${box.y + box.height}`,
-    );
-  }
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.waitForTimeout(100);
-  const cta = (await page.locator(".trend-cta").boundingBox())!;
-  assert.ok(
-    cta.y + cta.height <= 820,
-    `390: Explore debate ends at ${cta.y + cta.height}`,
-  );
-  await page.setViewportSize({ width: 1440, height: 1100 });
-  checks.trendingCardFitsTheFirstScreen = true;
-  await page.locator('[data-nav="following"]').click();
-  await page.waitForFunction(() =>
-    document
-      .querySelector<HTMLElement>("#ya-grid")!
-      .textContent.includes("Sign in"),
-  );
-  signedIn = true;
-  await page.reload();
-  await page.waitForFunction(() =>
-    document
-      .querySelector<HTMLElement>("[data-header-balance]")!
-      .textContent.includes("1234.00"),
-  );
-  assert.equal(await page.locator(".trend-signin").isVisible(), false);
-  assert.equal(await page.locator(".rail-promo-member").isVisible(), true);
-  assert.equal(await page.locator(".rail-promo-guest").isVisible(), false);
-  await page.locator("#ya-follow").click();
-  await page.waitForFunction(
-    () =>
-      document
-        .querySelector<HTMLElement>("#ya-follow")!
-        .getAttribute("aria-pressed") === "true",
-  );
-  assert.equal(
-    await page.locator("#ya-follow").getAttribute("aria-label"),
-    "Following this idea",
-  );
-  assert.equal(followWrites, 1);
-  await page.locator('[data-nav="following"]').click();
-  assert.equal(await page.locator("[data-expand]").count(), 1);
-  await page.locator("[data-expand]").click();
-  assert.equal(
-    await page
-      .locator('#ya-debate-grid a[href="/debates/published-debate"]')
-      .count(),
-    1,
-  );
-  assert.equal(
-    requests.some((u) =>
-      /viewer-token|\/replay\?|livekit|media\.bundle|replay\.bundle/.test(u),
-    ),
-    false,
-  );
-  await page.evaluate(() => {
-    window.yapFollows.initialize(document);
-    window.yapFollows.initialize(document);
-  }); // Dynamic controls are initialized once.
-  await page.locator("#ya-detail .ya-follow").click();
-  await page.waitForFunction(
-    () =>
-      document
-        .querySelector<HTMLElement>("#ya-follow")!
-        .getAttribute("aria-pressed") === "false",
-  );
-  assert.equal(followWrites, 2);
-  checks.realNullableDataWalletFollowsAndCanonicalDebates = true;
-  await page.evaluate(axe.source);
-  const axeViolations = await page.evaluate(async () =>
-    (
-      await window.axe.run(document, {
-        runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
-      })
-    ).violations.map((v) => ({
-      id: v.id,
-      impact: v.impact,
-      targets: v.nodes.map((n) => n.target),
-    })),
-  );
-  violations.push(...axeViolations);
-  assert.deepEqual(violations, []);
-  assert.deepEqual(await page.evaluate(() => window.homeCsp), []);
-  checks.accessibilityAndCsp = true;
-  const nojs = await browser.newContext({
+  checks.topicPageTouchInspectionAndPhones = true;
+
+  // Without JavaScript the server's list still links every debate.
+  const nojs: BrowserContext = await browser.newContext({
       javaScriptEnabled: false,
       viewport: { width: 1440, height: 1100 },
     }),
     plain = await nojs.newPage();
+  scenario = "busy";
   await plain.goto(base + "/home");
   assert.equal(await plain.locator("h1").textContent(), "Yap Arena");
-  assert.equal(await plain.locator(".ya-heading").count(), 0);
-  assert.equal(
-    await plain.locator(".ya-cardtitle").textContent(),
-    debate.proposition,
-  );
   assert.equal(
     await plain
-      .locator('a[data-expand][href="/topics/published-idea"]')
+      .locator(`a.home-row[href="/debates/${answerable.slug}"]`)
       .count(),
     1,
   );
-  assert.equal(
-    await plain.locator('.trend-cta[href="/debates/published-debate"]').count(),
-    1,
-  );
-  await plain
-    .getByRole("link", { name: "Explore debate", exact: true })
-    .click();
-  assert.ok(plain.url().endsWith("/debates/published-debate"));
-  assert.equal(await plain.locator("[data-media-event]").count(), 1);
-  await plain.goto(base + "/home");
-  await plain.getByRole("searchbox", { name: "Search ideas" }).fill("idea");
-  await Promise.all([
-    plain.waitForURL((url) => url.pathname === "/topics"),
-    plain.getByRole("searchbox", { name: "Search ideas" }).press("Enter"),
-  ]);
-  assert.equal(new URL(plain.url()).searchParams.get("q"), "idea");
+  await plain.locator(".home-top .home-feature").click();
+  assert.ok(plain.url().endsWith(`/debates/${liveDebate.slug}`));
   await plain.goto(base + "/home");
   // Without JavaScript the header still offers both Auth0 sign-in methods.
   for (const [name, connection] of [
@@ -746,7 +796,7 @@ try {
     );
   await nojs.close();
   checks.serverRenderedNoJavaScriptFallback = true;
-  checks.realDebateAndAccountNavigation = true;
+
   unavailable = true;
   const response = await page.goto(base + "/home");
   assert.equal(response!.status(), 503);
@@ -754,10 +804,10 @@ try {
     (await page.locator(".home-state").textContent())!,
     /unavailable/,
   );
-  assert.equal(await page.locator("#ya-value").count(), 0);
+  assert.equal(await page.locator("[data-home-feed]").count(), 0);
   assert.equal(await page.locator(".site-footer").count(), 1);
   unavailable = false;
-  checks.unavailableNeverSubstitutesConceptData = true;
+  checks.unavailableShowsOneState = true;
   assert.deepEqual(errors, []);
   const evidence = {
     result: "PASS",
@@ -765,7 +815,7 @@ try {
     errors,
     violations,
     scope:
-      "Loopback Express application with synthetic public records/auth responses and checked-in concept fixtures. No hosted writes or media sessions.",
+      "Loopback Express application with synthetic public records, waiting list, turn windows and auth responses. No hosted writes or media sessions.",
   };
   await writeFile(
     directory + "/evidence.json",

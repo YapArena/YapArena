@@ -1,7 +1,6 @@
-import type { BrowserContext, Page, Response } from "playwright-core";
+import type { BrowserContext, Page } from "playwright-core";
 import type { Pool } from "pg";
 import type { PublicBotActivity } from "../src/features/a4/public-bot-types.ts";
-import type { HomeData } from "../src/features/discovery/homepage-model.ts";
 import type { Run } from "./browser-fixture-types.ts";
 /* global document,window */
 import assert from "node:assert/strict";
@@ -45,6 +44,8 @@ export async function verifyPublicBotsBrowser({
     reducedMotion: "reduce",
     bypassCSP: false,
   });
+  // The topic page shows the topic's shared history, the chart the home used
+  // to show (first-run plan PR 6).
   const home = await isolated.newPage(),
     watch = await isolated.newPage(),
     errors: string[] = [],
@@ -80,14 +81,6 @@ export async function verifyPublicBotsBrowser({
   }
   const shots = [];
   let expectedRound: { id: string; mode: "mixed" | "observer" } | undefined;
-  const homepageResponses: Response[] = [];
-  home.on("response", (response) => {
-    if (
-      new URL(response.url()).pathname === "/api/public/homepage" &&
-      response.status() === 200
-    )
-      homepageResponses.push(response);
-  });
   try {
     // The arena creator can still have its normal 60-second round in flight.
     // Keep its consent and settlements independent of this shared-history trial.
@@ -155,7 +148,9 @@ export async function verifyPublicBotsBrowser({
       "sharing this fixture must not publish the arena creator's other rounds",
     );
     checks.separateCreatorKeepsWorkspaceRoundsPrivate = true;
-    await home.goto(base + "/home");
+    // The fixture's topic and debate share the slug.
+    const topicPath = base + "/topics/" + debateSlug;
+    await home.goto(topicPath);
     await watch.goto(base + "/debates/" + debateSlug);
     await showResults(watch);
     home.setDefaultTimeout(20000);
@@ -166,7 +161,6 @@ export async function verifyPublicBotsBrowser({
       exact: true,
     });
     if (await dismiss.isVisible()) await dismiss.click();
-    await home.locator(`[data-trending="${topic}"]`).click();
     await watch
       .locator("[data-shared-arguments]")
       .waitFor({ state: "visible" });
@@ -188,29 +182,34 @@ export async function verifyPublicBotsBrowser({
     assert.ok(before.items.length >= 18);
     assert.equal(before.items.length, 38);
     assert.ok(before.items.some((r) => r.mode === "mixed"));
-    await home.locator(`[data-expand="${topic}"]`).click();
     assert.equal(
-      await home
-        .locator(`#ya-debate-grid a[href="/debates/${debateSlug}"]`)
-        .count(),
+      await home.locator(`.dcard a[href="/debates/${debateSlug}"]`).count(),
       1,
     );
-    await home.locator("#ya-search").focus();
-    await home.mouse.move(0, 0);
-    checks.databaseBackedHomeExpansionAndDebateArguments = true;
+    assert.equal(
+      await home
+        .locator("[data-measure-topic]")
+        .getAttribute("data-measure-topic"),
+      topic,
+    );
+    assert.ok(
+      await home.locator("#ya-chart").getAttribute("data-latest-round"),
+    );
+    checks.databaseBackedTopicHistoryAndDebateArguments = true;
+    // The topic page draws the history it was served; a settled round shows
+    // there on the next visit, and on the debate page without one.
+    async function showsRound(id: string) {
+      await home.bringToFront();
+      await home.goto(topicPath);
+      await home.waitForFunction(
+        (id) =>
+          document.querySelector<SVGSVGElement>("#ya-chart")?.dataset
+            .latestRound === id,
+        id,
+        { timeout: 20000 },
+      );
+    }
     async function round(mode: "mixed" | "observer", label: string) {
-      const inspecting = mode === "observer";
-      const previousRound = await home
-        .locator("#ya-chart")
-        .getAttribute("data-latest-round");
-      if (inspecting) {
-        await home.bringToFront();
-        await home.locator("#ya-carousel .ya-scrub-control input").focus();
-        // Point inside the carousel but off the chart, so the keyboard keeps
-        // inspecting it.
-        await home.locator("#ya-carousel-dots").hover();
-        assert.equal(await home.locator("#ya-chart.is-scrubbing").count(), 1);
-      }
       const created = await api<{ id: string }>("a4/runs", {
         debateId: debate,
         mode,
@@ -247,64 +246,11 @@ export async function verifyPublicBotsBrowser({
       assert.equal(latest.humans, mode === "mixed" ? 1 : 0);
       assert.equal(latest.ownLimit, null);
       assert.equal(latest.runId, null);
-      if (inspecting) {
-        const containsRound = async (response: Response) => {
-          if (
-            new URL(response.url()).pathname !== "/api/public/homepage" ||
-            response.status() !== 200
-          )
-            return false;
-          const snapshot: HomeData = await response.json();
-          return snapshot.ideas.some(
-            (idea) =>
-              idea.id === topic && idea.activity?.items.at(-1)?.id === id,
-          );
-        };
-        let received = false;
-        for (const response of homepageResponses) {
-          if (await containsRound(response)) {
-            received = true;
-            break;
-          }
-        }
-        if (!received)
-          await home.waitForResponse(containsRound, { timeout: 20000 });
-        assert.equal(
-          await home.locator("#ya-chart").getAttribute("data-latest-round"),
-          previousRound,
-          "active inspection holds a received settlement until interaction ends",
-        );
-      }
-      // Observe polling only after foregrounding and ending chart interaction.
-      await home.bringToFront();
-      await home.locator("#ya-search").click();
-      await home.mouse.move(0, 0);
-      assert.equal(await home.evaluate(() => document.hidden), false);
-      assert.deepEqual(
-        await home.evaluate(() => ({
-          carouselActive: document
-            .querySelector("#ya-carousel")!
-            .matches(":hover,:focus-within"),
-          inspecting: document.querySelectorAll(".is-scrubbing").length,
-        })),
-        { carouselActive: false, inspecting: 0 },
-        "live refresh observation requires an idle homepage",
+      await showsRound(id);
+      assert.match(
+        (await home.locator("#ya-metric-label").textContent())!,
+        /Synthetic/,
       );
-      await home.waitForFunction(
-        (id) =>
-          document.querySelector<SVGSVGElement>("#ya-chart")?.dataset
-            .latestRound === id,
-        id,
-        { timeout: 20000 },
-      );
-      await home.waitForFunction(
-        (id) =>
-          document.querySelector<SVGSVGElement>("#ya-detail-chart")?.dataset
-            .latestRound === id,
-        id,
-        { timeout: 20000 },
-      );
-      if (inspecting) checks.activeInspectionDefersAndIdleReleasesUpdate = true;
       await watch.bringToFront();
       assert.equal(await watch.evaluate(() => document.hidden), false);
       await watch.locator(`[data-chart-round="${id}"]`).waitFor();
@@ -312,7 +258,7 @@ export async function verifyPublicBotsBrowser({
     }
     const observer = await round("observer", "Observer argument follow-up");
     const mixed = await round("mixed", "Mixed-round cost analysis");
-    checks.observerAndMixedSettlementRefreshHomeExpandedAndDebateWithoutReload = true;
+    checks.observerAndMixedSettlementReachTopicHistoryAndDebate = true;
     checks.pendingPrivacyAndAggregateOnlyPublication = true;
     await watch.locator(`[data-chart-round="${observer}"]`).focus();
     await watch.keyboard.press("Enter");
@@ -329,10 +275,10 @@ export async function verifyPublicBotsBrowser({
     );
     checks.debatePageShowsSharedHistoryOnly = true;
     await home.screenshot({
-      path: artifactDir + "/home-expanded.png",
+      path: artifactDir + "/topic-history.png",
       fullPage: true,
     });
-    shots.push("home-expanded.png");
+    shots.push("topic-history.png");
     await watch.screenshot({
       path: artifactDir + "/debate-shared.png",
       fullPage: true,
@@ -360,10 +306,10 @@ export async function verifyPublicBotsBrowser({
       assert.deepEqual(violations, []);
     }
     await home.screenshot({
-      path: artifactDir + "/home-mobile.png",
+      path: artifactDir + "/topic-mobile.png",
       fullPage: true,
     });
-    shots.push("home-mobile.png");
+    shots.push("topic-mobile.png");
     await watch.screenshot({
       path: artifactDir + "/debate-mobile.png",
       fullPage: true,
@@ -419,16 +365,7 @@ export async function verifyPublicBotsBrowser({
         .length,
       36,
     );
-    await home.bringToFront();
-    await home.locator("#ya-search").click();
-    await home.mouse.move(0, 0);
-    await home.waitForFunction(
-      (id) =>
-        document.querySelector<SVGSVGElement>("#ya-chart")?.dataset
-          .latestRound === id,
-      seedIds.at(-1),
-      { timeout: 20000 },
-    );
+    await showsRound(seedIds.at(-1)!);
     checks.consentWithdrawalRemovesPersonalRoundsEverywhere = true;
     await home.setViewportSize({ width: 1440, height: 1100 });
     await home.locator('[data-site-header] nav a[href="/live"]').click();
@@ -460,7 +397,7 @@ export async function verifyPublicBotsBrowser({
     console.log(JSON.stringify({ result: "PASS", checks }));
   } catch (error) {
     await home.screenshot({
-      path: artifactDir + "/home-failure.png",
+      path: artifactDir + "/topic-failure.png",
       fullPage: true,
     });
     await writeFile(
@@ -471,15 +408,10 @@ export async function verifyPublicBotsBrowser({
           checks,
           expectedRound,
           errors,
-          home: await home.evaluate(() => ({
+          topic: await home.evaluate(() => ({
             hidden: document.hidden,
-            focused: document.activeElement?.id,
-            hovered: Array.from(
-              document.querySelectorAll(":hover"),
-              (n) => n.id || n.tagName,
-            ),
-            inspecting: document.querySelectorAll(".is-scrubbing").length,
-            status: document.querySelector("#ya-status")?.textContent,
+            path: window.location.pathname,
+            history: Boolean(document.querySelector("[data-topic-history]")),
             latestRound:
               document.querySelector<SVGSVGElement>("#ya-chart")?.dataset
                 .latestRound,
