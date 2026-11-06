@@ -26,6 +26,8 @@ export type AuthorizationRequest = LoginSecrets &
   Readonly<{
     connection?: SignInMethod;
     loginHint?: string;
+    // New-user buttons open Universal Login on Sign up instead of Log in.
+    screenHint?: "signup";
     // Linking and confirmation ask for credentials again.
     prompt?: "login";
     // Confirmation also requires a new authentication (max_age=0).
@@ -162,6 +164,7 @@ export function createAuth0Client(
       if (request.connection)
         parameters.connection = auth0Connections[request.connection];
       if (request.loginHint) parameters.login_hint = request.loginHint;
+      if (request.screenHint) parameters.screen_hint = request.screenHint;
       if (request.prompt) parameters.prompt = request.prompt;
       if (request.maxAge !== undefined)
         parameters.max_age = String(request.maxAge);

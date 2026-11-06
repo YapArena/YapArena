@@ -256,6 +256,9 @@ export function createAuthRouter({
         message: "Choose Google or an email code to sign in.",
         back: returnPath,
       });
+    // The landing's new-user buttons send screen=signup, so Universal Login
+    // opens on Sign up. Any other value keeps its Log in screen.
+    const signUp = request.query.screen === "signup";
     // Already signed in on this device: there is nothing to do.
     if (await currentUser(request)) return response.redirect(303, returnPath);
     try {
@@ -263,6 +266,7 @@ export function createAuthRouter({
       const url = await auth0.client.authorizationUrl({
         ...secrets,
         ...(connection ? { connection } : {}),
+        ...(signUp ? { screenHint: "signup" } : {}),
       });
       await auth0.state.create({
         binding: browserBinding(request, response),

@@ -138,7 +138,9 @@ With nothing to watch, a Dydema headline sits beside the living emblem
   "Every idea deserves _a voice._" (64 / 40 / 28 px), the lead, "Join the arena" with "Sign in or
   create an account", and 380 px Google and email buttons. The living emblem sits in columns 8–12,
   above the words when upright under 900 px and beside them on a phone held sideways. The
-  header hides its Sign in pill here.
+  header hides its Sign in pill here. The header's Sign in leads here, so these buttons open
+  Auth0's Log in screen; only the landing's new-user buttons open Sign up
+  ([landing page](landing-page.md#routes-and-sessions)).
 - **While the account is checked**, a screen-tall space with the pixel loader holds the page, so
   the back link and the footer don't move.
 - **Settings**: the avatar slot (`.settings-avatar`, 72 px, 48 on phones) with the person's avatar
@@ -178,8 +180,13 @@ With nothing to watch, a Dydema headline sits beside the living emblem
   the title at 40 / 28 px, section numbers inline, the points at a glance as one bordered list on
   phones, and 44 px contents and "Back to top" links on touch screens.
 - **Cookie banner** (`frontend/measurement.ts`): the kit's card with a Dydema title. Reject all and
-  Accept all are equal secondary pills; Customize is a text link (under them on phones). The bottom
-  offset follows the safe area.
+  Accept all are equal secondary pills; Customize is a text link. The bottom offset follows the
+  safe area. On phones (under 600 px) the banner is one short line, "Analytics cookie only with
+  your OK.", with Customize beside it and Reject all and Accept all side by side at the same width
+  below: 122 px, about 15% of a 375×812 screen instead of 37% (two lines of text in the same
+  height at 320 px). Customize and Cookie settings open the full card on phones too: the title,
+  the full text with the Cookie Policy link, the switches, then Reject all and Accept all with Save
+  choices under them. The choices, what they store and the analytics are the same at every width.
 - **Offline page**: the kit's type and colours, from `site.css` alone (the service worker caches
   only the two).
 
