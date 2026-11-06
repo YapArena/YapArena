@@ -40,6 +40,8 @@ schemas, secret variable names, physical rail isolation and release boundaries.
 `suspend-account.ts` is also checked in the database-tools project. It is an explicit
 owner-only command that suspends or reinstates one account, with no `.env` loading or
 HTTP listener; see [suspending an account](operations.md#suspend-or-reinstate-an-account).
+`set-topic-category.ts` is checked there too: an owner-only command that changes one topic's
+category with a recorded reason; see [changing a topic's category](operations.md#change-a-topics-category).
 
 `verify-coin-testnet.ts` and `verify-coin-testnet-ledger.ts` are checked in the same
 project. Their fixed Base Sepolia/Circle test-asset paths use private disposable

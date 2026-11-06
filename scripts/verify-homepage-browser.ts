@@ -63,6 +63,7 @@ const topic: PublicTopic = {
   summary: "Synthetic local integration fixture.",
   sideALabel: "Support",
   sideBLabel: "Oppose",
+  category: "other",
   isDemo: false,
   createdAt: new Date("2026-10-01"),
 };
