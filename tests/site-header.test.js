@@ -7,6 +7,8 @@ import {
   renderAccount,
   renderCoins,
   renderMatchmaking,
+  renderDebates,
+  renderTopics,
 } from "../dist/features/discovery/web.js";
 import {
   renderMyModeration,
@@ -91,6 +93,43 @@ it("uses one navigation and session-aware account header across normal pages", (
   assert.match(home, /No public ideas yet/);
   assert.match(home, /<footer class="site-footer">/);
   assert.doesNotMatch(home, /<script[^>]+account-auth[.]bundle/);
+});
+
+it("names the three destinations' pages in the phone top row and keeps the logo elsewhere", () => {
+  const origin = "https://arena.example";
+  const empty = {
+    items: [],
+    pagination: { limit: 12, offset: 0, hasMore: false },
+  };
+  const title = (html) => {
+    const header = html.match(
+      /<header class="site-header"[\s\S]*?<\/header>/,
+    )[0];
+    const found = header.match(
+      /<p class="site-page-title ins" aria-hidden="true">([^<]*)<\/p>/,
+    );
+    // The attribute that swaps the logo for the name on phones comes with it.
+    assert.equal(/data-page-title/.test(header), Boolean(found));
+    return found ? found[1] : null;
+  };
+  // Visible capitals follow the inscription rule: U is shown as V.
+  assert.equal(title(renderLive(origin, [], { items: [] })), "live");
+  assert.equal(title(renderDebates(origin, empty, "", "all")), "explore");
+  assert.equal(title(renderDebates(origin, empty, "city", "ended")), "explore");
+  assert.equal(title(renderTopics(origin, empty, "")), "explore");
+  assert.equal(title(renderMatchmaking(origin)), "create");
+  for (const page of [
+    renderHome(origin),
+    renderAbout(origin),
+    renderAccount(origin),
+    renderCoins(origin),
+  ])
+    assert.equal(title(page), null);
+  // The logo stays in the markup on every page; CSS hides it on phones only.
+  assert.match(
+    renderLive(origin, [], { items: [] }),
+    /<a class="site-logo" href="\/home">/,
+  );
 });
 
 it("keeps the broadcast overlay free of navigation and account controls", () => {
