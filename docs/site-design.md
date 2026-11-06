@@ -73,11 +73,21 @@ Explore (`/debates`), Topics, topic pages and profiles use the kit through
 `src/features/discovery/cards-web.ts`, with their layout in `public/explore.css`. Live loads the
 same stylesheet for its topic cards.
 
+- **Explore switch** (first-run plan): Explore's two lists, `/debates` and `/topics`, open with
+  Debates and Topics as a two-option switch above the page head, styled like the Create page's
+  Now / Propose times; the current one has `aria-current="page"`. Full width on phones.
 - **Page head**: a kicker, the `.page-title` with its emphasised words in `--visit-1`, and a lead.
-- **Search**: a pill field with a Search button; phones search from the keyboard's key.
+- **Search**: a pill field with a Search button. On phones the field is hidden and Explore's search
+  bar in the top row takes its place ([Header](#header)), so there is only one.
 - **Status filters** on Explore: All, Live, Upcoming and Replay as chips, then More (a
   `<details data-menu>` that closes on Escape or a click outside) with Ready, Ended, Under review,
   Finalized and Cancelled; More shows the status in use. URLs are unchanged.
+- **Category filters** on Topics: All and the founder's categories from
+  `src/features/discovery/topic-categories.ts`, in its order, as chips linking to
+  `/topics?category=<id>` (the API's filter; an unknown category is an invalid link). Each keeps
+  the search. They wrap from 600 px; on phones the row scrolls sideways and loads with the chosen
+  chip in view (`frontend/site.ts`). The debate list has no category chips: debates can't be
+  filtered by their topic's category without a new database query.
 - **Debate card** `.dcard`: a 16:9 picture with both speakers' avatars in 48 px slots on two
   panes, under the recording's still for replays and finalized debates (the media router serves
   no still for others; `frontend/site.ts` hides one that fails), the status tag and a stamp; then
@@ -187,11 +197,11 @@ With nothing to watch, a Dydema headline sits beside the living emblem
 
 `src/features/discovery/site-header-web.ts`, `public/site-header.css`, `frontend/site-header.ts`.
 
-| Width                                | Layout                                                                                                                                                                                                                                                                                                                                   |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ≥ 1000 px                            | One 64 px row: the landing logo (32 px), Live · Explore · Create, a 22rem search pill, then the account group.                                                                                                                                                                                                                           |
-| 600–999 px, and phones held sideways | The same row; search is a 44 px icon that opens a search row under the header (Escape closes it). Without JavaScript the icon links to the debates search.                                                                                                                                                                               |
-| < 600 px                             | A 56 px row like the X app: the account button on the left, the logo (26 px) or the page's name in the middle, the balance on the right. Under 600 px the main navigation is the bottom tabs (below); pages without them (the debate page, moderation and measurement) keep the three destinations as a 44 px tab row under the top row. |
+| Width                                | Layout                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ≥ 1000 px                            | One 64 px row: the landing logo (32 px), Live · Explore · Create, a 22rem search pill, then the account group.                                                                                                                                                                                                                                             |
+| 600–999 px, and phones held sideways | The same row; search is a 44 px icon that opens a search row under the header (Escape closes it). Without JavaScript the icon links to the debates search.                                                                                                                                                                                                 |
+| < 600 px                             | A 56 px row like the X app: the account button on the left, the logo (26 px), the page's name or Explore's search in the middle, the balance on the right. Under 600 px the main navigation is the bottom tabs (below); pages without them (the debate page, moderation and measurement) keep the three destinations as a 44 px tab row under the top row. |
 
 - The page's section (from its canonical path: Live, Explore for debates, topics and people, Create
   for `/match`) has `aria-current="page"` and three 4 px pixels in the visit colours under it.
@@ -203,12 +213,19 @@ With nothing to watch, a Dydema headline sits beside the living emblem
   "Play money · no cash value"; the account menu starts with the avatar, name and @handle.
 - On the debate page, and on `/home` until it moves onto the kit, the header lines up with their
   wider layouts (up to 120rem).
-- Phones (first-run redesign, PR 1 of the confirmed plan): Live, Explore (`/debates` and `/topics`)
-  and Create (`/match`) show their name in Dydema in the middle of the top row; every other page
-  shows the logo. There is no search icon: search is the Explore page's own field. The account
+- Phones (first-run redesign, PR 1 of the confirmed plan): Live, Queue and Create (`/match`) show
+  their name in Dydema in the middle of the top row; Explore's two lists show its search bar
+  (below); every other page shows the logo. There is no search icon. The account
   button opens the account menu as a drawer from the left over a dimmed page; tapping the dimmed
   page or pressing Escape closes it, and the page behind does not scroll. The queue pill takes its
   own row under the top row.
+- Explore's search bar (phones, first-run plan): on `/debates` and `/topics` the middle of the top
+  row is a search pill, "Search debates" or "Search topics" (`.site-page-search`, from the
+  `search` option of `siteHeaderMarkup()`), with 16 px text so phones don't zoom in. It reloads
+  the list it is on with the query and keeps the filters in use as hidden fields: the status on
+  Debates, the category on Topics. It fills the room between the account button and the balance;
+  signed out, it starts at the side gutter. Tablets and desktop keep the header's search, which
+  always searches debates, and the page's own field.
 
 ## Queue tab
 

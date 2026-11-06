@@ -3,6 +3,41 @@
    cards. */
 
 /* ---- Page heads and list tools ------------------------------------------ */
+/* Explore's two lists, Debates and Topics, as a two-option switch above the
+   page head, like the Create page's Now / Propose times. */
+.explore-switch-row {
+  padding-top: var(--space-6);
+}
+.explore-switch-row + .page-head {
+  padding-top: var(--space-5);
+}
+.explore-switch {
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--panel);
+}
+.explore-switch a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-pill);
+  color: var(--muted);
+  font-weight: 700;
+  text-decoration: none;
+}
+.explore-switch a:hover {
+  color: var(--text);
+}
+.explore-switch a[aria-current="page"] {
+  background: var(--raised);
+  color: var(--acid);
+}
 .list-section {
   display: grid;
   gap: var(--space-5);
@@ -504,9 +539,20 @@
       transparent
     );
   }
-  /* Phones search from the keyboard's own key. */
-  .list-search .btn {
+  /* Phones search from Explore's search bar in the top row
+     (public/site-header.css), which keeps the page's filters, so the page's
+     own field is not shown. */
+  .list-search {
     display: none;
+  }
+  .explore-switch-row {
+    padding-top: var(--space-4);
+  }
+  .explore-switch-row + .page-head {
+    padding-top: var(--space-4);
+  }
+  .explore-switch {
+    display: grid;
   }
   .more-menu {
     right: 0;
@@ -538,8 +584,15 @@
     font-size: var(--text-16);
   }
 }
+/* Every category shows at once from 600 px; phones scroll the row sideways. */
+@media (min-width: 600px) {
+  .category-filters .chips {
+    flex-wrap: wrap;
+  }
+}
 @media (pointer: coarse) {
-  .follow-button.btn {
+  .follow-button.btn,
+  .explore-switch a {
     min-height: 44px;
   }
 }
