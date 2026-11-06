@@ -43,11 +43,24 @@ export interface MatchingPerson {
   displayName: string;
 }
 
+/** The Queue tab asks frontend/matchmaking.ts to queue on a topic's side (or leave that queue). */
+export interface QueueRequest {
+  topicSlug: string;
+  side: "A" | "B";
+  /** The button tapped, for the sign-in prompt's return focus. */
+  source: HTMLElement;
+}
+
 declare global {
   interface WindowEventMap {
     // The player answered or withdrew this challenge on the Match page (its request id), so the
     // site-wide challenge notice stays quiet.
     "yap:challenge-settled": CustomEvent<string>;
+    // The Queue tab's side buttons (frontend/queue-page.ts).
+    "yap:queue-request": CustomEvent<QueueRequest>;
+    // A queue notice from frontend/matchmaking.ts ("Checking your camera…", an error), for pages
+    // that show it next to their own buttons.
+    "yap:queue-note": CustomEvent<string>;
   }
 }
 export interface MatchingEvent {
