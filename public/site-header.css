@@ -534,6 +534,103 @@ body.account-page:has(#signed-out:not([hidden])) [data-header-guest] {
     font-size: var(--text-16);
   }
 }
+/* Phones, like the X app: the top row holds the account button on the left,
+   the logo or the page's name in the middle and the balance on the right, and
+   the account button opens its menu as a side drawer. The account group's
+   pieces join the header grid directly; the queue pill gets its own row. On
+   phones search is the Explore page's own field, so the search icon is not
+   shown. Tablets and wider screens are unchanged. */
+.site-page-title {
+  display: none;
+}
+@media (max-width: 599px) {
+  .site-header-grid,
+  .site-header[data-search-open] .site-header-grid {
+    grid-template-columns: minmax(44px, 1fr) auto minmax(44px, 1fr);
+    grid-template-areas:
+      "me middle balance"
+      "pill pill pill"
+      "nav nav nav";
+  }
+  .site-logo {
+    grid-area: middle;
+    justify-self: center;
+  }
+  .site-header[data-page-title] .site-logo {
+    display: none;
+  }
+  .site-page-title {
+    display: block;
+    grid-area: middle;
+    justify-self: center;
+    margin: 0;
+    font-size: var(--text-20);
+    line-height: 56px;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+  .header-search-toggle,
+  .site-header[data-search-open] .arena-header-search {
+    display: none;
+  }
+  .arena-header-account,
+  .header-member-actions:not([hidden]) {
+    display: contents;
+  }
+  .header-session-loading,
+  .header-auth-actions,
+  .header-retry,
+  .arena-wallet-menu {
+    grid-area: balance;
+    justify-self: end;
+  }
+  /* The 44 px target's inset lines the avatar up with the side gutter. */
+  .header-user-menu {
+    grid-area: me;
+    justify-self: start;
+    margin-inline-start: -4px;
+  }
+  .header-member-actions .queue-pill {
+    grid-area: pill;
+    justify-self: stretch;
+    justify-content: space-between;
+    margin-bottom: var(--space-2);
+  }
+  /* The account menu: a drawer from the left over a dimmed page. Tapping the
+     dimmed page closes it (frontend/site-header.ts). The header rises above
+     the page's own layers while it is open, except the cookie choice. */
+  .site-header:has(.header-user-menu[open]) {
+    z-index: 95;
+  }
+  .header-user-menu[open]::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 29;
+    background: rgb(0 0 0 / 0.6);
+  }
+  .header-user-menu > .header-user-popover {
+    position: fixed;
+    inset: 0 auto 0 0;
+    align-content: start;
+    width: min(20rem, 84vw);
+    padding: calc(var(--space-4) + env(safe-area-inset-top, 0px)) var(--space-3)
+      calc(var(--space-4) + env(safe-area-inset-bottom, 0px))
+      max(var(--space-3), env(safe-area-inset-left, 0px));
+    border-width: 0 1px 0 0;
+    border-radius: 0 var(--radius-card) var(--radius-card) 0;
+    overflow-y: auto;
+    animation: header-drawer 0.22s var(--ease-expo);
+  }
+  html:has(.header-user-menu[open]) {
+    overflow: hidden;
+  }
+}
+@keyframes header-drawer {
+  from {
+    transform: translateX(-100%);
+  }
+}
 @media (max-width: 359px) {
   .site-logo img {
     height: 20px;
@@ -546,6 +643,9 @@ body.account-page:has(#signed-out:not([hidden])) [data-header-guest] {
   .header-loader i {
     animation: none;
     opacity: 0.6;
+  }
+  .header-user-popover {
+    animation: none;
   }
 }
 

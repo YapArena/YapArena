@@ -638,6 +638,12 @@ if (header) {
         ))
           if (other !== menu) other.open = false;
     });
+    // On phones the account menu is a drawer over a dimmed page drawn by the
+    // menu itself (public/site-header.css): a tap there lands on the menu,
+    // outside its button and pop-up, and closes it.
+    menu.addEventListener("click", (event) => {
+      if (event.target === menu) menu.open = false;
+    });
   }
   document.addEventListener("click", (event) => {
     for (const menu of header.querySelectorAll<HTMLDetailsElement>("details"))
