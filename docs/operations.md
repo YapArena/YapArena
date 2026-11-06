@@ -316,6 +316,27 @@ debate seats, moderation records, the audit trail (90-day retention) and debate 
 replays. Removing a recording or replay is a separate decision for each debate, which also
 involves the other speaker.
 
+### Change a topic's category
+
+`scripts/set-topic-category.ts` is an owner command
+([Decision 0003](decisions/0003-topics-matching-events.md#topic-and-event-identity)). The owner
+runs it like the suspension command, from a built checkout of the deployed release with the
+owner environment file:
+
+```sh
+npm run build
+node --env-file="$HOME/yaparena-private/production/owner.env" scripts/set-topic-category.ts topic-slug politics "Reason for the record"
+node --env-file="$HOME/yaparena-private/production/owner.env" scripts/set-topic-category.ts topic-slug politics "Reason for the record" --execute
+```
+
+The slug is the one in the topic's address (`/topics/topic-slug`), and the category is one of
+`politics`, `society`, `cities`, `technology`, `work`, `climate`, `education`, `economy` or
+`other`. Without `--execute` it previews the change and rolls it back. It refuses any login but
+the dedicated `yaparena_owner`, and the reason must be 5–500 characters. A change sets the
+topic's category and records the previous one, the new one, the reason and the owner role in
+`topic_category_changes`; choosing the current category changes nothing. The web process
+cannot change a category: the database refuses it.
+
 ## Diagnose an incident
 
 1. Check container state and health: `docker compose ps`.

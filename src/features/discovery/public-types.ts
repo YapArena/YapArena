@@ -1,4 +1,5 @@
 import type { AvatarId } from "../identity/avatars.ts";
+import type { TopicCategory } from "./topic-categories.ts";
 
 export type DebateStatus =
   | "draft"
@@ -19,6 +20,8 @@ export interface PublicTopic {
   summary: string;
   sideALabel: string;
   sideBLabel: string;
+  /** One of the fixed topic categories (Decision 0003). */
+  category: TopicCategory;
   isDemo: boolean;
   createdAt: Date;
 }
