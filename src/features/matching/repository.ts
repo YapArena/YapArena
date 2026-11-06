@@ -2,6 +2,10 @@ import { randomUUID } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
 import { withTransaction } from "../../platform/transaction.ts";
 import { assertDebaterSettings } from "../transcription/debater-settings.ts";
+import {
+  DEFAULT_TOPIC_CATEGORY,
+  type TopicCategory,
+} from "../discovery/topic-categories.ts";
 import { activeRestriction } from "../community/restrictions.ts";
 import {
   BOOKING_LEAD_SECONDS,
@@ -641,13 +645,14 @@ export function createMatchingRepository(
         summary: string;
         sideALabel: string;
         sideBLabel: string;
+        category?: TopicCategory;
       },
     ) {
       const result = await database.query(
-        `INSERT INTO topics (creator_user_id, slug, title, summary, side_a_label, side_b_label)
-         VALUES ($1, $2, $3, $4, $5, $6)
+        `INSERT INTO topics (creator_user_id, slug, title, summary, side_a_label, side_b_label, category)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING id, slug, title, summary, side_a_label AS "sideALabel",
-           side_b_label AS "sideBLabel", publication_state AS "publicationState"`,
+           side_b_label AS "sideBLabel", category, publication_state AS "publicationState"`,
         [
           userId,
           input.slug,
@@ -655,6 +660,7 @@ export function createMatchingRepository(
           input.summary,
           input.sideALabel,
           input.sideBLabel,
+          input.category ?? DEFAULT_TOPIC_CATEGORY,
         ],
       );
       return result.rows[0];
@@ -662,7 +668,7 @@ export function createMatchingRepository(
     async listOwnTopics(userId: string) {
       const result = await database.query(
         `SELECT id, slug, title, summary, side_a_label AS "sideALabel",
-           side_b_label AS "sideBLabel", publication_state AS "publicationState"
+           side_b_label AS "sideBLabel", category, publication_state AS "publicationState"
          FROM topics WHERE creator_user_id = $1 ORDER BY created_at DESC LIMIT 50`,
         [userId],
       );

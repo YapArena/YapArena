@@ -42,6 +42,7 @@ const topic: PublicTopic = {
   summary: "Synthetic replay timeline fixture.",
   sideALabel: "Free for everyone",
   sideBLabel: "Fix service first",
+  category: "other",
   isDemo: false,
   createdAt: new Date(),
 };

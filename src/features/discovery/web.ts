@@ -1,6 +1,11 @@
 import { homepageMarkup } from "./homepage-view.ts";
 import { accountMarkup } from "./account-web.ts";
-import { siteHeaderMarkup, type SiteSection } from "./site-header-web.ts";
+import {
+  siteHeaderMarkup,
+  siteTabBarMarkup,
+  type SiteSection,
+  type SiteTab,
+} from "./site-header-web.ts";
 import type { PublicBotActivity } from "../a4/public-bots.ts";
 import { publicHomepage, type HomeData } from "./homepage-model.ts";
 import { renderVideoDebateCard } from "./video-card-web.ts";
@@ -17,6 +22,7 @@ import { debateCard, statusLabels as labels, topicCard } from "./cards-web.ts";
 import { inscription, searchIcon } from "./kit-web.ts";
 import { personSlot } from "./avatar-web.ts";
 import { pixelCoin } from "./pixel-mark.ts";
+import { TOPIC_CATEGORIES } from "./topic-categories.ts";
 import { html, raw, type SafeHtml } from "../../platform/html.ts";
 import type {
   PublicDebate,
@@ -34,6 +40,15 @@ function sectionFor(canonical: string): SiteSection | null {
   if (path === "/match") return "create";
   if (/^\/(debates|topics|people)(\/|$)/.test(path)) return "explore";
   return null;
+}
+
+// The bottom tab for this page: Home for /home, otherwise its header section.
+function tabFor(
+  canonical: string,
+  section: SiteSection | null,
+): SiteTab | null {
+  const path = new URL(canonical, "https://yaparena.invalid").pathname;
+  return path === "/home" ? "home" : section;
 }
 
 // On phones the top row names the three destinations' own pages; every other
@@ -58,9 +73,15 @@ export function layout(
 ) {
   const home = bodyClass.startsWith("arena-market-home");
   const reference = bodyClass.includes("reference-home");
-  const page = html`${siteHeaderMarkup(sectionFor(canonical), { title: pageTitleFor(canonical) })}${
+  const section = sectionFor(canonical);
+  // Debate pages keep their own phone layout (the stake bar sits at the
+  // bottom), so they have no bottom tabs.
+  const tabBar = bodyClass.includes("arena-page")
+    ? ""
+    : siteTabBarMarkup(tabFor(canonical, section));
+  const page = html`${siteHeaderMarkup(section, { title: pageTitleFor(canonical) })}${
     home ? content : html`<main id="main">${content}</main>`
-  }${siteFooterMarkup()}`;
+  }${siteFooterMarkup()}${tabBar}`;
   return html`<!doctype html><html lang="en"${emailFirst ? " data-email-first" : ""}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#000000"><title>${title} · YAP Arena</title><meta name="description" content="${description}"><link rel="canonical" href="${canonical}">${metadata}${iconLinks()}<link rel="stylesheet" href="${asset("site.css")}"><link rel="stylesheet" href="${asset("arena.css")}"><link rel="stylesheet" href="${asset("site-header.css")}">${stylesheets.map((name) => html`<link rel="stylesheet" href="${asset(name)}">`)}<script defer src="${asset("session-coordination.js")}"></script><script type="module" src="${asset("site-header.js")}"></script><script defer src="${asset("site.js")}"></script><script defer src="${asset("account-balance.js")}"></script>${reference ? "" : html`<script defer src="${asset("measurement.js")}"></script><script type="module" src="${asset("results-notice.js")}"></script>`}${home ? html`<link rel="stylesheet" href="${asset("homepage.css")}"><script defer src="${asset("homepage.bundle.js")}"></script>` : ""}</head><body class="${bodyClass}"><a class="skip-link" href="#main">Skip to content</a>${page}</body></html>`.toString();
 }
 
@@ -388,7 +409,7 @@ const sideCard = (title: string, list: SafeHtml) =>
 export function renderMatchmaking(origin: string, matchmaking = false) {
   const tab = (id: string, label: string, selected: boolean) =>
     html`<button class="match-tab" type="button" role="tab" id="match-tab-${id}" aria-controls="match-panel-${id}" aria-selected="${String(selected)}" tabindex="${selected ? "0" : "-1"}">${label}</button>`;
-  const content = html`<header class="container page-head kit-reveal"><p class="kicker">${inscription("Debate matching")}</p><h1 class="page-title">${inscription("Find the", "other side.")}</h1><p class="page-lead">${matchmaking ? "Create a topic or challenge a person. To debate right now, open a topic and queue on a side. A challenge becomes an event when both speakers agree to its proposition, sides, and start time." : "Create a topic, challenge a person, or join an open match request. A request becomes an event when two speakers agree to its proposition, sides, and start time."}</p></header><section class="container match-page"><p id="match-notice" class="match-notice" role="status" aria-live="polite">Checking your account…</p><div id="match-signed-out" hidden class="card match-signin"><p>Sign in with a public profile to open or join a debate.</p><a class="btn btn-primary" href="/account?next=%2Fmatch">Sign in</a></div><div id="match-signed-in" hidden class="match-layout"><div class="match-main"><div class="match-tabs" role="tablist" aria-label="Create">${tab("topic", "Start a topic", true)}${tab("other", matchmaking ? "Challenge a person" : "Open a request", false)}</div><section class="card match-panel" role="tabpanel" id="match-panel-topic" aria-labelledby="match-tab-topic"><h2 class="match-panel-title">${inscription("Define both sides")}</h2><form id="topic-create" class="stack-form"><label>URL slug<input name="slug" pattern="[a-z0-9][a-z0-9-]{2,79}" maxlength="80" required></label><label>Title<input name="title" minlength="5" maxlength="140" required></label><label>Summary<textarea name="summary" minlength="10" maxlength="600" required></textarea></label><label>Side A label<input name="sideALabel" minlength="2" maxlength="80" required></label><label>Side B label<input name="sideBLabel" minlength="2" maxlength="80" required></label><button class="btn btn-primary" type="submit">Create private draft</button></form><ul id="my-topics" class="account-list"></ul></section><section class="card match-panel" role="tabpanel" id="match-panel-other" aria-labelledby="match-tab-other" hidden>${matchmaking ? challengePanel : requestPanel}</section></div><aside class="match-side" aria-label="Your matches">${matchmaking ? html`<section class="card match-card"><h2 class="match-card-title">${inscription("Live queue")}</h2><p>Open a topic and queue on a side. You are matched with someone on the other side in seconds.</p><a class="text-link" href="/topics">Browse topics <span aria-hidden="true">→</span></a></section>` : sideCard("Open queue", html`<ul id="open-queue" class="account-list"></ul>`)}${sideCard(matchmaking ? "Your challenges" : "Your requests", html`<ul id="my-requests" class="account-list"></ul>`)}${sideCard("Your events", html`<ul id="my-events" class="account-list"></ul>`)}${sideCard("Updates", html`<ul id="match-notifications" class="account-list"></ul>`)}</aside></div></section><script defer src="${asset("matching.js")}"></script>`;
+  const content = html`<header class="container page-head kit-reveal"><p class="kicker">${inscription("Debate matching")}</p><h1 class="page-title">${inscription("Find the", "other side.")}</h1><p class="page-lead">${matchmaking ? "Create a topic or challenge a person. To debate right now, open a topic and queue on a side. A challenge becomes an event when both speakers agree to its proposition, sides, and start time." : "Create a topic, challenge a person, or join an open match request. A request becomes an event when two speakers agree to its proposition, sides, and start time."}</p></header><section class="container match-page"><p id="match-notice" class="match-notice" role="status" aria-live="polite">Checking your account…</p><div id="match-signed-out" hidden class="card match-signin"><p>Sign in with a public profile to open or join a debate.</p><a class="btn btn-primary" href="/account?next=%2Fmatch">Sign in</a></div><div id="match-signed-in" hidden class="match-layout"><div class="match-main"><div class="match-tabs" role="tablist" aria-label="Create">${tab("topic", "Start a topic", true)}${tab("other", matchmaking ? "Challenge a person" : "Open a request", false)}</div><section class="card match-panel" role="tabpanel" id="match-panel-topic" aria-labelledby="match-tab-topic"><h2 class="match-panel-title">${inscription("Define both sides")}</h2><form id="topic-create" class="stack-form"><label>URL slug<input name="slug" pattern="[a-z0-9][a-z0-9-]{2,79}" maxlength="80" required></label><label>Title<input name="title" minlength="5" maxlength="140" required></label><label>Summary<textarea name="summary" minlength="10" maxlength="600" required></textarea></label><label>Side A label<input name="sideALabel" minlength="2" maxlength="80" required></label><label>Side B label<input name="sideBLabel" minlength="2" maxlength="80" required></label><label>Category<select name="category" required><option value="">Choose a category</option>${TOPIC_CATEGORIES.map(([id, name]) => html`<option value="${id}">${name}</option>`)}</select></label><button class="btn btn-primary" type="submit">Create private draft</button></form><ul id="my-topics" class="account-list"></ul></section><section class="card match-panel" role="tabpanel" id="match-panel-other" aria-labelledby="match-tab-other" hidden>${matchmaking ? challengePanel : requestPanel}</section></div><aside class="match-side" aria-label="Your matches">${matchmaking ? html`<section class="card match-card"><h2 class="match-card-title">${inscription("Live queue")}</h2><p>Open a topic and queue on a side. You are matched with someone on the other side in seconds.</p><a class="text-link" href="/topics">Browse topics <span aria-hidden="true">→</span></a></section>` : sideCard("Open queue", html`<ul id="open-queue" class="account-list"></ul>`)}${sideCard(matchmaking ? "Your challenges" : "Your requests", html`<ul id="my-requests" class="account-list"></ul>`)}${sideCard("Your events", html`<ul id="my-events" class="account-list"></ul>`)}${sideCard("Updates", html`<ul id="match-notifications" class="account-list"></ul>`)}</aside></div></section><script defer src="${asset("matching.js")}"></script>`;
   return layout(
     "Match",
     "Create topics and arrange debates on YAP Arena.",

@@ -13,6 +13,7 @@ import { hasHiddenCharacters } from "../community/user-text.ts";
 import { MatchConflictError, MatchNotFoundError } from "./repository.ts";
 import { DebaterSettingsRequiredError } from "../transcription/debater-settings.ts";
 import { PROPOSAL_MIN_LEAD_MINUTES } from "./timings.ts";
+import { isTopicCategory } from "../discovery/topic-categories.ts";
 
 type Repository = ReturnType<typeof createMatchingRepository>;
 const slugPattern = /^[a-z0-9][a-z0-9-]{2,79}$/;
@@ -44,7 +45,14 @@ function topicInput(body: unknown) {
     !value ||
     Object.keys(value).some(
       (key) =>
-        !["slug", "title", "summary", "sideALabel", "sideBLabel"].includes(key),
+        ![
+          "slug",
+          "title",
+          "summary",
+          "sideALabel",
+          "sideBLabel",
+          "category",
+        ].includes(key),
     )
   )
     return null;
@@ -53,6 +61,8 @@ function topicInput(body: unknown) {
   const summary = text(value.summary, 600, 10);
   const sideALabel = text(value.sideALabel, 80, 2);
   const sideBLabel = text(value.sideBLabel, 80, 2);
+  // Optional (Decision 0003): the repository stores a topic without one as "other".
+  const category = value.category;
   if (
     typeof slug !== "string" ||
     !slugPattern.test(slug) ||
@@ -60,10 +70,18 @@ function topicInput(body: unknown) {
     !summary ||
     !sideALabel ||
     !sideBLabel ||
-    sideALabel.toLowerCase() === sideBLabel.toLowerCase()
+    sideALabel.toLowerCase() === sideBLabel.toLowerCase() ||
+    (category !== undefined && !isTopicCategory(category))
   )
     return null;
-  return { slug, title, summary, sideALabel, sideBLabel };
+  return {
+    slug,
+    title,
+    summary,
+    sideALabel,
+    sideBLabel,
+    ...(category !== undefined && { category }),
+  };
 }
 
 // A proposed or scheduled time: 1 hour to 90 days ahead, in UTC ISO form.

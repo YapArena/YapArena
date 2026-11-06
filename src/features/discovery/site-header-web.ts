@@ -1,5 +1,5 @@
 import { asset, avatarTemplate } from "./assets.ts";
-import { html } from "../../platform/html.ts";
+import { html, type SafeHtml } from "../../platform/html.ts";
 import { inscribe } from "./inscribe.ts";
 
 /** The header's destinations; the current one is marked (docs/site-design.md). */
@@ -15,6 +15,32 @@ const searchIcon = html`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="
 const personIcon = html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg>`;
 // Three tiles in the visit's colours; the balance's small pixel coin.
 const coin = html`<span class="header-coin" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>`;
+
+/** The bottom tabs' destinations: Home and the header's three. */
+export type SiteTab = "home" | SiteSection;
+
+// 24 px icons drawn in the text colour. Home is the YAP Arena ring, upright
+// like the emblem.
+const tabIcons: Record<SiteTab, SafeHtml> = {
+  home: html`<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/></svg>`,
+  live: html`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6" fill="currentColor"/><path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+  explore: html`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+  create: html`<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+};
+const tabs: [SiteTab, string, string][] = [
+  ["home", "/home", "Home"],
+  ...sections,
+];
+
+// Phones only (public/site-header.css): the main navigation as icon tabs with
+// their names, fixed to the bottom of the screen. Wider screens keep the
+// header's navigation and never show these.
+export function siteTabBarMarkup(current: SiteTab | null = null) {
+  return html`<nav class="site-tabbar" aria-label="Main navigation">${tabs.map(
+    ([key, href, label]) =>
+      html`<a href="${href}"${key === current ? html` aria-current="page"` : ""}>${tabIcons[key]}<span>${label}</span></a>`,
+  )}</nav>`;
+}
 
 export interface SiteHeaderOptions {
   /** On phones, this page's name replaces the logo in the middle of the top row. */

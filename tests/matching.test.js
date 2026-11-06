@@ -184,6 +184,32 @@ describe("matching API", () => {
       );
   });
 
+  it("takes an optional topic category from the fixed list", async () => {
+    const { authenticated, calls } = fixture();
+    const created = await authenticated("post", "/api/matching/topics").send({
+      ...topicInput,
+      category: "technology",
+    });
+    assert.equal(created.status, 201);
+    assert.deepEqual(calls[0], [
+      "topic",
+      "7",
+      { ...topicInput, category: "technology" },
+    ]);
+    // Without one, the repository stores "other".
+    await authenticated("post", "/api/matching/topics").send(topicInput);
+    assert.equal("category" in calls[1][2], false);
+    for (const category of ["Technology", "sports", "", null, 3, ["work"]]) {
+      const refused = await authenticated("post", "/api/matching/topics").send({
+        ...topicInput,
+        category,
+      });
+      assert.equal(refused.status, 400, String(category));
+      assert.deepEqual(refused.body, { error: "invalid topic fields" });
+    }
+    assert.equal(calls.length, 2);
+  });
+
   it("validates requests and binds their owner to the session", async () => {
     const { authenticated, calls } = fixture();
     const created = await authenticated("post", "/api/matching/requests").send(
