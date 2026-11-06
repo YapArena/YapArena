@@ -36,6 +36,7 @@ const path = (value: string) => encodeURIComponent(value);
 function sectionFor(canonical: string): SiteSection | null {
   const path = new URL(canonical, "https://yaparena.invalid").pathname;
   if (path === "/live") return "live";
+  if (path === "/queue") return "queue";
   if (path === "/match") return "create";
   if (/^\/(debates|topics|people)(\/|$)/.test(path)) return "explore";
   return null;
@@ -55,6 +56,7 @@ function tabFor(
 function pageTitleFor(canonical: string) {
   const path = new URL(canonical, "https://yaparena.invalid").pathname;
   if (path === "/live") return "Live";
+  if (path === "/queue") return "Queue";
   if (path === "/debates" || path === "/topics") return "Explore";
   if (path === "/match") return "Create";
   return null;
@@ -261,6 +263,37 @@ export function renderTopics(
       description: "Explore public topics on YAP Arena.",
       url: canonical,
     })}${headlineFont}`,
+    "",
+    false,
+    listStyles,
+  );
+}
+
+// The Queue tab (Decision 0011, first-run plan PR 3): every open question with
+// one button per side, and the questions where someone is already waiting
+// (frontend/queue-page.ts fills that list from GET /api/matchmaking/waiting).
+// The buttons hand each tap to frontend/matchmaking.ts, which queues with the
+// same sign-in, camera, one-queue and overlay rules as a topic page.
+export function renderQueue(
+  origin: string,
+  list: PublicList<PublicTopic>,
+  matchmaking = false,
+) {
+  const sideButton = (topic: PublicTopic, key: "A" | "B", label: string) =>
+    html`<button class="btn btn-secondary btn-sm queue-request" type="button" data-queue-request="${topic.slug}" data-request-side="${key}" data-side-label="${label}">${label}</button>`;
+  const row = (topic: PublicTopic) =>
+    html`<li class="queue-row" data-queue-row="${topic.slug}"><div class="queue-row-copy"><a class="queue-row-title" href="/topics/${path(topic.slug)}">${topic.title}</a><p class="queue-row-meta"><span data-queue-row-waiting></span>${matchmaking ? "" : html`${topic.sideALabel} vs ${topic.sideBLabel}`}</p></div>${matchmaking ? html`<div class="queue-row-sides" role="group" aria-label="Argue a side: ${topic.title}">${sideButton(topic, "A", topic.sideALabel)}${sideButton(topic, "B", topic.sideBLabel)}</div>` : ""}</li>`;
+  const questions = list.items.length
+    ? html`<ol class="queue-list">${list.items.map(row)}</ol>`
+    : quietState("No public questions yet.", "Create the first one.");
+  const content = html`${pageHead("Debate now", "Pick a question", "and a side.", "Pick your side. When someone queues on the other side, you both get 30 seconds to accept, then the debate starts.")}<section class="container list-section queue-page" aria-labelledby="questions-title">${matchmaking ? html`<p class="queue-page-note" data-queue-page-note role="status"></p>` : quietState("The live queue isn't open right now.", "You can still read every question and its debates.")}<a class="card queue-create" href="/match#topic-create"><span>Your question isn't here yet?</span><span class="btn btn-primary btn-sm" aria-hidden="true">+ Create</span></a>${matchmaking ? html`<section class="queue-waiting" data-waiting-section aria-labelledby="waiting-title" hidden><div class="section-head"><p class="kicker">${inscription("Fastest match")}</p><h2 class="section-title" id="waiting-title">${inscription("Someone's waiting")}</h2></div><ol class="queue-list" data-waiting-list></ol></section>` : ""}<div class="section-head"><p class="kicker">${inscription("Every open question")}</p><h2 class="section-title" id="questions-title">${inscription("All questions")}</h2></div>${questions}${pagination("/queue", list)}</section>${matchmaking ? html`<script type="module" src="${asset("queue-page.js")}"></script>` : ""}`;
+  const canonical = `${origin}${listPath("/queue", list)}`;
+  return layout(
+    "Queue",
+    "Pick a question and a side, and debate someone live on YAP Arena.",
+    canonical,
+    content,
+    headlineFont,
     "",
     false,
     listStyles,

@@ -45,6 +45,7 @@ exports[`renders a debate 1`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -675,6 +676,7 @@ exports[`renders a debate 10`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -1307,6 +1309,7 @@ exports[`renders a debate 2`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -1937,6 +1940,7 @@ exports[`renders a debate 3`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -2574,6 +2578,7 @@ exports[`renders a debate 4`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -3211,6 +3216,7 @@ exports[`renders a debate 5`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -3840,6 +3846,7 @@ exports[`renders a debate 6`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -4469,6 +4476,7 @@ exports[`renders a debate 7`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -5100,6 +5108,7 @@ exports[`renders a debate 8`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -5807,6 +5816,7 @@ exports[`renders a debate 9`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -6506,6 +6516,7 @@ exports[`renders a profile 1`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -6667,6 +6678,13 @@ exports[`renders a profile 1`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates" aria-current="page">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -6734,6 +6752,7 @@ exports[`renders a profile 2`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -6941,6 +6960,13 @@ exports[`renders a profile 2`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates" aria-current="page">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -7008,6 +7034,7 @@ exports[`renders a profile 3`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -7169,6 +7196,13 @@ exports[`renders a profile 3`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates" aria-current="page">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -7236,6 +7270,7 @@ exports[`renders a topic 1`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -7413,6 +7448,13 @@ exports[`renders a topic 1`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates" aria-current="page">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -7480,6 +7522,7 @@ exports[`renders a topic 2`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -7743,6 +7786,13 @@ exports[`renders a topic 2`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates" aria-current="page">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -7810,6 +7860,7 @@ exports[`renders a topic 3`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -8007,6 +8058,13 @@ exports[`renders a topic 3`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates" aria-current="page">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -8057,6 +8115,7 @@ exports[`renders community moderation and the broadcast overlay 1`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -8206,6 +8265,7 @@ exports[`renders community moderation and the broadcast overlay 2`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -8403,6 +8463,7 @@ exports[`renders community moderation and the broadcast overlay 3`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -8552,6 +8613,7 @@ exports[`renders community moderation and the broadcast overlay 4`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -8807,6 +8869,7 @@ exports[`renders the 400, 404 and 500 pages 1`] = `
 </a>
 <p class="site-page-title ins" aria-hidden="true">explore</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -8959,6 +9022,13 @@ exports[`renders the 400, 404 and 500 pages 1`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates" aria-current="page">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -9016,6 +9086,7 @@ exports[`renders the 400, 404 and 500 pages 2`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -9168,6 +9239,13 @@ exports[`renders the 400, 404 and 500 pages 2`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -9225,6 +9303,7 @@ exports[`renders the 400, 404 and 500 pages 3`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -9377,6 +9456,13 @@ exports[`renders the 400, 404 and 500 pages 3`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -9444,6 +9530,7 @@ exports[`renders the about and account pages 1`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -9607,6 +9694,13 @@ exports[`renders the about and account pages 1`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -9662,6 +9756,7 @@ exports[`renders the about and account pages 2`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -9992,6 +10087,13 @@ exports[`renders the about and account pages 2`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -10047,6 +10149,7 @@ exports[`renders the about and account pages 3`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -10399,6 +10502,13 @@ exports[`renders the about and account pages 3`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -10454,6 +10564,7 @@ exports[`renders the coins and match pages 1`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -10758,6 +10869,13 @@ exports[`renders the coins and match pages 1`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -10816,6 +10934,7 @@ exports[`renders the coins and match pages 2`] = `
 </a>
 <p class="site-page-title ins" aria-hidden="true">create</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match" aria-current="page">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -11049,6 +11168,13 @@ exports[`renders the coins and match pages 2`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -11107,6 +11233,7 @@ exports[`renders the coins and match pages 3`] = `
 </a>
 <p class="site-page-title ins" aria-hidden="true">create</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match" aria-current="page">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -11353,6 +11480,13 @@ exports[`renders the coins and match pages 3`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -11421,6 +11555,7 @@ exports[`renders the debate list 1`] = `
 </a>
 <p class="site-page-title ins" aria-hidden="true">explore</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -11605,6 +11740,13 @@ exports[`renders the debate list 1`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates" aria-current="page">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -11673,6 +11815,7 @@ exports[`renders the debate list 2`] = `
 </a>
 <p class="site-page-title ins" aria-hidden="true">explore</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -11940,6 +12083,13 @@ exports[`renders the debate list 2`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates" aria-current="page">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -12008,6 +12158,7 @@ exports[`renders the debate list 3`] = `
 </a>
 <p class="site-page-title ins" aria-hidden="true">explore</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -12232,6 +12383,13 @@ exports[`renders the debate list 3`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates" aria-current="page">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -12300,6 +12458,7 @@ exports[`renders the debate list 4`] = `
 </a>
 <p class="site-page-title ins" aria-hidden="true">explore</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -12520,6 +12679,13 @@ exports[`renders the debate list 4`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates" aria-current="page">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -12588,6 +12754,7 @@ exports[`renders the home page 1`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -12718,6 +12885,13 @@ exports[`renders the home page 1`] = `
 <path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
 </svg>
 <span>Live</span>
+</a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
 </a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -12787,6 +12961,7 @@ exports[`renders the home page 2`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -12918,6 +13093,13 @@ exports[`renders the home page 2`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -12986,6 +13168,7 @@ exports[`renders the home page 3`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -13120,6 +13303,13 @@ exports[`renders the home page 3`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -13188,6 +13378,7 @@ exports[`renders the home page 4`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -13575,6 +13766,13 @@ exports[`renders the home page 4`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -13643,6 +13841,7 @@ exports[`renders the home page 5`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -14120,6 +14319,13 @@ exports[`renders the home page 5`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -14184,6 +14390,7 @@ exports[`renders the home page 6`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -14906,6 +15113,13 @@ exports[`renders the home page 6`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -14974,6 +15188,7 @@ exports[`renders the home page 7`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -15361,6 +15576,13 @@ exports[`renders the home page 7`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -15430,6 +15652,7 @@ exports[`renders the live page 1`] = `
 </a>
 <p class="site-page-title ins" aria-hidden="true">live</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live" aria-current="page">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -15633,6 +15856,13 @@ exports[`renders the live page 1`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -15702,6 +15932,7 @@ exports[`renders the live page 2`] = `
 </a>
 <p class="site-page-title ins" aria-hidden="true">live</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live" aria-current="page">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -16075,6 +16306,13 @@ exports[`renders the live page 2`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -16125,6 +16363,7 @@ exports[`renders the measurement dashboard 1`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -16394,6 +16633,7 @@ exports[`renders the measurement dashboard 2`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -16683,6 +16923,7 @@ exports[`renders the privacy, terms and cookie pages 1`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -17313,6 +17554,13 @@ exports[`renders the privacy, terms and cookie pages 1`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -17380,6 +17628,7 @@ exports[`renders the privacy, terms and cookie pages 2`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -17687,6 +17936,13 @@ exports[`renders the privacy, terms and cookie pages 2`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -17754,6 +18010,7 @@ exports[`renders the privacy, terms and cookie pages 3`] = `
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
 </a>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -18126,6 +18383,13 @@ exports[`renders the privacy, terms and cookie pages 3`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -18194,6 +18458,7 @@ exports[`renders the topic list 1`] = `
 </a>
 <p class="site-page-title ins" aria-hidden="true">explore</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -18353,6 +18618,13 @@ exports[`renders the topic list 1`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates" aria-current="page">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -18421,6 +18693,7 @@ exports[`renders the topic list 2`] = `
 </a>
 <p class="site-page-title ins" aria-hidden="true">explore</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -18600,6 +18873,13 @@ exports[`renders the topic list 2`] = `
 </svg>
 <span>Live</span>
 </a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
 <a href="/debates" aria-current="page">
 <svg viewBox="0 0 24 24" aria-hidden="true">
 <circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
@@ -18668,6 +18948,7 @@ exports[`renders the topic list 3`] = `
 </a>
 <p class="site-page-title ins" aria-hidden="true">explore</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
+<a href="/queue">Queue</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
 </nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
@@ -18847,6 +19128,13 @@ exports[`renders the topic list 3`] = `
 <path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
 </svg>
 <span>Live</span>
+</a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
 </a>
 <a href="/debates" aria-current="page">
 <svg viewBox="0 0 24 24" aria-hidden="true">
