@@ -552,6 +552,89 @@
   }
 }
 
+/* ---- The Queue tab (/queue, first-run plan PR 3) ---------------------------
+   "Someone's waiting" first, then every open question, each with one button
+   per side. frontend/queue-page.ts fills the waiting list. */
+.queue-page-note {
+  margin: 0;
+  color: var(--muted);
+}
+.queue-page-note:empty {
+  display: none;
+}
+.queue-create {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-style: dashed;
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: none;
+}
+.queue-create:hover {
+  border-color: var(--muted);
+}
+.queue-waiting {
+  display: grid;
+  gap: var(--space-4);
+}
+.queue-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+.queue-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--line);
+}
+.queue-row-copy {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.queue-row-title {
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.queue-row-title:hover {
+  text-decoration: underline;
+}
+.queue-row-meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+.queue-row-sides {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+.queue-request[aria-pressed="true"] {
+  border-color: var(--acid);
+}
+@media (max-width: 599px) {
+  .queue-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .queue-row-sides {
+    justify-content: flex-start;
+  }
+  .queue-row-sides .queue-request {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
 /* ---- A topic's endorsement history (topic-history-web.ts) ---------------
    The chart that used to sit on the home, with the same look: one white line
    on five dotted guides, ending on a square pixel that pulses, drawn left to

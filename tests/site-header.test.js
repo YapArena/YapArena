@@ -11,6 +11,7 @@ import {
   renderTopics,
   renderTopic,
   renderDebate,
+  renderQueue,
 } from "../dist/features/discovery/web.js";
 import { debate, topic, empty } from "./page-fixtures.js";
 import {
@@ -41,7 +42,7 @@ it("uses one navigation and session-aware account header across normal pages", (
     assert.equal((html.match(/data-site-header/g) ?? []).length, 1);
     assert.match(
       html,
-      /href="\/live"(?: aria-current="page")?>Live<\/a><a href="\/debates"(?: aria-current="page")?>Explore<\/a><a href="\/match"(?: aria-current="page")?>Create<\/a>/,
+      /href="\/live"(?: aria-current="page")?>Live<\/a><a href="\/queue"(?: aria-current="page")?>Queue<\/a><a href="\/debates"(?: aria-current="page")?>Explore<\/a><a href="\/match"(?: aria-current="page")?>Create<\/a>/,
     );
     // The landing's logo, and below 1000 px a search icon that falls back
     // to the debates search without JavaScript.
@@ -125,6 +126,7 @@ it("names the three destinations' pages in the phone top row and keeps the logo 
   assert.equal(title(renderDebates(origin, empty, "city", "ended")), "explore");
   assert.equal(title(renderTopics(origin, empty, "")), "explore");
   assert.equal(title(renderMatchmaking(origin)), "create");
+  assert.equal(title(renderQueue(origin, empty, true)), "qveve");
   for (const page of [
     renderHome(origin),
     renderAbout(origin),
@@ -156,12 +158,13 @@ it("ends every layout page but the debate page with the phone bottom tabs", () =
     topics: renderTopics(origin, empty, ""),
     topic: renderTopic(origin, topic, empty),
     create: renderMatchmaking(origin),
+    queue: renderQueue(origin, empty, true),
     about: renderAbout(origin),
   };
   for (const html of Object.values(pages)) {
     const tabs = tabBar(html);
     assert.ok(tabs);
-    // Home, Live, Explore and Create, each an icon and its name.
+    // Home, Live, Queue, Explore and Create, each an icon and its name.
     assert.deepEqual(
       [
         ...tabs.matchAll(
@@ -171,6 +174,7 @@ it("ends every layout page but the debate page with the phone bottom tabs", () =
       [
         ["/home", "Home"],
         ["/live", "Live"],
+        ["/queue", "Queue"],
         ["/debates", "Explore"],
         ["/match", "Create"],
       ],
@@ -189,6 +193,7 @@ it("ends every layout page but the debate page with the phone bottom tabs", () =
   assert.deepEqual(current(pages.topics), ["/debates"]);
   assert.deepEqual(current(pages.topic), ["/debates"]);
   assert.deepEqual(current(pages.create), ["/match"]);
+  assert.deepEqual(current(pages.queue), ["/queue"]);
   assert.deepEqual(current(pages.about), []);
   // The debate page keeps its own phone layout: no bottom tabs.
   assert.equal(tabBar(renderDebate(origin, debate)), null);

@@ -668,6 +668,44 @@ describe("live topic queue pages", () => {
     assert.doesNotMatch(plain.text, /data-matchmaking|data-queue-topic/);
     assert.match((await request(off).get("/match")).text, /id="open-queue"/);
   });
+
+  it("serves the Queue tab with side buttons only when the queue is on", async () => {
+    const page = await request(live(true)).get("/queue");
+    assert.equal(page.status, 200);
+    assert.match(
+      page.text,
+      /<html lang="en" data-matchmaking data-email-first>/,
+    );
+    // Every open question has one button per side, named by its side; the
+    // queue script (matchmaking.js) does the queuing.
+    assert.match(
+      page.text,
+      /<li class="queue-row" data-queue-row="public-topic">[\s\S]*?data-queue-request="public-topic" data-request-side="A" data-side-label="[^"]+">[^<]+<\/button>[\s\S]*?data-request-side="B"/,
+    );
+    assert.match(page.text, /data-waiting-section[^>]*hidden>/);
+    assert.match(
+      page.text,
+      /<a class="card queue-create" href="\/match#topic-create">/,
+    );
+    assert.match(page.text, /queue-page\.js/);
+    assert.match(
+      page.text,
+      /<nav class="site-tabbar"[\s\S]*?<a href="\/queue" aria-current="page">/,
+    );
+
+    const off = await request(live(false)).get("/queue");
+    assert.equal(off.status, 200);
+    assert.doesNotMatch(
+      off.text,
+      /data-queue-request|data-waiting-section|queue-page\.js/,
+    );
+    assert.match(off.text, /The live queue isn/);
+    assert.match(off.text, /data-queue-row="public-topic"/);
+    assert.equal(
+      (await request(live(true)).get("/queue?offset=-1")).status,
+      400,
+    );
+  });
 });
 
 describe("launch pages, share previews and sitemap", () => {
