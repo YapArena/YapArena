@@ -291,6 +291,26 @@ describe("Queue tab page", () => {
     );
   });
 
+  it("names the sides of a demo question instead of offering buttons", () => {
+    const demo = {
+      ...topic,
+      slug: "demo-topic",
+      category: "work",
+      isDemo: true,
+    };
+    const page = renderQueue(origin, list([demo, topic]), true);
+    // The queue refuses demo topics, so tapping a side could only fail.
+    assert.doesNotMatch(page, /data-queue-request="demo-topic"/);
+    assert.match(
+      page,
+      /<li class="queue-row" data-queue-row="demo-topic">[^]*?<p class="queue-row-meta"><span>Work<\/span><span>Demo<\/span><span data-queue-row-waiting><\/span><span>For vs Against<\/span><\/p><\/div><\/li>/,
+    );
+    assert.match(
+      page,
+      /data-queue-request="public-topic" data-request-side="A"/,
+    );
+  });
+
   it("opens the one-step Create sheet only while the queue is on", () => {
     const page = renderQueue(origin, list([topic]), true);
     assert.match(

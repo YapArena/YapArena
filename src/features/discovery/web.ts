@@ -288,8 +288,11 @@ export function renderQueue(
   const base = `/queue${category ? `?category=${category}` : ""}`;
   const sideButton = (topic: PublicTopic, key: "A" | "B", label: string) =>
     html`<button class="btn btn-secondary btn-sm queue-request" type="button" data-queue-request="${topic.slug}" data-request-side="${key}" data-side-label="${label}">${label}</button>`;
+  // The queue refuses demo examples, so their rows name the sides instead of
+  // offering buttons.
+  const queueable = (topic: PublicTopic) => matchmaking && !topic.isDemo;
   const row = (topic: PublicTopic) =>
-    html`<li class="queue-row" data-queue-row="${topic.slug}"><div class="queue-row-copy"><a class="queue-row-title" href="/topics/${path(topic.slug)}">${topic.title}</a><p class="queue-row-meta"><span>${topicCategoryName(topic.category)}</span><span data-queue-row-waiting></span>${matchmaking ? "" : html`<span>${topic.sideALabel} vs ${topic.sideBLabel}</span>`}</p></div>${matchmaking ? html`<div class="queue-row-sides" role="group" aria-label="Argue a side: ${topic.title}">${sideButton(topic, "A", topic.sideALabel)}${sideButton(topic, "B", topic.sideBLabel)}</div>` : ""}</li>`;
+    html`<li class="queue-row" data-queue-row="${topic.slug}"><div class="queue-row-copy"><a class="queue-row-title" href="/topics/${path(topic.slug)}">${topic.title}</a><p class="queue-row-meta"><span>${topicCategoryName(topic.category)}</span>${topic.isDemo ? html`<span>Demo</span>` : ""}<span data-queue-row-waiting></span>${queueable(topic) ? "" : html`<span>${topic.sideALabel} vs ${topic.sideBLabel}</span>`}</p></div>${queueable(topic) ? html`<div class="queue-row-sides" role="group" aria-label="Argue a side: ${topic.title}">${sideButton(topic, "A", topic.sideALabel)}${sideButton(topic, "B", topic.sideBLabel)}</div>` : ""}</li>`;
   // Categories (Decision 0003): All, then the founder's list, as links.
   const chip = (id: TopicCategory | null, name: string) =>
     html`<a class="chip" href="/queue${id ? `?category=${id}` : ""}"${id === category ? html` aria-current="page"` : ""}>${name}</a>`;

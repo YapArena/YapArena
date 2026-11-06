@@ -224,7 +224,8 @@ With nothing to watch, a Dydema headline sits beside the living emblem
   the page is visible.
 - "All questions": every published topic, 12 a page, each with its title (linking to the topic
   page), its category, a "Waiting now" note when someone is queued on it, and one button per side
-  named by the side. Category chips above the list (All, then the founder's list) are links to
+  named by the side. Demo examples, which the queue refuses, say "Demo" and name their sides
+  without buttons. Category chips above the list (All, then the founder's list) are links to
   `/queue?category=…`; pagination and the canonical address keep the category.
 - The Create sheet (first-run PR 3b): a native modal `<dialog>`, a centred card from 600 px and a
   bottom sheet below. It asks for the question, what the debate is about, both sides, a category
