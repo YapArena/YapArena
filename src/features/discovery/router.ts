@@ -367,12 +367,19 @@ export function createDiscoveryRouter({
   router.get("/queue", async (request, response) => {
     const parameters = listParameters(request, response, invalid);
     if (!parameters) return;
+    const selected = categoryParameter(request, response, invalid);
+    if (!selected) return;
     return html(
       response,
       renderQueue(
         origin,
-        await discovery.listTopics({ ...parameters, query: "" }),
+        await discovery.listTopics({
+          ...parameters,
+          query: "",
+          category: selected.category,
+        }),
         matchmakingEnabled,
+        selected.category ?? null,
       ),
     );
   });

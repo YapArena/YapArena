@@ -634,3 +634,185 @@
     min-width: 0;
   }
 }
+/* A category, the waiting note and "Your question", dot-separated. */
+.queue-row-meta > span:not(:empty) ~ span:not(:empty)::before {
+  content: " · ";
+}
+
+/* "+ Create" on the Queue tab (frontend/queue-page.ts): the kit's dialog, as
+   a centred card from 600 px and a bottom sheet below, holding the Create
+   page's form fields. showModal() keeps the page behind inert. */
+.queue-create-dialog {
+  width: min(32rem, calc(100vw - 2 * var(--space-4)));
+  max-height: calc(100dvh - 2 * var(--space-4));
+  padding: 0;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-card);
+  background: var(--panel);
+  color: var(--text);
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+}
+.queue-create-dialog[open] {
+  animation: queue-sheet-in 0.32s var(--ease-expo);
+}
+.queue-create-dialog::backdrop {
+  background: rgb(0 0 0 / 0.78);
+  backdrop-filter: blur(6px);
+}
+html:has(.queue-create-dialog[open]) {
+  overflow: hidden;
+}
+.queue-create-form {
+  gap: var(--space-4);
+  max-width: none;
+  padding: var(--space-6);
+}
+.queue-create-form .section-title {
+  margin: 0;
+}
+.queue-create-help {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 1.5;
+}
+.queue-create-form label {
+  gap: var(--space-2);
+  min-width: 0;
+  font-size: var(--text-14);
+}
+/* 16 px text, so phones don't zoom into a field. */
+.queue-create-form input:not([type="radio"]),
+.queue-create-form textarea,
+.queue-create-form select {
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-inner);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-16);
+  font-weight: 400;
+}
+.queue-create-form textarea {
+  min-height: 88px;
+  padding-block: var(--space-3);
+  line-height: 1.5;
+  resize: vertical;
+}
+.queue-create-sides {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.queue-create-choice {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.queue-create-choice legend {
+  margin-bottom: var(--space-2);
+  padding: 0;
+  font-size: var(--text-14);
+  font-weight: 700;
+}
+.queue-create-choice label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-inner);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.queue-create-choice label:has(:checked) {
+  border-color: var(--acid);
+}
+.queue-create-choice input {
+  flex: none;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--acid);
+}
+.queue-create-error {
+  margin: 0;
+  color: var(--warning);
+  font-size: var(--text-14);
+}
+.queue-create-error:empty {
+  display: none;
+}
+.queue-create-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.queue-similar {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--control-border);
+  border-radius: var(--radius-inner);
+}
+.queue-similar .kicker {
+  margin: 0;
+}
+.queue-similar .queue-row {
+  grid-template-columns: minmax(0, 1fr);
+  padding: var(--space-3) 0;
+}
+.queue-similar .queue-row:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+.queue-similar .queue-row-sides {
+  justify-content: flex-start;
+}
+@keyframes queue-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+@keyframes queue-sheet-up {
+  from {
+    opacity: 0;
+    transform: translateY(48px);
+  }
+}
+@media (max-width: 599px) {
+  .queue-create-dialog {
+    width: 100%;
+    max-width: 100%;
+    max-height: 94dvh;
+    margin: auto 0 0;
+    border-bottom: 0;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+  }
+  .queue-create-dialog[open] {
+    animation-name: queue-sheet-up;
+  }
+  .queue-create-form {
+    padding: var(--space-5) max(var(--space-4), env(safe-area-inset-right, 0px))
+      max(var(--space-5), env(safe-area-inset-bottom, 0px))
+      max(var(--space-4), env(safe-area-inset-left, 0px));
+  }
+  .queue-create-actions .btn {
+    flex: 1 1 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .queue-create-dialog[open] {
+    animation: none;
+  }
+}

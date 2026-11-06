@@ -685,7 +685,7 @@ describe("live topic queue pages", () => {
     assert.match(page.text, /data-waiting-section[^>]*hidden>/);
     assert.match(
       page.text,
-      /<a class="card queue-create" href="\/match#topic-create">/,
+      /<a class="card queue-create" href="\/match#topic-create" data-create-open>/,
     );
     assert.match(page.text, /queue-page\.js/);
     assert.match(
@@ -705,6 +705,37 @@ describe("live topic queue pages", () => {
       (await request(live(true)).get("/queue?offset=-1")).status,
       400,
     );
+  });
+
+  it("filters the Queue tab by category", async () => {
+    const calls = [];
+    const app = express().use(
+      createDiscoveryRouter({
+        discovery: {
+          ...discovery,
+          listTopics: async (parameters) => {
+            calls.push(parameters);
+            return {
+              items: [{ ...topic, category: "cities" }],
+              pagination: { limit: 12, offset: 0, hasMore: false },
+            };
+          },
+        },
+        matchmakingEnabled: true,
+        applicationOrigin: "https://arena.example",
+      }),
+    );
+    const page = await request(app).get("/queue?category=cities");
+    assert.equal(page.status, 200);
+    assert.equal(calls[0].category, "cities");
+    assert.equal(calls[0].query, "");
+    assert.match(
+      page.text,
+      /href="\/queue\?category=cities" aria-current="page"/,
+    );
+    assert.equal((await request(app).get("/queue")).status, 200);
+    assert.equal(calls[1].category, undefined);
+    assert.equal((await request(app).get("/queue?category=nope")).status, 400);
   });
 });
 

@@ -22,7 +22,11 @@ import { debateCard, statusLabels as labels, topicCard } from "./cards-web.ts";
 import { inscription, searchIcon } from "./kit-web.ts";
 import { personSlot } from "./avatar-web.ts";
 import { pixelCoin } from "./pixel-mark.ts";
-import { TOPIC_CATEGORIES } from "./topic-categories.ts";
+import {
+  TOPIC_CATEGORIES,
+  topicCategoryName,
+  type TopicCategory,
+} from "./topic-categories.ts";
 import { html, raw, type SafeHtml } from "../../platform/html.ts";
 import type {
   PublicDebate,
@@ -279,16 +283,27 @@ export function renderQueue(
   origin: string,
   list: PublicList<PublicTopic>,
   matchmaking = false,
+  category: TopicCategory | null = null,
 ) {
+  const base = `/queue${category ? `?category=${category}` : ""}`;
   const sideButton = (topic: PublicTopic, key: "A" | "B", label: string) =>
     html`<button class="btn btn-secondary btn-sm queue-request" type="button" data-queue-request="${topic.slug}" data-request-side="${key}" data-side-label="${label}">${label}</button>`;
   const row = (topic: PublicTopic) =>
-    html`<li class="queue-row" data-queue-row="${topic.slug}"><div class="queue-row-copy"><a class="queue-row-title" href="/topics/${path(topic.slug)}">${topic.title}</a><p class="queue-row-meta"><span data-queue-row-waiting></span>${matchmaking ? "" : html`${topic.sideALabel} vs ${topic.sideBLabel}`}</p></div>${matchmaking ? html`<div class="queue-row-sides" role="group" aria-label="Argue a side: ${topic.title}">${sideButton(topic, "A", topic.sideALabel)}${sideButton(topic, "B", topic.sideBLabel)}</div>` : ""}</li>`;
+    html`<li class="queue-row" data-queue-row="${topic.slug}"><div class="queue-row-copy"><a class="queue-row-title" href="/topics/${path(topic.slug)}">${topic.title}</a><p class="queue-row-meta"><span>${topicCategoryName(topic.category)}</span><span data-queue-row-waiting></span>${matchmaking ? "" : html`<span>${topic.sideALabel} vs ${topic.sideBLabel}</span>`}</p></div>${matchmaking ? html`<div class="queue-row-sides" role="group" aria-label="Argue a side: ${topic.title}">${sideButton(topic, "A", topic.sideALabel)}${sideButton(topic, "B", topic.sideBLabel)}</div>` : ""}</li>`;
+  // Categories (Decision 0003): All, then the founder's list, as links.
+  const chip = (id: TopicCategory | null, name: string) =>
+    html`<a class="chip" href="/queue${id ? `?category=${id}` : ""}"${id === category ? html` aria-current="page"` : ""}>${name}</a>`;
+  const chips = html`<nav class="list-filters" aria-label="Categories"><div class="chips">${chip(null, "All")}${TOPIC_CATEGORIES.map(([id, name]) => chip(id, name))}</div></nav>`;
   const questions = list.items.length
-    ? html`<ol class="queue-list">${list.items.map(row)}</ol>`
-    : quietState("No public questions yet.", "Create the first one.");
-  const content = html`${pageHead("Debate now", "Pick a question", "and a side.", "Pick your side. When someone queues on the other side, you both get 30 seconds to accept, then the debate starts.")}<section class="container list-section queue-page" aria-labelledby="questions-title">${matchmaking ? html`<p class="queue-page-note" data-queue-page-note role="status"></p>` : quietState("The live queue isn't open right now.", "You can still read every question and its debates.")}<a class="card queue-create" href="/match#topic-create"><span>Your question isn't here yet?</span><span class="btn btn-primary btn-sm" aria-hidden="true">+ Create</span></a>${matchmaking ? html`<section class="queue-waiting" data-waiting-section aria-labelledby="waiting-title" hidden><div class="section-head"><p class="kicker">${inscription("Fastest match")}</p><h2 class="section-title" id="waiting-title">${inscription("Someone's waiting")}</h2></div><ol class="queue-list" data-waiting-list></ol></section>` : ""}<div class="section-head"><p class="kicker">${inscription("Every open question")}</p><h2 class="section-title" id="questions-title">${inscription("All questions")}</h2></div>${questions}${pagination("/queue", list)}</section>${matchmaking ? html`<script type="module" src="${asset("queue-page.js")}"></script>` : ""}`;
-  const canonical = `${origin}${listPath("/queue", list)}`;
+    ? html`<ol class="queue-list" data-question-list>${list.items.map(row)}</ol>`
+    : category
+      ? html`<ol class="queue-list" data-question-list hidden></ol>${quietState(`No ${topicCategoryName(category)} questions yet.`, "Create the first one, or choose All.")}`
+      : html`<ol class="queue-list" data-question-list hidden></ol>${quietState("No public questions yet.", "Create the first one.")}`;
+  // "+ Create": signed-in players get the sheet below (frontend/queue-page.ts);
+  // everyone else follows the link to the Match page's form, which signs in.
+  const createSheet = html`<dialog class="queue-create-dialog" data-create-dialog aria-labelledby="create-title"><form class="stack-form queue-create-form" data-create-form><h2 class="section-title" id="create-title">${inscription("New question")}</h2><p class="queue-create-help">It goes public right away and you join the queue on your side. A public question can't be edited.</p><label>Question<input name="title" minlength="5" maxlength="140" required autocomplete="off"></label><div class="queue-similar" data-similar hidden><p class="kicker">${inscription("Already asked?")}</p><p class="queue-create-help">Join one of these instead, so both sides land in the same queue.</p><ol class="queue-list" data-similar-list></ol></div><label>What's the debate about?<textarea name="summary" minlength="10" maxlength="600" rows="3" required></textarea></label><div class="queue-create-sides"><label>Side A<input name="sideALabel" minlength="2" maxlength="80" required autocomplete="off"></label><label>Side B<input name="sideBLabel" minlength="2" maxlength="80" required autocomplete="off"></label></div><label>Category<select name="category" required><option value="">Choose a category</option>${TOPIC_CATEGORIES.map(([id, name]) => html`<option value="${id}"${id === category ? html` selected` : ""}>${name}</option>`)}</select></label><fieldset class="queue-create-choice"><legend>You argue</legend><label><input type="radio" name="side" value="A"> <span data-side-name="A">Side A</span></label><label><input type="radio" name="side" value="B"> <span data-side-name="B">Side B</span></label></fieldset><p class="queue-create-error" data-create-error role="alert"></p><div class="queue-create-actions"><button class="btn btn-primary" type="submit" value="queue">Create and join the queue</button><button class="btn btn-secondary" type="submit" value="draft" formnovalidate>Save as a private draft</button><button class="btn" type="button" data-create-cancel>Cancel</button></div></form></dialog>`;
+  const content = html`${pageHead("Debate now", "Pick a question", "and a side.", "Pick your side. When someone queues on the other side, you both get 30 seconds to accept, then the debate starts.")}<section class="container list-section queue-page" aria-labelledby="questions-title">${matchmaking ? html`<p class="queue-page-note" data-queue-page-note role="status"></p>` : quietState("The live queue isn't open right now.", "You can still read every question and its debates.")}<a class="card queue-create" href="/match#topic-create" data-create-open><span>Your question isn't here yet?</span><span class="btn btn-primary btn-sm" aria-hidden="true">+ Create</span></a>${matchmaking ? html`<section class="queue-waiting" data-waiting-section aria-labelledby="waiting-title" hidden><div class="section-head"><p class="kicker">${inscription("Fastest match")}</p><h2 class="section-title" id="waiting-title">${inscription("Someone's waiting")}</h2></div><ol class="queue-list" data-waiting-list></ol></section>` : ""}<div class="section-head"><p class="kicker">${inscription("Every open question")}</p><h2 class="section-title" id="questions-title">${inscription("All questions")}</h2></div>${chips}${questions}${pagination(base, list)}</section>${matchmaking ? html`${createSheet}<script type="module" src="${asset("queue-page.js")}"></script>` : ""}`;
+  const canonical = `${origin}${listPath(base, list)}`;
   return layout(
     "Queue",
     "Pick a question and a side, and debate someone live on YAP Arena.",

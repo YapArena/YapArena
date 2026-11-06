@@ -215,15 +215,28 @@ With nothing to watch, a Dydema headline sits beside the living emblem
 `renderQueue()` in `src/features/discovery/web.ts` (`/queue`), `frontend/queue-page.ts` and
 `frontend/queue-page-model.ts`, styles at the end of `public/explore.css`.
 
-- The kit's page head ("Pick a question and a side"), then a dashed "+ Create" card that opens the
-  Match page's topic form (`/match#topic-create`).
+- The kit's page head ("Pick a question and a side"), then a dashed "+ Create" card. For a
+  signed-in player it opens the Create sheet (below); guests, and pages with the queue off, follow
+  its link to the Match page's topic form (`/match#topic-create`), which signs in.
 - "Someone's waiting": the questions where someone is in the live queue now, from
   `GET /api/matchmaking/waiting`, each with the count per side ("2 people waiting to argue …") and
   one button for the other side. Hidden while nobody is waiting; refreshed every 20 seconds while
   the page is visible.
 - "All questions": every published topic, 12 a page, each with its title (linking to the topic
-  page), a "Waiting now" note when someone is queued on it, and one button per side named by the
-  side.
+  page), its category, a "Waiting now" note when someone is queued on it, and one button per side
+  named by the side. Category chips above the list (All, then the founder's list) are links to
+  `/queue?category=…`; pagination and the canonical address keep the category.
+- The Create sheet (first-run PR 3b): a native modal `<dialog>`, a centred card from 600 px and a
+  bottom sheet below. It asks for the question, what the debate is about, both sides, a category
+  (the browsed one preselected) and "You argue", with the server's limits checked before sending.
+  While the question is typed, up to three published questions (demo examples left out) sharing a
+  word of four letters or more show under "Already asked?" with their side buttons, which close
+  the sheet and queue. "Create
+  and join the queue" makes the slug from the question, creates and publishes the topic with the
+  Match page's own calls (`POST /api/matching/topics`, then `…/publish`; a taken slug retries once
+  with a short random ending), adds the row at the top of the list and queues on the chosen side
+  like a side button. "Save as a private draft" only creates it; it is published later from
+  Create. A public question can't be edited, which the sheet says.
 - The buttons queue through `frontend/matchmaking.ts` (a `yap:queue-request` window event), with the
   topic page's sign-in, camera check, one-queue rule, overlay and strip. Your own side then reads
   "Leave queue" and the others are off until you leave; notices show above the list.
