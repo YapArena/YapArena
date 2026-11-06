@@ -143,7 +143,7 @@ a:focus-visible {
    settings from its webfont.css: kerning on, no extra letter or word spacing and
    a 1.3 line height. */
 .landing-headline {
-  margin: 0 0 var(--space-6);
+  margin: 0 0 var(--space-2);
   font-family: "Dydema Capitals", "Forum", Georgia, "Times New Roman", serif;
   /* Today's size wherever it fits; otherwise just small enough for the column.
      10.1em: "YOVR DISCVSSIONS" in Dydema Capitals (9.87em) plus a margin. */
@@ -154,6 +154,12 @@ a:focus-visible {
   line-height: 1.3;
   letter-spacing: 0;
   word-spacing: 0;
+}
+/* What YAP Arena is, in one line under the headline, in the size of
+   "Already have an account?" without its weight. */
+.landing-lead {
+  margin: 0 0 var(--space-6);
+  font-size: 1.05rem;
 }
 .landing-join h2 {
   margin: 0 0 var(--space-5);
@@ -460,6 +466,12 @@ a:focus-visible {
   }
   .headline-line {
     display: inline-block;
+  }
+  /* One line from 360px up, in the Explore link's size. The 24px gap to the
+     buttons keeps the Explore link on the first screen where it was. */
+  .landing-lead {
+    margin-bottom: var(--space-5);
+    font-size: 0.9rem;
   }
   /* The phone's group gap, as between the emblem, headline and buttons. */
   .landing-sign-in {
