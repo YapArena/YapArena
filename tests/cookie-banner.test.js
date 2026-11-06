@@ -39,8 +39,9 @@ describe("cookie banner", () => {
     const rule = (selector) => {
       // Prettier may wrap a long selector onto two lines.
       const pattern = selector
-        .replace(/[.()[\]>:]/g, "\\$&")
-        .replaceAll(" ", "\\s+");
+        .split(" ")
+        .map((part) => RegExp.escape(part))
+        .join("\\s+");
       const match = new RegExp(`\\n  ${pattern} \\{([^}]*)\\}`).exec(block);
       assert.ok(match, selector);
       return match[1];
