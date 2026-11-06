@@ -345,11 +345,24 @@ describe("Auth0 client", () => {
           response_type: "code",
         },
       );
+      assert.equal(url.searchParams.has("screen_hint"), false);
       const google = await client.authorizationUrl({
         ...secrets,
         connection: "google",
       });
       assert.equal(google.searchParams.get("connection"), "google-oauth2");
+      assert.equal(google.searchParams.has("screen_hint"), false);
+      // New-user buttons open Universal Login on Sign up, with no other
+      // change to the request.
+      const signUp = await client.authorizationUrl({
+        ...secrets,
+        connection: "email",
+        screenHint: "signup",
+      });
+      assert.equal(signUp.searchParams.get("screen_hint"), "signup");
+      assert.equal(signUp.searchParams.get("connection"), "email");
+      for (const key of ["prompt", "max_age", "login_hint"])
+        assert.equal(signUp.searchParams.has(key), false, key);
       assert.equal(
         client.logoutUrl("https://arena.example/").href,
         `${issuer.issuer}v2/logout?client_id=${clientId}&returnTo=https%3A%2F%2Farena.example%2F`,

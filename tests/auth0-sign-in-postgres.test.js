@@ -122,6 +122,7 @@ describe(
       for (const key of ["state", "nonce", "code_challenge"])
         assert.ok(authorization.searchParams.get(key)?.length >= 43);
       assert.equal(authorization.searchParams.has("prompt"), false);
+      assert.equal(authorization.searchParams.has("screen_hint"), false);
       assert.equal(callback.status, 200);
       assert.equal(callback.headers["cache-control"], "no-store");
       assert.equal(continueTarget(callback), "/debates?q=ai");
@@ -143,6 +144,46 @@ describe(
         email: identity.email.toUpperCase(),
       });
       assert.equal((await me(again.agent)).id, user.id);
+      assert.equal(await accountCount(identity.email), 1);
+    });
+
+    it("opens Sign up for the landing's new-user buttons and signs in as usual", async () => {
+      // A new address: Universal Login opens on Sign up, and the callback
+      // creates the account exactly as a Log in would.
+      const identity = emailIdentity();
+      const created = await signIn(context, identity, {
+        query: "connection=email&screen=signup&return=%2Fhome",
+      });
+      const authorization = new URL(created.location);
+      assert.equal(authorization.searchParams.get("screen_hint"), "signup");
+      assert.equal(authorization.searchParams.get("connection"), "email");
+      assert.equal(authorization.searchParams.has("prompt"), false);
+      assert.equal(created.callback.status, 200);
+      assert.equal(continueTarget(created.callback), "/home");
+      const user = await me(created.agent);
+      assert.ok(user);
+      // A returning person who picks a new-user button reaches the same
+      // account, never a second one.
+      const again = await signIn(context, identity, {
+        query: "connection=email&screen=signup&return=%2Fhome",
+      });
+      assert.equal((await me(again.agent)).id, user.id);
+      assert.equal(await accountCount(identity.email), 1);
+      // Google from the landing still proves a matching address with an
+      // email code; that step is a Log in, not a Sign up.
+      const agent = request.agent(context.app);
+      const location = await startSignIn(
+        agent,
+        "connection=google&screen=signup&return=%2Fhome",
+      );
+      assert.equal(new URL(location).searchParams.get("screen_hint"), "signup");
+      const step = await agent.get(
+        context.issuer.authorize(location, googleIdentity(identity.email)),
+      );
+      assert.equal(step.status, 303);
+      const code = new URL(step.headers.location);
+      assert.equal(code.searchParams.get("prompt"), "login");
+      assert.equal(code.searchParams.has("screen_hint"), false);
       assert.equal(await accountCount(identity.email), 1);
     });
 
