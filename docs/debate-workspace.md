@@ -62,6 +62,24 @@ move from "Your positions" into a results card with a total. Bots mode lives on 
 debate page keeps the shared bot history chart and an info card that links to the Bots sandbox
 there.
 
+**Notify me (first-run build plan PR 9):** an upcoming (scheduled or ready), non-demo debate
+shows "Notify me" in the stage while the live queue is on (`MATCHMAKING_ENABLED`), because only
+its jobs worker sends the reminder. `frontend/debate-notify.ts` (words and endpoint in
+`frontend/debate-notify-logic.ts`) reads `GET /api/matching/events/:id/notify` (`{ notifying }`,
+a viewer read lane like the follow reads), and the button saves the request with `PUT` (201
+created, 204 already saved) or removes it with `DELETE` (204). Saving needs the participant role
+and no community restriction, as following does; a signed-out click asks for an account through
+`yap:request-auth` and returns focus to the button after sign-in. The server accepts a request
+only while the debate's reminder is still to come: a published, non-demo debate on a published
+topic, scheduled or ready, starting later and booked more than five minutes ahead, with no
+reminder sent yet; otherwise 409 with the reason ("This debate starts in a few minutes."). The
+button turns into "Notifying you" and goes away at the start. When the worker reminds the
+speakers (five minutes before), each requester also gets one `event.notify_starting` notice in
+their notifications (Settings → Notifications and the Match page's Updates), naming the debate.
+A speaker who also asked gets only the speaker reminder, and suspended accounts get nothing.
+Requests count only while their debate is scheduled or ready; the hourly matchmaking cleanup
+deletes the rest. Phone notifications (web push) are a later PR.
+
 ## Data and interaction
 
 - Header search submits to the existing published-debate search. Navigation opens

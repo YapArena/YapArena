@@ -217,16 +217,35 @@ With nothing to watch, a Dydema headline sits beside the living emblem
   page or pressing Escape closes it, and the page behind does not scroll. The queue pill takes its
   own row under the top row.
 
+## Queue tab
+
+`renderQueue()` in `src/features/discovery/web.ts` (`/queue`), `frontend/queue-page.ts` and
+`frontend/queue-page-model.ts`, styles at the end of `public/explore.css`.
+
+- The kit's page head ("Pick a question and a side"), then a dashed "+ Create" card that opens the
+  Match page's topic form (`/match#topic-create`).
+- "Someone's waiting": the questions where someone is in the live queue now, from
+  `GET /api/matchmaking/waiting`, each with the count per side ("2 people waiting to argue …") and
+  one button for the other side. Hidden while nobody is waiting; refreshed every 20 seconds while
+  the page is visible.
+- "All questions": every published topic, 12 a page, each with its title (linking to the topic
+  page), a "Waiting now" note when someone is queued on it, and one button per side named by the
+  side.
+- The buttons queue through `frontend/matchmaking.ts` (a `yap:queue-request` window event), with the
+  topic page's sign-in, camera check, one-queue rule, overlay and strip. Your own side then reads
+  "Leave queue" and the others are off until you leave; notices show above the list.
+- With the queue off, the page lists the questions without buttons and says the queue isn't open.
+
 ## Bottom tabs
 
 `siteTabBarMarkup()` in `src/features/discovery/site-header-web.ts`, styles in `public/site-header.css`.
 
 - Phones only (under 600 px), on every page built by `layout()` except the debate page, whose stake
   bar sits at the bottom. Wider screens keep the header's navigation and never show the tabs.
-- Home (`/home`, the YAP Arena ring upright like the emblem), Live, Explore and Create: 24 px icons
-  with their names under them, in one 56 px row fixed above the phone's home indicator. The
-  current page's tab is white with `aria-current="page"`; the others are muted. The Queue tab joins
-  them with its page (PR 3 of the first-run plan).
+- Home (`/home`, the YAP Arena ring upright like the emblem), Live, Queue (two speech bubbles, in
+  the middle), Explore and Create: 24 px icons with their names under them, in one 56 px row fixed
+  above the phone's home indicator. The current page's tab is white with `aria-current="page"`;
+  the others are muted. The header's navigation lists the same four destinations on wider screens.
 - The tabs are labelled "Main navigation", like the header's navigation, which they replace on
   phones; only one of the two is ever shown.
 - The page keeps 57 px of space under its footer for the tabs. When you are in the queue, the

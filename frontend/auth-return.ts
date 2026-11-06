@@ -36,6 +36,7 @@ export type AuthResumeAction =
         | "community-chat"
         | "community-like"
         | "community-report"
+        | "debate-notify"
         | "matching"
         | "a4"
         | "inline-a4";
@@ -70,6 +71,7 @@ function resumeAction(value: unknown): AuthResumeAction | null {
     case "community-chat":
     case "community-like":
     case "community-report":
+    case "debate-notify":
     case "matching":
     case "a4":
     case "inline-a4":

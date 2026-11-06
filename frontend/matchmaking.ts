@@ -41,6 +41,7 @@ import {
 } from "./queue-overlay-logic.js";
 import type { OverlayView, QueueOverlay } from "./queue-overlay.js";
 import { needsDebaterSettings, showSettingsPrompt } from "./settings-prompt.js";
+import type { QueueRequest } from "./matching-types.js";
 
 declare global {
   interface WindowEventMap {
@@ -102,6 +103,8 @@ function announce(message: string) {
   // The page behind the overlay is inert, so the overlay reads notices out itself.
   lastNotice = message;
   overlay?.note(message);
+  // The Queue tab shows the notice beside its own buttons.
+  window.dispatchEvent(new CustomEvent("yap:queue-note", { detail: message }));
 }
 // A refusal for missing debater settings links to them; other errors show their message.
 function announceError(error: unknown) {
@@ -738,6 +741,40 @@ async function choose(side: Side, button: HTMLButtonElement) {
     announceError(error);
   } finally {
     renderPanel();
+  }
+}
+
+// The Queue tab (frontend/queue-page.ts) lists every open question; its side
+// buttons ask to queue here, with the same sign-in, one-queue and camera rules
+// as the topic page's buttons. A second tap on your own side leaves.
+window.addEventListener(
+  "yap:queue-request",
+  (event) => void requestQueue(event.detail),
+);
+async function requestQueue({ topicSlug, side, source }: QueueRequest) {
+  if (!member) {
+    const returnTo = location.pathname + location.search;
+    if (
+      window.dispatchEvent(
+        new CustomEvent("yap:request-auth", {
+          cancelable: true,
+          detail: { returnTo, source },
+        }),
+      )
+    )
+      location.assign(`/account?next=${encodeURIComponent(returnTo)}`);
+    return;
+  }
+  if (
+    isQueued(state) &&
+    state?.ticket?.topicSlug === topicSlug &&
+    state.ticket.side === side
+  )
+    return leave();
+  try {
+    await enterQueue(topicSlug, side);
+  } catch (error) {
+    announceError(error);
   }
 }
 

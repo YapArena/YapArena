@@ -1148,6 +1148,11 @@ textarea::placeholder {
 .arena-page .arena-video-surface .media-videos:not(:empty) {
   background: var(--bg);
 }
+/* Until a video arrives, clicks pass through to the stage's buttons below
+   ("Join as viewer", "Play replay"). */
+.arena-page .arena-video-surface .media-videos:empty {
+  pointer-events: none;
+}
 .arena-page .arena-video-surface .media-videos video {
   display: block;
   width: 100%;
@@ -1317,6 +1322,25 @@ textarea::placeholder {
   height: 14px;
   fill: currentColor;
   stroke: none;
+}
+/* "Notify me" on an upcoming debate sits above the empty video layer, which
+   covers the stage, and turns into an outline while it is on. */
+.arena-page .arena-workspace .arena-notify {
+  position: relative;
+  z-index: 1;
+}
+.arena-page .arena-workspace .arena-notify[aria-pressed="true"] {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+}
+.arena-page .arena-notify-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+.arena-page .arena-notify-status:not(:empty) {
+  margin-top: var(--space-2);
 }
 /* Hover corners (Decision 0013): the question top left, "Live · N watching"
    top right. They show on hover or focus (a tap on touch screens) and never
@@ -3595,7 +3619,8 @@ textarea::placeholder {
   .arena-page .arena-stage-title {
     font-size: var(--text-16);
   }
-  .arena-page .arena-stage-line {
+  .arena-page .arena-stage-line,
+  .arena-page .arena-notify-status {
     font-size: var(--text-12);
   }
   .arena-page .arena-scoreboard {

@@ -3,10 +3,11 @@ import { html, type SafeHtml } from "../../platform/html.ts";
 import { inscribe } from "./inscribe.ts";
 
 /** The header's destinations; the current one is marked (docs/site-design.md). */
-export type SiteSection = "live" | "explore" | "create";
+export type SiteSection = "live" | "queue" | "explore" | "create";
 
 const sections: [SiteSection, string, string][] = [
   ["live", "/live", "Live"],
+  ["queue", "/queue", "Queue"],
   ["explore", "/debates", "Explore"],
   ["create", "/match", "Create"],
 ];
@@ -16,14 +17,15 @@ const personIcon = html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColo
 // Three tiles in the visit's colours; the balance's small pixel coin.
 const coin = html`<span class="header-coin" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>`;
 
-/** The bottom tabs' destinations: Home and the header's three. */
+/** The bottom tabs' destinations: Home and the header's four. */
 export type SiteTab = "home" | SiteSection;
 
 // 24 px icons drawn in the text colour. Home is the YAP Arena ring, upright
-// like the emblem.
+// like the emblem; Queue is two speech bubbles, the second filled.
 const tabIcons: Record<SiteTab, SafeHtml> = {
   home: html`<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/></svg>`,
   live: html`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6" fill="currentColor"/><path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+  queue: html`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
   explore: html`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>`,
   create: html`<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
 };

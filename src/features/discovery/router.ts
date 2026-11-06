@@ -18,6 +18,7 @@ import {
   renderMatchmaking,
   renderNotFound,
   renderProfile,
+  renderQueue,
   renderTopic,
   renderTopics,
 } from "./web.ts";
@@ -359,6 +360,19 @@ export function createDiscoveryRouter({
         origin,
         await discovery.listTopics(parameters),
         parameters.query,
+      ),
+    );
+  });
+  // The Queue tab: every open question with its two sides (first-run plan PR 3).
+  router.get("/queue", async (request, response) => {
+    const parameters = listParameters(request, response, invalid);
+    if (!parameters) return;
+    return html(
+      response,
+      renderQueue(
+        origin,
+        await discovery.listTopics({ ...parameters, query: "" }),
+        matchmakingEnabled,
       ),
     );
   });
