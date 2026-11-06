@@ -1148,6 +1148,11 @@ textarea::placeholder {
 .arena-page .arena-video-surface .media-videos:not(:empty) {
   background: var(--bg);
 }
+/* Until a video arrives, clicks pass through to the stage's buttons below
+   ("Join as viewer", "Play replay"). */
+.arena-page .arena-video-surface .media-videos:empty {
+  pointer-events: none;
+}
 .arena-page .arena-video-surface .media-videos video {
   display: block;
   width: 100%;

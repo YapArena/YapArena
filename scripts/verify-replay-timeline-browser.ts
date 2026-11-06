@@ -17,8 +17,9 @@ import { createDiscoveryRouter } from "../dist/features/discovery/router.js";
 // video and Results by turn under the scoreboard. It serves the built
 // browser modules and the real debate page. The turn windows come from a
 // fixture answer to the public window list, and the replay position from
-// synthetic yap:playback events, as the replay player sends them. No
-// database, media or hosted service is involved.
+// synthetic yap:playback events, as the replay player sends them. It also
+// clicks the stage's Play replay and Join as viewer buttons with a real
+// mouse. No database, media or hosted service is involved.
 
 type DiscoveryOptions = Parameters<typeof createDiscoveryRouter>[0];
 type CreateFixtureRouter = (
@@ -577,6 +578,61 @@ try {
     results.live = true;
     await context.close();
   }
+
+  // 13. The stage's buttons take a real mouse click at phone, tablet and
+  //     desktop widths: Play replay on a replay, Join as viewer on a live
+  //     debate. The empty video layer over the stage once took these clicks.
+  //     Steps 2 and 4 press Play replay from script, which a cover misses.
+  const clickCentre = async (page: Page, selector: string, width: number) => {
+    const button = page.locator(`${selector}:not([hidden])`);
+    await button.scrollIntoViewIfNeeded();
+    const box = (await button.boundingBox())!;
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+    assert.equal(
+      await page.evaluate(
+        ([px, py, target]) => {
+          const top = document.elementFromPoint(px, py)!;
+          return top.closest(target) ? target : top.getAttribute("class");
+        },
+        [x, y, selector] as const,
+      ),
+      selector,
+      `${selector} is covered at ${width}px`,
+    );
+    await page.mouse.click(x, y);
+  };
+  for (const [width, height] of [
+    [390, 844],
+    [768, 1024],
+    [1440, 900],
+  ] as const) {
+    debate = base;
+    windowList = windows(true);
+    {
+      const { context, page, errors } = await open(width, height);
+      await clickCentre(page, "[data-media-replay]", width);
+      await page.locator("[data-media-replay-video]:not([hidden])").waitFor();
+      assert.equal(await page.evaluate(() => window.plays), 1);
+      assert.deepEqual(errors, []);
+      await context.close();
+    }
+    debate = { ...base, status: "live", liveEndedAt: null };
+    windowList = windows(false, 3, false);
+    {
+      const { context, page, errors } = await open(width, height);
+      const token = page.waitForRequest(
+        (request) =>
+          request.method() === "POST" &&
+          request.url().endsWith(`/api/media/events/${debateId}/viewer-token`),
+      );
+      await clickCentre(page, "[data-media-viewer]", width);
+      await token;
+      assert.deepEqual(errors, []);
+      await context.close();
+    }
+  }
+  results.stageButtonsTakeClicks = true;
 
   console.log(JSON.stringify({ replayTimelineBrowser: "PASS", ...results }));
 } finally {
