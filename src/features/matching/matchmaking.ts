@@ -16,6 +16,7 @@ import {
   MatchConflictError,
   MatchNotFoundError,
   profileFor,
+  pruneNotifyRequests,
   reservationFor,
 } from "./repository.ts";
 import {
@@ -874,6 +875,8 @@ export function createMatchmaking(
              AND updated_at < CURRENT_TIMESTAMP - make_interval(days => ${RETENTION_DAYS})
            LIMIT 1000)`,
       );
+      // Notify-me requests whose debate started or was called off.
+      await pruneNotifyRequests(database);
       return result.rowCount ?? 0;
     },
   });

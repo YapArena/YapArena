@@ -388,6 +388,8 @@ if (header) {
       return { kind: "community-chat" };
     if (source?.closest("[data-community-report-form]"))
       return { kind: "community-report" };
+    if (source?.closest("[data-debate-notify]"))
+      return { kind: "debate-notify" };
     if (source?.closest("#match-signed-out,#match-signed-in"))
       return { kind: "matching" };
     if (source?.closest("[data-a4]")) return { kind: "a4" };
@@ -427,6 +429,7 @@ if (header) {
       "community-chat": "[data-community-chat-form] textarea",
       "community-like": "[data-community-like]",
       "community-report": "[data-community-report-form] select",
+      "debate-notify": "[data-debate-notify]",
       matching: "#request-create input",
       a4: "[data-a4-create] select",
       "inline-a4": "[data-inline-form] select,[data-inline-setup] summary",

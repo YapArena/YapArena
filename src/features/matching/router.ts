@@ -449,6 +449,43 @@ export function createMatchingRouter({
       history: await matching.getEventHistory(id),
     });
   });
+  // "Notify me" on a scheduled debate: an in-app notice when the speakers are reminded, which
+  // only the live queue's worker sends. Shaped like the follow routes: anyone signed in reads
+  // their own request; adding one needs the participant role and no restriction (YA-07).
+  if (liveQueue) {
+    router.get("/events/:id/notify", async (request, response) => {
+      const id = idFrom(request);
+      if (!id) return response.status(404).json({ error: "event not found" });
+      return response.json({
+        notifying: await matching.isNotifying(request.user!.id, id),
+      });
+    });
+    router.put(
+      "/events/:id/notify",
+      participant,
+      unrestricted,
+      async (request, response) => {
+        const id = idFrom(request);
+        if (!id) return response.status(404).json({ error: "event not found" });
+        try {
+          const result = await matching.requestNotify(request.user!.id, id);
+          return response.status(result === "created" ? 201 : 204).end();
+        } catch (error) {
+          return errorResponse(response, error);
+        }
+      },
+    );
+    router.delete(
+      "/events/:id/notify",
+      participant,
+      async (request, response) => {
+        const id = idFrom(request);
+        if (!id) return response.status(404).json({ error: "event not found" });
+        await matching.cancelNotify(request.user!.id, id);
+        return response.status(204).end();
+      },
+    );
+  }
   router.post(
     "/events/:id/ready",
     participant,

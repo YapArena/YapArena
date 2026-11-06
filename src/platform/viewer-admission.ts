@@ -42,6 +42,8 @@ export function mediaDeliveryLane(
       /^\/api\/me\/follows\/(?:topics|people)\/[a-z0-9][a-z0-9-]{2,79}$/.test(
         request.path,
       ) ||
+      // A scheduled debate page reads the viewer's "Notify me" request.
+      /^\/api\/matching\/events\/[0-9a-f-]{36}\/notify$/i.test(request.path) ||
       /^\/api\/community\/events\/[0-9a-f-]{36}(?:\/(?:updates|my-like|chat(?:\/(?:sync|submissions))?))?$/i.test(
         request.path,
       ) ||

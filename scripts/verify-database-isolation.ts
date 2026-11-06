@@ -140,6 +140,8 @@ const applicationTables = [
   "job_heartbeats",
   // YA-07: moderators hide and restore topics, profiles and debates.
   "content_moderation_actions",
+  // First-run build plan PR 9: "Notify me" on a scheduled debate.
+  "debate_notify_requests",
 ];
 const container = `yaparena-isolation-${randomUUID().slice(0, 8)}`;
 const evidenceDirectory = `/tmp/${container}-evidence`;
