@@ -43,7 +43,10 @@ import {
 } from "./features/discovery/router.ts";
 import { createIdentityRouter } from "./features/identity/router.ts";
 import { createMatchingRouter } from "./features/matching/router.ts";
-import { createMatchmakingRouter } from "./features/matching/matchmaking-router.ts";
+import {
+  createMatchmakingRouter,
+  createPublicMatchmakingRouter,
+} from "./features/matching/matchmaking-router.ts";
 import { createCommunityRouter } from "./features/community/router.ts";
 import {
   createMeasurementRouter,
@@ -629,6 +632,8 @@ export function createApp({
     );
   }
   if (matchmaking && identity) {
+    // GET /api/matchmaking/waiting is public; every other queue route needs sign-in.
+    app.use("/api/matchmaking", createPublicMatchmakingRouter({ matchmaking }));
     app.use(
       "/api/matchmaking",
       createRequireAuthentication({ sessions, environment }),

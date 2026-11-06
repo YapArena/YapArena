@@ -156,6 +156,13 @@ Many user-created topics with two sides each split a small audience. Mitigations
 waiting counts per side, a list of topics with someone waiting, then queueing on several topics
 at once, an "either side" option, and offering to turn a long wait into a challenge.
 
+Current state (2026-11-06): waiting counts per side show on topic pages for signed-in players.
+The list of topics with someone waiting is served, without sign-in, at
+`GET /api/matchmaking/waiting`: published topics with fresh searching tickets (the per-topic
+count's rule), counts per side only, the most people waiting first, at most 20 topics. No screen
+shows it yet; the Queue tab and the home use it in later first-run PRs. The other mitigations are
+not built.
+
 ## Delivery phases
 
 1. **Queue loop:** tickets, offers and the 30-second accept; per-user stream with polling

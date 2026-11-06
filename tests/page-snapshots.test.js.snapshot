@@ -8639,9 +8639,10 @@ exports[`renders the 400, 404 and 500 pages 1`] = `
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
+<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab" data-page-title>\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
-</a>\\n      <nav class="site-nav" aria-label="Main navigation">
+</a>
+<p class="site-page-title ins" aria-hidden="true">explore</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
@@ -10444,9 +10445,10 @@ exports[`renders the coins and match pages 2`] = `
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
+<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab" data-page-title>\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
-</a>\\n      <nav class="site-nav" aria-label="Main navigation">
+</a>
+<p class="site-page-title ins" aria-hidden="true">create</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
 <a href="/debates">Explore</a>
 <a href="/match" aria-current="page">Create</a>
@@ -10705,9 +10707,10 @@ exports[`renders the coins and match pages 3`] = `
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
+<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab" data-page-title>\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
-</a>\\n      <nav class="site-nav" aria-label="Main navigation">
+</a>
+<p class="site-page-title ins" aria-hidden="true">create</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
 <a href="/debates">Explore</a>
 <a href="/match" aria-current="page">Create</a>
@@ -10989,9 +10992,10 @@ exports[`renders the debate list 1`] = `
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
+<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab" data-page-title>\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
-</a>\\n      <nav class="site-nav" aria-label="Main navigation">
+</a>
+<p class="site-page-title ins" aria-hidden="true">explore</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
@@ -11211,9 +11215,10 @@ exports[`renders the debate list 2`] = `
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
+<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab" data-page-title>\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
-</a>\\n      <nav class="site-nav" aria-label="Main navigation">
+</a>
+<p class="site-page-title ins" aria-hidden="true">explore</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
@@ -11516,9 +11521,10 @@ exports[`renders the debate list 3`] = `
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
+<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab" data-page-title>\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
-</a>\\n      <nav class="site-nav" aria-label="Main navigation">
+</a>
+<p class="site-page-title ins" aria-hidden="true">explore</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
@@ -11778,9 +11784,10 @@ exports[`renders the debate list 4`] = `
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
+<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab" data-page-title>\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
-</a>\\n      <nav class="site-nav" aria-label="Main navigation">
+</a>
+<p class="site-page-title ins" aria-hidden="true">explore</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
@@ -14675,9 +14682,10 @@ exports[`renders the live page 1`] = `
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
+<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab" data-page-title>\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
-</a>\\n      <nav class="site-nav" aria-label="Main navigation">
+</a>
+<p class="site-page-title ins" aria-hidden="true">live</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live" aria-current="page">Live</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
@@ -14917,9 +14925,10 @@ exports[`renders the live page 2`] = `
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
+<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab" data-page-title>\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
-</a>\\n      <nav class="site-nav" aria-label="Main navigation">
+</a>
+<p class="site-page-title ins" aria-hidden="true">live</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live" aria-current="page">Live</a>
 <a href="/debates">Explore</a>
 <a href="/match">Create</a>
@@ -17292,9 +17301,10 @@ exports[`renders the topic list 1`] = `
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
+<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab" data-page-title>\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
-</a>\\n      <nav class="site-nav" aria-label="Main navigation">
+</a>
+<p class="site-page-title ins" aria-hidden="true">explore</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
@@ -17489,9 +17499,10 @@ exports[`renders the topic list 2`] = `
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
+<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab" data-page-title>\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
-</a>\\n      <nav class="site-nav" aria-label="Main navigation">
+</a>
+<p class="site-page-title ins" aria-hidden="true">explore</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>
@@ -17706,9 +17717,10 @@ exports[`renders the topic list 3`] = `
 </head>
 <body class="">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
+<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab" data-page-title>\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
-</a>\\n      <nav class="site-nav" aria-label="Main navigation">
+</a>
+<p class="site-page-title ins" aria-hidden="true">explore</p>\\n      <nav class="site-nav" aria-label="Main navigation">
 <a href="/live">Live</a>
 <a href="/debates" aria-current="page">Explore</a>
 <a href="/match">Create</a>

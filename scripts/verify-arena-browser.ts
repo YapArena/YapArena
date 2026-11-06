@@ -564,7 +564,14 @@ export async function verifyArenaBrowser({
     await page.emulateMedia({ reducedMotion: "no-preference" });
     checks.reducedMotionHoverCorners = true;
     phase = "search";
-    // Below 1000 px the header's search field opens from its icon.
+    // On phones the top row has no search icon: search is the Explore page's
+    // own field (docs/site-design.md). From 600 to 999 px the header's search
+    // field still opens from its icon.
+    assert.equal(
+      await page.locator("[data-header-search-toggle]").isVisible(),
+      false,
+    );
+    await page.setViewportSize({ width: 820, height: 1180 });
     await page.locator("[data-header-search-toggle]").click();
     await page.locator("#header-search").fill("walkability");
     await page.locator("#header-search").press("Enter");
