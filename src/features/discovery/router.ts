@@ -26,6 +26,7 @@ import {
 import { renderLanding } from "./landing-web.ts";
 import { renderCookies, renderPrivacy, renderTerms } from "./legal-web.ts";
 import { html as markup } from "../../platform/html.ts";
+import { isTopicCategory } from "./topic-categories.ts";
 
 type Repository = ReturnType<typeof createDiscoveryRepository>;
 const statuses = new Set<DebateStatus>([
@@ -86,6 +87,21 @@ function statusParameter(
     return null;
   }
   return { status: raw as DebateStatus };
+}
+
+// An optional topic category filter: absent or empty lists every category.
+function categoryParameter(
+  request: Request,
+  response: Response,
+  invalid: Invalid,
+) {
+  const raw = request.query.category;
+  if (raw === undefined || raw === "") return { category: undefined };
+  if (!isTopicCategory(raw)) {
+    invalid(response, request.path, "invalid topic category");
+    return null;
+  }
+  return { category: raw };
 }
 
 // Sends a server-rendered page with this deployment's page flags. The app's
@@ -162,7 +178,14 @@ export function createDiscoveryRouter({
   router.get("/api/public/topics", async (request, response) => {
     const parameters = listParameters(request, response, invalid);
     if (!parameters) return;
-    response.json(await discovery.listTopics(parameters));
+    const selected = categoryParameter(request, response, invalid);
+    if (!selected) return;
+    response.json(
+      await discovery.listTopics({
+        ...parameters,
+        category: selected.category,
+      }),
+    );
   });
   router.get("/api/public/topics/:slug", async (request, response) => {
     const key = slug(request.params.slug);

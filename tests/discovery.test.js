@@ -247,6 +247,54 @@ describe("public discovery", () => {
     );
   });
 
+  it("sends each topic's category and filters the topic list by one", async () => {
+    const calls = [];
+    const categorized = { ...topic, category: "cities" };
+    const filtered = appWith({
+      ...discovery,
+      listTopics: async (parameters) => {
+        calls.push(parameters);
+        return {
+          items: [categorized],
+          pagination: { limit: 12, offset: 0, hasMore: false },
+        };
+      },
+      getTopic: async (slug) => (slug === topic.slug ? categorized : null),
+    });
+    const list = await request(filtered).get(
+      "/api/public/topics?category=cities&q=transit&limit=5",
+    );
+    assert.equal(list.status, 200);
+    assert.equal(list.body.items[0].category, "cities");
+    assert.deepEqual(calls[0], {
+      query: "transit",
+      limit: 5,
+      offset: 0,
+      category: "cities",
+    });
+    for (const path of ["/api/public/topics", "/api/public/topics?category="])
+      assert.equal((await request(filtered).get(path)).status, 200, path);
+    assert.equal(calls[1].category, undefined);
+    assert.equal(calls[2].category, undefined);
+    for (const category of [
+      "Cities",
+      "sports",
+      "all",
+      "cities&category=work",
+    ]) {
+      const refused = await request(filtered).get(
+        `/api/public/topics?category=${category}`,
+      );
+      assert.equal(refused.status, 400, category);
+      assert.deepEqual(refused.body, { error: "invalid topic category" });
+    }
+    assert.equal(calls.length, 3);
+    const single = await request(filtered).get(
+      "/api/public/topics/public-topic",
+    );
+    assert.equal(single.body.category, "cities");
+  });
+
   it("returns the public API shape and hides unknown records", async () => {
     const response = await request(app).get(
       "/api/public/debates/public-debate",
@@ -814,6 +862,25 @@ describe("discovery repository visibility", () => {
         .slice(2)
         .every(({ sql }) => sql.includes("publication_state = 'published'")),
     );
+  });
+
+  it("selects each topic's category and filters by one only when asked", async () => {
+    const queries = [];
+    const repository = createDiscoveryRepository({
+      query: async (sql, values) => {
+        queries.push({ sql, values });
+        return { rows: [] };
+      },
+    });
+    await repository.listTopics({ category: "climate", limit: 4 });
+    await repository.listTopics({});
+    await repository.getTopic("public-topic");
+    assert.match(queries[0].sql, /AND category = \$4/);
+    assert.deepEqual(queries[0].values, ["", 5, 0, "climate"]);
+    assert.doesNotMatch(queries[1].sql, /category = /);
+    assert.deepEqual(queries[1].values, ["", 13, 0]);
+    for (const { sql } of queries)
+      assert.match(sql, /side_b_label AS "sideBLabel", category,/);
   });
 
   it("maps optional public relations and detects the next page", async () => {

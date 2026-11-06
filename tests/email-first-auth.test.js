@@ -166,6 +166,9 @@ describe("exact platform-currency presentation", () => {
       parse = (value) =>
         parseAuthReturnIntent(JSON.stringify(value), origin, now);
     assert.deepEqual(parse(intent), intent);
+    // A debate's "Notify me" button is a public action locator too.
+    const notify = { ...intent, action: { kind: "debate-notify" } };
+    assert.deepEqual(parse(notify), notify);
     for (const patch of [
       { version: 2 },
       { expiresAt: now },

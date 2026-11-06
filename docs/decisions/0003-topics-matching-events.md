@@ -21,6 +21,17 @@ The topic slug and side mapping are immutable after creation. Public discovery s
 published topics. The creator cannot edit a published topic through this package; a future
 moderation and correction process must preserve topic history and any later market rights.
 
+Each topic has one category from a fixed list (founder, 2026-11-06): Politics, Society, Cities,
+Technology, Work, Climate, Education, Economy and Other. The creator picks it on the Create
+page; the API field `category` is optional, takes the lowercase id (`politics` … `other`) and
+defaults to `other`, and topics that predate categories are `other`. Afterwards only the owner
+changes it, with a reason, through the
+[owner command](../operations.md#change-a-topics-category); the database refuses a change by
+any other role and keeps each change in `topic_category_changes`. Public topic data includes
+`category`, and `/api/public/topics?category=` lists one category. The list lives in
+`src/features/discovery/topic-categories.ts` and in the database's checks, so a new category
+needs a migration.
+
 Every debate has one proposition, exactly two different participant accounts and public
 profiles, opposite sides A and B, one start time in UTC, and a snapshot of the enabled
 platform-wide rules version. A participant cannot negotiate per-event economic rules.

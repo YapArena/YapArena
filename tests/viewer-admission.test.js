@@ -177,8 +177,15 @@ it("does not exempt protected mutations or authentication from their existing co
     `${path}/speaker-seat`,
     `${path}/captions.vtt`,
     `${path}/replay`,
+    `/api/matching/events/${id}/notify`,
   ])
     assert.equal(mediaDeliveryLane({ method: "GET", path: url }), "read");
+  // Saving or removing a "Notify me" request keeps the ordinary API budget.
+  for (const method of ["PUT", "DELETE"])
+    assert.equal(
+      mediaDeliveryLane({ method, path: `/api/matching/events/${id}/notify` }),
+      undefined,
+    );
 });
 it("rejects tampered/expired/malformed guard values and renews them without authentication privileges", () => {
   const f = fixture({ secure: false });

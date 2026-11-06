@@ -112,6 +112,11 @@ it("puts Create's two forms in a tab pair and the lists beside them", () => {
     page,
     /<div class="match-switch-options"><label><input type="radio" name="mode" value="now" checked> Now<\/label>/,
   );
+  // The topic form asks for one of the fixed categories (Decision 0003).
+  assert.match(
+    page,
+    /<label>Category<select name="category" required><option value="">Choose a category<\/option><option value="politics">Politics<\/option><option value="society">Society<\/option><option value="cities">Cities<\/option><option value="technology">Technology<\/option><option value="work">Work<\/option><option value="climate">Climate<\/option><option value="education">Education<\/option><option value="economy">Economy<\/option><option value="other">Other<\/option><\/select><\/label><button class="btn btn-primary" type="submit">Create private draft<\/button><\/form>/,
+  );
   assert.match(page, /Browse topics <span aria-hidden="true">→<\/span>/);
   assert.match(page, /<aside class="match-side" aria-label="Your matches">/);
   assert.doesNotMatch(page.split('<main id="main">')[1], /↗|01 \/|02 \//);

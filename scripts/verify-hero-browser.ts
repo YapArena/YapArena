@@ -66,6 +66,7 @@ try {
     summary: "Synthetic local interface fixture.",
     sideALabel: "People first",
     sideBLabel: "Keep cars moving",
+    category: "other",
     isDemo: false,
     createdAt: new Date(),
   };

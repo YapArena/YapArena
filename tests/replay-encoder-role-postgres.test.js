@@ -228,6 +228,7 @@ describe(
           "messages",
           "follows",
           "account_notifications",
+          "debate_notify_requests",
         ],
       };
       assert.ok(named.coins.length > 20);

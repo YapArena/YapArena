@@ -13,6 +13,7 @@ import { hasHiddenCharacters } from "../community/user-text.ts";
 import { MatchConflictError, MatchNotFoundError } from "./repository.ts";
 import { DebaterSettingsRequiredError } from "../transcription/debater-settings.ts";
 import { PROPOSAL_MIN_LEAD_MINUTES } from "./timings.ts";
+import { isTopicCategory } from "../discovery/topic-categories.ts";
 
 type Repository = ReturnType<typeof createMatchingRepository>;
 const slugPattern = /^[a-z0-9][a-z0-9-]{2,79}$/;
@@ -44,7 +45,14 @@ function topicInput(body: unknown) {
     !value ||
     Object.keys(value).some(
       (key) =>
-        !["slug", "title", "summary", "sideALabel", "sideBLabel"].includes(key),
+        ![
+          "slug",
+          "title",
+          "summary",
+          "sideALabel",
+          "sideBLabel",
+          "category",
+        ].includes(key),
     )
   )
     return null;
@@ -53,6 +61,8 @@ function topicInput(body: unknown) {
   const summary = text(value.summary, 600, 10);
   const sideALabel = text(value.sideALabel, 80, 2);
   const sideBLabel = text(value.sideBLabel, 80, 2);
+  // Optional (Decision 0003): the repository stores a topic without one as "other".
+  const category = value.category;
   if (
     typeof slug !== "string" ||
     !slugPattern.test(slug) ||
@@ -60,10 +70,18 @@ function topicInput(body: unknown) {
     !summary ||
     !sideALabel ||
     !sideBLabel ||
-    sideALabel.toLowerCase() === sideBLabel.toLowerCase()
+    sideALabel.toLowerCase() === sideBLabel.toLowerCase() ||
+    (category !== undefined && !isTopicCategory(category))
   )
     return null;
-  return { slug, title, summary, sideALabel, sideBLabel };
+  return {
+    slug,
+    title,
+    summary,
+    sideALabel,
+    sideBLabel,
+    ...(category !== undefined && { category }),
+  };
 }
 
 // A proposed or scheduled time: 1 hour to 90 days ahead, in UTC ISO form.
@@ -449,6 +467,43 @@ export function createMatchingRouter({
       history: await matching.getEventHistory(id),
     });
   });
+  // "Notify me" on a scheduled debate: an in-app notice when the speakers are reminded, which
+  // only the live queue's worker sends. Shaped like the follow routes: anyone signed in reads
+  // their own request; adding one needs the participant role and no restriction (YA-07).
+  if (liveQueue) {
+    router.get("/events/:id/notify", async (request, response) => {
+      const id = idFrom(request);
+      if (!id) return response.status(404).json({ error: "event not found" });
+      return response.json({
+        notifying: await matching.isNotifying(request.user!.id, id),
+      });
+    });
+    router.put(
+      "/events/:id/notify",
+      participant,
+      unrestricted,
+      async (request, response) => {
+        const id = idFrom(request);
+        if (!id) return response.status(404).json({ error: "event not found" });
+        try {
+          const result = await matching.requestNotify(request.user!.id, id);
+          return response.status(result === "created" ? 201 : 204).end();
+        } catch (error) {
+          return errorResponse(response, error);
+        }
+      },
+    );
+    router.delete(
+      "/events/:id/notify",
+      participant,
+      async (request, response) => {
+        const id = idFrom(request);
+        if (!id) return response.status(404).json({ error: "event not found" });
+        await matching.cancelNotify(request.user!.id, id);
+        return response.status(204).end();
+      },
+    );
+  }
   router.post(
     "/events/:id/ready",
     participant,

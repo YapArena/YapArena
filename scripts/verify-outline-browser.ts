@@ -49,6 +49,7 @@ const topic: PublicTopic = {
   summary: "Synthetic outline fixture.",
   sideALabel: "For",
   sideBLabel: "Against",
+  category: "other",
   isDemo: false,
   createdAt: new Date(),
 };

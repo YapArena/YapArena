@@ -2,6 +2,10 @@ import { randomUUID } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
 import { withTransaction } from "../../platform/transaction.ts";
 import { assertDebaterSettings } from "../transcription/debater-settings.ts";
+import {
+  DEFAULT_TOPIC_CATEGORY,
+  type TopicCategory,
+} from "../discovery/topic-categories.ts";
 import { activeRestriction } from "../community/restrictions.ts";
 import {
   BOOKING_LEAD_SECONDS,
@@ -11,6 +15,7 @@ import {
   ONLINE_SECONDS,
   OPEN_CHALLENGES_LIMIT,
   QUEUE_JOIN_SECONDS,
+  REMINDER_MINUTES,
   SCHEDULED_JOIN_SECONDS,
 } from "./timings.ts";
 
@@ -464,6 +469,51 @@ export async function remindScheduledDebate(
       "Your debate starts in a few minutes. Join now.",
       { debateId },
     );
+  // Viewers who asked to be notified get one notice at the same moment, while the debate is
+  // public. A speaker who also asked keeps only the reminder above, and a suspended account,
+  // which can't sign in, gets nothing. A restriction only stops an account asking (YA-07).
+  const debate = await client.query<{ proposition: string }>(
+    `SELECT d.proposition FROM debates d
+     JOIN topics t ON t.id = d.topic_id AND t.publication_state = 'published'
+     WHERE d.id = $1 AND d.publication_state = 'published'`,
+    [debateId],
+  );
+  if (!debate.rows[0]) return;
+  await client.query(
+    `INSERT INTO account_notifications (user_id, event_type, message, debate_id)
+     SELECT r.user_id, 'event.notify_starting', $2, r.debate_id
+     FROM debate_notify_requests r
+     JOIN users u ON u.id = r.user_id AND u.account_status = 'active'
+     WHERE r.debate_id = $1 AND NOT EXISTS (
+       SELECT 1 FROM event_participants p
+       WHERE p.debate_id = r.debate_id AND p.user_id = r.user_id AND p.active)`,
+    [debateId, notifyStartingMessage(debate.rows[0].proposition)],
+  );
+}
+
+// The notice names the debate, since the notification list shows text only. It fits the
+// 240-character message column; a long proposition is cut with an ellipsis.
+export function notifyStartingMessage(proposition: string) {
+  const lead =
+    "A debate you asked to be notified about starts in a few minutes: “";
+  const room = 240 - lead.length - 1;
+  const text =
+    proposition.length > room
+      ? `${proposition.slice(0, room - 1).trimEnd()}…`
+      : proposition;
+  return `${lead}${text}”`;
+}
+
+// Notify-me requests matter only until their debate starts or is called off; the hourly
+// matchmaking cleanup deletes the rest, a bounded batch at a time.
+export async function pruneNotifyRequests(database: Pick<Pool, "query">) {
+  const result = await database.query(
+    `DELETE FROM debate_notify_requests WHERE (user_id, debate_id) IN (
+       SELECT r.user_id, r.debate_id FROM debate_notify_requests r
+       JOIN debates d ON d.id = r.debate_id
+       WHERE d.status NOT IN ('scheduled', 'ready') LIMIT 1000)`,
+  );
+  return result.rowCount ?? 0;
 }
 
 // A "now" challenge nobody answered in time stays open: it can still be accepted while the
@@ -595,13 +645,14 @@ export function createMatchingRepository(
         summary: string;
         sideALabel: string;
         sideBLabel: string;
+        category?: TopicCategory;
       },
     ) {
       const result = await database.query(
-        `INSERT INTO topics (creator_user_id, slug, title, summary, side_a_label, side_b_label)
-         VALUES ($1, $2, $3, $4, $5, $6)
+        `INSERT INTO topics (creator_user_id, slug, title, summary, side_a_label, side_b_label, category)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING id, slug, title, summary, side_a_label AS "sideALabel",
-           side_b_label AS "sideBLabel", publication_state AS "publicationState"`,
+           side_b_label AS "sideBLabel", category, publication_state AS "publicationState"`,
         [
           userId,
           input.slug,
@@ -609,6 +660,7 @@ export function createMatchingRepository(
           input.summary,
           input.sideALabel,
           input.sideBLabel,
+          input.category ?? DEFAULT_TOPIC_CATEGORY,
         ],
       );
       return result.rows[0];
@@ -616,7 +668,7 @@ export function createMatchingRepository(
     async listOwnTopics(userId: string) {
       const result = await database.query(
         `SELECT id, slug, title, summary, side_a_label AS "sideALabel",
-           side_b_label AS "sideBLabel", publication_state AS "publicationState"
+           side_b_label AS "sideBLabel", category, publication_state AS "publicationState"
          FROM topics WHERE creator_user_id = $1 ORDER BY created_at DESC LIMIT 50`,
         [userId],
       );
@@ -1145,6 +1197,69 @@ export function createMatchingRepository(
         [id, userId],
       );
       return Boolean(result.rows[0]);
+    },
+    // "Notify me": the account's own request, which counts only while its debate awaits its start.
+    async isNotifying(userId: string, debateId: string) {
+      const result = await database.query<{ notifying: boolean }>(
+        `SELECT EXISTS (
+           SELECT 1 FROM debate_notify_requests r JOIN debates d ON d.id = r.debate_id
+           WHERE r.user_id = $1 AND r.debate_id = $2 AND d.status IN ('scheduled', 'ready')
+         ) AS notifying`,
+        [userId, debateId],
+      );
+      return result.rows[0]?.notifying ?? false;
+    },
+    // Accepted while the public debate's reminder is still to come: the worker sends it a few
+    // minutes before the start, to the speakers and to every request saved by then.
+    async requestNotify(
+      userId: string,
+      debateId: string,
+    ): Promise<"created" | "exists"> {
+      return withTransaction(database, async (client) => {
+        // Taken before the checks below: the reminder step holds this row while it sends, so
+        // a request saved concurrently either waits and sees the reminder, or delays it.
+        const debate = await client.query<{
+          status: string;
+          isDemo: boolean;
+          due: boolean;
+        }>(
+          `SELECT d.status, d.is_demo AS "isDemo",
+             d.scheduled_at > CURRENT_TIMESTAMP
+               AND d.scheduled_at > d.created_at + make_interval(mins => ${REMINDER_MINUTES}) AS due
+           FROM debates d
+           JOIN topics t ON t.id = d.topic_id AND t.publication_state = 'published'
+           WHERE d.id = $1 AND d.publication_state = 'published'
+           FOR KEY SHARE OF d`,
+          [debateId],
+        );
+        const current = debate.rows[0];
+        if (!current) throw new MatchNotFoundError("event not found");
+        if (
+          current.isDemo ||
+          (current.status !== "scheduled" && current.status !== "ready")
+        )
+          throw new MatchConflictError(
+            "Notices are only for debates that haven't started.",
+          );
+        const reminded = await client.query(
+          "SELECT 1 FROM event_history WHERE debate_id = $1 AND action = 'reminded' LIMIT 1",
+          [debateId],
+        );
+        if (!current.due || reminded.rows[0])
+          throw new MatchConflictError("This debate starts in a few minutes.");
+        const created = await client.query(
+          `INSERT INTO debate_notify_requests (user_id, debate_id) VALUES ($1, $2)
+           ON CONFLICT DO NOTHING RETURNING debate_id`,
+          [userId, debateId],
+        );
+        return created.rows[0] ? "created" : "exists";
+      });
+    },
+    async cancelNotify(userId: string, debateId: string) {
+      await database.query(
+        "DELETE FROM debate_notify_requests WHERE user_id = $1 AND debate_id = $2",
+        [userId, debateId],
+      );
     },
     async markReady(userId: string, id: string) {
       return withTransaction(database, async (client) => {

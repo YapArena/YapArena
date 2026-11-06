@@ -40,6 +40,8 @@ schemas, secret variable names, physical rail isolation and release boundaries.
 `suspend-account.ts` is also checked in the database-tools project. It is an explicit
 owner-only command that suspends or reinstates one account, with no `.env` loading or
 HTTP listener; see [suspending an account](operations.md#suspend-or-reinstate-an-account).
+`set-topic-category.ts` is checked there too: an owner-only command that changes one topic's
+category with a recorded reason; see [changing a topic's category](operations.md#change-a-topics-category).
 
 `verify-coin-testnet.ts` and `verify-coin-testnet-ledger.ts` are checked in the same
 project. Their fixed Base Sepolia/Circle test-asset paths use private disposable
@@ -92,7 +94,8 @@ their dependency tree, so the web app's and the build tools' packages stay out o
 checked in browser automation and run by `npm run verify:browser`, drives the outline panel in
 Chrome with synthetic LiveKit messages and an in-memory outline store. `verify-replay-timeline-browser.ts`, also
 run by `npm run verify:browser`, drives a replay's turn timeline and Results by turn with fixture
-turn windows and synthetic playback positions. `verify-matchmaking-browser.ts`,
+turn windows and synthetic playback positions, and clicks the stage's Play replay and Join as
+viewer buttons with a real mouse. `verify-matchmaking-browser.ts`,
 also in browser automation, runs two accounts through the live queue and a "now" challenge against
 the isolation harness's fresh database. `transcription-trial.ts`, in the
 database-tools project, scores the providers for the
