@@ -10951,6 +10951,19 @@ exports[`renders the coins and match pages 2`] = `
 </label>
 <label>Side B label<input name="sideBLabel" minlength="2" maxlength="80" required>
 </label>
+<label>Category<select name="category" required>
+<option value="">Choose a category</option>
+<option value="politics">Politics</option>
+<option value="society">Society</option>
+<option value="cities">Cities</option>
+<option value="technology">Technology</option>
+<option value="work">Work</option>
+<option value="climate">Climate</option>
+<option value="education">Education</option>
+<option value="economy">Economy</option>
+<option value="other">Other</option>
+</select>
+</label>
 <button class="btn btn-primary" type="submit">Create private draft</button>
 </form>
 <ul id="my-topics" class="account-list">
@@ -11241,6 +11254,19 @@ exports[`renders the coins and match pages 3`] = `
 <label>Side A label<input name="sideALabel" minlength="2" maxlength="80" required>
 </label>
 <label>Side B label<input name="sideBLabel" minlength="2" maxlength="80" required>
+</label>
+<label>Category<select name="category" required>
+<option value="">Choose a category</option>
+<option value="politics">Politics</option>
+<option value="society">Society</option>
+<option value="cities">Cities</option>
+<option value="technology">Technology</option>
+<option value="work">Work</option>
+<option value="climate">Climate</option>
+<option value="education">Education</option>
+<option value="economy">Economy</option>
+<option value="other">Other</option>
+</select>
 </label>
 <button class="btn btn-primary" type="submit">Create private draft</button>
 </form>
