@@ -1,5 +1,6 @@
 import { asset, avatarTemplate } from "./assets.ts";
 import { html } from "../../platform/html.ts";
+import { inscribe } from "./inscribe.ts";
 
 /** The header's destinations; the current one is marked (docs/site-design.md). */
 export type SiteSection = "live" | "explore" | "create";
@@ -15,16 +16,29 @@ const personIcon = html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColo
 // Three tiles in the visit's colours; the balance's small pixel coin.
 const coin = html`<span class="header-coin" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>`;
 
-// One grid: logo, nav, search and account on one row; on phones the nav moves
-// to its own tab row under them (public/site-header.css).
-export function siteHeaderMarkup(current: SiteSection | null = null) {
+export interface SiteHeaderOptions {
+  /** On phones, this page's name replaces the logo in the middle of the top row. */
+  title?: string | null;
+}
+
+// One grid: logo, nav, search and account on one row; on phones the top row
+// holds the account button, the logo or the page's name and the balance, and
+// the nav moves to its own tab row under it (public/site-header.css).
+export function siteHeaderMarkup(
+  current: SiteSection | null = null,
+  { title = null }: SiteHeaderOptions = {},
+) {
   const nav = sections.map(
     ([key, href, label]) =>
       html`<a href="${href}"${key === current ? html` aria-current="page"` : ""}>${label}</a>`,
   );
-  return html`<header class="site-header" data-site-header data-session="checking" data-avatar-src="${avatarTemplate}">
+  // The page's own heading names it for screen readers; this copy is visual.
+  const pageTitle = title
+    ? html`<p class="site-page-title ins" aria-hidden="true">${inscribe(title.toLowerCase())}</p>`
+    : "";
+  return html`<header class="site-header" data-site-header data-session="checking" data-avatar-src="${avatarTemplate}"${title ? html` data-page-title` : ""}>
     <div class="container site-header-grid">
-      <a class="site-logo" href="/home"><img src="${asset("landing/yaparena-logo.png")}" width="575" height="151" alt="YAP Arena home"></a>
+      <a class="site-logo" href="/home"><img src="${asset("landing/yaparena-logo.png")}" width="575" height="151" alt="YAP Arena home"></a>${pageTitle}
       <nav class="site-nav" aria-label="Main navigation">${nav}</nav>
       <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search><label class="sr-only" for="header-search">Search debates</label>${searchIcon}<input id="header-search" type="search" name="q" maxlength="80" placeholder="Search debates…"><button type="submit" class="sr-only">Search</button></form>
       <a class="header-search-toggle" href="/debates#debate-search" data-header-search-toggle aria-label="Search debates"><span class="icon-search">${searchIcon}</span><svg class="icon-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></a>

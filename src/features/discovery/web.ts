@@ -37,6 +37,16 @@ function sectionFor(canonical: string): SiteSection | null {
   return null;
 }
 
+// On phones the top row names the three destinations' own pages; every other
+// page keeps the logo there.
+function pageTitleFor(canonical: string) {
+  const path = new URL(canonical, "https://yaparena.invalid").pathname;
+  if (path === "/live") return "Live";
+  if (path === "/debates" || path === "/topics") return "Explore";
+  if (path === "/match") return "Create";
+  return null;
+}
+
 export function layout(
   title: string,
   description: string,
@@ -49,7 +59,7 @@ export function layout(
 ) {
   const home = bodyClass.startsWith("arena-market-home");
   const reference = bodyClass.includes("reference-home");
-  const page = html`${siteHeaderMarkup(sectionFor(canonical))}${
+  const page = html`${siteHeaderMarkup(sectionFor(canonical), { title: pageTitleFor(canonical) })}${
     home ? content : html`<main id="main">${content}</main>`
   }${siteFooterMarkup()}`;
   return html`<!doctype html><html lang="en"${emailFirst ? " data-email-first" : ""}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#000000"><title>${title} · YAP Arena</title><meta name="description" content="${description}"><link rel="canonical" href="${canonical}">${metadata}${iconLinks()}<link rel="stylesheet" href="${asset("site.css")}"><link rel="stylesheet" href="${asset("arena.css")}"><link rel="stylesheet" href="${asset("site-header.css")}">${stylesheets.map((name) => html`<link rel="stylesheet" href="${asset(name)}">`)}<script defer src="${asset("session-coordination.js")}"></script><script type="module" src="${asset("site-header.js")}"></script><script defer src="${asset("site.js")}"></script><script defer src="${asset("account-balance.js")}"></script>${reference ? "" : html`<script defer src="${asset("measurement.js")}"></script><script type="module" src="${asset("results-notice.js")}"></script>`}${home ? html`<link rel="stylesheet" href="${asset("homepage.css")}"><script defer src="${asset("homepage.bundle.js")}"></script>` : ""}</head><body class="${bodyClass}"><a class="skip-link" href="#main">Skip to content</a>${page}</body></html>`.toString();

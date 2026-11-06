@@ -187,11 +187,11 @@ With nothing to watch, a Dydema headline sits beside the living emblem
 
 `src/features/discovery/site-header-web.ts`, `public/site-header.css`, `frontend/site-header.ts`.
 
-| Width                                | Layout                                                                                                                                                     |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ≥ 1000 px                            | One 64 px row: the landing logo (32 px), Live · Explore · Create, a 22rem search pill, then the account group.                                             |
-| 600–999 px, and phones held sideways | The same row; search is a 44 px icon that opens a search row under the header (Escape closes it). Without JavaScript the icon links to the debates search. |
-| < 600 px                             | A 56 px row (logo 26 px, search icon, account group) and the three destinations as a 44 px tab row: 100 px in all.                                         |
+| Width                                | Layout                                                                                                                                                                                                           |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ≥ 1000 px                            | One 64 px row: the landing logo (32 px), Live · Explore · Create, a 22rem search pill, then the account group.                                                                                                   |
+| 600–999 px, and phones held sideways | The same row; search is a 44 px icon that opens a search row under the header (Escape closes it). Without JavaScript the icon links to the debates search.                                                       |
+| < 600 px                             | A 56 px row like the X app: the account button on the left, the logo (26 px) or the page's name in the middle, the balance on the right. The three destinations stay as a 44 px tab row under it: 100 px in all. |
 
 - The page's section (from its canonical path: Live, Explore for debates, topics and people, Create
   for `/match`) has `aria-current="page"` and three 4 px pixels in the visit colours under it.
@@ -203,6 +203,12 @@ With nothing to watch, a Dydema headline sits beside the living emblem
   "Play money · no cash value"; the account menu starts with the avatar, name and @handle.
 - On the debate page, and on `/home` until it moves onto the kit, the header lines up with their
   wider layouts (up to 120rem).
+- Phones (first-run redesign, PR 1 of the confirmed plan): Live, Explore (`/debates` and `/topics`)
+  and Create (`/match`) show their name in Dydema in the middle of the top row; every other page
+  shows the logo. There is no search icon: search is the Explore page's own field. The account
+  button opens the account menu as a drawer from the left over a dimmed page; tapping the dimmed
+  page or pressing Escape closes it, and the page behind does not scroll. The queue pill takes its
+  own row under the top row.
 
 ## Footer
 
