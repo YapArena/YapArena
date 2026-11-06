@@ -153,3 +153,18 @@ export function createMatchmakingRouter({
   });
   return router;
 }
+
+// Topics with someone waiting, per side, for the Queue tab and the home (Decision 0011).
+// Public: mounted before sign-in at /api/matchmaking. Counts only, never who is waiting.
+export function createPublicMatchmakingRouter({
+  matchmaking,
+}: {
+  matchmaking: Pick<ReturnType<typeof createMatchmaking>, "waitingTopics">;
+}) {
+  const router = Router();
+  router.get("/waiting", async (_request, response) => {
+    response.set("Cache-Control", "no-store");
+    return response.json({ topics: await matchmaking.waitingTopics() });
+  });
+  return router;
+}

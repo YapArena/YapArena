@@ -2,7 +2,12 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import express from "express";
 import request from "../scripts/test-http-request.ts";
-import { createMatchmakingRouter } from "../dist/features/matching/matchmaking-router.js";
+import { createApp } from "../dist/app.js";
+import { createLogger } from "../dist/platform/logger.js";
+import {
+  createMatchmakingRouter,
+  createPublicMatchmakingRouter,
+} from "../dist/features/matching/matchmaking-router.js";
 import {
   MatchConflictError,
   MatchNotFoundError,
@@ -281,5 +286,84 @@ describe("live topic queue API", () => {
         if (message) assert.equal(response.body.error, message);
       }
     }
+  });
+});
+
+describe("public list of topics with someone waiting", () => {
+  const topics = [
+    {
+      slug: "four-day-week",
+      title: "The four-day workweek should become standard",
+      sideALabel: "For",
+      sideBLabel: "Against",
+      waiting: { sideA: 2, sideB: 0 },
+    },
+  ];
+  const stub = (waitingTopics) => ({
+    async waitingTopics() {
+      return waitingTopics();
+    },
+  });
+
+  it("serves counts per topic and side without a signed-in player", async () => {
+    let calls = 0;
+    const app = express().use(
+      "/api/matchmaking",
+      createPublicMatchmakingRouter({
+        matchmaking: stub(async () => {
+          calls += 1;
+          return topics;
+        }),
+      }),
+    );
+    const response = await request(app).get("/api/matchmaking/waiting");
+    assert.equal(response.status, 200);
+    assert.equal(response.headers["cache-control"], "no-store");
+    assert.deepEqual(response.body, { topics });
+    assert.equal(calls, 1);
+  });
+
+  // createApp mounts the list before sign-in and leaves every other queue route behind it.
+  function app(waitingTopics) {
+    const matchmaking = {
+      ...stub(waitingTopics),
+      async state() {
+        throw new Error("signed-in route reached without a session");
+      },
+      async waiting() {
+        throw new Error("signed-in route reached without a session");
+      },
+    };
+    return createApp({
+      environment: "test",
+      logger: createLogger({ enabled: false }),
+      messages: {},
+      sessions: { findUserByTokenHash: async () => null },
+      identity: {},
+      matchmaking,
+    });
+  }
+
+  it("is public in the app while the rest of the queue still needs sign-in", async () => {
+    const server = app(async () => topics);
+    const listed = await request(server).get("/api/matchmaking/waiting");
+    assert.equal(listed.status, 200);
+    assert.equal(listed.headers["cache-control"], "no-store");
+    assert.deepEqual(listed.body, { topics });
+    for (const path of ["/me", "/topics/four-day-week/waiting"]) {
+      const response = await request(server).get(`/api/matchmaking${path}`);
+      assert.equal(response.status, 401, path);
+      assert.equal(response.body.error, "authentication required");
+    }
+  });
+
+  it("answers a database failure like the per-topic count", async () => {
+    const response = await request(
+      app(async () => {
+        throw new Error("database down");
+      }),
+    ).get("/api/matchmaking/waiting");
+    assert.equal(response.status, 500);
+    assert.deepEqual(response.body, { error: "internal server error" });
   });
 });
