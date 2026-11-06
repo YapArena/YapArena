@@ -9,7 +9,10 @@ import {
   renderMatchmaking,
   renderDebates,
   renderTopics,
+  renderTopic,
+  renderDebate,
 } from "../dist/features/discovery/web.js";
+import { debate, topic, empty } from "./page-fixtures.js";
 import {
   renderMyModeration,
   renderModeration,
@@ -80,11 +83,14 @@ it("uses one navigation and session-aware account header across normal pages", (
     assert.match(html, /site-header\.js/);
     assert.doesNotMatch(html, /class="ya-top"/);
   }
-  // The current section is marked on its own page only.
+  // The current section is marked on its own page only (in the header; the
+  // phone bottom tabs mark theirs too, tested below).
   const current = (html) =>
-    [...html.matchAll(/<a href="([^"]+)" aria-current="page">/g)].map(
-      ([, href]) => href,
-    );
+    [
+      ...html
+        .match(/<header class="site-header"[\s\S]*?<\/header>/)[0]
+        .matchAll(/<a href="([^"]+)" aria-current="page">/g),
+    ].map(([, href]) => href);
   assert.deepEqual(current(pages[1]), ["/live"]);
   assert.deepEqual(current(pages[5]), ["/match"]);
   assert.deepEqual(current(pages[2]), []);
@@ -130,6 +136,61 @@ it("names the three destinations' pages in the phone top row and keeps the logo 
     renderLive(origin, [], { items: [] }),
     /<a class="site-logo" href="\/home">/,
   );
+});
+
+it("ends every layout page but the debate page with the phone bottom tabs", () => {
+  const origin = "https://arena.example";
+  const tabBar = (html) =>
+    html.match(
+      /<nav class="site-tabbar" aria-label="Main navigation">[\s\S]*?<\/nav>/,
+    )?.[0] ?? null;
+  const current = (html) =>
+    [...tabBar(html).matchAll(/<a href="([^"]+)" aria-current="page">/g)].map(
+      ([, href]) => href,
+    );
+  const pages = {
+    home: renderHome(origin),
+    live: renderLive(origin, [], { items: [] }),
+    explore: renderDebates(origin, empty, "", "all"),
+    topics: renderTopics(origin, empty, ""),
+    topic: renderTopic(origin, topic, empty),
+    create: renderMatchmaking(origin),
+    about: renderAbout(origin),
+  };
+  for (const html of Object.values(pages)) {
+    const tabs = tabBar(html);
+    assert.ok(tabs);
+    // Home, Live, Explore and Create, each an icon and its name.
+    assert.deepEqual(
+      [
+        ...tabs.matchAll(
+          /<a href="([^"]+)"[^>]*><svg[^>]*aria-hidden="true">[\s\S]*?<\/svg><span>([^<]+)<\/span><\/a>/g,
+        ),
+      ].map(([, href, label]) => [href, label]),
+      [
+        ["/home", "Home"],
+        ["/live", "Live"],
+        ["/debates", "Explore"],
+        ["/match", "Create"],
+      ],
+    );
+    // The tabs come last in the body, after the footer.
+    assert.match(
+      html,
+      /<\/footer><nav class="site-tabbar"[\s\S]*<\/nav><\/body>/,
+    );
+    // The header keeps its own navigation for wider screens.
+    assert.match(html, /<nav class="site-nav" aria-label="Main navigation">/);
+  }
+  assert.deepEqual(current(pages.home), ["/home"]);
+  assert.deepEqual(current(pages.live), ["/live"]);
+  assert.deepEqual(current(pages.explore), ["/debates"]);
+  assert.deepEqual(current(pages.topics), ["/debates"]);
+  assert.deepEqual(current(pages.topic), ["/debates"]);
+  assert.deepEqual(current(pages.create), ["/match"]);
+  assert.deepEqual(current(pages.about), []);
+  // The debate page keeps its own phone layout: no bottom tabs.
+  assert.equal(tabBar(renderDebate(origin, debate)), null);
 });
 
 it("keeps the broadcast overlay free of navigation and account controls", () => {

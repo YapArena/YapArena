@@ -631,6 +631,65 @@ body.account-page:has(#signed-out:not([hidden])) [data-header-guest] {
     transform: translateX(-100%);
   }
 }
+/* Phones: the bottom tabs replace the header's tab row on pages that have
+   them (every page but the debate page and the separate moderation and
+   measurement layouts). A 56 px row of icons with their names, over the
+   phone's home indicator. The queue pill becomes a strip just above the
+   tabs, and the cookie choice rises above them. */
+.site-tabbar {
+  display: none;
+}
+@media (max-width: 599px) {
+  .site-tabbar {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 25;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px)
+      env(safe-area-inset-left, 0px);
+    border-top: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .site-tabbar a {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 3px;
+    min-height: 56px;
+    color: var(--muted);
+    font-size: var(--text-12);
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+  }
+  .site-tabbar a:hover,
+  .site-tabbar a[aria-current="page"] {
+    color: var(--text);
+  }
+  .site-tabbar svg {
+    width: 24px;
+    height: 24px;
+  }
+  body:has(> .site-tabbar) {
+    padding-bottom: calc(57px + env(safe-area-inset-bottom, 0px));
+  }
+  body:has(> .site-tabbar) .site-nav {
+    display: none;
+  }
+  body:has(> .site-tabbar) .header-member-actions .queue-pill {
+    position: fixed;
+    inset: auto max(var(--space-3), env(safe-area-inset-right, 0px))
+      calc(57px + env(safe-area-inset-bottom, 0px) + var(--space-2))
+      max(var(--space-3), env(safe-area-inset-left, 0px));
+    margin: 0;
+    background: var(--bg);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.6);
+  }
+  body:has(> .site-tabbar) .cookie-choice {
+    bottom: calc(57px + env(safe-area-inset-bottom, 0px) + var(--space-3));
+  }
+}
 @media (max-width: 359px) {
   .site-logo img {
     height: 20px;

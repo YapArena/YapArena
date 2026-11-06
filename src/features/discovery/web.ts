@@ -1,6 +1,11 @@
 import { homepageMarkup } from "./homepage-view.ts";
 import { accountMarkup } from "./account-web.ts";
-import { siteHeaderMarkup, type SiteSection } from "./site-header-web.ts";
+import {
+  siteHeaderMarkup,
+  siteTabBarMarkup,
+  type SiteSection,
+  type SiteTab,
+} from "./site-header-web.ts";
 import type { PublicBotActivity } from "../a4/public-bots.ts";
 import { publicHomepage, type HomeData } from "./homepage-model.ts";
 import { renderVideoDebateCard } from "./video-card-web.ts";
@@ -36,6 +41,15 @@ function sectionFor(canonical: string): SiteSection | null {
   return null;
 }
 
+// The bottom tab for this page: Home for /home, otherwise its header section.
+function tabFor(
+  canonical: string,
+  section: SiteSection | null,
+): SiteTab | null {
+  const path = new URL(canonical, "https://yaparena.invalid").pathname;
+  return path === "/home" ? "home" : section;
+}
+
 // On phones the top row names the three destinations' own pages; every other
 // page keeps the logo there.
 function pageTitleFor(canonical: string) {
@@ -58,9 +72,15 @@ export function layout(
 ) {
   const home = bodyClass.startsWith("arena-market-home");
   const reference = bodyClass.includes("reference-home");
-  const page = html`${siteHeaderMarkup(sectionFor(canonical), { title: pageTitleFor(canonical) })}${
+  const section = sectionFor(canonical);
+  // Debate pages keep their own phone layout (the stake bar sits at the
+  // bottom), so they have no bottom tabs.
+  const tabBar = bodyClass.includes("arena-page")
+    ? ""
+    : siteTabBarMarkup(tabFor(canonical, section));
+  const page = html`${siteHeaderMarkup(section, { title: pageTitleFor(canonical) })}${
     home ? content : html`<main id="main">${content}</main>`
-  }${siteFooterMarkup()}`;
+  }${siteFooterMarkup()}${tabBar}`;
   return html`<!doctype html><html lang="en"${emailFirst ? " data-email-first" : ""}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#000000"><title>${title} · YAP Arena</title><meta name="description" content="${description}"><link rel="canonical" href="${canonical}">${metadata}${iconLinks()}<link rel="stylesheet" href="${asset("site.css")}"><link rel="stylesheet" href="${asset("arena.css")}"><link rel="stylesheet" href="${asset("site-header.css")}">${stylesheets.map((name) => html`<link rel="stylesheet" href="${asset(name)}">`)}<script defer src="${asset("session-coordination.js")}"></script><script type="module" src="${asset("site-header.js")}"></script><script defer src="${asset("site.js")}"></script><script defer src="${asset("account-balance.js")}"></script>${reference ? "" : html`<script defer src="${asset("measurement.js")}"></script><script type="module" src="${asset("results-notice.js")}"></script>`}${home ? html`<link rel="stylesheet" href="${asset("homepage.css")}"><script defer src="${asset("homepage.bundle.js")}"></script>` : ""}</head><body class="${bodyClass}"><a class="skip-link" href="#main">Skip to content</a>${page}</body></html>`.toString();
 }
 
