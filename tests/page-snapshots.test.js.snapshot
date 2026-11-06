@@ -6653,6 +6653,35 @@ exports[`renders a profile 1`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -6898,6 +6927,35 @@ exports[`renders a profile 2`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -7097,6 +7155,35 @@ exports[`renders a profile 3`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -7312,6 +7399,35 @@ exports[`renders a topic 1`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -7613,6 +7729,35 @@ exports[`renders a topic 2`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -7848,6 +7993,35 @@ exports[`renders a topic 3`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -8771,6 +8945,35 @@ exports[`renders the 400, 404 and 500 pages 1`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -8951,6 +9154,35 @@ exports[`renders the 400, 404 and 500 pages 2`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -9131,6 +9363,35 @@ exports[`renders the 400, 404 and 500 pages 3`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -9332,6 +9593,35 @@ exports[`renders the about and account pages 1`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -9688,6 +9978,35 @@ exports[`renders the about and account pages 2`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -10066,6 +10385,35 @@ exports[`renders the about and account pages 3`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -10396,6 +10744,35 @@ exports[`renders the coins and match pages 1`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -10658,6 +11035,35 @@ exports[`renders the coins and match pages 2`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -10933,6 +11339,35 @@ exports[`renders the coins and match pages 3`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -11156,6 +11591,35 @@ exports[`renders the debate list 1`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -11462,6 +11926,35 @@ exports[`renders the debate list 2`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -11725,6 +12218,35 @@ exports[`renders the debate list 3`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -11984,6 +12506,35 @@ exports[`renders the debate list 4`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -12154,6 +12705,35 @@ exports[`renders the home page 1`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -12324,6 +12904,35 @@ exports[`renders the home page 2`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -12497,6 +13106,35 @@ exports[`renders the home page 3`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -12923,6 +13561,35 @@ exports[`renders the home page 4`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -13439,6 +14106,35 @@ exports[`renders the home page 5`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -14196,6 +14892,35 @@ exports[`renders the home page 6`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -14622,6 +15347,35 @@ exports[`renders the home page 7`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -14865,6 +15619,35 @@ exports[`renders the live page 1`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -15278,6 +16061,35 @@ exports[`renders the live page 2`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -16487,6 +17299,35 @@ exports[`renders the privacy, terms and cookie pages 1`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -16832,6 +17673,35 @@ exports[`renders the privacy, terms and cookie pages 2`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -17242,6 +18112,35 @@ exports[`renders the privacy, terms and cookie pages 3`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -17440,6 +18339,35 @@ exports[`renders the topic list 1`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -17658,6 +18586,35 @@ exports[`renders the topic list 2`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;
@@ -17877,6 +18834,35 @@ exports[`renders the topic list 3`] = `
 </nav>
 <p class="footer-note">Play money · no cash value</p>
 </footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/debates" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
 </body>
 </html>
 `;

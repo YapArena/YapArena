@@ -187,11 +187,11 @@ With nothing to watch, a Dydema headline sits beside the living emblem
 
 `src/features/discovery/site-header-web.ts`, `public/site-header.css`, `frontend/site-header.ts`.
 
-| Width                                | Layout                                                                                                                                                                                                           |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ≥ 1000 px                            | One 64 px row: the landing logo (32 px), Live · Explore · Create, a 22rem search pill, then the account group.                                                                                                   |
-| 600–999 px, and phones held sideways | The same row; search is a 44 px icon that opens a search row under the header (Escape closes it). Without JavaScript the icon links to the debates search.                                                       |
-| < 600 px                             | A 56 px row like the X app: the account button on the left, the logo (26 px) or the page's name in the middle, the balance on the right. The three destinations stay as a 44 px tab row under it: 100 px in all. |
+| Width                                | Layout                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ≥ 1000 px                            | One 64 px row: the landing logo (32 px), Live · Explore · Create, a 22rem search pill, then the account group.                                                                                                                                                                                                                           |
+| 600–999 px, and phones held sideways | The same row; search is a 44 px icon that opens a search row under the header (Escape closes it). Without JavaScript the icon links to the debates search.                                                                                                                                                                               |
+| < 600 px                             | A 56 px row like the X app: the account button on the left, the logo (26 px) or the page's name in the middle, the balance on the right. Under 600 px the main navigation is the bottom tabs (below); pages without them (the debate page, moderation and measurement) keep the three destinations as a 44 px tab row under the top row. |
 
 - The page's section (from its canonical path: Live, Explore for debates, topics and people, Create
   for `/match`) has `aria-current="page"` and three 4 px pixels in the visit colours under it.
@@ -209,6 +209,21 @@ With nothing to watch, a Dydema headline sits beside the living emblem
   button opens the account menu as a drawer from the left over a dimmed page; tapping the dimmed
   page or pressing Escape closes it, and the page behind does not scroll. The queue pill takes its
   own row under the top row.
+
+## Bottom tabs
+
+`siteTabBarMarkup()` in `src/features/discovery/site-header-web.ts`, styles in `public/site-header.css`.
+
+- Phones only (under 600 px), on every page built by `layout()` except the debate page, whose stake
+  bar sits at the bottom. Wider screens keep the header's navigation and never show the tabs.
+- Home (`/home`, the YAP Arena ring upright like the emblem), Live, Explore and Create: 24 px icons
+  with their names under them, in one 56 px row fixed above the phone's home indicator. The
+  current page's tab is white with `aria-current="page"`; the others are muted. The Queue tab joins
+  them with its page (PR 3 of the first-run plan).
+- The tabs are labelled "Main navigation", like the header's navigation, which they replace on
+  phones; only one of the two is ever shown.
+- The page keeps 57 px of space under its footer for the tabs. When you are in the queue, the
+  queue pill becomes a strip just above the tabs; the cookie choice also sits above them.
 
 ## Footer
 
