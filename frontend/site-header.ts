@@ -658,3 +658,8 @@ if (header) {
 // Live topic queue (Decision 0011): header pill, match dialog and queue buttons.
 if (document.documentElement.hasAttribute("data-matchmaking"))
   void import("./matchmaking.js");
+
+// First-run tips (FIRST_RUN_TIPS_ENABLED): the coin menu's two lines, and two
+// one-time tips on debate pages.
+if (document.documentElement.hasAttribute("data-first-run-tips"))
+  void import("./first-run-tips.js");

@@ -9,6 +9,13 @@ import {
   type AvatarId,
 } from "./avatar.js";
 import { apiFetch } from "./lib/api.js";
+import {
+  intentPath,
+  WELCOME_COPY,
+  WELCOME_LINES,
+  welcomeTitle,
+} from "./first-run-copy.js";
+import { guideList } from "./first-run-view.js";
 
 const handlePattern = /^[a-z0-9][a-z0-9-]{2,39}$/;
 const handleHelp = "Lowercase letters, numbers and hyphens.";
@@ -45,7 +52,26 @@ const handleTip =
 const label = (id: string, text: string, count: string) =>
   `<div class="ps-label-row"><span class="ps-label"><label for="${id}">${text}</label><button type="button" class="ps-info" aria-label="About ${text.toLowerCase()}s" aria-describedby="${id}-tip">i</button><span class="ps-tip" role="tooltip" id="${id}-tip">${handleTip}</span></span><span class="ps-count" ${count} aria-hidden="true">0/${id === "ps-name" ? 80 : 40}</span></div>`;
 
-const template = () => `<form class="ps-form" novalidate>
+// The last step: today's "Welcome to the arena", or, with the first-run
+// welcome switch on (FIRST_RUN_WELCOME_ENABLED), how YAP Arena works and
+// "What brings you here?".
+const doneStep = (guide: boolean) =>
+  guide
+    ? `<section class="ps-step ps-done ps-guide" data-step="done" hidden>
+    <div class="ps-hello"><span class="ps-avatar" data-ps-done-avatar></span><h2 tabindex="-1" data-ps-done-title>Welcome</h2></div>
+    <p class="ps-eyebrow">${WELCOME_COPY.eyebrow}</p>
+    <ul data-ps-how></ul>
+    <p class="ps-ask" id="ps-intent-title">${WELCOME_COPY.ask}</p>
+    <div class="ps-intents" role="group" aria-labelledby="ps-intent-title"><button class="ps-primary" type="button" data-ps-intent="watch">${WELCOME_COPY.watch}</button><button class="ps-secondary" type="button" data-ps-intent="debate">${WELCOME_COPY.debate}</button></div>
+    <button class="ps-look" type="button" data-ps-finish>${WELCOME_COPY.look}</button>
+  </section>`
+    : `<section class="ps-step ps-done" data-step="done" hidden>
+    <div class="living-emblem ps-emblem" data-ps-emblem aria-hidden="true"><canvas class="aura"></canvas><img src="/assets/landing/yaparena-emblem.png" width="2048" height="1715" alt=""><canvas class="bloom"></canvas><canvas class="cores"></canvas></div>
+    <h2 tabindex="-1" data-ps-done-title>Welcome to the arena</h2>
+    <button class="ps-primary" type="button" data-ps-finish>Start exploring</button>
+  </section>`;
+
+const template = (guide: boolean) => `<form class="ps-form" novalidate>
   <div class="ps-brand"><img class="ps-logo" src="${logo()}" width="575" height="151" alt="YAP Arena"></div>
   <div class="ps-progress" role="progressbar" aria-label="Profile setup" aria-valuemin="1" aria-valuemax="2" aria-valuenow="1" aria-valuetext="Step 1 of 2" data-progress="1"><span></span><span></span></div>
   <section class="ps-step" data-step="details">
@@ -77,11 +103,7 @@ const template = () => `<form class="ps-form" novalidate>
     <p class="ps-form-error" role="alert" data-ps-form-error hidden></p>
     <div class="ps-actions"><button class="ps-secondary" type="button" data-ps-back>Edit</button><button class="ps-primary" type="submit" data-ps-claim>Claim my handle</button></div>
   </section>
-  <section class="ps-step ps-done" data-step="done" hidden>
-    <div class="living-emblem ps-emblem" data-ps-emblem aria-hidden="true"><canvas class="aura"></canvas><img src="/assets/landing/yaparena-emblem.png" width="2048" height="1715" alt=""><canvas class="bloom"></canvas><canvas class="cores"></canvas></div>
-    <h2 tabindex="-1" data-ps-done-title>Welcome to the arena</h2>
-    <button class="ps-primary" type="button" data-ps-finish>Start exploring</button>
-  </section>
+  ${doneStep(guide)}
 </form>`;
 
 let open: Promise<Profile | null> | undefined;
@@ -102,7 +124,11 @@ function show() {
   const dialog = document.createElement("dialog");
   dialog.className = "profile-setup";
   dialog.setAttribute("aria-label", "Create your profile");
-  dialog.innerHTML = template();
+  const guide = document.documentElement.hasAttribute("data-first-run-welcome");
+  dialog.innerHTML = template(guide);
+  dialog
+    .querySelector("[data-ps-how]")
+    ?.replaceWith(guideList(WELCOME_LINES, "ps-how"));
   const q = <T extends Element>(selector: string) =>
     dialog.querySelector<T>(selector)!;
   const form = q<HTMLFormElement>(".ps-form");
@@ -173,7 +199,8 @@ function show() {
   // The welcome screen's emblem comes alive like the landing's; it rests with
   // reduced motion, and the still image stays if it cannot load.
   function welcome() {
-    const stage = q<HTMLElement>("[data-ps-emblem]");
+    const stage = dialog.querySelector<HTMLElement>("[data-ps-emblem]");
+    if (!stage) return;
     const parts = {
       logo: stage.querySelector<HTMLImageElement>("img")!,
       cores: stage.querySelector<HTMLCanvasElement>(".cores")!,
@@ -345,8 +372,12 @@ function show() {
       } = await response.json().catch(() => ({}));
       if (response.status === 201 && body.profile) {
         created = body.profile;
-        q<HTMLElement>("[data-ps-done-title]").textContent =
-          `Welcome to the arena, ${created.displayName.split(/\s+/)[0]}`;
+        q<HTMLElement>("[data-ps-done-title]").textContent = guide
+          ? welcomeTitle(created.displayName)
+          : `Welcome to the arena, ${created.displayName.split(/\s+/)[0]}`;
+        dialog
+          .querySelector<HTMLElement>("[data-ps-done-avatar]")
+          ?.replaceChildren(avatarImage(avatarId));
         goTo("done");
         return;
       }
@@ -439,6 +470,19 @@ function show() {
   q<HTMLButtonElement>("[data-ps-finish]").addEventListener("click", () =>
     finish(created),
   );
+  // "What brings you here?": Watch debates opens Live, Debate myself the Queue
+  // tab (Create while the queue is off).
+  for (const button of dialog.querySelectorAll<HTMLButtonElement>(
+    "[data-ps-intent]",
+  ))
+    button.addEventListener("click", () => {
+      const path = intentPath(
+        button.dataset.psIntent,
+        document.documentElement.hasAttribute("data-matchmaking"),
+      );
+      finish(created);
+      if (path) window.location.assign(path);
+    });
 
   // The step is required: Escape does nothing, and a forced close reopens it.
   dialog.addEventListener("cancel", (event) => event.preventDefault());

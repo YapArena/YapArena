@@ -110,10 +110,20 @@ function categoryParameter(
 export function createPageSender({
   emailFirst = false,
   matchmakingEnabled = false,
+  firstRunWelcome = false,
+  firstRunTips = false,
 }: {
   emailFirst?: boolean;
   matchmakingEnabled?: boolean;
+  // The first-run guide's switches: the welcome screen and the tips.
+  firstRunWelcome?: boolean;
+  firstRunTips?: boolean;
 }) {
+  const flags = [
+    matchmakingEnabled ? " data-matchmaking" : "",
+    firstRunWelcome ? " data-first-run-welcome" : "",
+    firstRunTips ? " data-first-run-tips" : "",
+  ].join("");
   return (response: Response, body: string, status = 200) => {
     const page = emailFirst
       ? body.replace('<html lang="en">', '<html lang="en" data-email-first>')
@@ -122,8 +132,8 @@ export function createPageSender({
       .status(status)
       .type("html")
       .send(
-        matchmakingEnabled
-          ? page.replace('<html lang="en"', '<html lang="en" data-matchmaking')
+        flags
+          ? page.replace('<html lang="en"', `<html lang="en"${flags}`)
           : page,
       );
   };
@@ -144,6 +154,8 @@ export function createDiscoveryRouter({
   emailFirst = false,
   liveOutline,
   matchmakingEnabled = false,
+  firstRunWelcome = false,
+  firstRunTips = false,
   signedIn = async () => false,
 }: {
   discovery: Repository;
@@ -160,12 +172,20 @@ export function createDiscoveryRouter({
   emailFirst?: boolean;
   // Live topic queue (Decision 0011): pages load the queue module and show its controls.
   matchmakingEnabled?: boolean;
+  // The first-run guide's switches, as page flags for the browser.
+  firstRunWelcome?: boolean;
+  firstRunTips?: boolean;
   // Whether the request carries a valid session; / sends those readers to /home.
   signedIn?: (request: Request) => Promise<boolean>;
 }) {
   const router = Router();
   const origin = applicationOrigin.replace(/\/$/, "");
-  const html = createPageSender({ emailFirst, matchmakingEnabled });
+  const html = createPageSender({
+    emailFirst,
+    matchmakingEnabled,
+    firstRunWelcome,
+    firstRunTips,
+  });
   const invalid: Invalid = (response, requestPath, message) =>
     requestPath.startsWith("/api/")
       ? response.status(400).json({ error: message })

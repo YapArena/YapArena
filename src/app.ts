@@ -184,6 +184,7 @@ export function createApp({
   environment = "development",
   productionService = false,
   homepageReferenceEnabled = false,
+  firstRun = { welcome: false, tips: false },
   landingFont,
   publicBots,
   metrics = createMetrics(),
@@ -240,6 +241,8 @@ export function createApp({
   // PRODUCTION_SERVICE=true: the one deployment search engines may index.
   productionService?: boolean;
   homepageReferenceEnabled?: boolean;
+  // The first-run guide's switches (FIRST_RUN_WELCOME_ENABLED, FIRST_RUN_TIPS_ENABLED).
+  firstRun?: { welcome: boolean; tips: boolean };
   // The licensed landing headline font, read from LANDING_FONT_FILE at startup.
   landingFont?: Buffer;
   publicBots?: ReturnType<typeof createPublicBotRepository>;
@@ -460,6 +463,8 @@ export function createApp({
   const pageFlags = {
     emailFirst: true,
     matchmakingEnabled: Boolean(matchmaking && identity),
+    firstRunWelcome: firstRun.welcome,
+    firstRunTips: firstRun.tips,
   };
   const recordProductAction = measurement
     ? createProductActionRecorder({ measurement, environment })

@@ -303,6 +303,27 @@ With nothing to watch, a Dydema headline sits beside the living emblem
   "Leave queue" and the others are off until you leave; notices show above the list.
 - With the queue off, the page lists the questions without buttons and says the queue isn't open.
 
+## First-run guide
+
+First-run plan PRs 11 and 12. Every sentence is in `frontend/first-run-copy.ts`, for the founder's
+review; the coin sentences follow [A4](a4-mechanism.md). Two web switches, both off by default,
+turn the parts on separately: `FIRST_RUN_WELCOME_ENABLED` and `FIRST_RUN_TIPS_ENABLED`. They reach
+the browser as `data-first-run-welcome` and `data-first-run-tips` on `<html>`, like
+`data-matchmaking`. With both off, the pages are unchanged.
+
+- Welcome screen (`frontend/profile-setup.ts`): the handle pop-up's last step shows the new
+  account's Yapper and "Welcome, <first name>", then "How YAP Arena works" in three lines (two
+  people debate live; during each turn, tap Yes or No; Yap Coins on your answer, with the welcome
+  grant of 2,500 that `grant-accounting.ts` issues). Then "What brings you here?": Watch debates
+  opens Live, Debate myself opens the Queue tab (Create while the queue is off), and Just look
+  around stays on the page. It replaces the living emblem and "Start exploring".
+- Tips (`frontend/first-run-tips.ts`, loaded by `frontend/site-header.ts`):
+  - The coin menu (tap your coins in the top bar) gains two lines on answering with contracts.
+  - On a debate page, tip 1 of 2 shows under Yes and No the first time a turn can be answered,
+    naming whoever has the floor. Got it, or tapping Yes or No, ends it.
+  - Tip 2 of 2 shows on the answer panel's results card the first time it shows a result.
+  - Each tip shows once per browser (`localStorage`); the answer panel itself is unchanged.
+
 ## Bottom tabs
 
 `siteTabBarMarkup()` in `src/features/discovery/site-header-web.ts`, styles in `public/site-header.css`.
