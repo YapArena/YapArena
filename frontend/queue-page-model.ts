@@ -78,3 +78,109 @@ export function sideButtonView(
     disabled: Boolean(ticket && !mine),
   };
 }
+
+// ---- "+ Create": a new question, made public and queued in one step ---------------------------
+
+/** The Create sheet's fields, as typed. */
+export interface NewQuestion {
+  title: string;
+  summary: string;
+  sideALabel: string;
+  sideBLabel: string;
+  category: string;
+  side: Side | null;
+}
+
+const plain = (text: string) =>
+  text
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+/**
+ * The topic's URL slug, from its question, in the form the server accepts
+ * (`[a-z0-9][a-z0-9-]{2,79}`). A suffix makes a second try unique.
+ */
+export function slugFromTitle(title: string, suffix = "") {
+  const tail = suffix ? `-${suffix}` : "";
+  const base =
+    plain(title)
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80 - tail.length)
+      .replace(/-+$/, "") || "question";
+  const slug = `${base}${tail}`;
+  return slug.length >= 3 ? slug : `${slug}-question`;
+}
+
+// Common words that would match almost every question.
+const STOP_WORDS = new Set([
+  "about",
+  "become",
+  "could",
+  "every",
+  "everyone",
+  "from",
+  "have",
+  "into",
+  "make",
+  "more",
+  "less",
+  "should",
+  "than",
+  "that",
+  "their",
+  "there",
+  "these",
+  "this",
+  "what",
+  "when",
+  "where",
+  "which",
+  "while",
+  "will",
+  "with",
+  "would",
+]);
+
+/**
+ * A query for today's topic search (`/api/public/topics?q=`, PostgreSQL's
+ * web search syntax) that finds questions sharing any meaningful word: the
+ * words of four letters or more, joined with "or", within the 80-character
+ * limit. Empty when nothing is worth searching for.
+ */
+export function similarQuery(text: string) {
+  const words = [
+    ...new Set(
+      plain(text)
+        .split(/[^a-z0-9]+/)
+        .filter((word) => word.length >= 4 && !STOP_WORDS.has(word)),
+    ),
+  ];
+  let query = "";
+  for (const word of words) {
+    const next = query ? `${query} or ${word}` : word;
+    if (next.length > 80) break;
+    query = next;
+  }
+  return query;
+}
+
+/** The server's limits for a topic, checked before sending; null when valid. */
+export function newQuestionError(question: NewQuestion, joining: boolean) {
+  const title = question.title.trim();
+  const summary = question.summary.trim();
+  const a = question.sideALabel.trim();
+  const b = question.sideBLabel.trim();
+  if (title.length < 5 || title.length > 140)
+    return "Write a question of 5 to 140 characters.";
+  if (summary.length < 10 || summary.length > 600)
+    return "Say what the debate is about in 10 to 600 characters.";
+  if (a.length < 2 || b.length < 2 || a.length > 80 || b.length > 80)
+    return "Name both sides, 2 to 80 characters each.";
+  if (a.toLowerCase() === b.toLowerCase())
+    return "Give the two sides different names.";
+  if (!question.category) return "Choose a category.";
+  if (joining && !question.side) return "Choose the side you argue.";
+  return null;
+}
