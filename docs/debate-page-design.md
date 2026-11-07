@@ -173,7 +173,8 @@ sideways.
   draws the band over the whole track, reads "0 < _p_ 0.81 < 1" with "Whole range" under 0 and 1,
   and adds "Drawn over the whole range, from 0 to 1 YC." Then the inspector's drawn Yes and No
   prices, explanation and legend. Signed-in viewers' own limits come from the answer panel's
-  private read (`yap:stake-rounds`), on every width. Under 360 px the turn buttons take their own
+  private read (`yap:stake-rounds`, kept for late modules like the window list in
+  `frontend/stake-windows.ts`), on every width. Under 360 px the turn buttons take their own
   row at the top of the card, and the tabs' side padding narrows to 6 px so the four names fit.
 - **About:** "About this debate" with the latest result, then the event, moderation and site
   links (Topics, Yap Coins, About YAP Arena).

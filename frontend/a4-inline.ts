@@ -13,7 +13,7 @@ import { createRoundChart, sharePercent } from "./arena-chart.js";
 import { createPriceInspector } from "./arena-price.js";
 import { watchRoom } from "./community-stream.js";
 import { seekReplay } from "./replay-seek.js";
-import { onStakeWindows } from "./stake-windows.js";
+import { onStakeRounds, onStakeWindows } from "./stake-windows.js";
 import { createTurnBars } from "./turn-results.js";
 import {
   isTurnWindow,
@@ -285,9 +285,8 @@ if (root) {
       void loadTimeline();
     renderShared();
   });
-  window.addEventListener("yap:stake-rounds", (event) => {
-    if (event.detail.debateId !== debateId) return;
-    ownLimits = event.detail.limits;
+  onStakeRounds(debateId, (limits) => {
+    ownLimits = limits;
     if (mode === "bars") renderShared();
   });
   // The replay's playing turn is outlined in Results by turn.
