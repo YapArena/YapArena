@@ -2,14 +2,17 @@
 // page as the yap:stake-windows event after each read (frontend/stake-panel.ts).
 // Each page module loads on its own, so the first read can finish before a
 // module that loads later starts listening. The latest read stays on window,
-// and a module that starts after it begins from it.
+// and a module that starts after it begins from it. The signed-in viewer's own
+// limits (yap:stake-rounds) are shared the same way for the price inspector.
 import type { RevealedWindow } from "./window-chart-model.js";
 
 type StakeWindows = WindowEventMap["yap:stake-windows"]["detail"];
+type StakeRounds = WindowEventMap["yap:stake-rounds"]["detail"];
 
 declare global {
   interface Window {
     yapStakeWindows?: StakeWindows;
+    yapStakeRounds?: StakeRounds;
   }
 }
 
@@ -35,5 +38,29 @@ export function onStakeWindows(
   queueMicrotask(() => {
     const latest = window.yapStakeWindows;
     if (latest?.debateId === debateId) listener(latest.windows);
+  });
+}
+
+/** Sends this viewer's own limits to the page and keeps them for later modules. */
+export function shareStakeRounds(detail: StakeRounds) {
+  window.yapStakeRounds = detail;
+  window.dispatchEvent(new CustomEvent("yap:stake-rounds", { detail }));
+}
+
+/**
+ * Calls `listener` with this debate's own limits by window id: the latest
+ * ones already shared, if any, once the calling module's code has run, then
+ * every new read.
+ */
+export function onStakeRounds(
+  debateId: string,
+  listener: (limits: Record<string, string>) => void,
+) {
+  window.addEventListener("yap:stake-rounds", (event) => {
+    if (event.detail.debateId === debateId) listener(event.detail.limits);
+  });
+  queueMicrotask(() => {
+    const latest = window.yapStakeRounds;
+    if (latest?.debateId === debateId) listener(latest.limits);
   });
 }

@@ -39,7 +39,7 @@ import {
   type StakeRound,
   type StakeSide,
 } from "./stake-model.js";
-import { shareStakeWindows } from "./stake-windows.js";
+import { shareStakeRounds, shareStakeWindows } from "./stake-windows.js";
 interface Target {
   window: PublicWindow | null;
   round: StakeRound | null;
@@ -254,6 +254,15 @@ if (root) {
     );
     if (current !== generation) return;
     rounds = view;
+    // The price inspector marks this viewer's own limit on revealed turns.
+    shareStakeRounds({
+      debateId,
+      limits: Object.fromEntries(
+        view.flatMap((round) =>
+          round.own ? [[round.id, round.own.limit]] : [],
+        ),
+      ),
+    });
     // A reveal changes the balance everywhere on the page.
     const revealed = resultsSummary(view).revealed.length;
     if (revealedSeen !== null && revealed > revealedSeen)

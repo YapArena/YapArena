@@ -3789,6 +3789,279 @@ textarea::placeholder {
   }
 }
 
+/* Phones (first-run build plan PR 8): Results by turn as one row per turn
+   with its arguments, and the price inspector as a "Price draw · a < p < b"
+   card that a revealed turn opens. Wider screens keep the bars and the
+   inspector as they are; these parts stay hidden there. */
+.arena-page :is(.arena-results-sub-phone, .arena-price-phone),
+.arena-page .arena-turn-bar-line,
+.arena-page
+  .arena-price-inspector
+  :is(.arena-price-turn, .arena-price-order, .arena-price-range) {
+  display: none;
+}
+@media (max-width: 599px) {
+  .arena-page :is(.arena-results-sub-wide, .arena-price-wide) {
+    display: none;
+  }
+  .arena-page .arena-price-phone {
+    display: inline;
+  }
+  .arena-page .arena-results-sub-phone {
+    display: block;
+  }
+  /* Each row carries what the caption says, so the caption only says when
+     results come. */
+  .arena-page .arena-turn-caption:has(+ .arena-turns:not([hidden])) {
+    display: none;
+  }
+  .arena-page .arena-turns {
+    padding-right: 0;
+  }
+  .arena-page .arena-turns::before,
+  .arena-page .arena-turns-even {
+    display: none;
+  }
+  .arena-page .arena-turns-list {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+  }
+  /* A row: "Turn 4", the bar split at the yes share, the share, then the
+     speaker and the turn's arguments. */
+  .arena-page .arena-workspace .arena-turn-bar button {
+    grid-template-columns: 3.25rem minmax(0, 1fr) 2.75rem;
+    grid-template-areas:
+      "turn bar value"
+      "line line line";
+    align-items: center;
+    gap: var(--space-1) var(--space-3);
+    min-height: 44px;
+    padding: var(--space-2) var(--space-3);
+    text-align: left;
+  }
+  .arena-page .arena-workspace .arena-turn-bar button:focus-visible {
+    outline-offset: -2px;
+  }
+  .arena-page .arena-workspace .arena-turn-bar button::before {
+    content: "";
+    grid-area: bar;
+    height: 10px;
+    border-radius: 5px;
+    background: var(--raised);
+  }
+  .arena-page .arena-turn-bar button:hover {
+    background: rgb(255 255 255 / 4%);
+  }
+  .arena-page .arena-workspace .arena-turn-bar[data-selected] button {
+    background: var(--raised);
+  }
+  .arena-page .arena-workspace .arena-turn-bar[data-selected] button::before {
+    background: var(--control-border);
+  }
+  .arena-page .arena-workspace .arena-turn-bar[data-playing] button {
+    box-shadow: inset 0 0 0 1px var(--control-border);
+  }
+  .arena-page .arena-turn-bar :is(.arena-turn-bar-plot, .arena-turn-bar-who) {
+    display: contents;
+  }
+  .arena-page .arena-turn-bar[data-direction] .arena-turn-bar-fill {
+    grid-area: bar;
+    position: static;
+    width: auto;
+    height: 10px;
+    border-radius: 5px;
+    transform: none;
+    background: linear-gradient(
+      to right,
+      var(--answer-yes) var(--yes),
+      var(--answer-no) var(--yes)
+    );
+  }
+  .arena-page .arena-turn-bar[data-direction] .arena-turn-bar-value {
+    grid-area: value;
+    position: static;
+    font-size: var(--text-16);
+    text-align: right;
+  }
+  .arena-page .arena-turn-bar .arena-turn-bar-number {
+    grid-area: turn;
+    font-size: var(--text-14);
+    font-weight: 400;
+  }
+  .arena-page .arena-turn-bar .arena-turn-bar-number::before {
+    content: "Turn ";
+  }
+  .arena-page
+    .arena-turn-bar
+    :is(
+      .arena-turn-bar-name,
+      .arena-turn-bar-initials,
+      .arena-turn-bar-playing
+    ) {
+    display: none;
+  }
+  .arena-page .arena-turn-bar .arena-turn-bar-line {
+    grid-area: line;
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    line-height: 18px;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .arena-page .arena-turn-bar[data-selected] .arena-turn-bar-line {
+    color: var(--button-text);
+  }
+  /* The card: the turn picker beside its title, the scale with the draw
+     range, the order of a, p and b, then the inspector's own lines. */
+  .arena-page .arena-price-details {
+    position: relative;
+  }
+  .arena-page .arena-price-details > .arena-price-inspector {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-1);
+    padding: var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-inner);
+    background: var(--bg);
+  }
+  .arena-page .arena-price-details .arena-price-heading {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-height: 44px;
+  }
+  /* Room for the turn picker: on the narrowest phones the title wraps. */
+  .arena-page .arena-price-details[open] > summary {
+    padding-right: 9.5rem;
+  }
+  .arena-page .arena-price-details .arena-price-navigation select,
+  .arena-page .arena-price-details .arena-price-context {
+    display: none;
+  }
+  .arena-page .arena-price-details .arena-price-turn {
+    display: block;
+    color: var(--text);
+    font-size: var(--text-14);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .arena-page .arena-price-details .arena-price-scale text {
+    font-size: 30px;
+  }
+  .arena-page .arena-price-details .arena-price-scale line {
+    vector-effect: non-scaling-stroke;
+  }
+  .arena-page .arena-price-details .arena-price-track {
+    stroke-width: 6;
+  }
+  .arena-page .arena-price-details .arena-price-interval {
+    stroke-width: 8;
+  }
+  .arena-page .arena-price-details .arena-price-median {
+    stroke-width: 2;
+  }
+  /* The chips under the scale name the typical limits, so the scale's own
+     label for them, too small at this size, is left out. */
+  .arena-page .arena-price-details [data-price-marker="interval-label"] {
+    display: none;
+  }
+  .arena-page .arena-price-details .arena-price-offer-dot {
+    stroke: var(--bg);
+    stroke-width: 5;
+    transform: scale(2);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  /* A whole-range draw: the band is the whole track, with a and b still
+     marked on it. */
+  .arena-page .arena-price-inspector[data-draw="whole"] .arena-price-track {
+    stroke: #acacac;
+  }
+  .arena-page
+    .arena-price-details
+    .arena-price-inspector[data-draw="whole"]
+    :is([data-price-marker="interval"], [data-price-marker="interval-label"]) {
+    display: none;
+  }
+  .arena-page
+    .arena-price-details
+    .arena-price-inspector[data-draw="whole"]
+    .arena-price-median {
+    stroke: var(--bg);
+  }
+  .arena-page .arena-price-details .arena-price-order:not([hidden]) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(
+        0,
+        1fr
+      );
+    align-items: start;
+    gap: var(--space-1);
+    margin: 0;
+  }
+  .arena-page .arena-price-chip {
+    display: grid;
+    gap: 2px;
+    padding: 6px var(--space-1);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    text-align: center;
+  }
+  .arena-page .arena-price-chip.is-price {
+    border-color: var(--control-border);
+    background: var(--raised);
+  }
+  .arena-page .arena-price-chip b {
+    color: var(--text);
+    font: 400 var(--text-16) / 20px var(--font-number);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .arena-page .arena-price-chip i {
+    color: var(--muted);
+  }
+  .arena-page .arena-price-chip small {
+    color: var(--muted);
+    font-size: var(--text-12);
+    line-height: 14px;
+  }
+  .arena-page .arena-price-less {
+    padding-top: 7px;
+    color: var(--muted);
+    font: 400 var(--text-16) / 20px var(--font-number);
+  }
+  .arena-page .arena-price-details .arena-price-range:not([hidden]) {
+    display: block;
+    margin: 0;
+    color: var(--text);
+    font-size: var(--text-12);
+  }
+  .arena-page .arena-price-details .arena-offer-values,
+  .arena-page .arena-price-details .arena-price-explanation {
+    margin: 0;
+  }
+}
+
+/* The narrowest phones (under 360 px): the four tabs fit their names, and
+   the card's turn picker takes its own row above the scale. */
+@media (max-width: 359px) {
+  .arena-page .arena-workspace .arena-tabs button {
+    padding: 0 6px;
+  }
+  .arena-page .arena-price-details .arena-price-heading {
+    position: static;
+    order: -1;
+    justify-content: flex-end;
+  }
+  .arena-page .arena-price-details[open] > summary {
+    padding-right: 0;
+  }
+}
+
 /* Yap Coins results notice (Decision 0013, interface 10), on every page. It
    sits below the header and under the cookie banner. */
 .results-notice {

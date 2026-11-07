@@ -32,6 +32,12 @@ declare global {
       debateId: string;
       windows: RevealedWindow[];
     }>;
+    // The signed-in viewer's own limits (on the yes scale) by window id,
+    // from the panel's private read, so the price inspector can mark them.
+    "yap:stake-rounds": CustomEvent<{
+      debateId: string;
+      limits: Record<string, string>;
+    }>;
   }
 }
 

@@ -9,7 +9,7 @@ import {
   roundProgress,
   chartBadges,
 } from "../public/arena-chart.js";
-import { roundPrices, priceText } from "../public/arena-price.js";
+import { priceDraw, roundPrices, priceText } from "../public/arena-price.js";
 import { runConfig } from "../dist/features/a4/repository.js";
 
 describe("settlement dashboard boundaries", () => {
@@ -90,6 +90,48 @@ describe("settlement dashboard boundaries", () => {
     assert.equal(empty.ownLimit, null);
     assert.equal(empty.interval, false);
     assert.equal(roundPrices({ ownLimit: "1.5" }).ownLimit, null);
+  });
+  it("says how a revealed price was drawn: between a and b, or over the whole range", () => {
+    const fraction = (n) => ({ n: String(n), d: "100" });
+    const point = (branch, overrides = {}) => ({
+      medianNo: fraction(45),
+      medianYes: fraction(60),
+      offer: fraction(52),
+      share: fraction(58),
+      branch,
+      revealed: true,
+      ...overrides,
+    });
+    assert.deepEqual(priceDraw(point("targeted")), {
+      kind: "between",
+      a: 45,
+      offer: 52,
+      b: 60,
+    });
+    // The A4 engine's exploratory branch draws over 0–1 even with a < b.
+    assert.deepEqual(priceDraw(point("exploratory", { offer: fraction(81) })), {
+      kind: "whole",
+      offer: 81,
+    });
+    // Fallback: a side had no answers, or a was at or above b.
+    assert.deepEqual(
+      priceDraw(point("fallback", { medianNo: null, offer: fraction(12) })),
+      { kind: "whole", offer: 12 },
+    );
+    assert.deepEqual(priceDraw(point("fallback", { medianNo: fraction(62) })), {
+      kind: "whole",
+      offer: 52,
+    });
+    // Nothing to draw: no offer, an empty round, an unrevealed round, an
+    // unknown branch, or a targeted branch without an interval.
+    assert.equal(priceDraw(null), null);
+    assert.equal(priceDraw(point("empty", { offer: null })), null);
+    assert.equal(priceDraw(point("targeted", { revealed: false })), null);
+    assert.equal(priceDraw(point(null)), null);
+    assert.equal(
+      priceDraw(point("targeted", { medianNo: fraction(70) })),
+      null,
+    );
   });
   it("accepts short argument labels as metadata and rejects empty, multiline and oversized labels", () => {
     assert.equal(

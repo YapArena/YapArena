@@ -33,6 +33,25 @@ export function roundPrices(point: RoundPoint | null | undefined) {
   };
 }
 
+/**
+ * How a revealed round's Yes price was drawn, for the phone card's
+ * "a < p < b" line: between the typical No limit (a) and the typical Yes
+ * limit (b), or over the whole range from 0 to 1 (the A4 engine's
+ * exploratory and fallback branches). Null without a drawn price.
+ */
+export function priceDraw(point: RoundPoint | null | undefined) {
+  const p = roundPrices(point);
+  if (!point || point.revealed === false || p.offer === null) return null;
+  if (point.branch === "targeted" && p.interval)
+    return { kind: "between", a: p.a!, offer: p.offer, b: p.b! } as const;
+  if (point.branch === "exploratory" || point.branch === "fallback")
+    return { kind: "whole", offer: p.offer } as const;
+  return null;
+}
+
+// "0.45" for a price chip: the scale under it already says Yap Coins.
+const chipValue = (percent: number) => (percent / 100).toFixed(2);
+
 export function createPriceInspector(
   root: HTMLElement,
   onSelect: (point: RoundPoint) => void,
@@ -42,7 +61,8 @@ export function createPriceInspector(
         K extends keyof PriceElements ? PriceElements[K] : HTMLElement
       >(`[data-price-${name}]`)!,
     select = el("round"),
-    drawing = el("drawing");
+    drawing = el("drawing"),
+    section = drawing.closest<HTMLElement>(".arena-price-inspector");
   let points: RoundPoint[] = [],
     signature: string | undefined;
   const node = <K extends keyof SVGElementTagNameMap>(
@@ -140,8 +160,70 @@ export function createPriceInspector(
     layer.style.removeProperty("pointer-events");
     layer.setAttribute("aria-hidden", "false");
   }
-  function show(point: RoundPoint | null | undefined) {
+  /** Phones: "a 0.45 < p 0.52 < b 0.60", or 0 < p < 1 for a whole-range draw. */
+  function showDraw(point: RoundPoint | null | undefined) {
+    const draw = priceDraw(point);
+    if (section) section.dataset.draw = draw?.kind ?? "";
+    el("range").hidden = draw?.kind !== "whole";
+    const order = el("order");
+    order.hidden = !draw;
+    if (!draw) {
+      order.replaceChildren();
+      return;
+    }
+    const chip = (
+      letter: string,
+      value: string,
+      name: string,
+      price = false,
+    ) => {
+      const node = document.createElement("span");
+      node.className = `arena-price-chip${price ? " is-price" : ""}`;
+      const amount = document.createElement("b");
+      if (letter) {
+        const symbol = document.createElement("i");
+        symbol.textContent = letter;
+        amount.append(symbol, ` ${value}`);
+      } else amount.textContent = value;
+      const caption = document.createElement("small");
+      caption.textContent = name;
+      node.append(amount, caption);
+      return node;
+    };
+    const less = () => {
+      const node = document.createElement("span");
+      node.className = "arena-price-less";
+      node.textContent = "<";
+      return node;
+    };
+    const drawn = chip("p", chipValue(draw.offer), "Drawn Yes price", true);
+    order.replaceChildren(
+      ...(draw.kind === "between"
+        ? [
+            chip("a", chipValue(draw.a), "Typical No limit"),
+            less(),
+            drawn,
+            less(),
+            chip("b", chipValue(draw.b), "Typical Yes limit"),
+          ]
+        : [
+            chip("", "0", "Whole range"),
+            less(),
+            drawn,
+            less(),
+            chip("", "1", "Whole range"),
+          ]),
+    );
+  }
+  // `unit` names the point in the phone card's navigation: "Turn 4" for a
+  // debate's turn windows, "Round 4" for the bot history.
+  function show(
+    point: RoundPoint | null | undefined,
+    unit: "Round" | "Turn" = "Round",
+  ) {
     const p = roundPrices(point);
+    el("turn").textContent = point ? `${unit} ${point.number}` : "";
+    showDraw(point);
     select.value = point?.id ?? "";
     el("previous").disabled = select.selectedIndex <= 0;
     el("next").disabled =

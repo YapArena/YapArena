@@ -9,6 +9,9 @@ import {
   barScale,
   barShape,
   captionParts,
+  percents,
+  phoneColumns,
+  rowLine,
   type Names,
   type TurnColumn,
 } from "./turn-results-model.js";
@@ -36,11 +39,17 @@ export interface TurnBarsView {
 export function createTurnBars(
   root: HTMLElement,
   choose: (column: TurnColumn) => void,
+  // Phones show the turns as rows, and only those with a result.
+  phone: Pick<MediaQueryList, "matches" | "addEventListener"> = matchMedia(
+    "(max-width: 599px)",
+  ),
 ) {
   const box = root.querySelector<HTMLElement>("[data-turn-bars]")!;
   const list = box.querySelector<HTMLOListElement>("[data-turn-bar-list]")!;
   const caption = root.querySelector<HTMLElement>("[data-turn-caption]")!;
   let view: TurnBarsView | null = null;
+  // The last view asked for, before the phone list drops turns.
+  let requested: TurnBarsView | null = null;
   let signature = "";
   // The turn under the pointer or keyboard focus, shown in the caption.
   let looked: number | null = null;
@@ -114,6 +123,9 @@ export function createTurnBars(
         item.dataset.turnBar = String(column.turnNumber);
         item.dataset.state = column.state;
         const shape = barShape(column, scale);
+        // A phone row's bar is split at the yes share.
+        if (column.yes !== null)
+          item.style.setProperty("--yes", `${percents(column.yes).yes}%`);
         const button = document.createElement("button");
         button.type = "button";
         button.setAttribute("aria-describedby", "arena-turns-hint");
@@ -146,7 +158,14 @@ export function createTurnBars(
           ),
           text("span", "arena-turn-bar-playing", "playing"),
         );
-        button.append(plot, who);
+        // Phones: the speaker and the turn's arguments under the bar.
+        const line = text(
+          "span",
+          "arena-turn-bar-line",
+          rowLine(column, names),
+        );
+        line.setAttribute("aria-hidden", "true");
+        button.append(plot, who, line);
         item.append(button);
         buttons.set(column.turnNumber, button);
         return item;
@@ -183,11 +202,11 @@ export function createTurnBars(
     if (!list.contains(event.relatedTarget as Node | null)) look(null);
   });
   list.addEventListener("keydown", (event) => {
-    if (
-      !view ||
-      !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)
-    )
-      return;
+    // Phones stack the turns as rows, so Up and Down move between them too.
+    const keys = phone.matches
+      ? ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"]
+      : ["ArrowLeft", "ArrowRight", "Home", "End"];
+    if (!view || !keys.includes(event.key)) return;
     const turns = view.columns.map((column) => column.turnNumber);
     const index = turns.indexOf(turnOf(event.target) ?? -1);
     if (index < 0) return;
@@ -201,7 +220,10 @@ export function createTurnBars(
               0,
               Math.min(
                 turns.length - 1,
-                index + (event.key === "ArrowLeft" ? -1 : 1),
+                index +
+                  (event.key === "ArrowLeft" || event.key === "ArrowUp"
+                    ? -1
+                    : 1),
               ),
             );
     const button = buttons.get(turns[next]!)!;
@@ -210,20 +232,30 @@ export function createTurnBars(
     button.focus();
   });
 
+  phone.addEventListener("change", () => {
+    if (requested) render(requested);
+  });
+  function render(asked: TurnBarsView) {
+    requested = asked;
+    const next = phone.matches
+      ? { ...asked, columns: phoneColumns(asked.columns) }
+      : asked;
+    const nextSignature = JSON.stringify([next.columns, next.names]);
+    view = next;
+    box.hidden = !next.columns.length;
+    if (nextSignature !== signature) {
+      signature = nextSignature;
+      build(next.columns, next.names);
+    }
+    paint();
+  }
+
   return {
-    render(next: TurnBarsView) {
-      const nextSignature = JSON.stringify([next.columns, next.names]);
-      view = next;
-      box.hidden = !next.columns.length;
-      if (nextSignature !== signature) {
-        signature = nextSignature;
-        build(next.columns, next.names);
-      }
-      paint();
-    },
+    render,
     hide() {
       box.hidden = true;
       view = null;
+      requested = null;
       signature = "";
       looked = null;
       buttons.clear();
