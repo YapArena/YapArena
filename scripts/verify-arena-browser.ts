@@ -564,14 +564,64 @@ export async function verifyArenaBrowser({
     await page.emulateMedia({ reducedMotion: "no-preference" });
     checks.reducedMotionHoverCorners = true;
     phase = "search";
-    // On phones the top row has no search icon: search is the Explore page's
-    // own field (docs/site-design.md). From 600 to 999 px the header's search
-    // field still opens from its icon.
+    // On phones the top row has no search icon: Explore's two lists search
+    // from a field in the top row instead (docs/site-design.md). From 600 to
+    // 999 px the header's search field still opens from its icon.
     assert.equal(
       await page.locator("[data-header-search-toggle]").isVisible(),
       false,
     );
+    // Explore's search bar replaces the page's own field on phones and
+    // searches the list it is on, keeping that list's filters.
+    await page.goto(base + "/debates");
+    const topSearch = page.locator("#top-search");
+    assert.ok(await topSearch.isVisible());
+    assert.equal(await page.locator("#debate-search").isVisible(), false);
+    assert.equal(
+      await page.locator("[data-header-search-toggle]").isVisible(),
+      false,
+    );
+    await topSearch.fill("walkability");
+    await topSearch.press("Enter");
+    await page.waitForURL("**/debates?q=walkability");
+    assert.ok(await page.locator(".dcard").count());
+    // Topics live inside Explore: the switch, then a category chip, which a
+    // search from the top row keeps. The A4 fixture topic is in Other.
+    await page
+      .locator(".explore-switch")
+      .getByRole("link", { name: "Topics", exact: true })
+      .click();
+    await page.waitForURL("**/topics");
+    assert.equal(
+      await page.locator('.explore-switch [aria-current="page"]').textContent(),
+      "Topics",
+    );
+    await page
+      .locator(".category-filters")
+      .getByRole("link", { name: "Other", exact: true })
+      .click();
+    await page.waitForURL("**/topics?category=other");
+    await topSearch.fill("fixture");
+    await topSearch.press("Enter");
+    await page.waitForURL("**/topics?category=other&q=fixture");
+    assert.equal(
+      await page
+        .locator('.category-filters [aria-current="page"]')
+        .textContent(),
+      "Other",
+    );
+    assert.equal(await topSearch.inputValue(), "fixture");
+    assert.ok(await page.locator(".tcard").count());
+    assert.ok(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    );
+    checks.phoneExploreSearch = true;
     await page.setViewportSize({ width: 820, height: 1180 });
+    // Tablets keep the page's own field and the header's search icon.
+    assert.equal(await topSearch.isVisible(), false);
+    assert.ok(await page.locator("#topic-search").isVisible());
     await page.locator("[data-header-search-toggle]").click();
     await page.locator("#header-search").fill("walkability");
     await page.locator("#header-search").press("Enter");

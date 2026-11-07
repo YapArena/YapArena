@@ -71,6 +71,7 @@
   width: min(22rem, 100%);
 }
 .arena-header-search svg,
+.site-page-search svg,
 .header-search-toggle svg {
   width: 18px;
   height: 18px;
@@ -79,13 +80,15 @@
   stroke-width: 2;
   stroke-linecap: round;
 }
-.arena-header-search svg {
+.arena-header-search svg,
+.site-page-search svg {
   position: absolute;
   left: 16px;
   color: var(--muted);
   pointer-events: none;
 }
-.arena-header-search input {
+.arena-header-search input,
+.site-page-search input {
   width: 100%;
   min-height: 40px;
   padding: 0 var(--space-4) 0 46px;
@@ -95,13 +98,16 @@
   color: var(--text);
   font-size: var(--text-14);
 }
-.arena-header-search input:hover {
+.arena-header-search input:hover,
+.site-page-search input:hover {
   border-color: var(--control-border);
 }
-.arena-header-search input::placeholder {
+.arena-header-search input::placeholder,
+.site-page-search input::placeholder {
   color: #8a8a8a;
 }
-.arena-header-search input:focus-visible {
+.arena-header-search input:focus-visible,
+.site-page-search input:focus-visible {
   outline-offset: 1px;
 }
 .header-search-toggle {
@@ -456,7 +462,8 @@ body.account-page:has(#signed-out:not([hidden])) [data-header-guest] {
   .header-login,
   .header-retry,
   .arena-wallet-menu > summary,
-  .arena-header-search input {
+  .arena-header-search input,
+  .site-page-search input {
     min-height: 44px;
   }
 }
@@ -538,8 +545,8 @@ body.account-page:has(#signed-out:not([hidden])) [data-header-guest] {
    the logo or the page's name in the middle and the balance on the right, and
    the account button opens its menu as a side drawer. The account group's
    pieces join the header grid directly; the queue pill gets its own row. On
-   phones search is the Explore page's own field, so the search icon is not
-   shown. Tablets and wider screens are unchanged. */
+   phones search is Explore's search bar in the top row (below), so the search
+   icon is not shown. Tablets and wider screens are unchanged. */
 .site-page-title {
   display: none;
 }
@@ -629,6 +636,40 @@ body.account-page:has(#signed-out:not([hidden])) [data-header-guest] {
 @keyframes header-drawer {
   from {
     transform: translateX(-100%);
+  }
+}
+/* Explore's search bar (first-run plan): on phones, /debates and /topics have
+   a search field for the page's own list in the middle of the top row instead
+   of the logo, filling the room between the account button and the balance.
+   Its text is 16 px so phones don't zoom in on it. Wider screens never show
+   it; they keep the header's search and the page's own field. */
+.site-page-search {
+  display: none;
+}
+@media (max-width: 599px) {
+  .site-header[data-page-search] .site-header-grid {
+    grid-template-columns: minmax(44px, auto) minmax(0, 1fr) auto;
+  }
+  /* Signed out there is no account button, so the field starts at the edge. */
+  .site-header[data-page-search][data-session="guest"] .site-header-grid {
+    grid-template-areas:
+      "middle middle balance"
+      "pill pill pill"
+      "nav nav nav";
+  }
+  .site-header[data-page-search] .site-logo {
+    display: none;
+  }
+  .site-page-search {
+    grid-area: middle;
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    min-height: 56px;
+  }
+  .site-page-search input {
+    font-size: var(--text-16);
   }
 }
 /* Phones: the bottom tabs replace the header's tab row on pages that have
