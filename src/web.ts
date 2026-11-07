@@ -76,6 +76,7 @@ export function createWebServer(
     identity,
     matching,
     matchmaking,
+    pushSubscriptions,
     debateAutoStart,
     community,
     measurement,
@@ -173,6 +174,14 @@ export function createWebServer(
     identity,
     matching,
     matchmaking,
+    // Web push for "Notify me" (first-run build plan PR 10), with the live queue and the key.
+    webPush:
+      pushSubscriptions && config.webPush
+        ? {
+            publicKey: config.webPush.publicKey,
+            subscriptions: pushSubscriptions,
+          }
+        : undefined,
     userStreams,
     debateAutoStart,
     media,

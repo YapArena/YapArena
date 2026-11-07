@@ -152,6 +152,7 @@ describe("configuration", () => {
         agentName: "yaparena-transcriber",
         ingestSecret: undefined,
       },
+      webPush: undefined,
       a4Mode: "disabled",
       a4Funding: { starterCoins: 1000, refillCoins: 1000, botCoins: 1000 },
     });
@@ -212,6 +213,7 @@ describe("configuration", () => {
           agentName: "yaparena-transcriber",
           ingestSecret: undefined,
         },
+        webPush: undefined,
         a4Mode: "disabled",
         a4Funding: { starterCoins: 1000, refillCoins: 1000, botCoins: 1000 },
       },

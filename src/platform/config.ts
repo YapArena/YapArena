@@ -1,3 +1,5 @@
+import { vapidPublicKey, vapidSigningKey } from "./web-push.ts";
+
 const environments = new Set(["development", "test", "production"]);
 const logLevels = new Set([
   "trace",
@@ -58,6 +60,8 @@ const secretReaders: Readonly<Record<string, readonly ConfigService[]>> = {
   LIVEKIT_API_SECRET: ["web", "jobs"],
   MEDIA_EGRESS_S3_SECRET_KEY: ["web", "jobs"],
   MEDIA_S3_SECRET_KEY: ["web", "jobs", "encoder"],
+  // Web reads it only while it runs the background jobs itself.
+  WEB_PUSH_PRIVATE_KEY: ["web", "jobs"],
 };
 
 function unusedSecrets(
@@ -283,6 +287,48 @@ function parseLiveOutline(
     enabled: enabled === "true",
     agentName,
     ingestSecret: ingests ? ingestSecret! : undefined,
+  });
+}
+
+// Web push for "Notify me" (first-run build plan PR 10). Off unless WEB_PUSH_PUBLIC_KEY is set,
+// so a version can deploy before the keys exist. Web gives browsers the public key; the process
+// that runs the background jobs (the jobs worker, or web with RUN_BACKGROUND_JOBS=true) signs
+// and sends with the private key, naming APP_ORIGIN as its contact. A private key is always
+// checked against the public one, so a pasting mistake stops the deploy instead of every push.
+function parseWebPush(
+  environment: NodeJS.ProcessEnv,
+  service: ConfigService,
+  backgroundJobs: boolean,
+) {
+  if (service === "encoder") return undefined;
+  const publicKey = environment.WEB_PUSH_PUBLIC_KEY || undefined;
+  const privateKey = environment.WEB_PUSH_PRIVATE_KEY || undefined;
+  if (!publicKey) {
+    if (privateKey)
+      throw new Error("WEB_PUSH_PRIVATE_KEY requires WEB_PUSH_PUBLIC_KEY");
+    return undefined;
+  }
+  const key = vapidPublicKey(publicKey);
+  if (privateKey) vapidSigningKey(publicKey, privateKey);
+  else if (service === "jobs")
+    throw new Error(
+      "the jobs worker sends web push: set WEB_PUSH_PUBLIC_KEY and WEB_PUSH_PRIVATE_KEY together",
+    );
+  const sends = service === "jobs" || backgroundJobs;
+  if (!sends || !privateKey)
+    return Object.freeze({ publicKey: key, sender: undefined });
+  let subject: string;
+  try {
+    const origin = new URL(environment.APP_ORIGIN ?? "");
+    if (origin.protocol !== "https:" && origin.protocol !== "http:")
+      throw new Error();
+    subject = origin.origin;
+  } catch {
+    throw new Error("sending web push requires APP_ORIGIN as its contact");
+  }
+  return Object.freeze({
+    publicKey: key,
+    sender: Object.freeze({ privateKey, subject }),
   });
 }
 
@@ -525,6 +571,7 @@ export function loadConfig(
   if (backgroundJobs !== "true" && backgroundJobs !== "false") {
     throw new Error("RUN_BACKGROUND_JOBS must be true or false");
   }
+  const webPush = parseWebPush(environment, service, backgroundJobs === "true");
 
   if (host.trim() === "") {
     throw new Error("HOST must not be empty");
@@ -613,6 +660,7 @@ export function loadConfig(
     userStream,
     firstRun,
     liveOutline,
+    webPush,
     a4Funding,
     a4Mode: a4Mode as "disabled" | "yap-coins" | "bots",
   });

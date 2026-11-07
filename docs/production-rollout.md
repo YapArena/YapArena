@@ -1048,6 +1048,8 @@ it from staging, and never reuse it there.
 | `MEDIA_REPLAY_EDGE_URL`                                    | ✓   |      |         | `https://replay.yaparena.com` (dashboard)                             | Differs                     |
 | `MEDIA_REPLAY_SIGNING_SECRET`                              | ✓   |      |         | `<SIGNING_SECRET>` from 7.3 (dashboard)                               | Own                         |
 | `MEDIA_REPLAY_PACKAGING_ENABLED`                           | ✓   |      | ✓       | `true` (dashboard)                                                    | Same                        |
+| `WEB_PUSH_PUBLIC_KEY`                                      | ✓   | ✓    |         | Production's own pair from 9.6 (dashboard), after launch              | Own                         |
+| `WEB_PUSH_PRIVATE_KEY`                                     |     | ✓    |         | Production's own pair from 9.6 (dashboard), after launch              | Own                         |
 
 Secret files: `supabase-ca.crt` on all three; `landing-headline-font.b64` on web only.
 
@@ -1067,6 +1069,7 @@ changes; it checks this at startup and refuses the runtime URL.
 - `MEDIA_REPLAY_SIGNING_SECRET`, `MEDIA_ADMISSION_SECRET` and `TRANSCRIPTION_INGEST_SECRET` on the
   jobs worker or the encoder, and `LIVEKIT_*` or `MEDIA_EGRESS_S3_*` on the encoder: they don't
   use them.
+- `WEB_PUSH_PRIVATE_KEY` on web or the encoder: only the jobs worker sends web push.
 - `HOMEPAGE_REFERENCE_ENABLED`: refused in production.
 - `COIN_SANDBOX_TRANSFERS_ENABLED`: simulated purchases and withdrawals. The production web service
   refuses to start with it.
@@ -1128,6 +1131,33 @@ Until then, also search the jobs worker's **Logs** now and then for these lines:
 
 Prompt 12c ([Decision 0009](decisions/0009-auth0.md) point 13). Until then, a user who wants their
 account deleted asks you, and you remove it by hand.
+
+### 9.6 Web push for Notify me
+
+Phone notifications for "Notify me" ([web push](operations.md#web-push-for-notify-me)). Do it after
+staging passed [staging step 9](staging-rollout.md#9-turn-on-web-push-for-notify-me), and after the
+privacy page names push subscriptions (9.1). Until then, production keeps the in-app notice only.
+
+1. Terminal, in the production release checkout, make production's own pair, once:
+
+   ```sh
+   (umask 077; node scripts/generate-web-push-keys.ts > "$HOME/yaparena-private/production/web-push.env")
+   cat "$HOME/yaparena-private/production/web-push.env"
+   ```
+
+   Never reuse staging's pair here, or production's on staging.
+
+2. Make sure production runs a release with the migration `1794009019883_add-web-push-subscriptions`
+   (apply migrations before deploying, as in [Releasing](#releasing-from-now-on)).
+3. Render → `yaparena-jobs` → **Environment**: add `WEB_PUSH_PUBLIC_KEY` and
+   `WEB_PUSH_PRIVATE_KEY` with the values after `=` on the two lines, **Save and deploy**, and wait
+   for "Deploy live".
+4. Render → `yaparena-web` → **Environment**: add `WEB_PUSH_PUBLIC_KEY` only, with the same public
+   value, **Save and deploy**, and wait for "Deploy live".
+
+- Done when: the jobs worker's **Logs** show a `background job ran` line with `"job":"web-push"`,
+  and the iPhone check of [staging 9.4](staging-rollout.md#94-check-on-an-iphone) passes on
+  `https://yaparena.com` with a Home Screen app and a debate booked an hour ahead.
 
 ## 10. Connect yaparena.com
 

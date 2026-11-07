@@ -13,6 +13,7 @@ import type { createDiscoveryRepository } from "./features/discovery/repository.
 import type { createIdentityRepository } from "./features/identity/repository.ts";
 import type { createMatchingRepository } from "./features/matching/repository.ts";
 import type { createMatchmaking } from "./features/matching/matchmaking.ts";
+import type { PushSubscriptions } from "./features/matching/push.ts";
 import type { SseResponse } from "./platform/sse.ts";
 import { createMediaTelemetry } from "./features/media/telemetry.ts";
 import type { createMediaRepository } from "./features/media/repository.ts";
@@ -170,6 +171,7 @@ export function createApp({
   identity,
   matching,
   matchmaking,
+  webPush,
   userStreams,
   debateAutoStart,
   media,
@@ -220,6 +222,9 @@ export function createApp({
   matching?: ReturnType<typeof createMatchingRepository>;
   // Live topic queue (Decision 0011); present only when MATCHMAKING_ENABLED=true.
   matchmaking?: ReturnType<typeof createMatchmaking>;
+  // Web push for "Notify me" (first-run build plan PR 10): the VAPID public key the debate page
+  // hands to browsers, and the store for the subscriptions they save. Absent, push is off.
+  webPush?: { publicKey: string; subscriptions: PushSubscriptions };
   debateAutoStart?: { tryStart(debateId: string): Promise<boolean> };
   // Personal live updates at /api/me/stream (interface 10); absent, clients poll.
   userStreams?: {
@@ -516,6 +521,7 @@ export function createApp({
         liveOutline: outlines
           ? { snapshot: (id: string) => outlines.snapshot(id) }
           : undefined,
+        pushKey: matchmaking ? webPush?.publicKey : undefined,
       }),
     );
   }
@@ -633,6 +639,7 @@ export function createApp({
         recordProductAction,
         debateAutoStart,
         liveQueue: Boolean(matchmaking),
+        pushSubscriptions: matchmaking ? webPush?.subscriptions : undefined,
       }),
     );
   }

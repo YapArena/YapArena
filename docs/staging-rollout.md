@@ -33,6 +33,7 @@ the agent's region (decision D1).
 | [6](#6-turn-on-captions-and-the-ai-outline)                   | Captions and the AI outline                    | Render, staging site, Terminal       | 30 min     |
 | [7](#7-run-the-provider-trial)                                | Deepgram and ElevenLabs compared               | Staging site, phone, Terminal        | about 3 h  |
 | [8](#8-turn-on-matchmaking)                                   | The live queue and challenges                  | Render, staging site, Supabase       | about 1½ h |
+| [9](#9-turn-on-web-push-for-notify-me)                        | Phone notifications for "Notify me"            | Terminal, Render, iPhone             | about 1½ h |
 
 ## Decide before you start
 
@@ -1391,6 +1392,147 @@ Time: 15 minutes. Let any trial debate end first (8.9).
   - **Queue tickets** stay in the database unused, and close as stale if it's turned on again.
   - **Booked debates** from challenges stay scheduled; start them with **Operator controls**.
   - **Open challenges** can still be answered on `/match`.
+
+## 9. Turn on web push for Notify me
+
+Time: 20 minutes of clicks, plus about an hour of waiting in 9.4 for a booked test debate.
+
+"Notify me" on an upcoming debate gives viewers an in-app notice when the speakers are reminded,
+five minutes before the start. With web push on, it also sends a notification to the viewer's
+phone or computer, even with the site closed ([how it works](operations.md#web-push-for-notify-me)).
+On iPhone this works only for YAP Arena added to the Home Screen, on iOS 16.4 or later.
+
+It needs matchmaking (step 8) and a release that includes web push: its checkout has
+`scripts/generate-web-push-keys.ts`. It stays off until the keys are set, and deleting them turns
+it off again (9.5).
+
+| Variable               | Set on                  | Value                                             |
+| ---------------------- | ----------------------- | ------------------------------------------------- |
+| `WEB_PUSH_PUBLIC_KEY`  | Jobs worker **and** web | The `WEB_PUSH_PUBLIC_KEY=` line's value from 9.1  |
+| `WEB_PUSH_PRIVATE_KEY` | Jobs worker **only**    | The `WEB_PUSH_PRIVATE_KEY=` line's value from 9.1 |
+
+Web runs with `RUN_BACKGROUND_JOBS=false`, so it never sends and doesn't get the private key.
+
+### 9.1 Make the key pair, once
+
+Time: 2 minutes. Do this only once for staging: a new pair later stops every saved phone and
+browser until each viewer taps Notify me again.
+
+Terminal, in the release checkout from step 0.5:
+
+```sh
+cd ~/yaparena-release
+(umask 077; node scripts/generate-web-push-keys.ts > "$HOME/yaparena-private/web-push-staging.env")
+cat "$HOME/yaparena-private/web-push-staging.env"
+```
+
+- Check: it prints two lines, `WEB_PUSH_PUBLIC_KEY=` followed by 87 characters and
+  `WEB_PUSH_PRIVATE_KEY=` followed by 43. Keep the file: it's the only copy of the private key
+  outside Render. Never paste it into a chat, an issue or the repository.
+- If it prints `No such file or directory` for the script, the release checkout is older than web
+  push; prepare it again (step 0.5) with the new release.
+
+### 9.2 Migrate and deploy the release
+
+Time: 30 minutes. Skip the parts already done for this release.
+
+1. Apply the owner migrations as in [step 1](#1-apply-the-owner-migrations). This release adds
+   `1794009019883_add-web-push-subscriptions`, after `1794001956039_add-debate-notify-requests`
+   (#186).
+2. Deploy the release to web, the jobs worker and the encoder as in
+   [step 2](#2-deploy-web-the-jobs-worker-and-the-encoder).
+
+- Check: `SELECT name FROM yaparena_migrations.pgmigrations ORDER BY name DESC LIMIT 1;` returns
+  `1794009019883_add-web-push-subscriptions` (or a later one), and all three services read "Deploy
+  live".
+- Web and the worker refuse to start while a migration is pending: always migrate first.
+
+### 9.3 Add the keys, jobs worker first
+
+Time: 15 minutes, most of it waiting for deploys.
+
+1. Render → `yaparena-staging-jobs` → **Environment** → **+ Add Environment Variable**. Key
+   `WEB_PUSH_PUBLIC_KEY`; value: the text after `WEB_PUSH_PUBLIC_KEY=` in the file from 9.1, with
+   no spaces or quotes.
+2. **+ Add Environment Variable** again. Key `WEB_PUSH_PRIVATE_KEY`; value: the text after
+   `WEB_PUSH_PRIVATE_KEY=`.
+3. Choose **Save and deploy**, then open **Events** and wait until the new deploy reads "Deploy
+   live".
+4. Render → `yaparena-staging-web` → **Environment** → **+ Add Environment Variable**. Key
+   `WEB_PUSH_PUBLIC_KEY`, with the same value as in item 1. Don't add the private key here.
+5. Choose **Save and deploy** and wait for "Deploy live".
+
+- Check, worker: **Logs**, search `web-push`. A `background job ran` line shows
+  `"job":"web-push"` within a few seconds of the deploy.
+- Check, web: book a debate at least an hour ahead (9.4, items 1 to 3), then in the Terminal
+
+  ```sh
+  curl -fsS https://yaparena-staging-web.onrender.com/debates/<debate-slug> | grep -c data-push-key
+  ```
+
+  prints `1`.
+
+- If the worker's deploy fails and its **Logs** show:
+  - `the jobs worker sends web push: set WEB_PUSH_PUBLIC_KEY and WEB_PUSH_PRIVATE_KEY together`:
+    one key is missing on the worker.
+  - `WEB_PUSH_PRIVATE_KEY does not belong to WEB_PUSH_PUBLIC_KEY`, or `must be a P-256 … key`: a
+    value was cut or came from another pair. Paste both again from the file.
+  - `sending web push requires APP_ORIGIN`: the worker lost its `APP_ORIGIN`
+    (`https://yaparena-staging-web.onrender.com`); add it back.
+
+### 9.4 Check on an iPhone
+
+Time: 15 minutes of taps spread over at least an hour. You need accounts A and B from 8.4 as the
+speakers, and a third account C for the viewer: speakers get their own reminder, not a viewer's
+notification.
+
+1. B challenges A at a time at least an hour ahead, and A accepts, as in
+   [8.8](#88-challenge-at-an-agreed-time), items 1 to 3.
+2. Open the debate from **Your events** on `/match` and note its address: that's `<debate-slug>`.
+3. On the iPhone (Settings → General → About shows iOS 16.4 or later), open Safari at
+   `https://yaparena-staging-web.onrender.com`. Tap **Share** (the square with an arrow), then
+   **Add to Home Screen**, then **Add**.
+4. Open **YAP Arena** from the new Home Screen icon. It opens without Safari's address bar. Sign in
+   as C: the Home Screen app keeps its own sign-in, separate from Safari's. If you use an email
+   code, switching to Mail and back keeps the app where it was.
+5. In the app, open `https://yaparena-staging-web.onrender.com/debates/<debate-slug>` (from Live
+   or Explore, or from C's notifications), and tap **Notify me**. When iOS asks whether YAP Arena
+   may send notifications, tap **Allow**.
+6. Lock the phone and wait for five minutes before the start.
+
+- Check:
+  - After item 5, the button reads "Notifying you" and the line under it says "You’ll get a
+    notification on this device and a notice in your notifications a few minutes before it
+    starts." In the SQL editor,
+    `SELECT count(*) FROM yaparena.web_push_subscriptions;` returns at least `1`.
+  - About five minutes before the start, the lock screen shows a YAP Arena notification with the
+    debate's question and "Starts in a few minutes. Tap to watch." Tapping it opens the debate in
+    the app.
+  - The worker's **Logs**, searched for `web push deliveries sent`, show `"sent":1`.
+  - Safari itself (not the Home Screen app): tapping **Notify me** on another upcoming debate
+    shows "On iPhone, add YAP Arena to your Home Screen…" and asks nothing.
+- If no question appears in item 5: the app was opened from Safari rather than the Home Screen
+  icon, iOS is older than 16.4, or notifications were refused before. Check Settings →
+  Notifications → YAP Arena → **Allow Notifications**, then tap **Notifying you** and **Notify
+  me** again.
+- If the question was allowed but nothing arrives: search the worker's **Logs** for
+  `web push not delivered`. Status `403` means web and the worker have different public keys:
+  set both from the same file (9.3), then tap **Notifying you** and **Notify me** again on the
+  phone. No line at all: check that C, not a speaker, asked, and that the debate was booked more
+  than five minutes before its start.
+- End the test debate afterwards as in [8.9](#89-end-the-trial-debates).
+
+On Android or a computer (Chrome, Edge, Firefox), item 5 works in a normal browser tab, without
+adding anything to the Home Screen.
+
+### 9.5 Turning it off
+
+1. Render → `yaparena-staging-web` → **Environment**. Delete `WEB_PUSH_PUBLIC_KEY` (the trash icon
+   on its row), choose **Save and deploy**, and wait for "Deploy live". Notify me stops asking.
+2. Do the same on `yaparena-staging-jobs` for both keys. Nothing is sent after this deploy.
+
+- What stays: saved subscriptions stay in the database unused, and work again if the same pair is
+  added back. Queued deliveries expire within ten minutes; the hourly cleanup deletes them.
 
 ## Results of the 2026-10-27 run
 

@@ -27,6 +27,7 @@ import {
   QUEUE_JOIN_SECONDS,
   SCHEDULED_JOIN_SECONDS,
 } from "./timings.ts";
+import { pruneExpiredPushDeliveries } from "./push.ts";
 
 export {
   OFFER_SECONDS,
@@ -368,10 +369,13 @@ export function createMatchmaking(
     // While the live outline is on, queueing needs a debate language and transcription consent:
     // a 30-second accept leaves no time for forms (Decision 0011).
     requireDebaterSettings = false,
+    // With web push configured, the reminder step also queues push deliveries (PR 10).
+    webPush = false,
   }: {
     liveDebateCapacity: number;
     requireDeviceCheck?: boolean;
     requireDebaterSettings?: boolean;
+    webPush?: boolean;
   },
 ) {
   async function participantOffer(userId: string, offerId: string) {
@@ -868,7 +872,9 @@ export function createMatchmaking(
              ORDER BY d.scheduled_at LIMIT 50 FOR UPDATE OF d SKIP LOCKED`,
           );
           for (const debate of reminders.rows)
-            await remindScheduledDebate(client, debate.id, debate.status);
+            await remindScheduledDebate(client, debate.id, debate.status, {
+              webPush,
+            });
           for (const offer of due.rows) await expireOffer(client, offer);
           const noShows = await resolveNoShows(client);
           // A queue match must end before the player's next booking begins.
@@ -921,8 +927,10 @@ export function createMatchmaking(
              AND updated_at < CURRENT_TIMESTAMP - make_interval(days => ${RETENTION_DAYS})
            LIMIT 1000)`,
       );
-      // Notify-me requests whose debate started or was called off.
+      // Notify-me requests whose debate started or was called off, and push deliveries that
+      // can no longer be sent.
       await pruneNotifyRequests(database);
+      await pruneExpiredPushDeliveries(database);
       return result.rowCount ?? 0;
     },
   });

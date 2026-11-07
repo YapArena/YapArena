@@ -18,6 +18,7 @@ import {
   REMINDER_MINUTES,
   SCHEDULED_JOIN_SECONDS,
 } from "./timings.ts";
+import { queuePushDeliveries } from "./push.ts";
 
 export class MatchConflictError extends Error {}
 export class MatchNotFoundError extends Error {}
@@ -455,6 +456,8 @@ export async function remindScheduledDebate(
   client: PoolClient,
   debateId: string,
   status: string,
+  // With web push configured, each notified requester's browsers also get the notice (PR 10).
+  { webPush = false }: { webPush?: boolean } = {},
 ) {
   await record(client, { debateId }, null, "reminded", status, status);
   const speakers = await client.query<{ userId: string }>(
@@ -479,16 +482,23 @@ export async function remindScheduledDebate(
     [debateId],
   );
   if (!debate.rows[0]) return;
-  await client.query(
+  const notified = await client.query<{ userId: string }>(
     `INSERT INTO account_notifications (user_id, event_type, message, debate_id)
      SELECT r.user_id, 'event.notify_starting', $2, r.debate_id
      FROM debate_notify_requests r
      JOIN users u ON u.id = r.user_id AND u.account_status = 'active'
      WHERE r.debate_id = $1 AND NOT EXISTS (
        SELECT 1 FROM event_participants p
-       WHERE p.debate_id = r.debate_id AND p.user_id = r.user_id AND p.active)`,
+       WHERE p.debate_id = r.debate_id AND p.user_id = r.user_id AND p.active)
+     RETURNING user_id AS "userId"`,
     [debateId, notifyStartingMessage(debate.rows[0].proposition)],
   );
+  if (webPush)
+    await queuePushDeliveries(
+      client,
+      debateId,
+      notified.rows.map((row) => row.userId),
+    );
 }
 
 // The notice names the debate, since the notification list shows text only. It fits the
