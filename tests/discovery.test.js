@@ -165,7 +165,7 @@ describe("public discovery", () => {
   it("serves the public journey and stable canonical links without login", async () => {
     const home = await request(app).get("/home");
     assert.equal(home.status, 200);
-    assert.match(home.text, /id="ya-market-v4"/);
+    assert.match(home.text, /data-home-list/);
     assert.doesNotMatch(
       home.text,
       /data-debate-preview|Debates to watch|Topics in play/,
@@ -206,10 +206,10 @@ describe("public discovery", () => {
     );
     const home = await request(shell).get("/home");
     assert.equal(home.status, 503);
-    assert.match(home.text, /id="ya-market-v4"/);
+    assert.match(home.text, /class="container home-list"/);
     assert.match(home.text, /Discovery temporarily unavailable/);
-    // No ideas: one state, no controller data and no sample figures.
-    assert.doesNotMatch(home.text, /ya-home-data/);
+    // One state, no controller data and no sample figures.
+    assert.doesNotMatch(home.text, /home-list-data|home-list\.js/);
     assert.doesNotMatch(
       home.text,
       /Concept · Sample data|AI models should be open source/,
@@ -533,7 +533,7 @@ describe("public discovery", () => {
       items: [debate],
       pagination: { limit: 1, offset: 1, hasMore: false },
     };
-    assert.match(renderHome(origin), /No public ideas yet/);
+    assert.match(renderHome(origin), /Start the first debate/);
     assert.match(renderLive(origin, [], empty), /No watchable debates yet/);
     assert.match(renderLive(origin, [], empty), /No public topics yet/);
     assert.match(renderTopics(origin, empty, "missing"), /No topics found/);

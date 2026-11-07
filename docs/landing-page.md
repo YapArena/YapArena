@@ -15,9 +15,15 @@ unavailable fallback and the development-only `?reference=1` view.
   succeeds.
 - Sign-up and sign-in are the existing email-first Auth0 flow
   ([Decision 0009](decisions/0009-auth0.md)). "Continue with Google" and
-  "Continue with email" pick the connection; "Sign in" lets Universal Login offer
-  both. All three return to `/home`, which is also the login default when no return
-  path is given. Sign-out still returns to `/`.
+  "Continue with email" pick the connection and are the new-user buttons: they add
+  `screen=signup`, which `/api/auth/login` sends to Auth0 as `screen_hint=signup`, so
+  Universal Login opens on its Sign up screen (Google goes straight to Google and
+  shows no Auth0 screen). "Sign in" lets Universal Login offer both on its Log in
+  screen. Every other sign-in link (the header, the account page, retry links) and
+  the Google-linking email code also open Log in. The callback is the same either
+  way: an address that already has an account signs in to it. All three return to
+  `/home`, which is also the login default when no return path is given. Sign-out
+  still returns to `/`.
 - Links that mean the app's home (the site header brand, the sign-in interstitial
   brand and the measurement page's back link) point to `/home`. Product
   measurement records `/home` as the `home` surface; the landing page loads no
@@ -30,6 +36,12 @@ module, not the site header, homepage bundle or account scripts. The static logo
 sits in the header (hidden on phones), the sign-up actions on the left and the
 animated emblem on the right.
 
+One line under the headline says what YAP Arena is: "Live video debates. Say if
+you agree, turn by turn." (founder, 2026-11-06). It is set in the page's Arial at
+1.05rem, the size of "Already have an account?" without its weight, and on phones
+at 0.9rem, the Explore link's size, where it fits one line from 360px wide (two at
+320px).
+
 ### Spacing and layout
 
 - Every margin, padding and gap uses the 8-point scale on `:root`: `--space-1`
@@ -41,11 +53,11 @@ animated emblem on the right.
   1–7, the emblem centered in columns 8–12 (at most 560px wide and 70vh tall). The
   bottom padding is 4vh larger than the top, lifting the content slightly above
   center.
-- Gaps in the text column group related items: headline → "Join the arena." 32px,
-  → first button 24px, between the sign-up buttons 12px, → "Already have an
-  account?" 48px, → Sign in 12px, → Explore 24px. Phones have no "Join the
-  arena." (headline → first button 32px) and 32px above "Already have an
-  account?".
+- Gaps in the text column group related items: headline → the line under it 8px,
+  → "Join the arena." 32px, → first button 24px, between the sign-up buttons 12px,
+  → "Already have an account?" 48px, → Sign in 12px, → Explore 24px. Phones have
+  no "Join the arena." (the line → first button 24px, which keeps the Explore link
+  on the first screen where it was) and 32px above "Already have an account?".
 - Header padding is 24px (16px below 1000px) around a 32px logo (28px). The
   footer has 24px padding and links at least 24px tall, 24px apart.
 - Below 1000px the page is one column: the emblem, a 32px gap, then the text.
@@ -64,19 +76,21 @@ animated emblem on the right.
   there). Where the first screen has no room for that, the emblem shrinks to the
   room the text leaves, down to 120px. Spare height goes after the content, so
   the Explore link shows on most phones. The headline is `100cqi / 14.8` (see
-  Headline font); every other size is unchanged. Measured at approximate visible
-  heights with the toolbars showing:
+  Headline font) and the line under it 0.9rem; every other size is unchanged.
+  Measured at approximate visible heights with the toolbars showing:
 
   | Phone             | Viewport | Emblem  | Headline | Sign in bottom | Explore bottom |
   | ----------------- | -------- | ------- | -------- | -------------- | -------------- |
-  | iPhone 15/16      | 393×650  | 300×252 | 24.2px   | 576px          | 622px          |
-  | iPhone 12–14      | 390×664  | 298×250 | 24.0px   | 574px          | 620px          |
-  | iPhone Pro Max    | 430×740  | 329×275 | 26.4px   | 603px          | 648px          |
-  | Android, 360 wide | 360×670  | 275×230 | 22.1px   | 552px          | 598px          |
-  | iPhone SE         | 375×550  | 252×211 | 23.1px   | 534px          | 580px          |
+  | iPhone 15/16      | 393×650  | 300×252 | 24.2px   | 598px          | 643px          |
+  | iPhone 12–14      | 390×664  | 298×250 | 24.0px   | 596px          | 641px          |
+  | iPhone Pro Max    | 430×740  | 329×275 | 26.4px   | 624px          | 670px          |
+  | Android, 360 wide | 360×670  | 275×230 | 22.1px   | 574px          | 620px          |
+  | iPhone SE         | 375×550  | 226×189 | 23.1px   | 534px          | 580px          |
 
   Only on the iPhone SE does the emblem shrink, and only there is the Explore
-  link below the fold.
+  link below the fold. The line under the headline added 22px above the buttons
+  (measured again 2026-11-06); the emblems kept their size except on the iPhone SE
+  (252×211 before).
 
 ### Rotating headline
 
@@ -106,10 +120,10 @@ The motion matches dydema.com's hero:
   flip comes 2.6s after the headline's reveal ends.
 - **Page-load reveal.** Blocks wipe up from `clip-path: inset(100% -8% -8%)` to
   `inset(-8%)` over 1.05s and fade in over 0.525s, with the same easing. The
-  delays are 0s and 0.08s for the two headline lines, 0.16s for "Join the arena.",
-  0.25s for the sign-up buttons, and 0.35s for the sign-in group and the Explore
-  link. The reveal is CSS `@keyframes`, so it needs no script and the content ends
-  visible without JavaScript.
+  delays are 0s and 0.08s for the two headline lines, 0.16s for the line under
+  the headline and "Join the arena.", 0.25s for the sign-up buttons, and 0.35s for
+  the sign-in group and the Explore link. The reveal is CSS `@keyframes`, so it
+  needs no script and the content ends visible without JavaScript.
 
 With `prefers-reduced-motion: reduce` there is no reveal and no flip, and the
 headline shows "Yappers matter". Without JavaScript it shows "Your opinions

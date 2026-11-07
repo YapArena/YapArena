@@ -1301,6 +1301,10 @@ h3 {
 .cookie-choice p {
   margin: 0;
 }
+/* The phones' one-line banner text (below); wider screens show the card. */
+.cookie-brief {
+  display: none;
+}
 .cookie-title {
   margin-bottom: var(--space-1) !important;
   font-family: var(--font-display);
@@ -1461,6 +1465,34 @@ label.cookie-option {
   .cookie-actions [data-cookie-save] {
     order: 2;
     flex-basis: 100%;
+  }
+  /* The banner, until Customize opens the settings: one short line with
+     Customize, then Reject all and Accept all side by side. The line's 60%
+     basis leaves no room for a button beside it, so both buttons wrap
+     together and stay the same width. */
+  .cookie-choice:has(> .cookie-options[hidden]) {
+    gap: 0;
+    padding: var(--space-3);
+  }
+  .cookie-choice:has(> .cookie-options[hidden]) > .cookie-copy {
+    display: none;
+  }
+  .cookie-choice:has(> .cookie-options[hidden]) .cookie-actions {
+    gap: var(--space-2) var(--space-3);
+  }
+  .cookie-choice:has(> .cookie-options[hidden]) .cookie-brief {
+    display: block;
+    flex: 1 1 60%;
+    font-size: var(--text-14);
+    line-height: 1.5;
+  }
+  .cookie-choice:has(> .cookie-options[hidden]) .cookie-actions .cookie-link {
+    order: 0;
+    margin: 0;
+  }
+  .cookie-choice:has(> .cookie-options[hidden])
+    > [data-cookie-status]:not(:empty) {
+    margin-top: var(--space-2);
   }
 }
 .table-scroll {

@@ -66,18 +66,21 @@ describe("landing page", () => {
       /<div class="pixel-logo" data-pixel-logo><canvas class="aura" aria-hidden="true"><\/canvas><img id="pixel-logo" src="\/assets\/landing\/yaparena-emblem\.png\?v=[0-9a-f]{12}" width="2048" height="1715" alt=""><canvas class="bloom" aria-hidden="true"><\/canvas><canvas class="cores" aria-hidden="true"><\/canvas><\/div>/,
     );
     assert.match(page.text, /role="status" data-pixel-status/);
+    // The new-user buttons ask Universal Login for its Sign up screen;
+    // returning readers' Sign in keeps its Log in screen.
     assert.match(
       page.text,
-      /href="\/api\/auth\/login\?connection=google&amp;return=%2Fhome" data-sign-in="google">Continue with Google</,
+      /href="\/api\/auth\/login\?connection=google&amp;screen=signup&amp;return=%2Fhome" data-sign-in="google">Continue with Google</,
     );
     assert.match(
       page.text,
-      /href="\/api\/auth\/login\?connection=email&amp;return=%2Fhome" data-sign-in="email">Continue with email</,
+      /href="\/api\/auth\/login\?connection=email&amp;screen=signup&amp;return=%2Fhome" data-sign-in="email">Continue with email</,
     );
     assert.match(
       page.text,
       /href="\/api\/auth\/login\?return=%2Fhome">Sign in</,
     );
+    assert.equal(page.text.match(/screen=signup/g).length, 2);
     assert.match(page.text, /href="\/home">Explore debates without an account/);
     assert.match(
       page.text,
@@ -139,7 +142,13 @@ describe("landing page", () => {
       headline,
       /Your opinions, debates, ideas and discussions matter\./,
     );
-    // Reveal order: headline lines, then the heading, buttons and sign-in.
+    // One line under the headline says what YAP Arena is.
+    assert.match(
+      text,
+      /<\/h1><p class="landing-lead reveal reveal-3">Live video debates\. Say if you agree, turn by turn\.<\/p><h2 /,
+    );
+    // Reveal order: headline lines, then the line and the heading, buttons
+    // and sign-in.
     for (const pattern of [
       /<h2 class="reveal reveal-3">Join the arena\.<\/h2>/,
       /<div class="landing-actions reveal reveal-4">/,
@@ -185,7 +194,7 @@ describe("landing page", () => {
   it("serves the former homepage at /home and links the app brand there", async () => {
     const home = await request(app).get("/home");
     assert.equal(home.status, 200);
-    assert.match(home.text, /id="ya-market-v4"/);
+    assert.match(home.text, /data-home-list/);
     assert.match(
       home.text,
       /rel="canonical" href="https:\/\/arena\.example\/home"/,
@@ -194,7 +203,7 @@ describe("landing page", () => {
       home.text,
       /<a class="site-logo" href="\/home"><img [^>]*alt="YAP Arena home">/,
     );
-    assert.match(home.text, /homepage\.bundle\.js\?v=/);
+    assert.match(home.text, /home-list\.js\?v=/);
   });
 
   it("serves the landing stylesheet, scripts and logo images", async () => {
@@ -275,6 +284,13 @@ describe("landing page", () => {
       /font-size: min\(clamp\(3rem, 5\.4vw, 4rem\), calc\(100cqi \/ 10\.1\)\);/,
     );
     assert.match(headline, /font-weight: 400;/);
+    // The line under the headline: 8px below it, 32px above "Join the
+    // arena.", in the size of "Already have an account?".
+    assert.match(headline, /margin: 0 0 var\(--space-2\);/);
+    const lead = rule(".landing-lead");
+    assert.match(lead, /margin: 0 0 var\(--space-6\);/);
+    assert.match(lead, /font-size: 1\.05rem;/);
+    assert.match(rule(".landing-sign-in p"), /font-size: 1\.05rem;/);
     assert.match(headline, /font-kerning: normal;/);
     assert.match(headline, /font-feature-settings: "kern" 1;/);
     assert.match(headline, /line-height: 1\.3;/);
@@ -349,6 +365,11 @@ describe("landing page", () => {
       phoneRule(".landing-sign-in"),
       /margin-top: var\(--space-6\);/,
     );
+    // Phones set the line in the Explore link's size, one line from 360px,
+    // 24px above the buttons, so Explore stays on the first screen.
+    const phoneLead = phoneRule(".landing-lead");
+    assert.match(phoneLead, /margin-bottom: var\(--space-5\);/);
+    assert.match(phoneLead, /font-size: 0\.9rem;/);
     // One headline line: "YOVR DISCVSSIONS MATTER" (14.41em) plus a margin.
     const phoneHeadline = phoneRule(".landing-headline");
     assert.match(phoneHeadline, /font-size: calc\(100cqi \/ 14\.8\);/);
@@ -386,10 +407,64 @@ describe("landing page", () => {
       /href="\/api\/auth\/login\?return=%2Fhome">Try again</,
     );
     assert.match(expired.text, /href="\/">Back to YAP Arena</);
+    assert.doesNotMatch(expired.text, /screen=signup/);
     assert.match(
       expired.text,
       /<a class="brand" href="\/home"><img src="\/assets\/landing\/yaparena-logo\.png"[^>]*alt="YAP Arena home">/,
     );
+  });
+
+  it("asks Universal Login for Sign up only for screen=signup", async () => {
+    const requests = [];
+    const auth0 = {
+      client: {
+        authorizationUrl: async (request) => {
+          requests.push([request.connection, request.screenHint]);
+          return new URL("https://tenant.example.test/authorize");
+        },
+        logoutUrl: () => new URL("https://tenant.example.test/v2/logout"),
+      },
+      accounts: {},
+      state: { create: async () => {}, consume: async () => null },
+    };
+    const signIn = landingApp({ auth0 });
+    for (const query of [
+      // The landing's two new-user buttons.
+      "connection=google&screen=signup&return=%2Fhome",
+      "connection=email&screen=signup&return=%2Fhome",
+      // Its Sign in button, the account page's buttons and retry links.
+      "return=%2Fhome",
+      "connection=email&return=%2Faccount",
+      // Anything else keeps Log in.
+      "screen=login",
+      "screen=SIGNUP",
+      "screen=signup&screen=signup",
+    ])
+      assert.equal(
+        (await request(signIn).get(`/api/auth/login?${query}`)).status,
+        303,
+        query,
+      );
+    assert.deepEqual(requests, [
+      ["google", "signup"],
+      ["email", "signup"],
+      [undefined, undefined],
+      ["email", undefined],
+      [undefined, undefined],
+      [undefined, undefined],
+      [undefined, undefined],
+    ]);
+    // A reader who is already signed in goes straight back, as before.
+    const member = landingApp({
+      auth0,
+      findUserByTokenHash: async () => ({ id: "7" }),
+    });
+    const back = await request(member)
+      .get("/api/auth/login?connection=email&screen=signup&return=%2Fhome")
+      .set("Cookie", "session=member");
+    assert.equal(back.status, 303);
+    assert.equal(back.headers.location, "/home");
+    assert.equal(requests.length, 7);
   });
 });
 

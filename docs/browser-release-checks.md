@@ -32,15 +32,15 @@ to its verifiers. Application processes receive runtime credentials only.
 
 ## What is enforced
 
-| Verifier                        | Scope                                                                                                                                                                                                                                                                                                                                   |
-| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `verify-database-isolation.ts`  | Fresh/upgrade permissions, runtime identities, migrations, the retired YAP play freeze on upgrade, backend journeys, A4 PostgreSQL cases and the full local quality gate.                                                                                                                                                               |
-| `verify-a4-browser.ts`          | Actual browser registration, a debate page with no private Bots controls and a working link to the Bots sandbox on `/coins`, advanced review, keyboard focus, receipt reload, controls, sealed data, exact deterministic execution/nonexecution, balances and reservation release, observer isolation, logout and cross-account denial. |
-| `verify-arena-browser.ts`       | Shared bot history with live settlement updates, live chat, round/price inspection, animation, enlargement, responsive layout and accessibility checks. Called by the A4 verifier.                                                                                                                                                      |
-| `verify-public-bots-browser.ts` | Owner seed idempotency, real worker settlement, public homepage/expanded/debate refresh, consent withdrawal on `/coins`, synthetic labels and private/unrevealed/hidden exclusions. Called by the A4 verifier.                                                                                                                          |
-| `verify-homepage-browser.ts`    | Six responsive widths, carousel/argument/ticker controls, pointer/touch/keyboard charts, reduced motion, follows/auth states, canonical navigation, no-JS fallback, unavailable data, CSP and axe checks. Controlled component repositories/auth responses.                                                                             |
-| `verify-hero-browser.ts`        | Real synthetic WebM playback, one-preview handoff, looping, hover/click/mobile navigation, reduced motion, Save-Data and authorization-denial behavior.                                                                                                                                                                                 |
-| `verify-matchmaking-browser.ts` | Two accounts through the live queue (opposite sides, both accept in 30 seconds, both open the room), the automatic no-show and a "now" challenge accepted from its dialog. Run from the isolation harness on the fresh database, without LiveKit.                                                                                       |
+| Verifier                        | Scope                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `verify-database-isolation.ts`  | Fresh/upgrade permissions, runtime identities, migrations, the retired YAP play freeze on upgrade, backend journeys, A4 PostgreSQL cases and the full local quality gate.                                                                                                                                                                                                                                                                 |
+| `verify-a4-browser.ts`          | Actual browser registration, a debate page with no private Bots controls and a working link to the Bots sandbox on `/coins`, advanced review, keyboard focus, receipt reload, controls, sealed data, exact deterministic execution/nonexecution, balances and reservation release, observer isolation, logout and cross-account denial.                                                                                                   |
+| `verify-arena-browser.ts`       | Shared bot history with live settlement updates, live chat, round/price inspection, animation, enlargement, responsive layout and accessibility checks. Called by the A4 verifier.                                                                                                                                                                                                                                                        |
+| `verify-public-bots-browser.ts` | Owner seed idempotency, real worker settlement, the topic page's history after each settlement and the debate page's refresh, consent withdrawal on `/coins`, synthetic labels and private/unrevealed/hidden exclusions. Called by the A4 verifier.                                                                                                                                                                                       |
+| `verify-homepage-browser.ts`    | Six responsive widths of the debate-list home: its sections and order, hidden past starts, results and replay windows, the waiting list, chips, the closable intro, followed topics, quiet and empty days, the first phone screen, reduced motion, the topic page's pointer/touch/keyboard chart, no-JS fallback, unavailable data, CSP and axe checks. Controlled component repositories, waiting list, turn windows and auth responses. |
+| `verify-hero-browser.ts`        | Real synthetic WebM playback, one-preview handoff, looping, hover/click/mobile navigation, reduced motion, Save-Data and authorization-denial behavior.                                                                                                                                                                                                                                                                                   |
+| `verify-matchmaking-browser.ts` | Two accounts through the live queue (opposite sides, both accept in 30 seconds, both open the room), the automatic no-show and a "now" challenge accepted from its dialog. Run from the isolation harness on the fresh database, without LiveKit.                                                                                                                                                                                         |
 
 The existing community, replay pipeline, packaging, backup/restore, container,
 monitoring and deployment-configuration gates remain separate and unchanged.
@@ -97,18 +97,13 @@ completed mixed histories created for this separate actor through the real worke
 leaves the workspace run and all existing timing/settlement assertions intact.
 
 The shared-data verifier brings each page to the foreground before waiting for its
-live chart refresh, and asserts that it is visible. Homepage polling pauses in
-hidden tabs; applying a received update also waits until hover, focus and chart
-inspection end. Before observing the homepage, the verifier clicks its existing
-search input normally and moves the pointer outside the interactive regions,
-then asserts that inspection/hover/focus have ended. It does not reload the page.
-A maintained observer-round case deliberately focuses the chart's range control
-and hovers the carousel, observes a real homepage response containing the settled
-round, and proves the chart retains its old round until interaction ends. Both
-homepage charts and the debate must then display the exact new round. Existing
-settlement, consent, privacy and refresh assertions and their 20-second timeouts
-remain unchanged. Failures retain the homepage screenshot and interaction state
-alongside the existing debate evidence. See the
+chart, and asserts that it is visible. Since first-run plan PR 6 the home no longer shows
+the chart: after each observer and mixed settlement the verifier opens the topic page,
+which draws the history it was served, and waits for the exact new round there; the
+debate page must show it without a reload. Existing settlement, consent, privacy and
+refresh assertions and their 20-second timeouts remain unchanged. Failures retain the
+topic page screenshot and state alongside the existing debate evidence. The earlier
+homepage polling and inspection-hold checks are described in the
 [CI correction evidence](evidence/ci-integration/2026-10-19.md#post-merge-browser-correction).
 
 The `integration: core browser and database isolation` job runs this gate on pull
@@ -128,14 +123,6 @@ An A4 failure retains its current synthetic screenshot and completed outcomes.
 CI retains only the selected synthetic JSON/screenshots for seven days; it does not
 upload database inventories, quality logs, environment files, traces or cookie jars.
 
-The homepage's original external HTML export is not a prerequisite for functional
-release checks. The separate original-design comparison remains available explicitly:
-
-```sh
-HOMEPAGE_REFERENCE_PATH=/path/to/original-export.html \
-  node scripts/verify-homepage-browser.ts --compare-reference
-```
-
-That command requires the actual export and fails if it is unavailable or invalid.
-The normal gate reports the export comparison as not requested, runs every maintained
-functional check with checked-in fixtures, and captures responsive screenshots.
+The homepage verifier needs no external export (the original-design comparison was
+retired with the wide homepage's redesign). It runs every maintained functional check with
+checked-in fixtures and captures responsive screenshots.

@@ -1,5 +1,11 @@
 # Wide homepage
 
+> **Current state (2026-11-06, first-run plan PR 6):** `/home` is now a list of debates
+> ([site design](site-design.md#home)). This page describes the trending home it replaced. Its
+> code stays in place, unused, until PR 7 removes it; its chart now draws each topic's history on
+> the topic page ([topic history](site-design.md#topic-history)). `/home?reference=1` is not found
+> whatever `HOMEPAGE_REFERENCE_ENABLED` says, and `GET /api/public/homepage` has no reader left.
+
 `/home` renders the native Express homepage rooted at `#ya-market-v4`. It began as a copy of
 the supplied `yaparena-wide-homepage.html` product; since the site redesign (PR 3 of 5, see
 [site design](site-design.md#home)) it uses the site kit, header and footer like every other
