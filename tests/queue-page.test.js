@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  newQuestionError,
   rowWaitingText,
   sideButtonView,
+  similarQuery,
+  slugFromTitle,
   waitingRows,
   waitingText,
 } from "../public/queue-page-model.js";
@@ -114,6 +117,84 @@ describe("Queue tab model", () => {
   });
 });
 
+describe("Queue tab Create sheet model", () => {
+  const question = {
+    title: "Should Montreal make public transit free?",
+    summary: "Fares versus a free network paid by taxes.",
+    sideALabel: "Free transit",
+    sideBLabel: "Keep fares",
+    category: "cities",
+    side: "A",
+  };
+
+  it("makes a slug the server accepts from any question", () => {
+    const pattern = /^[a-z0-9][a-z0-9-]{2,79}$/;
+    assert.equal(
+      slugFromTitle("Should Montréal make public transit free?"),
+      "should-montreal-make-public-transit-free",
+    );
+    assert.equal(
+      slugFromTitle("Should Montréal make public transit free?", "x1y2"),
+      "should-montreal-make-public-transit-free-x1y2",
+    );
+    assert.equal(slugFromTitle("?!"), "question");
+    assert.equal(slugFromTitle("Ok"), "ok-question");
+    const long = slugFromTitle(`${"word ".repeat(40)}end`, "ab12");
+    assert.ok(long.length <= 80 && long.endsWith("-ab12"), long);
+    for (const slug of [
+      long,
+      slugFromTitle("Ü"),
+      slugFromTitle("  --Free   transit--  "),
+      slugFromTitle(`${"a".repeat(79)} b`),
+    ])
+      assert.match(slug, pattern, slug);
+  });
+
+  it("searches for questions sharing a meaningful word", () => {
+    assert.equal(
+      similarQuery("Should Montréal make public transit free?"),
+      "montreal or public or transit or free",
+    );
+    assert.equal(similarQuery("Is it ok?"), "");
+    assert.equal(similarQuery("Transit, transit and TRANSIT"), "transit");
+    const long = similarQuery(
+      "Universities scholarships transportation infrastructure accessibility governments neighbourhoods",
+    );
+    assert.ok(long.length <= 80, long);
+    assert.ok(!long.endsWith(" or"), long);
+  });
+
+  it("checks the server's limits before sending", () => {
+    assert.equal(newQuestionError(question, true), null);
+    assert.match(
+      newQuestionError({ ...question, title: "Why?" }, true),
+      /5 to 140/,
+    );
+    assert.match(
+      newQuestionError({ ...question, summary: "Too short" }, true),
+      /10 to 600/,
+    );
+    assert.match(
+      newQuestionError({ ...question, sideBLabel: "x" }, true),
+      /2 to 80/,
+    );
+    assert.match(
+      newQuestionError({ ...question, sideBLabel: " free TRANSIT " }, true),
+      /different names/,
+    );
+    assert.match(
+      newQuestionError({ ...question, category: "" }, true),
+      /category/,
+    );
+    // A side is needed only to join the queue; a draft has none.
+    assert.match(
+      newQuestionError({ ...question, side: null }, true),
+      /side you argue/,
+    );
+    assert.equal(newQuestionError({ ...question, side: null }, false), null);
+  });
+});
+
 describe("Queue tab page", () => {
   const origin = "https://arena.example";
 
@@ -163,5 +244,111 @@ describe("Queue tab page", () => {
 
   it("invites the first question when there are none", () => {
     assert.match(renderQueue(origin, empty, true), /No public questions yet/);
+    const none = renderQueue(origin, empty, true, "cities");
+    assert.match(none, /No Cities questions yet/);
+    // A new question can still be added above the empty state.
+    assert.match(
+      none,
+      /<ol class="queue-list" data-question-list hidden><\/ol>/,
+    );
+  });
+
+  it("filters by category with chips that keep the page's address", () => {
+    const cities = { ...topic, category: "cities" };
+    const page = renderQueue(
+      origin,
+      {
+        items: [cities],
+        pagination: { limit: 12, offset: 0, hasMore: true },
+      },
+      true,
+      "cities",
+    );
+    assert.match(
+      page,
+      /<nav class="list-filters" aria-label="Categories"><div class="chips"><a class="chip" href="\/queue">All<\/a><a class="chip" href="\/queue\?category=politics">Politics<\/a>/,
+    );
+    assert.match(
+      page,
+      /<a class="chip" href="\/queue\?category=cities" aria-current="page">Cities<\/a>/,
+    );
+    // One current chip.
+    assert.equal(page.match(/class="chip"[^>]*aria-current/g).length, 1);
+    assert.match(
+      page,
+      /<link rel="canonical" href="https:\/\/arena\.example\/queue\?category=cities">/,
+    );
+    assert.match(page, /href="\/queue\?category=cities&amp;offset=12"/);
+    assert.match(
+      page,
+      /<p class="queue-row-meta"><span>Cities<\/span><span data-queue-row-waiting><\/span><\/p>/,
+    );
+    // The sheet suggests the category being browsed.
+    assert.match(page, /<option value="cities" selected>Cities<\/option>/);
+    assert.match(
+      renderQueue(origin, list([cities]), true),
+      /<a class="chip" href="\/queue" aria-current="page">All<\/a>/,
+    );
+  });
+
+  it("names the sides of a demo question instead of offering buttons", () => {
+    const demo = {
+      ...topic,
+      slug: "demo-topic",
+      category: "work",
+      isDemo: true,
+    };
+    const page = renderQueue(origin, list([demo, topic]), true);
+    // The queue refuses demo topics, so tapping a side could only fail.
+    assert.doesNotMatch(page, /data-queue-request="demo-topic"/);
+    assert.match(
+      page,
+      /<li class="queue-row" data-queue-row="demo-topic">[^]*?<p class="queue-row-meta"><span>Work<\/span><span>Demo<\/span><span data-queue-row-waiting><\/span><span>For vs Against<\/span><\/p><\/div><\/li>/,
+    );
+    assert.match(
+      page,
+      /data-queue-request="public-topic" data-request-side="A"/,
+    );
+  });
+
+  it("opens the one-step Create sheet only while the queue is on", () => {
+    const page = renderQueue(origin, list([topic]), true);
+    assert.match(
+      page,
+      /<a class="card queue-create" href="\/match#topic-create" data-create-open>/,
+    );
+    assert.match(
+      page,
+      /<dialog class="queue-create-dialog" data-create-dialog aria-labelledby="create-title"><form class="stack-form queue-create-form" data-create-form>/,
+    );
+    for (const [name, limits] of [
+      ["title", 'minlength="5" maxlength="140"'],
+      ["sideALabel", 'minlength="2" maxlength="80"'],
+      ["sideBLabel", 'minlength="2" maxlength="80"'],
+    ])
+      assert.ok(page.includes(`name="${name}" ${limits} required`), name);
+    assert.ok(
+      page.includes('<textarea name="summary" minlength="10" maxlength="600"'),
+    );
+    assert.match(
+      page,
+      /<input type="radio" name="side" value="A"> <span data-side-name="A">Side A<\/span>/,
+    );
+    assert.match(page, /data-similar hidden>/);
+    assert.match(
+      page,
+      /<p class="queue-create-error" data-create-error role="alert"><\/p>/,
+    );
+    assert.match(
+      page,
+      /<button class="btn btn-primary" type="submit" value="queue">Create and join the queue<\/button><button class="btn btn-secondary" type="submit" value="draft" formnovalidate>Save as a private draft<\/button>/,
+    );
+    // The sheet comes before the script that runs it; guests follow the link.
+    assert.ok(
+      page.indexOf("data-create-dialog") < page.indexOf("queue-page.js"),
+    );
+    const off = renderQueue(origin, list([topic]), false);
+    assert.doesNotMatch(off, /data-create-dialog|data-create-form/);
+    assert.match(off, /href="\/match#topic-create"/);
   });
 });

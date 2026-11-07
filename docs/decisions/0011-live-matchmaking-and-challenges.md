@@ -161,8 +161,9 @@ The list of topics with someone waiting is served, without sign-in, at
 `GET /api/matchmaking/waiting`: published topics with fresh searching tickets (the per-topic
 count's rule), counts per side only, the most people waiting first, at most 20 topics. The Queue
 tab (`/queue`) shows it above every open question, each with a button per side that queues
-through the topic page's rules; the home uses it in a later first-run PR. The other mitigations
-are not built.
+through the topic page's rules, and its "+ Create" sheet shows questions already asked with the
+same words before a new one is created and queued; the home uses the list in a later first-run
+PR. The other mitigations are not built.
 
 ## Delivery phases
 
