@@ -122,16 +122,16 @@ it("names the three destinations' pages in the phone top row and keeps the logo 
   };
   // Visible capitals follow the inscription rule: U is shown as V.
   assert.equal(title(renderLive(origin, [], { items: [] })), "live");
-  assert.equal(title(renderDebates(origin, empty, "", "all")), "explore");
-  assert.equal(title(renderDebates(origin, empty, "city", "ended")), "explore");
-  assert.equal(title(renderTopics(origin, empty, "")), "explore");
   assert.equal(title(renderMatchmaking(origin)), "create");
   assert.equal(title(renderQueue(origin, empty, true)), "qveve");
+  // Explore's two lists show their search there instead (tested below).
   for (const page of [
     renderHome(origin),
     renderAbout(origin),
     renderAccount(origin),
     renderCoins(origin),
+    renderDebates(origin, empty, "", "all"),
+    renderTopics(origin, empty, ""),
   ])
     assert.equal(title(page), null);
   // The logo stays in the markup on every page; CSS hides it on phones only.
@@ -139,6 +139,71 @@ it("names the three destinations' pages in the phone top row and keeps the logo 
     renderLive(origin, [], { items: [] }),
     /<a class="site-logo" href="\/home">/,
   );
+});
+
+it("puts Explore's search bar in the phone top row, searching the page's list with its filters", () => {
+  const origin = "https://arena.example";
+  const header = (html) =>
+    html.match(/<header class="site-header"[\s\S]*?<\/header>/)[0];
+  const search = (html) =>
+    header(html).match(
+      /<form class="site-page-search" action="([^"]+)" method="get" role="search">([\s\S]*?)<\/form>/,
+    );
+  // Debates: the status in use rides along as a hidden field, before the
+  // query, so the address reads like the status chips' links.
+  const debates = search(renderDebates(origin, empty, "city", "live"));
+  assert.equal(debates[1], "/debates");
+  assert.equal(
+    debates[2],
+    '<input type="hidden" name="status" value="live"><label class="sr-only" for="top-search">Search debates</label><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="top-search" type="search" name="q" maxlength="80" value="city" placeholder="Search debates" enterkeyhint="search"><button type="submit" class="sr-only">Search</button>',
+  );
+  assert.doesNotMatch(
+    search(renderDebates(origin, empty, "", "all"))[2],
+    /type="hidden"/,
+  );
+  // Topics: the category in use, and the query escaped in its field.
+  const topics = search(renderTopics(origin, empty, '"><b>', "climate"));
+  assert.equal(topics[1], "/topics");
+  assert.match(
+    topics[2],
+    /^<input type="hidden" name="category" value="climate"><label class="sr-only" for="top-search">Search topics<\/label>/,
+  );
+  assert.match(
+    topics[2],
+    /<input id="top-search" type="search" name="q" maxlength="80" value="&quot;&gt;&lt;b&gt;" placeholder="Search topics" enterkeyhint="search">/,
+  );
+  assert.doesNotMatch(
+    search(renderTopics(origin, empty, ""))[2],
+    /type="hidden"/,
+  );
+  // The attribute that swaps the logo for the field on phones comes with it;
+  // the header's own search and its icon stay for wider screens.
+  for (const html of [
+    renderDebates(origin, empty, "", "all"),
+    renderTopics(origin, empty, ""),
+  ]) {
+    assert.match(
+      header(html),
+      /<header class="site-header"[^>]* data-page-search>/,
+    );
+    assert.doesNotMatch(header(html), /data-page-title/);
+    assert.match(header(html), /<a class="site-logo" href="\/home">/);
+    assert.match(
+      header(html),
+      /<form class="arena-header-search" action="\/debates"/,
+    );
+    assert.match(header(html), /data-header-search-toggle/);
+  }
+  // No other page has it.
+  for (const html of [
+    renderHome(origin),
+    renderLive(origin, [], { items: [] }),
+    renderQueue(origin, empty, true),
+    renderTopic(origin, topic, empty),
+    renderDebate(origin, debate),
+  ]) {
+    assert.doesNotMatch(html, /site-page-search|data-page-search/);
+  }
 });
 
 it("ends every layout page but the debate page with the phone bottom tabs", () => {

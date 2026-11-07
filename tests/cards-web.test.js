@@ -14,7 +14,9 @@ import {
   renderDebates,
   renderProfile,
   renderTopic,
+  renderTopics,
 } from "../dist/features/discovery/web.js";
+import { TOPIC_CATEGORIES } from "../dist/features/discovery/topic-categories.js";
 
 const origin = "https://arena.example";
 const topic = {
@@ -237,6 +239,105 @@ describe("Explore, topic and profile pages", () => {
     assert.match(
       ended,
       /<a class="btn btn-secondary" href="\/debates">Clear search<\/a>/,
+    );
+  });
+
+  it("switches between Explore's Debates and Topics, marking the current one", () => {
+    const switchOf = (html) =>
+      html.match(
+        /<div class="container explore-switch-row"><nav class="explore-switch" aria-label="Explore">([\s\S]*?)<\/nav><\/div>/,
+      )?.[1];
+    // At the top of main, before the page head, with or without a search.
+    for (const html of [
+      renderDebates(origin, empty, "", "all"),
+      renderDebates(origin, empty, "city", "live"),
+    ]) {
+      assert.match(
+        html,
+        /<main id="main"><div class="container explore-switch-row">/,
+      );
+      assert.equal(
+        switchOf(html),
+        '<a href="/debates" aria-current="page">Debates</a><a href="/topics">Topics</a>',
+      );
+    }
+    for (const html of [
+      renderTopics(origin, empty, ""),
+      renderTopics(origin, empty, "city", "cities"),
+    ]) {
+      assert.match(
+        html,
+        /<main id="main"><div class="container explore-switch-row">/,
+      );
+      assert.equal(
+        switchOf(html),
+        '<a href="/debates">Debates</a><a href="/topics" aria-current="page">Topics</a>',
+      );
+    }
+    assert.equal(switchOf(renderTopic(origin, topic, empty)), undefined);
+  });
+
+  it("filters topics by category with All and each category as chips", () => {
+    const chipsOf = (html) => {
+      const nav = html.match(
+        /<nav class="list-filters category-filters" aria-label="Topic category"><div class="chips">([\s\S]*?)<\/div><\/nav>/,
+      )[1];
+      return [
+        ...nav.matchAll(
+          /<a class="chip"( aria-current="page")? href="([^"]+)">([^<]+)<\/a>/g,
+        ),
+      ].map(([, current, href, label]) => [label, href, Boolean(current)]);
+    };
+    // All first, then the founder's list in its order; All is current.
+    assert.deepEqual(chipsOf(renderTopics(origin, empty, "")), [
+      ["All", "/topics", true],
+      ...TOPIC_CATEGORIES.map(([id, name]) => [
+        name,
+        `/topics?category=${id}`,
+        false,
+      ]),
+    ]);
+    // A chosen category is current, and every chip keeps the search.
+    const chosen = renderTopics(
+      origin,
+      {
+        items: [topic],
+        pagination: { limit: 12, offset: 12, hasMore: true },
+      },
+      "bus & bike",
+      "cities",
+    );
+    const chips = chipsOf(chosen);
+    assert.deepEqual(chips[0], ["All", "/topics?q=bus%20%26%20bike", false]);
+    assert.deepEqual(chips[3], [
+      "Cities",
+      "/topics?category=cities&amp;q=bus%20%26%20bike",
+      true,
+    ]);
+    assert.equal(chips.filter(([, , current]) => current).length, 1);
+    // The chips sit under the page's own search; paging keeps the category.
+    assert.match(
+      chosen,
+      /<div class="list-tools"><form class="list-search" action="\/topics"[\s\S]*?<\/form><nav class="list-filters category-filters"/,
+    );
+    assert.match(
+      chosen,
+      /href="\/topics\?category=cities&amp;q=bus%20%26%20bike&amp;offset=24">Next/,
+    );
+    assert.match(
+      chosen,
+      /<link rel="canonical" href="https:\/\/arena\.example\/topics\?category=cities&amp;q=bus%20%26%20bike&amp;offset=12">/,
+    );
+    // An empty category suggests another one; Clear search shows them all.
+    const none = renderTopics(origin, empty, "", "work");
+    assert.match(none, /Try another search or category\./);
+    assert.match(
+      none,
+      /<a class="btn btn-secondary" href="\/topics">Clear search<\/a>/,
+    );
+    assert.match(
+      renderTopics(origin, empty, "missing"),
+      /<p>Try another search\. Published topics will appear here\.<\/p>/,
     );
   });
 
