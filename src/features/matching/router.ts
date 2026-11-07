@@ -14,6 +14,11 @@ import { MatchConflictError, MatchNotFoundError } from "./repository.ts";
 import { DebaterSettingsRequiredError } from "../transcription/debater-settings.ts";
 import { PROPOSAL_MIN_LEAD_MINUTES } from "./timings.ts";
 import { isTopicCategory } from "../discovery/topic-categories.ts";
+import type { PushSubscriptions } from "./push.ts";
+import {
+  parsePushSubscription,
+  pushEndpoint,
+} from "../../platform/web-push.ts";
 
 type Repository = ReturnType<typeof createMatchingRepository>;
 const slugPattern = /^[a-z0-9][a-z0-9-]{2,79}$/;
@@ -233,6 +238,7 @@ export function createMatchingRouter({
   recordProductAction,
   debateAutoStart,
   liveQueue = false,
+  pushSubscriptions,
 }: {
   matching: Repository;
   identity: ReturnType<typeof createIdentityRepository>;
@@ -242,6 +248,8 @@ export function createMatchingRouter({
   debateAutoStart?: { tryStart(debateId: string): Promise<boolean> };
   // With the live queue on, the old open-request list is retired (Decision 0011).
   liveQueue?: boolean;
+  // Web push for "Notify me" (first-run build plan PR 10); absent, push is off.
+  pushSubscriptions?: PushSubscriptions;
 }) {
   const router = Router();
   const participant = createRequireRole(identity, ["participant"]);
@@ -503,6 +511,32 @@ export function createMatchingRouter({
         return response.status(204).end();
       },
     );
+  }
+  // Web push for "Notify me" (first-run build plan PR 10): this browser's push subscription,
+  // saved when the viewer allows notifications on a "Notify me" tap. Saving takes the role that
+  // changes a request; anyone signed in removes their own.
+  if (liveQueue && pushSubscriptions) {
+    router.put("/push-subscription", participant, async (request, response) => {
+      const subscription = parsePushSubscription(request.body);
+      if (!subscription)
+        return response
+          .status(400)
+          .json({ error: "invalid push subscription" });
+      const result = await pushSubscriptions.save(
+        request.user!.id,
+        subscription,
+      );
+      return response.status(result === "created" ? 201 : 204).end();
+    });
+    router.delete("/push-subscription", async (request, response) => {
+      const endpoint = pushEndpoint(object(request.body)?.endpoint);
+      if (!endpoint)
+        return response
+          .status(400)
+          .json({ error: "invalid push subscription" });
+      await pushSubscriptions.remove(request.user!.id, endpoint);
+      return response.status(204).end();
+    });
   }
   router.post(
     "/events/:id/ready",

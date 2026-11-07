@@ -78,7 +78,25 @@ speakers (five minutes before), each requester also gets one `event.notify_start
 their notifications (Settings → Notifications and the Match page's Updates), naming the debate.
 A speaker who also asked gets only the speaker reminder, and suspended accounts get nothing.
 Requests count only while their debate is scheduled or ready; the hourly matchmaking cleanup
-deletes the rest. Phone notifications (web push) are a later PR.
+deletes the rest.
+
+**Web push for Notify me (first-run build plan PR 10):** with `WEB_PUSH_PUBLIC_KEY` set, the
+button carries the site's public VAPID key (`data-push-key`). When a signed-in viewer turns
+"Notify me" on with their own tap, `frontend/web-push.ts` asks for notification permission inside
+that tap (never on page load or after sign-in), subscribes through the service worker and saves
+the subscription with `PUT /api/matching/push-subscription` (201 created, 204 updated; participant
+role; `DELETE` with `{ endpoint }` removes it). The server keeps only addresses on the browsers'
+push services (Google, Mozilla, Apple, Microsoft), one row per address and at most ten per
+account. Unsupported browsers, a refused or blocked prompt and failures leave the in-app notice
+as before; a Safari tab on iPhone says to add YAP Arena to the Home Screen and tap Notify me
+there. When the reminder step writes each requester's notice, it queues one delivery per
+subscription in the same transaction (`web_push_deliveries`); the jobs worker's `web-push` job
+sends them every second, outside the queue's lock, as an encrypted message carrying only the
+debate's title and page (RFC 8291/8292, `src/platform/web-push.ts`, no push library). A push
+service's 404 or 410 deletes the subscription; no answer, 429 or a server error is tried up to
+three times; deliveries expire after ten minutes. `frontend/sw.ts` shows the notification
+("Starts in a few minutes. Tap to watch.") and a tap focuses a window already on the debate or
+opens it. Setup and checks: [web push in operations](operations.md#web-push-for-notify-me).
 
 ## Data and interaction
 

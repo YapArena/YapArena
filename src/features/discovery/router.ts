@@ -144,6 +144,7 @@ export function createDiscoveryRouter({
   emailFirst = false,
   liveOutline,
   matchmakingEnabled = false,
+  pushKey,
   signedIn = async () => false,
 }: {
   discovery: Repository;
@@ -160,6 +161,8 @@ export function createDiscoveryRouter({
   emailFirst?: boolean;
   // Live topic queue (Decision 0011): pages load the queue module and show its controls.
   matchmakingEnabled?: boolean;
+  // Web push for "Notify me" (first-run build plan PR 10): the VAPID public key, when push is on.
+  pushKey?: string;
   // Whether the request carries a valid session; / sends those readers to /home.
   signedIn?: (request: Request) => Promise<boolean>;
 }) {
@@ -461,6 +464,7 @@ export function createDiscoveryRouter({
             liveOutline
               ? { state: await liveOutline.snapshot(debate.id) }
               : undefined,
+            pushKey,
           ),
         )
       : html(response, renderNotFound(origin), 404);

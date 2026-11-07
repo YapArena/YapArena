@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import { loadConfig } from "../dist/platform/config.js";
 import { createMetrics } from "../dist/platform/metrics.js";
 import { createBackgroundWorker } from "../dist/services.js";
+import { generateWebPushKeys } from "../scripts/generate-web-push-keys.ts";
 
 const base = {
   NODE_ENV: "test",
@@ -138,5 +139,28 @@ describe("background worker", () => {
     await worker.stop();
     assert.deepEqual(events, ["verified", "database closed"]);
     assert.equal(cleared.length, timers.length);
+  });
+
+  it("sends web push only with the live queue and both keys", async () => {
+    const { publicKey, privateKey } = generateWebPushKeys();
+    const keys = {
+      APP_ORIGIN: "https://staging.example.test",
+      WEB_PUSH_PUBLIC_KEY: publicKey,
+      WEB_PUSH_PRIVATE_KEY: privateKey,
+    };
+    const off = startWorker({ ...base, ...keys });
+    await off.worker.start();
+    for (const timer of off.timers.filter(({ interval }) => interval === 1000))
+      await timer.callback();
+    assert.ok(!off.ran.includes("web-push"));
+    await off.worker.stop();
+    const on = startWorker({ ...base, ...keys, MATCHMAKING_ENABLED: "true" });
+    await on.worker.start();
+    for (const timer of on.timers.filter(({ interval }) => interval === 1000))
+      await timer.callback();
+    assert.ok(on.errors.includes("web push delivery failed"));
+    assert.ok(on.ran.includes("web-push"));
+    await on.worker.stop();
+    assert.equal(on.cleared.length, on.timers.length);
   });
 });

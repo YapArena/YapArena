@@ -8,6 +8,11 @@ import {
 import { createIdentityRepository } from "./features/identity/repository.ts";
 import { createMatchingRepository } from "./features/matching/repository.ts";
 import { createMatchmaking } from "./features/matching/matchmaking.ts";
+import {
+  createPushDelivery,
+  createPushSubscriptions,
+} from "./features/matching/push.ts";
+import { createWebPush } from "./platform/web-push.ts";
 import { createMediaRepository } from "./features/media/repository.ts";
 import { createMediaProvider, debateRoom } from "./features/media/provider.ts";
 import { AgentDispatchClient } from "livekit-server-sdk";
@@ -58,14 +63,33 @@ export function createServices({
   const matching = createMatchingRepository(database, {
     requireDebaterSettings,
   });
+  // Web push for "Notify me" (first-run build plan PR 10): sent by the process that runs the
+  // background jobs, only with the live queue, whose reminder step queues the deliveries.
+  const webPush =
+    config.matchmaking.enabled && config.webPush?.sender
+      ? createWebPush({
+          publicKey: config.webPush.publicKey,
+          privateKey: config.webPush.sender.privateKey,
+          subject: config.webPush.sender.subject,
+        })
+      : undefined;
   const matchmaking = config.matchmaking.enabled
     ? createMatchmaking(database, {
         liveDebateCapacity: config.matchmaking.liveDebateCapacity,
         // With media configured, players check camera and microphone before queueing.
         requireDeviceCheck: Boolean(config.media),
         requireDebaterSettings,
+        webPush: Boolean(webPush),
       })
     : undefined;
+  const pushDelivery = webPush
+    ? createPushDelivery({ database, push: webPush, logger })
+    : undefined;
+  // Web saves browsers' subscriptions whenever it has the public key.
+  const pushSubscriptions =
+    config.matchmaking.enabled && config.webPush
+      ? createPushSubscriptions(database)
+      : undefined;
   const community = createCommunityRepository(database);
   const measurement = createMeasurementRepository(database);
   const a4 = createA4Repository(database, config.a4Mode, config.a4Funding);
@@ -195,6 +219,7 @@ export function createServices({
     identity,
     matching,
     matchmaking,
+    pushSubscriptions,
     debateAutoStart,
     community,
     measurement,
@@ -245,6 +270,7 @@ export function createServices({
       identity,
       matching,
       matchmaking: matchmakingJobs,
+      webPush: pushDelivery,
       community,
       measurement,
       media,

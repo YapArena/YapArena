@@ -229,6 +229,8 @@ describe(
           "follows",
           "account_notifications",
           "debate_notify_requests",
+          "web_push_subscriptions",
+          "web_push_deliveries",
         ],
       };
       assert.ok(named.coins.length > 20);

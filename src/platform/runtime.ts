@@ -28,6 +28,7 @@ export function createRuntime({
   identity,
   matching,
   matchmaking,
+  webPush,
   community,
   communityStreams,
   userStreams,
@@ -69,6 +70,8 @@ export function createRuntime({
     "expireRequests"
   >;
   matchmaking?: { sweep(): Promise<unknown>; pruneExpired(): Promise<unknown> };
+  // Web push deliveries for "Notify me" (first-run build plan PR 10).
+  webPush?: { flush(): Promise<unknown> };
   community?: Pick<
     ReturnType<typeof createCommunityRepository>,
     "pruneExpired"
@@ -119,6 +122,9 @@ export function createRuntime({
   let matchmakingTimer: NodeJS.Timeout | undefined;
   let matchmakingTask: Promise<void> | undefined;
   let matchmakingWorking = false;
+  let webPushTimer: NodeJS.Timeout | undefined;
+  let webPushTask: Promise<void> | undefined;
+  let webPushWorking = false;
   let heartbeatTimer: NodeJS.Timeout | undefined;
   let heartbeatTask: Promise<void> | undefined;
   let beating = false;
@@ -381,6 +387,26 @@ export function createRuntime({
           }, 1000);
           if (app) matchmakingTimer.unref();
         }
+        if (webPush) {
+          // The reminder step queues deliveries; each second, the due ones are sent.
+          tickingJobs.push("web-push");
+          webPushTimer = setIntervalFn(() => {
+            if (webPushWorking || stopping) return webPushTask;
+            webPushWorking = true;
+            webPushTask = webPush
+              .flush()
+              .then(() => {})
+              .catch((error) =>
+                logger.error({ error }, "web push delivery failed"),
+              )
+              .finally(() => {
+                webPushWorking = false;
+                completed("web-push");
+              });
+            return webPushTask;
+          }, 1000);
+          if (app) webPushTimer.unref();
+        }
         if (heartbeat) {
           const startedAt = now();
           heartbeatTimer = setIntervalFn(
@@ -408,9 +434,11 @@ export function createRuntime({
       if (cleanupTimer) clearIntervalFn(cleanupTimer);
       if (mediaTimer) clearIntervalFn(mediaTimer);
       if (matchmakingTimer) clearIntervalFn(matchmakingTimer);
+      if (webPushTimer) clearIntervalFn(webPushTimer);
       await Promise.all([
         mediaTask,
         matchmakingTask,
+        webPushTask,
         heartbeatTask,
         mediaOperations?.stop(),
       ]);
