@@ -38,14 +38,8 @@ function browserKeys() {
 }
 
 // The site's VAPID pair, generated the way the founder's command does.
-function vapidPair() {
-  const ecdh = createECDH("prime256v1");
-  ecdh.generateKeys();
-  return {
-    publicKey: ecdh.getPublicKey().toString("base64url"),
-    privateKey: ecdh.getPrivateKey().toString("base64url"),
-  };
-}
+// Node drops a private key's leading zero byte (1 pair in 256), which the generator pads back.
+const vapidPair = generateWebPushKeys;
 
 // RFC 8291 decryption, as the browser does it, to check what the server sends.
 function decrypt(body, keys) {
@@ -484,5 +478,11 @@ describe("key generator", () => {
     assert.doesNotThrow(() =>
       vapidSigningKey(again.publicKey, again.privateKey),
     );
+    // Every pair is a full 43 characters, including those Node shortens.
+    for (let count = 0; count < 2000; count++) {
+      const pair = generateWebPushKeys();
+      assert.equal(pair.privateKey.length, 43);
+      assert.equal(pair.publicKey.length, 87);
+    }
   });
 });
