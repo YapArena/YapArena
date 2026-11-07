@@ -5,6 +5,7 @@
 // changes the player only by seeking (replay-seek.ts).
 /* global document, window */
 import { seekReplay } from "./replay-seek.js";
+import { onStakeWindows } from "./stake-windows.js";
 import {
   isTurnWindow,
   segmentLabel,
@@ -101,14 +102,8 @@ if (arena && timeline) {
     }
     paint();
   }
-  window.addEventListener("yap:stake-windows", (event) => {
-    if (event.detail.debateId !== debateId) return;
-    columns = turnColumns(
-      event.detail.windows.filter(isTurnWindow),
-      null,
-      null,
-      false,
-    );
+  onStakeWindows(debateId, (windows) => {
+    columns = turnColumns(windows.filter(isTurnWindow), null, null, false);
     render();
   });
   window.addEventListener("yap:playback", (event) => {
