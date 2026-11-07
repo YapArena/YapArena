@@ -20,6 +20,10 @@ const inPlaceBundles = [
   "debate-layout",
   "queue-overlay-logic",
   "avatar",
+  "home-list",
+  "topic-chart",
+  // The home's chart, for topic pages: topic-chart.js imports it as a sibling.
+  "homepage-chart",
 ];
 // Classic (non-module) page scripts that use frontend/lib/ or another frontend
 // module keep their URL and script scope as IIFE bundles with their own copy of

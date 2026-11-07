@@ -1,5 +1,12 @@
 # Shared bot discovery
 
+> **Current state (2026-11-06, first-run plan PR 6):** the home no longer shows these charts; it
+> is a list of debates. Each topic's history shows on its topic page
+> ([topic history](site-design.md#topic-history)) from `publicBots.topics()`, as served when the
+> page loads, without polling. The debate page is unchanged. The browser trial
+> (`scripts/verify-public-bots-browser.ts`) now checks the topic page after each settlement,
+> where the homepage, expansion and inspection-hold checks below used to run.
+
 The homepage and debate workspace use one database-backed, explicitly labeled
 simulation feed. A visible **Live** link in the homepage header opens the existing
 `/live` video page. Its media preview controller and layout remain intact.

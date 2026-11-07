@@ -39,6 +39,7 @@ import {
   type StakeRound,
   type StakeSide,
 } from "./stake-model.js";
+import { shareStakeWindows } from "./stake-windows.js";
 interface Target {
   window: PublicWindow | null;
   round: StakeRound | null;
@@ -228,11 +229,7 @@ if (root) {
     serverOffset = Date.parse(value.serverNow) - Date.now();
     // Item d: the chart shows revealed windows from this same public read,
     // for signed-in and signed-out viewers alike.
-    window.dispatchEvent(
-      new CustomEvent("yap:stake-windows", {
-        detail: { debateId, windows: value.windows },
-      }),
-    );
+    shareStakeWindows({ debateId, windows: value.windows });
   }
   // With readSummary false, the balance already shown stays: at a window
   // boundary only the windows and this viewer's rounds change, unless a

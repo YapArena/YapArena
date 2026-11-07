@@ -113,7 +113,9 @@ opens it. Setup and checks: [web push in operations](operations.md#web-push-for-
   the "Price and typical limits" disclosure under the bars (the price inspector). The windows come from the betting
   panel's read of the public `GET /api/public/debates/:id/windows` list, whose `pricing` is
   null until a window is revealed (#128), through a `yap:stake-windows` page event, so the
-  chart makes no second read and signed-out viewers see the same results. Labels follow
+  chart makes no second read and signed-out viewers see the same results. The page keeps
+  the latest read (`frontend/stake-windows.ts`), so a module that loads after it starts
+  from it instead of waiting for the next read. Labels follow
   S's contract:
   `GET /api/public/debates/:id/outline/timeline` is read once per page, and again only on
   the `outline` room signal while a revealed turn lacks its label; each window takes
