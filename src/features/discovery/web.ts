@@ -347,6 +347,7 @@ export function renderDebate(
   activity?: PublicBotActivity | null,
   matchmaking = false,
   liveOutline?: { state: unknown },
+  pushKey?: string,
 ) {
   const canonical = `${origin}/debates/${path(debate.slug)}`;
   return layout(
@@ -360,6 +361,7 @@ export function renderDebate(
       activity,
       matchmaking,
       liveOutline,
+      pushKey,
     ),
     // The share tags, then the headline font, preloaded exactly as the landing
     // does, at the unversioned URL site.css resolves, so it downloads once.

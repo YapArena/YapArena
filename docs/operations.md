@@ -337,6 +337,50 @@ topic's category and records the previous one, the new one, the reason and the o
 `topic_category_changes`; choosing the current category changes nothing. The web process
 cannot change a category: the database refuses it.
 
+## Web push for "Notify me"
+
+Web push sends the "Notify me" reminder to the viewer's phone or computer, not only to their
+in-app notifications ([how it works](debate-workspace.md)). It needs the live queue
+(`MATCHMAKING_ENABLED=true`) and stays off until `WEB_PUSH_PUBLIC_KEY` is set, so the release can
+deploy before the keys exist. On iPhone and iPad (iOS 16.4 or later) only a site added to the
+Home Screen gets push; the web app manifest opens it standalone, without Safari's address bar.
+
+Each environment has its own VAPID key pair, made once with the repository's generator (Node.js
+24, nothing to install). It prints two lines and stores nothing:
+
+```sh
+node scripts/generate-web-push-keys.ts
+```
+
+| Variable               | Web service                                           | Jobs worker | Value                                     |
+| ---------------------- | ----------------------------------------------------- | ----------- | ----------------------------------------- |
+| `WEB_PUSH_PUBLIC_KEY`  | ✓                                                     | ✓           | The generated public key (87 characters)  |
+| `WEB_PUSH_PRIVATE_KEY` | Only if it runs the jobs (`RUN_BACKGROUND_JOBS=true`) | ✓           | The generated private key (43 characters) |
+
+The jobs worker also needs `APP_ORIGIN`, which it already has: it signs each message with that
+origin as its contact. The worker refuses to start with only one key or with keys from different
+pairs; web refuses a private key that doesn't belong to its public key. The encoder needs neither.
+
+Order: apply the release's owner migrations (`1794009019883_add-web-push-subscriptions`), deploy
+the release to web and the jobs worker, then add the keys to the jobs worker and to web. The
+founder's click-by-click steps are [staging step 9](staging-rollout.md#9-turn-on-web-push-for-notify-me)
+and [production 9.6](production-rollout.md#96-web-push-for-notify-me).
+
+Checks and signals:
+
+- The worker logs `background job ran` with `"job":"web-push"` once after it starts, and
+  `web push deliveries sent` with counts after each reminder that has subscriptions.
+- `web push not delivered` names the push service and its status, never the address. A `403`
+  from every service means the browsers subscribed with a different public key than the worker
+  signs with: give web and the worker the same pair, and viewers tap Notify me again.
+- `SELECT count(*) FROM yaparena.web_push_subscriptions;` counts saved browsers;
+  `yaparena.web_push_deliveries` is empty except in the seconds after a reminder.
+
+To turn it off, delete both variables from the jobs worker and `WEB_PUSH_PUBLIC_KEY` from web.
+Saved subscriptions stay unused, and queued deliveries expire within ten minutes. Don't replace a
+pair that's in use: every saved subscription stops working, and each viewer would have to tap
+Notify me again.
+
 ## Diagnose an incident
 
 1. Check container state and health: `docker compose ps`.

@@ -9,16 +9,22 @@ import {
   notifyMessage,
   untilStart,
 } from "./debate-notify-logic.js";
+import { browserPushDevice, startPush, type PushDevice } from "./web-push.js";
 
 export function connectDebateNotify(
   button: HTMLButtonElement,
   status: HTMLElement,
+  // Web push (first-run build plan PR 10), when the page carries the public key.
+  device: PushDevice = browserPushDevice(),
 ) {
   const label = button.querySelector<HTMLElement>(
     "[data-debate-notify-label]",
   )!;
   const endpoint = notifyEndpoint(button.dataset.debateNotify!);
+  const pushKey = button.dataset.pushKey;
   let notifying = false;
+  // Known from the viewer's own request: only a signed-in viewer is asked about notifications.
+  let signedIn = false;
   // Changes when the account does, so an older answer can't overwrite a newer state.
   let epoch = 0;
   function show(value: boolean) {
@@ -42,8 +48,10 @@ export function connectDebateNotify(
         credentials: "same-origin",
         cache: "no-store",
       });
+      if (version !== epoch) return;
+      signedIn = response.ok;
       // Signed out (401), the button stays "Notify me".
-      if (!response.ok || version !== epoch) return;
+      if (!response.ok) return;
       const data = (await response.json()) as { notifying?: unknown };
       if (version === epoch) show(data.notifying === true);
     } catch {
@@ -51,9 +59,15 @@ export function connectDebateNotify(
     }
   }
 
-  button.addEventListener("click", async () => {
+  button.addEventListener("click", async (event) => {
     const version = epoch;
     const next = !notifying;
+    // Web push asks for permission only here, inside the viewer's own tap on "Notify me",
+    // never when a page loads.
+    const pushing =
+      next && pushKey && signedIn && event.isTrusted
+        ? startPush(device, pushKey)
+        : null;
     button.disabled = true;
     try {
       const response = await fetch(endpoint, {
@@ -62,6 +76,7 @@ export function connectDebateNotify(
       });
       if (version !== epoch) return;
       if (response.status === 401) {
+        signedIn = false;
         const returnTo =
           window.location.pathname +
           window.location.search +
@@ -85,8 +100,14 @@ export function connectDebateNotify(
         );
         return;
       }
+      signedIn = true;
       show(next);
       status.textContent = notifyMessage(next);
+      if (pushing)
+        void pushing.then((result) => {
+          if (version === epoch && notifying === next)
+            status.textContent = notifyMessage(next, result);
+        });
     } catch {
       if (version === epoch) status.textContent = notifyFailure;
     } finally {
@@ -95,6 +116,7 @@ export function connectDebateNotify(
   });
   window.addEventListener("yap:account-changed", () => {
     epoch += 1;
+    signedIn = false;
     show(false);
     status.textContent = "";
     void read();
