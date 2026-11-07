@@ -14,6 +14,7 @@ import {
   type TurnView,
 } from "./debate-layout-model.js";
 import type { PublicWindow } from "./stake-model.js";
+import { onStakeWindows } from "./stake-windows.js";
 import type { RevealedWindow } from "./window-chart-model.js";
 
 // The panel sends its whole public window list; the chart's event type
@@ -102,9 +103,8 @@ if (arena) {
     turn = event.detail;
     render();
   });
-  window.addEventListener("yap:stake-windows", (event) => {
-    if (event.detail.debateId !== debateId) return;
-    windows = event.detail.windows.filter(isTurnWindow);
+  onStakeWindows(debateId, (shared) => {
+    windows = shared.filter(isTurnWindow);
     render();
   });
   window.addEventListener("yap:playback", (event) => {

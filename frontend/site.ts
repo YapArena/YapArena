@@ -242,6 +242,17 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+// Explore's category chips scroll sideways on phones, so a chosen category
+// can load out of view; the row starts with it in the middle instead. The
+// row is positioned (public/explore.css), so the chip's offset is from it.
+const category = document.querySelector<HTMLElement>(
+  ".category-filters .chip[aria-current]",
+);
+if (category?.parentElement)
+  category.parentElement.scrollLeft =
+    category.offsetLeft -
+    (category.parentElement.clientWidth - category.offsetWidth) / 2;
+
 // A debate card's still hides when the recording has none, which shows both
 // speakers' panes under it. Errors before this script ran are caught by the
 // sweep below.

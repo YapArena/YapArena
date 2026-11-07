@@ -1,7 +1,9 @@
 import { publicHomepage } from "./homepage-model.ts";
-import { referenceHomepage } from "./homepage-reference.ts";
+import { emptyHomeList, homeList } from "./home-list-model.ts";
+import { topicHistory } from "./topic-history-web.ts";
 import { avatarAsset } from "./assets.ts";
 import type { createPublicBotRepository } from "../a4/public-bots.ts";
+import type { PublicBotActivity } from "../a4/public-bot-types.ts";
 import { digest } from "../a4/engine.ts";
 import { Router } from "express";
 import type { Request, Response } from "express";
@@ -137,7 +139,6 @@ export function createDiscoveryRouter({
   discovery,
   a4Enabled = false,
   mediaEnabled = false,
-  homepageReferenceEnabled = false,
   publicBots,
   applicationOrigin,
   emailFirst = false,
@@ -151,6 +152,8 @@ export function createDiscoveryRouter({
   // Decision 0012: debate pages carry captions and the AI outline, with the
   // outline's current state embedded so loading it needs no extra request.
   liveOutline?: { snapshot(debateId: string): Promise<unknown> };
+  // The old home's sample dataset; the debate list replaced that home, so
+  // /home?reference=1 is not found either way (first-run plan PR 7 removes it).
   homepageReferenceEnabled?: boolean;
   publicBots?: ReturnType<typeof createPublicBotRepository>;
   applicationOrigin: string;
@@ -303,22 +306,44 @@ export function createDiscoveryRouter({
     if (member) return response.redirect(303, "/home");
     return html(response, renderLanding(origin));
   });
+  // The home's lists (first-run plan PR 6) from the public debate reads:
+  // what is live, scheduled, and finished with a recording. homeList keeps
+  // only debates starting within a day and puts replays still taking answers
+  // apart from finished ones.
+  async function homeListData() {
+    const read = (status: DebateStatus, limit: number) =>
+      discovery.listDebates({ status, limit }).then((list) => list.items);
+    const [live, scheduled, ready, replays, finalized] = await Promise.all([
+      read("live", 12),
+      read("scheduled", 50),
+      read("ready", 12),
+      read("replay", 24),
+      read("finalized", 12),
+    ]);
+    return homeList(
+      {
+        live,
+        scheduled: [...scheduled, ...ready],
+        ended: [...replays, ...finalized],
+      },
+      new Date(),
+      { matchmaking: matchmakingEnabled, avatarUrl: avatarAsset },
+    );
+  }
   router.get("/home", async (request, response) => {
-    if (request.query.reference !== undefined) {
-      if (!homepageReferenceEnabled || request.query.reference !== "1")
-        return html(response, renderNotFound(origin), 404);
-      return html(response, renderHome(origin, referenceHomepage()));
-    }
+    // The sample dataset showed the old trending home, which the debate list
+    // replaced; its flag no longer changes this page.
+    if (request.query.reference !== undefined)
+      return html(response, renderNotFound(origin), 404);
     try {
-      return html(response, renderHome(origin, await homeData(), emailFirst));
+      return html(
+        response,
+        renderHome(origin, await homeListData(), emailFirst),
+      );
     } catch {
       return html(
         response,
-        renderHome(
-          origin,
-          { ...publicHomepage([], []), available: false },
-          emailFirst,
-        ),
+        renderHome(origin, emptyHomeList(new Date(), false), emailFirst),
         503,
       );
     }
@@ -351,15 +376,23 @@ export function createDiscoveryRouter({
       renderDebates(origin, list, parameters.query, selected.status ?? "all"),
     );
   });
+  // Explore's topics, with the API's category filter for the category chips.
   router.get("/topics", async (request, response) => {
     const parameters = listParameters(request, response, invalid);
     if (!parameters) return;
+    const selected = categoryParameter(request, response, invalid);
+    if (!selected) return;
     return html(
       response,
       renderTopics(
         origin,
-        await discovery.listTopics(parameters),
+        await discovery.listTopics(
+          selected.category
+            ? { ...parameters, category: selected.category }
+            : parameters,
+        ),
         parameters.query,
+        selected.category,
       ),
     );
   });
@@ -389,14 +422,28 @@ export function createDiscoveryRouter({
     if (!topic) return html(response, renderNotFound(origin), 404);
     const parameters = listParameters(request, response, invalid);
     if (!parameters) return;
-    const debates = await discovery.listDebates({
-      topicSlug: key!,
-      limit: parameters.limit,
-      offset: parameters.offset,
-    });
+    // The topic's endorsement history is optional: without it, or when it
+    // cannot be read, the page shows its debates alone.
+    const noActivity: Record<string, PublicBotActivity> = {};
+    const [debates, activity] = await Promise.all([
+      discovery.listDebates({
+        topicSlug: key!,
+        limit: parameters.limit,
+        offset: parameters.offset,
+      }),
+      publicBots
+        ? publicBots.topics([topic.id]).catch(() => noActivity)
+        : noActivity,
+    ]);
     return html(
       response,
-      renderTopic(origin, topic, debates, matchmakingEnabled),
+      renderTopic(
+        origin,
+        topic,
+        debates,
+        matchmakingEnabled,
+        topicHistory(topic, activity[topic.id]),
+      ),
     );
   });
   router.get("/debates/:slug", async (request, response) => {

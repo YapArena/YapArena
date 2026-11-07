@@ -49,6 +49,61 @@ try {
       return result.violations.map((item) => item.id);
     });
     assert.deepEqual(choiceViolations, []);
+    if (viewport.width < 600) {
+      // Phones: one short line with Customize, then Reject all and Accept all
+      // side by side at the same size, instead of the full card.
+      const layout = await page.evaluate(() => {
+        const panel = document.querySelector(".cookie-choice")!;
+        const box = (selector: string) => {
+          const { top, width, height } = panel
+            .querySelector(selector)!
+            .getBoundingClientRect();
+          return { top, width, height };
+        };
+        return {
+          panel: panel.getBoundingClientRect().height,
+          copy: panel.querySelector(".cookie-copy")!.getClientRects().length,
+          line: box(".cookie-brief"),
+          customize: box("[data-cookie-customize]"),
+          reject: box("[data-cookie-reject]"),
+          accept: box("[data-cookie-accept]"),
+        };
+      });
+      assert.ok(
+        layout.panel <= viewport.height * 0.2,
+        `phone banner is ${layout.panel}px tall`,
+      );
+      assert.equal(layout.copy, 0, "the full text waits for Customize");
+      // One line in Arial; a wider fallback font may wrap it, but never
+      // beyond the 44px row it shares with Customize.
+      assert.ok(
+        layout.line.height > 0 && layout.line.height <= layout.customize.height,
+      );
+      const middle = (item: { top: number; height: number }) =>
+        item.top + item.height / 2;
+      assert.ok(
+        Math.abs(middle(layout.customize) - middle(layout.line)) <= 2,
+        "Customize sits on the line's row",
+      );
+      assert.equal(layout.reject.top, layout.accept.top);
+      assert.equal(layout.reject.width, layout.accept.width);
+      assert.ok(layout.reject.height >= 44 && layout.accept.height >= 44);
+      assert.ok(layout.reject.top > layout.customize.top);
+      // Customize still opens the full text and the switches.
+      await page.getByRole("button", { name: "Customize" }).click();
+      assert.equal(
+        await page
+          .getByText("Essential cookies keep you signed in")
+          .isVisible(),
+        true,
+      );
+      assert.equal(
+        await page.getByRole("switch", { name: /Analytics/ }).isVisible(),
+        true,
+      );
+      await page.reload();
+      await page.getByRole("region", { name: "Cookie choices" }).waitFor();
+    }
     const before = await page.evaluate<{ consented: boolean }>(() =>
       fetch("/api/measurement/consent").then((r) => r.json()),
     );

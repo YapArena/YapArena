@@ -3,6 +3,10 @@
 // homepage fixtures come from tests/homepage.test.js.
 import { publicHomepage } from "../dist/features/discovery/homepage-model.js";
 import { referenceHomepage } from "../dist/features/discovery/homepage-reference.js";
+import {
+  emptyHomeList,
+  homeList,
+} from "../dist/features/discovery/home-list-model.js";
 
 // Line breaks at tag boundaries keep snapshot diffs readable. Existing
 // backslashes and newlines are escaped first, so the encoding stays lossless
@@ -222,4 +226,54 @@ export const homes = {
   public: publicHome,
   synthetic: { ...syntheticHome, following: [hostileTopic.id] },
   reference: referenceHomepage(),
+};
+
+// The debate-list home (first-run plan PR 6) at a fixed time, so countdowns
+// and the embedded data never change between runs.
+export const homeNow = new Date("2026-11-06T18:00:00Z");
+const hoursFrom = (hours) => new Date(homeNow.getTime() + hours * 3_600_000);
+const listed = (base, id, fields) => ({
+  ...base,
+  id: `66666666-6666-4666-8666-${String(id).padStart(12, "0")}`,
+  slug: `${base.slug}-${id}`,
+  ...fields,
+});
+export const homeLists = {
+  empty: emptyHomeList(homeNow),
+  unavailable: emptyHomeList(homeNow, false),
+  busy: homeList(
+    {
+      live: [hostileDebate, listed(debate, 1, { status: "live" })],
+      scheduled: [
+        listed(debate, 2, { scheduledAt: hoursFrom(2.25) }),
+        // A start that passed, and one more than a day away: both hidden.
+        listed(debate, 3, { scheduledAt: hoursFrom(-240) }),
+        listed(debate, 4, { scheduledAt: hoursFrom(30) }),
+      ],
+      ended: [
+        listed(hostileDebate, 5, {
+          status: "replay",
+          liveEndedAt: hoursFrom(-26),
+        }),
+        listed(debate, 6, {
+          status: "finalized",
+          speakerB: null,
+          liveEndedAt: hoursFrom(-400),
+        }),
+      ],
+    },
+    homeNow,
+    { matchmaking: true, avatarUrl },
+  ),
+  quiet: homeList(
+    {
+      live: [],
+      scheduled: [],
+      ended: [
+        listed(debate, 7, { status: "replay", liveEndedAt: hoursFrom(-3) }),
+      ],
+    },
+    homeNow,
+    { avatarUrl },
+  ),
 };

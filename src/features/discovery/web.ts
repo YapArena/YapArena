@@ -1,13 +1,20 @@
-import { homepageMarkup } from "./homepage-view.ts";
+import { homeListMarkup } from "./home-list-view.ts";
+import {
+  emptyHomeList,
+  homeView,
+  type HomeListData,
+} from "./home-list-model.ts";
+import type { HomeIdea } from "./homepage-model.ts";
+import { topicHistoryMarkup } from "./topic-history-web.ts";
 import { accountMarkup } from "./account-web.ts";
 import {
   siteHeaderMarkup,
   siteTabBarMarkup,
+  type PageSearch,
   type SiteSection,
   type SiteTab,
 } from "./site-header-web.ts";
 import type { PublicBotActivity } from "../a4/public-bots.ts";
-import { publicHomepage, type HomeData } from "./homepage-model.ts";
 import { renderVideoDebateCard } from "./video-card-web.ts";
 import { renderFeaturedDebate } from "./featured-web.ts";
 import { livingEmblem } from "./emblem-web.ts";
@@ -56,8 +63,9 @@ function tabFor(
   return path === "/home" ? "home" : section;
 }
 
-// On phones the top row names the three destinations' own pages; every other
-// page keeps the logo there.
+// On phones the top row names the destinations' own pages; every other page
+// keeps the logo there. Explore's two lists pass their search, which takes the
+// name's place.
 function pageTitleFor(canonical: string) {
   const path = new URL(canonical, "https://yaparena.invalid").pathname;
   if (path === "/live") return "Live";
@@ -76,6 +84,7 @@ export function layout(
   bodyClass = "",
   emailFirst = false,
   stylesheets: readonly string[] = [],
+  search: PageSearch | null = null,
 ) {
   const home = bodyClass.startsWith("arena-market-home");
   const reference = bodyClass.includes("reference-home");
@@ -85,7 +94,7 @@ export function layout(
   const tabBar = bodyClass.includes("arena-page")
     ? ""
     : siteTabBarMarkup(tabFor(canonical, section));
-  const page = html`${siteHeaderMarkup(section, { title: pageTitleFor(canonical) })}${
+  const page = html`${siteHeaderMarkup(section, { title: pageTitleFor(canonical), search })}${
     home ? content : html`<main id="main">${content}</main>`
   }${siteFooterMarkup()}${tabBar}`;
   return html`<!doctype html><html lang="en"${emailFirst ? " data-email-first" : ""}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#000000"><title>${title} · YAP Arena</title><meta name="description" content="${description}"><link rel="canonical" href="${canonical}">${metadata}${iconLinks()}<link rel="stylesheet" href="${asset("site.css")}"><link rel="stylesheet" href="${asset("arena.css")}"><link rel="stylesheet" href="${asset("site-header.css")}">${stylesheets.map((name) => html`<link rel="stylesheet" href="${asset(name)}">`)}<script defer src="${asset("session-coordination.js")}"></script><script type="module" src="${asset("site-header.js")}"></script><script defer src="${asset("site.js")}"></script><script defer src="${asset("account-balance.js")}"></script>${reference ? "" : html`<script defer src="${asset("measurement.js")}"></script><script type="module" src="${asset("results-notice.js")}"></script>`}${home ? html`<link rel="stylesheet" href="${asset("homepage.css")}"><script defer src="${asset("homepage.bundle.js")}"></script>` : ""}</head><body class="${bodyClass}"><a class="skip-link" href="#main">Skip to content</a>${page}</body></html>`.toString();
@@ -110,6 +119,14 @@ function listSearch(
   query: string,
 ) {
   return html`<form class="list-search" action="${action}" method="get" role="search"><label class="sr-only" for="${id}">${label}</label><div class="search-pill">${searchIcon}<input class="input" id="${id}" name="q" maxlength="80" value="${query}" placeholder="${placeholder}" enterkeyhint="search"></div><button class="btn btn-secondary" type="submit">Search</button></form>`;
+}
+
+// Explore's two lists (first-run plan): a switch between them at the top of
+// both, on every width; the current one is marked.
+function exploreSwitch(current: "debates" | "topics") {
+  const link = (key: typeof current, label: string) =>
+    html`<a href="/${key}"${key === current ? html` aria-current="page"` : ""}>${label}</a>`;
+  return html`<div class="container explore-switch-row"><nav class="explore-switch" aria-label="Explore">${link("debates", "Debates")}${link("topics", "Topics")}</nav></div>`;
 }
 
 // An empty list: the emblem, today's words and a way back to everything.
@@ -153,24 +170,28 @@ function listPath(
   return `${base}${base.includes("?") ? "&" : "?"}${parameters}`;
 }
 
+// /home as a list of debates (first-run plan PR 6, docs/site-design.md#home).
+// The server shows what every reader sees; frontend/home-list.ts adds the
+// reader's followed topics, who is waiting and each debate's results.
 export function renderHome(
   origin: string,
-  data: HomeData = publicHomepage([], []),
+  data: HomeListData = emptyHomeList(new Date()),
   emailFirst = false,
 ) {
   return layout(
     "Where ideas move",
     "Follow an idea. Hear both sides. Take a position.",
     `${origin}/home`,
-    homepageMarkup(data),
+    html`${homeListMarkup(data, homeView(data, new Set(), []))}${data.available ? html`<script type="module" src="${asset("home-list.js")}"></script>` : ""}`,
     shareMetadata({
       origin,
       title: "YAP Arena",
       description: "Follow an idea. Hear both sides. Take a position.",
       url: `${origin}/home`,
     }),
-    `arena-market-home${data.reference ? " reference-home" : ""}`,
+    "",
     emailFirst,
+    ["home.css"],
   );
 }
 
@@ -230,7 +251,7 @@ export function renderDebates(
   const moreCurrent = more.includes(status);
   const filters = html`<nav class="list-filters" aria-label="Debate status"><div class="chips">${chips}</div><details class="more-chip" data-menu><summary class="chip${moreCurrent ? " is-current" : ""}"><span class="sr-only">More statuses${moreCurrent ? ":" : ""}</span><span${moreCurrent ? "" : html` aria-hidden="true"`}>${moreCurrent ? label(status) : "More"}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></summary><div class="more-menu">${more.map((option) => html`<a${current(option)} href="${href(option)}">${label(option)}</a>`)}</div></details></nav>`;
   const base = `/debates${query || status !== "all" ? `?${new URLSearchParams({ ...(query ? { q: query } : {}), ...(status !== "all" ? { status } : {}) })}` : ""}`;
-  const content = html`${pageHead("The debate floor", "Find your next", "good argument.", "Upcoming conversations and public debate archives, all in one place.")}<section class="container list-section" aria-labelledby="debates-results"><h2 class="sr-only" id="debates-results">Debates</h2><div class="list-tools">${listSearch("/debates", "debate-search", "Search debates", "Search propositions or topics", query)}${filters}</div>${list.items.length ? html`<div class="list-grid">${list.items.map(debateCard)}</div>` : emptyList("No debates found.", "Try another search or status filter. Only published debates appear here.", "/debates")}${pagination(base, list)}</section>`;
+  const content = html`${exploreSwitch("debates")}${pageHead("The debate floor", "Find your next", "good argument.", "Upcoming conversations and public debate archives, all in one place.")}<section class="container list-section" aria-labelledby="debates-results"><h2 class="sr-only" id="debates-results">Debates</h2><div class="list-tools">${listSearch("/debates", "debate-search", "Search debates", "Search propositions or topics", query)}${filters}</div>${list.items.length ? html`<div class="list-grid">${list.items.map(debateCard)}</div>` : emptyList("No debates found.", "Try another search or status filter. Only published debates appear here.", "/debates")}${pagination(base, list)}</section>`;
   const canonical = `${origin}${listPath(base, list)}`;
   return layout(
     "Debates",
@@ -246,6 +267,12 @@ export function renderDebates(
     "",
     false,
     listStyles,
+    {
+      action: "/debates",
+      label: "Search debates",
+      query,
+      filters: status === "all" ? [] : [["status", status]],
+    },
   );
 }
 
@@ -253,9 +280,22 @@ export function renderTopics(
   origin: string,
   list: PublicList<PublicTopic>,
   query: string,
+  category?: TopicCategory,
 ) {
-  const base = `/topics${query ? `?q=${encodeURIComponent(query)}` : ""}`;
-  const content = html`${pageHead("The idea index", "Find the question", "worth asking.", "Each topic frames two sides of an ongoing conversation.")}<section class="container list-section" aria-labelledby="topics-results"><h2 class="sr-only" id="topics-results">Topics</h2><div class="list-tools">${listSearch("/topics", "topic-search", "Search topics", "Search an idea", query)}</div>${list.items.length ? html`<div class="list-grid">${list.items.map(topicCard)}</div>` : emptyList("No topics found.", "Try another search. Published topics will appear here.", "/topics")}${pagination(base, list)}</section>`;
+  // Category ids are lowercase letters, so they need no encoding.
+  const topicsPath = (option: TopicCategory | undefined) => {
+    const parameters = [
+      option && `category=${option}`,
+      query && `q=${encodeURIComponent(query)}`,
+    ].filter(Boolean);
+    return `/topics${parameters.length ? `?${parameters.join("&")}` : ""}`;
+  };
+  // All, then every category in the founder's order (#185's list).
+  const chip = (option: TopicCategory | undefined, label: string) =>
+    html`<a class="chip"${option === category ? html` aria-current="page"` : ""} href="${topicsPath(option)}">${label}</a>`;
+  const filters = html`<nav class="list-filters category-filters" aria-label="Topic category"><div class="chips">${chip(undefined, "All")}${TOPIC_CATEGORIES.map(([id, name]) => chip(id, name))}</div></nav>`;
+  const base = topicsPath(category);
+  const content = html`${exploreSwitch("topics")}${pageHead("The idea index", "Find the question", "worth asking.", "Each topic frames two sides of an ongoing conversation.")}<section class="container list-section" aria-labelledby="topics-results"><h2 class="sr-only" id="topics-results">Topics</h2><div class="list-tools">${listSearch("/topics", "topic-search", "Search topics", "Search an idea", query)}${filters}</div>${list.items.length ? html`<div class="list-grid">${list.items.map(topicCard)}</div>` : emptyList("No topics found.", category ? "Try another search or category. Published topics will appear here." : "Try another search. Published topics will appear here.", "/topics")}${pagination(base, list)}</section>`;
   const canonical = `${origin}${listPath(base, list)}`;
   return layout(
     "Topics",
@@ -271,6 +311,12 @@ export function renderTopics(
     "",
     false,
     listStyles,
+    {
+      action: "/topics",
+      label: "Search topics",
+      query,
+      filters: category ? [["category", category]] : [],
+    },
   );
 }
 
@@ -333,13 +379,16 @@ function sidesCard(topic: PublicTopic, matchmaking: boolean) {
   return html`<section class="card queue-card" data-queue-topic="${topic.slug}" aria-labelledby="queue-heading"><div class="queue-head"><p class="kicker">${inscription("Debate it live")}</p><h2 class="queue-title" id="queue-heading">${inscription("Take a side and get matched")}</h2><p class="queue-help">Pick your side. When someone queues on the other side, you both get 30 seconds to accept, then the debate starts.</p></div>${sides}<div class="queue-notes"><p data-queue-waiting aria-live="polite"></p><p data-queue-note role="status"></p></div></section>`;
 }
 
+// A topic: its question and both sides, its debates and, once it has rounds,
+// its endorsement history (the chart that used to sit on the home).
 export function renderTopic(
   origin: string,
   topic: PublicTopic,
   debates: PublicList<PublicDebate>,
   matchmaking = false,
+  history: HomeIdea | null = null,
 ) {
-  const content = html`<div class="container topic-hero" data-measure-topic="${topic.id}"><div class="topic-copy">${backLink("/topics", "All topics")}<p class="kicker">${inscription(`Topic${topic.isDemo ? " · Demo" : ""}`)}</p><h1 class="title-serif">${topic.title}</h1><p class="page-lead">${topic.summary}</p>${followButton("topics", topic.slug)}</div>${sidesCard(topic, matchmaking)}</div><section class="container page-section" aria-labelledby="topic-debates"><div class="section-head"><p class="kicker">${inscription("On this topic")}</p><h2 class="section-title" id="topic-debates">${inscription("Debates")}</h2></div>${debates.items.length ? html`<div class="list-grid">${debates.items.map(debateCard)}</div>` : quietState("No public debates on this topic yet.", matchmaking ? "Queue on a side to start the first one." : "")}${pagination(`/topics/${path(topic.slug)}`, debates)}</section>`;
+  const content = html`<div class="container topic-hero" data-measure-topic="${topic.id}"><div class="topic-copy">${backLink("/topics", "All topics")}<p class="kicker">${inscription(`Topic${topic.isDemo ? " · Demo" : ""}`)}</p><h1 class="title-serif">${topic.title}</h1><p class="page-lead">${topic.summary}</p>${followButton("topics", topic.slug)}</div>${sidesCard(topic, matchmaking)}</div><section class="container page-section" aria-labelledby="topic-debates"><div class="section-head"><p class="kicker">${inscription("On this topic")}</p><h2 class="section-title" id="topic-debates">${inscription("Debates")}</h2></div>${debates.items.length ? html`<div class="list-grid">${debates.items.map(debateCard)}</div>` : quietState("No public debates on this topic yet.", matchmaking ? "Queue on a side to start the first one." : "")}${pagination(`/topics/${path(topic.slug)}`, debates)}</section>${history ? html`${topicHistoryMarkup(history)}<script type="module" src="${asset("topic-chart.js")}"></script>` : ""}`;
   const canonical = `${origin}${listPath(`/topics/${path(topic.slug)}`, debates)}`;
   return layout(
     topic.title,

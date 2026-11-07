@@ -165,7 +165,7 @@ describe("public discovery", () => {
   it("serves the public journey and stable canonical links without login", async () => {
     const home = await request(app).get("/home");
     assert.equal(home.status, 200);
-    assert.match(home.text, /id="ya-market-v4"/);
+    assert.match(home.text, /data-home-list/);
     assert.doesNotMatch(
       home.text,
       /data-debate-preview|Debates to watch|Topics in play/,
@@ -206,10 +206,10 @@ describe("public discovery", () => {
     );
     const home = await request(shell).get("/home");
     assert.equal(home.status, 503);
-    assert.match(home.text, /id="ya-market-v4"/);
+    assert.match(home.text, /class="container home-list"/);
     assert.match(home.text, /Discovery temporarily unavailable/);
-    // No ideas: one state, no controller data and no sample figures.
-    assert.doesNotMatch(home.text, /ya-home-data/);
+    // One state, no controller data and no sample figures.
+    assert.doesNotMatch(home.text, /home-list-data|home-list\.js/);
     assert.doesNotMatch(
       home.text,
       /Concept · Sample data|AI models should be open source/,
@@ -293,6 +293,53 @@ describe("public discovery", () => {
       "/api/public/topics/public-topic",
     );
     assert.equal(single.body.category, "cities");
+  });
+
+  it("filters the Topics page by the category in its link, like the API", async () => {
+    const calls = [];
+    const filtered = appWith({
+      ...discovery,
+      listTopics: async (parameters) => {
+        calls.push(parameters);
+        return {
+          items: [{ ...topic, category: "cities" }],
+          pagination: { limit: 12, offset: 0, hasMore: false },
+        };
+      },
+    });
+    const page = await request(filtered).get(
+      "/topics?category=cities&q=transit",
+    );
+    assert.equal(page.status, 200);
+    assert.deepEqual(calls[0], {
+      query: "transit",
+      limit: 12,
+      offset: 0,
+      category: "cities",
+    });
+    // The Cities chip is current, and the top-bar search keeps it.
+    assert.match(
+      page.text,
+      /<a class="chip" aria-current="page" href="\/topics\?category=cities&amp;q=transit">Cities<\/a>/,
+    );
+    assert.match(
+      page.text,
+      /<input type="hidden" name="category" value="cities">/,
+    );
+    // No category, or an empty one, lists every topic as before.
+    for (const path of ["/topics", "/topics?category="])
+      assert.equal((await request(filtered).get(path)).status, 200, path);
+    assert.deepEqual(calls[1], { query: "", limit: 12, offset: 0 });
+    assert.deepEqual(calls[2], { query: "", limit: 12, offset: 0 });
+    // A category that isn't on the list is an invalid link.
+    for (const category of ["Cities", "sports", "cities&category=work"]) {
+      const refused = await request(filtered).get(
+        `/topics?category=${category}`,
+      );
+      assert.equal(refused.status, 400, category);
+      assert.match(refused.text, /Invalid link/);
+    }
+    assert.equal(calls.length, 3);
   });
 
   it("returns the public API shape and hides unknown records", async () => {
@@ -533,7 +580,7 @@ describe("public discovery", () => {
       items: [debate],
       pagination: { limit: 1, offset: 1, hasMore: false },
     };
-    assert.match(renderHome(origin), /No public ideas yet/);
+    assert.match(renderHome(origin), /Start the first debate/);
     assert.match(renderLive(origin, [], empty), /No watchable debates yet/);
     assert.match(renderLive(origin, [], empty), /No public topics yet/);
     assert.match(renderTopics(origin, empty, "missing"), /No topics found/);

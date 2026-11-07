@@ -476,6 +476,9 @@ try {
   //    their speakers by initials.
   {
     const { context, page, errors } = await open(390, 844);
+    // The timeline and the bars build from the same windows read, each in
+    // its own module; wait for both.
+    await page.locator("[data-timeline-turn] button").first().waitFor();
     await page.locator("[data-turn-bars]:not([hidden])").waitFor();
     assert.deepEqual(
       await page.evaluate(() => {
@@ -540,6 +543,11 @@ try {
     windowList = windows(true, 10, false);
     debate = base;
     const { context, page, errors } = await open(1440, 900);
+    // The timeline has the windows (its turns, unseen) and still waits.
+    await page
+      .locator("[data-timeline-turn] button")
+      .first()
+      .waitFor({ state: "attached" });
     await page.locator("[data-turn-bars]:not([hidden])").waitFor();
     assert.deepEqual(
       await page.locator("[data-replay-timeline]").evaluate((node) => ({
