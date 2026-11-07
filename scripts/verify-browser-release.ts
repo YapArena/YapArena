@@ -196,11 +196,13 @@ try {
     "Live AI outline panel with synthetic LiveKit messages",
     process.execPath,
     ["scripts/verify-outline-browser.ts"],
+    { OUTLINE_ARTIFACT_DIR: join(directory, "outline") },
   );
   await run(
     "Replay turn timeline and Results by turn with synthetic playback",
     process.execPath,
     ["scripts/verify-replay-timeline-browser.ts"],
+    { REPLAY_TIMELINE_ARTIFACT_DIR: join(directory, "replay-timeline") },
   );
   assert.equal(interrupted, false, "verification interrupted");
   console.log(`Browser release gate PASS. Synthetic evidence: ${directory}`);

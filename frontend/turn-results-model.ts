@@ -5,6 +5,7 @@
 // revealed. No DOM access, so tests import the built module.
 import type { OutlineTimeline } from "../src/features/outline/public-types.ts";
 import { sharePercent } from "./arena-chart.js";
+import { firstName } from "./debate-layout-model.js";
 import type {
   PublicWindow,
   RecordingSpan,
@@ -197,6 +198,32 @@ export function captionParts(column: TurnColumn, names: Names) {
     label: column.label,
     result: resultText(column),
   };
+}
+
+/**
+ * Phones list one row per turn with a result to show: revealed (with or
+ * without answers) or cancelled. Turns still to come or waiting for their
+ * reveal stay off the list; the caption says when results come.
+ */
+export function phoneColumns(columns: readonly TurnColumn[]) {
+  return columns.filter((column) =>
+    ["revealed", "empty", "void"].includes(column.state),
+  );
+}
+
+/**
+ * A phone row's line under its bar, as the caption says it on wider
+ * screens: the speaker's first name, the turn's argument labels, and the
+ * result in words when there is no share to draw.
+ */
+export function rowLine(column: TurnColumn, names: Names) {
+  return [
+    column.side ? firstName(names[column.side]) : null,
+    column.label ? `“${column.label}”` : null,
+    column.state === "revealed" ? null : resultText(column),
+  ]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 /** A bar's accessible name, which carries everything the column shows. */

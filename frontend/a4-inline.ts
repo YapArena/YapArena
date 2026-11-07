@@ -13,7 +13,7 @@ import { createRoundChart, sharePercent } from "./arena-chart.js";
 import { createPriceInspector } from "./arena-price.js";
 import { watchRoom } from "./community-stream.js";
 import { seekReplay } from "./replay-seek.js";
-import { onStakeWindows } from "./stake-windows.js";
+import { onStakeRounds, onStakeWindows } from "./stake-windows.js";
 import { createTurnBars } from "./turn-results.js";
 import {
   isTurnWindow,
@@ -83,19 +83,37 @@ if (root) {
   const lineChart = root.querySelector<HTMLElement>("[data-line-chart]");
   const plot = root.querySelector<HTMLElement>(".arena-chart-plot");
   const turnEmpty = root.querySelector<HTMLElement>("[data-turn-empty]");
-  const priceDetails = root.querySelector<HTMLElement>("[data-price-details]");
+  const priceDetails = root.querySelector<HTMLDetailsElement>(
+    "[data-price-details]",
+  );
   const inspector = root.querySelector<HTMLElement>(".arena-price-inspector");
   let mode: "bars" | "line" | "empty" = lineChart ? "line" : "empty";
   let columns: TurnColumn[] = [];
+  // This viewer's own limits by window id, from the answer panel.
+  let ownLimits: Record<string, string> = {};
+  const phone = matchMedia("(max-width: 599px)");
+  const calm = matchMedia("(prefers-reduced-motion: reduce)");
   let selectedTurn: number | null = null;
   let position: number | null = null;
   let playingTurn: number | null = null;
-  const bars = createTurnBars(root, (column) => {
-    selectedTurn = column.turnNumber;
-    renderShared();
-    // On a replay, choosing a turn plays it.
-    if (replay && column.recording) seekReplay(column.recording.startSeconds);
-  });
+  const bars = createTurnBars(
+    root,
+    (column) => {
+      selectedTurn = column.turnNumber;
+      renderShared();
+      // Phones: a revealed turn opens its price draw under the rows.
+      if (phone.matches && column.state === "revealed" && priceDetails) {
+        priceDetails.open = true;
+        inspector?.scrollIntoView({
+          block: "nearest",
+          behavior: calm.matches ? "auto" : "smooth",
+        });
+      }
+      // On a replay, choosing a turn plays it.
+      if (replay && column.recording) seekReplay(column.recording.startSeconds);
+    },
+    phone,
+  );
   const prices = createPriceInspector(root, (item) => {
     if (mode === "bars") {
       selectedTurn = item.number;
@@ -177,12 +195,18 @@ if (root) {
     };
     defaultPrice = latest;
     prices.update(data);
-    prices.show(points.find((point) => point.number === selected) ?? null);
+    prices.show(
+      points.find((point) => point.number === selected) ?? null,
+      "Turn",
+    );
     ui("scope").textContent = "Yap Coins · revealed turn windows";
     renderSentiment(latest, `Yap Coins · turn ${latest.number}`, "Revealed");
   }
   function renderShared() {
-    const revealed = windowPoints(windows, timeline);
+    const revealed = windowPoints(windows, timeline).map((point) => ({
+      ...point,
+      ownLimit: ownLimits[point.id] ?? null,
+    }));
     if (
       revealed.length ||
       (!shared?.items.length && windows.some(isTurnWindow))
@@ -260,6 +284,10 @@ if (root) {
     if (timelineState === "idle" && windowPoints(windows, null).length)
       void loadTimeline();
     renderShared();
+  });
+  onStakeRounds(debateId, (limits) => {
+    ownLimits = limits;
+    if (mode === "bars") renderShared();
   });
   // The replay's playing turn is outlined in Results by turn.
   window.addEventListener("yap:playback", (event) => {

@@ -10,8 +10,10 @@ import {
   isTurnWindow,
   latestRevealed,
   percents,
+  phoneColumns,
   playingAt,
   resultText,
+  rowLine,
   revealNote,
   segmentLabel,
   timelineSegments,
@@ -266,6 +268,53 @@ describe("bars", () => {
     assert.equal(
       barLabel({ ...column(null, "hidden"), side: null }, names, false),
       "Turn 1: Results not revealed yet.",
+    );
+  });
+});
+
+describe("phone rows", () => {
+  const column = (turnNumber, state, overrides = {}) => ({
+    turnNumber,
+    side: turnNumber % 2 ? "A" : "B",
+    state,
+    yes: state === "revealed" ? 58 : null,
+    label: null,
+    recording: null,
+    windowId: null,
+    ...overrides,
+  });
+
+  it("list only the turns with a result to show", () => {
+    const columns = [
+      column(1, "revealed"),
+      column(2, "empty"),
+      column(3, "void"),
+      column(4, "hidden"),
+      column(5, "upcoming"),
+    ];
+    assert.deepEqual(
+      phoneColumns(columns).map((item) => item.turnNumber),
+      [1, 2, 3],
+    );
+    assert.deepEqual(phoneColumns([column(1, "hidden")]), []);
+  });
+
+  it("carry the speaker and the turn's arguments, as the caption does", () => {
+    assert.equal(
+      rowLine(
+        column(1, "revealed", { label: "Fares cost · Riders first" }),
+        names,
+      ),
+      "Maya · “Fares cost · Riders first”",
+    );
+    assert.equal(rowLine(column(2, "revealed"), names), "Léo");
+    assert.equal(
+      rowLine(column(2, "empty", { label: "Service first" }), names),
+      "Léo · “Service first” · No answers in this turn",
+    );
+    assert.equal(
+      rowLine(column(3, "void", { side: null }), names),
+      "No result: this turn's window was cancelled",
     );
   });
 });

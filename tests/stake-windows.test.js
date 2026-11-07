@@ -4,7 +4,7 @@
 import assert from "node:assert/strict";
 import { beforeEach, it } from "node:test";
 
-const { onStakeWindows, shareStakeWindows } =
+const { onStakeRounds, onStakeWindows, shareStakeRounds, shareStakeWindows } =
   await import("../public/stake-windows.js");
 
 beforeEach(() => {
@@ -83,4 +83,26 @@ it("keeps the read on window and still sends the page event", () => {
   shareStakeWindows(detail);
   assert.equal(globalThis.window.yapStakeWindows, detail);
   assert.deepEqual(events, [detail]);
+});
+
+it("shares the viewer's own limits the same way, latest first, per debate", async () => {
+  const events = [];
+  globalThis.window.addEventListener("yap:stake-rounds", (event) =>
+    events.push(event.detail),
+  );
+  shareStakeRounds({ debateId: "d2", limits: { w9: "0.10" } });
+  shareStakeRounds({ debateId: "d1", limits: { w1: "0.58" } });
+  const seen = [];
+  onStakeRounds("d1", (limits) => seen.push(limits));
+  assert.deepEqual(seen, []);
+  await settle();
+  assert.deepEqual(seen, [{ w1: "0.58" }]);
+  shareStakeRounds({ debateId: "d1", limits: { w1: "0.58", w2: "0.40" } });
+  shareStakeRounds({ debateId: "d2", limits: {} });
+  assert.deepEqual(seen, [{ w1: "0.58" }, { w1: "0.58", w2: "0.40" }]);
+  assert.deepEqual(globalThis.window.yapStakeRounds, {
+    debateId: "d2",
+    limits: {},
+  });
+  assert.equal(events.length, 4);
 });

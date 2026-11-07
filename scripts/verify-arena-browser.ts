@@ -550,6 +550,27 @@ export async function verifyArenaBrowser({
       "true",
     );
     checks.mobileTabsKeyboard = true;
+    // First-run build plan PR 8: on phones the AI outline's tab is named
+    // "Arguments", and Results by turn lists rows that open the price card.
+    const phoneParts = () =>
+      page.evaluate(() => ({
+        outlineTab:
+          document.querySelector<HTMLElement>("#arena-tab-outline")
+            ?.innerText ?? null,
+        resultsLine: getComputedStyle(
+          document.querySelector(".arena-results-sub-phone")!,
+        ).display,
+        barsLine: getComputedStyle(
+          document.querySelector(".arena-results-sub-wide")!,
+        ).display,
+      }));
+    const phone = await phoneParts();
+    assert.deepEqual(phone, {
+      outlineTab: phone.outlineTab === null ? null : "Arguments",
+      resultsLine: "block",
+      barsLine: "none",
+    });
+    checks.mobileArgumentsAndRows = true;
     await page.screenshot({ path: directory + "/mobile.png", fullPage: true });
     checks.mobileNoOverflow = true;
     // Reduced motion removes the hover fades.
@@ -654,6 +675,14 @@ export async function verifyArenaBrowser({
       { resultsTab: 0, inStage: true, afterScoreboard: true, timeline: 1 },
     );
     checks.replayResultsUnderScoreboard = true;
+    // Wider screens keep the outline's own name and the rising bars' line.
+    const wide = await phoneParts();
+    assert.deepEqual(wide, {
+      outlineTab: wide.outlineTab === null ? null : "AI outline",
+      resultsLine: "none",
+      barsLine: "block",
+    });
+    checks.wideKeepsOutlineAndBars = true;
     await page.evaluate(async () => {
       const canvas = document.createElement("canvas");
       canvas.width = 640;

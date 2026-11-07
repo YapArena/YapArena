@@ -8,18 +8,22 @@ import type {
 /* global document, window, HTMLVideoElement */
 import assert from "node:assert/strict";
 import { once } from "node:events";
+import { mkdir } from "node:fs/promises";
+import { join } from "node:path";
 import express from "express";
 import axe from "axe-core";
 import { chromium, type Browser } from "playwright-core";
 import { createDiscoveryRouter } from "../dist/features/discovery/router.js";
 
 // Direction BC1's replay board in Chrome: the turn timeline under the
-// video and Results by turn under the scoreboard. It serves the built
-// browser modules and the real debate page. The turn windows come from a
-// fixture answer to the public window list, and the replay position from
-// synthetic yap:playback events, as the replay player sends them. It also
-// clicks the stage's Play replay and Join as viewer buttons with a real
-// mouse. No database, media or hosted service is involved.
+// video and Results by turn under the scoreboard, and on phones the rows
+// and the price draw card (first-run build plan PR 8). It serves the built
+// browser modules and the real debate page. The turn windows and their
+// final outline labels come from fixture answers to the public reads, and
+// the replay position from synthetic yap:playback events, as the replay
+// player sends them. It also clicks the stage's Play replay and Join as
+// viewer buttons with a real mouse. No database, media or hosted service is
+// involved. With REPLAY_TIMELINE_ARTIFACT_DIR set it saves phone screenshots.
 
 type DiscoveryOptions = Parameters<typeof createDiscoveryRouter>[0];
 type CreateFixtureRouter = (
@@ -78,6 +82,20 @@ const liveStart = Date.parse("2026-10-23T23:00:00.000Z");
 // Each turn plays for 60 seconds, one second apart, from 0:02.
 const start = (turn: number) => 2 + (turn - 1) * 61;
 const shares = [52, 47, 55, 52, 61, 52, 63, 56, 64, 60];
+// Each turn's final AI outline labels; turn 1 has two arguments.
+const labels = [
+  ["Free fares bring riders back", "Cars leave downtown"],
+  ["Service is too unreliable today"],
+  ["Tallinn's ridership rose"],
+  ["Fares fund a third of operations"],
+  ["A congestion charge can replace fares"],
+  ["Riders want frequency"],
+  ["Low-income riders gain most"],
+  ["Targeted passes cost less"],
+  ["One fare-free city is simpler"],
+  ["Fix the metro first"],
+];
+const artifacts = process.env.REPLAY_TIMELINE_ARTIFACT_DIR;
 const future = new Date(Date.now() + 3 * 86_400_000).toISOString();
 function windows(revealed: boolean, count = 10, recorded = true) {
   return Array.from({ length: count }, (_, index) => {
@@ -95,13 +113,15 @@ function windows(revealed: boolean, count = 10, recorded = true) {
       recording: recorded
         ? { startSeconds: start(turn), endSeconds: start(turn) + 60 }
         : null,
+      // Turn 5's price was drawn over the whole range (the A4 engine's
+      // exploratory branch); the others between a and b.
       pricing: revealed
         ? {
             share: { n: String(shares[index]), d: "100" },
             a: { n: "45", d: "100" },
             b: { n: "60", d: "100" },
-            price: { n: "52", d: "100" },
-            branch: "targeted",
+            price: { n: turn === 5 ? "81" : "52", d: "100" },
+            branch: turn === 5 ? "exploratory" : "targeted",
             reason: null,
           }
         : null,
@@ -179,6 +199,28 @@ try {
           revealMode: "five_day",
           revealAt: windowList[0]?.revealAt ?? null,
           windows: windowList,
+        },
+      });
+    // The turns' final outline labels, which label revealed turns.
+    if (url.pathname === `/api/public/debates/${debateId}/outline/timeline`)
+      return route.fulfill({
+        json: {
+          debateId,
+          complete: true,
+          timed: false,
+          versions: [],
+          turns: labels.map((items, index) => ({
+            turnNumber: index + 1,
+            side: index % 2 ? "B" : "A",
+            language: "en",
+            arguments: items.map((label, item) => ({
+              id: `t${index + 1}a${item + 1}`,
+              label,
+              rebuts: null,
+              continues: null,
+            })),
+            final: true,
+          })),
         },
       });
     // A signed-out visitor.
@@ -449,6 +491,37 @@ try {
       true,
     );
     results.priceInDisclosure = true;
+    // The phone rows' lines and the card's phone parts stay hidden here.
+    assert.deepEqual(
+      await page.evaluate(() => {
+        const shown = (selector: string) =>
+          [...document.querySelectorAll<HTMLElement>(selector)].some(
+            (node) => node.getClientRects().length > 0,
+          );
+        const first = document
+          .querySelector('[data-turn-bar="1"]')!
+          .getBoundingClientRect();
+        const second = document
+          .querySelector('[data-turn-bar="2"]')!
+          .getBoundingClientRect();
+        return {
+          columns: Math.abs(first.top - second.top) < 1,
+          lines: shown(".arena-turn-bar-line"),
+          phoneParts: shown(
+            ".arena-results-sub-phone, .arena-price-phone, [data-price-turn], [data-price-order], [data-price-range]",
+          ),
+          summary: document.querySelector("[data-price-details] > summary")!
+            .textContent,
+        };
+      }),
+      {
+        columns: true,
+        lines: false,
+        phoneParts: false,
+        summary: "Price and typical limitsPrice draw · a < p < b",
+      },
+    );
+    results.desktopUnchangedByPhoneParts = true;
 
     // 8. No serious accessibility problems in the stage.
     await page.addScriptTag({ content: axe.source });
@@ -472,30 +545,50 @@ try {
     await context.close();
   }
 
-  // 9. A phone: no sideways scroll, the timeline and bars fit, the bars name
-  //    their speakers by initials.
+  // 9. A phone: Results by turn as one row per turn with its speaker and
+  //    arguments, and a revealed turn opening its "Price draw · a < p < b"
+  //    card, with no sideways scroll at 390 or 320 px.
   {
     const { context, page, errors } = await open(390, 844);
     // The timeline and the bars build from the same windows read, each in
     // its own module; wait for both.
     await page.locator("[data-timeline-turn] button").first().waitFor();
     await page.locator("[data-turn-bars]:not([hidden])").waitFor();
+    await page
+      .locator('[data-turn-bar="1"] .arena-turn-bar-line')
+      .filter({ hasText: "Free fares" })
+      .waitFor();
     assert.deepEqual(
       await page.evaluate(() => {
         const list = document.querySelector("[data-turn-bar-list]")!;
         const timeline = document.querySelector("[data-replay-timeline-list]")!;
-        const initials = document.querySelector<HTMLElement>(
-          ".arena-turn-bar-initials",
+        const row = (turn: number) =>
+          document
+            .querySelector(`[data-turn-bar="${turn}"] button`)!
+            .getBoundingClientRect();
+        const line = document.querySelector<HTMLElement>(
+          '[data-turn-bar="1"] .arena-turn-bar-line',
         )!;
         return {
           noSideScroll:
             document.documentElement.scrollWidth <= window.innerWidth,
-          barsFit: list.scrollWidth <= list.clientWidth,
+          rowsFit: list.scrollWidth <= list.clientWidth,
           timelineFits: timeline.scrollWidth <= timeline.clientWidth,
-          initials:
-            getComputedStyle(initials).display !== "none"
-              ? initials.textContent
-              : null,
+          stacked: row(2).top >= row(1).bottom,
+          rowHeight: row(1).height >= 44,
+          rows: document.querySelectorAll("[data-turn-bar]").length,
+          line: getComputedStyle(line).display !== "none" && line.textContent,
+          initials: getComputedStyle(
+            document.querySelector(".arena-turn-bar-initials")!,
+          ).display,
+          // Each row carries the caption's content, so the caption hides.
+          caption: getComputedStyle(
+            document.querySelector("[data-turn-caption]")!,
+          ).display,
+          sub: document.querySelector(".arena-results-sub-phone")!.textContent,
+          cardClosed: !document.querySelector<HTMLDetailsElement>(
+            "[data-price-details]",
+          )!.open,
           segmentHeight: Math.round(
             document
               .querySelector("[data-timeline-turn] button")!
@@ -505,12 +598,172 @@ try {
       }),
       {
         noSideScroll: true,
-        barsFit: true,
+        rowsFit: true,
         timelineFits: true,
-        initials: "MC",
+        stacked: true,
+        rowHeight: true,
+        rows: 10,
+        line: "Maya · “Free fares bring riders back · Cars leave downtown”",
+        initials: "none",
+        caption: "none",
+        sub: "Share who said yes in each 60-second window · tap a turn for its price draw",
+        cardClosed: true,
         segmentHeight: 44,
       },
     );
+    assert.equal(
+      await page.locator(".arena-results-sub-phone").isVisible(),
+      true,
+    );
+    assert.equal(
+      await page.locator(".arena-results-sub-wide").isVisible(),
+      false,
+    );
+    // The rows stack, so Up and Down move between them as well.
+    await page.locator('[data-turn-bar="10"] button').focus();
+    await page.keyboard.press("ArrowUp");
+    assert.equal(
+      await page.evaluate(
+        () =>
+          (document.activeElement as HTMLElement).closest<HTMLElement>(
+            "[data-turn-bar]",
+          )?.dataset.turnBar,
+      ),
+      "9",
+    );
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Home");
+    assert.equal(
+      await page.evaluate(
+        () =>
+          (document.activeElement as HTMLElement).closest<HTMLElement>(
+            "[data-turn-bar]",
+          )?.dataset.turnBar,
+      ),
+      "1",
+    );
+    results.phoneRows = true;
+
+    // Tapping a revealed row opens its card: the draw between a and b, the
+    // drawn price and the inspector's own lines.
+    const card = page.locator(".arena-price-inspector");
+    const order = () =>
+      page.locator("[data-price-order] .arena-price-chip b").allTextContents();
+    await page.locator('[data-turn-bar="3"] button').click();
+    await card.waitFor({ state: "visible" });
+    assert.equal(
+      await page
+        .locator('[data-turn-bar="3"] button')
+        .getAttribute("aria-pressed"),
+      "true",
+    );
+    assert.equal(
+      await page.locator("[data-price-turn]").textContent(),
+      "Turn 3",
+    );
+    assert.deepEqual(await order(), ["a 0.45", "p 0.52", "b 0.60"]);
+    assert.equal(await page.locator("[data-price-range]").isVisible(), false);
+    assert.equal(
+      await page.locator("[data-price-explanation]").textContent(),
+      "Typical limits 0.45 YC–0.60 YC · targeted draw.",
+    );
+    assert.equal(
+      await page.locator("[data-price-details] > summary").innerText(),
+      "Price draw · a < p < b",
+    );
+    assert.equal(await page.locator("#arena-price-round").isVisible(), false);
+    // The card scrolls into view (smoothly, unless motion is reduced).
+    await page.waitForFunction(() => {
+      const box = document
+        .querySelector(".arena-price-inspector")!
+        .getBoundingClientRect();
+      return box.top >= 0 && box.bottom <= window.innerHeight;
+    });
+    // The inspector's markers slide for 320 ms.
+    const settle = () => page.waitForTimeout(400);
+    if (artifacts) {
+      await mkdir(artifacts, { recursive: true });
+      await settle();
+      await page.screenshot({ path: join(artifacts, "phone-targeted.png") });
+    }
+    results.phoneCardBetween = true;
+
+    // The card's next and previous buttons move the chosen row with it; a
+    // whole-range draw says so and draws its band over the whole track.
+    await page.getByRole("button", { name: "Next settled round" }).click();
+    await page.getByRole("button", { name: "Next settled round" }).click();
+    assert.equal(
+      await page.locator("[data-price-turn]").textContent(),
+      "Turn 5",
+    );
+    assert.equal(
+      await page.locator('[data-turn-bar="5"]').getAttribute("data-selected"),
+      "",
+    );
+    assert.deepEqual(await order(), ["0", "p 0.81", "1"]);
+    assert.equal(
+      await page.locator("[data-price-range]").innerText(),
+      "Drawn over the whole range, from 0 to 1 YC.",
+    );
+    assert.deepEqual(
+      await card.evaluate((node) => ({
+        draw: (node as HTMLElement).dataset.draw,
+        band: getComputedStyle(node.querySelector(".arena-price-track")!)
+          .stroke,
+        interval: getComputedStyle(
+          node.querySelector('[data-price-marker="interval"]')!,
+        ).display,
+      })),
+      { draw: "whole", band: "rgb(172, 172, 172)", interval: "none" },
+    );
+    if (artifacts) {
+      await settle();
+      await page.screenshot({ path: join(artifacts, "phone-whole-range.png") });
+    }
+    await page.getByRole("button", { name: "Previous settled round" }).click();
+    assert.equal(
+      await page.locator("[data-price-turn]").textContent(),
+      "Turn 4",
+    );
+    results.phoneCardWholeRange = true;
+
+    // No serious accessibility problems with the card open.
+    await page.addScriptTag({ content: axe.source });
+    const violations = await page.evaluate(async () => {
+      const run = await window.axe.run(
+        document.querySelector("#arena-results")!,
+        {
+          runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
+        },
+      );
+      return run.violations
+        .filter((item) => ["serious", "critical"].includes(item.impact ?? ""))
+        .map((item) => ({
+          id: item.id,
+          nodes: item.nodes.map((node) => node.target),
+        }));
+    });
+    assert.deepEqual(violations, []);
+    results.phoneAxe = true;
+
+    // 320 px, the narrowest phone: still no sideways scroll, card open.
+    await page.setViewportSize({ width: 320, height: 640 });
+    assert.deepEqual(
+      await page.evaluate(() => {
+        const order = document.querySelector("[data-price-order]")!;
+        return {
+          noSideScroll:
+            document.documentElement.scrollWidth <= window.innerWidth,
+          orderFits: order.scrollWidth <= order.clientWidth,
+        };
+      }),
+      { noSideScroll: true, orderFits: true },
+    );
+    if (artifacts)
+      await page.screenshot({
+        path: join(artifacts, "phone-320.png"),
+        fullPage: true,
+      });
     assert.deepEqual(errors, []);
     results.phone = true;
     await context.close();

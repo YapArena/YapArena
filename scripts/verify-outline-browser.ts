@@ -10,6 +10,8 @@ import type { OutlineEdit } from "../src/features/outline/reducer.ts";
 /* global document, window */
 import assert from "node:assert/strict";
 import { once } from "node:events";
+import { mkdir } from "node:fs/promises";
+import { join } from "node:path";
 import express from "express";
 import { chromium } from "playwright-core";
 import { renderDebate } from "../dist/features/discovery/web.js";
@@ -22,7 +24,9 @@ import {
 // Decision 0012: the AI outline panel in Chrome with synthetic LiveKit
 // messages. It serves the built browser modules and the real outline routes
 // over an in-memory store; no database, LiveKit or model is involved, and it
-// refuses nothing because it reaches nothing hosted.
+// refuses nothing because it reaches nothing hosted. It also checks the phone
+// debate page's argument line and Arguments tab (first-run build plan PR 8)
+// and, with OUTLINE_ARTIFACT_DIR set, saves a phone screenshot.
 
 type Edit = OutlineEdit;
 // The fixture routes call only getDebate on the discovery repository.
@@ -496,13 +500,21 @@ window.harness = {
   assert.equal(results.reducedMotion, "none");
   assert.equal(await animation("no-preference"), "live-outline-flash");
 
-  // 7. Phone width: no horizontal overflow.
+  // 7. Phone width: no horizontal overflow, and a rebuttal's link still
+  //    opens and focuses the card it answers.
   const phone = await open("no-preference", 375);
   assert.ok(
     await phone.tab.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
     ),
   );
+  await phone.tab.waitForSelector('[data-id="t2a2"] .live-outline-toggle');
+  await phone.tab.locator('[data-id="t2a2"] .live-outline-toggle').click();
+  await phone.tab.locator('[data-id="t2a2"] .live-outline-jump').click();
+  await phone.tab.waitForFunction(
+    () => document.activeElement?.closest('[data-id="t1a1"]') != null,
+  );
+  results.phoneRebuttalJumps = true;
   await phone.tab.context().close();
 
   // 8. The real debate page renders the panel and paints its initial state
@@ -523,7 +535,105 @@ window.harness = {
     await tab.getByRole("heading", { name: "AI outline" }).count(),
     1,
   );
+  // The phone line under the speakers stays off wider screens.
+  assert.equal(await tab.locator("[data-outline-now]").isVisible(), false);
+  assert.equal(await tab.getByRole("tab", { name: "AI outline" }).count(), 1);
   await context.close();
+
+  // 9. Phones (first-run build plan PR 8): the outline's tab and heading
+  //    say "Arguments", and one line under the speakers names the argument
+  //    being made now, from the same state; the media's turn moves it on.
+  const phonePage = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+  });
+  const phoneTab = await phonePage.newPage();
+  const phoneErrors: string[] = [];
+  phoneTab.on("pageerror", (error) => phoneErrors.push(error.message));
+  await phoneTab.goto(`${base}/debates/${debate.slug}`);
+  const nowLine = phoneTab.locator("[data-outline-now]");
+  await nowLine.waitFor({ state: "visible" });
+  assert.deepEqual(
+    await phoneTab.evaluate(() => {
+      const line = document.querySelector<HTMLElement>("[data-outline-now]")!;
+      const scoreboard = document.querySelector(".arena-scoreboard")!;
+      const cards = scoreboard.querySelectorAll(".arena-side");
+      return {
+        inScoreboard: line.parentElement === scoreboard,
+        underSpeakers:
+          line.getBoundingClientRect().top >=
+          cards[1]!.getBoundingClientRect().bottom,
+        kind: line.dataset.kind,
+        kicker: line.querySelector("[data-outline-now-kicker]")!.textContent,
+        label: line.querySelector("[data-outline-now-label]")!.textContent,
+        lang: line
+          .querySelector("[data-outline-now-label]")!
+          .getAttribute("lang"),
+        noSideScroll: document.documentElement.scrollWidth <= window.innerWidth,
+      };
+    }),
+    {
+      inScoreboard: true,
+      underSpeakers: true,
+      kind: "argument",
+      kicker: "Argument · Maya · turn 2",
+      label: "Le nucléaire est pilotable",
+      lang: "fr",
+      noSideScroll: true,
+    },
+  );
+  assert.equal(
+    await phoneTab.getByRole("tab", { name: "Arguments" }).count(),
+    1,
+  );
+  assert.equal(
+    await phoneTab.getByRole("heading", { name: "Arguments" }).count(),
+    1,
+  );
+  const artifacts = process.env.OUTLINE_ARTIFACT_DIR;
+  if (artifacts) {
+    await mkdir(artifacts, { recursive: true });
+    await phoneTab
+      .getByRole("button", { name: "Reject all", exact: true })
+      .click({ timeout: 3000 })
+      .catch(() => {});
+    await phoneTab.locator(".arena-scoreboard").scrollIntoViewIfNeeded();
+    await phoneTab.screenshot({ path: join(artifacts, "phone-arguments.png") });
+  }
+  const turn = (detail: Record<string, unknown>) =>
+    phoneTab.evaluate(
+      (value) =>
+        window.dispatchEvent(new CustomEvent("yap:turn", { detail: value })),
+      {
+        debateId,
+        eventStatus: "live",
+        state: "running",
+        turnDeadlineAt: null,
+        serverOffset: 0,
+        ...detail,
+      },
+    );
+  await turn({ activeSide: "B", turnNumber: 3 });
+  assert.deepEqual(
+    await nowLine.evaluate((line) => ({
+      kind: line.dataset.kind,
+      text: line.textContent,
+    })),
+    {
+      kind: "listening",
+      text: "Jonah · turn 3Listening for the next argument…",
+    },
+  );
+  await turn({ eventStatus: "ended", state: "ended", activeSide: null });
+  assert.equal(await nowLine.isVisible(), false);
+  await phoneTab.setViewportSize({ width: 320, height: 640 });
+  assert.ok(
+    await phoneTab.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  );
+  assert.deepEqual(phoneErrors, []);
+  results.phoneArgumentLine = true;
+  await phonePage.close();
 
   console.log(JSON.stringify({ outlineBrowser: "PASS", ...results }));
 } finally {

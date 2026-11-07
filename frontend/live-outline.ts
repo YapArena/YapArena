@@ -6,6 +6,7 @@ import type {
 } from "../src/features/outline/public-types.ts";
 import type { OutlineSide } from "../src/features/outline/reducer.ts";
 import { createCaptions } from "./live-captions.js";
+import { createNowLine } from "./outline-now.js";
 import { createOutlinePanel, type SideLabel } from "./outline-panel.js";
 import {
   OUTLINE_TOPIC,
@@ -103,6 +104,8 @@ export function createLiveOutline(
   root: HTMLElement,
   dependencies: OutlineDependencies = browserDependencies(),
   panelOptions: Partial<Parameters<typeof createOutlinePanel>[0]> = {},
+  // The phone line under the speakers with the argument being made now.
+  nowElement: HTMLElement | null = null,
 ) {
   const template = root.querySelector<HTMLTemplateElement>(
     "[data-live-outline-state]",
@@ -126,12 +129,22 @@ export function createLiveOutline(
         .then((status) => {
           if (status !== 201) return;
           view = { ...view, flags: new Set([...view.flags, itemId]) };
-          panel.show(view);
+          showView();
         });
     },
     ...panelOptions,
   });
-  panel.show(view);
+  const now = nowElement
+    ? createNowLine(nowElement, bootstrap.sides, dependencies.events, debateId)
+    : null;
+  // A replay page's line waits for the player's position: before that the
+  // view is the whole debate's outline, not what is being said.
+  let following = !bootstrap.replay;
+  function showView() {
+    panel.show(view);
+    now?.show(following ? view : null);
+  }
+  showView();
 
   function catchUp() {
     catching ??= dependencies
@@ -144,7 +157,7 @@ export function createLiveOutline(
           answer as OutlineCatchUp | OutlineSnapshot,
         );
         view = result.view;
-        panel.show(view);
+        showView();
         panel.announce(result.added);
       })
       .catch(() => {
@@ -162,14 +175,14 @@ export function createLiveOutline(
       const final = parseFinalMessage(payload, debateId);
       if (!final) return;
       view = applyFinal(view, final);
-      panel.show(view);
+      showView();
       return;
     }
     const result = applyVersion(view, next);
     if (result.kind === "gap") void catchUp();
     if (result.kind !== "applied") return;
     view = result.view;
-    panel.show(view);
+    showView();
     panel.announce(result.added);
   }
   function listen(room: DataRoom) {
@@ -219,7 +232,8 @@ export function createLiveOutline(
     const show = () => {
       if (!index?.timed || position === undefined) return;
       view = index.at(position * 1000);
-      panel.show(view);
+      following = true;
+      showView();
     };
     void dependencies
       .fetchJson(`/api/public/debates/${debateId}/outline/timeline`)
@@ -270,7 +284,14 @@ export function startLiveOutline(
   void debateId;
   const captions = createCaptions();
   const root = page?.querySelector<HTMLElement>("[data-live-outline]");
-  const outline = root ? createLiveOutline(root) : undefined;
+  const outline = root
+    ? createLiveOutline(
+        root,
+        undefined,
+        undefined,
+        page?.querySelector<HTMLElement>("[data-outline-now]"),
+      )
+    : undefined;
   return (room: Room) => {
     captions?.attach(room);
     outline?.attach(room);
