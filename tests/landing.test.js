@@ -194,7 +194,7 @@ describe("landing page", () => {
   it("serves the former homepage at /home and links the app brand there", async () => {
     const home = await request(app).get("/home");
     assert.equal(home.status, 200);
-    assert.match(home.text, /id="ya-market-v4"/);
+    assert.match(home.text, /data-home-list/);
     assert.match(
       home.text,
       /rel="canonical" href="https:\/\/arena\.example\/home"/,
@@ -203,7 +203,7 @@ describe("landing page", () => {
       home.text,
       /<a class="site-logo" href="\/home"><img [^>]*alt="YAP Arena home">/,
     );
-    assert.match(home.text, /homepage\.bundle\.js\?v=/);
+    assert.match(home.text, /home-list\.js\?v=/);
   });
 
   it("serves the landing stylesheet, scripts and logo images", async () => {
