@@ -6,7 +6,7 @@ import {
   activity,
   debate,
   empty,
-  homes,
+  homeLists,
   hostileDebate,
   hostileProfile,
   hostileText,
@@ -14,7 +14,6 @@ import {
   list,
   origin,
   profile,
-  publicHome,
   snapshot,
   topic,
 } from "./page-fixtures.js";
@@ -24,14 +23,15 @@ process.env.RENDER_GIT_COMMIT = "0123456789abcdef0123456789abcdef01234567";
 const web = await import("../dist/features/discovery/web.js");
 const community = await import("../dist/features/community/web.js");
 const legal = await import("../dist/features/discovery/legal-web.js");
+const { topicHistory } =
+  await import("../dist/features/discovery/topic-history-web.js");
 const { renderMeasurementDashboard } =
   await import("../dist/features/measurement/web.js");
 
 it("renders the home page", (t) => {
-  snapshot(t, web.renderHome(origin));
-  for (const data of Object.values(homes))
+  for (const data of Object.values(homeLists))
     snapshot(t, web.renderHome(origin, data));
-  snapshot(t, web.renderHome(origin, publicHome, true));
+  snapshot(t, web.renderHome(origin, homeLists.busy, true));
 });
 
 it("renders the live page", (t) => {
@@ -124,6 +124,17 @@ it("renders a topic", (t) => {
   );
   // Live topic queue on (Decision 0011); the hostile labels prove escaping.
   snapshot(t, web.renderTopic(origin, hostileTopic, empty, true));
+  // With shared rounds, the topic shows its endorsement history.
+  snapshot(
+    t,
+    web.renderTopic(
+      origin,
+      hostileTopic,
+      empty,
+      false,
+      topicHistory(hostileTopic, activity),
+    ),
+  );
 });
 
 it("renders a debate", (t) => {

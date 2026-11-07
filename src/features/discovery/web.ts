@@ -1,4 +1,11 @@
-import { homepageMarkup } from "./homepage-view.ts";
+import { homeListMarkup } from "./home-list-view.ts";
+import {
+  emptyHomeList,
+  homeView,
+  type HomeListData,
+} from "./home-list-model.ts";
+import type { HomeIdea } from "./homepage-model.ts";
+import { topicHistoryMarkup } from "./topic-history-web.ts";
 import { accountMarkup } from "./account-web.ts";
 import {
   siteHeaderMarkup,
@@ -8,7 +15,6 @@ import {
   type SiteTab,
 } from "./site-header-web.ts";
 import type { PublicBotActivity } from "../a4/public-bots.ts";
-import { publicHomepage, type HomeData } from "./homepage-model.ts";
 import { renderVideoDebateCard } from "./video-card-web.ts";
 import { renderFeaturedDebate } from "./featured-web.ts";
 import { livingEmblem } from "./emblem-web.ts";
@@ -160,24 +166,28 @@ function listPath(
   return `${base}${base.includes("?") ? "&" : "?"}${parameters}`;
 }
 
+// /home as a list of debates (first-run plan PR 6, docs/site-design.md#home).
+// The server shows what every reader sees; frontend/home-list.ts adds the
+// reader's followed topics, who is waiting and each debate's results.
 export function renderHome(
   origin: string,
-  data: HomeData = publicHomepage([], []),
+  data: HomeListData = emptyHomeList(new Date()),
   emailFirst = false,
 ) {
   return layout(
     "Where ideas move",
     "Follow an idea. Hear both sides. Take a position.",
     `${origin}/home`,
-    homepageMarkup(data),
+    html`${homeListMarkup(data, homeView(data, new Set(), []))}${data.available ? html`<script type="module" src="${asset("home-list.js")}"></script>` : ""}`,
     shareMetadata({
       origin,
       title: "YAP Arena",
       description: "Follow an idea. Hear both sides. Take a position.",
       url: `${origin}/home`,
     }),
-    `arena-market-home${data.reference ? " reference-home" : ""}`,
+    "",
     emailFirst,
+    ["home.css"],
   );
 }
 
@@ -351,13 +361,16 @@ function sidesCard(topic: PublicTopic, matchmaking: boolean) {
   return html`<section class="card queue-card" data-queue-topic="${topic.slug}" aria-labelledby="queue-heading"><div class="queue-head"><p class="kicker">${inscription("Debate it live")}</p><h2 class="queue-title" id="queue-heading">${inscription("Take a side and get matched")}</h2><p class="queue-help">Pick your side. When someone queues on the other side, you both get 30 seconds to accept, then the debate starts.</p></div>${sides}<div class="queue-notes"><p data-queue-waiting aria-live="polite"></p><p data-queue-note role="status"></p></div></section>`;
 }
 
+// A topic: its question and both sides, its debates and, once it has rounds,
+// its endorsement history (the chart that used to sit on the home).
 export function renderTopic(
   origin: string,
   topic: PublicTopic,
   debates: PublicList<PublicDebate>,
   matchmaking = false,
+  history: HomeIdea | null = null,
 ) {
-  const content = html`<div class="container topic-hero" data-measure-topic="${topic.id}"><div class="topic-copy">${backLink("/topics", "All topics")}<p class="kicker">${inscription(`Topic${topic.isDemo ? " · Demo" : ""}`)}</p><h1 class="title-serif">${topic.title}</h1><p class="page-lead">${topic.summary}</p>${followButton("topics", topic.slug)}</div>${sidesCard(topic, matchmaking)}</div><section class="container page-section" aria-labelledby="topic-debates"><div class="section-head"><p class="kicker">${inscription("On this topic")}</p><h2 class="section-title" id="topic-debates">${inscription("Debates")}</h2></div>${debates.items.length ? html`<div class="list-grid">${debates.items.map(debateCard)}</div>` : quietState("No public debates on this topic yet.", matchmaking ? "Queue on a side to start the first one." : "")}${pagination(`/topics/${path(topic.slug)}`, debates)}</section>`;
+  const content = html`<div class="container topic-hero" data-measure-topic="${topic.id}"><div class="topic-copy">${backLink("/topics", "All topics")}<p class="kicker">${inscription(`Topic${topic.isDemo ? " · Demo" : ""}`)}</p><h1 class="title-serif">${topic.title}</h1><p class="page-lead">${topic.summary}</p>${followButton("topics", topic.slug)}</div>${sidesCard(topic, matchmaking)}</div><section class="container page-section" aria-labelledby="topic-debates"><div class="section-head"><p class="kicker">${inscription("On this topic")}</p><h2 class="section-title" id="topic-debates">${inscription("Debates")}</h2></div>${debates.items.length ? html`<div class="list-grid">${debates.items.map(debateCard)}</div>` : quietState("No public debates on this topic yet.", matchmaking ? "Queue on a side to start the first one." : "")}${pagination(`/topics/${path(topic.slug)}`, debates)}</section>${history ? html`${topicHistoryMarkup(history)}<script type="module" src="${asset("topic-chart.js")}"></script>` : ""}`;
   const canonical = `${origin}${listPath(`/topics/${path(topic.slug)}`, debates)}`;
   return layout(
     topic.title,

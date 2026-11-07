@@ -8095,6 +8095,331 @@ exports[`renders a topic 3`] = `
 </html>
 `;
 
+exports[`renders a topic 4`] = `
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<title>Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; · YAP Arena</title>
+<meta name="description" content="Summary &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
+<link rel="canonical" href="https://arena.example/topics/hostile-topic">
+<meta property="og:site_name" content="YAP Arena">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
+<meta property="og:description" content="Summary &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
+<meta property="og:url" content="https://arena.example/topics/hostile-topic">
+<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="YAP Arena">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="/assets/landing/fonts/headline.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
+<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
+<link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/explore.css?v=0123456789ab">
+<script defer src="/assets/session-coordination.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/site-header.js?v=0123456789ab">
+</script>
+<script defer src="/assets/site.js?v=0123456789ab">
+</script>
+<script defer src="/assets/account-balance.js?v=0123456789ab">
+</script>
+<script defer src="/assets/measurement.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/results-notice.js?v=0123456789ab">
+</script>
+</head>
+<body class="">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
+<img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
+</a>\\n      <nav class="site-nav" aria-label="Main navigation">
+<a href="/live">Live</a>
+<a href="/queue">Queue</a>
+<a href="/debates" aria-current="page">Explore</a>
+<a href="/match">Create</a>
+</nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
+<label class="sr-only" for="header-search">Search debates</label>
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="10.5" cy="10.5" r="6.5"/>
+<path d="m16 16 5 5"/>
+</svg>
+<input id="header-search" type="search" name="q" maxlength="80" placeholder="Search debates…">
+<button type="submit" class="sr-only">Search</button>
+</form>\\n      <a class="header-search-toggle" href="/debates#debate-search" data-header-search-toggle aria-label="Search debates">
+<span class="icon-search">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="10.5" cy="10.5" r="6.5"/>
+<path d="m16 16 5 5"/>
+</svg>
+</span>
+<svg class="icon-close" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</a>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
+<span class="header-loader" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="sr-only">Checking your account…</span>
+</span>\\n        <div class="header-auth-actions" data-header-guest hidden>
+<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
+</div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
+<summary aria-label="Yap Coins balance and actions">
+<span class="header-coin" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<strong data-header-balance>—</strong>
+</summary>
+<div class="arena-wallet-popover">
+<strong data-header-balance-heading>Your Yap Coins</strong>
+<strong class="header-balance-amount" data-header-balance-copy aria-hidden="true">—</strong>
+<span data-header-reserved>Checking balance…</span>
+<span class="header-play-money">Play money · no cash value</span>
+<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
+</div>
+</details>\\n          <details class="header-user-menu">
+<summary class="arena-avatar" data-header-account aria-label="Open account menu">
+<span class="header-avatar" data-header-avatar>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+<circle cx="12" cy="8" r="3.5"/>
+<path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
+</svg>
+</span>
+</summary>
+<div class="header-user-popover">
+<span class="header-menu-caption" data-header-identity>
+<span>YOUR ACCOUNT</span>
+</span>
+<a href="/account#profile" data-header-profile-link>Your profile</a>
+<a href="/account">Settings</a>
+<a href="/coins">Yap Coins</a>
+<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
+</button>
+</div>
+</details>\\n        </div>\\n        <noscript>
+<div class="header-auth-actions">
+<a class="header-login" href="/api/auth/login?connection=google">Continue with Google</a>
+<a class="header-signup" href="/api/auth/login?connection=email">Continue with email</a>
+</div>
+</noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
+</p>\\n    </div>\\n  </header>
+<main id="main">
+<div class="container topic-hero" data-measure-topic="44444444-4444-4444-8444-444444444444">
+<div class="topic-copy">
+<a class="back-link" href="/topics">
+<span aria-hidden="true">←</span> All topics</a>
+<p class="kicker">
+<span class="sr-only">Topic · Demo</span>
+<span class="ins" aria-hidden="true">topic · demo</span>
+</p>
+<h1 class="title-serif">Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</h1>
+<p class="page-lead">Summary &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</p>
+<div class="follow-row">
+<button class="follow-button btn btn-outline btn-sm" type="button" data-follow-type="topics" data-follow-slug="hostile-topic" aria-pressed="false">Follow topic</button>
+<span class="follow-message" role="status" aria-live="polite">
+</span>
+</div>
+</div>
+<section class="card queue-card" aria-label="The two sides">
+<div class="queue-sides">
+<div class="queue-side">
+<p class="kicker">
+<span class="sr-only">Side A</span>
+<span class="ins" aria-hidden="true">side a</span>
+</p>
+<p class="side-label" id="queue-side-a">Side A &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</p>
+</div>
+<span class="vs queue-vs">
+<span class="sr-only">versus</span>
+<span aria-hidden="true">VS</span>
+</span>
+<div class="queue-side">
+<p class="kicker">
+<span class="sr-only">Side B</span>
+<span class="ins" aria-hidden="true">side b</span>
+</p>
+<p class="side-label" id="queue-side-b">Side B &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</p>
+</div>
+</div>
+</section>
+</div>
+<section class="container page-section" aria-labelledby="topic-debates">
+<div class="section-head">
+<p class="kicker">
+<span class="sr-only">On this topic</span>
+<span class="ins" aria-hidden="true">on this topic</span>
+</p>
+<h2 class="section-title" id="topic-debates">
+<span class="sr-only">Debates</span>
+<span class="ins" aria-hidden="true">debates</span>
+</h2>
+</div>
+<div class="state state-quiet">
+<h3>
+<span class="sr-only">No public debates on this topic yet.</span>
+<span class="ins" aria-hidden="true">no pvblic debates on this topic yet.</span>
+</h3>
+</div>
+</section>
+<section class="container page-section topic-history" aria-labelledby="topic-history-title" data-topic-history>
+<div class="section-head">
+<p class="kicker">
+<span class="sr-only">Shared simulation</span>
+<span class="ins" aria-hidden="true">shared simvlation</span>
+</p>
+<h2 class="section-title" id="topic-history-title">
+<span class="sr-only">Endorsement history</span>
+<span class="ins" aria-hidden="true">endorsement history</span>
+</h2>
+</div>
+<div class="card topic-chart-card">
+<div class="topic-chart-bar">
+<p class="topic-chart-legend">
+<i aria-hidden="true">
+</i>
+<span id="ya-legend-name">Endorsement</span> <strong class="num" id="ya-legend">47%</strong>
+</p>
+<div class="topic-chart-tools">
+<div class="ya-segments" role="group" aria-label="Chart metric">
+<button type="button" data-metric="endorsement" aria-pressed="true">Endorsement</button>
+<button type="button" data-metric="price" aria-pressed="false">Price</button>
+</div>
+<div class="ya-segments" role="group" aria-label="Chart period">
+<button type="button" data-range="1D" aria-pressed="true">1D</button>
+<button type="button" data-range="1W" aria-pressed="false">1W</button>
+<button type="button" data-range="1M" aria-pressed="false">1M</button>
+</div>
+</div>
+</div>
+<svg id="ya-chart" class="ya-chart" role="img" aria-label="Synthetic simulation endorsement history" viewBox="0 0 800 240" data-latest-round="round-2">
+<title>Sample participant endorsement, in percent</title>
+<line class="ya-guide" x1="8" y1="212" x2="754" y2="212"/>
+<text x="761" y="216">44%</text>
+<line class="ya-guide" x1="8" y1="162" x2="754" y2="162"/>
+<text x="761" y="166">47%</text>
+<line class="ya-guide" x1="8" y1="112" x2="754" y2="112"/>
+<text x="761" y="116">50%</text>
+<line class="ya-guide" x1="8" y1="62" x2="754" y2="62"/>
+<text x="761" y="66">52%</text>
+<line class="ya-guide" x1="8" y1="12" x2="754" y2="12"/>
+<text x="761" y="16">55%</text>
+<clipPath id="ya-chart-clip">
+<rect data-chart-clip x="0" y="0" width="800" height="240"/>
+</clipPath>
+<path class="ya-linepath" pathLength="1" d="M8,66.54545454545453 L752,157.45454545454547" clip-path="url(#ya-chart-clip)"/>
+<text x="8" y="236" text-anchor="start">00:00</text>
+<text x="8" y="236" text-anchor="middle">00:00</text>
+<text x="752" y="236" text-anchor="middle">00:00</text>
+<text x="752" y="236" text-anchor="middle">00:00</text>
+<text x="752" y="236" text-anchor="end">00:00</text>
+<g class="ya-endpoint" aria-hidden="true">
+<rect class="ya-endpoint-pulse" x="748" y="153.45454545454547" width="8" height="8"/>
+<rect x="748" y="153.45454545454547" width="8" height="8"/>
+</g>
+<g class="ya-hover-group" aria-hidden="true">
+<rect data-chart-hover-marker width="10" height="10"/>
+</g>
+<rect data-chart-hit x="8" y="0" width="744" height="240" fill="transparent"/>
+</svg>
+<p class="topic-chart-meta">
+<span id="ya-metric-label">Synthetic bots + shared participants · settled round</span> <span class="ya-change" id="ya-change">↘ 5 pp today</span>
+</p>
+</div>
+<div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
+<span data-tip-date>
+</span> <strong>
+</strong>
+</div>
+</section>
+<template id="topic-history-data">{&quot;id&quot;:&quot;44444444-4444-4444-8444-444444444444&quot;,&quot;topicSlug&quot;:&quot;hostile-topic&quot;,&quot;href&quot;:&quot;/topics/hostile-topic&quot;,&quot;cat&quot;:&quot;Category &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;title&quot;:&quot;Topic &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;short&quot;:&quot;Topic &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;reference&quot;:false,&quot;demo&quot;:true,&quot;pct&quot;:47,&quot;delta&quot;:-5,&quot;vol&quot;:5,&quot;people&quot;:500,&quot;price&quot;:null,&quot;points&quot;:[52,47],&quot;viewers&quot;:null,&quot;live&quot;:0,&quot;yes&quot;:&quot;Side A &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;no&quot;:&quot;Side B &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:61,&quot;endorsed&quot;:305,&quot;population&quot;:500},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:39,&quot;endorsed&quot;:195,&quot;population&quot;:500}],&quot;debates&quot;:[],&quot;activity&quot;:{&quot;scope&quot;:&quot;shared&quot;,&quot;synthetic&quot;:true,&quot;revision&quot;:&quot;fixture-revision&quot;,&quot;hasMore&quot;:false,&quot;window&quot;:30,&quot;items&quot;:[{&quot;id&quot;:&quot;round-1&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:1,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;52&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:{&quot;n&quot;:&quot;40&quot;,&quot;d&quot;:&quot;100&quot;},&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;},{&quot;id&quot;:&quot;round-2&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:2,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;47&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:null,&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;}],&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:61,&quot;endorsed&quot;:305,&quot;population&quot;:500},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:39,&quot;endorsed&quot;:195,&quot;population&quot;:500}],&quot;category&quot;:&quot;Category &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;totals&quot;:{&quot;premium&quot;:&quot;5000000000&quot;,&quot;humanCommitments&quot;:4,&quot;botCommitments&quot;:996,&quot;executed&quot;:240}}}</template>
+<script type="module" src="/assets/topic-chart.js?v=0123456789ab">
+</script>
+</main>
+<footer class="site-footer">
+<nav class="container footer-inner" aria-label="Site">
+<a href="/topics">Topics</a>
+<a href="/coins">Yap Coins</a>
+<a href="/about">About</a>
+<a href="/privacy">Privacy</a>
+<a href="/terms">Terms</a>
+<a href="/cookies">Cookies</a>
+</nav>
+<p class="footer-note">Play money · no cash value</p>
+</footer>
+<nav class="site-tabbar" aria-label="Main navigation">
+<a href="/home">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
+</svg>
+<span>Home</span>
+</a>
+<a href="/live">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Live</span>
+</a>
+<a href="/queue">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+<span>Queue</span>
+</a>
+<a href="/debates" aria-current="page">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
+<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+<span>Explore</span>
+</a>
+<a href="/match">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+<span>Create</span>
+</a>
+</nav>
+</body>
+</html>
+`;
+
 exports[`renders community moderation and the broadcast overlay 1`] = `
 <!doctype html>
 <html lang="en">
@@ -12827,6 +13152,7 @@ exports[`renders the home page 1`] = `
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/home.css?v=0123456789ab">
 <script defer src="/assets/session-coordination.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/site-header.js?v=0123456789ab">
@@ -12839,11 +13165,8 @@ exports[`renders the home page 1`] = `
 </script>
 <script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
-<link rel="stylesheet" href="/assets/homepage.css?v=0123456789ab">
-<script defer src="/assets/homepage.bundle.js?v=0123456789ab">
-</script>
 </head>
-<body class="arena-market-home">
+<body class="">
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
@@ -12943,19 +13266,46 @@ exports[`renders the home page 1`] = `
 </div>
 </noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
 </p>\\n    </div>\\n  </header>
-<div id="ya-market-v4" data-reference="false">
-<main id="main" class="ya-content container">
+<main id="main">
+<div class="container home-list" data-home-list>
 <h1 class="sr-only">Yap Arena</h1>
-<div class="state home-state">
-<h2>
-<span class="sr-only">No public ideas yet.</span>
-<span class="ins" aria-hidden="true">no pvblic ideas yet.</span>
+<div class="home-intro" data-home-intro>
+<p>Live video debates. Say whether you agree during each turn's 60-second window.</p>
+<button class="home-intro-close" type="button" data-home-intro-close aria-label="Close the introduction">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18">
+</path>
+</svg>
+</button>
+</div>
+<div class="chips home-chips" role="group" aria-label="Show">
+<button class="chip" type="button" data-home-filter="all" aria-pressed="true">All</button>
+<button class="chip" type="button" data-home-filter="soon" aria-pressed="false">Soon · 0</button>
+<button class="chip" type="button" data-home-filter="replays" aria-pressed="false">Replays · 0</button>
+</div>
+<div class="home-feed" data-home-feed>
+<section class="home-section home-top" aria-labelledby="home-top-title">
+<h2 class="home-section-title" id="home-top-title">
+<span class="sr-only">Start the first debate</span>
+<span class="ins" aria-hidden="true">start the first debate</span>
 </h2>
-<p>Published topics and their debates will appear here.</p>
-<a class="btn btn-secondary" href="/topics">Explore topics</a>
+<a class="card home-feature" href="/match" data-home-key="start">
+<span class="home-feature-text">Create a topic, then challenge someone to debate it.</span>
+<span class="home-feature-foot">
+<span class="btn btn-primary btn-sm home-action">Create a topic</span>
+</span>
+</a>
+</section>
+<a class="text-link home-more" href="/debates">All debates <span aria-hidden="true">→</span>
+</a>
 </div>
+<p class="sr-only" role="status" data-home-status>
+</p>
+</div>
+<template id="home-list-data">{&quot;available&quot;:true,&quot;now&quot;:&quot;2026-11-06T18:00:00.000Z&quot;,&quot;matchmaking&quot;:false,&quot;live&quot;:[],&quot;soon&quot;:[],&quot;replays&quot;:[],&quot;finished&quot;:[]}</template>
+<script type="module" src="/assets/home-list.js?v=0123456789ab">
+</script>
 </main>
-</div>
 <footer class="site-footer">
 <nav class="container footer-inner" aria-label="Site">
 <a href="/topics">Topics</a>
@@ -13034,6 +13384,7 @@ exports[`renders the home page 2`] = `
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/home.css?v=0123456789ab">
 <script defer src="/assets/session-coordination.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/site-header.js?v=0123456789ab">
@@ -13046,11 +13397,8 @@ exports[`renders the home page 2`] = `
 </script>
 <script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
-<link rel="stylesheet" href="/assets/homepage.css?v=0123456789ab">
-<script defer src="/assets/homepage.bundle.js?v=0123456789ab">
-</script>
 </head>
-<body class="arena-market-home">
+<body class="">
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
@@ -13150,19 +13498,22 @@ exports[`renders the home page 2`] = `
 </div>
 </noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
 </p>\\n    </div>\\n  </header>
-<div id="ya-market-v4" data-reference="false">
-<main id="main" class="ya-content container">
+<main id="main">
+<div class="container home-list">
 <h1 class="sr-only">Yap Arena</h1>
 <div class="state home-state">
 <h2>
-<span class="sr-only">No public ideas yet.</span>
-<span class="ins" aria-hidden="true">no pvblic ideas yet.</span>
+<span class="sr-only">Discovery temporarily unavailable.</span>
+<span class="ins" aria-hidden="true">discovery temporarily vnavailable.</span>
 </h2>
-<p>Published topics and their debates will appear here.</p>
-<a class="btn btn-secondary" href="/topics">Explore topics</a>
+<p>Try again shortly.</p>
+<div class="home-state-actions">
+<a class="btn btn-secondary" href="/home">Try again</a>
+<a class="btn btn-outline" href="/topics">Explore topics</a>
+</div>
+</div>
 </div>
 </main>
-</div>
 <footer class="site-footer">
 <nav class="container footer-inner" aria-label="Site">
 <a href="/topics">Topics</a>
@@ -13241,6 +13592,7 @@ exports[`renders the home page 3`] = `
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/home.css?v=0123456789ab">
 <script defer src="/assets/session-coordination.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/site-header.js?v=0123456789ab">
@@ -13253,11 +13605,8 @@ exports[`renders the home page 3`] = `
 </script>
 <script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
-<link rel="stylesheet" href="/assets/homepage.css?v=0123456789ab">
-<script defer src="/assets/homepage.bundle.js?v=0123456789ab">
-</script>
 </head>
-<body class="arena-market-home">
+<body class="">
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
@@ -13357,22 +13706,177 @@ exports[`renders the home page 3`] = `
 </div>
 </noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
 </p>\\n    </div>\\n  </header>
-<div id="ya-market-v4" data-reference="false">
-<main id="main" class="ya-content container">
+<main id="main">
+<div class="container home-list" data-home-list>
 <h1 class="sr-only">Yap Arena</h1>
-<div class="state home-state">
-<h2>
-<span class="sr-only">Discovery temporarily unavailable.</span>
-<span class="ins" aria-hidden="true">discovery temporarily vnavailable.</span>
+<div class="home-intro" data-home-intro>
+<p>Live video debates. Say whether you agree during each turn's 60-second window.</p>
+<button class="home-intro-close" type="button" data-home-intro-close aria-label="Close the introduction">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18">
+</path>
+</svg>
+</button>
+</div>
+<div class="chips home-chips" role="group" aria-label="Show">
+<button class="chip" type="button" data-home-filter="all" aria-pressed="true">All</button>
+<button class="chip" type="button" data-home-filter="soon" aria-pressed="false">Soon · 1</button>
+<button class="chip" type="button" data-home-filter="replays" aria-pressed="false">Replays · 2</button>
+</div>
+<div class="home-feed" data-home-feed>
+<section class="home-section home-top" aria-labelledby="home-top-title">
+<h2 class="home-section-title" id="home-top-title">
+<span class="live-pixel" aria-hidden="true">
+</span>
+<span class="sr-only">Live now</span>
+<span class="ins" aria-hidden="true">live now</span>
 </h2>
-<p>Try again shortly.</p>
-<div class="home-state-actions">
-<a class="btn btn-secondary" href="/home">Try again</a>
-<a class="btn btn-outline" href="/topics">Explore topics</a>
+<a class="card home-feature" href="/debates/hostile-debate" data-home-key="55555555-5555-4555-8555-555555555555">
+<span class="home-feature-head">
+<span class="home-pair">
+<span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
+</span>
+<span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
+</span>
+</span>
+<span class="tag tag-live">
+<span class="live-pixel" aria-hidden="true">
+</span>Live</span>
+</span>
+<span class="home-feature-title">Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
+<span class="home-row-meta">
+<span class="live-pixel" aria-hidden="true">
+</span>
+<span>Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; vs Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; · Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span> <span class="tag tag-quiet">Demo</span>
+</span>
+<span class="home-feature-foot">
+<span class="home-row-meta">
+</span>
+<span class="btn btn-primary btn-sm home-action">Watch</span>
+</span>
+</a>
+<ul class="home-rows">
+<li>
+<a class="home-row" href="/debates/public-debate-1" data-home-key="66666666-6666-4666-8666-000000000001">
+<span class="home-pair">
+<span class="avatar-slot" style="--avatar-size:36px" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+</span>
+<span class="avatar-slot" style="--avatar-size:36px" aria-hidden="true">
+<span class="avatar-initials">?</span>
+</span>
+</span>
+<span class="home-row-copy">
+<span class="home-row-title">Should we debate this?</span>
+<span class="home-row-meta">
+<span class="live-pixel" aria-hidden="true">
+</span>
+<span>Alex Public vs Against · Public topic</span>
+</span>
+</span>
+<span class="btn btn-outline btn-sm home-action">Watch</span>
+</a>
+</li>
+</ul>
+</section>
+<section class="home-section" aria-labelledby="home-soon-title" data-home-section="soon">
+<h2 class="home-section-title" id="home-soon-title">
+<span class="sr-only">Starting soon</span>
+<span class="ins" aria-hidden="true">starting soon</span>
+</h2>
+<ul class="home-rows">
+<li>
+<a class="home-row" href="/debates/public-debate-2" data-home-key="66666666-6666-4666-8666-000000000002">
+<span class="home-pair">
+<span class="avatar-slot" style="--avatar-size:36px" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+</span>
+<span class="avatar-slot" style="--avatar-size:36px" aria-hidden="true">
+<span class="avatar-initials">?</span>
+</span>
+</span>
+<span class="home-row-copy">
+<span class="home-row-title">Should we debate this?</span>
+<span class="home-row-meta">
+<span>Alex Public vs Against · Public topic</span>
+</span>
+</span>
+<span class="home-when">
+<time class="num" datetime="2026-11-06T20:15:00.000Z" data-home-countdown="start">in 2 h 15</time>
+</span>
+</a>
+</li>
+</ul>
+</section>
+<section class="home-section" aria-labelledby="home-replays-title" data-home-section="replays">
+<h2 class="home-section-title" id="home-replays-title">
+<span class="sr-only">Replays you can still answer</span>
+<span class="ins" aria-hidden="true">replays yov can still answer</span>
+</h2>
+<ul class="home-rows">
+<li>
+<a class="home-row" href="/debates/hostile-debate-5" data-home-key="66666666-6666-4666-8666-000000000005">
+<span class="home-pair">
+<span class="avatar-slot" style="--avatar-size:36px" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
+</span>
+<span class="avatar-slot" style="--avatar-size:36px" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
+</span>
+</span>
+<span class="home-row-copy">
+<span class="home-row-title">Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
+<span class="home-row-meta">
+<span>Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; vs Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; · Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span> <span class="tag tag-quiet">Demo</span>
+</span>
+<span class="home-row-meta">Answers close <time class="num" datetime="2026-11-10T16:00:00.000Z" data-home-countdown="close">in 3 days</time>
+</span>
+</span>
+<span class="btn btn-outline btn-sm home-action">Answer</span>
+</a>
+</li>
+</ul>
+</section>
+<section class="home-section" aria-labelledby="home-finished-title" data-home-section="finished">
+<h2 class="home-section-title" id="home-finished-title">
+<span class="sr-only">Finished debates</span>
+<span class="ins" aria-hidden="true">finished debates</span>
+</h2>
+<ul class="home-rows">
+<li>
+<a class="home-row" href="/debates/public-debate-6" data-home-key="66666666-6666-4666-8666-000000000006">
+<span class="home-pair">
+<span class="avatar-slot" style="--avatar-size:36px" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+</span>
+<span class="avatar-slot" style="--avatar-size:36px" aria-hidden="true">
+<span class="avatar-initials">?</span>
+</span>
+</span>
+<span class="home-row-copy">
+<span class="home-row-title">Should we debate this?</span>
+<span class="home-row-meta">
+<span>Alex Public vs Against · Public topic</span>
+</span>
+<span class="home-row-meta">Ended Oct 21</span>
+</span>
+<span class="btn btn-outline btn-sm home-action">Watch</span>
+</a>
+</li>
+</ul>
+</section>
+<a class="text-link home-more" href="/debates">All debates <span aria-hidden="true">→</span>
+</a>
 </div>
+<p class="sr-only" role="status" data-home-status>
+</p>
 </div>
+<template id="home-list-data">{&quot;available&quot;:true,&quot;now&quot;:&quot;2026-11-06T18:00:00.000Z&quot;,&quot;matchmaking&quot;:true,&quot;live&quot;:[{&quot;id&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;slug&quot;:&quot;hostile-debate&quot;,&quot;href&quot;:&quot;/debates/hostile-debate&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;proposition&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;topic&quot;:{&quot;slug&quot;:&quot;hostile-topic&quot;,&quot;title&quot;:&quot;Topic &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;},&quot;names&quot;:[&quot;Name &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;],&quot;named&quot;:[true,true],&quot;avatars&quot;:[&quot;/assets/avatars/yap-crab.svg?v=0123456789ab&quot;,&quot;/assets/avatars/yap-frog.svg?v=0123456789ab&quot;],&quot;demo&quot;:true,&quot;startsAt&quot;:&quot;2026-10-01T17:00:00.000Z&quot;,&quot;endedAt&quot;:null,&quot;closesAt&quot;:null,&quot;result&quot;:null},{&quot;id&quot;:&quot;66666666-6666-4666-8666-000000000001&quot;,&quot;slug&quot;:&quot;public-debate-1&quot;,&quot;href&quot;:&quot;/debates/public-debate-1&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;proposition&quot;:&quot;Should we debate this?&quot;,&quot;topic&quot;:{&quot;slug&quot;:&quot;public-topic&quot;,&quot;title&quot;:&quot;Public topic&quot;},&quot;names&quot;:[&quot;Alex Public&quot;,&quot;Against&quot;],&quot;named&quot;:[true,false],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;demo&quot;:false,&quot;startsAt&quot;:&quot;2026-10-01T17:00:00.000Z&quot;,&quot;endedAt&quot;:null,&quot;closesAt&quot;:null,&quot;result&quot;:null}],&quot;soon&quot;:[{&quot;id&quot;:&quot;66666666-6666-4666-8666-000000000002&quot;,&quot;slug&quot;:&quot;public-debate-2&quot;,&quot;href&quot;:&quot;/debates/public-debate-2&quot;,&quot;kind&quot;:&quot;soon&quot;,&quot;proposition&quot;:&quot;Should we debate this?&quot;,&quot;topic&quot;:{&quot;slug&quot;:&quot;public-topic&quot;,&quot;title&quot;:&quot;Public topic&quot;},&quot;names&quot;:[&quot;Alex Public&quot;,&quot;Against&quot;],&quot;named&quot;:[true,false],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;demo&quot;:false,&quot;startsAt&quot;:&quot;2026-11-06T20:15:00.000Z&quot;,&quot;endedAt&quot;:null,&quot;closesAt&quot;:null,&quot;result&quot;:null}],&quot;replays&quot;:[{&quot;id&quot;:&quot;66666666-6666-4666-8666-000000000005&quot;,&quot;slug&quot;:&quot;hostile-debate-5&quot;,&quot;href&quot;:&quot;/debates/hostile-debate-5&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;proposition&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;topic&quot;:{&quot;slug&quot;:&quot;hostile-topic&quot;,&quot;title&quot;:&quot;Topic &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;},&quot;names&quot;:[&quot;Name &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;],&quot;named&quot;:[true,true],&quot;avatars&quot;:[&quot;/assets/avatars/yap-crab.svg?v=0123456789ab&quot;,&quot;/assets/avatars/yap-frog.svg?v=0123456789ab&quot;],&quot;demo&quot;:true,&quot;startsAt&quot;:&quot;2026-10-01T17:00:00.000Z&quot;,&quot;endedAt&quot;:&quot;2026-11-05T16:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2026-11-10T16:00:00.000Z&quot;,&quot;result&quot;:null}],&quot;finished&quot;:[{&quot;id&quot;:&quot;66666666-6666-4666-8666-000000000006&quot;,&quot;slug&quot;:&quot;public-debate-6&quot;,&quot;href&quot;:&quot;/debates/public-debate-6&quot;,&quot;kind&quot;:&quot;finished&quot;,&quot;proposition&quot;:&quot;Should we debate this?&quot;,&quot;topic&quot;:{&quot;slug&quot;:&quot;public-topic&quot;,&quot;title&quot;:&quot;Public topic&quot;},&quot;names&quot;:[&quot;Alex Public&quot;,&quot;Against&quot;],&quot;named&quot;:[true,false],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;demo&quot;:false,&quot;startsAt&quot;:&quot;2026-10-01T17:00:00.000Z&quot;,&quot;endedAt&quot;:&quot;2026-10-21T02:00:00.000Z&quot;,&quot;closesAt&quot;:null,&quot;result&quot;:null}]}</template>
+<script type="module" src="/assets/home-list.js?v=0123456789ab">
+</script>
 </main>
-</div>
 <footer class="site-footer">
 <nav class="container footer-inner" aria-label="Site">
 <a href="/topics">Topics</a>
@@ -13451,6 +13955,7 @@ exports[`renders the home page 4`] = `
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/home.css?v=0123456789ab">
 <script defer src="/assets/session-coordination.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/site-header.js?v=0123456789ab">
@@ -13463,11 +13968,8 @@ exports[`renders the home page 4`] = `
 </script>
 <script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
-<link rel="stylesheet" href="/assets/homepage.css?v=0123456789ab">
-<script defer src="/assets/homepage.bundle.js?v=0123456789ab">
-</script>
 </head>
-<body class="arena-market-home">
+<body class="">
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
@@ -13567,275 +14069,65 @@ exports[`renders the home page 4`] = `
 </div>
 </noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
 </p>\\n    </div>\\n  </header>
-<div id="ya-market-v4" data-reference="false">\\n  <main id="main" class="ya-content container">\\n    <h1 class="sr-only">Yap Arena</h1>\\n    <div class="home-top">\\n    <section class="ya-carousel" id="ya-carousel" aria-label="Trending ideas" aria-roledescription="carousel">\\n    <div class="ya-carousel-window" id="ya-carousel-window">
-<article class="card trend" id="ya-trending-slide" aria-roledescription="slide" aria-label="1 of 1: A real &lt;question&gt;?">
-<header class="trend-head">
-<svg class="pixel-mark" width="48" height="48" viewBox="0 0 6 6" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
-<rect width="6" height="6" rx="1.5" fill="var(--raised)">
-</rect>
-<path d="M1.5 0.5h1v1h-1zM3.5 0.5h1v1h-1zM2.5 0.5h1v1h-1zM0.5 1.5h1v1h-1zM4.5 1.5h1v1h-1zM1.5 1.5h1v1h-1zM3.5 1.5h1v1h-1zM2.5 1.5h1v1h-1zM0.5 2.5h1v1h-1zM4.5 2.5h1v1h-1zM2.5 3.5h1v1h-1z" fill="var(--visit-0)">
-</path>
-</svg>
-<div class="trend-heading">
-<p class="trend-cat" id="ya-category">
-<span class="sr-only">Ideas · Trending</span>
-<span class="ins" aria-hidden="true">ideas · trending</span>
-</p>
-<h2 class="trend-title" id="ya-title">
-<a href="/topics/public-idea">A real &lt;question&gt;?</a>
-</h2>
-</div>
-<button class="ya-follow ya-bookmark follow-button" type="button" id="ya-follow" data-idea="11111111-1111-4111-8111-111111111111" data-follow-type="topics" data-follow-slug="public-idea" data-follow-icon="true" aria-pressed="false"  aria-label="Follow this idea">
+<main id="main">
+<div class="container home-list" data-home-list>
+<h1 class="sr-only">Yap Arena</h1>
+<div class="home-intro" data-home-intro>
+<p>Live video debates. Say whether you agree during each turn's 60-second window.</p>
+<button class="home-intro-close" type="button" data-home-intro-close aria-label="Close the introduction">
 <svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M6.5 3.5h11v17l-5.5-4-5.5 4z">
+<path d="M6 6l12 12M18 6 6 18">
 </path>
 </svg>
 </button>
-<span class="follow-message sr-only" role="status">
-</span>
-</header>
-<div class="trend-body">
-<div class="trend-left">
-<div class="trend-none">
-<p class="trend-none-title">
-<span class="sr-only">No rounds yet</span>
-<span class="ins" aria-hidden="true">no rovnds yet</span>
-</p>
-<p>Participant endorsement appears after the first closed round.</p>
 </div>
-<section class="trend-args" aria-labelledby="ya-args-title">
-<h3 class="trend-args-title" id="ya-args-title">
-<span class="sr-only">Behind the position</span>
-<span class="ins" aria-hidden="true">behind the position</span>
-</h3>
-<ul class="trend-arg-list">
-<li class="trend-arg">
-<p class="trend-arg-meta">
-<strong>For the idea</strong>
-</p>
-<p class="trend-arg-text">For &lt;the&gt; idea</p>
-</li>
-<li class="trend-arg is-counter">
-<p class="trend-arg-meta">
-<strong>Counterargument</strong>
-</p>
-<p class="trend-arg-text">Against &amp; questioning</p>
-</li>
-</ul>
-</section>
+<div class="chips home-chips" role="group" aria-label="Show">
+<button class="chip" type="button" data-home-filter="all" aria-pressed="true">All</button>
+<button class="chip" type="button" data-home-filter="soon" aria-pressed="false">Soon · 0</button>
+<button class="chip" type="button" data-home-filter="replays" aria-pressed="false">Replays · 1</button>
 </div>
-<div class="trend-right">
-<div class="trend-chartbar">
-<p class="trend-legend">
-<i aria-hidden="true">
-</i>
-<span id="ya-legend-name">Endorsement</span> <strong class="num" id="ya-legend">—</strong>
-</p>
-<div class="trend-tools">
-<div class="ya-segments" role="group" aria-label="Chart metric">
-<button type="button" data-metric="endorsement" aria-pressed="true">Endorsement</button>
-<button type="button" data-metric="price" aria-pressed="false">Price</button>
-</div>
-<div class="ya-segments" role="group" aria-label="Chart period">
-<button type="button" data-range="1D" aria-pressed="true">1D</button>
-<button type="button" data-range="1W" aria-pressed="false">1W</button>
-<button type="button" data-range="1M" aria-pressed="false">1M</button>
-</div>
-</div>
-</div>
-<svg id="ya-chart" class="ya-chart" role="img" aria-label="Idea history unavailable" viewBox="0 0 800 240">
-<title>Unavailable participant endorsement, in percent</title>
-<line class="ya-guide" x1="8" y1="212" x2="792" y2="212"/>
-<line class="ya-guide" x1="8" y1="162" x2="792" y2="162"/>
-<line class="ya-guide" x1="8" y1="112" x2="792" y2="112"/>
-<line class="ya-guide" x1="8" y1="62" x2="792" y2="62"/>
-<line class="ya-guide" x1="8" y1="12" x2="792" y2="12"/>
-<text class="ya-chart-empty" x="400" y="92" text-anchor="middle">The chart starts after the first closed round.</text>
-</svg>
-</div>
-</div>
-<footer class="trend-foot">
-<p class="trend-stats">
-<span>1 live</span>
-</p>
-<div class="trend-arena">
-<p class="trend-match">
-<span class="trend-people">
-<span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
+<div class="home-feed" data-home-feed>
+<p class="home-quiet">
+<span class="home-quiet-mark" aria-hidden="true">
+</span>Nothing live right now. Live debates show here first.</p>
+<section class="home-section home-top" aria-labelledby="home-top-title">
+<h2 class="home-section-title" id="home-top-title">
+<span class="sr-only">You can still answer</span>
+<span class="ins" aria-hidden="true">yov can still answer</span>
+</h2>
+<a class="card home-feature" href="/debates/public-debate-7" data-home-key="66666666-6666-4666-8666-000000000007">
+<span class="home-feature-head">
+<span class="home-pair">
+<span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
 <img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
-<span>Alex Rivera</span>
-<span class="vs">
-<span class="sr-only">versus</span>
-<span aria-hidden="true">VS</span>
+<span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
+<span class="avatar-initials">?</span>
 </span>
-<span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">SB</span>
 </span>
-<span>Speaker B</span>
+<span class="tag">Replay</span>
 </span>
-<span class="trend-when">
-<span class="trend-live">
-<span class="live-pixel" aria-hidden="true">
-</span>Live now</span>
+<span class="home-feature-title">Should we debate this?</span>
+<span class="home-row-meta">
+<span>Alex Public vs Against · Public topic</span>
 </span>
-</p>
-<a class="btn btn-primary btn-sm trend-cta" href="/debates/real-debate">Explore debate</a>
-</div>
-<p class="trend-signin">
-<a href="/account">Sign in to take part</a>
-</p>
-</footer>
-</article>
-</div>\\n    <div class="ya-carousel-controls">
-<div class="ya-carousel-dots" id="ya-carousel-dots" role="group" aria-label="Choose trending idea">
-<button type="button" class="ya-carousel-dot" data-trending="11111111-1111-4111-8111-111111111111" aria-label="Show A real &lt;question&gt;?" aria-current="true">
-<span class="ya-dot-pixels" aria-hidden="true">
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
+<span class="home-feature-foot">
+<span class="home-row-meta">Answers close <time class="num" datetime="2026-11-11T15:00:00.000Z" data-home-countdown="close">in 4 days</time>
 </span>
-</button>
-</div>
-<div class="ya-carousel-nav" id="ya-carousel-nav">
-<button type="button" class="ya-nav-pill" data-carousel="previous" aria-label="Previous idea: A real &lt;question&gt;?" disabled>
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M15 6l-6 6 6 6">
-</path>
-</svg>
-<span>A real &lt;question&gt;?</span>
-</button>
-<button type="button" class="ya-nav-pill" data-carousel="next" aria-label="Next idea: A real &lt;question&gt;?" disabled>
-<span>A real &lt;question&gt;?</span>
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M9 6l6 6-6 6">
-</path>
-</svg>
-</button>
-</div>
-</div>\\n    </section>\\n    <aside class="home-rail" id="ya-rail" aria-label="Live now and popular ideas">
-<section class="card rail-live" aria-labelledby="ya-live-title">
-<p class="rail-live-top">
-<span class="tag tag-live">
-<span class="live-pixel" aria-hidden="true">
-</span>Live</span>
-</p>
-<h2 class="rail-live-title" id="ya-live-title">
-<a href="/debates/real-debate">A real &lt;question&gt;?</a>
-</h2>
-<p class="rail-live-people">Alex Rivera vs Speaker B</p>
-<a class="btn btn-secondary btn-sm" href="/debates/real-debate" aria-label="Watch: A real &lt;question&gt;?">Watch</a>
-</section>
-<section class="card rail-promo rail-promo-member" aria-labelledby="ya-promo-member">
-<h2 class="rail-title" id="ya-promo-member">
-<span class="sr-only">Take a side</span>
-<span class="ins" aria-hidden="true">take a side</span>
-</h2>
-<p>Open a topic and queue on a side. You are matched with someone on the other side in seconds.</p>
-<a class="btn btn-secondary btn-sm" href="/topics">Browse topics</a>
-</section>
-<section class="card rail-promo rail-promo-guest" aria-labelledby="ya-promo-guest">
-<h2 class="rail-title" id="ya-promo-guest">
-<span class="sr-only">Join the arena</span>
-<span class="ins" aria-hidden="true">join the arena</span>
-</h2>
-<p>Sign in to follow ideas, take a side and debate live.</p>
-<a class="btn btn-secondary btn-sm" href="/account">Sign in</a>
-</section>
-<section class="rail-popular" aria-labelledby="ya-popular-title">
-<h2 class="rail-title" id="ya-popular-title">
-<span class="sr-only">Popular ideas</span>
-<span class="ins" aria-hidden="true">popvlar ideas</span>
-</h2>
-<ol class="rail-popular-list">
-<li>
-<a href="/topics/public-idea">
-<span class="rail-rank num">1</span>
-<span class="rail-pop">
-<span class="rail-pop-name">A real &lt;question&gt;?</span>
-<span class="rail-pop-vol">
-<span class="live-pixel" aria-hidden="true">
-</span>1 live</span>
-</span>
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M9 6l6 6-6 6">
-</path>
-</svg>
-</a>
-</li>
-</ol>
-</section>
-<a class="btn btn-outline rail-all" href="#ya-ideas">Explore all ideas</a>
-</aside>\\n    </div>\\n    <section class="ya-discovery" id="ya-ideas" aria-labelledby="ya-grid-title">
-<div class="ya-sectionhead">
-<h2 class="section-title" id="ya-grid-title" tabindex="-1">
-<span class="sr-only">Ideas in motion</span>
-<span class="ins" aria-hidden="true">ideas in motion</span>
-</h2>
-<label class="sr-only" for="ya-sort">Sort ideas</label>
-<select class="input ya-sort" id="ya-sort">
-<option value="active">Most active</option>
-<option value="moves">Biggest shifts</option>
-</select>
-</div>
-<div class="ya-discovery-tools">
-<div class="ya-view-tabs ya-segments" role="group" aria-label="Ideas view">
-<button type="button" data-nav="all" aria-pressed="true">All ideas</button>
-<button type="button" data-nav="following" aria-pressed="false">Following</button>
-</div>
-<div class="chips ya-filters" role="group" aria-label="Idea categories">
-<button class="chip ya-filter" data-filter="All" aria-pressed="true" type="button">All ideas</button>
-<button class="chip ya-filter" data-filter="Ideas" aria-pressed="false" type="button">Ideas</button>
-</div>
-<form class="ya-idea-search search-pill" action="/topics" method="get" role="search" aria-label="Search ideas">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<circle cx="11" cy="11" r="7">
-</circle>
-<path d="m20 20-3.5-3.5">
-</path>
-</svg>
-<label class="sr-only" for="ya-search">Search ideas</label>
-<input class="input" id="ya-search" name="q" type="search" placeholder="Search ideas…" maxlength="80">
-</form>
-</div>
-<div class="ya-grid" id="ya-grid">
-<a href="/topics/public-idea" class="ya-marketcard" data-expand="11111111-1111-4111-8111-111111111111" aria-expanded="false">
-<span class="ya-cardtop">
-<span class="ya-cardcat">
-<svg class="pixel-mark" width="24" height="24" viewBox="0 0 6 6" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
-<rect width="6" height="6" rx="2" fill="var(--raised)">
-</rect>
-<path d="M1.5 0.5h1v1h-1zM3.5 0.5h1v1h-1zM2.5 0.5h1v1h-1zM0.5 1.5h1v1h-1zM4.5 1.5h1v1h-1zM1.5 1.5h1v1h-1zM3.5 1.5h1v1h-1zM2.5 1.5h1v1h-1zM0.5 2.5h1v1h-1zM4.5 2.5h1v1h-1zM2.5 3.5h1v1h-1z" fill="var(--visit-0)">
-</path>
-</svg>
-<span>Ideas</span>
-</span>
-<span class="ya-cardlive is-live">
-<span class="live-pixel" aria-hidden="true">
-</span>1 live</span>
-</span>
-<span class="ya-cardtitle">A real &lt;question&gt;?</span>
-<span class="ya-cardnone">
-<strong>No rounds yet</strong> · Participant endorsement appears after the first closed round.</span>
-<span class="ya-cardhint">
-<span>Explore idea & debates</span>
-<span aria-hidden="true">+</span>
+<span class="btn btn-primary btn-sm home-action">Answer</span>
 </span>
 </a>
+</section>
+<a class="text-link home-more" href="/debates">All debates <span aria-hidden="true">→</span>
+</a>
 </div>
-<p class="ya-endnote">Endorsement = share of participants choosing YES in the latest closed round. Synthetic activity is labeled.</p>
-</section>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
-<span data-tip-date>
-</span> <strong>
-</strong>
-</div>\\n    <div id="ya-status" aria-live="polite" class="sr-only">
-</div>\\n  <noscript>
-<p class="ya-endnote">Idea links open their public topic pages. Enable JavaScript for inline charts, filters and previews.</p>
-</noscript>
-</main>\\n</div>\\n<template id="ya-home-data">{&quot;reference&quot;:false,&quot;available&quot;:true,&quot;following&quot;:[],&quot;ideas&quot;:[{&quot;id&quot;:&quot;11111111-1111-4111-8111-111111111111&quot;,&quot;topicSlug&quot;:&quot;public-idea&quot;,&quot;href&quot;:&quot;/topics/public-idea&quot;,&quot;cat&quot;:&quot;Ideas&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;short&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;reference&quot;:false,&quot;demo&quot;:false,&quot;pct&quot;:null,&quot;delta&quot;:null,&quot;vol&quot;:null,&quot;people&quot;:null,&quot;price&quot;:null,&quot;points&quot;:[],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;no&quot;:&quot;Against &amp; questioning&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;rate&quot;:null},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against &amp; questioning&quot;,&quot;rate&quot;:null}],&quot;debates&quot;:[{&quot;id&quot;:&quot;22222222-2222-4222-8222-222222222222&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;replay&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Speaker A&quot;,&quot;Morgan B&quot;,&quot;SA&quot;,&quot;MB&quot;],&quot;avatars&quot;:[null,&quot;/assets/avatars/yap-frog.svg?v=0123456789ab&quot;],&quot;meta&quot;:&quot;Replay debate&quot;,&quot;stamp&quot;:&quot;Replay&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;upcoming&quot;,&quot;kind&quot;:&quot;upcoming&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;meta&quot;:&quot;Upcoming / awaiting media&quot;,&quot;stamp&quot;:&quot;Upcoming&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null}]}]}</template>
+<p class="sr-only" role="status" data-home-status>
+</p>
+</div>
+<template id="home-list-data">{&quot;available&quot;:true,&quot;now&quot;:&quot;2026-11-06T18:00:00.000Z&quot;,&quot;matchmaking&quot;:false,&quot;live&quot;:[],&quot;soon&quot;:[],&quot;replays&quot;:[{&quot;id&quot;:&quot;66666666-6666-4666-8666-000000000007&quot;,&quot;slug&quot;:&quot;public-debate-7&quot;,&quot;href&quot;:&quot;/debates/public-debate-7&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;proposition&quot;:&quot;Should we debate this?&quot;,&quot;topic&quot;:{&quot;slug&quot;:&quot;public-topic&quot;,&quot;title&quot;:&quot;Public topic&quot;},&quot;names&quot;:[&quot;Alex Public&quot;,&quot;Against&quot;],&quot;named&quot;:[true,false],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;demo&quot;:false,&quot;startsAt&quot;:&quot;2026-10-01T17:00:00.000Z&quot;,&quot;endedAt&quot;:&quot;2026-11-06T15:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2026-11-11T15:00:00.000Z&quot;,&quot;result&quot;:null}],&quot;finished&quot;:[]}</template>
+<script type="module" src="/assets/home-list.js?v=0123456789ab">
+</script>
+</main>
 <footer class="site-footer">
 <nav class="container footer-inner" aria-label="Site">
 <a href="/topics">Topics</a>
@@ -13889,1353 +14181,6 @@ exports[`renders the home page 4`] = `
 
 exports[`renders the home page 5`] = `
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#000000">
-<title>Where ideas move · YAP Arena</title>
-<meta name="description" content="Follow an idea. Hear both sides. Take a position.">
-<link rel="canonical" href="https://arena.example/home">
-<meta property="og:site_name" content="YAP Arena">
-<meta property="og:type" content="website">
-<meta property="og:title" content="YAP Arena">
-<meta property="og:description" content="Follow an idea. Hear both sides. Take a position.">
-<meta property="og:url" content="https://arena.example/home">
-<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="YAP Arena">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
-<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
-<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
-<link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
-<link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
-<link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
-<script defer src="/assets/session-coordination.js?v=0123456789ab">
-</script>
-<script type="module" src="/assets/site-header.js?v=0123456789ab">
-</script>
-<script defer src="/assets/site.js?v=0123456789ab">
-</script>
-<script defer src="/assets/account-balance.js?v=0123456789ab">
-</script>
-<script defer src="/assets/measurement.js?v=0123456789ab">
-</script>
-<script type="module" src="/assets/results-notice.js?v=0123456789ab">
-</script>
-<link rel="stylesheet" href="/assets/homepage.css?v=0123456789ab">
-<script defer src="/assets/homepage.bundle.js?v=0123456789ab">
-</script>
-</head>
-<body class="arena-market-home">
-<a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
-<img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
-</a>\\n      <nav class="site-nav" aria-label="Main navigation">
-<a href="/live">Live</a>
-<a href="/queue">Queue</a>
-<a href="/debates">Explore</a>
-<a href="/match">Create</a>
-</nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
-<label class="sr-only" for="header-search">Search debates</label>
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<circle cx="10.5" cy="10.5" r="6.5"/>
-<path d="m16 16 5 5"/>
-</svg>
-<input id="header-search" type="search" name="q" maxlength="80" placeholder="Search debates…">
-<button type="submit" class="sr-only">Search</button>
-</form>\\n      <a class="header-search-toggle" href="/debates#debate-search" data-header-search-toggle aria-label="Search debates">
-<span class="icon-search">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<circle cx="10.5" cy="10.5" r="6.5"/>
-<path d="m16 16 5 5"/>
-</svg>
-</span>
-<svg class="icon-close" viewBox="0 0 24 24" aria-hidden="true">
-<path d="M6 6l12 12M18 6 6 18"/>
-</svg>
-</a>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
-<span class="header-loader" aria-hidden="true">
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-</span>
-<span class="sr-only">Checking your account…</span>
-</span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
-</div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
-<summary aria-label="Yap Coins balance and actions">
-<span class="header-coin" aria-hidden="true">
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-</span>
-<strong data-header-balance>—</strong>
-</summary>
-<div class="arena-wallet-popover">
-<strong data-header-balance-heading>Your Yap Coins</strong>
-<strong class="header-balance-amount" data-header-balance-copy aria-hidden="true">—</strong>
-<span data-header-reserved>Checking balance…</span>
-<span class="header-play-money">Play money · no cash value</span>
-<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
-</div>
-</details>\\n          <details class="header-user-menu">
-<summary class="arena-avatar" data-header-account aria-label="Open account menu">
-<span class="header-avatar" data-header-avatar>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-<circle cx="12" cy="8" r="3.5"/>
-<path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
-</svg>
-</span>
-</summary>
-<div class="header-user-popover">
-<span class="header-menu-caption" data-header-identity>
-<span>YOUR ACCOUNT</span>
-</span>
-<a href="/account#profile" data-header-profile-link>Your profile</a>
-<a href="/account">Settings</a>
-<a href="/coins">Yap Coins</a>
-<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
-</button>
-</div>
-</details>\\n        </div>\\n        <noscript>
-<div class="header-auth-actions">
-<a class="header-login" href="/api/auth/login?connection=google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email">Continue with email</a>
-</div>
-</noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
-</p>\\n    </div>\\n  </header>
-<div id="ya-market-v4" data-reference="false">\\n  <main id="main" class="ya-content container">\\n    <h1 class="sr-only">Yap Arena</h1>\\n    <div class="home-top">\\n    <section class="ya-carousel" id="ya-carousel" aria-label="Trending ideas" aria-roledescription="carousel">\\n    <div class="ya-carousel-window" id="ya-carousel-window">
-<article class="card trend" id="ya-trending-slide" aria-roledescription="slide" aria-label="1 of 2: Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">
-<header class="trend-head">
-<svg class="pixel-mark" width="48" height="48" viewBox="0 0 6 6" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
-<rect width="6" height="6" rx="1.5" fill="var(--raised)">
-</rect>
-<path d="M2.5 0.5h1v1h-1zM0.5 1.5h1v1h-1zM4.5 1.5h1v1h-1zM1.5 1.5h1v1h-1zM3.5 1.5h1v1h-1zM2.5 1.5h1v1h-1zM0.5 2.5h1v1h-1zM4.5 2.5h1v1h-1zM2.5 3.5h1v1h-1zM0.5 4.5h1v1h-1zM4.5 4.5h1v1h-1zM2.5 4.5h1v1h-1z" fill="var(--visit-3)">
-</path>
-</svg>
-<div class="trend-heading">
-<p class="trend-cat" id="ya-category">
-<span class="sr-only">Category &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; · Trending</span>
-<span class="ins" aria-hidden="true">category &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;qvoted&quot; &#39;single&#39; &amp; &lt; · trending</span>
-</p>
-<h2 class="trend-title" id="ya-title">
-<a href="/topics/hostile-topic">Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</a>
-</h2>
-</div>
-<button class="ya-follow ya-bookmark" type="button" id="ya-follow" data-idea="44444444-4444-4444-8444-444444444444"  aria-pressed="true"  aria-label="Following this idea">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M6.5 3.5h11v17l-5.5-4-5.5 4z">
-</path>
-</svg>
-</button>
-</header>
-<div class="trend-body">
-<div class="trend-left">
-<ul class="trend-outcomes" aria-label="Participant endorsement, latest closed round">
-<li>
-<i class="oc-mark oc-yes" aria-hidden="true">
-</i>
-<span>For the idea</span>
-<strong class="num" id="ya-value">47%</strong>
-</li>
-<li>
-<i class="oc-mark oc-no" aria-hidden="true">
-</i>
-<span>Against</span>
-<strong class="num" id="ya-against">53%</strong>
-</li>
-</ul>
-<p class="trend-meta">
-<span id="ya-metric-label">Synthetic bots + shared participants · settled round</span> <span class="ya-change down" id="ya-change">↘ 5 pp today</span>
-</p>
-<section class="trend-args" aria-labelledby="ya-args-title">
-<h3 class="trend-args-title" id="ya-args-title">
-<span class="sr-only">Behind the position</span>
-<span class="ins" aria-hidden="true">behind the position</span>
-</h3>
-<ul class="trend-arg-list">
-<li class="trend-arg">
-<p class="trend-arg-meta">
-<strong>For the idea</strong> · <span class="num">61%</span> endorse</p>
-<p class="trend-arg-text">For argument &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</p>
-</li>
-<li class="trend-arg is-counter">
-<p class="trend-arg-meta">
-<strong>Counterargument</strong> · <span class="num">39%</span> endorse</p>
-<p class="trend-arg-text">Against argument &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</p>
-</li>
-</ul>
-</section>
-</div>
-<div class="trend-right">
-<div class="trend-chartbar">
-<p class="trend-legend">
-<i aria-hidden="true">
-</i>
-<span id="ya-legend-name">Endorsement</span> <strong class="num" id="ya-legend">47%</strong>
-</p>
-<div class="trend-tools">
-<div class="ya-segments" role="group" aria-label="Chart metric">
-<button type="button" data-metric="endorsement" aria-pressed="true">Endorsement</button>
-<button type="button" data-metric="price" aria-pressed="false">Price</button>
-</div>
-<div class="ya-segments" role="group" aria-label="Chart period">
-<button type="button" data-range="1D" aria-pressed="true">1D</button>
-<button type="button" data-range="1W" aria-pressed="false">1W</button>
-<button type="button" data-range="1M" aria-pressed="false">1M</button>
-</div>
-</div>
-</div>
-<svg id="ya-chart" class="ya-chart" role="img" aria-label="Synthetic simulation endorsement history" viewBox="0 0 800 240">
-<title>Sample participant endorsement, in percent</title>
-<line class="ya-guide" x1="8" y1="212" x2="754" y2="212"/>
-<text x="761" y="216">44%</text>
-<line class="ya-guide" x1="8" y1="162" x2="754" y2="162"/>
-<text x="761" y="166">47%</text>
-<line class="ya-guide" x1="8" y1="112" x2="754" y2="112"/>
-<text x="761" y="116">50%</text>
-<line class="ya-guide" x1="8" y1="62" x2="754" y2="62"/>
-<text x="761" y="66">52%</text>
-<line class="ya-guide" x1="8" y1="12" x2="754" y2="12"/>
-<text x="761" y="16">55%</text>
-<clipPath id="ya-chart-clip">
-<rect data-chart-clip x="0" y="0" width="800" height="240"/>
-</clipPath>
-<path class="ya-linepath" pathLength="1" d="M8,66.54545454545453 L752,157.45454545454547" clip-path="url(#ya-chart-clip)"/>
-<text x="8" y="236" text-anchor="start">00:00</text>
-<text x="8" y="236" text-anchor="middle">00:00</text>
-<text x="752" y="236" text-anchor="middle">00:00</text>
-<text x="752" y="236" text-anchor="middle">00:00</text>
-<text x="752" y="236" text-anchor="end">00:00</text>
-<g class="ya-endpoint" aria-hidden="true">
-<rect class="ya-endpoint-pulse" x="748" y="153.45454545454547" width="8" height="8"/>
-<rect x="748" y="153.45454545454547" width="8" height="8"/>
-</g>
-<g class="ya-hover-group" aria-hidden="true">
-<rect data-chart-hover-marker width="10" height="10"/>
-</g>
-<rect data-chart-hit x="8" y="0" width="744" height="240" fill="transparent"/>
-</svg>
-</div>
-</div>
-<footer class="trend-foot">
-<p class="trend-stats">
-<span class="num">5.0k YC Vol</span>
-<span>· 500 endorsements</span>
-<span class="trend-fill">· Shared YES offer <span class="num">—</span>
-</span>
-</p>
-<div class="trend-arena">
-<p class="trend-match">
-<span class="trend-people">
-<span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
-</span>
-<span>Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
-<span class="vs">
-<span class="sr-only">versus</span>
-<span aria-hidden="true">VS</span>
-</span>
-<span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
-</span>
-<span>Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
-</span>
-<span class="trend-when">
-<span class="trend-live">
-<span class="live-pixel" aria-hidden="true">
-</span>Live now</span>
-</span>
-</p>
-<a class="btn btn-primary btn-sm trend-cta" href="/debates/hostile-debate">Explore debate</a>
-</div>
-<p class="trend-signin">
-<a href="/account">Sign in to take part</a>
-</p>
-</footer>
-</article>
-</div>\\n    <div class="ya-carousel-controls">
-<div class="ya-carousel-dots" id="ya-carousel-dots" role="group" aria-label="Choose trending idea">
-<button type="button" class="ya-carousel-dot" data-trending="44444444-4444-4444-8444-444444444444" aria-label="Show Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" aria-current="true">
-<span class="ya-dot-pixels" aria-hidden="true">
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-</span>
-</button>
-<button type="button" class="ya-carousel-dot" data-trending="11111111-1111-4111-8111-111111111111" aria-label="Show A real &lt;question&gt;?" aria-current="false">
-<span class="ya-dot-pixels" aria-hidden="true">
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-</span>
-</button>
-</div>
-<div class="ya-carousel-nav" id="ya-carousel-nav">
-<button type="button" class="ya-nav-pill" data-carousel="previous" aria-label="Previous idea: A real &lt;question&gt;?">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M15 6l-6 6 6 6">
-</path>
-</svg>
-<span>A real &lt;question&gt;?</span>
-</button>
-<button type="button" class="ya-nav-pill" data-carousel="next" aria-label="Next idea: A real &lt;question&gt;?">
-<span>A real &lt;question&gt;?</span>
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M9 6l6 6-6 6">
-</path>
-</svg>
-</button>
-</div>
-</div>\\n    </section>\\n    <aside class="home-rail" id="ya-rail" aria-label="Live now and popular ideas">
-<section class="card rail-live" aria-labelledby="ya-live-title">
-<p class="rail-live-top">
-<span class="tag tag-live">
-<span class="live-pixel" aria-hidden="true">
-</span>Live</span>
-</p>
-<h2 class="rail-live-title" id="ya-live-title">
-<a href="/debates/hostile-debate">Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</a>
-</h2>
-<p class="rail-live-people">Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; vs Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</p>
-<a class="btn btn-secondary btn-sm" href="/debates/hostile-debate" aria-label="Watch: Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;">Watch</a>
-</section>
-<section class="card rail-promo rail-promo-member" aria-labelledby="ya-promo-member">
-<h2 class="rail-title" id="ya-promo-member">
-<span class="sr-only">Take a side</span>
-<span class="ins" aria-hidden="true">take a side</span>
-</h2>
-<p>Open a topic and queue on a side. You are matched with someone on the other side in seconds.</p>
-<a class="btn btn-secondary btn-sm" href="/topics">Browse topics</a>
-</section>
-<section class="card rail-promo rail-promo-guest" aria-labelledby="ya-promo-guest">
-<h2 class="rail-title" id="ya-promo-guest">
-<span class="sr-only">Join the arena</span>
-<span class="ins" aria-hidden="true">join the arena</span>
-</h2>
-<p>Sign in to follow ideas, take a side and debate live.</p>
-<a class="btn btn-secondary btn-sm" href="/account">Sign in</a>
-</section>
-<section class="rail-popular" aria-labelledby="ya-popular-title">
-<h2 class="rail-title" id="ya-popular-title">
-<span class="sr-only">Popular ideas</span>
-<span class="ins" aria-hidden="true">popvlar ideas</span>
-</h2>
-<ol class="rail-popular-list">
-<li>
-<a href="/topics/hostile-topic">
-<span class="rail-rank num">1</span>
-<span class="rail-pop">
-<span class="rail-pop-name">Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
-<span class="rail-pop-vol">
-<span class="num">5.0k YC</span> · 24h</span>
-</span>
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M9 6l6 6-6 6">
-</path>
-</svg>
-</a>
-</li>
-<li>
-<a href="/topics/public-idea">
-<span class="rail-rank num">2</span>
-<span class="rail-pop">
-<span class="rail-pop-name">A real &lt;question&gt;?</span>
-<span class="rail-pop-vol">
-<span class="live-pixel" aria-hidden="true">
-</span>1 live</span>
-</span>
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M9 6l6 6-6 6">
-</path>
-</svg>
-</a>
-</li>
-</ol>
-</section>
-<a class="btn btn-outline rail-all" href="#ya-ideas">Explore all ideas</a>
-</aside>\\n    </div>\\n    <section class="ya-discovery" id="ya-ideas" aria-labelledby="ya-grid-title">
-<div class="ya-sectionhead">
-<h2 class="section-title" id="ya-grid-title" tabindex="-1">
-<span class="sr-only">Ideas in motion</span>
-<span class="ins" aria-hidden="true">ideas in motion</span>
-</h2>
-<label class="sr-only" for="ya-sort">Sort ideas</label>
-<select class="input ya-sort" id="ya-sort">
-<option value="active">Most active</option>
-<option value="moves">Biggest shifts</option>
-</select>
-</div>
-<div class="ya-discovery-tools">
-<div class="ya-view-tabs ya-segments" role="group" aria-label="Ideas view">
-<button type="button" data-nav="all" aria-pressed="true">All ideas</button>
-<button type="button" data-nav="following" aria-pressed="false">Following</button>
-</div>
-<div class="chips ya-filters" role="group" aria-label="Idea categories">
-<button class="chip ya-filter" data-filter="All" aria-pressed="true" type="button">All ideas</button>
-<button class="chip ya-filter" data-filter="Category &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" aria-pressed="false" type="button">Category &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</button>
-<button class="chip ya-filter" data-filter="Ideas" aria-pressed="false" type="button">Ideas</button>
-</div>
-<form class="ya-idea-search search-pill" action="/topics" method="get" role="search" aria-label="Search ideas">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<circle cx="11" cy="11" r="7">
-</circle>
-<path d="m20 20-3.5-3.5">
-</path>
-</svg>
-<label class="sr-only" for="ya-search">Search ideas</label>
-<input class="input" id="ya-search" name="q" type="search" placeholder="Search ideas…" maxlength="80">
-</form>
-</div>
-<div class="ya-grid" id="ya-grid">
-<a href="/topics/hostile-topic" class="ya-marketcard" data-expand="44444444-4444-4444-8444-444444444444" aria-expanded="false">
-<span class="ya-cardtop">
-<span class="ya-cardcat">
-<svg class="pixel-mark" width="24" height="24" viewBox="0 0 6 6" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
-<rect width="6" height="6" rx="2" fill="var(--raised)">
-</rect>
-<path d="M2.5 0.5h1v1h-1zM0.5 1.5h1v1h-1zM4.5 1.5h1v1h-1zM1.5 1.5h1v1h-1zM3.5 1.5h1v1h-1zM2.5 1.5h1v1h-1zM0.5 2.5h1v1h-1zM4.5 2.5h1v1h-1zM2.5 3.5h1v1h-1zM0.5 4.5h1v1h-1zM4.5 4.5h1v1h-1zM2.5 4.5h1v1h-1z" fill="var(--visit-3)">
-</path>
-</svg>
-<span>Category &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; · Synthetic</span>
-</span>
-<span class="ya-cardlive is-live">
-<span class="live-pixel" aria-hidden="true">
-</span>1 live</span>
-</span>
-<span class="ya-cardtitle">Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
-<span class="ya-cardmetric">
-<span>
-<strong class="num">47%</strong> <span class="ya-change down">↘ 5 pp</span>
-</span>
-<svg class="ya-spark" viewBox="0 0 86 35" role="img" aria-label="Endorsement trend, now 47%">
-<polyline class="ya-spark-line" pathLength="1" points="1,10.222222222222221 85,25.77777777777778" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-</polyline>
-</svg>
-</span>
-<span class="ya-cardlabel">Participant endorsement</span>
-<span class="ya-cardbottom">
-<span class="num">5.0k YC · 24h</span>
-<span class="num">YES offer —</span>
-</span>
-<span class="ya-cardhint">
-<span>Explore idea & debates</span>
-<span aria-hidden="true">+</span>
-</span>
-</a>
-<a href="/topics/public-idea" class="ya-marketcard" data-expand="11111111-1111-4111-8111-111111111111" aria-expanded="false">
-<span class="ya-cardtop">
-<span class="ya-cardcat">
-<svg class="pixel-mark" width="24" height="24" viewBox="0 0 6 6" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
-<rect width="6" height="6" rx="2" fill="var(--raised)">
-</rect>
-<path d="M1.5 0.5h1v1h-1zM3.5 0.5h1v1h-1zM2.5 0.5h1v1h-1zM0.5 1.5h1v1h-1zM4.5 1.5h1v1h-1zM1.5 1.5h1v1h-1zM3.5 1.5h1v1h-1zM2.5 1.5h1v1h-1zM0.5 2.5h1v1h-1zM4.5 2.5h1v1h-1zM2.5 3.5h1v1h-1z" fill="var(--visit-0)">
-</path>
-</svg>
-<span>Ideas</span>
-</span>
-<span class="ya-cardlive is-live">
-<span class="live-pixel" aria-hidden="true">
-</span>1 live</span>
-</span>
-<span class="ya-cardtitle">A real &lt;question&gt;?</span>
-<span class="ya-cardnone">
-<strong>No rounds yet</strong> · Participant endorsement appears after the first closed round.</span>
-<span class="ya-cardhint">
-<span>Explore idea & debates</span>
-<span aria-hidden="true">+</span>
-</span>
-</a>
-</div>
-<p class="ya-endnote">Endorsement = share of participants choosing YES in the latest closed round. Synthetic activity is labeled.</p>
-</section>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
-<span data-tip-date>
-</span> <strong>
-</strong>
-</div>\\n    <div id="ya-status" aria-live="polite" class="sr-only">
-</div>\\n  <noscript>
-<p class="ya-endnote">Idea links open their public topic pages. Enable JavaScript for inline charts, filters and previews.</p>
-</noscript>
-</main>\\n</div>\\n<template id="ya-home-data">{&quot;reference&quot;:false,&quot;available&quot;:true,&quot;following&quot;:[&quot;44444444-4444-4444-8444-444444444444&quot;],&quot;ideas&quot;:[{&quot;id&quot;:&quot;44444444-4444-4444-8444-444444444444&quot;,&quot;topicSlug&quot;:&quot;hostile-topic&quot;,&quot;href&quot;:&quot;/topics/hostile-topic&quot;,&quot;cat&quot;:&quot;Category &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;title&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;short&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;reference&quot;:false,&quot;demo&quot;:true,&quot;pct&quot;:47,&quot;delta&quot;:-5,&quot;vol&quot;:5,&quot;people&quot;:500,&quot;price&quot;:null,&quot;points&quot;:[52,47],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;Side A &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;no&quot;:&quot;Side B &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:61,&quot;endorsed&quot;:305,&quot;population&quot;:500},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:39,&quot;endorsed&quot;:195,&quot;population&quot;:500}],&quot;debates&quot;:[{&quot;id&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;names&quot;:[&quot;Name &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;N&lt;&quot;,&quot;M&lt;&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-crab.svg?v=0123456789ab&quot;,&quot;/assets/avatars/yap-frog.svg?v=0123456789ab&quot;],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/hostile-debate&quot;,&quot;startsAt&quot;:&quot;2026-10-01T17:00:00.000Z&quot;}],&quot;activity&quot;:{&quot;scope&quot;:&quot;shared&quot;,&quot;synthetic&quot;:true,&quot;revision&quot;:&quot;fixture-revision&quot;,&quot;hasMore&quot;:false,&quot;window&quot;:30,&quot;items&quot;:[{&quot;id&quot;:&quot;round-1&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:1,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-01T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;52&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:{&quot;n&quot;:&quot;40&quot;,&quot;d&quot;:&quot;100&quot;},&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;},{&quot;id&quot;:&quot;round-2&quot;,&quot;runId&quot;:null,&quot;debateId&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;debateSlug&quot;:&quot;hostile-debate&quot;,&quot;number&quot;:2,&quot;period&quot;:1,&quot;settledAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2999-01-02T00:00:00.000Z&quot;,&quot;mode&quot;:&quot;seed&quot;,&quot;share&quot;:{&quot;n&quot;:&quot;47&quot;,&quot;d&quot;:&quot;100&quot;},&quot;offer&quot;:null,&quot;medianNo&quot;:null,&quot;medianYes&quot;:null,&quot;branch&quot;:null,&quot;argumentLabel&quot;:&quot;Argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;ownLimit&quot;:null,&quot;humans&quot;:2,&quot;bots&quot;:498,&quot;executed&quot;:120,&quot;premium&quot;:&quot;2500000000&quot;,&quot;quantity&quot;:&quot;500&quot;}],&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:61,&quot;endorsed&quot;:305,&quot;population&quot;:500},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against argument &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;rate&quot;:39,&quot;endorsed&quot;:195,&quot;population&quot;:500}],&quot;category&quot;:&quot;Category &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;totals&quot;:{&quot;premium&quot;:&quot;5000000000&quot;,&quot;humanCommitments&quot;:4,&quot;botCommitments&quot;:996,&quot;executed&quot;:240}}},{&quot;id&quot;:&quot;11111111-1111-4111-8111-111111111111&quot;,&quot;topicSlug&quot;:&quot;public-idea&quot;,&quot;href&quot;:&quot;/topics/public-idea&quot;,&quot;cat&quot;:&quot;Ideas&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;short&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;reference&quot;:false,&quot;demo&quot;:false,&quot;pct&quot;:null,&quot;delta&quot;:null,&quot;vol&quot;:null,&quot;people&quot;:null,&quot;price&quot;:null,&quot;points&quot;:[],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;no&quot;:&quot;Against &amp; questioning&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;rate&quot;:null},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against &amp; questioning&quot;,&quot;rate&quot;:null}],&quot;debates&quot;:[{&quot;id&quot;:&quot;22222222-2222-4222-8222-222222222222&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;replay&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Speaker A&quot;,&quot;Morgan B&quot;,&quot;SA&quot;,&quot;MB&quot;],&quot;avatars&quot;:[null,&quot;/assets/avatars/yap-frog.svg?v=0123456789ab&quot;],&quot;meta&quot;:&quot;Replay debate&quot;,&quot;stamp&quot;:&quot;Replay&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;upcoming&quot;,&quot;kind&quot;:&quot;upcoming&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;meta&quot;:&quot;Upcoming / awaiting media&quot;,&quot;stamp&quot;:&quot;Upcoming&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null}]}]}</template>
-<footer class="site-footer">
-<nav class="container footer-inner" aria-label="Site">
-<a href="/topics">Topics</a>
-<a href="/coins">Yap Coins</a>
-<a href="/about">About</a>
-<a href="/privacy">Privacy</a>
-<a href="/terms">Terms</a>
-<a href="/cookies">Cookies</a>
-</nav>
-<p class="footer-note">Play money · no cash value</p>
-</footer>
-<nav class="site-tabbar" aria-label="Main navigation">
-<a href="/home" aria-current="page">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
-</svg>
-<span>Home</span>
-</a>
-<a href="/live">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
-<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-</svg>
-<span>Live</span>
-</a>
-<a href="/queue">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
-<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
-</svg>
-<span>Queue</span>
-</a>
-<a href="/debates">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
-<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-</svg>
-<span>Explore</span>
-</a>
-<a href="/match">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
-<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-</svg>
-<span>Create</span>
-</a>
-</nav>
-</body>
-</html>
-`;
-
-exports[`renders the home page 6`] = `
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#000000">
-<title>Where ideas move · YAP Arena</title>
-<meta name="description" content="Follow an idea. Hear both sides. Take a position.">
-<link rel="canonical" href="https://arena.example/home">
-<meta property="og:site_name" content="YAP Arena">
-<meta property="og:type" content="website">
-<meta property="og:title" content="YAP Arena">
-<meta property="og:description" content="Follow an idea. Hear both sides. Take a position.">
-<meta property="og:url" content="https://arena.example/home">
-<meta property="og:image" content="https://arena.example/assets/icons/share.png?v=0123456789ab">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="YAP Arena">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
-<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png?v=0123456789ab">
-<link rel="manifest" href="/assets/manifest.webmanifest?v=0123456789ab">
-<link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
-<link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
-<link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
-<script defer src="/assets/session-coordination.js?v=0123456789ab">
-</script>
-<script type="module" src="/assets/site-header.js?v=0123456789ab">
-</script>
-<script defer src="/assets/site.js?v=0123456789ab">
-</script>
-<script defer src="/assets/account-balance.js?v=0123456789ab">
-</script>
-<link rel="stylesheet" href="/assets/homepage.css?v=0123456789ab">
-<script defer src="/assets/homepage.bundle.js?v=0123456789ab">
-</script>
-</head>
-<body class="arena-market-home reference-home">
-<a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
-<img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
-</a>\\n      <nav class="site-nav" aria-label="Main navigation">
-<a href="/live">Live</a>
-<a href="/queue">Queue</a>
-<a href="/debates">Explore</a>
-<a href="/match">Create</a>
-</nav>\\n      <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search>
-<label class="sr-only" for="header-search">Search debates</label>
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<circle cx="10.5" cy="10.5" r="6.5"/>
-<path d="m16 16 5 5"/>
-</svg>
-<input id="header-search" type="search" name="q" maxlength="80" placeholder="Search debates…">
-<button type="submit" class="sr-only">Search</button>
-</form>\\n      <a class="header-search-toggle" href="/debates#debate-search" data-header-search-toggle aria-label="Search debates">
-<span class="icon-search">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<circle cx="10.5" cy="10.5" r="6.5"/>
-<path d="m16 16 5 5"/>
-</svg>
-</span>
-<svg class="icon-close" viewBox="0 0 24 24" aria-hidden="true">
-<path d="M6 6l12 12M18 6 6 18"/>
-</svg>
-</a>\\n      <div class="arena-header-account">\\n        <span data-header-checking class="header-session-loading" role="status">
-<span class="header-loader" aria-hidden="true">
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-</span>
-<span class="sr-only">Checking your account…</span>
-</span>\\n        <div class="header-auth-actions" data-header-guest hidden>
-<a class="header-signup" href="/account" data-header-sign-in>Sign in</a>
-</div>\\n        <button class="header-retry" type="button" data-header-retry hidden>Retry account</button>\\n        <div class="header-member-actions" data-header-member hidden>\\n          <details class="arena-wallet-menu">
-<summary aria-label="Yap Coins balance and actions">
-<span class="header-coin" aria-hidden="true">
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-</span>
-<strong data-header-balance>—</strong>
-</summary>
-<div class="arena-wallet-popover">
-<strong data-header-balance-heading>Your Yap Coins</strong>
-<strong class="header-balance-amount" data-header-balance-copy aria-hidden="true">—</strong>
-<span data-header-reserved>Checking balance…</span>
-<span class="header-play-money">Play money · no cash value</span>
-<a href="/coins" data-header-balances-link>Balances &amp; activity →</a>
-</div>
-</details>\\n          <details class="header-user-menu">
-<summary class="arena-avatar" data-header-account aria-label="Open account menu">
-<span class="header-avatar" data-header-avatar>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-<circle cx="12" cy="8" r="3.5"/>
-<path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
-</svg>
-</span>
-</summary>
-<div class="header-user-popover">
-<span class="header-menu-caption" data-header-identity>
-<span>YOUR ACCOUNT</span>
-</span>
-<a href="/account#profile" data-header-profile-link>Your profile</a>
-<a href="/account">Settings</a>
-<a href="/coins">Yap Coins</a>
-<button type="button" data-header-logout>Sign out <span aria-hidden="true">↗</span>
-</button>
-</div>
-</details>\\n        </div>\\n        <noscript>
-<div class="header-auth-actions">
-<a class="header-login" href="/api/auth/login?connection=google">Continue with Google</a>
-<a class="header-signup" href="/api/auth/login?connection=email">Continue with email</a>
-</div>
-</noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
-</p>\\n    </div>\\n  </header>
-<div id="ya-market-v4" data-reference="true">\\n  <main id="main" class="ya-content container">\\n    <div class="ya-heading">
-<div>
-<h1>Where ideas move.</h1>
-<p>Follow an idea. Hear both sides. Take a position.</p>
-</div>
-<span class="tag ya-concept">Concept · Sample data</span>
-</div>\\n    <div class="home-top">\\n    <section class="ya-carousel" id="ya-carousel" aria-label="Trending ideas" aria-roledescription="carousel">\\n    <div class="ya-carousel-window" id="ya-carousel-window">
-<article class="card trend" id="ya-trending-slide" aria-roledescription="slide" aria-label="1 of 6: AI models should be open source.">
-<header class="trend-head">
-<svg class="pixel-mark" width="48" height="48" viewBox="0 0 6 6" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
-<rect width="6" height="6" rx="1.5" fill="var(--raised)">
-</rect>
-<path d="M0.5 0.5h1v1h-1zM4.5 0.5h1v1h-1zM2.5 0.5h1v1h-1zM1.5 1.5h1v1h-1zM3.5 1.5h1v1h-1zM2.5 1.5h1v1h-1zM1.5 2.5h1v1h-1zM3.5 2.5h1v1h-1zM2.5 2.5h1v1h-1zM1.5 3.5h1v1h-1zM3.5 3.5h1v1h-1zM1.5 4.5h1v1h-1zM3.5 4.5h1v1h-1z" fill="var(--visit-2)">
-</path>
-</svg>
-<div class="trend-heading">
-<p class="trend-cat" id="ya-category">
-<span class="sr-only">Technology · Trending</span>
-<span class="ins" aria-hidden="true">technology · trending</span>
-</p>
-<h2 class="trend-title" id="ya-title">AI models should be open source.</h2>
-</div>
-<button class="ya-follow ya-bookmark" type="button" id="ya-follow" data-idea="ai"  aria-pressed="false"  aria-label="Follow this idea">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M6.5 3.5h11v17l-5.5-4-5.5 4z">
-</path>
-</svg>
-</button>
-</header>
-<div class="trend-body">
-<div class="trend-left">
-<ul class="trend-outcomes" aria-label="Participant endorsement, latest closed round">
-<li>
-<i class="oc-mark oc-yes" aria-hidden="true">
-</i>
-<span>For the idea</span>
-<strong class="num" id="ya-value">68%</strong>
-</li>
-<li>
-<i class="oc-mark oc-no" aria-hidden="true">
-</i>
-<span>Against</span>
-<strong class="num" id="ya-against">32%</strong>
-</li>
-</ul>
-<p class="trend-meta">
-<span id="ya-metric-label">Participant endorsement · latest closed round</span> <span class="ya-change " id="ya-change">↗ 8 pp today</span>
-</p>
-<section class="trend-args" aria-labelledby="ya-args-title">
-<h3 class="trend-args-title" id="ya-args-title">
-<span class="sr-only">Behind the position</span>
-<span class="ins" aria-hidden="true">behind the position</span>
-</h3>
-<ul class="trend-arg-list">
-<li class="trend-arg">
-<p class="trend-arg-meta">
-<strong>For the idea</strong> · <span class="num">79%</span> endorse</p>
-<p class="trend-arg-text">Open models let independent researchers audit safety and bias.</p>
-</li>
-<li class="trend-arg is-counter">
-<p class="trend-arg-meta">
-<strong>Counterargument</strong> · <span class="num">58%</span> endorse</p>
-<p class="trend-arg-text">Open weights can put dangerous capabilities in the wrong hands.</p>
-</li>
-<li class="trend-arg">
-<p class="trend-arg-meta">
-<strong>For the idea</strong> · <span class="num">76%</span> endorse</p>
-<p class="trend-arg-text">Smaller teams should be able to build on the same foundations.</p>
-</li>
-</ul>
-</section>
-</div>
-<div class="trend-right">
-<div class="trend-chartbar">
-<p class="trend-legend">
-<i aria-hidden="true">
-</i>
-<span id="ya-legend-name">Endorsement</span> <strong class="num" id="ya-legend">68%</strong>
-</p>
-<div class="trend-tools">
-<div class="ya-segments" role="group" aria-label="Chart metric">
-<button type="button" data-metric="endorsement" aria-pressed="true">Endorsement</button>
-<button type="button" data-metric="price" aria-pressed="false">Price</button>
-</div>
-<div class="ya-segments" role="group" aria-label="Chart period">
-<button type="button" data-range="1D" aria-pressed="true">1D</button>
-<button type="button" data-range="1W" aria-pressed="false">1W</button>
-<button type="button" data-range="1M" aria-pressed="false">1M</button>
-</div>
-</div>
-</div>
-<svg id="ya-chart" class="ya-chart" role="img" aria-label="Sample participant endorsement over completed rounds" viewBox="0 0 800 240">
-<title>Sample participant endorsement, in percent</title>
-<line class="ya-guide" x1="8" y1="212" x2="754" y2="212"/>
-<text x="761" y="216">56%</text>
-<line class="ya-guide" x1="8" y1="162" x2="754" y2="162"/>
-<text x="761" y="166">60%</text>
-<line class="ya-guide" x1="8" y1="112" x2="754" y2="112"/>
-<text x="761" y="116">64%</text>
-<line class="ya-guide" x1="8" y1="62" x2="754" y2="62"/>
-<text x="761" y="66">67%</text>
-<line class="ya-guide" x1="8" y1="12" x2="754" y2="12"/>
-<text x="761" y="16">71%</text>
-<clipPath id="ya-chart-clip">
-<rect data-chart-clip x="0" y="0" width="800" height="240"/>
-</clipPath>
-<path class="ya-linepath" pathLength="1" d="M8,158.66666666666666 L57.6,172 L107.2,145.33333333333331 L156.8,158.66666666666666 L206.4,132 L256,145.33333333333331 L305.6,158.66666666666666 L355.2,118.66666666666667 L404.8,132 L454.4,105.33333333333333 L504,105.33333333333333 L553.5999999999999,118.66666666666667 L603.2,78.66666666666666 L652.8000000000001,92 L702.4,65.33333333333334 L752,52" clip-path="url(#ya-chart-clip)"/>
-<text x="8" y="236" text-anchor="start">00:00</text>
-<text x="206.4" y="236" text-anchor="middle">06:00</text>
-<text x="404.8" y="236" text-anchor="middle">12:00</text>
-<text x="553.5999999999999" y="236" text-anchor="middle">18:00</text>
-<text x="752" y="236" text-anchor="end">Now</text>
-<g class="ya-endpoint" aria-hidden="true">
-<rect class="ya-endpoint-pulse" x="748" y="48" width="8" height="8"/>
-<rect x="748" y="48" width="8" height="8"/>
-</g>
-<g class="ya-hover-group" aria-hidden="true">
-<rect data-chart-hover-marker width="10" height="10"/>
-</g>
-<rect data-chart-hit x="8" y="0" width="744" height="240" fill="transparent"/>
-</svg>
-</div>
-</div>
-<footer class="trend-foot">
-<p class="trend-stats">
-<span class="num">24.8k YC Vol</span>
-<span>· 842 people</span>
-<span class="trend-fill">· Last YES fill <span class="num">0.34 YC</span>
-</span>
-</p>
-<div class="trend-arena">
-<p class="trend-match">
-<span class="trend-people">
-<span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">JD</span>
-</span>
-<span>Jordan D.</span>
-<span class="vs">
-<span class="sr-only">versus</span>
-<span aria-hidden="true">VS</span>
-</span>
-<span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">SR</span>
-</span>
-<span>Sam R.</span>
-</span>
-<span class="trend-when">
-<span class="trend-live">
-<span class="live-pixel" aria-hidden="true">
-</span>Live · 1.2k watching</span>
-</span>
-</p>
-<a class="btn btn-primary btn-sm trend-cta" href="#idea-ai" data-open-idea="ai">Explore debate</a>
-</div>
-<p class="trend-signin">
-<a href="/account">Sign in to take part</a>
-</p>
-</footer>
-</article>
-</div>\\n    <div class="ya-carousel-controls">
-<div class="ya-carousel-dots" id="ya-carousel-dots" role="group" aria-label="Choose trending idea">
-<button type="button" class="ya-carousel-dot" data-trending="ai" aria-label="Show AI models should be open source." aria-current="true">
-<span class="ya-dot-pixels" aria-hidden="true">
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-</span>
-</button>
-<button type="button" class="ya-carousel-dot" data-trending="work" aria-label="Show A four-day workweek should be the standard." aria-current="false">
-<span class="ya-dot-pixels" aria-hidden="true">
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-</span>
-</button>
-<button type="button" class="ya-carousel-dot" data-trending="nuclear" aria-label="Show Nuclear power belongs at the center of climate policy." aria-current="false">
-<span class="ya-dot-pixels" aria-hidden="true">
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-</span>
-</button>
-<button type="button" class="ya-carousel-dot" data-trending="ubi" aria-label="Show Universal basic income is worth the cost." aria-current="false">
-<span class="ya-dot-pixels" aria-hidden="true">
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-</span>
-</button>
-<button type="button" class="ya-carousel-dot" data-trending="city" aria-label="Show City centers should prioritize people over cars." aria-current="false">
-<span class="ya-dot-pixels" aria-hidden="true">
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-</span>
-</button>
-<button type="button" class="ya-carousel-dot" data-trending="growth" aria-label="Show Economic growth should remain a policy priority." aria-current="false">
-<span class="ya-dot-pixels" aria-hidden="true">
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
-</span>
-</button>
-</div>
-<div class="ya-carousel-nav" id="ya-carousel-nav">
-<button type="button" class="ya-nav-pill" data-carousel="previous" aria-label="Previous idea: Economic growth should remain a policy priority.">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M15 6l-6 6 6 6">
-</path>
-</svg>
-<span>Economic growth should remain a policy priority.</span>
-</button>
-<button type="button" class="ya-nav-pill" data-carousel="next" aria-label="Next idea: A four-day workweek should be the standard.">
-<span>A four-day workweek should be the standard.</span>
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M9 6l6 6-6 6">
-</path>
-</svg>
-</button>
-</div>
-</div>\\n    </section>\\n    <aside class="home-rail" id="ya-rail" aria-label="Live now and popular ideas">
-<section class="card rail-live" aria-labelledby="ya-live-title">
-<p class="rail-live-top">
-<span class="tag tag-live">
-<span class="live-pixel" aria-hidden="true">
-</span>Live</span>
-<span>1.2k watching</span>
-</p>
-<h2 class="rail-live-title" id="ya-live-title">
-<a href="#idea-ai" data-open-idea="ai">Who should control AI?</a>
-</h2>
-<p class="rail-live-people">Jordan D. vs Sam R.</p>
-<a class="btn btn-secondary btn-sm" href="#idea-ai" data-open-idea="ai" aria-label="Watch: Who should control AI?">Watch</a>
-</section>
-<section class="card rail-promo rail-promo-member" aria-labelledby="ya-promo-member">
-<h2 class="rail-title" id="ya-promo-member">
-<span class="sr-only">Take a side</span>
-<span class="ins" aria-hidden="true">take a side</span>
-</h2>
-<p>Open a topic and queue on a side. You are matched with someone on the other side in seconds.</p>
-<a class="btn btn-secondary btn-sm" href="/topics">Browse topics</a>
-</section>
-<section class="card rail-promo rail-promo-guest" aria-labelledby="ya-promo-guest">
-<h2 class="rail-title" id="ya-promo-guest">
-<span class="sr-only">Join the arena</span>
-<span class="ins" aria-hidden="true">join the arena</span>
-</h2>
-<p>Sign in to follow ideas, take a side and debate live.</p>
-<a class="btn btn-secondary btn-sm" href="/account">Sign in</a>
-</section>
-<section class="rail-popular" aria-labelledby="ya-popular-title">
-<h2 class="rail-title" id="ya-popular-title">
-<span class="sr-only">Popular ideas</span>
-<span class="ins" aria-hidden="true">popvlar ideas</span>
-</h2>
-<ol class="rail-popular-list">
-<li>
-<a href="#idea-ai" data-open-idea="ai">
-<span class="rail-rank num">1</span>
-<span class="rail-pop">
-<span class="rail-pop-name">AI models should be open source.</span>
-<span class="rail-pop-vol">
-<span class="num">24.8k YC</span> · 24h</span>
-</span>
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M9 6l6 6-6 6">
-</path>
-</svg>
-</a>
-</li>
-<li>
-<a href="#idea-work" data-open-idea="work">
-<span class="rail-rank num">2</span>
-<span class="rail-pop">
-<span class="rail-pop-name">A four-day workweek should be the standard.</span>
-<span class="rail-pop-vol">
-<span class="num">18.2k YC</span> · 24h</span>
-</span>
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M9 6l6 6-6 6">
-</path>
-</svg>
-</a>
-</li>
-<li>
-<a href="#idea-nuclear" data-open-idea="nuclear">
-<span class="rail-rank num">3</span>
-<span class="rail-pop">
-<span class="rail-pop-name">Nuclear power belongs at the center of climate policy.</span>
-<span class="rail-pop-vol">
-<span class="num">14.6k YC</span> · 24h</span>
-</span>
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M9 6l6 6-6 6">
-</path>
-</svg>
-</a>
-</li>
-<li>
-<a href="#idea-ubi" data-open-idea="ubi">
-<span class="rail-rank num">4</span>
-<span class="rail-pop">
-<span class="rail-pop-name">Universal basic income is worth the cost.</span>
-<span class="rail-pop-vol">
-<span class="num">12.4k YC</span> · 24h</span>
-</span>
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M9 6l6 6-6 6">
-</path>
-</svg>
-</a>
-</li>
-<li>
-<a href="#idea-city" data-open-idea="city">
-<span class="rail-rank num">5</span>
-<span class="rail-pop">
-<span class="rail-pop-name">City centers should prioritize people over cars.</span>
-<span class="rail-pop-vol">
-<span class="num">9.7k YC</span> · 24h</span>
-</span>
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M9 6l6 6-6 6">
-</path>
-</svg>
-</a>
-</li>
-</ol>
-</section>
-<a class="btn btn-outline rail-all" href="#ya-ideas">Explore all ideas</a>
-</aside>\\n    </div>\\n    <section class="ya-discovery" id="ya-ideas" aria-labelledby="ya-grid-title">
-<div class="ya-sectionhead">
-<h2 class="section-title" id="ya-grid-title" tabindex="-1">
-<span class="sr-only">Ideas in motion</span>
-<span class="ins" aria-hidden="true">ideas in motion</span>
-</h2>
-<label class="sr-only" for="ya-sort">Sort ideas</label>
-<select class="input ya-sort" id="ya-sort">
-<option value="active">Most active</option>
-<option value="moves">Biggest shifts</option>
-</select>
-</div>
-<div class="ya-discovery-tools">
-<div class="ya-view-tabs ya-segments" role="group" aria-label="Ideas view">
-<button type="button" data-nav="all" aria-pressed="true">All ideas</button>
-<button type="button" data-nav="following" aria-pressed="false">Following</button>
-</div>
-<div class="chips ya-filters" role="group" aria-label="Idea categories">
-<button class="chip ya-filter" data-filter="All" aria-pressed="true" type="button">All ideas</button>
-<button class="chip ya-filter" data-filter="Technology" aria-pressed="false" type="button">Technology</button>
-<button class="chip ya-filter" data-filter="Society" aria-pressed="false" type="button">Society</button>
-<button class="chip ya-filter" data-filter="Economy" aria-pressed="false" type="button">Economy</button>
-<button class="chip ya-filter" data-filter="Climate" aria-pressed="false" type="button">Climate</button>
-</div>
-<form class="ya-idea-search search-pill" action="/topics" method="get" role="search" aria-label="Search ideas">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<circle cx="11" cy="11" r="7">
-</circle>
-<path d="m20 20-3.5-3.5">
-</path>
-</svg>
-<label class="sr-only" for="ya-search">Search ideas</label>
-<input class="input" id="ya-search" name="q" type="search" placeholder="Search ideas…" maxlength="80">
-</form>
-</div>
-<div class="ya-grid" id="ya-grid">
-<a href="#idea-ai" class="ya-marketcard" data-expand="ai" aria-expanded="false">
-<span class="ya-cardtop">
-<span class="ya-cardcat">
-<svg class="pixel-mark" width="24" height="24" viewBox="0 0 6 6" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
-<rect width="6" height="6" rx="2" fill="var(--raised)">
-</rect>
-<path d="M0.5 0.5h1v1h-1zM4.5 0.5h1v1h-1zM2.5 0.5h1v1h-1zM1.5 1.5h1v1h-1zM3.5 1.5h1v1h-1zM2.5 1.5h1v1h-1zM1.5 2.5h1v1h-1zM3.5 2.5h1v1h-1zM2.5 2.5h1v1h-1zM1.5 3.5h1v1h-1zM3.5 3.5h1v1h-1zM1.5 4.5h1v1h-1zM3.5 4.5h1v1h-1z" fill="var(--visit-2)">
-</path>
-</svg>
-<span>Technology</span>
-</span>
-<span class="ya-cardlive is-live">
-<span class="live-pixel" aria-hidden="true">
-</span>3 live</span>
-</span>
-<span class="ya-cardtitle">AI models should be open source.</span>
-<span class="ya-cardmetric">
-<span>
-<strong class="num">68%</strong> <span class="ya-change ">↗ 8 pp</span>
-</span>
-<svg class="ya-spark" viewBox="0 0 86 35" role="img" aria-label="Endorsement trend, now 68%">
-<polyline class="ya-spark-line" pathLength="1" points="1,25.53846153846154 6.6,27.692307692307693 12.2,23.384615384615383 17.8,25.53846153846154 23.4,21.23076923076923 29,23.384615384615383 34.6,25.53846153846154 40.2,19.076923076923077 45.8,21.23076923076923 51.4,16.923076923076923 57,16.923076923076923 62.6,19.076923076923077 68.2,12.615384615384617 73.8,14.769230769230766 79.4,10.46153846153846 85,8.307692307692307" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-</polyline>
-</svg>
-</span>
-<span class="ya-cardlabel">Participant endorsement</span>
-<span class="ya-cardbottom">
-<span class="num">24.8k YC · 24h</span>
-<span class="num">YES fill 0.34 YC</span>
-</span>
-<span class="ya-cardhint">
-<span>Explore idea & debates</span>
-<span aria-hidden="true">+</span>
-</span>
-</a>
-<a href="#idea-work" class="ya-marketcard" data-expand="work" aria-expanded="false">
-<span class="ya-cardtop">
-<span class="ya-cardcat">
-<svg class="pixel-mark" width="24" height="24" viewBox="0 0 6 6" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
-<rect width="6" height="6" rx="2" fill="var(--raised)">
-</rect>
-<path d="M1.5 0.5h1v1h-1zM3.5 0.5h1v1h-1zM2.5 0.5h1v1h-1zM1.5 1.5h1v1h-1zM3.5 1.5h1v1h-1zM2.5 1.5h1v1h-1zM0.5 2.5h1v1h-1zM4.5 2.5h1v1h-1zM1.5 2.5h1v1h-1zM3.5 2.5h1v1h-1zM2.5 2.5h1v1h-1zM0.5 3.5h1v1h-1zM4.5 3.5h1v1h-1zM1.5 3.5h1v1h-1zM3.5 3.5h1v1h-1zM2.5 3.5h1v1h-1zM0.5 4.5h1v1h-1zM4.5 4.5h1v1h-1zM1.5 4.5h1v1h-1zM3.5 4.5h1v1h-1zM2.5 4.5h1v1h-1z" fill="var(--visit-0)">
-</path>
-</svg>
-<span>Society</span>
-</span>
-<span class="ya-cardlive is-live">
-<span class="live-pixel" aria-hidden="true">
-</span>2 live</span>
-</span>
-<span class="ya-cardtitle">A four-day workweek should be the standard.</span>
-<span class="ya-cardmetric">
-<span>
-<strong class="num">74%</strong> <span class="ya-change ">↗ 5 pp</span>
-</span>
-<svg class="ya-spark" viewBox="0 0 86 35" role="img" aria-label="Endorsement trend, now 74%">
-<polyline class="ya-spark-line" pathLength="1" points="1,25.77777777777778 6.6,22.666666666666668 12.2,25.77777777777778 17.8,19.555555555555557 23.4,22.666666666666668 29,16.444444444444443 34.6,19.555555555555557 40.2,19.555555555555557 45.8,22.666666666666668 51.4,16.444444444444443 57,13.333333333333336 62.6,16.444444444444443 68.2,10.222222222222221 73.8,13.333333333333336 79.4,10.222222222222221 85,10.222222222222221" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-</polyline>
-</svg>
-</span>
-<span class="ya-cardlabel">Participant endorsement</span>
-<span class="ya-cardbottom">
-<span class="num">18.2k YC · 24h</span>
-<span class="num">YES fill 0.42 YC</span>
-</span>
-<span class="ya-cardhint">
-<span>Explore idea & debates</span>
-<span aria-hidden="true">+</span>
-</span>
-</a>
-<a href="#idea-nuclear" class="ya-marketcard" data-expand="nuclear" aria-expanded="false">
-<span class="ya-cardtop">
-<span class="ya-cardcat">
-<svg class="pixel-mark" width="24" height="24" viewBox="0 0 6 6" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
-<rect width="6" height="6" rx="2" fill="var(--raised)">
-</rect>
-<path d="M1.5 0.5h1v1h-1zM3.5 0.5h1v1h-1zM2.5 1.5h1v1h-1zM1.5 2.5h1v1h-1zM3.5 2.5h1v1h-1zM2.5 3.5h1v1h-1zM0.5 4.5h1v1h-1zM4.5 4.5h1v1h-1zM1.5 4.5h1v1h-1zM3.5 4.5h1v1h-1zM2.5 4.5h1v1h-1z" fill="var(--visit-1)">
-</path>
-</svg>
-<span>Climate</span>
-</span>
-<span class="ya-cardlive is-live">
-<span class="live-pixel" aria-hidden="true">
-</span>1 live</span>
-</span>
-<span class="ya-cardtitle">Nuclear power belongs at the center of climate policy.</span>
-<span class="ya-cardmetric">
-<span>
-<strong class="num">61%</strong> <span class="ya-change ">↗ 3 pp</span>
-</span>
-<svg class="ya-spark" viewBox="0 0 86 35" role="img" aria-label="Endorsement trend, now 61%">
-<polyline class="ya-spark-line" pathLength="1" points="1,22.666666666666668 6.6,25.77777777777778 12.2,22.666666666666668 17.8,22.666666666666668 23.4,19.555555555555557 29,16.444444444444443 34.6,19.555555555555557 40.2,22.666666666666668 45.8,16.444444444444443 51.4,13.333333333333336 57,16.444444444444443 62.6,16.444444444444443 68.2,10.222222222222221 73.8,13.333333333333336 79.4,16.444444444444443 85,13.333333333333336" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-</polyline>
-</svg>
-</span>
-<span class="ya-cardlabel">Participant endorsement</span>
-<span class="ya-cardbottom">
-<span class="num">14.6k YC · 24h</span>
-<span class="num">YES fill 0.28 YC</span>
-</span>
-<span class="ya-cardhint">
-<span>Explore idea & debates</span>
-<span aria-hidden="true">+</span>
-</span>
-</a>
-<a href="#idea-ubi" class="ya-marketcard" data-expand="ubi" aria-expanded="false">
-<span class="ya-cardtop">
-<span class="ya-cardcat">
-<svg class="pixel-mark" width="24" height="24" viewBox="0 0 6 6" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
-<rect width="6" height="6" rx="2" fill="var(--raised)">
-</rect>
-<path d="M0.5 0.5h1v1h-1zM4.5 0.5h1v1h-1zM1.5 0.5h1v1h-1zM3.5 0.5h1v1h-1zM2.5 1.5h1v1h-1zM0.5 2.5h1v1h-1zM4.5 2.5h1v1h-1zM0.5 3.5h1v1h-1zM4.5 3.5h1v1h-1z" fill="var(--visit-1)">
-</path>
-</svg>
-<span>Economy</span>
-</span>
-<span class="ya-cardlive is-live">
-<span class="live-pixel" aria-hidden="true">
-</span>2 live</span>
-</span>
-<span class="ya-cardtitle">Universal basic income is worth the cost.</span>
-<span class="ya-cardmetric">
-<span>
-<strong class="num">46%</strong> <span class="ya-change down">↘ 4 pp</span>
-</span>
-<svg class="ya-spark" viewBox="0 0 86 35" role="img" aria-label="Endorsement trend, now 46%">
-<polyline class="ya-spark-line" pathLength="1" points="1,12.400000000000002 6.6,9.599999999999998 12.2,12.400000000000002 17.8,15.2 23.4,12.400000000000002 29,18 34.6,15.2 40.2,18 45.8,20.799999999999997 51.4,18 57,20.799999999999997 62.6,23.6 68.2,20.799999999999997 73.8,26.4 79.4,23.6 85,23.6" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-</polyline>
-</svg>
-</span>
-<span class="ya-cardlabel">Participant endorsement</span>
-<span class="ya-cardbottom">
-<span class="num">12.4k YC · 24h</span>
-<span class="num">YES fill 0.31 YC</span>
-</span>
-<span class="ya-cardhint">
-<span>Explore idea & debates</span>
-<span aria-hidden="true">+</span>
-</span>
-</a>
-<a href="#idea-city" class="ya-marketcard" data-expand="city" aria-expanded="false">
-<span class="ya-cardtop">
-<span class="ya-cardcat">
-<svg class="pixel-mark" width="24" height="24" viewBox="0 0 6 6" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
-<rect width="6" height="6" rx="2" fill="var(--raised)">
-</rect>
-<path d="M1.5 0.5h1v1h-1zM3.5 0.5h1v1h-1zM0.5 3.5h1v1h-1zM4.5 3.5h1v1h-1zM1.5 3.5h1v1h-1zM3.5 3.5h1v1h-1zM1.5 4.5h1v1h-1zM3.5 4.5h1v1h-1zM2.5 4.5h1v1h-1z" fill="var(--visit-3)">
-</path>
-</svg>
-<span>Society</span>
-</span>
-<span class="ya-cardlive is-live">
-<span class="live-pixel" aria-hidden="true">
-</span>1 live</span>
-</span>
-<span class="ya-cardtitle">City centers should prioritize people over cars.</span>
-<span class="ya-cardmetric">
-<span>
-<strong class="num">57%</strong> <span class="ya-change ">↗ 6 pp</span>
-</span>
-<svg class="ya-spark" viewBox="0 0 86 35" role="img" aria-label="Endorsement trend, now 57%">
-<polyline class="ya-spark-line" pathLength="1" points="1,24.363636363636363 6.6,26.90909090909091 12.2,21.81818181818182 17.8,24.363636363636363 23.4,21.81818181818182 29,19.272727272727273 34.6,21.81818181818182 40.2,16.727272727272727 45.8,19.272727272727273 51.4,16.727272727272727 57,16.727272727272727 62.6,11.636363636363637 68.2,14.181818181818183 73.8,11.636363636363637 79.4,9.09090909090909 85,9.09090909090909" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-</polyline>
-</svg>
-</span>
-<span class="ya-cardlabel">Participant endorsement</span>
-<span class="ya-cardbottom">
-<span class="num">9.7k YC · 24h</span>
-<span class="num">YES fill 0.37 YC</span>
-</span>
-<span class="ya-cardhint">
-<span>Explore idea & debates</span>
-<span aria-hidden="true">+</span>
-</span>
-</a>
-<a href="#idea-growth" class="ya-marketcard" data-expand="growth" aria-expanded="false">
-<span class="ya-cardtop">
-<span class="ya-cardcat">
-<svg class="pixel-mark" width="24" height="24" viewBox="0 0 6 6" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
-<rect width="6" height="6" rx="2" fill="var(--raised)">
-</rect>
-<path d="M1.5 0.5h1v1h-1zM3.5 0.5h1v1h-1zM0.5 1.5h1v1h-1zM4.5 1.5h1v1h-1zM1.5 1.5h1v1h-1zM3.5 1.5h1v1h-1zM2.5 1.5h1v1h-1zM2.5 2.5h1v1h-1zM1.5 3.5h1v1h-1zM3.5 3.5h1v1h-1zM2.5 3.5h1v1h-1zM0.5 4.5h1v1h-1zM4.5 4.5h1v1h-1zM1.5 4.5h1v1h-1zM3.5 4.5h1v1h-1zM2.5 4.5h1v1h-1z" fill="var(--visit-3)">
-</path>
-</svg>
-<span>Economy</span>
-</span>
-<span class="ya-cardlive is-live">
-<span class="live-pixel" aria-hidden="true">
-</span>1 live</span>
-</span>
-<span class="ya-cardtitle">Economic growth should remain a policy priority.</span>
-<span class="ya-cardmetric">
-<span>
-<strong class="num">52%</strong> <span class="ya-change down">↘ 2 pp</span>
-</span>
-<svg class="ya-spark" viewBox="0 0 86 35" role="img" aria-label="Endorsement trend, now 52%">
-<polyline class="ya-spark-line" pathLength="1" points="1,14.5 6.6,11 12.2,14.5 17.8,18 23.4,14.5 29,11 34.6,14.5 40.2,18 45.8,14.5 51.4,21.5 57,18 62.6,21.5 68.2,25 73.8,21.5 79.4,18 85,21.5" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-</polyline>
-</svg>
-</span>
-<span class="ya-cardlabel">Participant endorsement</span>
-<span class="ya-cardbottom">
-<span class="num">8.3k YC · 24h</span>
-<span class="num">YES fill 0.47 YC</span>
-</span>
-<span class="ya-cardhint">
-<span>Explore idea & debates</span>
-<span aria-hidden="true">+</span>
-</span>
-</a>
-</div>
-<p class="ya-endnote">Endorsement = share of participants choosing YES in the latest closed round. YC = Yap Coins · All activity is illustrative.</p>
-</section>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
-<span data-tip-date>
-</span> <strong>
-</strong>
-</div>\\n    <div id="ya-status" aria-live="polite" class="sr-only">
-</div>\\n  <noscript>
-<p class="ya-endnote">Idea links open their public topic pages. Enable JavaScript for inline charts, filters and previews.</p>
-</noscript>
-</main>\\n</div>\\n<template id="ya-home-data">{&quot;reference&quot;:true,&quot;available&quot;:true,&quot;ideas&quot;:[{&quot;id&quot;:&quot;ai&quot;,&quot;cat&quot;:&quot;Technology&quot;,&quot;title&quot;:&quot;AI models should be open source.&quot;,&quot;short&quot;:&quot;Who should control AI?&quot;,&quot;pct&quot;:68,&quot;delta&quot;:8,&quot;vol&quot;:24.8,&quot;people&quot;:842,&quot;price&quot;:0.34,&quot;live&quot;:3,&quot;viewers&quot;:&quot;1.2k&quot;,&quot;yes&quot;:&quot;Open access spreads opportunity and lets more people audit powerful systems.&quot;,&quot;no&quot;:&quot;Unrestricted release makes misuse harder to contain and accountability harder to enforce.&quot;,&quot;points&quot;:[60,59,61,60,62,61,60,63,62,64,64,63,66,65,67,68],&quot;reference&quot;:true,&quot;href&quot;:null,&quot;topicSlug&quot;:null,&quot;demo&quot;:true,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;Open models let independent researchers audit safety and bias.&quot;,&quot;rate&quot;:79},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Open weights can put dangerous capabilities in the wrong hands.&quot;,&quot;rate&quot;:58},{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;Smaller teams should be able to build on the same foundations.&quot;,&quot;rate&quot;:76},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Who takes responsibility when an open model causes harm?&quot;,&quot;rate&quot;:51},{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;Public scrutiny can expose problems that private testing misses.&quot;,&quot;rate&quot;:73},{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;Access to powerful AI should not depend on a few companies.&quot;,&quot;rate&quot;:81}],&quot;debates&quot;:[{&quot;id&quot;:&quot;ai-live-0&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;Who should control AI?&quot;,&quot;names&quot;:[&quot;Jordan D.&quot;,&quot;Sam R.&quot;,&quot;JD&quot;,&quot;SR&quot;],&quot;meta&quot;:&quot;1.2k watching&quot;,&quot;stamp&quot;:&quot;Round 04&quot;,&quot;href&quot;:null},{&quot;id&quot;:&quot;ai-live-1&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;The strongest case on each side&quot;,&quot;names&quot;:[&quot;Alex M.&quot;,&quot;Casey L.&quot;,&quot;AM&quot;,&quot;CL&quot;],&quot;meta&quot;:&quot;255 watching&quot;,&quot;stamp&quot;:&quot;Round 05&quot;,&quot;href&quot;:null},{&quot;id&quot;:&quot;ai-live-2&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;What would change your mind?&quot;,&quot;names&quot;:[&quot;Taylor K.&quot;,&quot;Morgan B.&quot;,&quot;TK&quot;,&quot;MB&quot;],&quot;meta&quot;:&quot;184 watching&quot;,&quot;stamp&quot;:&quot;Round 06&quot;,&quot;href&quot;:null},{&quot;id&quot;:&quot;ai-replay-0&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;The trade-offs behind the idea&quot;,&quot;names&quot;:[&quot;Alex M.&quot;,&quot;Casey L.&quot;,&quot;AM&quot;,&quot;CL&quot;],&quot;meta&quot;:&quot;Yesterday · 2.4k views&quot;,&quot;stamp&quot;:&quot;28:14&quot;,&quot;href&quot;:null},{&quot;id&quot;:&quot;ai-replay-1&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;Where both sides disagree&quot;,&quot;names&quot;:[&quot;Taylor K.&quot;,&quot;Morgan B.&quot;,&quot;TK&quot;,&quot;MB&quot;],&quot;meta&quot;:&quot;Oct 14 · 1.8k views&quot;,&quot;stamp&quot;:&quot;42:08&quot;,&quot;href&quot;:null}]},{&quot;id&quot;:&quot;work&quot;,&quot;cat&quot;:&quot;Society&quot;,&quot;title&quot;:&quot;A four-day workweek should be the standard.&quot;,&quot;short&quot;:&quot;Less time. Better work?&quot;,&quot;pct&quot;:74,&quot;delta&quot;:5,&quot;vol&quot;:18.2,&quot;people&quot;:618,&quot;price&quot;:0.42,&quot;live&quot;:2,&quot;viewers&quot;:&quot;864&quot;,&quot;yes&quot;:&quot;A shorter week can protect focus and give people more control over their lives.&quot;,&quot;no&quot;:&quot;One standard cannot fit every industry or every kind of work.&quot;,&quot;points&quot;:[69,70,69,71,70,72,71,71,70,72,73,72,74,73,74,74],&quot;reference&quot;:true,&quot;href&quot;:null,&quot;topicSlug&quot;:null,&quot;demo&quot;:true,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;A shorter week rewards focused output instead of hours at a desk.&quot;,&quot;rate&quot;:82},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Hospitals, restaurants and care services cannot simply close for a day.&quot;,&quot;rate&quot;:66},{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;More time to recover can reduce burnout and staff turnover.&quot;,&quot;rate&quot;:86},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Compressing five days of work into four can intensify the workload.&quot;,&quot;rate&quot;:63},{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;An extra day creates time for family, care and community.&quot;,&quot;rate&quot;:79},{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;Trials let employers test productivity before committing.&quot;,&quot;rate&quot;:88}],&quot;debates&quot;:[{&quot;id&quot;:&quot;work-live-0&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;Less time. Better work?&quot;,&quot;names&quot;:[&quot;Jordan D.&quot;,&quot;Sam R.&quot;,&quot;JD&quot;,&quot;SR&quot;],&quot;meta&quot;:&quot;864 watching&quot;,&quot;stamp&quot;:&quot;Round 04&quot;,&quot;href&quot;:null},{&quot;id&quot;:&quot;work-live-1&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;The strongest case on each side&quot;,&quot;names&quot;:[&quot;Alex M.&quot;,&quot;Casey L.&quot;,&quot;AM&quot;,&quot;CL&quot;],&quot;meta&quot;:&quot;255 watching&quot;,&quot;stamp&quot;:&quot;Round 05&quot;,&quot;href&quot;:null},{&quot;id&quot;:&quot;work-replay-0&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;The trade-offs behind the idea&quot;,&quot;names&quot;:[&quot;Alex M.&quot;,&quot;Casey L.&quot;,&quot;AM&quot;,&quot;CL&quot;],&quot;meta&quot;:&quot;Yesterday · 2.4k views&quot;,&quot;stamp&quot;:&quot;28:14&quot;,&quot;href&quot;:null},{&quot;id&quot;:&quot;work-replay-1&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;Where both sides disagree&quot;,&quot;names&quot;:[&quot;Taylor K.&quot;,&quot;Morgan B.&quot;,&quot;TK&quot;,&quot;MB&quot;],&quot;meta&quot;:&quot;Oct 14 · 1.8k views&quot;,&quot;stamp&quot;:&quot;42:08&quot;,&quot;href&quot;:null}]},{&quot;id&quot;:&quot;nuclear&quot;,&quot;cat&quot;:&quot;Climate&quot;,&quot;title&quot;:&quot;Nuclear power belongs at the center of climate policy.&quot;,&quot;short&quot;:&quot;The case for nuclear.&quot;,&quot;pct&quot;:61,&quot;delta&quot;:3,&quot;vol&quot;:14.6,&quot;people&quot;:524,&quot;price&quot;:0.28,&quot;live&quot;:1,&quot;viewers&quot;:&quot;642&quot;,&quot;yes&quot;:&quot;Reliable low-carbon electricity should be central to an energy transition.&quot;,&quot;no&quot;:&quot;Cost and construction timelines make other investments more urgent.&quot;,&quot;points&quot;:[58,57,58,58,59,60,59,58,60,61,60,60,62,61,60,61],&quot;reference&quot;:true,&quot;href&quot;:null,&quot;topicSlug&quot;:null,&quot;demo&quot;:true,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;Reliable low-carbon electricity keeps the grid running around the clock.&quot;,&quot;rate&quot;:78},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Long construction timelines can delay emissions reductions.&quot;,&quot;rate&quot;:62},{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;Firm power complements wind and solar when weather changes.&quot;,&quot;rate&quot;:83},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Cost overruns can crowd out faster clean-energy investments.&quot;,&quot;rate&quot;:67},{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;Extending safe plants can preserve existing low-carbon capacity.&quot;,&quot;rate&quot;:81},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Waste storage needs durable institutions and public consent.&quot;,&quot;rate&quot;:59}],&quot;debates&quot;:[{&quot;id&quot;:&quot;nuclear-live-0&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;The case for nuclear.&quot;,&quot;names&quot;:[&quot;Jordan D.&quot;,&quot;Sam R.&quot;,&quot;JD&quot;,&quot;SR&quot;],&quot;meta&quot;:&quot;642 watching&quot;,&quot;stamp&quot;:&quot;Round 04&quot;,&quot;href&quot;:null},{&quot;id&quot;:&quot;nuclear-replay-0&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;The trade-offs behind the idea&quot;,&quot;names&quot;:[&quot;Alex M.&quot;,&quot;Casey L.&quot;,&quot;AM&quot;,&quot;CL&quot;],&quot;meta&quot;:&quot;Yesterday · 2.4k views&quot;,&quot;stamp&quot;:&quot;28:14&quot;,&quot;href&quot;:null},{&quot;id&quot;:&quot;nuclear-replay-1&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;Where both sides disagree&quot;,&quot;names&quot;:[&quot;Taylor K.&quot;,&quot;Morgan B.&quot;,&quot;TK&quot;,&quot;MB&quot;],&quot;meta&quot;:&quot;Oct 14 · 1.8k views&quot;,&quot;stamp&quot;:&quot;42:08&quot;,&quot;href&quot;:null}]},{&quot;id&quot;:&quot;ubi&quot;,&quot;cat&quot;:&quot;Economy&quot;,&quot;title&quot;:&quot;Universal basic income is worth the cost.&quot;,&quot;short&quot;:&quot;A floor for everyone?&quot;,&quot;pct&quot;:46,&quot;delta&quot;:-4,&quot;vol&quot;:12.4,&quot;people&quot;:486,&quot;price&quot;:0.31,&quot;live&quot;:2,&quot;viewers&quot;:&quot;716&quot;,&quot;yes&quot;:&quot;An unconditional income floor gives people bargaining power and stability.&quot;,&quot;no&quot;:&quot;Limited public funds should be directed toward those with the greatest need.&quot;,&quot;points&quot;:[50,51,50,49,50,48,49,48,47,48,47,46,47,45,46,46],&quot;reference&quot;:true,&quot;href&quot;:null,&quot;topicSlug&quot;:null,&quot;demo&quot;:true,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;A guaranteed income floor gives people stability between jobs.&quot;,&quot;rate&quot;:77},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;A universal payment is expensive even when many recipients do not need it.&quot;,&quot;rate&quot;:72},{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;People gain bargaining power to leave exploitative work.&quot;,&quot;rate&quot;:63},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Targeted services may do more with the same public budget.&quot;,&quot;rate&quot;:69},{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;Unconditional support reduces administrative barriers and stigma.&quot;,&quot;rate&quot;:75},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Funding the payment matters as much as its headline amount.&quot;,&quot;rate&quot;:84}],&quot;debates&quot;:[{&quot;id&quot;:&quot;ubi-live-0&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;A floor for everyone?&quot;,&quot;names&quot;:[&quot;Jordan D.&quot;,&quot;Sam R.&quot;,&quot;JD&quot;,&quot;SR&quot;],&quot;meta&quot;:&quot;716 watching&quot;,&quot;stamp&quot;:&quot;Round 04&quot;,&quot;href&quot;:null},{&quot;id&quot;:&quot;ubi-live-1&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;The strongest case on each side&quot;,&quot;names&quot;:[&quot;Alex M.&quot;,&quot;Casey L.&quot;,&quot;AM&quot;,&quot;CL&quot;],&quot;meta&quot;:&quot;255 watching&quot;,&quot;stamp&quot;:&quot;Round 05&quot;,&quot;href&quot;:null},{&quot;id&quot;:&quot;ubi-replay-0&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;The trade-offs behind the idea&quot;,&quot;names&quot;:[&quot;Alex M.&quot;,&quot;Casey L.&quot;,&quot;AM&quot;,&quot;CL&quot;],&quot;meta&quot;:&quot;Yesterday · 2.4k views&quot;,&quot;stamp&quot;:&quot;28:14&quot;,&quot;href&quot;:null},{&quot;id&quot;:&quot;ubi-replay-1&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;Where both sides disagree&quot;,&quot;names&quot;:[&quot;Taylor K.&quot;,&quot;Morgan B.&quot;,&quot;TK&quot;,&quot;MB&quot;],&quot;meta&quot;:&quot;Oct 14 · 1.8k views&quot;,&quot;stamp&quot;:&quot;42:08&quot;,&quot;href&quot;:null}]},{&quot;id&quot;:&quot;city&quot;,&quot;cat&quot;:&quot;Society&quot;,&quot;title&quot;:&quot;City centers should prioritize people over cars.&quot;,&quot;short&quot;:&quot;Who owns the street?&quot;,&quot;pct&quot;:57,&quot;delta&quot;:6,&quot;vol&quot;:9.7,&quot;people&quot;:352,&quot;price&quot;:0.37,&quot;live&quot;:1,&quot;viewers&quot;:&quot;428&quot;,&quot;yes&quot;:&quot;Safer streets and useful public spaces make cities better places to live.&quot;,&quot;no&quot;:&quot;Access for workers, families and local businesses needs more flexibility.&quot;,&quot;points&quot;:[51,50,52,51,52,53,52,54,53,54,54,56,55,56,57,57],&quot;reference&quot;:true,&quot;href&quot;:null,&quot;topicSlug&quot;:null,&quot;demo&quot;:true,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;Less through-traffic creates safer streets for walking and cycling.&quot;,&quot;rate&quot;:81},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;People with mobility limitations still need convenient vehicle access.&quot;,&quot;rate&quot;:86},{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;Public space can serve residents instead of parked cars.&quot;,&quot;rate&quot;:74},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Deliveries and local businesses need workable access plans.&quot;,&quot;rate&quot;:79},{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;Reliable transit makes a people-first center accessible to more people.&quot;,&quot;rate&quot;:87},{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;Cleaner air and quieter streets improve everyday quality of life.&quot;,&quot;rate&quot;:80}],&quot;debates&quot;:[{&quot;id&quot;:&quot;city-live-0&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;Who owns the street?&quot;,&quot;names&quot;:[&quot;Jordan D.&quot;,&quot;Sam R.&quot;,&quot;JD&quot;,&quot;SR&quot;],&quot;meta&quot;:&quot;428 watching&quot;,&quot;stamp&quot;:&quot;Round 04&quot;,&quot;href&quot;:null},{&quot;id&quot;:&quot;city-replay-0&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;The trade-offs behind the idea&quot;,&quot;names&quot;:[&quot;Alex M.&quot;,&quot;Casey L.&quot;,&quot;AM&quot;,&quot;CL&quot;],&quot;meta&quot;:&quot;Yesterday · 2.4k views&quot;,&quot;stamp&quot;:&quot;28:14&quot;,&quot;href&quot;:null},{&quot;id&quot;:&quot;city-replay-1&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;Where both sides disagree&quot;,&quot;names&quot;:[&quot;Taylor K.&quot;,&quot;Morgan B.&quot;,&quot;TK&quot;,&quot;MB&quot;],&quot;meta&quot;:&quot;Oct 14 · 1.8k views&quot;,&quot;stamp&quot;:&quot;42:08&quot;,&quot;href&quot;:null}]},{&quot;id&quot;:&quot;growth&quot;,&quot;cat&quot;:&quot;Economy&quot;,&quot;title&quot;:&quot;Economic growth should remain a policy priority.&quot;,&quot;short&quot;:&quot;What does progress mean?&quot;,&quot;pct&quot;:52,&quot;delta&quot;:-2,&quot;vol&quot;:8.3,&quot;people&quot;:294,&quot;price&quot;:0.47,&quot;live&quot;:1,&quot;viewers&quot;:&quot;391&quot;,&quot;yes&quot;:&quot;Growth expands the resources available for public services and innovation.&quot;,&quot;no&quot;:&quot;Wellbeing and ecological limits deserve priority over total output.&quot;,&quot;points&quot;:[54,55,54,53,54,55,54,53,54,52,53,52,51,52,53,52],&quot;reference&quot;:true,&quot;href&quot;:null,&quot;topicSlug&quot;:null,&quot;demo&quot;:true,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;A growing economy can fund better public services and infrastructure.&quot;,&quot;rate&quot;:72},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;GDP can rise while housing, health and everyday security get worse.&quot;,&quot;rate&quot;:78},{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;Productivity gains can support higher wages and more free time.&quot;,&quot;rate&quot;:76},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Ecological limits need to shape what kind of growth we pursue.&quot;,&quot;rate&quot;:82},{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;Innovation can expand what society can afford and achieve.&quot;,&quot;rate&quot;:74},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Distribution matters: more output does not guarantee shared prosperity.&quot;,&quot;rate&quot;:85}],&quot;debates&quot;:[{&quot;id&quot;:&quot;growth-live-0&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;What does progress mean?&quot;,&quot;names&quot;:[&quot;Jordan D.&quot;,&quot;Sam R.&quot;,&quot;JD&quot;,&quot;SR&quot;],&quot;meta&quot;:&quot;391 watching&quot;,&quot;stamp&quot;:&quot;Round 04&quot;,&quot;href&quot;:null},{&quot;id&quot;:&quot;growth-replay-0&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;The trade-offs behind the idea&quot;,&quot;names&quot;:[&quot;Alex M.&quot;,&quot;Casey L.&quot;,&quot;AM&quot;,&quot;CL&quot;],&quot;meta&quot;:&quot;Yesterday · 2.4k views&quot;,&quot;stamp&quot;:&quot;28:14&quot;,&quot;href&quot;:null},{&quot;id&quot;:&quot;growth-replay-1&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;Where both sides disagree&quot;,&quot;names&quot;:[&quot;Taylor K.&quot;,&quot;Morgan B.&quot;,&quot;TK&quot;,&quot;MB&quot;],&quot;meta&quot;:&quot;Oct 14 · 1.8k views&quot;,&quot;stamp&quot;:&quot;42:08&quot;,&quot;href&quot;:null}]}],&quot;following&quot;:[&quot;work&quot;,&quot;nuclear&quot;]}</template>
-<footer class="site-footer">
-<nav class="container footer-inner" aria-label="Site">
-<a href="/topics">Topics</a>
-<a href="/coins">Yap Coins</a>
-<a href="/about">About</a>
-<a href="/privacy">Privacy</a>
-<a href="/terms">Terms</a>
-<a href="/cookies">Cookies</a>
-</nav>
-<p class="footer-note">Play money · no cash value</p>
-</footer>
-<nav class="site-tabbar" aria-label="Main navigation">
-<a href="/home" aria-current="page">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path fill="currentColor" fill-rule="evenodd" d="M1.5 12a10.5 8.8 0 1 0 21 0a10.5 8.8 0 1 0-21 0zM4.8 13.5a7.2 5.9 0 1 0 14.4 0a7.2 5.9 0 1 0-14.4 0z"/>
-</svg>
-<span>Home</span>
-</a>
-<a href="/live">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<circle cx="12" cy="12" r="2.6" fill="currentColor"/>
-<path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-</svg>
-<span>Live</span>
-</a>
-<a href="/queue">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M4.5 3.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5H8.2L5 15.2v-2.7h-.5A2.5 2.5 0 0 1 2 10V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
-<path d="M11.5 10.5h8a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-.5v2.7l-3.2-2.7h-4.3A2.5 2.5 0 0 1 9 17v-4a2.5 2.5 0 0 1 2.5-2.5z" fill="currentColor" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
-</svg>
-<span>Queue</span>
-</a>
-<a href="/debates">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<circle cx="11" cy="11" r="6.6" fill="none" stroke="currentColor" stroke-width="2.2"/>
-<path d="M16 16l4.6 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-</svg>
-<span>Explore</span>
-</a>
-<a href="/match">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
-<path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-</svg>
-<span>Create</span>
-</a>
-</nav>
-</body>
-</html>
-`;
-
-exports[`renders the home page 7`] = `
-<!doctype html>
 <html lang="en" data-email-first>
 <head>
 <meta charset="utf-8">
@@ -15261,6 +14206,7 @@ exports[`renders the home page 7`] = `
 <link rel="stylesheet" href="/assets/site.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/arena.css?v=0123456789ab">
 <link rel="stylesheet" href="/assets/site-header.css?v=0123456789ab">
+<link rel="stylesheet" href="/assets/home.css?v=0123456789ab">
 <script defer src="/assets/session-coordination.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/site-header.js?v=0123456789ab">
@@ -15273,11 +14219,8 @@ exports[`renders the home page 7`] = `
 </script>
 <script type="module" src="/assets/results-notice.js?v=0123456789ab">
 </script>
-<link rel="stylesheet" href="/assets/homepage.css?v=0123456789ab">
-<script defer src="/assets/homepage.bundle.js?v=0123456789ab">
-</script>
 </head>
-<body class="arena-market-home">
+<body class="">
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header" data-site-header data-session="checking" data-avatar-src="/assets/avatars/{id}.svg?v=0123456789ab">\\n    <div class="container site-header-grid">\\n      <a class="site-logo" href="/home">
 <img src="/assets/landing/yaparena-logo.png?v=0123456789ab" width="575" height="151" alt="YAP Arena home">
@@ -15377,275 +14320,177 @@ exports[`renders the home page 7`] = `
 </div>
 </noscript>\\n      </div>\\n      <p class="sr-only" role="status" data-header-status>
 </p>\\n    </div>\\n  </header>
-<div id="ya-market-v4" data-reference="false">\\n  <main id="main" class="ya-content container">\\n    <h1 class="sr-only">Yap Arena</h1>\\n    <div class="home-top">\\n    <section class="ya-carousel" id="ya-carousel" aria-label="Trending ideas" aria-roledescription="carousel">\\n    <div class="ya-carousel-window" id="ya-carousel-window">
-<article class="card trend" id="ya-trending-slide" aria-roledescription="slide" aria-label="1 of 1: A real &lt;question&gt;?">
-<header class="trend-head">
-<svg class="pixel-mark" width="48" height="48" viewBox="0 0 6 6" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
-<rect width="6" height="6" rx="1.5" fill="var(--raised)">
-</rect>
-<path d="M1.5 0.5h1v1h-1zM3.5 0.5h1v1h-1zM2.5 0.5h1v1h-1zM0.5 1.5h1v1h-1zM4.5 1.5h1v1h-1zM1.5 1.5h1v1h-1zM3.5 1.5h1v1h-1zM2.5 1.5h1v1h-1zM0.5 2.5h1v1h-1zM4.5 2.5h1v1h-1zM2.5 3.5h1v1h-1z" fill="var(--visit-0)">
-</path>
-</svg>
-<div class="trend-heading">
-<p class="trend-cat" id="ya-category">
-<span class="sr-only">Ideas · Trending</span>
-<span class="ins" aria-hidden="true">ideas · trending</span>
-</p>
-<h2 class="trend-title" id="ya-title">
-<a href="/topics/public-idea">A real &lt;question&gt;?</a>
-</h2>
-</div>
-<button class="ya-follow ya-bookmark follow-button" type="button" id="ya-follow" data-idea="11111111-1111-4111-8111-111111111111" data-follow-type="topics" data-follow-slug="public-idea" data-follow-icon="true" aria-pressed="false"  aria-label="Follow this idea">
+<main id="main">
+<div class="container home-list" data-home-list>
+<h1 class="sr-only">Yap Arena</h1>
+<div class="home-intro" data-home-intro>
+<p>Live video debates. Say whether you agree during each turn's 60-second window.</p>
+<button class="home-intro-close" type="button" data-home-intro-close aria-label="Close the introduction">
 <svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M6.5 3.5h11v17l-5.5-4-5.5 4z">
+<path d="M6 6l12 12M18 6 6 18">
 </path>
 </svg>
 </button>
-<span class="follow-message sr-only" role="status">
-</span>
-</header>
-<div class="trend-body">
-<div class="trend-left">
-<div class="trend-none">
-<p class="trend-none-title">
-<span class="sr-only">No rounds yet</span>
-<span class="ins" aria-hidden="true">no rovnds yet</span>
-</p>
-<p>Participant endorsement appears after the first closed round.</p>
 </div>
-<section class="trend-args" aria-labelledby="ya-args-title">
-<h3 class="trend-args-title" id="ya-args-title">
-<span class="sr-only">Behind the position</span>
-<span class="ins" aria-hidden="true">behind the position</span>
-</h3>
-<ul class="trend-arg-list">
-<li class="trend-arg">
-<p class="trend-arg-meta">
-<strong>For the idea</strong>
-</p>
-<p class="trend-arg-text">For &lt;the&gt; idea</p>
-</li>
-<li class="trend-arg is-counter">
-<p class="trend-arg-meta">
-<strong>Counterargument</strong>
-</p>
-<p class="trend-arg-text">Against &amp; questioning</p>
-</li>
-</ul>
-</section>
+<div class="chips home-chips" role="group" aria-label="Show">
+<button class="chip" type="button" data-home-filter="all" aria-pressed="true">All</button>
+<button class="chip" type="button" data-home-filter="soon" aria-pressed="false">Soon · 1</button>
+<button class="chip" type="button" data-home-filter="replays" aria-pressed="false">Replays · 2</button>
 </div>
-<div class="trend-right">
-<div class="trend-chartbar">
-<p class="trend-legend">
-<i aria-hidden="true">
-</i>
-<span id="ya-legend-name">Endorsement</span> <strong class="num" id="ya-legend">—</strong>
-</p>
-<div class="trend-tools">
-<div class="ya-segments" role="group" aria-label="Chart metric">
-<button type="button" data-metric="endorsement" aria-pressed="true">Endorsement</button>
-<button type="button" data-metric="price" aria-pressed="false">Price</button>
-</div>
-<div class="ya-segments" role="group" aria-label="Chart period">
-<button type="button" data-range="1D" aria-pressed="true">1D</button>
-<button type="button" data-range="1W" aria-pressed="false">1W</button>
-<button type="button" data-range="1M" aria-pressed="false">1M</button>
-</div>
-</div>
-</div>
-<svg id="ya-chart" class="ya-chart" role="img" aria-label="Idea history unavailable" viewBox="0 0 800 240">
-<title>Unavailable participant endorsement, in percent</title>
-<line class="ya-guide" x1="8" y1="212" x2="792" y2="212"/>
-<line class="ya-guide" x1="8" y1="162" x2="792" y2="162"/>
-<line class="ya-guide" x1="8" y1="112" x2="792" y2="112"/>
-<line class="ya-guide" x1="8" y1="62" x2="792" y2="62"/>
-<line class="ya-guide" x1="8" y1="12" x2="792" y2="12"/>
-<text class="ya-chart-empty" x="400" y="92" text-anchor="middle">The chart starts after the first closed round.</text>
-</svg>
-</div>
-</div>
-<footer class="trend-foot">
-<p class="trend-stats">
-<span>1 live</span>
-</p>
-<div class="trend-arena">
-<p class="trend-match">
-<span class="trend-people">
-<span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
-</span>
-<span>Alex Rivera</span>
-<span class="vs">
-<span class="sr-only">versus</span>
-<span aria-hidden="true">VS</span>
-</span>
-<span class="avatar-slot" style="--avatar-size:24px" aria-hidden="true">
-<span class="avatar-initials">SB</span>
-</span>
-<span>Speaker B</span>
-</span>
-<span class="trend-when">
-<span class="trend-live">
+<div class="home-feed" data-home-feed>
+<section class="home-section home-top" aria-labelledby="home-top-title">
+<h2 class="home-section-title" id="home-top-title">
 <span class="live-pixel" aria-hidden="true">
-</span>Live now</span>
 </span>
-</p>
-<a class="btn btn-primary btn-sm trend-cta" href="/debates/real-debate">Explore debate</a>
-</div>
-<p class="trend-signin">
-<a href="/account">Sign in to take part</a>
-</p>
-</footer>
-</article>
-</div>\\n    <div class="ya-carousel-controls">
-<div class="ya-carousel-dots" id="ya-carousel-dots" role="group" aria-label="Choose trending idea">
-<button type="button" class="ya-carousel-dot" data-trending="11111111-1111-4111-8111-111111111111" aria-label="Show A real &lt;question&gt;?" aria-current="true">
-<span class="ya-dot-pixels" aria-hidden="true">
-<i>
-</i>
-<i>
-</i>
-<i>
-</i>
+<span class="sr-only">Live now</span>
+<span class="ins" aria-hidden="true">live now</span>
+</h2>
+<a class="card home-feature" href="/debates/hostile-debate" data-home-key="55555555-5555-4555-8555-555555555555">
+<span class="home-feature-head">
+<span class="home-pair">
+<span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
 </span>
-</button>
-</div>
-<div class="ya-carousel-nav" id="ya-carousel-nav">
-<button type="button" class="ya-nav-pill" data-carousel="previous" aria-label="Previous idea: A real &lt;question&gt;?" disabled>
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M15 6l-6 6 6 6">
-</path>
-</svg>
-<span>A real &lt;question&gt;?</span>
-</button>
-<button type="button" class="ya-nav-pill" data-carousel="next" aria-label="Next idea: A real &lt;question&gt;?" disabled>
-<span>A real &lt;question&gt;?</span>
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M9 6l6 6-6 6">
-</path>
-</svg>
-</button>
-</div>
-</div>\\n    </section>\\n    <aside class="home-rail" id="ya-rail" aria-label="Live now and popular ideas">
-<section class="card rail-live" aria-labelledby="ya-live-title">
-<p class="rail-live-top">
+<span class="avatar-slot" style="--avatar-size:48px" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
+</span>
+</span>
 <span class="tag tag-live">
 <span class="live-pixel" aria-hidden="true">
 </span>Live</span>
-</p>
-<h2 class="rail-live-title" id="ya-live-title">
-<a href="/debates/real-debate">A real &lt;question&gt;?</a>
-</h2>
-<p class="rail-live-people">Alex Rivera vs Speaker B</p>
-<a class="btn btn-secondary btn-sm" href="/debates/real-debate" aria-label="Watch: A real &lt;question&gt;?">Watch</a>
-</section>
-<section class="card rail-promo rail-promo-member" aria-labelledby="ya-promo-member">
-<h2 class="rail-title" id="ya-promo-member">
-<span class="sr-only">Take a side</span>
-<span class="ins" aria-hidden="true">take a side</span>
-</h2>
-<p>Open a topic and queue on a side. You are matched with someone on the other side in seconds.</p>
-<a class="btn btn-secondary btn-sm" href="/topics">Browse topics</a>
-</section>
-<section class="card rail-promo rail-promo-guest" aria-labelledby="ya-promo-guest">
-<h2 class="rail-title" id="ya-promo-guest">
-<span class="sr-only">Join the arena</span>
-<span class="ins" aria-hidden="true">join the arena</span>
-</h2>
-<p>Sign in to follow ideas, take a side and debate live.</p>
-<a class="btn btn-secondary btn-sm" href="/account">Sign in</a>
-</section>
-<section class="rail-popular" aria-labelledby="ya-popular-title">
-<h2 class="rail-title" id="ya-popular-title">
-<span class="sr-only">Popular ideas</span>
-<span class="ins" aria-hidden="true">popvlar ideas</span>
-</h2>
-<ol class="rail-popular-list">
-<li>
-<a href="/topics/public-idea">
-<span class="rail-rank num">1</span>
-<span class="rail-pop">
-<span class="rail-pop-name">A real &lt;question&gt;?</span>
-<span class="rail-pop-vol">
-<span class="live-pixel" aria-hidden="true">
-</span>1 live</span>
 </span>
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M9 6l6 6-6 6">
-</path>
-</svg>
+<span class="home-feature-title">Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
+<span class="home-row-meta">
+<span class="live-pixel" aria-hidden="true">
+</span>
+<span>Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; vs Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; · Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span> <span class="tag tag-quiet">Demo</span>
+</span>
+<span class="home-feature-foot">
+<span class="home-row-meta">
+</span>
+<span class="btn btn-primary btn-sm home-action">Watch</span>
+</span>
+</a>
+<ul class="home-rows">
+<li>
+<a class="home-row" href="/debates/public-debate-1" data-home-key="66666666-6666-4666-8666-000000000001">
+<span class="home-pair">
+<span class="avatar-slot" style="--avatar-size:36px" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+</span>
+<span class="avatar-slot" style="--avatar-size:36px" aria-hidden="true">
+<span class="avatar-initials">?</span>
+</span>
+</span>
+<span class="home-row-copy">
+<span class="home-row-title">Should we debate this?</span>
+<span class="home-row-meta">
+<span class="live-pixel" aria-hidden="true">
+</span>
+<span>Alex Public vs Against · Public topic</span>
+</span>
+</span>
+<span class="btn btn-outline btn-sm home-action">Watch</span>
 </a>
 </li>
-</ol>
+</ul>
 </section>
-<a class="btn btn-outline rail-all" href="#ya-ideas">Explore all ideas</a>
-</aside>\\n    </div>\\n    <section class="ya-discovery" id="ya-ideas" aria-labelledby="ya-grid-title">
-<div class="ya-sectionhead">
-<h2 class="section-title" id="ya-grid-title" tabindex="-1">
-<span class="sr-only">Ideas in motion</span>
-<span class="ins" aria-hidden="true">ideas in motion</span>
+<section class="home-section" aria-labelledby="home-soon-title" data-home-section="soon">
+<h2 class="home-section-title" id="home-soon-title">
+<span class="sr-only">Starting soon</span>
+<span class="ins" aria-hidden="true">starting soon</span>
 </h2>
-<label class="sr-only" for="ya-sort">Sort ideas</label>
-<select class="input ya-sort" id="ya-sort">
-<option value="active">Most active</option>
-<option value="moves">Biggest shifts</option>
-</select>
-</div>
-<div class="ya-discovery-tools">
-<div class="ya-view-tabs ya-segments" role="group" aria-label="Ideas view">
-<button type="button" data-nav="all" aria-pressed="true">All ideas</button>
-<button type="button" data-nav="following" aria-pressed="false">Following</button>
-</div>
-<div class="chips ya-filters" role="group" aria-label="Idea categories">
-<button class="chip ya-filter" data-filter="All" aria-pressed="true" type="button">All ideas</button>
-<button class="chip ya-filter" data-filter="Ideas" aria-pressed="false" type="button">Ideas</button>
-</div>
-<form class="ya-idea-search search-pill" action="/topics" method="get" role="search" aria-label="Search ideas">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<circle cx="11" cy="11" r="7">
-</circle>
-<path d="m20 20-3.5-3.5">
-</path>
-</svg>
-<label class="sr-only" for="ya-search">Search ideas</label>
-<input class="input" id="ya-search" name="q" type="search" placeholder="Search ideas…" maxlength="80">
-</form>
-</div>
-<div class="ya-grid" id="ya-grid">
-<a href="/topics/public-idea" class="ya-marketcard" data-expand="11111111-1111-4111-8111-111111111111" aria-expanded="false">
-<span class="ya-cardtop">
-<span class="ya-cardcat">
-<svg class="pixel-mark" width="24" height="24" viewBox="0 0 6 6" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
-<rect width="6" height="6" rx="2" fill="var(--raised)">
-</rect>
-<path d="M1.5 0.5h1v1h-1zM3.5 0.5h1v1h-1zM2.5 0.5h1v1h-1zM0.5 1.5h1v1h-1zM4.5 1.5h1v1h-1zM1.5 1.5h1v1h-1zM3.5 1.5h1v1h-1zM2.5 1.5h1v1h-1zM0.5 2.5h1v1h-1zM4.5 2.5h1v1h-1zM2.5 3.5h1v1h-1z" fill="var(--visit-0)">
-</path>
-</svg>
-<span>Ideas</span>
+<ul class="home-rows">
+<li>
+<a class="home-row" href="/debates/public-debate-2" data-home-key="66666666-6666-4666-8666-000000000002">
+<span class="home-pair">
+<span class="avatar-slot" style="--avatar-size:36px" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
 </span>
-<span class="ya-cardlive is-live">
-<span class="live-pixel" aria-hidden="true">
-</span>1 live</span>
+<span class="avatar-slot" style="--avatar-size:36px" aria-hidden="true">
+<span class="avatar-initials">?</span>
 </span>
-<span class="ya-cardtitle">A real &lt;question&gt;?</span>
-<span class="ya-cardnone">
-<strong>No rounds yet</strong> · Participant endorsement appears after the first closed round.</span>
-<span class="ya-cardhint">
-<span>Explore idea & debates</span>
-<span aria-hidden="true">+</span>
+</span>
+<span class="home-row-copy">
+<span class="home-row-title">Should we debate this?</span>
+<span class="home-row-meta">
+<span>Alex Public vs Against · Public topic</span>
+</span>
+</span>
+<span class="home-when">
+<time class="num" datetime="2026-11-06T20:15:00.000Z" data-home-countdown="start">in 2 h 15</time>
 </span>
 </a>
+</li>
+</ul>
+</section>
+<section class="home-section" aria-labelledby="home-replays-title" data-home-section="replays">
+<h2 class="home-section-title" id="home-replays-title">
+<span class="sr-only">Replays you can still answer</span>
+<span class="ins" aria-hidden="true">replays yov can still answer</span>
+</h2>
+<ul class="home-rows">
+<li>
+<a class="home-row" href="/debates/hostile-debate-5" data-home-key="66666666-6666-4666-8666-000000000005">
+<span class="home-pair">
+<span class="avatar-slot" style="--avatar-size:36px" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
+</span>
+<span class="avatar-slot" style="--avatar-size:36px" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
+</span>
+</span>
+<span class="home-row-copy">
+<span class="home-row-title">Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
+<span class="home-row-meta">
+<span>Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; vs Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt; · Topic &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span> <span class="tag tag-quiet">Demo</span>
+</span>
+<span class="home-row-meta">Answers close <time class="num" datetime="2026-11-10T16:00:00.000Z" data-home-countdown="close">in 3 days</time>
+</span>
+</span>
+<span class="btn btn-outline btn-sm home-action">Answer</span>
+</a>
+</li>
+</ul>
+</section>
+<section class="home-section" aria-labelledby="home-finished-title" data-home-section="finished">
+<h2 class="home-section-title" id="home-finished-title">
+<span class="sr-only">Finished debates</span>
+<span class="ins" aria-hidden="true">finished debates</span>
+</h2>
+<ul class="home-rows">
+<li>
+<a class="home-row" href="/debates/public-debate-6" data-home-key="66666666-6666-4666-8666-000000000006">
+<span class="home-pair">
+<span class="avatar-slot" style="--avatar-size:36px" aria-hidden="true">
+<img class="avatar-img" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+</span>
+<span class="avatar-slot" style="--avatar-size:36px" aria-hidden="true">
+<span class="avatar-initials">?</span>
+</span>
+</span>
+<span class="home-row-copy">
+<span class="home-row-title">Should we debate this?</span>
+<span class="home-row-meta">
+<span>Alex Public vs Against · Public topic</span>
+</span>
+<span class="home-row-meta">Ended Oct 21</span>
+</span>
+<span class="btn btn-outline btn-sm home-action">Watch</span>
+</a>
+</li>
+</ul>
+</section>
+<a class="text-link home-more" href="/debates">All debates <span aria-hidden="true">→</span>
+</a>
 </div>
-<p class="ya-endnote">Endorsement = share of participants choosing YES in the latest closed round. Synthetic activity is labeled.</p>
-</section>\\n    <div id="ya-chart-tooltip" class="ya-chart-tooltip" role="tooltip" aria-hidden="true">
-<span data-tip-date>
-</span> <strong>
-</strong>
-</div>\\n    <div id="ya-status" aria-live="polite" class="sr-only">
-</div>\\n  <noscript>
-<p class="ya-endnote">Idea links open their public topic pages. Enable JavaScript for inline charts, filters and previews.</p>
-</noscript>
-</main>\\n</div>\\n<template id="ya-home-data">{&quot;reference&quot;:false,&quot;available&quot;:true,&quot;following&quot;:[],&quot;ideas&quot;:[{&quot;id&quot;:&quot;11111111-1111-4111-8111-111111111111&quot;,&quot;topicSlug&quot;:&quot;public-idea&quot;,&quot;href&quot;:&quot;/topics/public-idea&quot;,&quot;cat&quot;:&quot;Ideas&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;short&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;reference&quot;:false,&quot;demo&quot;:false,&quot;pct&quot;:null,&quot;delta&quot;:null,&quot;vol&quot;:null,&quot;people&quot;:null,&quot;price&quot;:null,&quot;points&quot;:[],&quot;viewers&quot;:null,&quot;live&quot;:1,&quot;yes&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;no&quot;:&quot;Against &amp; questioning&quot;,&quot;arguments&quot;:[{&quot;stance&quot;:&quot;for&quot;,&quot;text&quot;:&quot;For &lt;the&gt; idea&quot;,&quot;rate&quot;:null},{&quot;stance&quot;:&quot;against&quot;,&quot;text&quot;:&quot;Against &amp; questioning&quot;,&quot;rate&quot;:null}],&quot;debates&quot;:[{&quot;id&quot;:&quot;22222222-2222-4222-8222-222222222222&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;meta&quot;:&quot;Live debate&quot;,&quot;stamp&quot;:&quot;Live&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;replay&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Speaker A&quot;,&quot;Morgan B&quot;,&quot;SA&quot;,&quot;MB&quot;],&quot;avatars&quot;:[null,&quot;/assets/avatars/yap-frog.svg?v=0123456789ab&quot;],&quot;meta&quot;:&quot;Replay debate&quot;,&quot;stamp&quot;:&quot;Replay&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null},{&quot;id&quot;:&quot;upcoming&quot;,&quot;kind&quot;:&quot;upcoming&quot;,&quot;title&quot;:&quot;A real &lt;question&gt;?&quot;,&quot;names&quot;:[&quot;Alex Rivera&quot;,&quot;Speaker B&quot;,&quot;AR&quot;,&quot;SB&quot;],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;meta&quot;:&quot;Upcoming / awaiting media&quot;,&quot;stamp&quot;:&quot;Upcoming&quot;,&quot;href&quot;:&quot;/debates/real-debate&quot;,&quot;startsAt&quot;:null}]}]}</template>
+<p class="sr-only" role="status" data-home-status>
+</p>
+</div>
+<template id="home-list-data">{&quot;available&quot;:true,&quot;now&quot;:&quot;2026-11-06T18:00:00.000Z&quot;,&quot;matchmaking&quot;:true,&quot;live&quot;:[{&quot;id&quot;:&quot;55555555-5555-4555-8555-555555555555&quot;,&quot;slug&quot;:&quot;hostile-debate&quot;,&quot;href&quot;:&quot;/debates/hostile-debate&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;proposition&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;topic&quot;:{&quot;slug&quot;:&quot;hostile-topic&quot;,&quot;title&quot;:&quot;Topic &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;},&quot;names&quot;:[&quot;Name &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;],&quot;named&quot;:[true,true],&quot;avatars&quot;:[&quot;/assets/avatars/yap-crab.svg?v=0123456789ab&quot;,&quot;/assets/avatars/yap-frog.svg?v=0123456789ab&quot;],&quot;demo&quot;:true,&quot;startsAt&quot;:&quot;2026-10-01T17:00:00.000Z&quot;,&quot;endedAt&quot;:null,&quot;closesAt&quot;:null,&quot;result&quot;:null},{&quot;id&quot;:&quot;66666666-6666-4666-8666-000000000001&quot;,&quot;slug&quot;:&quot;public-debate-1&quot;,&quot;href&quot;:&quot;/debates/public-debate-1&quot;,&quot;kind&quot;:&quot;live&quot;,&quot;proposition&quot;:&quot;Should we debate this?&quot;,&quot;topic&quot;:{&quot;slug&quot;:&quot;public-topic&quot;,&quot;title&quot;:&quot;Public topic&quot;},&quot;names&quot;:[&quot;Alex Public&quot;,&quot;Against&quot;],&quot;named&quot;:[true,false],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;demo&quot;:false,&quot;startsAt&quot;:&quot;2026-10-01T17:00:00.000Z&quot;,&quot;endedAt&quot;:null,&quot;closesAt&quot;:null,&quot;result&quot;:null}],&quot;soon&quot;:[{&quot;id&quot;:&quot;66666666-6666-4666-8666-000000000002&quot;,&quot;slug&quot;:&quot;public-debate-2&quot;,&quot;href&quot;:&quot;/debates/public-debate-2&quot;,&quot;kind&quot;:&quot;soon&quot;,&quot;proposition&quot;:&quot;Should we debate this?&quot;,&quot;topic&quot;:{&quot;slug&quot;:&quot;public-topic&quot;,&quot;title&quot;:&quot;Public topic&quot;},&quot;names&quot;:[&quot;Alex Public&quot;,&quot;Against&quot;],&quot;named&quot;:[true,false],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;demo&quot;:false,&quot;startsAt&quot;:&quot;2026-11-06T20:15:00.000Z&quot;,&quot;endedAt&quot;:null,&quot;closesAt&quot;:null,&quot;result&quot;:null}],&quot;replays&quot;:[{&quot;id&quot;:&quot;66666666-6666-4666-8666-000000000005&quot;,&quot;slug&quot;:&quot;hostile-debate-5&quot;,&quot;href&quot;:&quot;/debates/hostile-debate-5&quot;,&quot;kind&quot;:&quot;replay&quot;,&quot;proposition&quot;:&quot;Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;topic&quot;:{&quot;slug&quot;:&quot;hostile-topic&quot;,&quot;title&quot;:&quot;Topic &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;},&quot;names&quot;:[&quot;Name &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;,&quot;Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; \\\\&quot;quoted\\\\&quot; &#39;single&#39; &amp; &lt;&quot;],&quot;named&quot;:[true,true],&quot;avatars&quot;:[&quot;/assets/avatars/yap-crab.svg?v=0123456789ab&quot;,&quot;/assets/avatars/yap-frog.svg?v=0123456789ab&quot;],&quot;demo&quot;:true,&quot;startsAt&quot;:&quot;2026-10-01T17:00:00.000Z&quot;,&quot;endedAt&quot;:&quot;2026-11-05T16:00:00.000Z&quot;,&quot;closesAt&quot;:&quot;2026-11-10T16:00:00.000Z&quot;,&quot;result&quot;:null}],&quot;finished&quot;:[{&quot;id&quot;:&quot;66666666-6666-4666-8666-000000000006&quot;,&quot;slug&quot;:&quot;public-debate-6&quot;,&quot;href&quot;:&quot;/debates/public-debate-6&quot;,&quot;kind&quot;:&quot;finished&quot;,&quot;proposition&quot;:&quot;Should we debate this?&quot;,&quot;topic&quot;:{&quot;slug&quot;:&quot;public-topic&quot;,&quot;title&quot;:&quot;Public topic&quot;},&quot;names&quot;:[&quot;Alex Public&quot;,&quot;Against&quot;],&quot;named&quot;:[true,false],&quot;avatars&quot;:[&quot;/assets/avatars/yap-owl.svg?v=0123456789ab&quot;,null],&quot;demo&quot;:false,&quot;startsAt&quot;:&quot;2026-10-01T17:00:00.000Z&quot;,&quot;endedAt&quot;:&quot;2026-10-21T02:00:00.000Z&quot;,&quot;closesAt&quot;:null,&quot;result&quot;:null}]}</template>
+<script type="module" src="/assets/home-list.js?v=0123456789ab">
+</script>
+</main>
 <footer class="site-footer">
 <nav class="container footer-inner" aria-label="Site">
 <a href="/topics">Topics</a>
@@ -18382,6 +17227,12 @@ exports[`renders the privacy, terms and cookie pages 3`] = `
 <th scope="row">yap:live-captions</th>
 <td data-label="Category">Strictly necessary</td>
 <td data-label="Purpose">Remembers whether you turned captions on or off.</td>
+<td data-label="Duration">Until you clear site data</td>
+</tr>
+<tr>
+<th scope="row">yaparena-home-intro</th>
+<td data-label="Category">Strictly necessary</td>
+<td data-label="Purpose">Remembers that you closed the introduction on Home.</td>
 <td data-label="Duration">Until you clear site data</td>
 </tr>
 <tr>

@@ -1,0 +1,298 @@
+/* /home as a list of debates (docs/site-design.md#home, first-run plan PR 6).
+   Loaded after site.css; every value comes from its tokens. One column, so
+   phones and wide screens read the same order. */
+.home-list {
+  display: grid;
+  gap: var(--space-5);
+  max-width: 48rem;
+  padding-top: var(--space-5);
+}
+
+/* The closable one-line intro for new and signed-out readers. */
+.home-intro {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-inner);
+  background: var(--panel);
+}
+.home-intro[hidden] {
+  display: none;
+}
+.home-intro p {
+  flex: 1;
+  margin: 0;
+  padding: var(--space-2) 0;
+  font-size: var(--text-14);
+  line-height: 1.5;
+}
+.home-intro-close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--muted);
+}
+.home-intro-close:hover {
+  color: var(--acid);
+}
+.home-intro-close svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.home-feed {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
+}
+.home-quiet {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 calc(-1 * var(--space-3));
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+.home-quiet-mark {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  background: var(--muted);
+}
+
+.home-section {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.home-section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-20);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+/* Rows: both speakers' avatars, the proposition in Forum with who and the
+   topic under it, and one way in on the right. The whole row is the link. */
+.home-rows {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.home-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "pair copy action";
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-inner);
+  background: var(--panel);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.2s;
+}
+.home-row:hover,
+.home-feature:hover {
+  border-color: var(--control-border);
+  color: var(--text);
+}
+.home-row:focus-visible,
+.home-feature:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
+}
+.home-pair {
+  grid-area: pair;
+  display: flex;
+  gap: 2px;
+}
+.home-count {
+  grid-area: pair;
+  display: grid;
+  place-items: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-inner);
+  background: var(--raised);
+  font-size: var(--text-20);
+}
+.home-row-copy {
+  grid-area: copy;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.home-row-title,
+.home-feature-title {
+  font-family: var(--font-number);
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+.home-row-title {
+  font-size: 1.125rem;
+  line-height: 1.3;
+}
+.home-row-meta {
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.home-row-meta .live-pixel {
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: 0.1em;
+}
+.home-row-meta .tag {
+  height: auto;
+  vertical-align: baseline;
+}
+.home-result {
+  color: var(--text);
+}
+.home-action,
+.home-when {
+  grid-area: action;
+  justify-self: end;
+}
+/* A debate starting soon shows its countdown where the button would be. */
+.home-when {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-16);
+  white-space: nowrap;
+}
+/* The button inside a link lights up with its row or card. */
+.home-row:hover .btn-outline {
+  border-color: #f3f3f3;
+}
+.home-feature:hover .btn-primary {
+  filter: brightness(0.88);
+}
+
+/* The top slot: one card, with the page's one white button. */
+.home-feature {
+  display: grid;
+  gap: var(--space-3);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.2s;
+}
+.home-feature-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.home-feature-head .home-count {
+  min-width: 48px;
+  height: 48px;
+  font-size: var(--text-28);
+}
+.home-feature-head .home-feature-title {
+  flex: 1;
+}
+.home-feature-title {
+  font-size: var(--text-28);
+  line-height: 1.2;
+  text-wrap: balance;
+}
+.home-feature-text {
+  max-width: 36rem;
+  font-size: var(--text-16);
+  line-height: 1.5;
+}
+.home-countdown {
+  font-family: var(--font-number);
+  font-size: var(--text-28);
+  line-height: 1;
+  white-space: nowrap;
+}
+.home-feature-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+.home-feature-foot .home-action {
+  margin-left: auto;
+}
+
+.home-empty {
+  padding: var(--space-6) var(--space-5);
+}
+.home-empty > h2 {
+  font-size: var(--text-20);
+}
+.home-more {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+}
+.home-state {
+  margin: var(--space-7) 0;
+}
+.home-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+/* Phones: the avatars and the button share the row's first line, and the
+   proposition takes the full width under them. */
+@media (max-width: 599px) {
+  .home-list {
+    gap: var(--space-4);
+    padding-top: var(--space-4);
+  }
+  .home-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "pair action"
+      "copy copy";
+    padding: var(--space-3);
+  }
+  .home-row .home-pair,
+  .home-row .home-count {
+    justify-self: start;
+  }
+  .home-feature-title,
+  .home-countdown {
+    font-size: var(--text-24);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-row,
+  .home-feature {
+    transition: none;
+  }
+}

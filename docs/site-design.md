@@ -98,36 +98,73 @@ same stylesheet for its topic cards.
 - **Topic page**: the title in Forum beside one card holding both sides (under it below 1000 px).
   With the queue on, each side has a "Queue for this side" button described by the side's name;
   a side you queued for lights up and its button turns white.
+  Once it has shared rounds, its endorsement history follows its debates
+  ([Topic history](#topic-history)).
 - **Profile**: the avatar in a 96 px slot (72 on phones) beside the name, @handle, bio and Follow.
 - **Empty lists** show the emblem, today's words and Clear search; inside a topic or profile, a
   quieter note without the emblem.
 
 ## Home
 
-`/home` (`src/features/discovery/homepage-view.ts`, `public/homepage.css`,
-`frontend/homepage.ts`; [wide homepage](wide-homepage.md)) has no headline of its own:
+`/home` is a list of debates (first-run plan PR 6, direction A of the decision confirmed on
+2026-11-06): `src/features/discovery/home-list-model.ts` sorts the public debate reads,
+`home-list-view.ts` draws them, `public/home.css` styles them and `frontend/home-list.ts` adds
+what depends on the reader. One column of at most 48rem on every screen, so phones and wide
+screens read the same order; a visually hidden "Yap Arena" is the page's heading.
 
-- **Trending card**: the idea's pixel mark (`pixelMark("idea-" + id, 48)` from
-  `src/features/discovery/pixel-mark.ts`: a 5 × 5 mirrored pattern from an FNV-1a hash in one
-  of the visit colours; ideas get marks, people get their avatars), the category in Dydema, the
-  title in Forum 28 / 20 px and a bookmark to follow. From a 640 px card, For and Against with
-  their share in Forum and up to three arguments sit beside the chart, and the body keeps a
-  28rem minimum so every slide is the same height. The footer holds the volume, the debaters
-  and one white Explore debate. An idea without rounds shows "No rounds yet" and an empty frame.
-- **Chart**: one white line on five dotted guides, five dates, a square end pixel that pulses;
-  hover, a tap or the keyboard shows a square marker with "Oct 19 55%".
-- **Under the card**: dots (the current idea as three lit pixels) and previous / next named after
-  the neighbouring ideas, icons only on phones. Nothing turns by itself.
-- **Rail** (20rem from 1200 px, two columns under the card below that): Live now, Take a side
-  (Join the arena when signed out; not on phones), Popular ideas by 24-hour volume, and
-  Explore all ideas.
-- **Ideas in motion**: today's tools and cards with the idea's 24 px mark, a Forum title and
-  percentage, and a white sparkline that draws in like the chart.
-- With no ideas the page is one state: "No public ideas yet." or, when discovery fails,
-  "Discovery temporarily unavailable." with Try again.
+- **Intro**: one closable line for new and signed-out readers, "Live video debates. Say whether
+  you agree during each turn's 60-second window." It stays closed on the device once closed
+  (`yaparena-home-intro`, listed in the Cookie Policy) and hides for an account that follows a
+  topic. It explains nothing about Yap Coins until the founder approves that wording.
+- **Chips**: All, Soon · n and Replays · n (the kit's `.chips`, pressed is white). Category chips
+  join them with the topic categories (PR 5).
+- **Top slot**: never an empty card or chart. Under a Dydema title, one card with the page's one
+  white button, filled in this order (the decision page's "When nothing is live"): a live debate
+  in a followed topic; a debate starting within a day or a replay still taking answers in a
+  followed topic ("From your topics"); any other live debate ("Live now", or "Live in other
+  topics" for someone who follows topics), never hidden; the next debate within a day with its
+  countdown; a replay still taking answers; someone waiting; a finished debate, one with its
+  result first ("Latest result"); and, with nothing at all, "Start the first debate" (Pick a
+  topic, or Create a topic without the live queue). "Your topics" are the topics you follow;
+  signed out or new, you follow none. With nothing live, a quiet line says "Nothing live right
+  now. Live debates show here first."
+- **Sections**, each a Dydema title over rows, nothing listed twice: Live now (the others follow a
+  live top slot in its own section), Starting soon (a start that passed is never shown, nor one
+  more than a day away; each row counts down), Someone's waiting (`GET /api/matchmaking/waiting`:
+  "1 person waiting to argue …", "Take the other side: …" and Argue for / Argue against, where for
+  is side A; the row opens the topic page at that side's queue button), Replays you can still
+  answer ("Answers close in 4 days", until each debate's 120-hour close) and Finished debates
+  ("Ended 3 days ago · Turn 6: 58% said yes", the latest revealed turn). "All debates →" ends the
+  list.
+- **Rows**: both speakers' Pixel Yappers in 36 px slots ("?" while nobody is named), the
+  proposition in Forum, who and the topic under it, and one way in: Watch, Answer or Argue; a
+  debate starting soon shows its countdown instead. The whole row is the link, with the focus
+  ring on it. On phones the avatars and the button share the first line and the proposition takes
+  the full width under them; nothing scrolls sideways at 320 px.
+- **The reader's part**: the server renders what everyone sees. The browser then reads the
+  account's followed topics (`GET /api/me/follows`), who is waiting and each replay's and
+  finished debate's public turn windows (`GET /api/public/debates/:id/windows`): a replay keeps
+  taking answers only in the five-day mode with an open turn window, before its close, and
+  shows that close; any other is finished. It renders the list again once, keeping focus, and
+  updates countdowns every 15 seconds.
+- When discovery fails the page is one state: "Discovery temporarily unavailable." with Try
+  again and Explore topics.
 
-At 1440 × 900 and 1280 × 800 the card and its controls end by 800 px; on a 390 × 844 phone
-Explore debate ends by 820 px (`scripts/verify-homepage-browser.ts` checks both).
+On a 390 × 844 phone the top slot's button ends above the bottom tabs
+(`scripts/verify-homepage-browser.ts` checks it). The old trending home (`homepage-view.ts`,
+`homepage.css`, `frontend/homepage.ts`, [wide homepage](wide-homepage.md)) no longer shows; its
+code is removed in PR 7, which keeps what topic pages use (below).
+
+## Topic history
+
+A topic page shows its endorsement history once it has shared rounds
+(`src/features/discovery/topic-history-web.ts`, `frontend/topic-chart.ts`, styles at the end of
+`public/explore.css`): the chart that used to sit on the home, under the topic's debates. It reuses
+the home's idea model (`publicHomepage()`), geometry (`homepage-chart.ts`) and inspection
+(`frontend/homepage-chart.ts`, `changeText()` from `homepage-view.ts`): one white line on five
+dotted guides, five dates, a square end pixel that pulses; hover, a tap or the keyboard shows a
+square marker with "Oct 19 55%". Endorsement or Price, 1D, 1W or 1M. It shows the history the page
+was served, and a topic without rounds shows no chart.
 
 ## Live
 
@@ -148,7 +185,9 @@ With nothing to watch, a Dydema headline sits beside the living emblem
   "Every idea deserves _a voice._" (64 / 40 / 28 px), the lead, "Join the arena" with "Sign in or
   create an account", and 380 px Google and email buttons. The living emblem sits in columns 8–12,
   above the words when upright under 900 px and beside them on a phone held sideways. The
-  header hides its Sign in pill here.
+  header hides its Sign in pill here. The header's Sign in leads here, so these buttons open
+  Auth0's Log in screen; only the landing's new-user buttons open Sign up
+  ([landing page](landing-page.md#routes-and-sessions)).
 - **While the account is checked**, a screen-tall space with the pixel loader holds the page, so
   the back link and the footer don't move.
 - **Settings**: the avatar slot (`.settings-avatar`, 72 px, 48 on phones) with the person's avatar
@@ -188,8 +227,13 @@ With nothing to watch, a Dydema headline sits beside the living emblem
   the title at 40 / 28 px, section numbers inline, the points at a glance as one bordered list on
   phones, and 44 px contents and "Back to top" links on touch screens.
 - **Cookie banner** (`frontend/measurement.ts`): the kit's card with a Dydema title. Reject all and
-  Accept all are equal secondary pills; Customize is a text link (under them on phones). The bottom
-  offset follows the safe area.
+  Accept all are equal secondary pills; Customize is a text link. The bottom offset follows the
+  safe area. On phones (under 600 px) the banner is one short line, "Analytics cookie only with
+  your OK.", with Customize beside it and Reject all and Accept all side by side at the same width
+  below: 122 px, about 15% of a 375×812 screen instead of 37% (two lines of text in the same
+  height at 320 px). Customize and Cookie settings open the full card on phones too: the title,
+  the full text with the Cookie Policy link, the switches, then Reject all and Accept all with Save
+  choices under them. The choices, what they store and the analytics are the same at every width.
 - **Offline page**: the kit's type and colours, from `site.css` alone (the service worker caches
   only the two).
 
@@ -211,8 +255,7 @@ With nothing to watch, a Dydema headline sits beside the living emblem
   Forum) and the account button, a 44 px target around a 36 px square slot with the person's
   avatar. The balance pop-up repeats the amount in Forum 40 px with "In open positions" and
   "Play money · no cash value"; the account menu starts with the avatar, name and @handle.
-- On the debate page, and on `/home` until it moves onto the kit, the header lines up with their
-  wider layouts (up to 120rem).
+- On the debate page, the header lines up with its wider layout (up to 120rem).
 - Phones (first-run redesign, PR 1 of the confirmed plan): Live, Queue and Create (`/match`) show
   their name in Dydema in the middle of the top row; Explore's two lists show its search bar
   (below); every other page shows the logo. There is no search icon. The account
