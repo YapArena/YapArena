@@ -93,6 +93,27 @@ describe("configuration", () => {
     );
   });
 
+  it("keeps each part of the first-run guide off until its switch is on", () => {
+    const load = (env) => loadConfig({ DATABASE_URL: databaseUrl, ...env });
+    assert.deepEqual(load({}).firstRun, { welcome: false, tips: false });
+    assert.deepEqual(load({ FIRST_RUN_WELCOME_ENABLED: "true" }).firstRun, {
+      welcome: true,
+      tips: false,
+    });
+    assert.deepEqual(
+      load({
+        FIRST_RUN_WELCOME_ENABLED: "false",
+        FIRST_RUN_TIPS_ENABLED: "true",
+      }).firstRun,
+      { welcome: false, tips: true },
+    );
+    for (const name of ["FIRST_RUN_WELCOME_ENABLED", "FIRST_RUN_TIPS_ENABLED"])
+      assert.throws(
+        () => load({ [name]: "yes" }),
+        new RegExp(`${name} must be true or false`),
+      );
+  });
+
   it("provides safe development defaults", () => {
     assert.deepEqual(loadConfig({ DATABASE_URL: databaseUrl }), {
       environment: "development",
@@ -125,6 +146,7 @@ describe("configuration", () => {
       communityStream,
       matchmaking: { enabled: false, liveDebateCapacity: 2 },
       userStream: { enabled: false },
+      firstRun: { welcome: false, tips: false },
       liveOutline: {
         enabled: false,
         agentName: "yaparena-transcriber",
@@ -185,6 +207,7 @@ describe("configuration", () => {
         communityStream,
         matchmaking: { enabled: false, liveDebateCapacity: 2 },
         userStream: { enabled: false },
+        firstRun: { welcome: false, tips: false },
         liveOutline: {
           enabled: false,
           agentName: "yaparena-transcriber",

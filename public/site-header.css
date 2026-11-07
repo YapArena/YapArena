@@ -1416,6 +1416,160 @@ body.account-page:has(#signed-out:not([hidden])) [data-header-guest] {
   width: 100%;
   margin-top: var(--space-3);
 }
+/* The first-run welcome (FIRST_RUN_WELCOME_ENABLED): how YAP Arena works and
+   "What brings you here?" in the emblem's place. */
+.ps-guide {
+  justify-items: stretch;
+  padding-top: var(--space-2);
+  text-align: left;
+}
+.ps-hello {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.ps-eyebrow {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: var(--text-14);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.ps-ask {
+  margin: 0;
+  font-weight: 700;
+}
+.ps-intents {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.ps-guide .ps-primary {
+  width: auto;
+  margin-top: 0;
+}
+.ps-look {
+  justify-self: center;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--text-14);
+  font-weight: 700;
+  cursor: pointer;
+}
+.ps-look:hover {
+  color: var(--text);
+}
+@media (max-width: 380px) {
+  .ps-intents {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* The guide's icon lines: the welcome screen and, with the tips on, the coin
+   menu. */
+.first-run-how {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.first-run-how li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-3);
+}
+.first-run-how p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 1.5;
+}
+.first-run-how b,
+.first-run-tip b {
+  color: var(--text);
+}
+.first-run-glyph {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--raised);
+}
+.first-run-glyph svg {
+  width: 18px;
+  height: 18px;
+}
+.first-run-speaker-a,
+.first-run-speaker-b,
+.first-run-coin {
+  fill: none;
+  stroke-width: 1.6;
+}
+.first-run-speaker-a {
+  stroke: var(--visit-1);
+}
+.first-run-speaker-b,
+.first-run-coin {
+  stroke: var(--visit-0);
+}
+.first-run-yes {
+  fill: var(--answer-yes);
+}
+.first-run-no {
+  fill: var(--answer-no);
+}
+.coin-menu-how {
+  padding: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+
+/* A one-time tip (FIRST_RUN_TIPS_ENABLED) in the debate page's answer panel. */
+.first-run-tip {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--visit-1);
+  border-radius: var(--radius-inner);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 1.5;
+  text-align: left;
+}
+.first-run-tip p {
+  margin: 0;
+}
+.first-run-tip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--text-12);
+}
+.first-run-tip-row button {
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: var(--raised);
+  color: var(--button-text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.first-run-tip-row button:hover {
+  border-color: #f3f3f3;
+}
 .profile-setup :focus-visible {
   outline: 2px solid var(--acid);
   outline-offset: 3px;

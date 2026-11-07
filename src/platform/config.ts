@@ -551,6 +551,19 @@ export function loadConfig(
   const userStream = Object.freeze({
     enabled: matchmaking.enabled || userStreamEnabled === "true",
   });
+  // First-run guide (first-run plan PRs 11 and 12), off by default: the
+  // welcome screen on the handle pop-up's last step, and the one-time tips on
+  // the debate page with the coin menu's two lines. Each is its own switch.
+  const firstRunSwitch = (name: string) => {
+    const value = environment[name] ?? "false";
+    if (!["true", "false"].includes(value))
+      throw new Error(`${name} must be true or false`);
+    return value === "true";
+  };
+  const firstRun = Object.freeze({
+    welcome: firstRunSwitch("FIRST_RUN_WELCOME_ENABLED"),
+    tips: firstRunSwitch("FIRST_RUN_TIPS_ENABLED"),
+  });
 
   if (!environments.has(nodeEnvironment)) {
     throw new Error("NODE_ENV must be development, test, or production");
@@ -645,6 +658,7 @@ export function loadConfig(
     communityStream,
     matchmaking,
     userStream,
+    firstRun,
     liveOutline,
     webPush,
     a4Funding,

@@ -1391,6 +1391,8 @@ Ship. Set them on web and the jobs worker together.
 | `MEDIA_REPLAY_PACKAGING_ENABLED` | `true`              | `true`                | Adaptive replays through the encoder                |
 | `COMMUNITY_STREAM_ENABLED`       | `false`             | `false`               | A separate rollout gate                             |
 | `USER_STREAM_ENABLED`            | unset               | unset                 | On with matchmaking                                 |
+| `FIRST_RUN_WELCOME_ENABLED`      | unset               | your call, web only   | Welcome screen; its wording awaits your approval    |
+| `FIRST_RUN_TIPS_ENABLED`         | unset               | your call, web only   | One-time tips and the coin menu's two lines         |
 | `A4_MODE`                        | check staging       | unset (`disabled`)    | Bot runs are staging demonstrations                 |
 | Agent `TRANSCRIPTION_PROVIDER`   | `deepgram`          | `deepgram`, no shadow | The founder's choice until the ElevenLabs retest    |
 

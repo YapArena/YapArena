@@ -3739,6 +3739,20 @@ textarea::placeholder {
     grid-area: sides;
     margin-top: var(--space-3);
   }
+  /* A first-run tip (FIRST_RUN_TIPS_ENABLED) takes the bar's top row while it
+     shows. */
+  .arena-page .stake-panel:not([data-sheet]):has(> .first-run-tip) {
+    grid-template-areas:
+      "tip tip"
+      "question meta"
+      "proposition proposition"
+      "sides sides";
+  }
+  .arena-page .stake-panel:not([data-sheet]) > .first-run-tip {
+    display: grid;
+    grid-area: tip;
+    margin: 0 0 var(--space-3);
+  }
   /* The sheet: the bar opens upward over the page and scrolls. */
   .arena-page .stake-panel[data-sheet] {
     position: fixed;

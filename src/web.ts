@@ -198,6 +198,7 @@ export function createWebServer(
     environment: config.environment,
     productionService: config.productionService,
     homepageReferenceEnabled: config.homepageReferenceEnabled,
+    firstRun: config.firstRun,
     applicationOrigin: config.applicationOrigin,
     trustProxy: config.trustProxy,
     requestBodyLimit: config.requestBodyLimit,
