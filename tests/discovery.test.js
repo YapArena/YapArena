@@ -295,6 +295,53 @@ describe("public discovery", () => {
     assert.equal(single.body.category, "cities");
   });
 
+  it("filters the Topics page by the category in its link, like the API", async () => {
+    const calls = [];
+    const filtered = appWith({
+      ...discovery,
+      listTopics: async (parameters) => {
+        calls.push(parameters);
+        return {
+          items: [{ ...topic, category: "cities" }],
+          pagination: { limit: 12, offset: 0, hasMore: false },
+        };
+      },
+    });
+    const page = await request(filtered).get(
+      "/topics?category=cities&q=transit",
+    );
+    assert.equal(page.status, 200);
+    assert.deepEqual(calls[0], {
+      query: "transit",
+      limit: 12,
+      offset: 0,
+      category: "cities",
+    });
+    // The Cities chip is current, and the top-bar search keeps it.
+    assert.match(
+      page.text,
+      /<a class="chip" aria-current="page" href="\/topics\?category=cities&amp;q=transit">Cities<\/a>/,
+    );
+    assert.match(
+      page.text,
+      /<input type="hidden" name="category" value="cities">/,
+    );
+    // No category, or an empty one, lists every topic as before.
+    for (const path of ["/topics", "/topics?category="])
+      assert.equal((await request(filtered).get(path)).status, 200, path);
+    assert.deepEqual(calls[1], { query: "", limit: 12, offset: 0 });
+    assert.deepEqual(calls[2], { query: "", limit: 12, offset: 0 });
+    // A category that isn't on the list is an invalid link.
+    for (const category of ["Cities", "sports", "cities&category=work"]) {
+      const refused = await request(filtered).get(
+        `/topics?category=${category}`,
+      );
+      assert.equal(refused.status, 400, category);
+      assert.match(refused.text, /Invalid link/);
+    }
+    assert.equal(calls.length, 3);
+  });
+
   it("returns the public API shape and hides unknown records", async () => {
     const response = await request(app).get(
       "/api/public/debates/public-debate",
@@ -685,7 +732,7 @@ describe("live topic queue pages", () => {
     assert.match(page.text, /data-waiting-section[^>]*hidden>/);
     assert.match(
       page.text,
-      /<a class="card queue-create" href="\/match#topic-create">/,
+      /<a class="card queue-create" href="\/match#topic-create" data-create-open>/,
     );
     assert.match(page.text, /queue-page\.js/);
     assert.match(
@@ -705,6 +752,37 @@ describe("live topic queue pages", () => {
       (await request(live(true)).get("/queue?offset=-1")).status,
       400,
     );
+  });
+
+  it("filters the Queue tab by category", async () => {
+    const calls = [];
+    const app = express().use(
+      createDiscoveryRouter({
+        discovery: {
+          ...discovery,
+          listTopics: async (parameters) => {
+            calls.push(parameters);
+            return {
+              items: [{ ...topic, category: "cities" }],
+              pagination: { limit: 12, offset: 0, hasMore: false },
+            };
+          },
+        },
+        matchmakingEnabled: true,
+        applicationOrigin: "https://arena.example",
+      }),
+    );
+    const page = await request(app).get("/queue?category=cities");
+    assert.equal(page.status, 200);
+    assert.equal(calls[0].category, "cities");
+    assert.equal(calls[0].query, "");
+    assert.match(
+      page.text,
+      /href="\/queue\?category=cities" aria-current="page"/,
+    );
+    assert.equal((await request(app).get("/queue")).status, 200);
+    assert.equal(calls[1].category, undefined);
+    assert.equal((await request(app).get("/queue?category=nope")).status, 400);
   });
 });
 

@@ -73,11 +73,21 @@ Explore (`/debates`), Topics, topic pages and profiles use the kit through
 `src/features/discovery/cards-web.ts`, with their layout in `public/explore.css`. Live loads the
 same stylesheet for its topic cards.
 
+- **Explore switch** (first-run plan): Explore's two lists, `/debates` and `/topics`, open with
+  Debates and Topics as a two-option switch above the page head, styled like the Create page's
+  Now / Propose times; the current one has `aria-current="page"`. Full width on phones.
 - **Page head**: a kicker, the `.page-title` with its emphasised words in `--visit-1`, and a lead.
-- **Search**: a pill field with a Search button; phones search from the keyboard's key.
+- **Search**: a pill field with a Search button. On phones the field is hidden and Explore's search
+  bar in the top row takes its place ([Header](#header)), so there is only one.
 - **Status filters** on Explore: All, Live, Upcoming and Replay as chips, then More (a
   `<details data-menu>` that closes on Escape or a click outside) with Ready, Ended, Under review,
   Finalized and Cancelled; More shows the status in use. URLs are unchanged.
+- **Category filters** on Topics: All and the founder's categories from
+  `src/features/discovery/topic-categories.ts`, in its order, as chips linking to
+  `/topics?category=<id>` (the API's filter; an unknown category is an invalid link). Each keeps
+  the search. They wrap from 600 px; on phones the row scrolls sideways and loads with the chosen
+  chip in view (`frontend/site.ts`). The debate list has no category chips: debates can't be
+  filtered by their topic's category without a new database query.
 - **Debate card** `.dcard`: a 16:9 picture with both speakers' avatars in 48 px slots on two
   panes, under the recording's still for replays and finalized debates (the media router serves
   no still for others; `frontend/site.ts` hides one that fails), the status tag and a stamp; then
@@ -231,11 +241,11 @@ With nothing to watch, a Dydema headline sits beside the living emblem
 
 `src/features/discovery/site-header-web.ts`, `public/site-header.css`, `frontend/site-header.ts`.
 
-| Width                                | Layout                                                                                                                                                                                                                                                                                                                                   |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ≥ 1000 px                            | One 64 px row: the landing logo (32 px), Live · Explore · Create, a 22rem search pill, then the account group.                                                                                                                                                                                                                           |
-| 600–999 px, and phones held sideways | The same row; search is a 44 px icon that opens a search row under the header (Escape closes it). Without JavaScript the icon links to the debates search.                                                                                                                                                                               |
-| < 600 px                             | A 56 px row like the X app: the account button on the left, the logo (26 px) or the page's name in the middle, the balance on the right. Under 600 px the main navigation is the bottom tabs (below); pages without them (the debate page, moderation and measurement) keep the three destinations as a 44 px tab row under the top row. |
+| Width                                | Layout                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ≥ 1000 px                            | One 64 px row: the landing logo (32 px), Live · Explore · Create, a 22rem search pill, then the account group.                                                                                                                                                                                                                                             |
+| 600–999 px, and phones held sideways | The same row; search is a 44 px icon that opens a search row under the header (Escape closes it). Without JavaScript the icon links to the debates search.                                                                                                                                                                                                 |
+| < 600 px                             | A 56 px row like the X app: the account button on the left, the logo (26 px), the page's name or Explore's search in the middle, the balance on the right. Under 600 px the main navigation is the bottom tabs (below); pages without them (the debate page, moderation and measurement) keep the three destinations as a 44 px tab row under the top row. |
 
 - The page's section (from its canonical path: Live, Explore for debates, topics and people, Create
   for `/match`) has `aria-current="page"` and three 4 px pixels in the visit colours under it.
@@ -246,27 +256,48 @@ With nothing to watch, a Dydema headline sits beside the living emblem
   avatar. The balance pop-up repeats the amount in Forum 40 px with "In open positions" and
   "Play money · no cash value"; the account menu starts with the avatar, name and @handle.
 - On the debate page, the header lines up with its wider layout (up to 120rem).
-- Phones (first-run redesign, PR 1 of the confirmed plan): Live, Explore (`/debates` and `/topics`)
-  and Create (`/match`) show their name in Dydema in the middle of the top row; every other page
-  shows the logo. There is no search icon: search is the Explore page's own field. The account
+- Phones (first-run redesign, PR 1 of the confirmed plan): Live, Queue and Create (`/match`) show
+  their name in Dydema in the middle of the top row; Explore's two lists show its search bar
+  (below); every other page shows the logo. There is no search icon. The account
   button opens the account menu as a drawer from the left over a dimmed page; tapping the dimmed
   page or pressing Escape closes it, and the page behind does not scroll. The queue pill takes its
   own row under the top row.
+- Explore's search bar (phones, first-run plan): on `/debates` and `/topics` the middle of the top
+  row is a search pill, "Search debates" or "Search topics" (`.site-page-search`, from the
+  `search` option of `siteHeaderMarkup()`), with 16 px text so phones don't zoom in. It reloads
+  the list it is on with the query and keeps the filters in use as hidden fields: the status on
+  Debates, the category on Topics. It fills the room between the account button and the balance;
+  signed out, it starts at the side gutter. Tablets and desktop keep the header's search, which
+  always searches debates, and the page's own field.
 
 ## Queue tab
 
 `renderQueue()` in `src/features/discovery/web.ts` (`/queue`), `frontend/queue-page.ts` and
 `frontend/queue-page-model.ts`, styles at the end of `public/explore.css`.
 
-- The kit's page head ("Pick a question and a side"), then a dashed "+ Create" card that opens the
-  Match page's topic form (`/match#topic-create`).
+- The kit's page head ("Pick a question and a side"), then a dashed "+ Create" card. For a
+  signed-in player it opens the Create sheet (below); guests, and pages with the queue off, follow
+  its link to the Match page's topic form (`/match#topic-create`), which signs in.
 - "Someone's waiting": the questions where someone is in the live queue now, from
   `GET /api/matchmaking/waiting`, each with the count per side ("2 people waiting to argue …") and
   one button for the other side. Hidden while nobody is waiting; refreshed every 20 seconds while
   the page is visible.
 - "All questions": every published topic, 12 a page, each with its title (linking to the topic
-  page), a "Waiting now" note when someone is queued on it, and one button per side named by the
-  side.
+  page), its category, a "Waiting now" note when someone is queued on it, and one button per side
+  named by the side. Demo examples, which the queue refuses, say "Demo" and name their sides
+  without buttons. Category chips above the list (All, then the founder's list) are links to
+  `/queue?category=…`; pagination and the canonical address keep the category.
+- The Create sheet (first-run PR 3b): a native modal `<dialog>`, a centred card from 600 px and a
+  bottom sheet below. It asks for the question, what the debate is about, both sides, a category
+  (the browsed one preselected) and "You argue", with the server's limits checked before sending.
+  While the question is typed, up to three published questions (demo examples left out) sharing a
+  word of four letters or more show under "Already asked?" with their side buttons, which close
+  the sheet and queue. "Create
+  and join the queue" makes the slug from the question, creates and publishes the topic with the
+  Match page's own calls (`POST /api/matching/topics`, then `…/publish`; a taken slug retries once
+  with a short random ending), adds the row at the top of the list and queues on the chosen side
+  like a side button. "Save as a private draft" only creates it; it is published later from
+  Create. A public question can't be edited, which the sheet says.
 - The buttons queue through `frontend/matchmaking.ts` (a `yap:queue-request` window event), with the
   topic page's sign-in, camera check, one-queue rule, overlay and strip. Your own side then reads
   "Leave queue" and the others are off until you leave; notices show above the list.

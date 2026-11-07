@@ -376,15 +376,23 @@ export function createDiscoveryRouter({
       renderDebates(origin, list, parameters.query, selected.status ?? "all"),
     );
   });
+  // Explore's topics, with the API's category filter for the category chips.
   router.get("/topics", async (request, response) => {
     const parameters = listParameters(request, response, invalid);
     if (!parameters) return;
+    const selected = categoryParameter(request, response, invalid);
+    if (!selected) return;
     return html(
       response,
       renderTopics(
         origin,
-        await discovery.listTopics(parameters),
+        await discovery.listTopics(
+          selected.category
+            ? { ...parameters, category: selected.category }
+            : parameters,
+        ),
         parameters.query,
+        selected.category,
       ),
     );
   });
@@ -392,12 +400,19 @@ export function createDiscoveryRouter({
   router.get("/queue", async (request, response) => {
     const parameters = listParameters(request, response, invalid);
     if (!parameters) return;
+    const selected = categoryParameter(request, response, invalid);
+    if (!selected) return;
     return html(
       response,
       renderQueue(
         origin,
-        await discovery.listTopics({ ...parameters, query: "" }),
+        await discovery.listTopics({
+          ...parameters,
+          query: "",
+          category: selected.category,
+        }),
         matchmakingEnabled,
+        selected.category ?? null,
       ),
     );
   });

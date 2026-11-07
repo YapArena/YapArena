@@ -96,6 +96,16 @@ it("renders the topic list", (t) => {
       hostileText("q"),
     ),
   );
+  // A category chosen with the chips (and kept by the top-bar search).
+  snapshot(
+    t,
+    web.renderTopics(
+      origin,
+      list([topic], { limit: 1, offset: 1, hasMore: true }),
+      hostileText("q"),
+      "cities",
+    ),
+  );
 });
 
 it("renders a topic", (t) => {

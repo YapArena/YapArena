@@ -10,6 +10,7 @@ import { accountMarkup } from "./account-web.ts";
 import {
   siteHeaderMarkup,
   siteTabBarMarkup,
+  type PageSearch,
   type SiteSection,
   type SiteTab,
 } from "./site-header-web.ts";
@@ -28,7 +29,11 @@ import { debateCard, statusLabels as labels, topicCard } from "./cards-web.ts";
 import { inscription, searchIcon } from "./kit-web.ts";
 import { personSlot } from "./avatar-web.ts";
 import { pixelCoin } from "./pixel-mark.ts";
-import { TOPIC_CATEGORIES } from "./topic-categories.ts";
+import {
+  TOPIC_CATEGORIES,
+  topicCategoryName,
+  type TopicCategory,
+} from "./topic-categories.ts";
 import { html, raw, type SafeHtml } from "../../platform/html.ts";
 import type {
   PublicDebate,
@@ -58,8 +63,9 @@ function tabFor(
   return path === "/home" ? "home" : section;
 }
 
-// On phones the top row names the three destinations' own pages; every other
-// page keeps the logo there.
+// On phones the top row names the destinations' own pages; every other page
+// keeps the logo there. Explore's two lists pass their search, which takes the
+// name's place.
 function pageTitleFor(canonical: string) {
   const path = new URL(canonical, "https://yaparena.invalid").pathname;
   if (path === "/live") return "Live";
@@ -78,6 +84,7 @@ export function layout(
   bodyClass = "",
   emailFirst = false,
   stylesheets: readonly string[] = [],
+  search: PageSearch | null = null,
 ) {
   const home = bodyClass.startsWith("arena-market-home");
   const reference = bodyClass.includes("reference-home");
@@ -87,7 +94,7 @@ export function layout(
   const tabBar = bodyClass.includes("arena-page")
     ? ""
     : siteTabBarMarkup(tabFor(canonical, section));
-  const page = html`${siteHeaderMarkup(section, { title: pageTitleFor(canonical) })}${
+  const page = html`${siteHeaderMarkup(section, { title: pageTitleFor(canonical), search })}${
     home ? content : html`<main id="main">${content}</main>`
   }${siteFooterMarkup()}${tabBar}`;
   return html`<!doctype html><html lang="en"${emailFirst ? " data-email-first" : ""}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#000000"><title>${title} · YAP Arena</title><meta name="description" content="${description}"><link rel="canonical" href="${canonical}">${metadata}${iconLinks()}<link rel="stylesheet" href="${asset("site.css")}"><link rel="stylesheet" href="${asset("arena.css")}"><link rel="stylesheet" href="${asset("site-header.css")}">${stylesheets.map((name) => html`<link rel="stylesheet" href="${asset(name)}">`)}<script defer src="${asset("session-coordination.js")}"></script><script type="module" src="${asset("site-header.js")}"></script><script defer src="${asset("site.js")}"></script><script defer src="${asset("account-balance.js")}"></script>${reference ? "" : html`<script defer src="${asset("measurement.js")}"></script><script type="module" src="${asset("results-notice.js")}"></script>`}${home ? html`<link rel="stylesheet" href="${asset("homepage.css")}"><script defer src="${asset("homepage.bundle.js")}"></script>` : ""}</head><body class="${bodyClass}"><a class="skip-link" href="#main">Skip to content</a>${page}</body></html>`.toString();
@@ -112,6 +119,14 @@ function listSearch(
   query: string,
 ) {
   return html`<form class="list-search" action="${action}" method="get" role="search"><label class="sr-only" for="${id}">${label}</label><div class="search-pill">${searchIcon}<input class="input" id="${id}" name="q" maxlength="80" value="${query}" placeholder="${placeholder}" enterkeyhint="search"></div><button class="btn btn-secondary" type="submit">Search</button></form>`;
+}
+
+// Explore's two lists (first-run plan): a switch between them at the top of
+// both, on every width; the current one is marked.
+function exploreSwitch(current: "debates" | "topics") {
+  const link = (key: typeof current, label: string) =>
+    html`<a href="/${key}"${key === current ? html` aria-current="page"` : ""}>${label}</a>`;
+  return html`<div class="container explore-switch-row"><nav class="explore-switch" aria-label="Explore">${link("debates", "Debates")}${link("topics", "Topics")}</nav></div>`;
 }
 
 // An empty list: the emblem, today's words and a way back to everything.
@@ -236,7 +251,7 @@ export function renderDebates(
   const moreCurrent = more.includes(status);
   const filters = html`<nav class="list-filters" aria-label="Debate status"><div class="chips">${chips}</div><details class="more-chip" data-menu><summary class="chip${moreCurrent ? " is-current" : ""}"><span class="sr-only">More statuses${moreCurrent ? ":" : ""}</span><span${moreCurrent ? "" : html` aria-hidden="true"`}>${moreCurrent ? label(status) : "More"}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></summary><div class="more-menu">${more.map((option) => html`<a${current(option)} href="${href(option)}">${label(option)}</a>`)}</div></details></nav>`;
   const base = `/debates${query || status !== "all" ? `?${new URLSearchParams({ ...(query ? { q: query } : {}), ...(status !== "all" ? { status } : {}) })}` : ""}`;
-  const content = html`${pageHead("The debate floor", "Find your next", "good argument.", "Upcoming conversations and public debate archives, all in one place.")}<section class="container list-section" aria-labelledby="debates-results"><h2 class="sr-only" id="debates-results">Debates</h2><div class="list-tools">${listSearch("/debates", "debate-search", "Search debates", "Search propositions or topics", query)}${filters}</div>${list.items.length ? html`<div class="list-grid">${list.items.map(debateCard)}</div>` : emptyList("No debates found.", "Try another search or status filter. Only published debates appear here.", "/debates")}${pagination(base, list)}</section>`;
+  const content = html`${exploreSwitch("debates")}${pageHead("The debate floor", "Find your next", "good argument.", "Upcoming conversations and public debate archives, all in one place.")}<section class="container list-section" aria-labelledby="debates-results"><h2 class="sr-only" id="debates-results">Debates</h2><div class="list-tools">${listSearch("/debates", "debate-search", "Search debates", "Search propositions or topics", query)}${filters}</div>${list.items.length ? html`<div class="list-grid">${list.items.map(debateCard)}</div>` : emptyList("No debates found.", "Try another search or status filter. Only published debates appear here.", "/debates")}${pagination(base, list)}</section>`;
   const canonical = `${origin}${listPath(base, list)}`;
   return layout(
     "Debates",
@@ -252,6 +267,12 @@ export function renderDebates(
     "",
     false,
     listStyles,
+    {
+      action: "/debates",
+      label: "Search debates",
+      query,
+      filters: status === "all" ? [] : [["status", status]],
+    },
   );
 }
 
@@ -259,9 +280,22 @@ export function renderTopics(
   origin: string,
   list: PublicList<PublicTopic>,
   query: string,
+  category?: TopicCategory,
 ) {
-  const base = `/topics${query ? `?q=${encodeURIComponent(query)}` : ""}`;
-  const content = html`${pageHead("The idea index", "Find the question", "worth asking.", "Each topic frames two sides of an ongoing conversation.")}<section class="container list-section" aria-labelledby="topics-results"><h2 class="sr-only" id="topics-results">Topics</h2><div class="list-tools">${listSearch("/topics", "topic-search", "Search topics", "Search an idea", query)}</div>${list.items.length ? html`<div class="list-grid">${list.items.map(topicCard)}</div>` : emptyList("No topics found.", "Try another search. Published topics will appear here.", "/topics")}${pagination(base, list)}</section>`;
+  // Category ids are lowercase letters, so they need no encoding.
+  const topicsPath = (option: TopicCategory | undefined) => {
+    const parameters = [
+      option && `category=${option}`,
+      query && `q=${encodeURIComponent(query)}`,
+    ].filter(Boolean);
+    return `/topics${parameters.length ? `?${parameters.join("&")}` : ""}`;
+  };
+  // All, then every category in the founder's order (#185's list).
+  const chip = (option: TopicCategory | undefined, label: string) =>
+    html`<a class="chip"${option === category ? html` aria-current="page"` : ""} href="${topicsPath(option)}">${label}</a>`;
+  const filters = html`<nav class="list-filters category-filters" aria-label="Topic category"><div class="chips">${chip(undefined, "All")}${TOPIC_CATEGORIES.map(([id, name]) => chip(id, name))}</div></nav>`;
+  const base = topicsPath(category);
+  const content = html`${exploreSwitch("topics")}${pageHead("The idea index", "Find the question", "worth asking.", "Each topic frames two sides of an ongoing conversation.")}<section class="container list-section" aria-labelledby="topics-results"><h2 class="sr-only" id="topics-results">Topics</h2><div class="list-tools">${listSearch("/topics", "topic-search", "Search topics", "Search an idea", query)}${filters}</div>${list.items.length ? html`<div class="list-grid">${list.items.map(topicCard)}</div>` : emptyList("No topics found.", category ? "Try another search or category. Published topics will appear here." : "Try another search. Published topics will appear here.", "/topics")}${pagination(base, list)}</section>`;
   const canonical = `${origin}${listPath(base, list)}`;
   return layout(
     "Topics",
@@ -277,6 +311,12 @@ export function renderTopics(
     "",
     false,
     listStyles,
+    {
+      action: "/topics",
+      label: "Search topics",
+      query,
+      filters: category ? [["category", category]] : [],
+    },
   );
 }
 
@@ -289,16 +329,30 @@ export function renderQueue(
   origin: string,
   list: PublicList<PublicTopic>,
   matchmaking = false,
+  category: TopicCategory | null = null,
 ) {
+  const base = `/queue${category ? `?category=${category}` : ""}`;
   const sideButton = (topic: PublicTopic, key: "A" | "B", label: string) =>
     html`<button class="btn btn-secondary btn-sm queue-request" type="button" data-queue-request="${topic.slug}" data-request-side="${key}" data-side-label="${label}">${label}</button>`;
+  // The queue refuses demo examples, so their rows name the sides instead of
+  // offering buttons.
+  const queueable = (topic: PublicTopic) => matchmaking && !topic.isDemo;
   const row = (topic: PublicTopic) =>
-    html`<li class="queue-row" data-queue-row="${topic.slug}"><div class="queue-row-copy"><a class="queue-row-title" href="/topics/${path(topic.slug)}">${topic.title}</a><p class="queue-row-meta"><span data-queue-row-waiting></span>${matchmaking ? "" : html`${topic.sideALabel} vs ${topic.sideBLabel}`}</p></div>${matchmaking ? html`<div class="queue-row-sides" role="group" aria-label="Argue a side: ${topic.title}">${sideButton(topic, "A", topic.sideALabel)}${sideButton(topic, "B", topic.sideBLabel)}</div>` : ""}</li>`;
+    html`<li class="queue-row" data-queue-row="${topic.slug}"><div class="queue-row-copy"><a class="queue-row-title" href="/topics/${path(topic.slug)}">${topic.title}</a><p class="queue-row-meta"><span>${topicCategoryName(topic.category)}</span>${topic.isDemo ? html`<span>Demo</span>` : ""}<span data-queue-row-waiting></span>${queueable(topic) ? "" : html`<span>${topic.sideALabel} vs ${topic.sideBLabel}</span>`}</p></div>${queueable(topic) ? html`<div class="queue-row-sides" role="group" aria-label="Argue a side: ${topic.title}">${sideButton(topic, "A", topic.sideALabel)}${sideButton(topic, "B", topic.sideBLabel)}</div>` : ""}</li>`;
+  // Categories (Decision 0003): All, then the founder's list, as links.
+  const chip = (id: TopicCategory | null, name: string) =>
+    html`<a class="chip" href="/queue${id ? `?category=${id}` : ""}"${id === category ? html` aria-current="page"` : ""}>${name}</a>`;
+  const chips = html`<nav class="list-filters" aria-label="Categories"><div class="chips">${chip(null, "All")}${TOPIC_CATEGORIES.map(([id, name]) => chip(id, name))}</div></nav>`;
   const questions = list.items.length
-    ? html`<ol class="queue-list">${list.items.map(row)}</ol>`
-    : quietState("No public questions yet.", "Create the first one.");
-  const content = html`${pageHead("Debate now", "Pick a question", "and a side.", "Pick your side. When someone queues on the other side, you both get 30 seconds to accept, then the debate starts.")}<section class="container list-section queue-page" aria-labelledby="questions-title">${matchmaking ? html`<p class="queue-page-note" data-queue-page-note role="status"></p>` : quietState("The live queue isn't open right now.", "You can still read every question and its debates.")}<a class="card queue-create" href="/match#topic-create"><span>Your question isn't here yet?</span><span class="btn btn-primary btn-sm" aria-hidden="true">+ Create</span></a>${matchmaking ? html`<section class="queue-waiting" data-waiting-section aria-labelledby="waiting-title" hidden><div class="section-head"><p class="kicker">${inscription("Fastest match")}</p><h2 class="section-title" id="waiting-title">${inscription("Someone's waiting")}</h2></div><ol class="queue-list" data-waiting-list></ol></section>` : ""}<div class="section-head"><p class="kicker">${inscription("Every open question")}</p><h2 class="section-title" id="questions-title">${inscription("All questions")}</h2></div>${questions}${pagination("/queue", list)}</section>${matchmaking ? html`<script type="module" src="${asset("queue-page.js")}"></script>` : ""}`;
-  const canonical = `${origin}${listPath("/queue", list)}`;
+    ? html`<ol class="queue-list" data-question-list>${list.items.map(row)}</ol>`
+    : category
+      ? html`<ol class="queue-list" data-question-list hidden></ol>${quietState(`No ${topicCategoryName(category)} questions yet.`, "Create the first one, or choose All.")}`
+      : html`<ol class="queue-list" data-question-list hidden></ol>${quietState("No public questions yet.", "Create the first one.")}`;
+  // "+ Create": signed-in players get the sheet below (frontend/queue-page.ts);
+  // everyone else follows the link to the Match page's form, which signs in.
+  const createSheet = html`<dialog class="queue-create-dialog" data-create-dialog aria-labelledby="create-title"><form class="stack-form queue-create-form" data-create-form><h2 class="section-title" id="create-title">${inscription("New question")}</h2><p class="queue-create-help">It goes public right away and you join the queue on your side. A public question can't be edited.</p><label>Question<input name="title" minlength="5" maxlength="140" required autocomplete="off"></label><div class="queue-similar" data-similar hidden><p class="kicker">${inscription("Already asked?")}</p><p class="queue-create-help">Join one of these instead, so both sides land in the same queue.</p><ol class="queue-list" data-similar-list></ol></div><label>What's the debate about?<textarea name="summary" minlength="10" maxlength="600" rows="3" required></textarea></label><div class="queue-create-sides"><label>Side A<input name="sideALabel" minlength="2" maxlength="80" required autocomplete="off"></label><label>Side B<input name="sideBLabel" minlength="2" maxlength="80" required autocomplete="off"></label></div><label>Category<select name="category" required><option value="">Choose a category</option>${TOPIC_CATEGORIES.map(([id, name]) => html`<option value="${id}"${id === category ? html` selected` : ""}>${name}</option>`)}</select></label><fieldset class="queue-create-choice"><legend>You argue</legend><label><input type="radio" name="side" value="A"> <span data-side-name="A">Side A</span></label><label><input type="radio" name="side" value="B"> <span data-side-name="B">Side B</span></label></fieldset><p class="queue-create-error" data-create-error role="alert"></p><div class="queue-create-actions"><button class="btn btn-primary" type="submit" value="queue">Create and join the queue</button><button class="btn btn-secondary" type="submit" value="draft" formnovalidate>Save as a private draft</button><button class="btn" type="button" data-create-cancel>Cancel</button></div></form></dialog>`;
+  const content = html`${pageHead("Debate now", "Pick a question", "and a side.", "Pick your side. When someone queues on the other side, you both get 30 seconds to accept, then the debate starts.")}<section class="container list-section queue-page" aria-labelledby="questions-title">${matchmaking ? html`<p class="queue-page-note" data-queue-page-note role="status"></p>` : quietState("The live queue isn't open right now.", "You can still read every question and its debates.")}<a class="card queue-create" href="/match#topic-create" data-create-open><span>Your question isn't here yet?</span><span class="btn btn-primary btn-sm" aria-hidden="true">+ Create</span></a>${matchmaking ? html`<section class="queue-waiting" data-waiting-section aria-labelledby="waiting-title" hidden><div class="section-head"><p class="kicker">${inscription("Fastest match")}</p><h2 class="section-title" id="waiting-title">${inscription("Someone's waiting")}</h2></div><ol class="queue-list" data-waiting-list></ol></section>` : ""}<div class="section-head"><p class="kicker">${inscription("Every open question")}</p><h2 class="section-title" id="questions-title">${inscription("All questions")}</h2></div>${chips}${questions}${pagination(base, list)}</section>${matchmaking ? html`${createSheet}<script type="module" src="${asset("queue-page.js")}"></script>` : ""}`;
+  const canonical = `${origin}${listPath(base, list)}`;
   return layout(
     "Queue",
     "Pick a question and a side, and debate someone live on YAP Arena.",

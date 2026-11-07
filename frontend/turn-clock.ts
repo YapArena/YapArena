@@ -19,6 +19,7 @@ import {
 } from "./turn-clock-logic.js";
 import { playingTurn, type TurnDetail } from "./debate-layout-model.js";
 import type { PublicWindow } from "./stake-model.js";
+import { onStakeWindows } from "./stake-windows.js";
 import type { RevealedWindow } from "./window-chart-model.js";
 
 const isTurnWindow = (window: RevealedWindow): window is PublicWindow =>
@@ -149,9 +150,8 @@ if (arena && face && clock) {
     turn = event.detail;
     schedule();
   });
-  window.addEventListener("yap:stake-windows", (event) => {
-    if (event.detail.debateId !== debateId) return;
-    windows = event.detail.windows.filter(isTurnWindow);
+  onStakeWindows(debateId, (shared) => {
+    windows = shared.filter(isTurnWindow);
     schedule();
   });
   window.addEventListener("yap:playback", (event) => {

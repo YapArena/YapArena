@@ -44,29 +44,56 @@ export function siteTabBarMarkup(current: SiteTab | null = null) {
   )}</nav>`;
 }
 
+/** A search of the page's own list, kept with the page's filters. */
+export interface PageSearch {
+  /** The list page the search reloads, such as /debates or /topics. */
+  action: string;
+  /** "Search debates": the field's label and placeholder. */
+  label: string;
+  query: string;
+  /** The filters in use, as query parameters a new search keeps. */
+  filters: readonly (readonly [name: string, value: string])[];
+}
+
 export interface SiteHeaderOptions {
   /** On phones, this page's name replaces the logo in the middle of the top row. */
   title?: string | null;
+  /** On phones, this search field takes the middle of the top row instead. */
+  search?: PageSearch | null;
+}
+
+// Explore's search bar (first-run plan): phones only, in the middle of the top
+// row. It searches the page's own list with its filters, which the page's
+// search field, hidden on phones, would otherwise do (public/explore.css).
+function pageSearchMarkup({ action, label, query, filters }: PageSearch) {
+  return html`<form class="site-page-search" action="${action}" method="get" role="search">${filters.map(([name, value]) => html`<input type="hidden" name="${name}" value="${value}">`)}<label class="sr-only" for="top-search">${label}</label>${searchIcon}<input id="top-search" type="search" name="q" maxlength="80" value="${query}" placeholder="${label}" enterkeyhint="search"><button type="submit" class="sr-only">Search</button></form>`;
 }
 
 // One grid: logo, nav, search and account on one row; on phones the top row
-// holds the account button, the logo or the page's name and the balance, and
-// the nav moves to its own tab row under it (public/site-header.css).
+// holds the account button, the logo, the page's name or its search, and the
+// balance, and the nav moves to its own tab row under it
+// (public/site-header.css).
 export function siteHeaderMarkup(
   current: SiteSection | null = null,
-  { title = null }: SiteHeaderOptions = {},
+  { title = null, search = null }: SiteHeaderOptions = {},
 ) {
   const nav = sections.map(
     ([key, href, label]) =>
       html`<a href="${href}"${key === current ? html` aria-current="page"` : ""}>${label}</a>`,
   );
   // The page's own heading names it for screen readers; this copy is visual.
-  const pageTitle = title
-    ? html`<p class="site-page-title ins" aria-hidden="true">${inscribe(title.toLowerCase())}</p>`
-    : "";
-  return html`<header class="site-header" data-site-header data-session="checking" data-avatar-src="${avatarTemplate}"${title ? html` data-page-title` : ""}>
+  const pageTitle =
+    title && !search
+      ? html`<p class="site-page-title ins" aria-hidden="true">${inscribe(title.toLowerCase())}</p>`
+      : "";
+  const middle = search
+    ? html` data-page-search`
+    : title
+      ? html` data-page-title`
+      : "";
+  return html`<header class="site-header" data-site-header data-session="checking" data-avatar-src="${avatarTemplate}"${middle}>
     <div class="container site-header-grid">
-      <a class="site-logo" href="/home"><img src="${asset("landing/yaparena-logo.png")}" width="575" height="151" alt="YAP Arena home"></a>${pageTitle}
+      <a class="site-logo" href="/home"><img src="${asset("landing/yaparena-logo.png")}" width="575" height="151" alt="YAP Arena home"></a>${pageTitle}${search ? pageSearchMarkup(search) : ""}
       <nav class="site-nav" aria-label="Main navigation">${nav}</nav>
       <form class="arena-header-search" action="/debates" method="get" role="search" data-header-search><label class="sr-only" for="header-search">Search debates</label>${searchIcon}<input id="header-search" type="search" name="q" maxlength="80" placeholder="Search debates…"><button type="submit" class="sr-only">Search</button></form>
       <a class="header-search-toggle" href="/debates#debate-search" data-header-search-toggle aria-label="Search debates"><span class="icon-search">${searchIcon}</span><svg class="icon-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></a>

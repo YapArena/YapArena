@@ -13,6 +13,7 @@ import { createRoundChart, sharePercent } from "./arena-chart.js";
 import { createPriceInspector } from "./arena-price.js";
 import { watchRoom } from "./community-stream.js";
 import { seekReplay } from "./replay-seek.js";
+import { onStakeWindows } from "./stake-windows.js";
 import { createTurnBars } from "./turn-results.js";
 import {
   isTurnWindow,
@@ -278,9 +279,8 @@ if (root) {
     }
     renderShared();
   }
-  window.addEventListener("yap:stake-windows", (event) => {
-    if (event.detail.debateId !== debateId) return;
-    windows = event.detail.windows;
+  onStakeWindows(debateId, (shared) => {
+    windows = shared;
     if (timelineState === "idle" && windowPoints(windows, null).length)
       void loadTimeline();
     renderShared();
