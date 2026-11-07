@@ -486,7 +486,8 @@ exports[`renders a debate 1`] = `
 <span class="sr-only">Results by turn</span>
 <span class="ins" aria-hidden="true">resvlts by tvrn</span>
 </h2>
-<p class="arena-results-sub">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
@@ -498,7 +499,11 @@ exports[`renders a debate 1`] = `
 </div>
 <p class="arena-turns-empty" data-turn-empty>Results appear here once a turn's Yap Coins results are revealed.</p>
 <details class="arena-price-details" data-price-details hidden>
-<summary>Price and typical limits</summary>
+<summary>
+<span class="arena-price-wide">Price and typical limits</span>
+<span class="arena-price-phone">Price draw · <i>a</i> &lt; <i>p</i> &lt; <i>b</i>
+</span>
+</summary>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
 <title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
@@ -516,6 +521,8 @@ exports[`renders a debate 1`] = `
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
 <text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
+<p class="arena-price-order" data-price-order aria-hidden="true" hidden>
+</p>
 <div class="arena-price-heading">
 <h4 id="arena-price-title">Price and typical limits</h4>
 <div class="arena-price-navigation">
@@ -524,6 +531,8 @@ exports[`renders a debate 1`] = `
 <select id="arena-price-round" data-price-round disabled>
 <option value="">No settled rounds</option>
 </select>
+<span class="arena-price-turn" data-price-turn>
+</span>
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
@@ -538,6 +547,7 @@ exports[`renders a debate 1`] = `
 <strong data-price-no>—</strong>
 </div>
 </div>
+<p class="arena-price-range" data-price-range hidden>Drawn over the whole range, from 0 to 1 YC.</p>
 <p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
 <span class="lavender">● Typical limits / drawn price</span>
@@ -1128,7 +1138,8 @@ exports[`renders a debate 10`] = `
 <span class="sr-only">Results by turn</span>
 <span class="ins" aria-hidden="true">resvlts by tvrn</span>
 </h2>
-<p class="arena-results-sub">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
@@ -1140,7 +1151,11 @@ exports[`renders a debate 10`] = `
 </div>
 <p class="arena-turns-empty" data-turn-empty>Results appear here once a turn's Yap Coins results are revealed.</p>
 <details class="arena-price-details" data-price-details hidden>
-<summary>Price and typical limits</summary>
+<summary>
+<span class="arena-price-wide">Price and typical limits</span>
+<span class="arena-price-phone">Price draw · <i>a</i> &lt; <i>p</i> &lt; <i>b</i>
+</span>
+</summary>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
 <title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
@@ -1158,6 +1173,8 @@ exports[`renders a debate 10`] = `
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
 <text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
+<p class="arena-price-order" data-price-order aria-hidden="true" hidden>
+</p>
 <div class="arena-price-heading">
 <h4 id="arena-price-title">Price and typical limits</h4>
 <div class="arena-price-navigation">
@@ -1166,6 +1183,8 @@ exports[`renders a debate 10`] = `
 <select id="arena-price-round" data-price-round disabled>
 <option value="">No settled rounds</option>
 </select>
+<span class="arena-price-turn" data-price-turn>
+</span>
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
@@ -1180,6 +1199,7 @@ exports[`renders a debate 10`] = `
 <strong data-price-no>—</strong>
 </div>
 </div>
+<p class="arena-price-range" data-price-range hidden>Drawn over the whole range, from 0 to 1 YC.</p>
 <p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
 <span class="lavender">● Typical limits / drawn price</span>
@@ -1761,7 +1781,8 @@ exports[`renders a debate 2`] = `
 <span class="sr-only">Results by turn</span>
 <span class="ins" aria-hidden="true">resvlts by tvrn</span>
 </h2>
-<p class="arena-results-sub">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
@@ -1773,7 +1794,11 @@ exports[`renders a debate 2`] = `
 </div>
 <p class="arena-turns-empty" data-turn-empty>Results appear here once a turn's Yap Coins results are revealed.</p>
 <details class="arena-price-details" data-price-details hidden>
-<summary>Price and typical limits</summary>
+<summary>
+<span class="arena-price-wide">Price and typical limits</span>
+<span class="arena-price-phone">Price draw · <i>a</i> &lt; <i>p</i> &lt; <i>b</i>
+</span>
+</summary>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
 <title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
@@ -1791,6 +1816,8 @@ exports[`renders a debate 2`] = `
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
 <text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
+<p class="arena-price-order" data-price-order aria-hidden="true" hidden>
+</p>
 <div class="arena-price-heading">
 <h4 id="arena-price-title">Price and typical limits</h4>
 <div class="arena-price-navigation">
@@ -1799,6 +1826,8 @@ exports[`renders a debate 2`] = `
 <select id="arena-price-round" data-price-round disabled>
 <option value="">No settled rounds</option>
 </select>
+<span class="arena-price-turn" data-price-turn>
+</span>
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
@@ -1813,6 +1842,7 @@ exports[`renders a debate 2`] = `
 <strong data-price-no>—</strong>
 </div>
 </div>
+<p class="arena-price-range" data-price-range hidden>Drawn over the whole range, from 0 to 1 YC.</p>
 <p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
 <span class="lavender">● Typical limits / drawn price</span>
@@ -2246,7 +2276,8 @@ exports[`renders a debate 3`] = `
 <span class="sr-only">Results by turn</span>
 <span class="ins" aria-hidden="true">resvlts by tvrn</span>
 </h2>
-<p class="arena-results-sub">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
@@ -2258,7 +2289,11 @@ exports[`renders a debate 3`] = `
 </div>
 <p class="arena-turns-empty" data-turn-empty>Results appear here once a turn's Yap Coins results are revealed.</p>
 <details class="arena-price-details" data-price-details hidden>
-<summary>Price and typical limits</summary>
+<summary>
+<span class="arena-price-wide">Price and typical limits</span>
+<span class="arena-price-phone">Price draw · <i>a</i> &lt; <i>p</i> &lt; <i>b</i>
+</span>
+</summary>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
 <title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
@@ -2276,6 +2311,8 @@ exports[`renders a debate 3`] = `
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
 <text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
+<p class="arena-price-order" data-price-order aria-hidden="true" hidden>
+</p>
 <div class="arena-price-heading">
 <h4 id="arena-price-title">Price and typical limits</h4>
 <div class="arena-price-navigation">
@@ -2284,6 +2321,8 @@ exports[`renders a debate 3`] = `
 <select id="arena-price-round" data-price-round disabled>
 <option value="">No settled rounds</option>
 </select>
+<span class="arena-price-turn" data-price-turn>
+</span>
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
@@ -2298,6 +2337,7 @@ exports[`renders a debate 3`] = `
 <strong data-price-no>—</strong>
 </div>
 </div>
+<p class="arena-price-range" data-price-range hidden>Drawn over the whole range, from 0 to 1 YC.</p>
 <p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
 <span class="lavender">● Typical limits / drawn price</span>
@@ -2884,7 +2924,8 @@ exports[`renders a debate 4`] = `
 <span class="sr-only">Results by turn</span>
 <span class="ins" aria-hidden="true">resvlts by tvrn</span>
 </h2>
-<p class="arena-results-sub">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
@@ -2896,7 +2937,11 @@ exports[`renders a debate 4`] = `
 </div>
 <p class="arena-turns-empty" data-turn-empty>Results appear here once a turn's Yap Coins results are revealed.</p>
 <details class="arena-price-details" data-price-details hidden>
-<summary>Price and typical limits</summary>
+<summary>
+<span class="arena-price-wide">Price and typical limits</span>
+<span class="arena-price-phone">Price draw · <i>a</i> &lt; <i>p</i> &lt; <i>b</i>
+</span>
+</summary>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
 <title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
@@ -2914,6 +2959,8 @@ exports[`renders a debate 4`] = `
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
 <text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
+<p class="arena-price-order" data-price-order aria-hidden="true" hidden>
+</p>
 <div class="arena-price-heading">
 <h4 id="arena-price-title">Price and typical limits</h4>
 <div class="arena-price-navigation">
@@ -2922,6 +2969,8 @@ exports[`renders a debate 4`] = `
 <select id="arena-price-round" data-price-round disabled>
 <option value="">No settled rounds</option>
 </select>
+<span class="arena-price-turn" data-price-turn>
+</span>
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
@@ -2936,6 +2985,7 @@ exports[`renders a debate 4`] = `
 <strong data-price-no>—</strong>
 </div>
 </div>
+<p class="arena-price-range" data-price-range hidden>Drawn over the whole range, from 0 to 1 YC.</p>
 <p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
 <span class="lavender">● Typical limits / drawn price</span>
@@ -3667,7 +3717,8 @@ exports[`renders a debate 5`] = `
 <span class="sr-only">Results by turn</span>
 <span class="ins" aria-hidden="true">resvlts by tvrn</span>
 </h2>
-<p class="arena-results-sub">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
@@ -3679,7 +3730,11 @@ exports[`renders a debate 5`] = `
 </div>
 <p class="arena-turns-empty" data-turn-empty>Results appear here once a turn's Yap Coins results are revealed.</p>
 <details class="arena-price-details" data-price-details hidden>
-<summary>Price and typical limits</summary>
+<summary>
+<span class="arena-price-wide">Price and typical limits</span>
+<span class="arena-price-phone">Price draw · <i>a</i> &lt; <i>p</i> &lt; <i>b</i>
+</span>
+</summary>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
 <title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
@@ -3697,6 +3752,8 @@ exports[`renders a debate 5`] = `
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
 <text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
+<p class="arena-price-order" data-price-order aria-hidden="true" hidden>
+</p>
 <div class="arena-price-heading">
 <h4 id="arena-price-title">Price and typical limits</h4>
 <div class="arena-price-navigation">
@@ -3705,6 +3762,8 @@ exports[`renders a debate 5`] = `
 <select id="arena-price-round" data-price-round disabled>
 <option value="">No settled rounds</option>
 </select>
+<span class="arena-price-turn" data-price-turn>
+</span>
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
@@ -3719,6 +3778,7 @@ exports[`renders a debate 5`] = `
 <strong data-price-no>—</strong>
 </div>
 </div>
+<p class="arena-price-range" data-price-range hidden>Drawn over the whole range, from 0 to 1 YC.</p>
 <p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
 <span class="lavender">● Typical limits / drawn price</span>
@@ -4297,7 +4357,8 @@ exports[`renders a debate 6`] = `
 <span class="sr-only">Results by turn</span>
 <span class="ins" aria-hidden="true">resvlts by tvrn</span>
 </h2>
-<p class="arena-results-sub">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
@@ -4309,7 +4370,11 @@ exports[`renders a debate 6`] = `
 </div>
 <p class="arena-turns-empty" data-turn-empty>Results appear here once a turn's Yap Coins results are revealed.</p>
 <details class="arena-price-details" data-price-details hidden>
-<summary>Price and typical limits</summary>
+<summary>
+<span class="arena-price-wide">Price and typical limits</span>
+<span class="arena-price-phone">Price draw · <i>a</i> &lt; <i>p</i> &lt; <i>b</i>
+</span>
+</summary>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
 <title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
@@ -4327,6 +4392,8 @@ exports[`renders a debate 6`] = `
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
 <text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
+<p class="arena-price-order" data-price-order aria-hidden="true" hidden>
+</p>
 <div class="arena-price-heading">
 <h4 id="arena-price-title">Price and typical limits</h4>
 <div class="arena-price-navigation">
@@ -4335,6 +4402,8 @@ exports[`renders a debate 6`] = `
 <select id="arena-price-round" data-price-round disabled>
 <option value="">No settled rounds</option>
 </select>
+<span class="arena-price-turn" data-price-turn>
+</span>
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
@@ -4349,6 +4418,7 @@ exports[`renders a debate 6`] = `
 <strong data-price-no>—</strong>
 </div>
 </div>
+<p class="arena-price-range" data-price-range hidden>Drawn over the whole range, from 0 to 1 YC.</p>
 <p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
 <span class="lavender">● Typical limits / drawn price</span>
@@ -4929,7 +4999,8 @@ exports[`renders a debate 7`] = `
 <span class="sr-only">Results by turn</span>
 <span class="ins" aria-hidden="true">resvlts by tvrn</span>
 </h2>
-<p class="arena-results-sub">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
@@ -4941,7 +5012,11 @@ exports[`renders a debate 7`] = `
 </div>
 <p class="arena-turns-empty" data-turn-empty>Results appear here once a turn's Yap Coins results are revealed.</p>
 <details class="arena-price-details" data-price-details hidden>
-<summary>Price and typical limits</summary>
+<summary>
+<span class="arena-price-wide">Price and typical limits</span>
+<span class="arena-price-phone">Price draw · <i>a</i> &lt; <i>p</i> &lt; <i>b</i>
+</span>
+</summary>
 <section class="arena-price-inspector" aria-labelledby="arena-price-title">
 <svg class="arena-price-scale" viewBox="0 0 720 104" role="img" aria-labelledby="arena-price-scale-title">
 <title id="arena-price-scale-title">Typical limits and drawn price, shown once results are revealed</title>
@@ -4959,6 +5034,8 @@ exports[`renders a debate 7`] = `
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
 <text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
+<p class="arena-price-order" data-price-order aria-hidden="true" hidden>
+</p>
 <div class="arena-price-heading">
 <h4 id="arena-price-title">Price and typical limits</h4>
 <div class="arena-price-navigation">
@@ -4967,6 +5044,8 @@ exports[`renders a debate 7`] = `
 <select id="arena-price-round" data-price-round disabled>
 <option value="">No settled rounds</option>
 </select>
+<span class="arena-price-turn" data-price-turn>
+</span>
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
@@ -4981,6 +5060,7 @@ exports[`renders a debate 7`] = `
 <strong data-price-no>—</strong>
 </div>
 </div>
+<p class="arena-price-range" data-price-range hidden>Drawn over the whole range, from 0 to 1 YC.</p>
 <p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
 <span class="lavender">● Typical limits / drawn price</span>
@@ -5568,7 +5648,8 @@ exports[`renders a debate 8`] = `
 <span class="sr-only">Results by turn</span>
 <span class="ins" aria-hidden="true">resvlts by tvrn</span>
 </h2>
-<p class="arena-results-sub">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
@@ -5650,6 +5731,8 @@ exports[`renders a debate 8`] = `
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
 <text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
+<p class="arena-price-order" data-price-order aria-hidden="true" hidden>
+</p>
 <div class="arena-price-heading">
 <h4 id="arena-price-title">Price and typical limits</h4>
 <div class="arena-price-navigation">
@@ -5658,6 +5741,8 @@ exports[`renders a debate 8`] = `
 <select id="arena-price-round" data-price-round disabled>
 <option value="">No settled rounds</option>
 </select>
+<span class="arena-price-turn" data-price-turn>
+</span>
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
@@ -5672,6 +5757,7 @@ exports[`renders a debate 8`] = `
 <strong data-price-no>—</strong>
 </div>
 </div>
+<p class="arena-price-range" data-price-range hidden>Drawn over the whole range, from 0 to 1 YC.</p>
 <p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
 <span class="lavender">● Typical limits / drawn price</span>
@@ -5690,7 +5776,11 @@ exports[`renders a debate 8`] = `
 </div>
 </div>
 <details class="arena-price-details" data-price-details hidden>
-<summary>Price and typical limits</summary>
+<summary>
+<span class="arena-price-wide">Price and typical limits</span>
+<span class="arena-price-phone">Price draw · <i>a</i> &lt; <i>p</i> &lt; <i>b</i>
+</span>
+</summary>
 </details>
 </div>
 <section class="arena-arguments" data-shared-arguments hidden>
@@ -6268,7 +6358,8 @@ exports[`renders a debate 9`] = `
 <span class="sr-only">Results by turn</span>
 <span class="ins" aria-hidden="true">resvlts by tvrn</span>
 </h2>
-<p class="arena-results-sub">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
+<p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
@@ -6350,6 +6441,8 @@ exports[`renders a debate 9`] = `
 <line x1="652" x2="652" y1="48" y2="53" class="arena-price-tick"/>
 <text x="652" y="91" text-anchor="middle">1 YC</text>
 </svg>
+<p class="arena-price-order" data-price-order aria-hidden="true" hidden>
+</p>
 <div class="arena-price-heading">
 <h4 id="arena-price-title">Price and typical limits</h4>
 <div class="arena-price-navigation">
@@ -6358,6 +6451,8 @@ exports[`renders a debate 9`] = `
 <select id="arena-price-round" data-price-round disabled>
 <option value="">No settled rounds</option>
 </select>
+<span class="arena-price-turn" data-price-turn>
+</span>
 <button type="button" data-price-next aria-label="Next settled round" disabled>→</button>
 </div>
 </div>
@@ -6372,6 +6467,7 @@ exports[`renders a debate 9`] = `
 <strong data-price-no>—</strong>
 </div>
 </div>
+<p class="arena-price-range" data-price-range hidden>Drawn over the whole range, from 0 to 1 YC.</p>
 <p class="arena-price-explanation" data-price-explanation>Typical limits stay hidden until a turn’s results are revealed.</p>
 <p class="arena-price-legend">
 <span class="lavender">● Typical limits / drawn price</span>
@@ -6390,7 +6486,11 @@ exports[`renders a debate 9`] = `
 </div>
 </div>
 <details class="arena-price-details" data-price-details hidden>
-<summary>Price and typical limits</summary>
+<summary>
+<span class="arena-price-wide">Price and typical limits</span>
+<span class="arena-price-phone">Price draw · <i>a</i> &lt; <i>p</i> &lt; <i>b</i>
+</span>
+</summary>
 </details>
 </div>
 <section class="arena-arguments" data-shared-arguments hidden>

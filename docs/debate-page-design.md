@@ -7,7 +7,9 @@ the answer panel above a panel of tabs (AI outline, Results, About). On a replay
 sits under the video and Results by turn under the scoreboard (the founder's replay board,
 2026-11-02). It amends [Decision 0013](decisions/0013-yap-coins-always-on-and-debate-staking.md)
 (see its 2026-10-30 and 2026-11-02 amendments). Everything else in Decisions 0012 and 0013 stands. Behaviour and data flow are in
-[the debate workspace](debate-workspace.md).
+[the debate workspace](debate-workspace.md). Phones (under 600 px) also get the argument being made
+now under the speakers, an Arguments tab, Results by turn as rows and a price draw card (first-run
+build plan PR 8, 2026-11-06); wider screens are unchanged.
 
 The founder asked for the emblem clock in review, so it landed with the layout instead of in a
 pull request of its own. `frontend/pixel-emblem.ts` has the countdown mode only; the queue overlay
@@ -53,7 +55,7 @@ preloads `headline.woff2` as the landing does; without the file, the labels show
 | ≥ 1200 px   | Grid `minmax(0, 1fr) 400px`, gap 24, max width 1920. The page fits one screen: the footer is hidden (its links are in About) and the video takes the largest 16:9 size above the status line and scoreboard (968 × 544 at 1440 × 900). Chat sits over the video when the video is at least 800 × 480 px; on a smaller video (about 1280 × 900 windows and smaller) it is a tab, as below 1200 px. The rail is the answer panel, then the tabs panel; the rail scrolls inside itself when the ticket is tall. |
 | 960–1199 px | One screen as above, rail 340 px. Chat becomes a tab ("Chat · N new" counts messages that arrive while it is hidden). The cards drop the @handle and show the side as text.                                                                                                                                                                                                                                                                                                                                  |
 | 600–959 px  | One column, max width 720, scrolling: stage, answer panel, then the tabs panel (`min(560px, max(70svh, 26rem))` tall) with Chat as a tab.                                                                                                                                                                                                                                                                                                                                                                    |
-| < 600 px    | Video full-bleed with no radius, compact cards, the tabs panel, then the answer bar pinned to the bottom with safe-area padding. Picking Yes or No opens it as a sheet (at most 85svh, scrolls); Back or Escape closes it and returns focus to the answer.                                                                                                                                                                                                                                                   |
+| < 600 px    | Video full-bleed with no radius, compact cards with the argument line under them, the tabs panel (Arguments, Chat, Results, About), then the answer bar pinned to the bottom with safe-area padding. Picking Yes or No opens it as a sheet (at most 85svh, scrolls); Back or Escape closes it and returns focus to the answer.                                                                                                                                                                               |
 
 On phones the bar steps aside while the chat composer has focus or the cookie banner is open, and
 `scroll-padding-bottom` keeps focused elements clear of it. No width from 320 px up scrolls
@@ -96,6 +98,15 @@ sideways.
   speaking / listening / next", the
   side pill, filled white while that side has the floor) and the turn clock between them, with
   "Turn 3 of 10" below. Cards are white and grey only.
+- **Argument line (phones):** with the AI outline on, a line under the cards (the scoreboard's last
+  row) names the argument being made now, from the outline state the panel paints
+  (`frontend/outline-now.ts`): "Argument" in white or "Counterargument" in coral `#fa9b8c` with the
+  speaker's first name and turn ("Counterargument · Maya · turn 5", an 11 px capitals kicker), then
+  the label (15/20 bold, two lines kept so the page under it stays put) on `--panel` with a 3 px
+  left border in the kicker's colour. When the media snapshot (`yap:turn`) reports a turn the
+  outline hasn't reached, it reads "Léo · turn 6" and the panel's "Listening for the next
+  argument…" in muted text. It hides once the debate ends, and on a replay until the player
+  reports a position. Not announced: the panel already announces new arguments.
 - **Turn clock:** the landing emblem's tiles on a canvas (`frontend/turn-clock.ts`, rules in
   `frontend/turn-clock-logic.ts`). As a turn starts the tiles light clockwise over 0.6 s; they
   then drain clockwise from 12 o'clock over the turn, with an ember in the visit's Yappers colour
@@ -125,7 +136,8 @@ sideways.
   "Rebutted by" links that open, scroll to and focus the other card. Cards stay open through
   updates. Earlier turns arrive as labels only, so their cards show points only if the page saw
   that turn live. "Listening for the next argument…" fills the next slot while live; "Written by
-  AI…" sits under the list. A debater's own cards open to their flag buttons.
+  AI…" sits under the list. A debater's own cards open to their flag buttons. On phones the tab
+  and its heading say "Arguments" (the same panel and cards).
 - **Results by turn:** "Results by turn" in Dydema 16 px beside "Share who said yes in each
   60-second window · bars rise for a yes majority and drop for a no majority" (14 px muted). A
   two-line caption (15/24) names the turn and speaker, the argument in bold and the result, for the
@@ -141,6 +153,28 @@ sideways.
   choosing it fills it and, on a replay, plays it. "Price and typical limits" (the price
   inspector and its turn picker) is a disclosure under the bars, closed at first. With Bots mode
   on, the bot history keeps its line chart, restyled with CSS only, until a turn is revealed.
+- **Results by turn on phones:** one row per turn with a result (revealed, unanswered or
+  cancelled; turns still to come or waiting for their reveal stay off, and the caption says when
+  results come). A row is a 44 px button: "Turn 4", a 10 px bar split at the yes share (Yes green,
+  then No red), the share in Forum 16 px, and under them the speaker's first name and the turn's
+  argument labels in 13/18 muted ("Léo · “Fares fund a third of operations”"), or the result in
+  words when there is no share. The chosen row is filled `--raised`, the playing one outlined. The
+  rows carry the caption's content, so the caption shows only while there are none; the line
+  under the heading reads "… · tap a turn for its price draw". Up and Down move between rows as
+  well as Left and Right. Tapping a revealed row opens the disclosure as a card and scrolls it into
+  view.
+- **Price draw card (phones):** the disclosure's summary reads "Price draw · _a_ < _p_ < _b_", with
+  the inspector's previous and next buttons and "Turn 4" beside it (its select is hidden). In a
+  `--bg` card with a 1 px `--line` border: the inspector's scale (the draw range as the band, the
+  typical limits as ticks, the drawn Yes price as a ringed dot, the final yes share and the
+  viewer's own limit), then three chips "_a_ 0.45 < _p_ 0.52 < _b_ 0.60" captioned "Typical No
+  limit", "Drawn Yes price" and "Typical Yes limit" (hidden from screen readers; the values are in
+  the inspector's own lines). A whole-range draw (the engine's exploratory or fallback branch)
+  draws the band over the whole track, reads "0 < _p_ 0.81 < 1" with "Whole range" under 0 and 1,
+  and adds "Drawn over the whole range, from 0 to 1 YC." Then the inspector's drawn Yes and No
+  prices, explanation and legend. Signed-in viewers' own limits come from the answer panel's
+  private read (`yap:stake-rounds`), on every width. Under 360 px the turn buttons take their own
+  row at the top of the card, and the tabs' side padding narrows to 6 px so the four names fit.
 - **About:** "About this debate" with the latest result, then the event, moderation and site
   links (Topics, Yap Coins, About YAP Arena).
 - **Chat as a tab (< 1200 px, or a smaller video):** the panel grows to at least 26rem while Chat is open (the rail scrolls on short screens). The connection pill and a 44 px "⋯" menu (like, copy link, check
@@ -154,6 +188,6 @@ sideways.
 Focus rings are 2 px `#f8f8f8` with a 3 px offset (drawn inside scroll boxes and the video; an
 outline card's ring goes round the whole card). Headings: the question (`h1`), then "Do you
 agree?", "Chat", "AI outline", "Results by turn" and "About this debate" (`h2`). The rail is a
-labelled `aside`. Yes and No carry words and colours; the speaking state carries a word, a border
+labelled `aside`. On phones the outline's tab and heading are "Arguments". Yes and No carry words and colours; the speaking state carries a word, a border
 and the lit video frame. Reduced motion removes the hover fades, the frame and outline
 transitions, the outline highlight, the clock's motion and the sheet animation.

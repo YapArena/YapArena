@@ -404,6 +404,71 @@
     height: 22rem;
   }
 }
+
+/* Phones (first-run build plan PR 8): the outline's tab and heading say
+   "Arguments", and one line under the speakers names the argument being
+   made now. Two lines of label are kept, so the page under it stays put. */
+.outline-name-phone,
+.arena-now {
+  display: none;
+}
+@media (max-width: 599px) {
+  .outline-name-wide {
+    display: none;
+  }
+  .outline-name-phone {
+    display: inline;
+  }
+  .arena-now:not([hidden]) {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 2px;
+    margin: var(--space-3) 0 0;
+    padding: var(--space-2) var(--space-3);
+    border-left: 3px solid var(--acid);
+    border-radius: 0 var(--radius-inner) var(--radius-inner) 0;
+    background: var(--panel);
+  }
+  .arena-now[data-kind="counter"] {
+    border-left-color: #fa9b8c;
+  }
+  .arena-now[data-kind="listening"] {
+    border-left-color: var(--control-border);
+  }
+  .arena-now-kicker {
+    overflow: hidden;
+    color: var(--acid);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 16px;
+    letter-spacing: 0.09em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .arena-now[data-kind="counter"] .arena-now-kicker {
+    color: #fa9b8c;
+  }
+  .arena-now[data-kind="listening"] .arena-now-kicker {
+    color: var(--muted);
+  }
+  .arena-now-label {
+    display: -webkit-box;
+    min-height: 40px;
+    overflow: hidden;
+    color: var(--text);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    line-height: 20px;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .arena-now[data-kind="listening"] .arena-now-label {
+    color: var(--muted);
+    font-weight: 400;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .live-outline .is-changed,
   .live-outline-more,

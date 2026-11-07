@@ -550,6 +550,27 @@ export async function verifyArenaBrowser({
       "true",
     );
     checks.mobileTabsKeyboard = true;
+    // First-run build plan PR 8: on phones the AI outline's tab is named
+    // "Arguments", and Results by turn lists rows that open the price card.
+    const phoneParts = () =>
+      page.evaluate(() => ({
+        outlineTab:
+          document.querySelector<HTMLElement>("#arena-tab-outline")
+            ?.innerText ?? null,
+        resultsLine: getComputedStyle(
+          document.querySelector(".arena-results-sub-phone")!,
+        ).display,
+        barsLine: getComputedStyle(
+          document.querySelector(".arena-results-sub-wide")!,
+        ).display,
+      }));
+    const phone = await phoneParts();
+    assert.deepEqual(phone, {
+      outlineTab: phone.outlineTab === null ? null : "Arguments",
+      resultsLine: "block",
+      barsLine: "none",
+    });
+    checks.mobileArgumentsAndRows = true;
     await page.screenshot({ path: directory + "/mobile.png", fullPage: true });
     checks.mobileNoOverflow = true;
     // Reduced motion removes the hover fades.
@@ -572,6 +593,13 @@ export async function verifyArenaBrowser({
       false,
     );
     await page.setViewportSize({ width: 820, height: 1180 });
+    // Tablets keep the wide names and the rising bars' description.
+    const tablet = await phoneParts();
+    assert.deepEqual(tablet, {
+      outlineTab: tablet.outlineTab === null ? null : "AI outline",
+      resultsLine: "none",
+      barsLine: "block",
+    });
     await page.locator("[data-header-search-toggle]").click();
     await page.locator("#header-search").fill("walkability");
     await page.locator("#header-search").press("Enter");

@@ -257,6 +257,19 @@ if (root) {
     );
     if (current !== generation) return;
     rounds = view;
+    // The price inspector marks this viewer's own limit on revealed turns.
+    window.dispatchEvent(
+      new CustomEvent("yap:stake-rounds", {
+        detail: {
+          debateId,
+          limits: Object.fromEntries(
+            view.flatMap((round) =>
+              round.own ? [[round.id, round.own.limit]] : [],
+            ),
+          ),
+        },
+      }),
+    );
     // A reveal changes the balance everywhere on the page.
     const revealed = resultsSummary(view).revealed.length;
     if (revealedSeen !== null && revealed > revealedSeen)
