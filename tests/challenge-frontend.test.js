@@ -120,6 +120,10 @@ describe("challenge screens", () => {
       /now, when you're both online/,
     );
     assert.equal(
+      requestSummary(request({ revealMode: "per_round" }), target, now, format),
+      "From @alex · Canada should expand nuclear power · You argue Against · Waiting for an answer · live opinions · expires <12:00>",
+    );
+    assert.equal(
       requestSummary(
         request({ status: "accepted", debateSlug: "booked" }),
         target,

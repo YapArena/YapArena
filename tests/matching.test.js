@@ -219,7 +219,25 @@ describe("matching API", () => {
     assert.equal(calls[0][1], "7");
     assert.equal(calls[0][2].requestedSide, "A");
     assert.equal(calls[0][2].scheduledAt.toISOString(), scheduledAt);
+    assert.equal(
+      calls[0][2].liveOpinions,
+      false,
+      "live opinions are off by default",
+    );
+    const live = await authenticated("post", "/api/matching/requests").send({
+      ...requestInput,
+      liveOpinions: true,
+    });
+    assert.equal(live.status, 201);
+    assert.equal(calls.at(-1)[2].liveOpinions, true);
     for (const input of [
+      { ...requestInput, liveOpinions: "yes" },
+      {
+        ...requestInput,
+        kind: "queue",
+        targetHandle: undefined,
+        liveOpinions: true,
+      },
       { ...requestInput, requestedSide: "C" },
       {
         ...requestInput,

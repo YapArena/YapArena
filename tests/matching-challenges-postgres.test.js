@@ -223,6 +223,68 @@ describe(
       assert.ok((await notices(a.id, "challenge.proposed")) >= 1);
     });
 
+    it("gives a debate per-round reveal only when its challenge sender chose live opinions", async () => {
+      const slug = await topic();
+      const [a, b, c] = await Promise.all([player(), player(), player()]);
+      const mode = async (debateId) =>
+        (
+          await owner.query(
+            "SELECT mode, recorded_by FROM coin_debate_reveal_modes WHERE debate_id = $1",
+            [debateId],
+          )
+        ).rows[0] ?? null;
+      const live = await challenge(a, b, slug, {
+        proposedTimes: [hours(3)],
+        liveOpinions: true,
+      });
+      assert.equal(live.revealMode, "per_round");
+      await assert.rejects(
+        runtime.query(
+          "UPDATE match_requests SET reveal_mode = 'five_day' WHERE id = $1",
+          [live.id],
+        ),
+        /keeps its reveal mode/,
+      );
+      const proposal = (await matching.listRequests(b.id)).find(
+        (entry) => entry.id === live.id,
+      ).proposals[0];
+      const perRound = await matching.acceptRequest(b.id, live.id, {
+        proposalId: proposal.id,
+      });
+      assert.deepEqual(await mode(perRound.id), {
+        mode: "per_round",
+        recorded_by: "yaparena_runtime",
+      });
+
+      const plain = await challenge(a, c, slug, { proposedTimes: [hours(30)] });
+      assert.equal(plain.revealMode, "five_day");
+      const plainProposal = (await matching.listRequests(c.id)).find(
+        (entry) => entry.id === plain.id,
+      ).proposals[0];
+      const fiveDay = await matching.acceptRequest(c.id, plain.id, {
+        proposalId: plainProposal.id,
+      });
+      assert.equal(await mode(fiveDay.id), null, "five-day by default");
+      // The runtime cannot record a mode outside the transaction that created the debate.
+      await assert.rejects(
+        runtime.query(
+          "INSERT INTO coin_debate_reveal_modes (debate_id, mode, reason) VALUES ($1, 'per_round', 'Later attempt')",
+          [fiveDay.id],
+        ),
+        /only the owner records a reveal mode/,
+      );
+      await assert.rejects(
+        owner.query(
+          `INSERT INTO match_requests (kind, status, initiator_user_id, topic_id, proposition,
+             requested_side, scheduled_at, expires_at, reveal_mode)
+           SELECT 'queue', 'open', $1, id, 'Canada should expand nuclear power', 'A', $2, $3, 'per_round'
+           FROM topics WHERE slug = $4`,
+          [a.id, hours(3), hours(2), slug],
+        ),
+        /match_requests_per_round_direct/,
+      );
+    });
+
     it("allows several open challenges, one per opponent, up to ten", async () => {
       const slug = await topic();
       const a = await player();

@@ -131,6 +131,7 @@ function requestInput(body: unknown) {
           "scheduledAt",
           "mode",
           "proposedTimes",
+          "liveOpinions",
         ].includes(key),
     )
   )
@@ -155,12 +156,17 @@ function requestInput(body: unknown) {
   if (mode !== "now" && mode !== "scheduled") return null;
   if (kind === "queue" && (mode !== "scheduled" || value.proposedTimes))
     return null;
+  // Only a direct challenge may show live opinions (per-round reveal).
+  const liveOpinions = value.liveOpinions ?? false;
+  if (typeof liveOpinions !== "boolean" || (liveOpinions && kind !== "direct"))
+    return null;
   const base = {
     kind: kind as "direct" | "queue",
     topicSlug,
     targetHandle: typeof targetHandle === "string" ? targetHandle : undefined,
     proposition,
     requestedSide: requestedSide as "A" | "B",
+    liveOpinions,
   };
   // "now" carries no time; otherwise one scheduledAt or one to three proposedTimes.
   if (mode === "now")

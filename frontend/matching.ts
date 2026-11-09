@@ -463,6 +463,7 @@ function challengeBody(data: Record<string, FormDataEntryValue>) {
     proposition,
     requestedSide: data.requestedSide,
     targetHandle,
+    liveOpinions: data.liveOpinions === "on",
   };
   if (data.mode === "now") return { ...base, mode: "now" };
   const checked = proposedTimes(
@@ -490,9 +491,26 @@ if (challengeForm) {
     'input[name="mode"]',
   ))
     radio.addEventListener("change", showTimes);
-  // A reset restores "Now" after the reset event itself.
-  challengeForm.addEventListener("reset", () => window.setTimeout(showTimes));
+  // The warning shows while live opinions are on.
+  const liveOpinions = challengeForm.querySelector<HTMLInputElement>(
+    'input[name="liveOpinions"]',
+  )!;
+  const liveWarning = challengeForm.querySelector<HTMLElement>(
+    "[data-live-opinions-warning]",
+  )!;
+  const showLiveWarning = () => {
+    liveWarning.hidden = !liveOpinions.checked;
+  };
+  liveOpinions.addEventListener("change", showLiveWarning);
+  // A reset restores "Now" and turns live opinions off after the reset event itself.
+  challengeForm.addEventListener("reset", () =>
+    window.setTimeout(() => {
+      showTimes();
+      showLiveWarning();
+    }),
+  );
   showTimes();
+  showLiveWarning();
 
   // Suggestions by handle prefix or part of a display name, as the player types.
   const person = challengeForm.querySelector<HTMLInputElement>(
