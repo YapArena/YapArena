@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  canAnswer,
   ceilingCents,
   ceilingText,
   clock,
   coins,
+  debatesHere,
   lastPosition,
   liveWindow,
   parseCeiling,
@@ -205,6 +207,38 @@ describe("betting panel terms (Decision 0013)", () => {
       assert.ok(reasonText(reason).length > 10, reason);
     assert.match(reasonText("debater"), /in this debate/);
     assert.equal(reasonText(null), "");
+  });
+
+  it("keeps a debater's answer buttons off on every turn, even one not yet read", () => {
+    const eligible = { eligibility: { canTakePosition: true, reason: null } };
+    const debating = {
+      eligibility: { canTakePosition: false, reason: "debater" },
+    };
+    const viewer = (overrides) => ({
+      signedIn: true,
+      coins: true,
+      debater: false,
+      round: eligible,
+      ...overrides,
+    });
+    assert.equal(canAnswer(viewer()), true);
+    // A signed-out viewer's tap asks them to sign in.
+    assert.equal(canAnswer(viewer({ signedIn: false, coins: false })), true);
+    assert.equal(canAnswer(viewer({ signedIn: null })), true);
+    assert.equal(
+      canAnswer(viewer({ signedIn: null, coins: false, round: null })),
+      false,
+    );
+    assert.equal(canAnswer(viewer({ coins: false })), false);
+    assert.equal(canAnswer(viewer({ round: debating })), false);
+    // The operator in the 2026-11-09 test: the new turn's eligibility hadn't
+    // arrived, so the panel offered Yes and No and the server refused.
+    assert.equal(canAnswer(viewer({ round: null })), false);
+    assert.equal(canAnswer(viewer({ debater: true })), false);
+    // One round naming the viewer a debater covers the whole debate.
+    assert.equal(debatesHere([]), false);
+    assert.equal(debatesHere([eligible, eligible]), false);
+    assert.equal(debatesHere([eligible, debating]), true);
   });
 
   it("describes locked, settled, unfilled and voided positions", () => {
