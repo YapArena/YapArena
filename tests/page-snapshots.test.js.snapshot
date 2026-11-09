@@ -11872,6 +11872,14 @@ exports[`renders the coins and match pages 3`] = `
 <label>Third choice (optional)<input name="time3" type="datetime-local">
 </label>
 </div>
+<label class="live-opinions">
+<span class="live-opinions-text">
+<strong>Live opinions</strong>
+<span>Show what viewers think after each turn, instead of 5 days after the debate.</span>
+</span>
+<input type="checkbox" name="liveOpinions" role="switch" aria-describedby="live-opinions-warning">
+</label>
+<p class="live-opinions-warning" id="live-opinions-warning" data-live-opinions-warning hidden>Turn this on only if plenty of people will be watching to give their opinion, or if you're debating among a group of friends. With just a few viewers, each turn's result comes from one or two answers, so it isn't very interesting. You can't change this after you send the challenge.</p>
 <button class="btn btn-primary" type="submit">Send challenge</button>
 </form>
 <p class="form-note">Now: if they're online, they have 2 minutes to answer; otherwise the challenge waits for them. Proposed times must be 1 hour to 90 days ahead. Unanswered challenges expire after 7 days.</p>

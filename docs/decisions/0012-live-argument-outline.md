@@ -112,6 +112,9 @@ flag off wherever user-created debates exist.
   - A cancelled or under-review debate's locked rounds are voided as before (F15: only unrevealed
     rounds).
   - Rounds created before this migration keep revealing at their cutoff.
+  - Update (founder, 2026-11-09): the sender of a direct challenge may turn on live opinions,
+    which records per-round for the debate that challenge books (migration
+    `1794239162527_add-challenge-live-opinions`). Queue matches stay five-day.
 - **Manual rounds.** A locked five-day manual round no longer blocks the next one: asking for a
   round returns the manual round still taking orders, or opens one. The one-open-manual-round index
   now covers per-round rounds only; the coin transition lock serializes the rest.

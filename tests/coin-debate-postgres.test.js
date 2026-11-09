@@ -1246,7 +1246,9 @@ describe(
           "INSERT INTO coin_debate_reveal_modes(debate_id,mode,reason) VALUES($1,'per_round','Runtime attempt')",
           [debateId],
         ),
-        /permission denied/,
+        // The runtime may insert only for a debate its own transaction booked
+        // from a live-opinions challenge (1794239162527); the guard refuses this one.
+        /only the owner records a reveal mode/,
       );
       await assert.rejects(
         a4.setRevealMode(debateId, "per_round", "Runtime attempt"),

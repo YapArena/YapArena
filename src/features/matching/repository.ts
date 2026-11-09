@@ -49,6 +49,8 @@ export interface MatchRequest {
   mode?: "now" | "scheduled";
   // While set and in the future, an online target is answering a "now" challenge.
   respondBy?: Date | null;
+  // per_round: the sender chose live opinions; its debate reveals each turn at its cutoff (F11).
+  revealMode?: "five_day" | "per_round";
 }
 
 export interface TimeProposal {
@@ -84,7 +86,7 @@ const requestFields = `r.id, r.kind, r.status, r.initiator_user_id AS "initiator
   r.proposition, r.requested_side AS "requestedSide", r.scheduled_at AS "scheduledAt",
   r.expires_at AS "expiresAt", r.debate_id AS "debateId",
   d.slug AS "debateSlug", r.created_at AS "createdAt", r.mode,
-  r.respond_by AS "respondBy"`;
+  r.respond_by AS "respondBy", r.reveal_mode AS "revealMode"`;
 const eventFields = `id, slug, status, publication_state AS "publicationState",
   topic_id AS "topicId", proposition, speaker_a_profile_id AS "speakerAProfileId",
   speaker_b_profile_id AS "speakerBProfileId", rules_version AS "rulesVersion",
@@ -261,6 +263,7 @@ export async function createPairedEvent(
     actorId: string;
     acceptedRequestId: string | null;
     notice: string;
+    revealMode?: "five_day" | "per_round";
   },
 ) {
   const aUser = pair.sideAUserId;
@@ -313,6 +316,13 @@ export async function createPairedEvent(
     await client.query(
       "UPDATE match_requests SET status = 'accepted', debate_id = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
       [pair.acceptedRequestId, event.id],
+    );
+  // The sender chose live opinions; the database accepts this only for the
+  // debate this transaction just created from that challenge.
+  if (pair.acceptedRequestId && pair.revealMode === "per_round")
+    await client.query(
+      "INSERT INTO coin_debate_reveal_modes (debate_id, mode, reason) VALUES ($1, 'per_round', $2)",
+      [event.id, "Challenge sender chose live opinions"],
     );
   const conflicted = await client.query<{
     id: string;
@@ -628,6 +638,7 @@ async function completeMatch(
     booking: booking.mode,
     actorId,
     acceptedRequestId: request.id,
+    revealMode: request.revealMode,
     notice:
       booking.mode === "now"
         ? "Your debate is ready. Join now."
@@ -712,6 +723,8 @@ export function createMatchingRepository(
         // A direct challenge is either "now" or proposes one to three times (Decision 0011).
         mode?: "now" | "scheduled";
         proposedTimes?: readonly Date[];
+        // A direct challenge's live opinions: per-round reveal for its debate.
+        liveOpinions?: boolean;
       },
     ) {
       const mode =
@@ -833,8 +846,9 @@ export function createMatchingRepository(
           : null;
         const created = await client.query<MatchRequest>(
           `INSERT INTO match_requests (kind, status, initiator_user_id, target_user_id,
-             topic_id, proposition, requested_side, scheduled_at, expires_at, mode, respond_by)
-           VALUES ($1, 'open', $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
+             topic_id, proposition, requested_side, scheduled_at, expires_at, mode, respond_by,
+             reveal_mode)
+           VALUES ($1, 'open', $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`,
           [
             input.kind,
             userId,
@@ -846,6 +860,9 @@ export function createMatchingRepository(
             expiresAt,
             mode,
             respondBy,
+            input.kind === "direct" && input.liveOpinions
+              ? "per_round"
+              : "five_day",
           ],
         );
         const request = await requestById(client, created.rows[0]!.id);

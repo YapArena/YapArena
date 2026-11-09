@@ -121,6 +121,7 @@ export function requestSummary(
     `You argue ${label}`,
     shown,
   ];
+  if (request.revealMode === "per_round") parts.push("live opinions");
   if (status === "booked" && request.scheduledAt)
     parts.push(format(request.scheduledAt));
   else if (request.status === "open") {

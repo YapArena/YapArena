@@ -26,6 +26,8 @@ export interface MatchingRequest {
   mode?: "now" | "scheduled";
   // While in the future, an online target is answering a "now" challenge.
   respondBy?: string | null;
+  // per_round: the sender turned on live opinions, so each turn's result shows at its cutoff.
+  revealMode?: "five_day" | "per_round";
   proposals?: MatchingProposal[];
   initiatorHandle?: string | null;
   initiatorName?: string | null;

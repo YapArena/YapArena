@@ -182,13 +182,14 @@ rounds. The runtime may void only those; the database refuses any other runtime 
 
 ## Reveal mode and debaters
 
-Every debate round reveals in its debate's mode (Decision 0012, F11). **Five-day** is the default
-and the only mode of a user-created debate: rounds take orders until their cutoff, stay locked,
+Every debate round reveals in its debate's mode (Decision 0012, F11). **Five-day** is the default: rounds take orders until their cutoff, stay locked,
 and price and settle at the debate's 120-hour close, 120 elapsed hours after its live end. Until
 then participants see their own order and the participant count, not a price or execution.
-**Per-round** debates settle each round at its cutoff, as before. Record per-round only for a
-founder-created debate, before its first round, with `set-reveal-mode`; the first round locks the
-mode. Debaters cannot take a position in their own debate (F14).
+**Per-round** debates settle each round at its cutoff, as before. A debate is per-round when the
+person who sent its direct challenge turned on **Live opinions**: accepting the challenge records
+it in the transaction that creates the debate, and the challenge cannot change it afterwards.
+Queue matches and open requests stay five-day. For a founder-created debate, the owner records
+per-round before its first round with `set-reveal-mode`; the first round locks the mode. Debaters cannot take a position in their own debate (F14).
 
 From a five-day debate's live end until its 120-hour close, replay viewers may join a turn
 window after its cutoff by giving the replay position they are watching (F10). The position must

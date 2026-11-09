@@ -1766,7 +1766,8 @@ export function createCoinDebateSandbox(
       }, workerLimits);
     },
     // F11: the owner records per-round reveal for a founder-created debate,
-    // before its first round. User-created debates keep the five-day default.
+    // before its first round. A user-created debate is per-round only when its
+    // challenge sender turned on live opinions (matching/repository.ts).
     async setRevealMode(debateId: string, mode: RevealMode, reason: string) {
       resource(debateId);
       if (mode !== "five_day" && mode !== "per_round")
