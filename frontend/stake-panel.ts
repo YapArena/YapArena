@@ -13,9 +13,12 @@ import {
 } from "./lib/coins.js";
 import { watchRoom } from "./community-stream.js";
 import {
+  canAnswer,
   ceilingCents,
   ceilingText,
+  checkingTurnText,
   clock,
+  debatesHere,
   lastPosition,
   liveWindow,
   parseCeiling,
@@ -120,6 +123,9 @@ if (root) {
   let windows: PublicWindows | null = null;
   let unavailable = false;
   let rounds: StakeRound[] = [];
+  // Set once a round says this account debates here; it then can't answer
+  // any turn, even one whose rounds read failed (debatesHere).
+  let debater = false;
   let signedIn: boolean | null = null;
   let summary: CoinSummary | null = null;
   let serverOffset = 0;
@@ -266,6 +272,7 @@ if (root) {
     );
     if (current !== generation) return;
     rounds = view;
+    if (debatesHere(view)) debater = true;
     // The price inspector marks this viewer's own limit on revealed turns.
     shareStakeRounds({
       debateId,
@@ -430,6 +437,8 @@ if (root) {
   }
   function statusText(current: Target | null) {
     const eventStatus = windows?.eventStatus ?? root!.dataset.debateStatus;
+    // A debater can't answer any turn, whatever else failed to load.
+    if (current && signedIn && debater) return reasonText("debater");
     if (loadFailed)
       return "Couldn't load this debate's Yap Coins rounds. They refresh automatically.";
     if (!current && closedTurn !== null && side)
@@ -446,6 +455,9 @@ if (root) {
     if (current) {
       if (signedIn && !summary)
         return "Yap Coins aren't available on this site right now.";
+      // The live turn is always in the signed-in view once it loads.
+      if (signedIn && !current.round && current.via === "live")
+        return checkingTurnText;
       if (
         signedIn &&
         current.round &&
@@ -471,15 +483,16 @@ if (root) {
     return "Answers for this debate are closed.";
   }
   function joinable(current: Target | null): current is Target {
-    // (A replay window needs the signed-in view's eligibility before it
-    // takes an answer; the next refresh brings it.)
+    // A turn takes an answer once the signed-in view brings its eligibility;
+    // the refresh that finds a new window reads both.
     return (
       current !== null &&
-      (signedIn === false ||
-        (summary !== null &&
-          (current.round
-            ? current.round.eligibility.canTakePosition
-            : current.via === "live")))
+      canAnswer({
+        signedIn,
+        coins: summary !== null,
+        debater,
+        round: current.round,
+      })
     );
   }
   function renderTicket(current: Target | null) {
@@ -907,6 +920,7 @@ if (root) {
     signedIn = null;
     summary = null;
     rounds = [];
+    debater = false;
     side = null;
     revealedSeen = null;
     void refresh(true);
@@ -916,6 +930,7 @@ if (root) {
     signedIn = false;
     summary = null;
     rounds = [];
+    debater = false;
     side = null;
     render();
   });

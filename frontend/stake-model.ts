@@ -268,6 +268,42 @@ export function reasonText(reason: EligibilityReason | null) {
 }
 
 /**
+ * True once any round says this account debates here. The server decides it
+ * for the whole debate, so it holds for every turn, including one whose
+ * eligibility hasn't reached the page yet.
+ */
+export function debatesHere(
+  rounds: readonly Pick<StakeRound, "eligibility">[],
+) {
+  return rounds.some((round) => round.eligibility.reason === "debater");
+}
+
+/**
+ * Whether Yes and No take a tap on the turn shown. A signed-out viewer's tap
+ * asks them to sign in. A signed-in viewer answers only a turn whose
+ * eligibility the server sent, never one it hasn't yet (a failed read leaves
+ * a new turn unknown), and never in a debate they're in.
+ */
+export function canAnswer(viewer: {
+  signedIn: boolean | null;
+  /** The coin summary loaded. */
+  coins: boolean;
+  debater: boolean;
+  round: Pick<StakeRound, "eligibility"> | null;
+}) {
+  if (viewer.signedIn === false) return true;
+  return (
+    viewer.coins &&
+    !viewer.debater &&
+    viewer.round !== null &&
+    viewer.round.eligibility.canTakePosition
+  );
+}
+
+/** The panel's line while a signed-in viewer waits for a turn's eligibility. */
+export const checkingTurnText = "Checking whether you can answer this turn…";
+
+/**
  * The read (1–99 %) behind a position's yes-scale limit. A Yes ceiling is the
  * read and a No ceiling is 100 minus it, so the limit is the read either way.
  */
