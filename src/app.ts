@@ -195,6 +195,7 @@ export function createApp({
   trustProxy = false,
   requestBodyLimit = "10kb",
   apiRateLimit = 300,
+  coinNetworkLimit = 600,
   authRateLimit = 10,
   rateLimitWindowMs = 15 * 60 * 1_000,
   sessionDurationMs = 7 * 24 * 60 * 60 * 1_000,
@@ -257,6 +258,8 @@ export function createApp({
   trustProxy?: number | false;
   requestBodyLimit?: string;
   apiRateLimit?: number;
+  /** Yap Coins requests per minute from one connection. */
+  coinNetworkLimit?: number;
   authRateLimit?: number;
   rateLimitWindowMs?: number;
   sessionDurationMs?: number;
@@ -363,6 +366,13 @@ export function createApp({
   // so they have their own limit below that counts only unverified requests.
   const mediaWebhook = (request: Request) =>
     Boolean(media && mediaProvider) && request.path === "/api/media/webhook";
+  // A debate page reads the viewer's Yap Coins every turn and each answer is
+  // two writes, so Yap Coins have their own budget below (per connection, then
+  // per account) instead of this one. Simulated deposit webhooks keep this one.
+  const coinRoute = (request: Request) =>
+    Boolean(coinSandbox) &&
+    request.path.startsWith("/api/coin-sandbox/") &&
+    !request.path.startsWith("/api/coin-sandbox/webhook");
   app.use(
     createViewerAdmission({
       secret: mediaAdmissionSecret,
@@ -380,6 +390,7 @@ export function createApp({
         streamRead(request) ||
         internalIngest(request) ||
         mediaWebhook(request) ||
+        coinRoute(request) ||
         Boolean(mediaDeliveryLane(request)),
       shared: sharedRateLimits?.("api", "open"),
     }),
@@ -548,6 +559,13 @@ export function createApp({
   if (coinSandbox)
     app.use(
       "/api/coin-sandbox",
+      // Enough for a household or office answering every turn together; each
+      // account also has its own limit inside the router.
+      createApiRateLimiter({
+        windowMs: 60_000,
+        limit: coinNetworkLimit,
+        shared: sharedRateLimits?.("coin-network", "open"),
+      }),
       createRequireAuthentication({ sessions, environment }),
       createCoinSandboxRouter({
         ...coinSandbox,

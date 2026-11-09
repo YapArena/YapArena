@@ -6,6 +6,7 @@ import {
   features,
   held,
   readCoins,
+  readSummary,
   spendable,
 } from "../public/lib/coins.js";
 
@@ -104,7 +105,12 @@ describe("the welcome grant claim", () => {
       ],
     );
     assert.equal(formatCoins(spendable(next.balances)), "2,500 YC");
-    assert.deepEqual(events, ["yap:coins-changed"]);
+    // The read announces itself to the page's other balances, and the claim
+    // tells them the balance changed.
+    assert.deepEqual(events.toSorted(), [
+      "yap:coins-changed",
+      "yap:coins-summary",
+    ]);
   });
 
   it("asks nothing once claimed or while a correction review pauses coins", async () => {
@@ -128,5 +134,67 @@ describe("the welcome grant claim", () => {
     assert.deepEqual(await readCoins(), { state: "absent" });
     assert.equal((await readCoins()).state, "ready");
     await assert.rejects(readCoins(), { status: 500 });
+  });
+});
+
+describe("the page's shared balance read", () => {
+  let sent, announced, answers;
+  beforeEach(() => {
+    sent = [];
+    announced = [];
+    answers = [];
+    globalThis.location = { origin: "https://arena.example" };
+    globalThis.window = {
+      dispatchEvent: (event) => announced.push(event.detail),
+    };
+    // Each request waits until the test answers it.
+    globalThis.fetch = (path) => {
+      sent.push(path);
+      return new Promise((resolve) =>
+        answers.push((status, body) =>
+          resolve(
+            new Response(JSON.stringify(body), {
+              status,
+              headers: {
+                "Content-Type": "application/json",
+                ...(status === 429 ? { "Retry-After": "30" } : {}),
+              },
+            }),
+          ),
+        ),
+      );
+    };
+  });
+  afterEach(() => {
+    delete globalThis.fetch;
+    delete globalThis.window;
+    delete globalThis.location;
+  });
+  const settle = () => new Promise((resolve) => setImmediate(resolve));
+
+  it("sends one request for the modules that ask together, and announces it", async () => {
+    // The header and the debate panel both read on yap:coins-changed.
+    const header = readSummary();
+    const panel = readSummary();
+    answers.shift()(200, summary({ initialized: true }));
+    assert.deepEqual(await header, await panel);
+    assert.deepEqual(sent, ["/api/coin-sandbox/summary"]);
+    await settle();
+    assert.deepEqual(announced, [summary({ initialized: true })]);
+    // Once answered, the next read asks again.
+    const later = readSummary();
+    answers.shift()(200, summary({ sessionId: "42" }));
+    assert.equal((await later).sessionId, "42");
+    assert.equal(sent.length, 2);
+  });
+
+  it("gives every waiting module the refusal and its Retry-After, announcing nothing", async () => {
+    const reads = [readSummary(), readSummary()];
+    answers.shift()(429, { error: "too many requests" });
+    for (const read of reads)
+      await assert.rejects(read, { status: 429, retryAfterSeconds: 30 });
+    await settle();
+    assert.equal(sent.length, 1);
+    assert.deepEqual(announced, []);
   });
 });

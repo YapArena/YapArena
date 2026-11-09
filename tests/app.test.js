@@ -281,6 +281,34 @@ describe("yaparena API", () => {
     assert.equal((await request(limited).get("/health")).status, 429);
   });
 
+  it("gives Yap Coins their own budget per connection, apart from the API limit", async () => {
+    const limited = createApp({
+      messages,
+      users,
+      sessions,
+      logger,
+      apiRateLimit: 1,
+      coinNetworkLimit: 3,
+      coinSandbox: {
+        sandbox: { summary: async () => ({ sessionId: "9" }) },
+        debates: {},
+        operations: {},
+      },
+    });
+    const summary = () =>
+      request(limited)
+        .get("/api/coin-sandbox/summary")
+        .set("Cookie", "session=test-token");
+    // A debate page reads the balance every turn; that leaves the API budget
+    // for everything else.
+    for (let i = 0; i < 3; i++) assert.equal((await summary()).status, 200);
+    const refused = await summary();
+    assert.equal(refused.status, 429);
+    assert.ok(Number(refused.headers["retry-after"]) > 0);
+    assert.equal((await request(limited).get("/health")).status, 200);
+    assert.equal((await request(limited).get("/health")).status, 429);
+  });
+
   it("bounds the readiness database ping with a short deadline", async () => {
     const started = performance.now();
     await assert.rejects(

@@ -11,6 +11,7 @@ import {
   createCommunityStream,
   createDeadlineFollower,
   createSignalRefresh,
+  POLL_FRESH_MS,
   deadlineDelay,
   roomTopics,
   roundDeadlines,
@@ -208,12 +209,13 @@ describe("room signals from the page's EventSource", () => {
   it("reports live only for a healthy EventSource, and repeats its state on request", async () => {
     const s = stream();
     s.transport.start();
-    // Polled frames still announce references but do not make the stream live.
+    // Polled frames announce references and count as flowing signals, but do
+    // not make the stream live.
     await s.transport.acceptHttp(frame("2", [signal("media")]));
-    assert.deepEqual(s.health, []);
+    assert.deepEqual(s.health, [{ room, live: false, flowing: true }]);
     assert.equal(s.received.length, 1);
     Source.instances[0].emit("heartbeat", { version: 1 });
-    assert.deepEqual(s.health, [{ room, live: true }]);
+    assert.deepEqual(s.health.at(-1), { room, live: true, flowing: true });
     s.signals.dispatchEvent(
       new CustomEvent("yap:room-stream-query", { detail: { room } }),
     );
@@ -222,17 +224,18 @@ describe("room signals from the page's EventSource", () => {
         detail: { room: "33333333-3333-4333-8333-333333333333" },
       }),
     );
-    assert.equal(s.health.length, 2);
+    assert.equal(s.health.length, 3);
+    // A hidden page stops polling too.
     s.transport.suspend();
-    assert.deepEqual(s.health.at(-1), { room, live: false });
+    assert.deepEqual(s.health.at(-1), { room, live: false, flowing: false });
     s.transport.reconnect();
     Source.instances
       .at(-1)
       .emit("community", frame("3", [signal("round")]), roomCursor(room, "3"));
     await delay(0);
-    assert.deepEqual(s.health.at(-1), { room, live: true });
+    assert.deepEqual(s.health.at(-1), { room, live: true, flowing: true });
     Source.instances.at(-1).onerror();
-    assert.deepEqual(s.health.at(-1), { room, live: false });
+    assert.deepEqual(s.health.at(-1), { room, live: false, flowing: false });
     s.transport.stop();
     // Heartbeat, the echoed query and the reconnect.
     assert.equal(s.health.filter((h) => h.live).length, 3);
@@ -247,7 +250,7 @@ describe("room signals from the page's EventSource", () => {
     );
     await delay(0);
     Source.instances[0].emit("unavailable", { version: 1, roomId: room });
-    assert.deepEqual(s.health.at(-1), { room, live: false });
+    assert.deepEqual(s.health.at(-1), { room, live: false, flowing: false });
     const polled = stream();
     polled.transport.start();
     Source.instances[0].emit("heartbeat", { version: 1 });
@@ -258,7 +261,42 @@ describe("room signals from the page's EventSource", () => {
       roomId: room,
       kind: "unavailable",
     });
-    assert.deepEqual(polled.health.at(-1), { room, live: false });
+    assert.deepEqual(polled.health.at(-1), {
+      room,
+      live: false,
+      flowing: false,
+    });
+  });
+  it("counts the polling fallback as flowing signals until its polls stop", async () => {
+    let time = 1_000;
+    const jobs = [];
+    const s = stream({
+      now: () => time,
+      setTimer: (fn, ms) => jobs.push({ fn, ms }),
+      clearTimer: (id) => {
+        if (id) jobs[id - 1].cleared = true;
+      },
+    });
+    const pending = () => jobs.filter((job) => !job.cleared);
+    await s.transport.acceptHttp(frame("1", [signal("window")]));
+    assert.deepEqual(s.health, [{ room, live: false, flowing: true }]);
+    assert.deepEqual(
+      pending().map((job) => job.ms),
+      [POLL_FRESH_MS],
+    );
+    // Every successful poll, changed or not, restarts the freshness window.
+    time += POLL_FRESH_MS - 1_000;
+    await s.transport.acceptHttp(frame("1"));
+    assert.equal(pending().length, 1);
+    assert.equal(s.health.length, 1);
+    // No poll succeeds for ten seconds: signals no longer count as flowing.
+    time += POLL_FRESH_MS;
+    pending()[0].fn();
+    assert.deepEqual(s.health.at(-1), { room, live: false, flowing: false });
+    await s.transport.acceptHttp(frame("2"));
+    assert.deepEqual(s.health.at(-1), { room, live: false, flowing: true });
+    s.transport.stop();
+    assert.deepEqual(s.health.at(-1), { room, live: false, flowing: false });
   });
   it("works without page events", () => {
     const s = createCommunityStream({
@@ -319,6 +357,32 @@ describe("room watchers in other bundles", () => {
     stop();
     send({ room, cursor: "12", topics: ["round"] });
     assert.equal(signals.length, 1);
+  });
+  it("reports flowing signals apart from stream health", () => {
+    const events = new EventTarget();
+    const health = [];
+    const flowing = [];
+    watchRoom({
+      room,
+      topics: [],
+      events,
+      signal() {},
+      health: (live) => health.push(live),
+      flowing: (value) => flowing.push(value),
+    });
+    for (const [live, arriving] of [
+      [false, true], // the chat's poll delivers signals
+      [true, true], // the stream connects
+      [false, true], // the stream drops; the poll goes on
+      [false, false], // the poll stops
+    ])
+      events.dispatchEvent(
+        new CustomEvent("yap:room-stream", {
+          detail: { room, live, flowing: arriving },
+        }),
+      );
+    assert.deepEqual(health, [true, false]);
+    assert.deepEqual(flowing, [true, false]);
   });
 });
 

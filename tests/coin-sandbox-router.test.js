@@ -200,6 +200,37 @@ describe("Yap Coins refusals", () => {
       assert.deepEqual(response.body, body);
     }
   });
+  it("keep the account write budget for money flows, not debate answers", async () => {
+    const limited = [];
+    const { server, calls } = app(
+      {
+        sharedWriteLimiter: (r, s) => {
+          limited.push(r.path);
+          s.status(429).json({ error: "too many attempts; try again shortly" });
+        },
+      },
+      { create: async () => ({ id: roundId, created: false }) },
+    );
+    // Joining a turn's window and placing an answer, once per turn.
+    for (const path of [
+      `/coins/debates/${debateId}/rounds`,
+      `/coins/rounds/${roundId}/submit`,
+    ]) {
+      const response = await post(
+        server,
+        path,
+        path.endsWith("submit")
+          ? { side: "YES", ceiling: "0.50", quantity: 10 }
+          : {},
+      );
+      assert.ok([200, 201].includes(response.status), path);
+    }
+    assert.deepEqual(calls, ["submit"]);
+    // Grants and transfers still count against it.
+    for (const path of ["/coins/initialize", "/coins/grants/daily"])
+      assert.equal((await post(server, path)).status, 429, path);
+    assert.deepEqual(limited, ["/initialize", "/grants/daily"]);
+  });
   it("name a changed account context", async () => {
     const { server } = app();
     const response = await request(server)

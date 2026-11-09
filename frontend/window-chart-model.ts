@@ -38,6 +38,9 @@ declare global {
       debateId: string;
       limits: Record<string, string>;
     }>;
+    // The panel's last window read failed, so the chart's turns may be stale
+    // until the next yap:stake-windows.
+    "yap:stake-windows-failed": CustomEvent<{ debateId: string }>;
   }
 }
 

@@ -13,7 +13,11 @@ import { createRoundChart, sharePercent } from "./arena-chart.js";
 import { createPriceInspector } from "./arena-price.js";
 import { watchRoom } from "./community-stream.js";
 import { seekReplay } from "./replay-seek.js";
-import { onStakeRounds, onStakeWindows } from "./stake-windows.js";
+import {
+  onStakeRounds,
+  onStakeWindows,
+  onStakeWindowsStale,
+} from "./stake-windows.js";
 import { createTurnBars } from "./turn-results.js";
 import {
   isTurnWindow,
@@ -61,10 +65,10 @@ if (root) {
     sharedBusy = false;
   // Shared activity re-reads on room signals, spread over a few seconds so a
   // room's viewers do not read at once; the interval is a safety net, slower
-  // while the room stream is live.
+  // while signals arrive (by stream or by the chat's poll).
   let lastShared = Date.now(),
     sharedDueAt: number | null = null,
-    roomLive = false;
+    signalsFlowing = false;
   const spread = () => Date.now() + Math.random() * 3000;
   const sharedAbort = new AbortController();
   const selectRound = (item: RoundPoint) => {
@@ -285,6 +289,13 @@ if (root) {
       void loadTimeline();
     renderShared();
   });
+  // The turns come from the answer panel's reads; say when they can't refresh.
+  const resultsStatus = root.querySelector<HTMLElement>(
+    "[data-results-status]",
+  );
+  onStakeWindowsStale(debateId, (stale) => {
+    if (resultsStatus) resultsStatus.hidden = !stale;
+  });
   onStakeRounds(debateId, (limits) => {
     ownLimits = limits;
     if (mode === "bars") renderShared();
@@ -345,7 +356,7 @@ if (root) {
     const now = Date.now();
     if (
       (sharedDueAt !== null && now >= sharedDueAt) ||
-      now - lastShared >= (roomLive ? 60000 : 15000)
+      now - lastShared >= (signalsFlowing ? 60000 : 15000)
     )
       void loadShared();
   }, 1000);
@@ -370,8 +381,11 @@ if (root) {
         );
       }
     },
-    health(live) {
-      roomLive = live;
+    health() {
+      // Only whether signals arrive matters here; see `flowing`.
+    },
+    flowing(value) {
+      signalsFlowing = value;
     },
   });
   window.addEventListener(

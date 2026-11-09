@@ -14,6 +14,7 @@ import { formatCoins } from "./lib/coin-format.js";
 import { visitColors } from "./lib/visit-colors.js";
 import {
   claimWelcome,
+  fetchSummary,
   held,
   spendable,
   type CoinSummary,
@@ -56,9 +57,21 @@ if (header) {
   const balanceCopy = header.querySelector<HTMLElement>(
     "[data-header-balance-copy]",
   );
+  // True once this account's balance is on screen. A later failed refresh
+  // keeps it there and says so, instead of blanking it.
+  let balanceShown = false;
   function setBalance(text: string) {
     balance.textContent = text;
     if (balanceCopy) balanceCopy.textContent = text;
+    balanceShown = text !== "—";
+  }
+  function balanceFailed() {
+    if (balanceShown) {
+      reserved.textContent = "Couldn't refresh your balance. Reopen to retry.";
+      return;
+    }
+    setBalance("—");
+    reserved.textContent = "Balance unavailable. Reopen to retry.";
   }
   const emailFirst =
     document.documentElement.hasAttribute("data-email-first") ||
@@ -167,7 +180,7 @@ if (header) {
   async function balanceRequest() {
     const options = { cache: "no-store" as const, timeout: 10000 };
     if (emailFirst) {
-      const sandbox = await apiFetch("/api/coin-sandbox/summary", options);
+      const sandbox = await fetchSummary(options.timeout);
       if (sandbox.status !== 404)
         return { response: sandbox, source: "sandbox" as const };
     }
@@ -190,8 +203,7 @@ if (header) {
   ) {
     if (response.status === 401 || response.status === 403) return false;
     if (!response.ok) {
-      setBalance("—");
-      reserved.textContent = "Balance unavailable. Reopen to retry.";
+      balanceFailed();
       return true;
     }
     if (source === "sandbox") {
@@ -309,8 +321,7 @@ if (header) {
       })
       .catch(() => {
         if (current !== version) return;
-        setBalance("—");
-        reserved.textContent = "Balance unavailable. Reopen to retry.";
+        balanceFailed();
       });
   });
   window.addEventListener("yap:balance", (event) => {

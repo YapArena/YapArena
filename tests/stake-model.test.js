@@ -12,6 +12,7 @@ import {
   parseSize,
   percent,
   placementError,
+  waitText,
   positionStatus,
   price,
   readFromLimit,
@@ -442,7 +443,14 @@ describe("placement refusals in the panel's words", () => {
         /^You're signed out\. Sign in again to answer\.$/,
       ],
       [failure(401, undefined), /^You're signed out/],
-      [failure(429, undefined), /Wait a moment/],
+      [
+        failure(429, undefined),
+        /^Too many requests\. Nothing was reserved; wait a moment, then try again\.$/,
+      ],
+      [
+        Object.assign(failure(429, undefined), { retryAfterSeconds: 42 }),
+        /^Too many requests\. Nothing was reserved; try again in 42 seconds\.$/,
+      ],
       [
         failure(409, "idempotency_conflict"),
         /^Couldn't place your answer\. Nothing was reserved; try again\.$/,
@@ -471,6 +479,17 @@ describe("placement refusals in the panel's words", () => {
         /server text|internal server|Failed to fetch|signal timed out/,
       );
     }
+  });
+  it("says how long the server asked to wait", () => {
+    assert.deepEqual([0.2, 1, 59, 60, 61, 300, 900].map(waitText), [
+      "1 second",
+      "1 second",
+      "59 seconds",
+      "1 minute",
+      "2 minutes",
+      "5 minutes",
+      "15 minutes",
+    ]);
   });
   it("leaves the balance out when the panel doesn't know it", () => {
     assert.equal(

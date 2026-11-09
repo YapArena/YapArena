@@ -2980,6 +2980,16 @@ textarea::placeholder {
 .arena-page .arena-turn-caption:empty {
   display: none;
 }
+/* Shown while the turn results can't be refreshed. */
+.arena-page .arena-results-status {
+  margin: var(--space-2) 0 0;
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 20px;
+}
+.arena-page .arena-results-status[hidden] {
+  display: none;
+}
 .arena-page
   :is(
     .arena-turn-caption-lead,

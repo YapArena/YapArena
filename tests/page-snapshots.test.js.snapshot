@@ -489,6 +489,7 @@ exports[`renders a debate 1`] = `
 <p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
 <p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
+<p class="arena-results-status" data-results-status role="status" hidden>Results paused · reconnecting…</p>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
 <div class="arena-turns" data-turn-bars hidden>
@@ -1141,6 +1142,7 @@ exports[`renders a debate 10`] = `
 <p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
 <p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
+<p class="arena-results-status" data-results-status role="status" hidden>Results paused · reconnecting…</p>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
 <div class="arena-turns" data-turn-bars hidden>
@@ -1784,6 +1786,7 @@ exports[`renders a debate 2`] = `
 <p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
 <p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
+<p class="arena-results-status" data-results-status role="status" hidden>Results paused · reconnecting…</p>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
 <div class="arena-turns" data-turn-bars hidden>
@@ -2279,6 +2282,7 @@ exports[`renders a debate 3`] = `
 <p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
 <p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
+<p class="arena-results-status" data-results-status role="status" hidden>Results paused · reconnecting…</p>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
 <div class="arena-turns" data-turn-bars hidden>
@@ -2927,6 +2931,7 @@ exports[`renders a debate 4`] = `
 <p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
 <p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
+<p class="arena-results-status" data-results-status role="status" hidden>Results paused · reconnecting…</p>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
 <div class="arena-turns" data-turn-bars hidden>
@@ -3720,6 +3725,7 @@ exports[`renders a debate 5`] = `
 <p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
 <p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
+<p class="arena-results-status" data-results-status role="status" hidden>Results paused · reconnecting…</p>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
 <div class="arena-turns" data-turn-bars hidden>
@@ -4360,6 +4366,7 @@ exports[`renders a debate 6`] = `
 <p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
 <p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
+<p class="arena-results-status" data-results-status role="status" hidden>Results paused · reconnecting…</p>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
 <div class="arena-turns" data-turn-bars hidden>
@@ -5002,6 +5009,7 @@ exports[`renders a debate 7`] = `
 <p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
 <p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
+<p class="arena-results-status" data-results-status role="status" hidden>Results paused · reconnecting…</p>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
 <div class="arena-turns" data-turn-bars hidden>
@@ -5651,6 +5659,7 @@ exports[`renders a debate 8`] = `
 <p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
 <p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
+<p class="arena-results-status" data-results-status role="status" hidden>Results paused · reconnecting…</p>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
 <div class="arena-turns" data-turn-bars hidden>
@@ -6361,6 +6370,7 @@ exports[`renders a debate 9`] = `
 <p class="arena-results-sub arena-results-sub-wide">Share who said yes in each turn&#39;s window · bars rise for a yes majority and drop for a no majority</p>
 <p class="arena-results-sub arena-results-sub-phone">Share who said yes in each turn&#39;s window · tap a turn for its price draw</p>
 </header>
+<p class="arena-results-status" data-results-status role="status" hidden>Results paused · reconnecting…</p>
 <p class="arena-turn-caption" data-turn-caption>
 </p>
 <div class="arena-turns" data-turn-bars hidden>

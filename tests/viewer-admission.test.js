@@ -187,6 +187,38 @@ it("does not exempt protected mutations or authentication from their existing co
       undefined,
     );
 });
+it("counts a debate page's repeated reads and heartbeats per browser, not per connection", () => {
+  // Read on every turn by each viewer of a live debate.
+  for (const url of [
+    `/api/public/debates/${id}/windows`,
+    `/api/public/debates/${id}/activity`,
+    `/api/public/debates/${id}/outline`,
+    `/api/public/debates/${id}/outline/timeline`,
+    "/api/me/profile",
+  ])
+    assert.equal(mediaDeliveryLane({ method: "GET", path: url }), "read", url);
+  // The "watching" count and watch-time heartbeats.
+  for (const url of [
+    `/api/community/events/${id}/presence`,
+    "/api/measurement/watch",
+  ])
+    assert.equal(
+      mediaDeliveryLane({ method: "POST", path: url }),
+      "report",
+      url,
+    );
+  // Writes keep the API budget, and Yap Coins have their own (src/app.ts).
+  for (const [method, url] of [
+    ["POST", `/api/public/debates/${id}/windows`],
+    ["PUT", "/api/me/profile"],
+    ["GET", `/api/community/events/${id}/presence`],
+    ["POST", "/api/measurement/discovery"],
+    ["GET", "/api/coin-sandbox/summary"],
+    ["GET", `/api/public/debates/${id}/windows/extra`],
+    ["GET", "/api/public/debates/not-an-id/windows"],
+  ])
+    assert.equal(mediaDeliveryLane({ method, path: url }), undefined, url);
+});
 it("rejects tampered/expired/malformed guard values and renews them without authentication privileges", () => {
   const f = fixture({ secure: false });
   const initial = f.call();
