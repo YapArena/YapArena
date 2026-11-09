@@ -17,8 +17,13 @@ services:
         value: --max-semi-space-size=4
       - key: PORT
         value: "10000"
+      # Requests reach the app through Cloudflare, Render's router and a local
+      # proxy (X-Forwarded-For "visitor, Cloudflare, router" from 127.0.0.1).
+      # With fewer hops, every rate limit keys on Render's internal addresses
+      # and the whole site shares a few budgets. Check with the command in
+      # docs/operations.md after a plan change.
       - key: TRUST_PROXY
-        value: "1"
+        value: "3"
       # yaparena-staging-jobs below runs every background job. Set "true" only
       # to roll back or while that worker is missing; see docs/render-staging.md.
       - key: RUN_BACKGROUND_JOBS

@@ -107,8 +107,21 @@ export function createCoinSandboxRouter(options: {
       shared: options.sharedRateLimits?.("coin-sandbox", "open"),
     }),
   );
+  // The account's 30-per-15-minutes write budget covers money flows: the
+  // welcome and daily grants, simulated purchases and withdrawals, and error
+  // reports. Answering a debate turn (joining its window, then placing) is
+  // two writes a turn, at most one answer per window; the per-account limit
+  // above covers it.
+  const answering = (r: Request) =>
+    /^\/debates\/[0-9a-f-]{36}\/rounds$|^\/rounds\/[0-9a-f-]{36}\/submit$/i.test(
+      r.path,
+    );
   router.use((r, s, next) => {
-    if (!["GET", "HEAD"].includes(r.method) && options.sharedWriteLimiter)
+    if (
+      !["GET", "HEAD"].includes(r.method) &&
+      !answering(r) &&
+      options.sharedWriteLimiter
+    )
       return options.sharedWriteLimiter(r, s, next);
     next();
   });

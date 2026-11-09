@@ -4,8 +4,14 @@
 import assert from "node:assert/strict";
 import { beforeEach, it } from "node:test";
 
-const { onStakeRounds, onStakeWindows, shareStakeRounds, shareStakeWindows } =
-  await import("../public/stake-windows.js");
+const {
+  onStakeRounds,
+  onStakeWindows,
+  onStakeWindowsStale,
+  reportStakeWindowsFailure,
+  shareStakeRounds,
+  shareStakeWindows,
+} = await import("../public/stake-windows.js");
 
 beforeEach(() => {
   globalThis.window = new EventTarget();
@@ -105,4 +111,14 @@ it("shares the viewer's own limits the same way, latest first, per debate", asyn
     limits: {},
   });
   assert.equal(events.length, 4);
+});
+
+it("marks the Results tab stale after a failed read until the next read arrives", () => {
+  const stale = [];
+  onStakeWindowsStale("d1", (value) => stale.push(value));
+  reportStakeWindowsFailure("d2");
+  reportStakeWindowsFailure("d1");
+  shareStakeWindows({ debateId: "d2", windows: read(1) });
+  shareStakeWindows({ debateId: "d1", windows: read(2) });
+  assert.deepEqual(stale, [true, false]);
 });

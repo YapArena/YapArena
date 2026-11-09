@@ -31,6 +31,7 @@ export function mediaDeliveryLane(
       "/sw.js",
       "/api/auth/me",
       "/api/me/roles",
+      "/api/me/profile",
     ].includes(request.path) ||
       /^\/(?:debates|topics|people)\/[a-z0-9][a-z0-9-]{2,79}(?:\/qr\.svg)?$/.test(
         request.path,
@@ -49,6 +50,11 @@ export function mediaDeliveryLane(
       ) ||
       /^\/api\/media\/events\/[0-9a-f-]{36}(?:\/(?:replay|captions\.vtt|speaker-seat))?$/i.test(
         request.path,
+      ) ||
+      // A debate page re-reads its turn windows, outline and bot history on
+      // every turn. Viewers who share a connection each have their own budget.
+      /^\/api\/public\/debates\/[0-9a-f-]{36}\/(?:windows|activity|outline(?:\/timeline)?)$/i.test(
+        request.path,
       ))
   )
     return "read";
@@ -59,7 +65,12 @@ export function mediaDeliveryLane(
     return "grant";
   if (
     request.method === "POST" &&
-    /^\/api\/media\/events\/[0-9a-f-]{36}\/playback$/i.test(request.path)
+    (/^\/api\/media\/events\/[0-9a-f-]{36}\/playback$/i.test(request.path) ||
+      // The "watching" count and watch-time heartbeats.
+      /^\/api\/community\/events\/[0-9a-f-]{36}\/presence$/i.test(
+        request.path,
+      ) ||
+      request.path === "/api/measurement/watch")
   )
     return "report";
   return undefined;

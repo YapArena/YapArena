@@ -2,10 +2,15 @@
 // one position per turn window, placed live or from the replay. The server
 // keeps every rule; this controller shows the current window, the viewer's
 // terms and receipts, and never shows side totals before the reveal.
-import { api, apiErrorStatus, apiFetch } from "./lib/api.js";
+import { api, apiError, apiErrorStatus, apiFetch } from "./lib/api.js";
 import { sessionStore } from "./lib/session.js";
 import { formatCoins } from "./lib/coin-format.js";
-import { claimWelcome, spendable, type CoinSummary } from "./lib/coins.js";
+import {
+  claimWelcome,
+  readSummary as sharedSummary,
+  spendable,
+  type CoinSummary,
+} from "./lib/coins.js";
 import { watchRoom } from "./community-stream.js";
 import {
   ceilingCents,
@@ -39,7 +44,11 @@ import {
   type StakeRound,
   type StakeSide,
 } from "./stake-model.js";
-import { shareStakeRounds, shareStakeWindows } from "./stake-windows.js";
+import {
+  reportStakeWindowsFailure,
+  shareStakeRounds,
+  shareStakeWindows,
+} from "./stake-windows.js";
 interface Target {
   window: PublicWindow | null;
   round: StakeRound | null;
@@ -120,9 +129,12 @@ if (root) {
   let closedTurn: number | null = null;
   let playback: { positionSeconds: number; playing: boolean } | null = null;
   let generation = 0;
-  let roomLive = false;
+  // True while room signals reach the page, by stream or by the chat's poll.
+  let signalsFlowing = false;
   let refreshTimer: number | undefined;
   let loadFailed = false;
+  // After a refused read, the server's Retry-After, as a time.
+  let waitUntil = 0;
   let explaining = false;
   // The window the review pop-up shows; "Place it" places only on it.
   let reviewed: { id: string; turnNumber: number } | null = null;
@@ -222,7 +234,7 @@ if (root) {
       windows = null;
       return;
     }
-    if (!response.ok) throw new Error("Turn windows unavailable");
+    if (!response.ok) throw await apiError(response);
     const value: PublicWindows = await response.json();
     unavailable = false;
     windows = value;
@@ -238,7 +250,7 @@ if (root) {
     if (!signedIn) return;
     let value =
       readSummary || !summary || !summary.initialized
-        ? await coinApi<CoinSummary>("/summary")
+        ? await sharedSummary(15000)
         : summary;
     if (current !== generation) return;
     summary = value;
@@ -280,18 +292,39 @@ if (root) {
         if (current !== generation) return;
         signedIn = Boolean(user);
       }
-      await loadWindows();
+      await loadWindows().catch((error: unknown) => {
+        // The Results tab reads its turns from this read; say it's stale.
+        if (current === generation) reportStakeWindowsFailure(debateId);
+        throw error;
+      });
       if (current !== generation) return;
       await loadPrivate(current, readSummary).catch((error: unknown) => {
         // A disabled coin sandbox (404) leaves only the public view.
         if (apiErrorStatus(error) === 404) summary = null;
         else throw error;
       });
-      if (current === generation) loadFailed = false;
-    } catch {
-      if (current === generation) loadFailed = true;
+      if (current === generation) {
+        loadFailed = false;
+        waitUntil = 0;
+      }
+    } catch (error) {
+      if (current === generation) {
+        loadFailed = true;
+        waitUntil = Date.now() + retryAfterMs(error);
+      }
     }
     if (current === generation) render();
+  }
+  // How long a refused read asked to wait (Retry-After), or nothing.
+  function retryAfterMs(error: unknown) {
+    const seconds =
+      typeof error === "object" &&
+      error !== null &&
+      "retryAfterSeconds" in error &&
+      typeof error.retryAfterSeconds === "number"
+        ? error.retryAfterSeconds
+        : 0;
+    return Math.min(seconds, 900) * 1000;
   }
 
   // The window the viewer would answer now: the live turn's window, or on a
@@ -828,27 +861,31 @@ if (root) {
       () => void refresh(false, readSummary),
       Math.random() * 3000,
     );
+  // Only a viewer with an open position here can see their balance change
+  // when a window opens, closes or settles.
+  const ownOpen = () =>
+    rounds.some((round) => round.own && round.state === "open");
   watchRoom({
     room: debateId,
     topics: ["window"],
     events: window,
     signal() {
-      // A window opened, closed or settled; only a viewer with an open
-      // position here can see their balance change.
       window.clearTimeout(refreshTimer);
-      refreshTimer = spread(
-        rounds.some((round) => round.own && round.state === "open"),
-      );
+      refreshTimer = spread(ownOpen());
     },
-    health(live) {
-      roomLive = live;
+    health() {
+      // The panel needs signals, however they arrive; see `flowing`.
+    },
+    flowing(value) {
+      signalsFlowing = value;
     },
   });
-  // Another part of the page changed the balance: read it again.
+  // Another part of the page changed the balance: read it again. The header
+  // asks at the same moment, and they share one request.
   window.addEventListener("yap:coins-changed", () => {
     if (!signedIn || !summary) return;
     const current = generation;
-    void coinApi<CoinSummary>("/summary")
+    void sharedSummary(15000)
       .then((value) => {
         if (current !== generation) return;
         summary = value;
@@ -857,6 +894,12 @@ if (root) {
       .catch(() => {
         // The next refresh tries again.
       });
+  });
+  // Any module's balance read for this session updates the panel too.
+  window.addEventListener("yap:coins-summary", (event) => {
+    if (!signedIn || summary?.sessionId !== event.detail.sessionId) return;
+    summary = event.detail;
+    render();
   });
   window.addEventListener("yap:account-changed", () => {
     generation++;
@@ -898,10 +941,17 @@ if (root) {
       return;
     }
     lastTarget = current;
-    const pollEvery = roomLive ? 60000 : 15000;
-    if (!document.hidden && Date.now() - lastPoll > pollEvery) {
+    // A safety net: signals bring changes, so while they arrive this reads
+    // once a minute, and the balance only for an open position (other
+    // balance reads on the page reach the panel as yap:coins-summary).
+    const pollEvery = signalsFlowing && !loadFailed ? 60000 : 15000;
+    if (
+      !document.hidden &&
+      Date.now() - lastPoll > pollEvery &&
+      Date.now() >= waitUntil
+    ) {
       lastPoll = Date.now();
-      void refresh();
+      void refresh(false, ownOpen());
     }
     render();
   }, 1000);

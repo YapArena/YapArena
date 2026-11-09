@@ -19,6 +19,11 @@ export interface RoomStreamDetail {
   room: string;
   /** True while the EventSource delivers applied frames or heartbeats. */
   live: boolean;
+  /**
+   * True while room signals reach the page: the stream is live, or the
+   * polling fallback applied a frame in the last 10 seconds.
+   */
+  flowing: boolean;
 }
 declare global {
   interface WindowEventMap {
@@ -35,6 +40,8 @@ export type RoomEvents = Pick<
 >;
 const pageEvents = (): RoomEvents | undefined =>
   typeof window === "undefined" ? undefined : window;
+/** How long one successful poll keeps room signals counted as flowing. */
+export const POLL_FRESH_MS = 10_000;
 
 interface StreamOptions {
   room: string;
@@ -78,15 +85,26 @@ export function createCommunityStream({
   let generation = 0;
   let applied = false;
   let live = false;
+  // The polling fallback announces the same signals, every two seconds or so.
+  let flowing = false;
+  let polledAt: number | null = null;
+  let pollCheck: number | undefined;
   function announceHealth() {
     signals?.dispatchEvent(
-      new CustomEvent("yap:room-stream", { detail: { room, live } }),
+      new CustomEvent("yap:room-stream", { detail: { room, live, flowing } }),
     );
   }
   function setLive(value: boolean) {
-    if (live === value) return;
+    const next =
+      value || (polledAt !== null && now() - polledAt < POLL_FRESH_MS);
+    if (live === value && flowing === next) return;
     live = value;
+    flowing = next;
     announceHealth();
+  }
+  function forgetPolls() {
+    polledAt = null;
+    clearTimer(pollCheck);
   }
   // Modules that load after the stream started ask for its current state.
   signals?.addEventListener("yap:room-stream-query", (event) => {
@@ -210,6 +228,7 @@ export function createCommunityStream({
       stopped = true;
       close();
       clearTimer(timer);
+      forgetPolls();
       setLive(false);
       degraded(false);
       unavailable();
@@ -251,6 +270,12 @@ export function createCommunityStream({
       degraded(false);
       status("Live updates on");
       setLive(true);
+    } else {
+      polledAt = now();
+      clearTimer(pollCheck);
+      // Without another successful poll, signals stop counting as flowing.
+      pollCheck = setTimer(() => setLive(live), POLL_FRESH_MS);
+      setLive(live);
     }
   }
   return {
@@ -261,6 +286,7 @@ export function createCommunityStream({
         stopped = true;
         close();
         clearTimer(timer);
+        forgetPolls();
         setLive(false);
         degraded(false);
         unavailable();
@@ -278,6 +304,7 @@ export function createCommunityStream({
     suspend() {
       close();
       clearTimer(timer);
+      forgetPolls();
       setLive(false);
       degraded(false);
     },
@@ -285,6 +312,7 @@ export function createCommunityStream({
       stopped = true;
       close();
       clearTimer(timer);
+      forgetPolls();
       setLive(false);
       degraded(false);
     },
@@ -295,23 +323,27 @@ export function createCommunityStream({
 }
 
 // Listens for one room's signals and stream health from another bundle.
-// Health starts as not live and is reported only when it changes.
+// Health starts as not live and is reported only when it changes; so does
+// `flowing`, for a module that only needs signals, by stream or by poll.
 export function watchRoom({
   room,
   topics,
   signal,
   health,
+  flowing,
   events = pageEvents(),
 }: {
   room: string;
   topics: readonly RoomTopic[];
   signal: (topic: RoomTopic, cursor: bigint) => void;
   health: (live: boolean) => void;
+  flowing?: (flowing: boolean) => void;
   events?: RoomEvents | undefined;
 }) {
   if (!events) return () => {};
   const target = events;
   let live = false;
+  let arriving = false;
   function onSignal(event: CustomEvent<RoomSignalDetail>) {
     if (event.detail.room !== room) return;
     for (const topic of topics)
@@ -319,9 +351,15 @@ export function watchRoom({
         signal(topic, BigInt(event.detail.cursor));
   }
   function onStream(event: CustomEvent<RoomStreamDetail>) {
-    if (event.detail.room !== room || event.detail.live === live) return;
-    live = event.detail.live;
-    health(live);
+    if (event.detail.room !== room) return;
+    if (event.detail.live !== live) {
+      live = event.detail.live;
+      health(live);
+    }
+    if (event.detail.flowing !== arriving) {
+      arriving = event.detail.flowing;
+      flowing?.(arriving);
+    }
   }
   target.addEventListener("yap:room-signal", onSignal);
   target.addEventListener("yap:room-stream", onStream);

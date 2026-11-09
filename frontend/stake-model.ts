@@ -485,9 +485,31 @@ export function placementError(
   }
   if (status === 401)
     return plain("You're signed out. Sign in again to answer.");
-  if (status === 429)
-    return plain("Too many tries. Wait a moment, then try again.");
+  if (status === 429) {
+    const wait =
+      known &&
+      "retryAfterSeconds" in error &&
+      typeof error.retryAfterSeconds === "number" &&
+      error.retryAfterSeconds > 0
+        ? error.retryAfterSeconds
+        : null;
+    return plain(
+      wait === null
+        ? "Too many requests. Nothing was reserved; wait a moment, then try again."
+        : `Too many requests. Nothing was reserved; try again in ${waitText(wait)}.`,
+    );
+  }
   return plain("Couldn't place your answer. Nothing was reserved; try again.");
+}
+
+/** "45 seconds", "1 minute", "3 minutes": a server's Retry-After. */
+export function waitText(seconds: number) {
+  if (seconds < 60) {
+    const whole = Math.max(1, Math.ceil(seconds));
+    return `${whole} ${whole === 1 ? "second" : "seconds"}`;
+  }
+  const minutes = Math.ceil(seconds / 60);
+  return `${minutes} ${minutes === 1 ? "minute" : "minutes"}`;
 }
 
 /** True when no window has a span in the recording yet (F10 can't work). */

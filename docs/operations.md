@@ -634,7 +634,17 @@ and restrict who can read it. It is separate from the local `.env` file and must
 - `DATABASE_URL` grants runtime database access and must be secret-managed and rotated.
 - `APP_ORIGIN` is the exact public HTTPS origin used to validate browser mutations.
 - `TRUST_PROXY` is the number of trusted proxy hops; set it to the real topology, not an arbitrary
-  large value.
+  large value. Too few hops make every rate limit key on a proxy's address, so all visitors share
+  a few budgets. On Render, set it to the number of addresses in `X-Forwarded-For` as the app
+  receives it; the most common count in recent request logs is that number (staging: 3, for
+  Cloudflare, Render's router and a local proxy). Check it after a plan or domain change:
+
+  ```sh
+  render logs -r <WEB_SERVICE_ID> --limit 100 -o json --confirm \
+    | jq -r '.message | fromjson? | .req.headers["x-forwarded-for"] // empty | split(", ") | length' \
+    | sort | uniq -c
+  ```
+
 - `LOG_LEVEL` controls operational detail, while `HOST_PORT` selects the loopback port used by the
   host reverse proxy.
 - `METRICS_TOKEN` is the bearer token the metrics collector sends to `/metrics`; without it the

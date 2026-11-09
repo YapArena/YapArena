@@ -41,6 +41,29 @@ export function onStakeWindows(
   });
 }
 
+/** Tells the page the panel's latest window read failed. */
+export function reportStakeWindowsFailure(debateId: string) {
+  window.dispatchEvent(
+    new CustomEvent("yap:stake-windows-failed", { detail: { debateId } }),
+  );
+}
+
+/**
+ * Calls `listener` with true when a window read for this debate fails, and
+ * false when the next one arrives.
+ */
+export function onStakeWindowsStale(
+  debateId: string,
+  listener: (stale: boolean) => void,
+) {
+  window.addEventListener("yap:stake-windows-failed", (event) => {
+    if (event.detail.debateId === debateId) listener(true);
+  });
+  window.addEventListener("yap:stake-windows", (event) => {
+    if (event.detail.debateId === debateId) listener(false);
+  });
+}
+
 /** Sends this viewer's own limits to the page and keeps them for later modules. */
 export function shareStakeRounds(detail: StakeRounds) {
   window.yapStakeRounds = detail;
