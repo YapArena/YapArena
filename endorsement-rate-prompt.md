@@ -167,11 +167,23 @@ approves the plan.
 | Outline correlation API (no frontend consumer)                        | `src/features/outline/repository.ts:618-707`                                                                                                                | **Quantity-weighted** share of settled windows, null below 5 commitments                                                                                                                                       |
 
 Per-debate and per-turn results are "each debate's own result" in the spec's sense and stay.
-The plan must say, surface by surface, what changes. The specification says the bar appears only
-on debate pages, and that the topic figure is shown with its label, account count, last debate
-date and each debate's result. It does not say on which page that topic figure appears, or
-whether the topic page chart becomes a history of the new figure (one point per reveal, the
-figure "at time T"). Treat that as a decision.
+The plan must say, surface by surface, what changes. Two points are decided (founder,
+2026-11-12):
+
+- **The topic figure goes on the topic page.** This is the topic-wide rate ("Of 3,491 accounts,
+  47% last answered YES …"), shown with its label, the account count, the date of the last
+  debate and each debate's own result. The debate bar is a different, per-debate number and
+  stays on debate pages only.
+- **The topic page chart becomes the history of the topic figure.** It replaces the current
+  "Endorsement history" chart, which draws bot simulation data. It has one point per revealed
+  round (turn window): the topic figure recomputed with the last-answer method through that
+  round. Each point counts every account's last answer in all rounds of the topic revealed up to
+  and including that round.
+
+In five-day debates every round of a debate reveals at the same 120-hour close. Those rounds
+still give one point each, ordered by turn number, so a debate adds as many points as it has
+revealed turns. Say how the chart's existing 1D/1W/1M ranges and the Endorsement/Price switch
+apply to this series. The Price view has no counterpart in the new figure.
 
 ### Data model: what fits
 
@@ -212,11 +224,10 @@ figure "at time T"). Treat that as a decision.
    (`users.account_status`) and retired accounts (an `account_subjects` row with no user).
 5. **Ties on `created_at`.** Give a deterministic tie-break (for example turn number, then
    round id).
-6. **Corrections after reveal do not exist.** Settled rounds cannot be updated (guard raises once
-   `state<>'open'`), orders are immutable, and the only correction mechanism is account-level
-   (`coin_sandbox_requests.kind='correction'`, `coin_sandbox_reports`). F16 promises "visible
-   append-only correction note, recomputed combined figure". Spec step 4 needs a new insert-only
-   table (or a deferred phase), and the plan must say which.
+6. **Spec step 4 means recomputation, not a corrections mechanism (founder, 2026-11-12).** It
+   means that when a round or a debate's results are revealed, the topic figure is recomputed
+   with the last-answer method and a new point is added to the chart. No correction table or
+   workflow is in scope. Settled rounds and orders stay immutable as they are today.
 7. **Indexes.** `coin_debate_orders` has only its PK `(round_id,user_id)` and `request_id`
    unique. Rounds have `coin_debate_turn_window(debate_id,turn_number)`. A topic-wide query
    (topic → debates → rounds → orders, `DISTINCT ON (user_id) … ORDER BY created_at DESC`) and
@@ -226,9 +237,10 @@ figure "at time T"). Treat that as a decision.
    chunked and the final chunk sets `revealed_at` (`debate-sandbox.ts:908-926`), run by the
    worker `tick()` every second. Compare (a) computing on read with a short shared read, and
    (b) appending an insert-only snapshot row per topic and per debate when a round settles
-   (which also gives the "at time T" history and "change since previous turn" cheaply). In
-   five-day debates every round of a debate reveals at the same 120-hour close, so the topic
-   figure moves once per debate.
+   (which also gives the per-round chart history and "change since previous turn" cheaply). In
+   five-day debates every round of a debate reveals at the same 120-hour close, so many chart
+   points appear at once. Settlement runs round by round in separate transactions, so a reader
+   may briefly see only some of a debate's rounds revealed; say how the history stays consistent.
 
 ### Precondition: one question per topic
 
@@ -331,8 +343,8 @@ always NO. The plan must make this hold everywhere:
 ### Switching statistics
 
 - Per-debate stats (switchers and direction) are needed for the bar's card. Topic-level stats
-  have no stated location; propose one (the topic page next to the figure is the obvious
-  candidate) as a decision.
+  have no stated location. Since the topic figure is on the topic page, propose showing them
+  next to it, as a decision.
 - "Within one debate" means between turns of the same debate (never within a turn, because of
   the PK). "Between debates" means consecutive answers in different debates of the topic.
 - All of it is computed from revealed, settled rounds only, with the same exclusions as the figure.
@@ -367,21 +379,33 @@ always NO. The plan must make this hold everywhere:
 
 1. **Baseline**: branch, `origin/main` commit, and anything that changed since `c8fc7a8`.
 2. **Decisions for the founder**: each conflict or open choice above, with options, repo facts
-   and a recommended default. Over-capacity answers, side A = YES and the bar's placement are
-   already decided; do not reopen them. At least: which surfaces change; the topic page chart;
-   how existing topics are brought in line with side A = YES; proposition lock (existing debates, database
-   enforcement); corrections table now or later; demo, suspended and retired accounts; compute-on-read vs snapshots; delivery path; the About card bar; where topic
-   switching statistics appear.
+   and a recommended default. Already decided, do not reopen:
+   - over-capacity answers count;
+   - side A = YES;
+   - the bar's placement;
+   - step 4 is recomputation only;
+   - the topic figure and its per-round history chart go on the topic page.
+
+   Still to decide, at least:
+   - the other surfaces (home cards, About card bar, bot history chart);
+   - how existing topics are brought in line with side A = YES;
+   - the proposition lock (existing debates, database enforcement);
+   - demo, suspended and retired accounts;
+   - compute-on-read vs snapshots;
+   - the delivery path;
+   - where topic switching statistics appear.
+
 3. **Server design**: SQL for the topic figure at time T, the debate figure through turn N, and
    the switching statistics. Give types in `src/features/...`, the module and repository
    function, the route and payload shape, caching, and revealed-only guarantees.
-4. **Schema**: new migrations (indexes, optional snapshot and correction tables, proposition
-   lock), grants for `yaparena_runtime`, insert-only triggers, and rollout order.
+4. **Schema**: new migrations (indexes, an optional snapshot table, proposition lock), grants for `yaparena_runtime`, insert-only triggers, and rollout order.
 5. **Frontend design**: markup in `debate-web.ts`, CSS in `public/arena.css` (z-index, bottom
    edge conflicts, breakpoints, expanded mode, `hover:none`), a new strict TS module and its bus
    wiring, accessibility, and the card's content and copy.
-6. **Topic page**: what replaces or joins the "Endorsement history" section, the label text,
-   the account count, the last debate date and each debate's result.
+6. **Topic page**: the topic figure with its label text, account count, last debate date and
+   each debate's result. Also the history chart that replaces "Endorsement history": one point
+   per revealed round, with its data shape, tooltip copy, ranges and empty state (a topic with no
+   revealed round).
 7. **Proposition lock**: form, router, repository and validation changes, and copy.
 8. **Tests and verification**: per layer, and which evidence goes in the PR description.
 9. **PR breakdown**: small, ordered PRs with what each one ships and depends on, including the
