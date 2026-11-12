@@ -200,9 +200,10 @@ figure "at time T"). Treat that as a decision.
    `settled` and `void` (`1792426006100:22-23`; void sets it at `debate-sandbox.ts:1070-1071`).
    "Revealed" must mean `state='settled' AND revealed_at <= T`, as `publicWindows` does
    (`debate-sandbox.ts:1972-1973`).
-2. **Over-capacity orders.** Orders left out of pricing are listed in `result.overCapacity`
-   (`debate-sandbox.ts:670-693`, :921) but stay in the table. Decide whether the figure follows
-   the settlement snapshot (excludes them) or the raw table.
+2. **Over-capacity orders count (founder, 2026-11-12).** Orders left out of a turn's pricing
+   are listed in `result.overCapacity` (`debate-sandbox.ts:670-693`, :921) but stay in the
+   table. They count in the topic figure and in the debate bar, so read the raw table, not the
+   settlement snapshot. Settlement itself is unchanged.
 3. **Rail.** Rounds carry `rail` ('simulation' or 'base-sepolia') and `publicWindows` filters
    by it (`r.rail=$2`). The figure must filter by the same rail.
 4. **Publication and demo.** Public reads require `debates.publication_state='published'` and
@@ -241,24 +242,33 @@ figure "at time T"). Treat that as a decision.
   prevents it.
 - Schema limits differ: `topics.title varchar(140)`, `debates.proposition varchar(240)`,
   router minimum 10 characters.
-- The exclusion rule needs a comparison. Choose between: current `topics.title` (a later title
-  edit would drop the whole history), the round's stored proposition, or a new stored flag set
-  when the debate is created. Check whether topic titles can be edited and how.
+- Exclusion rule: count a debate only when its proposition equals its topic's title. No code
+  edits a topic's title today: the only `UPDATE topics` statements change `category`
+  (`src/features/matching/topic-category.ts:49`) and `publication_state`
+  (`src/features/matching/repository.ts:700`). A direct comparison with `topics.title` is
+  therefore enough. If title editing is ever added, it must not silently drop a topic's history.
 - Locking means changing both forms, router validation, `match_requests` handling and the
   matching repository. Say whether a database constraint should enforce it, and how existing
   debates and open match requests with a different proposition are treated.
 
-### Polarity: YES = side A
+### Polarity: side A is always YES (founder, 2026-11-12)
 
-- There is no column mapping YES to side A. YES endorses the proposition
+The founder decided that side A is always the YES answer to the topic's question, and side B
+always NO. The plan must make this hold everywhere:
+
+- There is no column mapping YES to side A today. YES endorses the proposition
   (`docs/a4-mechanism.md:72-73`).
-- Decision 0013 says "side A is not the yes side": speakers are named by their side label and
-  never coloured by answer (`docs/decisions/0013-yap-coins-always-on-and-debate-staking.md:46-48`).
-  The spec's label "47% last answered YES ([side A label])" and the card's "side A label and %"
-  assume side A's label is the YES answer to the topic title. The plan needs a decision record
-  amending 0013 on this point. It must check that existing topics' `side_a_label` reads as the
-  YES side of their title, and say how new topics are kept that way (topic creation form and
-  validation).
+- Decision 0013 says "side A is not the yes side" (speakers are named by side label and never
+  coloured by answer; `docs/decisions/0013-yap-coins-always-on-and-debate-staking.md:46-48`).
+  The new decision record amends that line.
+- Topic creation asks for a "Question", then free "Side A" and "Side B" labels, with nothing
+  saying side A is the yes side (form in `src/features/discovery/web.ts:353`, validation
+  `src/features/matching/router.ts:50-90`: labels 2-80 characters and different). Plan the
+  form copy (and any validation) so side A is entered as the YES answer.
+- Audit existing topics, where `side_a_label` may not read as the YES answer to the title. Say
+  how mismatched topics are found and fixed, or excluded, without silently changing records.
+- The stake panel's question ("Do you agree?" with green Yes / red No) and the speakers' side
+  labels must stay consistent with this mapping on the debate page.
 
 ### Delivery to the debate page
 
@@ -286,11 +296,14 @@ figure "at time T"). Treat that as a decision.
 
 ### The bar on the video panel
 
+- Placement is decided (founder, 2026-11-12): a slim bar overlaid on the video itself, along
+  its very bottom edge, full width. It is not a strip under the video.
 - Panel: `.arena-video-surface[data-arena-video]` inside `.arena-video-slot`
   (`src/features/discovery/debate-web.ts:150-158`). It is `position:relative; overflow:hidden`
   (`public/arena.css:1128`), so an absolutely positioned child stays inside the rounded panel
   and does not change the 960 px+ `--stage-rest` height calculation (`arena.css:3265-3276`).
-- Things already at the bottom edge:
+- Things that also sit near the bottom edge. They are stacking details for the plan to solve,
+  not reasons to move the bar:
   - replay `<video controls>`, whose native controls draw along the bottom (:155);
   - `.arena-frame-tag` at bottom-left of each half, shown on hover (`arena.css:1219`, :1253);
   - from 1200 px, chat overlaid bottom-right (`arena.css:3321-3343`, z-index 4, shadow 3);
@@ -354,10 +367,10 @@ figure "at time T"). Treat that as a decision.
 
 1. **Baseline**: branch, `origin/main` commit, and anything that changed since `c8fc7a8`.
 2. **Decisions for the founder**: each conflict or open choice above, with options, repo facts
-   and a recommended default. At least: which surfaces change; the topic page chart; polarity
-   and Decision 0013; proposition lock (comparison rule, existing debates, database
-   enforcement); corrections table now or later; over-capacity, demo, suspended and retired
-   accounts; compute-on-read vs snapshots; delivery path; the About card bar; where topic
+   and a recommended default. Over-capacity answers, side A = YES and the bar's placement are
+   already decided; do not reopen them. At least: which surfaces change; the topic page chart;
+   how existing topics are brought in line with side A = YES; proposition lock (existing debates, database
+   enforcement); corrections table now or later; demo, suspended and retired accounts; compute-on-read vs snapshots; delivery path; the About card bar; where topic
    switching statistics appear.
 3. **Server design**: SQL for the topic figure at time T, the debate figure through turn N, and
    the switching statistics. Give types in `src/features/...`, the module and repository
