@@ -19,6 +19,7 @@ export function createRuntime({
   app,
   a4,
   coinDebates,
+  endorsement,
   coinTreasury,
   transcription,
   database,
@@ -50,6 +51,9 @@ export function createRuntime({
   app?: Express;
   a4?: { tick(): Promise<void> };
   coinDebates?: { tick(): Promise<unknown> };
+  // Decision 0015: stores the endorsement figure after each reveal, beside
+  // the coin loop and never inside settlement.
+  endorsement?: { record(): Promise<unknown> };
   // Founder D1: warns when a Yap Coins treasury runs low, once a minute.
   coinTreasury?: { check(): Promise<unknown> };
   // Decision 0012: transcriber warm-up dispatch and transcript retention.
@@ -311,19 +315,26 @@ export function createRuntime({
           }, 1000);
           if (app) speakerTimer.unref();
         }
-        if (a4 || coinDebates) {
+        if (a4 || coinDebates || endorsement) {
           tickingJobs.push("a4-recovery");
           a4Timer = setIntervalFn(() => {
             if (a4Ticking || stopping) return a4Task;
             a4Ticking = true;
-            a4Task = Promise.allSettled([a4?.tick(), coinDebates?.tick()])
+            a4Task = Promise.allSettled([
+              a4?.tick(),
+              coinDebates?.tick(),
+              endorsement?.record(),
+            ])
               .then((results) => {
-                for (const result of results)
+                results.forEach((result, index) => {
                   if (result.status === "rejected")
                     logger.error(
                       { error: result.reason },
-                      "A4 recovery tick failed",
+                      index === 2
+                        ? "endorsement recorder failed"
+                        : "A4 recovery tick failed",
                     );
+                });
               })
               .finally(() => {
                 a4Ticking = false;
