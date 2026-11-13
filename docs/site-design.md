@@ -99,7 +99,7 @@ same stylesheet for its topic cards.
   With the queue on, each side has a "Queue for this side" button described by the side's name;
   a side you queued for lights up and its button turns white.
   Once it has shared rounds, its endorsement history follows its debates
-  ([Topic history](#topic-history)).
+  ([Topic history](#topic-history)); the last-answer figure will replace it.
 - **Profile**: the avatar in a 96 px slot (72 on phones) beside the name, @handle, bio and Follow.
 - **Empty lists** show the emblem, today's words and Clear search; inside a topic or profile, a
   quieter note without the emblem.
@@ -165,6 +165,27 @@ the home's idea model (`publicHomepage()`), geometry (`homepage-chart.ts`) and i
 dotted guides, five dates, a square end pixel that pulses; hover, a tap or the keyboard shows a
 square marker with "Oct 19 55%". Endorsement or Price, 1D, 1W or 1M. It shows the history the page
 was served, and a topic without rounds shows no chart.
+
+Planned ([Decision 0015](decisions/0015-last-answer-endorsement.md), pull request 4): the shared
+simulation chart gives way to the topic's last-answer figure, read from stored
+`endorsement_points`.
+
+- **Where viewers ended up** (kicker "Last answers"), above Debates: "Of **3,491** accounts,
+  **47%** last answered YES (**People first**). Not a vote, a price or a forecast." and "Last
+  debate: Nov 12, 2026 · 14 debates counted" (the live end date of the debate behind the latest
+  point). A topic reviewed as "side A is not yes" reads "…last answered Yes." with no side label.
+- **Debate cards** of counted debates get one line: "Final: 52% Yes · 140 accounts".
+- **How answers changed**, under the figure: accounts that answered more than once, the share
+  that changed answer (kept the new side or came back), changes per answer pair within and between
+  debates, and the share of changes toward Yes.
+- **History chart:** the same line, guides, end pixel and inspection as today, with one point per
+  revealed turn placed by its order (five-day points share a reveal time), dates of the points
+  under the line, and a ±3 point margin. All (default), 1D, 1W and 1M count back from the latest
+  point and keep at least the latest debate's points; the Endorsement/Price switch goes. The
+  tooltip reads "Nov 12 · Turn 4 · {debate}" over "**47%** Yes · 3,491 accounts"; the meta line
+  says each point counts every account's last answer once a turn is revealed, and the change since
+  the first point in range. Without points the section keeps a line saying the figure starts with
+  a debate's first revealed turn, and that five-day debates reveal five days after they end.
 
 ## Live
 

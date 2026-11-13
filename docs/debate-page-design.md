@@ -94,6 +94,21 @@ sideways.
   empty if the turns have no places in the recording.
 - **Results by turn (replays, under the scoreboard; the Results tab elsewhere):** see Results
   below.
+- **Endorsement bar (planned, [Decision 0015](decisions/0015-last-answer-endorsement.md)):** the
+  debate's last-answer figure on the video's bottom edge, the surface's last child, on debates
+  with turn windows whose question is the topic title. A 6 px track (black at 55%, 1 px white top
+  edge at 16%) with a white fill at the Yes share, animating its width over 0.5 s (none under
+  reduced motion), clipped by the surface's rounded corners, at z-index 5: above the frames and
+  the overlay chat, below the chat and Enlarge buttons. Its hit area is 12 px tall, below the
+  overlay chat, and shrinks to 6 px while the replay's native controls show. It is a `role="meter"`
+  with a 2 px focus outline inset in the surface, always visible on touch, and stays on the
+  bottom edge in expanded mode. Hover, focus or a tap opens a card above it, kept inside the
+  surface: "Last answers in this debate", both sides' shares and counts, the accounts and the turn
+  it counts through, the change since the previous counted turn, how many accounts changed answer
+  (to Yes, to No, changed back) and "Not a vote, a price or a forecast."; Escape, blur, leaving or
+  a tap elsewhere closes it. Before a reveal it is empty and the card says when results come
+  (five days after the debate for five-day debates). It reads the `endorsement` block of the
+  window list and does not follow replay playback.
 - **Scoreboard:** two cards (48 px avatar, or "?" before a speaker is named; name, "@handle ·
   speaking / listening / next", the
   side pill, filled white while that side has the floor) and the turn clock between them, with
@@ -177,7 +192,8 @@ sideways.
   `frontend/stake-windows.ts`), on every width. Under 360 px the turn buttons take their own
   row at the top of the card, and the tabs' side padding narrows to 6 px so the four names fit.
 - **About:** "About this debate" with the latest result, then the event, moderation and site
-  links (Topics, Yap Coins, About YAP Arena).
+  links (Topics, Yap Coins, About YAP Arena). The latest result bar goes when the endorsement bar
+  ships (Decision 0015, D2).
 - **Chat as a tab (< 1200 px, or a smaller video):** the panel grows to at least 26rem while Chat is open (the rail scrolls on short screens). The connection pill and a 44 px "⋯" menu (like, copy link, check
   chat now, QR code, overlay, report), which ends just above the composer, measured as it opens. Messages are 14/20 with the author in bold, coloured from
   the visit's five landing colours (`pickHeadlineColors()`) by a stable hash of the name. Time and
