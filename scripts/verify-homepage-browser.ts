@@ -4,10 +4,8 @@ import type {
   PublicTopic,
   PublicDebate,
 } from "../src/features/discovery/public-types.ts";
-import type {
-  PublicBotActivity,
-  PublicBotRound,
-} from "../src/features/a4/public-bot-types.ts";
+import type { EndorsementHistoryPoint } from "../src/features/endorsement/types.ts";
+import type { TopicEndorsementView } from "../src/features/endorsement/topic-page.ts";
 import type { WaitingTopic } from "../src/features/discovery/home-list-model.ts";
 /* global document, window, getComputedStyle */
 import assert from "node:assert/strict";
@@ -35,7 +33,6 @@ type FixtureServices =
   | "media"
   | "mediaProvider"
   | "messages"
-  | "publicBots"
   | "users"
   | "sessions";
 type HomepageFixtureOptions = Omit<ApplicationOptions, FixtureServices> & {
@@ -59,7 +56,6 @@ type HomepageFixtureOptions = Omit<ApplicationOptions, FixtureServices> & {
     "publicUrl" | "playbackOrigin" | "playbackOrigins"
   >;
   messages: Pick<ApplicationOptions["messages"], "isReady">;
-  publicBots: Pick<NonNullable<ApplicationOptions["publicBots"]>, "topics">;
   sessions: Pick<ApplicationOptions["sessions"], "findUserByTokenHash">;
 };
 type CreateHomepageFixtureApp = (
@@ -184,45 +180,60 @@ const scenarios = {
 };
 let scenario: keyof typeof scenarios = "busy";
 const visible = () => scenarios[scenario];
-// A day of shared, labelled rounds for the topic page's chart.
-const round = (index: number): PublicBotRound => ({
-  id: `round-${index}`,
-  runId: null,
-  debateId: answerable.id,
-  debateSlug: answerable.slug,
-  number: index,
-  period: 1,
-  settledAt: new Date(started - (40 - index) * 0.5 * HOUR).toISOString(),
-  closesAt: new Date(started - (40 - index) * 0.5 * HOUR).toISOString(),
-  mode: "seed",
-  share: { n: String(50 + Math.round(10 * Math.sin(index / 4))), d: "100" },
-  offer: { n: String(40 + (index % 7)), d: "100" },
-  medianNo: null,
-  medianYes: null,
-  branch: null,
-  argumentLabel: "Opening case",
-  ownLimit: null,
-  humans: 2,
-  bots: 498,
-  executed: 120,
-  premium: "2500000000",
-  quantity: "500",
-});
-const activity: PublicBotActivity = {
-  scope: "shared",
-  synthetic: true,
-  revision: "fixture",
-  hasMore: false,
-  window: 30,
-  items: Array.from({ length: 40 }, (_, index) => round(index)),
-  arguments: [],
-  category: "Ideas",
-  totals: {
-    premium: "1",
-    humanCommitments: 1,
-    botCommitments: 1,
-    executed: 1,
+// Decision 0015: twelve revealed turns of two debates for the topic page's
+// last-answer figure and its history, the last four revealed together.
+const switching = {
+  multiAnswerAccounts: 412,
+  switchers: 74,
+  stayed: 49,
+  cameBack: 25,
+  pairs: { within: 300, between: 200 },
+  switches: { within: 12, between: 18 },
+  toYes: 18,
+  toNo: 12,
+};
+const point = (index: number): EndorsementHistoryPoint => {
+  const late = index >= 8;
+  const accounts = 100 + index * 40;
+  return {
+    id: String(index + 1),
+    // The earlier debate's turns end two days before the latest reveal.
+    revealedAt: new Date(
+      started - (late ? 1 : 48 + (7 - index) * 3) * HOUR,
+    ).toISOString(),
+    turnNumber: late ? index - 7 : index + 1,
+    debate: late
+      ? { slug: answerable.slug, title: answerable.proposition }
+      : { slug: "earlier-debate", title: "An earlier debate on this idea" },
+    yes: Math.round(accounts * (0.5 + 0.08 * Math.sin(index / 2))),
+    accounts,
+  };
+};
+const history = Array.from({ length: 12 }, (_, index) => point(index));
+const endorsement: TopicEndorsementView = {
+  figure: {
+    yes: history.at(-1)!.yes,
+    accounts: history.at(-1)!.accounts,
+    switching,
+    revealedAt: history.at(-1)!.revealedAt,
+    lastDebate: {
+      slug: answerable.slug,
+      title: answerable.proposition,
+      liveEndedAt: new Date(started - 2 * HOUR).toISOString(),
+    },
+    debatesCounted: 2,
   },
+  history,
+  debates: [
+    {
+      debateId: answerable.id,
+      throughTurn: 4,
+      yes: 52,
+      accounts: 140,
+      switching,
+    },
+  ],
+  sideAIsYes: true,
 };
 const list = <T>(items: T[]) => ({
   items,
@@ -334,14 +345,12 @@ app.use(
       playbackOrigins: ["https://media.example.test"],
     },
     messages: { isReady: async () => {} },
-    publicBots: {
-      topics: async (ids) =>
-        Object.fromEntries(
-          ids.map((id) => [
-            id,
-            id === idea.id ? activity : { ...activity, items: [] },
-          ]),
-        ),
+    // The idea has revealed turns; the other topic has none yet.
+    topicEndorsement: {
+      topic: async (id) =>
+        id === idea.id
+          ? endorsement
+          : { figure: null, history: [], debates: [], sideAIsYes: true },
     },
     sessions: { findUserByTokenHash: async () => null },
     logger: createLogger({ enabled: false }),
@@ -657,77 +666,103 @@ try {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   checks.reducedMotion = true;
 
-  // The chart moved to the topic page, with the home's inspection.
+  // Decision 0015: the topic page's last-answer figure and its history after
+  // each revealed turn, inspected like the home's chart.
   async function openTopic(target: Page) {
     await target.goto(`${base}/topics/${idea.slug}`);
     await target.locator("#ya-chart .ya-linepath").waitFor();
   }
   await openTopic(page);
+  assert.match(
+    (await page.locator(".topic-figure-lead").textContent())!,
+    /^Of [\d,]+ accounts, \d+% last answered Yes \(.+\)\.$/,
+  );
+  assert.match(
+    (await page.locator(".topic-changes").textContent())!,
+    /412 accounts answered more than once/,
+  );
+  assert.equal(await page.locator(".dcard-final").count(), 1);
   assert.equal(
-    await page.locator("#ya-chart").getAttribute("data-latest-round"),
-    "round-39",
+    await page.locator("#ya-chart").getAttribute("data-latest-point"),
+    "12",
   );
   const chart = page.locator("#ya-chart");
   await chart.scrollIntoViewIfNeeded();
   await page.waitForFunction(() =>
     document.querySelector("#ya-chart")!.classList.contains("is-drawing"),
   );
+  await page.waitForFunction(
+    () =>
+      !document.querySelector("#ya-chart")!.classList.contains("is-drawing"),
+  );
+  await page.screenshot({
+    path: `${directory}/topic-1440.png`,
+    fullPage: true,
+  });
   const rect = (await chart.boundingBox())!;
   const before = requests.length;
+  const latest = await page.locator("#ya-legend").textContent();
+  // The marker snaps to the nearest point: the fifth of twelve at 37%.
   await chart.hover({ position: { x: rect.width * 0.37, y: 70 } });
   await page.waitForFunction(() =>
     document.querySelector("#ya-chart")!.classList.contains("is-scrubbing"),
   );
-  const state = await chart.evaluate((n) => ({
-    x: Number(n.querySelector("[data-chart-clip]")!.getAttribute("width")),
-    width: n.getBoundingClientRect().width,
-  }));
-  assert.ok(Math.abs(state.x - state.width * 0.37) < 1);
   assert.match(
     (await page.locator("#ya-chart-tooltip").textContent())!,
-    /^[A-Z][a-z]{2} \d{1,2} \d+%$/,
+    /^[A-Z][a-z]{2} \d{1,2} · Turn 5 · An earlier debate on this idea\d+% Yes · [\d,]+ accounts$/,
   );
   assert.match(
     (await page.locator("#ya-metric-label").textContent())!,
-    / · \d\d:\d\d · Endorsement$/,
+    /^[A-Z][a-z]{2} \d{1,2} · Turn 5 · /,
   );
+  assert.notEqual(await page.locator("#ya-legend").textContent(), latest);
+  await page.locator(".topic-history").screenshot({
+    path: `${directory}/topic-inspect-1440.png`,
+  });
   assert.equal(requests.length, before);
   await page.mouse.move(0, 0);
   await page.waitForFunction(
     () =>
       !document.querySelector("#ya-chart")!.classList.contains("is-scrubbing"),
   );
-  const latest = await page.locator("#ya-legend").textContent();
+  assert.equal(await page.locator("#ya-legend").textContent(), latest);
   const slider = page.getByRole("slider", {
-    name: "Explore trending idea chart history",
+    name: "Explore the topic figure's history",
   });
   await slider.focus();
   await slider.press("ArrowLeft");
   assert.match(
     (await slider.getAttribute("aria-valuetext"))!,
-    /\d+% endorsement$/,
+    /· Turn 3 · .+: \d+% Yes · [\d,]+ accounts$/,
   );
   await slider.press("Escape");
   assert.equal(await page.locator("#ya-legend").textContent(), latest);
-  await page.getByRole("button", { name: "Price" }).click();
+  assert.equal(await page.getByRole("button", { name: "Price" }).count(), 0);
+  // 1D keeps the latest debate's four points, revealed together.
+  await page.getByRole("button", { name: "1D", exact: true }).click();
   assert.equal(
     await page
-      .getByRole("button", { name: "Price" })
+      .getByRole("button", { name: "All", exact: true })
       .getAttribute("aria-pressed"),
-    "true",
-  );
-  assert.match((await page.locator("#ya-legend").textContent())!, /YC$/);
-  await page.getByRole("button", { name: "1W" }).click();
-  assert.equal(
-    await page.getByRole("button", { name: "1D" }).getAttribute("aria-pressed"),
     "false",
   );
+  await slider.focus();
+  assert.equal(await slider.getAttribute("max"), "3");
+  await slider.press("Escape");
   await axeCheck(page);
   assert.deepEqual(violations, []);
-  // A topic without rounds shows no chart.
+  // A topic without revealed turns says when its figure starts; no chart.
   await page.goto(`${base}/topics/${work.slug}`);
   assert.equal(await page.locator("[data-topic-history]").count(), 0);
-  checks.topicPageChartPointerKeyboardAndControls = true;
+  assert.match(
+    (await page.locator("[data-topic-endorsement]").textContent())!,
+    /The figure starts when a debate's first turn is revealed/,
+  );
+  await page.screenshot({
+    path: `${directory}/topic-empty-1440.png`,
+    fullPage: true,
+  });
+  checks.topicPageFigureChartPointerKeyboardAndRanges = true;
 
   const touchContext = await newContext({
     viewport: { width: 390, height: 844 },
@@ -763,6 +798,25 @@ try {
     path: `${directory}/topic-390.png`,
     fullPage: true,
   });
+  await phone.goto(`${base}/topics/${work.slug}`);
+  assert.ok(await noOverflow(phone));
+  await phone.screenshot({
+    path: `${directory}/topic-empty-390.png`,
+    fullPage: true,
+  });
+  await phone.setViewportSize({ width: 768, height: 1024 });
+  await openTopic(phone);
+  assert.ok(await noOverflow(phone));
+  await phone.screenshot({
+    path: `${directory}/topic-768.png`,
+    fullPage: true,
+  });
+  await phone.goto(`${base}/topics/${work.slug}`);
+  await phone.screenshot({
+    path: `${directory}/topic-empty-768.png`,
+    fullPage: true,
+  });
+  await phone.setViewportSize({ width: 390, height: 844 });
   await openHome(phone, "busy");
   assert.ok(await noOverflow(phone));
   await touchContext.close();

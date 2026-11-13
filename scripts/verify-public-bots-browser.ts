@@ -44,8 +44,9 @@ export async function verifyPublicBotsBrowser({
     reducedMotion: "reduce",
     bypassCSP: false,
   });
-  // The topic page shows the topic's shared history, the chart the home used
-  // to show (first-run plan PR 6).
+  // The topic page lists the debate; the shared bot history shows on the
+  // debate page only (Decision 0015, D3: the topic page shows the last-answer
+  // figure instead).
   const home = await isolated.newPage(),
     watch = await isolated.newPage(),
     errors: string[] = [],
@@ -168,9 +169,9 @@ export async function verifyPublicBotsBrowser({
       await watch.locator("[data-shared-argument-list] article").count(),
       6,
     );
-    assert.match(
-      (await home.locator("#ya-metric-label").textContent())!,
-      /Synthetic/,
+    assert.doesNotMatch(
+      (await home.locator("main").textContent())!,
+      /Shared simulation|Synthetic bots/,
     );
     assert.equal(
       await home.locator('[data-site-header] nav a[href="/live"]').count(),
@@ -192,23 +193,8 @@ export async function verifyPublicBotsBrowser({
         .getAttribute("data-measure-topic"),
       topic,
     );
-    assert.ok(
-      await home.locator("#ya-chart").getAttribute("data-latest-round"),
-    );
-    checks.databaseBackedTopicHistoryAndDebateArguments = true;
-    // The topic page draws the history it was served; a settled round shows
-    // there on the next visit, and on the debate page without one.
-    async function showsRound(id: string) {
-      await home.bringToFront();
-      await home.goto(topicPath);
-      await home.waitForFunction(
-        (id) =>
-          document.querySelector<SVGSVGElement>("#ya-chart")?.dataset
-            .latestRound === id,
-        id,
-        { timeout: 20000 },
-      );
-    }
+    checks.databaseBackedTopicListingAndDebateArguments = true;
+    // A settled round shows on the debate page without a reload.
     async function round(mode: "mixed" | "observer", label: string) {
       const created = await api<{ id: string }>("a4/runs", {
         debateId: debate,
@@ -246,11 +232,6 @@ export async function verifyPublicBotsBrowser({
       assert.equal(latest.humans, mode === "mixed" ? 1 : 0);
       assert.equal(latest.ownLimit, null);
       assert.equal(latest.runId, null);
-      await showsRound(id);
-      assert.match(
-        (await home.locator("#ya-metric-label").textContent())!,
-        /Synthetic/,
-      );
       await watch.bringToFront();
       assert.equal(await watch.evaluate(() => document.hidden), false);
       await watch.locator(`[data-chart-round="${id}"]`).waitFor();
@@ -258,7 +239,7 @@ export async function verifyPublicBotsBrowser({
     }
     const observer = await round("observer", "Observer argument follow-up");
     const mixed = await round("mixed", "Mixed-round cost analysis");
-    checks.observerAndMixedSettlementReachTopicHistoryAndDebate = true;
+    checks.observerAndMixedSettlementReachDebate = true;
     checks.pendingPrivacyAndAggregateOnlyPublication = true;
     await watch.locator(`[data-chart-round="${observer}"]`).focus();
     await watch.keyboard.press("Enter");
@@ -275,10 +256,10 @@ export async function verifyPublicBotsBrowser({
     );
     checks.debatePageShowsSharedHistoryOnly = true;
     await home.screenshot({
-      path: artifactDir + "/topic-history.png",
+      path: artifactDir + "/topic-page.png",
       fullPage: true,
     });
-    shots.push("topic-history.png");
+    shots.push("topic-page.png");
     await watch.screenshot({
       path: artifactDir + "/debate-shared.png",
       fullPage: true,
@@ -365,7 +346,12 @@ export async function verifyPublicBotsBrowser({
         .length,
       36,
     );
-    await showsRound(seedIds.at(-1)!);
+    assert.equal(
+      (
+        await api<PublicBotActivity>(`public/debates/${debate}/activity`)
+      ).items.at(-1)!.id,
+      seedIds.at(-1)!,
+    );
     checks.consentWithdrawalRemovesPersonalRoundsEverywhere = true;
     await home.setViewportSize({ width: 1440, height: 1100 });
     await home.locator('[data-site-header] nav a[href="/live"]').click();
@@ -411,10 +397,7 @@ export async function verifyPublicBotsBrowser({
           topic: await home.evaluate(() => ({
             hidden: document.hidden,
             path: window.location.pathname,
-            history: Boolean(document.querySelector("[data-topic-history]")),
-            latestRound:
-              document.querySelector<SVGSVGElement>("#ya-chart")?.dataset
-                .latestRound,
+            figure: Boolean(document.querySelector("[data-topic-endorsement]")),
           })),
         },
         null,

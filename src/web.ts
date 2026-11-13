@@ -4,6 +4,7 @@ import { createSandboxWebhookRouter } from "./features/account-wallet/sandbox-we
 import { createSandboxErrorReports } from "./features/account-wallet/sandbox-reports.ts";
 import { createAccountWallet } from "./features/account-wallet/repository.ts";
 import { createPublicBotRepository } from "./features/a4/public-bots.ts";
+import { createTopicEndorsementReader } from "./features/endorsement/topic-page.ts";
 import { createApp } from "./app.ts";
 import { createMessageRepository } from "./features/messages/repository.ts";
 import { createDiscoveryRepository } from "./features/discovery/repository.ts";
@@ -170,6 +171,11 @@ export function createWebServer(
     jobHeartbeat: createJobHeartbeat(database),
     a4,
     publicBots: createPublicBotRepository(database),
+    // Decision 0015: topic pages read the stored last-answer points, on the
+    // coin loop's rail.
+    topicEndorsement: coinDebates
+      ? createTopicEndorsementReader(database, "simulation")
+      : undefined,
     discovery: createDiscoveryRepository(database),
     identity,
     matching,

@@ -1,9 +1,8 @@
 import { publicHomepage } from "./homepage-model.ts";
 import { emptyHomeList, homeList } from "./home-list-model.ts";
-import { topicHistory } from "./topic-history-web.ts";
 import { avatarAsset } from "./assets.ts";
 import type { createPublicBotRepository } from "../a4/public-bots.ts";
-import type { PublicBotActivity } from "../a4/public-bot-types.ts";
+import type { TopicEndorsementView } from "../endorsement/topic-page.ts";
 import { digest } from "../a4/engine.ts";
 import { Router } from "express";
 import type { Request, Response } from "express";
@@ -150,6 +149,7 @@ export function createDiscoveryRouter({
   a4Enabled = false,
   mediaEnabled = false,
   publicBots,
+  topicEndorsement,
   applicationOrigin,
   emailFirst = false,
   liveOutline,
@@ -170,6 +170,9 @@ export function createDiscoveryRouter({
   // /home?reference=1 is not found either way (first-run plan PR 7 removes it).
   homepageReferenceEnabled?: boolean;
   publicBots?: ReturnType<typeof createPublicBotRepository>;
+  // Decision 0015: the topic page's last-answer figure, its history and each
+  // counted debate's final figure. Wired only when Yap Coins are on.
+  topicEndorsement?: { topic(topicId: string): Promise<TopicEndorsementView> };
   applicationOrigin: string;
   emailFirst?: boolean;
   // Live topic queue (Decision 0011): pages load the queue module and show its controls.
@@ -448,28 +451,21 @@ export function createDiscoveryRouter({
     if (!topic) return html(response, renderNotFound(origin), 404);
     const parameters = listParameters(request, response, invalid);
     if (!parameters) return;
-    // The topic's endorsement history is optional: without it, or when it
-    // cannot be read, the page shows its debates alone.
-    const noActivity: Record<string, PublicBotActivity> = {};
-    const [debates, activity] = await Promise.all([
+    // The topic's figure is optional: without Yap Coins, or when it cannot
+    // be read, the page shows its debates alone.
+    const [debates, endorsement] = await Promise.all([
       discovery.listDebates({
         topicSlug: key!,
         limit: parameters.limit,
         offset: parameters.offset,
       }),
-      publicBots
-        ? publicBots.topics([topic.id]).catch(() => noActivity)
-        : noActivity,
+      topicEndorsement
+        ? topicEndorsement.topic(topic.id).catch(() => null)
+        : null,
     ]);
     return html(
       response,
-      renderTopic(
-        origin,
-        topic,
-        debates,
-        matchmakingEnabled,
-        topicHistory(topic, activity[topic.id]),
-      ),
+      renderTopic(origin, topic, debates, matchmakingEnabled, endorsement),
     );
   });
   router.get("/debates/:slug", async (request, response) => {

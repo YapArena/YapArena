@@ -78,6 +78,57 @@ export function interpolate(points: number[], fraction: number): number | null {
   const i = Math.min(points.length - 2, Math.floor(at));
   return points[i]! + (points[i + 1]! - points[i]!) * (at - i);
 }
+/**
+ * Five dotted guides between the range's ends, labelled on the right when
+ * there is a line to read. Shared by the home's chart and the topic page's
+ * endorsement history (topic-endorsement-chart.ts).
+ */
+export function chartGuides(o: {
+  lo: number;
+  hi: number;
+  w: number;
+  left: number;
+  right: number;
+  y: (value: number) => number;
+  labelled: boolean;
+  label: (value: number) => string;
+}): SafeHtml[] {
+  return [0, 1, 2, 3, 4].map((k) => {
+    const v = o.lo + ((o.hi - o.lo) * k) / 4;
+    return html`<line class="ya-guide" x1="${o.left}" y1="${o.y(v)}" x2="${o.labelled ? o.w - o.right + 2 : o.w - o.left}" y2="${o.y(v)}"/>${o.labelled ? html`<text x="${o.w - o.right + 9}" y="${o.y(v) + 4}">${o.label(v)}</text>` : ""}`;
+  });
+}
+
+/**
+ * The line through the points, with the clip rectangle that hides it to the
+ * right of the pointer while scrubbing.
+ */
+export function chartLine(
+  points: readonly (readonly [number, number])[],
+  clip: string,
+  w: number,
+  h: number,
+): SafeHtml {
+  const path = points
+    .map(([px, py], i) => (i ? "L" : "M") + px + "," + py)
+    .join(" ");
+  return html`<clipPath id="${clip}"><rect data-chart-clip x="0" y="0" width="${w}" height="${h}"/></clipPath><path class="ya-linepath" pathLength="1" d="${path}" clip-path="url(#${clip})"/>`;
+}
+
+/**
+ * The line ends on a square pixel that pulses; the marker that follows the
+ * pointer is a square too, and a transparent rectangle takes the pointer.
+ */
+export function chartEnd(
+  x: number,
+  y: number,
+  box: { w: number; h: number; left: number; right: number },
+): SafeHtml {
+  const endX = x - 4,
+    endY = y - 4;
+  return html`<g class="ya-endpoint" aria-hidden="true"><rect class="ya-endpoint-pulse" x="${endX}" y="${endY}" width="8" height="8"/><rect x="${endX}" y="${endY}" width="8" height="8"/></g><g class="ya-hover-group" aria-hidden="true"><rect data-chart-hover-marker width="10" height="10"/></g><rect data-chart-hit x="${box.left}" y="0" width="${box.w - box.left - box.right}" height="${box.h}" fill="transparent"/>`;
+}
+
 export function chartGeometry(
   m: HomeIdea,
   metric: HomeMetric,
@@ -132,22 +183,26 @@ export function chartGeometry(
   const markup: SafeHtml[] = [
     html`<title>${points.length ? "Sample" : "Unavailable"} ${metric === "price" ? "YES execution prices, in Yap Coins" : "participant endorsement, in percent"}</title>`,
   ];
-  // Five dotted guides between the range's ends, labelled on the right when
-  // there is a line to read.
-  for (const k of [0, 1, 2, 3, 4]) {
-    const v = lo + ((hi - lo) * k) / 4;
-    markup.push(
-      html`<line class="ya-guide" x1="${left}" y1="${y(v)}" x2="${points.length ? w - right + 2 : w - left}" y2="${y(v)}"/>${points.length ? html`<text x="${w - right + 9}" y="${y(v) + 4}">${metric === "price" ? v.toFixed(2) : Math.round(v) + "%"}</text>` : ""}`,
-    );
-  }
+  markup.push(
+    ...chartGuides({
+      lo,
+      hi,
+      w,
+      left,
+      right,
+      y,
+      labelled: points.length > 0,
+      label: (v) => (metric === "price" ? v.toFixed(2) : Math.round(v) + "%"),
+    }),
+  );
   if (points.length) {
-    const path = points
-      .map((v, i) => (i ? "L" : "M") + x(i) + "," + y(v))
-      .join(" ");
-    const clip = detail ? "ya-detail-chart-clip" : "ya-chart-clip";
-    // The clip rectangle hides the line to the right of the pointer while scrubbing.
     markup.push(
-      html`<clipPath id="${clip}"><rect data-chart-clip x="0" y="0" width="${w}" height="${h}"/></clipPath><path class="ya-linepath" pathLength="1" d="${path}" clip-path="url(#${clip})"/>`,
+      chartLine(
+        points.map((v, i) => [x(i), y(v)]),
+        detail ? "ya-detail-chart-clip" : "ya-chart-clip",
+        w,
+        h,
+      ),
     );
     // Five dates under the line: the sample's own, or the rounds' times.
     const labels =
@@ -178,10 +233,13 @@ export function chartGeometry(
       });
     // The line ends on a square pixel that pulses; the marker that follows the
     // pointer is a square too.
-    const endX = x(points.length - 1) - 4,
-      endY = y(points.at(-1)!) - 4;
     markup.push(
-      html`<g class="ya-endpoint" aria-hidden="true"><rect class="ya-endpoint-pulse" x="${endX}" y="${endY}" width="8" height="8"/><rect x="${endX}" y="${endY}" width="8" height="8"/></g><g class="ya-hover-group" aria-hidden="true"><rect data-chart-hover-marker width="10" height="10"/></g><rect data-chart-hit x="${left}" y="0" width="${w - left - right}" height="${h}" fill="transparent"/>`,
+      chartEnd(x(points.length - 1), y(points.at(-1)!), {
+        w,
+        h,
+        left,
+        right,
+      }),
     );
   } else
     markup.push(

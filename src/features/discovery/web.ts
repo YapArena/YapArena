@@ -4,8 +4,12 @@ import {
   homeView,
   type HomeListData,
 } from "./home-list-model.ts";
-import type { HomeIdea } from "./homepage-model.ts";
-import { topicHistoryMarkup } from "./topic-history-web.ts";
+import {
+  debateFinalLine,
+  topicFigureMarkup,
+  topicHistoryMarkup,
+  type TopicEndorsementView,
+} from "./topic-endorsement-web.ts";
 import { accountMarkup } from "./account-web.ts";
 import {
   siteHeaderMarkup,
@@ -251,7 +255,7 @@ export function renderDebates(
   const moreCurrent = more.includes(status);
   const filters = html`<nav class="list-filters" aria-label="Debate status"><div class="chips">${chips}</div><details class="more-chip" data-menu><summary class="chip${moreCurrent ? " is-current" : ""}"><span class="sr-only">More statuses${moreCurrent ? ":" : ""}</span><span${moreCurrent ? "" : html` aria-hidden="true"`}>${moreCurrent ? label(status) : "More"}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></summary><div class="more-menu">${more.map((option) => html`<a${current(option)} href="${href(option)}">${label(option)}</a>`)}</div></details></nav>`;
   const base = `/debates${query || status !== "all" ? `?${new URLSearchParams({ ...(query ? { q: query } : {}), ...(status !== "all" ? { status } : {}) })}` : ""}`;
-  const content = html`${exploreSwitch("debates")}${pageHead("The debate floor", "Find your next", "good argument.", "Upcoming conversations and public debate archives, all in one place.")}<section class="container list-section" aria-labelledby="debates-results"><h2 class="sr-only" id="debates-results">Debates</h2><div class="list-tools">${listSearch("/debates", "debate-search", "Search debates", "Search propositions or topics", query)}${filters}</div>${list.items.length ? html`<div class="list-grid">${list.items.map(debateCard)}</div>` : emptyList("No debates found.", "Try another search or status filter. Only published debates appear here.", "/debates")}${pagination(base, list)}</section>`;
+  const content = html`${exploreSwitch("debates")}${pageHead("The debate floor", "Find your next", "good argument.", "Upcoming conversations and public debate archives, all in one place.")}<section class="container list-section" aria-labelledby="debates-results"><h2 class="sr-only" id="debates-results">Debates</h2><div class="list-tools">${listSearch("/debates", "debate-search", "Search debates", "Search propositions or topics", query)}${filters}</div>${list.items.length ? html`<div class="list-grid">${list.items.map((debate) => debateCard(debate))}</div>` : emptyList("No debates found.", "Try another search or status filter. Only published debates appear here.", "/debates")}${pagination(base, list)}</section>`;
   const canonical = `${origin}${listPath(base, list)}`;
   return layout(
     "Debates",
@@ -379,16 +383,22 @@ function sidesCard(topic: PublicTopic, matchmaking: boolean) {
   return html`<section class="card queue-card" data-queue-topic="${topic.slug}" aria-labelledby="queue-heading"><div class="queue-head"><p class="kicker">${inscription("Debate it live")}</p><h2 class="queue-title" id="queue-heading">${inscription("Take a side and get matched")}</h2><p class="queue-help">Pick your side. When someone queues on the other side, you both get 30 seconds to accept, then the debate starts.</p></div>${sides}<div class="queue-notes"><p data-queue-waiting aria-live="polite"></p><p data-queue-note role="status"></p></div></section>`;
 }
 
-// A topic: its question and both sides, its debates and, once it has rounds,
-// its endorsement history (the chart that used to sit on the home).
+// A topic: its question and both sides, where viewers ended up (Decision
+// 0015's last-answer figure, when Yap Coins are on), its debates with each
+// counted debate's final figure, and the figure's history once a turn is
+// revealed.
 export function renderTopic(
   origin: string,
   topic: PublicTopic,
   debates: PublicList<PublicDebate>,
   matchmaking = false,
-  history: HomeIdea | null = null,
+  endorsement: TopicEndorsementView | null = null,
 ) {
-  const content = html`<div class="container topic-hero" data-measure-topic="${topic.id}"><div class="topic-copy">${backLink("/topics", "All topics")}<p class="kicker">${inscription(`Topic${topic.isDemo ? " · Demo" : ""}`)}</p><h1 class="title-serif">${topic.title}</h1><p class="page-lead">${topic.summary}</p>${followButton("topics", topic.slug)}</div>${sidesCard(topic, matchmaking)}</div><section class="container page-section" aria-labelledby="topic-debates"><div class="section-head"><p class="kicker">${inscription("On this topic")}</p><h2 class="section-title" id="topic-debates">${inscription("Debates")}</h2></div>${debates.items.length ? html`<div class="list-grid">${debates.items.map(debateCard)}</div>` : quietState("No public debates on this topic yet.", matchmaking ? "Queue on a side to start the first one." : "")}${pagination(`/topics/${path(topic.slug)}`, debates)}</section>${history ? html`${topicHistoryMarkup(history)}<script type="module" src="${asset("topic-chart.js")}"></script>` : ""}`;
+  const finals = new Map(
+    endorsement?.debates.map((result) => [result.debateId, result]),
+  );
+  const history = endorsement ? topicHistoryMarkup(endorsement) : "";
+  const content = html`<div class="container topic-hero" data-measure-topic="${topic.id}"><div class="topic-copy">${backLink("/topics", "All topics")}<p class="kicker">${inscription(`Topic${topic.isDemo ? " · Demo" : ""}`)}</p><h1 class="title-serif">${topic.title}</h1><p class="page-lead">${topic.summary}</p>${followButton("topics", topic.slug)}</div>${sidesCard(topic, matchmaking)}</div>${endorsement ? topicFigureMarkup(topic, endorsement) : ""}<section class="container page-section" aria-labelledby="topic-debates"><div class="section-head"><p class="kicker">${inscription("On this topic")}</p><h2 class="section-title" id="topic-debates">${inscription("Debates")}</h2></div>${debates.items.length ? html`<div class="list-grid">${debates.items.map((debate) => debateCard(debate, debateFinalLine(finals.get(debate.id))))}</div>` : quietState("No public debates on this topic yet.", matchmaking ? "Queue on a side to start the first one." : "")}${pagination(`/topics/${path(topic.slug)}`, debates)}</section>${history ? html`${history}<script type="module" src="${asset("topic-chart.js")}"></script>` : ""}`;
   const canonical = `${origin}${listPath(`/topics/${path(topic.slug)}`, debates)}`;
   return layout(
     topic.title,
@@ -449,7 +459,7 @@ export function renderProfile(
   profile: PublicProfile,
   debates: PublicList<PublicDebate>,
 ) {
-  const content = html`<div class="container person">${backLink("/debates", "All debates")}<header class="person-hero">${personSlot(profile)}<div class="person-id"><p class="kicker">${inscription(`Participant${profile.isDemo ? " · Demo" : ""}`)}</p><h1 class="title-serif">${profile.displayName}</h1><p class="person-handle">@${profile.handle}</p><p class="person-bio${profile.bio ? "" : " muted"}">${profile.bio ? profile.bio : "No public bio yet."}</p>${followButton("people", profile.handle)}</div></header></div><section class="container page-section" aria-labelledby="appearances"><div class="section-head"><p class="kicker">${inscription("Public appearances")}</p><h2 class="section-title" id="appearances">${inscription("Debates")}</h2></div>${debates.items.length ? html`<div class="list-grid">${debates.items.map(debateCard)}</div>` : quietState("No public debates yet.")}${pagination(`/people/${path(profile.handle)}`, debates)}</section>`;
+  const content = html`<div class="container person">${backLink("/debates", "All debates")}<header class="person-hero">${personSlot(profile)}<div class="person-id"><p class="kicker">${inscription(`Participant${profile.isDemo ? " · Demo" : ""}`)}</p><h1 class="title-serif">${profile.displayName}</h1><p class="person-handle">@${profile.handle}</p><p class="person-bio${profile.bio ? "" : " muted"}">${profile.bio ? profile.bio : "No public bio yet."}</p>${followButton("people", profile.handle)}</div></header></div><section class="container page-section" aria-labelledby="appearances"><div class="section-head"><p class="kicker">${inscription("Public appearances")}</p><h2 class="section-title" id="appearances">${inscription("Debates")}</h2></div>${debates.items.length ? html`<div class="list-grid">${debates.items.map((debate) => debateCard(debate))}</div>` : quietState("No public debates yet.")}${pagination(`/people/${path(profile.handle)}`, debates)}</section>`;
   const description =
     profile.bio ?? `Public profile for ${profile.displayName}.`;
   const canonical = `${origin}${listPath(`/people/${path(profile.handle)}`, debates)}`;
