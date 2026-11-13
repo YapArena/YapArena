@@ -160,6 +160,46 @@ describe("service runtime", () => {
       assert.deepEqual(errors, [`${failing} failed`]);
     });
 
+  // Decision 0015: the endorsement recorder runs beside the coin loop.
+  it("records endorsement points beside the coin loop and logs its own failure", async () => {
+    let callback;
+    const calls = [],
+      errors = [];
+    const runtime = createRuntime({
+      coinDebates: {
+        tick: async () => {
+          calls.push("coins");
+        },
+      },
+      endorsement: {
+        record: async () => {
+          calls.push("endorsement");
+          throw new Error("recorder failed");
+        },
+      },
+      database: { end: async () => {} },
+      sessions: { deleteExpired: async () => {} },
+      logger: {
+        info() {},
+        error: ({ error }, message) => errors.push([message, error.message]),
+      },
+      config: { port: 3000, host: "127.0.0.1" },
+      verifyDatabase: async () => {},
+      setIntervalFn: (fn, ms) => {
+        if (ms === 1000) callback = fn;
+        return { unref() {} };
+      },
+      clearIntervalFn() {},
+    });
+    await runtime.start();
+    await callback();
+    await runtime.stop();
+    assert.deepEqual(calls, ["coins", "endorsement"]);
+    assert.deepEqual(errors, [
+      ["endorsement recorder failed", "recorder failed"],
+    ]);
+  });
+
   it("recovers media revocations without overlapping claims and awaits in-flight recovery on shutdown", async () => {
     let callback,
       finish,
