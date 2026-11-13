@@ -87,7 +87,6 @@ describe(
         kind: "direct",
         topicSlug: slug,
         targetHandle: to.handle,
-        proposition: "Canada should expand nuclear power",
         requestedSide: "A",
         scheduledAt,
       });

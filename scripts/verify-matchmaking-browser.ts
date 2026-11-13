@@ -312,9 +312,6 @@ try {
   await form.waitFor({ state: "visible" });
   await form.locator('input[name="targetHandle"]').fill(alice.handle);
   await form.locator('input[name="topicSlug"]').fill(slug);
-  await form
-    .locator('input[name="proposition"]')
-    .fill("Canada should expand nuclear power");
   await form.locator('select[name="requestedSide"]').selectOption("B");
   await form.getByRole("button", { name: /Send challenge/ }).click();
   await bob.page

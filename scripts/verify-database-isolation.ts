@@ -149,6 +149,8 @@ const applicationTables = [
   "web_push_deliveries",
   // Decision 0015: the last-answer endorsement rate's stored points.
   "endorsement_points",
+  // Decision 0015 (D4): the founder's review of which side answers yes.
+  "topic_answer_reviews",
 ];
 const container = `yaparena-isolation-${randomUUID().slice(0, 8)}`;
 const evidenceDirectory = `/tmp/${container}-evidence`;
@@ -950,7 +952,6 @@ async function runtimeChecks(
       kind: "direct",
       topicSlug: topic.slug,
       targetHandle: "bob",
-      proposition: "Does the database boundary work?",
       requestedSide: "A",
       scheduledAt: new Date(Date.now() + 3 * 60 * 60 * 1000),
     });
@@ -1127,7 +1128,6 @@ async function runtimeChecks(
       kind: "direct",
       topicSlug: topic.slug,
       targetHandle: "bob",
-      proposition: "Will an expired request be cleaned up?",
       requestedSide: "A",
       scheduledAt: new Date(Date.now() + 3 * 60 * 60 * 1000),
     });

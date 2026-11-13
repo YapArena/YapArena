@@ -11512,9 +11512,10 @@ exports[`renders the coins and match pages 2`] = `
 <label>Summary<textarea name="summary" minlength="10" maxlength="600" required>
 </textarea>
 </label>
-<label>Side A label<input name="sideALabel" minlength="2" maxlength="80" required>
+<p class="form-note">Side A answers yes to the question, side B answers no.</p>
+<label>Yes answer (side A)<input name="sideALabel" minlength="2" maxlength="80" required>
 </label>
-<label>Side B label<input name="sideBLabel" minlength="2" maxlength="80" required>
+<label>No answer (side B)<input name="sideBLabel" minlength="2" maxlength="80" required>
 </label>
 <label>Category<select name="category" required>
 <option value="">Choose a category</option>
@@ -11547,8 +11548,7 @@ exports[`renders the coins and match pages 2`] = `
 </label>
 <label>Published topic slug<input name="topicSlug" pattern="[a-z0-9][a-z0-9-]{2,79}" required>
 </label>
-<label>Proposition<input name="proposition" minlength="10" maxlength="240" required>
-</label>
+<p class="form-note">You debate the topic's own question.</p>
 <label>Your side<select name="requestedSide">
 <option value="A">Side A</option>
 <option value="B">Side B</option>
@@ -11824,9 +11824,10 @@ exports[`renders the coins and match pages 3`] = `
 <label>Summary<textarea name="summary" minlength="10" maxlength="600" required>
 </textarea>
 </label>
-<label>Side A label<input name="sideALabel" minlength="2" maxlength="80" required>
+<p class="form-note">Side A answers yes to the question, side B answers no.</p>
+<label>Yes answer (side A)<input name="sideALabel" minlength="2" maxlength="80" required>
 </label>
-<label>Side B label<input name="sideBLabel" minlength="2" maxlength="80" required>
+<label>No answer (side B)<input name="sideBLabel" minlength="2" maxlength="80" required>
 </label>
 <label>Category<select name="category" required>
 <option value="">Choose a category</option>
@@ -11858,8 +11859,7 @@ exports[`renders the coins and match pages 3`] = `
 </datalist>
 <label>Published topic slug<input name="topicSlug" pattern="[a-z0-9][a-z0-9-]{2,79}" required>
 </label>
-<label>Proposition<input name="proposition" minlength="10" maxlength="240" required>
-</label>
+<p class="form-note">You debate the topic's own question.</p>
 <label>Your side<select name="requestedSide">
 <option value="A">Side A</option>
 <option value="B">Side B</option>
