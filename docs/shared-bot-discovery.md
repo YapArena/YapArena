@@ -1,6 +1,13 @@
 # Shared bot discovery
 
-> **Current state (2026-11-06, first-run plan PR 6):** the home no longer shows these charts; it
+> **Current state (2026-11-13, [Decision 0015](decisions/0015-last-answer-endorsement.md), D3):**
+> topic pages no longer show this history; they show the last-answer figure
+> ([topic history](site-design.md#topic-history)). The shared history shows on debate pages only,
+> and `publicBots.topics()` now feeds only the unused `GET /api/public/homepage`. The browser
+> trial checks the debate page after each settlement and that the topic page carries no
+> simulation chart.
+
+> **Earlier state (2026-11-06, first-run plan PR 6):** the home no longer shows these charts; it
 > is a list of debates. Each topic's history shows on its topic page
 > ([topic history](site-design.md#topic-history)) from `publicBots.topics()`, as served when the
 > page loads, without polling. The debate page is unchanged. The browser trial
