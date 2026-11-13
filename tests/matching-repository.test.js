@@ -57,8 +57,17 @@ function fake(options = {}) {
       );
     if (sql.startsWith("SELECT 1 FROM match_requests WHERE initiator_user_id"))
       return row(options.outgoing ? [{}] : []);
-    if (sql.startsWith("SELECT id FROM topics WHERE slug"))
-      return row(options.topicMissing ? [] : [{ id: topicId }]);
+    if (sql.startsWith("SELECT id, title FROM topics WHERE slug"))
+      return row(
+        options.topicMissing
+          ? []
+          : [
+              {
+                id: topicId,
+                title: "Should cities use AI for public services?",
+              },
+            ],
+      );
     if (sql.startsWith("SELECT 1 FROM topics WHERE id"))
       return row(options.topicMissing ? [] : [{}]);
     if (sql.startsWith('SELECT user_id AS "userId" FROM public_profiles'))
@@ -251,7 +260,6 @@ const direct = {
   kind: "direct",
   topicSlug: "civil-ai",
   targetHandle: "other-speaker",
-  proposition: "Should this be debated?",
   requestedSide: "A",
   scheduledAt: future,
 };
@@ -313,7 +321,16 @@ describe("matching repository transaction boundaries", () => {
     });
     const request = await repository.createRequest("1", direct);
     assert.equal(request.targetUserId, "2");
+    // The question is the topic's title (Decision 0015), never a typed one.
+    assert.equal(
+      request.proposition,
+      "Should cities use AI for public services?",
+    );
     const event = await repository.acceptRequest("2", id);
+    assert.equal(
+      event.proposition,
+      "Should cities use AI for public services?",
+    );
     assert.equal(event.speakerAProfileId, "profile-1");
     assert.equal(event.speakerBProfileId, "profile-2");
     assert.equal(state.request.status, "accepted");

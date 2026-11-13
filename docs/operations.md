@@ -337,6 +337,29 @@ topic's category and records the previous one, the new one, the reason and the o
 `topic_category_changes`; choosing the current category changes nothing. The web process
 cannot change a category: the database refuses it.
 
+### Review which side answers yes
+
+Side A answers yes to a topic's question
+([Decision 0015](decisions/0015-last-answer-endorsement.md), D4). Topics created before the
+forms said so may have labels the other way round. `scripts/topic-answer-sides.ts` is an owner
+command, run like the category command:
+
+```sh
+npm run build
+node --env-file="$HOME/yaparena-private/production/owner.env" scripts/topic-answer-sides.ts list --flagged
+node --env-file="$HOME/yaparena-private/production/owner.env" scripts/topic-answer-sides.ts review topic-slug side-a-not-yes "Reason for the record"
+node --env-file="$HOME/yaparena-private/production/owner.env" scripts/topic-answer-sides.ts review topic-slug side-a-not-yes "Reason for the record" --execute
+```
+
+`list` only reads. It prints every published topic (or, with `--flagged`, those flagged or
+already reviewed) with its title, both labels, its published debates, those whose question is
+the topic title, the answers in their turn windows, flags such as "side B starts with Yes", and
+the latest review. `review` records `side-a-yes` or `side-a-not-yes` with a 5–500 character
+reason in `topic_answer_reviews`; without `--execute` it previews and rolls back. The latest
+review of a topic wins, and repeating it records nothing. Reviews can't be changed or deleted,
+and stored side labels are never swapped. The web process can only read them. Unreviewed topics
+follow the rule that side A answers yes.
+
 ## Web push for "Notify me"
 
 Web push sends the "Notify me" reminder to the viewer's phone or computer, not only to their

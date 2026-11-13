@@ -79,7 +79,6 @@ describe(
         kind: "direct",
         topicSlug: slug,
         targetHandle: to.handle,
-        proposition: "Canada should expand nuclear power",
         requestedSide: "A",
         ...extra,
       });
@@ -119,6 +118,26 @@ describe(
         "a now debate has its own countdown",
       );
       assert.equal((await queue.state(b.id)).challenge, null);
+    });
+
+    it("debates the topic's own title, whatever question an old page sends (Decision 0015)", async () => {
+      const slug = await topic();
+      const [a, b] = await Promise.all([player(), player()]);
+      const request = await challenge(a, b, slug, {
+        scheduledAt: hours(3),
+        proposition: "A typed question that the server ignores",
+      });
+      assert.equal(request.proposition, "Canada should expand nuclear power");
+      const debate = await matching.acceptRequest(b.id, request.id);
+      assert.equal(debate.proposition, "Canada should expand nuclear power");
+      const stored = await owner.query(
+        "SELECT proposition FROM match_requests WHERE id = $1",
+        [request.id],
+      );
+      assert.equal(
+        stored.rows[0].proposition,
+        "Canada should expand nuclear power",
+      );
     });
 
     it("opens a just-accepted now debate even right after a queue match was cancelled", async () => {
@@ -384,7 +403,6 @@ describe(
           kind: "direct",
           topicSlug: slug,
           targetHandle: b.handle,
-          proposition: "Canada should expand nuclear power",
           requestedSide: "A",
           scheduledAt: hours(3),
           ...extra,

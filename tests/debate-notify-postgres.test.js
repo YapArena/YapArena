@@ -80,7 +80,6 @@ describe(
         kind: "direct",
         topicSlug: slug,
         targetHandle: b.handle,
-        proposition: "Cities should ban cars downtown",
         requestedSide: "A",
         scheduledAt: hours(3),
       });

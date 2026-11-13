@@ -71,30 +71,20 @@ try {
   const scheduledAt = new Date(Date.now() + 3 * 60 * 60 * 1000);
   const direct = async (
     from: Awaited<ReturnType<typeof person>>,
-    proposition: string,
     side: "A" | "B",
   ) => {
     const request = await matching.createRequest(from.id, {
       kind: "direct",
       topicSlug: `match-topic-${suffix}`,
       targetHandle: b.handle,
-      proposition,
       requestedSide: side,
       scheduledAt,
     });
     requests.push(request.id);
     return request;
   };
-  const first = await direct(
-    a,
-    "Should the verification topic be debated?",
-    "A",
-  );
-  const competing = await direct(
-    c,
-    "Can a competing request win this slot?",
-    "B",
-  );
+  const first = await direct(a, "A");
+  const competing = await direct(c, "B");
   const outcomes = await Promise.allSettled([
     matching.acceptRequest(b.id, first.id),
     matching.acceptRequest(b.id, competing.id),
@@ -181,7 +171,6 @@ try {
     kind: "direct",
     topicSlug: `match-topic-${suffix}`,
     targetHandle: d.handle,
-    proposition: "Can a speaker arrange another debate after the first ends?",
     requestedSide: "A",
     scheduledAt,
   });
@@ -201,7 +190,6 @@ try {
   const queue = await matching.createRequest(d.id, {
     kind: "queue",
     topicSlug: `match-topic-${suffix}`,
-    proposition: "Should this queue debate be created?",
     requestedSide: "B",
     scheduledAt,
   });

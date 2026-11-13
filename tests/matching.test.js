@@ -220,6 +220,23 @@ describe("matching API", () => {
     assert.equal(calls[0][2].requestedSide, "A");
     assert.equal(calls[0][2].scheduledAt.toISOString(), scheduledAt);
     assert.equal(
+      "proposition" in calls[0][2],
+      false,
+      "the question is the topic's title, so a typed one is ignored (Decision 0015)",
+    );
+    // A page served before the question lock still posts a proposition, which is
+    // ignored whatever it holds; a new page sends none.
+    const current = { ...requestInput };
+    delete current.proposition;
+    for (const input of [current, { ...requestInput, proposition: "short" }]) {
+      assert.equal(
+        (await authenticated("post", "/api/matching/requests").send(input))
+          .status,
+        201,
+      );
+      assert.equal("proposition" in calls.at(-1)[2], false);
+    }
+    assert.equal(
       calls[0][2].liveOpinions,
       false,
       "live opinions are off by default",
@@ -245,7 +262,6 @@ describe("matching API", () => {
       },
       { ...requestInput, targetHandle: "BAD" },
       { ...requestInput, initiatorUserId: "8" },
-      { ...requestInput, proposition: "short" },
       { ...requestInput, kind: "queue", targetHandle: "other-speaker" },
     ])
       assert.equal(
@@ -822,7 +838,7 @@ describe("matching moderation and privacy", () => {
       );
   });
 
-  it("refuses hidden characters in topics and propositions", async () => {
+  it("refuses hidden characters in topics", async () => {
     const { app, calls } = routes();
     for (const body of [
       { ...topicInput, title: "Civil use of AI‮" },
@@ -830,14 +846,6 @@ describe("matching moderation and privacy", () => {
       { ...topicInput, sideALabel: "F​or" },
     ])
       assert.equal((await request(app).post("/topics").send(body)).status, 400);
-    assert.equal(
-      (
-        await request(app)
-          .post("/requests")
-          .send({ ...requestInput, proposition: "Should cities use AI\u0000?" })
-      ).status,
-      400,
-    );
     assert.deepEqual(calls, []);
     // Line breaks in a summary still become single spaces.
     const created = await request(app)

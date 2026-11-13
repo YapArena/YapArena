@@ -708,7 +708,6 @@ describe(
       const open = await matching.createRequest(a, {
         kind: "queue",
         topicSlug: slug,
-        proposition: "Canada should expand nuclear power",
         requestedSide: "A",
         scheduledAt: new Date(Date.now() + 2 * 60 * 60 * 1000),
       });
