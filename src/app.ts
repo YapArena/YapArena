@@ -533,6 +533,7 @@ export function createApp({
           ? { snapshot: (id: string) => outlines.snapshot(id) }
           : undefined,
         pushKey: matchmaking ? webPush?.publicKey : undefined,
+        endorsementBar: Boolean(turnWindows),
       }),
     );
   }

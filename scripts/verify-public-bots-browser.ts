@@ -270,8 +270,8 @@ export async function verifyPublicBotsBrowser({
     // runs and receipts live in the Bots sandbox on /coins.
     assert.equal(await watch.locator("[data-shared-view]").count(), 0);
     assert.match(
-      (await watch.locator("[data-arena-scope]").textContent())!,
-      /Shared simulation/,
+      (await watch.locator("[data-arena-sync]").textContent())!,
+      /Synthetic activity/,
     );
     checks.debatePageShowsSharedHistoryOnly = true;
     await home.screenshot({

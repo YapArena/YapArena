@@ -23,7 +23,7 @@ type ProfileRow = Omit<PublicProfile, "avatarId"> & {
 };
 interface DebateRow extends Omit<
   PublicDebate,
-  "topic" | "speakerA" | "speakerB" | "sponsor" | "timing"
+  "topic" | "speakerA" | "speakerB" | "sponsor" | "timing" | "sideAIsYes"
 > {
   topicSlug: string;
   topicTitle: string;
@@ -304,21 +304,27 @@ export function createDiscoveryRepository(database: Pick<Pool, "query">) {
 
     async getDebate(slug: string): Promise<PublicDebate | null> {
       const result = await database.query<
-        DebateRow & { timing?: TimingRow | null }
+        DebateRow & { timing?: TimingRow | null; sideAIsYes?: boolean | null }
       >(
         `SELECT ${debateColumns},
            (SELECT jsonb_build_object(
               'turnSeconds', r.rules->'initial_speaking_time_seconds',
               'maximumSeconds', r.rules->'maximum_duration_seconds')
             FROM event_rule_versions r
-            WHERE r.version = d.rules_version) AS timing
+            WHERE r.version = d.rules_version) AS timing,
+           (SELECT v.side_a_is_yes FROM topic_answer_reviews v
+            WHERE v.topic_id = d.topic_id ORDER BY v.id DESC LIMIT 1) AS "sideAIsYes"
          ${debateJoins}
          WHERE d.slug = $1 AND d.publication_state = 'published'`,
         [slug],
       );
       const row = result.rows[0];
       return row
-        ? { ...mapDebate(row), timing: timing(row.timing ?? null) }
+        ? {
+            ...mapDebate(row),
+            timing: timing(row.timing ?? null),
+            ...(row.sideAIsYes === false ? { sideAIsYes: false as const } : {}),
+          }
         : null;
     },
   });

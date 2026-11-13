@@ -100,7 +100,8 @@ checked in browser automation and run by `npm run verify:browser`, drives the ou
 Chrome with synthetic LiveKit messages and an in-memory outline store. `verify-replay-timeline-browser.ts`, also
 run by `npm run verify:browser`, drives a replay's turn timeline and Results by turn with fixture
 turn windows and synthetic playback positions, and clicks the stage's Play replay and Join as
-viewer buttons with a real mouse. `verify-matchmaking-browser.ts`,
+viewer buttons with a real mouse. It also checks the last-answer bar on the video (Decision 0015):
+its hit area over the replay's native controls, its card by keyboard and touch, and expanded mode. `verify-matchmaking-browser.ts`,
 also in browser automation, runs two accounts through the live queue and a "now" challenge against
 the isolation harness's fresh database. `transcription-trial.ts`, in the
 database-tools project, scores the providers for the

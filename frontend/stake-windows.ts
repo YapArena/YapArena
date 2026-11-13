@@ -5,6 +5,7 @@
 // and a module that starts after it begins from it. The signed-in viewer's own
 // limits (yap:stake-rounds) are shared the same way for the price inspector.
 import type { RevealedWindow } from "./window-chart-model.js";
+import type { DebateEndorsement } from "../src/features/endorsement/types.ts";
 
 type StakeWindows = WindowEventMap["yap:stake-windows"]["detail"];
 type StakeRounds = WindowEventMap["yap:stake-rounds"]["detail"];
@@ -38,6 +39,39 @@ export function onStakeWindows(
   queueMicrotask(() => {
     const latest = window.yapStakeWindows;
     if (latest?.debateId === debateId) listener(latest.windows);
+  });
+}
+
+/** Decision 0015: the debate's last-answer figure and its reveal timing. */
+export interface DebateEndorsementView {
+  endorsement: DebateEndorsement | null;
+  revealMode: "five_day" | "per_round";
+  revealAt: string | null;
+}
+
+function endorsementView(detail: StakeWindows): DebateEndorsementView {
+  return {
+    endorsement: detail.endorsement ?? null,
+    revealMode: detail.revealMode ?? "five_day",
+    revealAt: detail.revealAt ?? null,
+  };
+}
+
+/**
+ * Calls `listener` with this debate's last-answer figure from each window
+ * read, the latest one already shared first, exactly as onStakeWindows.
+ */
+export function onDebateEndorsement(
+  debateId: string,
+  listener: (view: DebateEndorsementView) => void,
+) {
+  window.addEventListener("yap:stake-windows", (event) => {
+    if (event.detail.debateId === debateId)
+      listener(endorsementView(event.detail));
+  });
+  queueMicrotask(() => {
+    const latest = window.yapStakeWindows;
+    if (latest?.debateId === debateId) listener(endorsementView(latest));
   });
 }
 

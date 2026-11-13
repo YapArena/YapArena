@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import { beforeEach, it } from "node:test";
 
 const {
+  onDebateEndorsement,
   onStakeRounds,
   onStakeWindows,
   onStakeWindowsStale,
@@ -111,6 +112,35 @@ it("shares the viewer's own limits the same way, latest first, per debate", asyn
     limits: {},
   });
   assert.equal(events.length, 4);
+});
+
+// Decision 0015: the bar on the video takes the debate's last-answer figure
+// from the same read, with when its answers are revealed.
+it("shares the debate's last-answer figure from each window read", async () => {
+  const figure = { throughTurn: 2, yes: 1, accounts: 3 };
+  shareStakeWindows({
+    debateId: "d1",
+    windows: read(1),
+    endorsement: figure,
+    revealMode: "per_round",
+    revealAt: null,
+  });
+  const seen = [];
+  onDebateEndorsement("d1", (view) => seen.push(view));
+  onDebateEndorsement("d2", (view) => seen.push(view));
+  assert.deepEqual(seen, []);
+  await settle();
+  assert.deepEqual(seen, [
+    { endorsement: figure, revealMode: "per_round", revealAt: null },
+  ]);
+  // An older server's read carries no figure: the bar stays empty.
+  shareStakeWindows({ debateId: "d1", windows: read(2) });
+  assert.deepEqual(seen.at(-1), {
+    endorsement: null,
+    revealMode: "five_day",
+    revealAt: null,
+  });
+  assert.equal(seen.length, 2);
 });
 
 it("marks the Results tab stale after a failed read until the next read arrives", () => {

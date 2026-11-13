@@ -1455,6 +1455,109 @@ textarea::placeholder {
   object-fit: contain;
   background: var(--bg);
 }
+/* Decision 0015: the debate's last-answer figure on the video's bottom
+   edge, white for the Yes share on a dark track. It sits above the frames,
+   the chat's shadow and the chat, level with the hover corners and below the
+   chat and Enlarge buttons; the surface clips it to its rounded corners and
+   carries it into expanded mode. Its 12px hit area ends where the overlay
+   chat begins. */
+.arena-page .arena-endorsement {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 5;
+  height: 6px;
+  background: rgb(0 0 0 / 55%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 16%);
+  cursor: pointer;
+}
+.arena-page .arena-endorsement::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 12px;
+}
+/* Over a replay's native controls only the visible 6px take the pointer. */
+.arena-page
+  .arena-video-surface:has(> video:not([hidden]))
+  .arena-endorsement::before {
+  height: 6px;
+}
+.arena-page .arena-endorsement-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--yes-share, 0%);
+  background: #fff;
+  transition: width 0.5s ease;
+}
+.arena-page .arena-endorsement[data-empty="true"] .arena-endorsement-fill {
+  display: none;
+}
+.arena-page .arena-endorsement:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: -2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .arena-page .arena-endorsement-fill {
+    transition: none;
+  }
+}
+.arena-page .arena-endorsement-card {
+  position: absolute;
+  bottom: calc(12px + var(--space-2));
+  left: var(--space-2);
+  z-index: 7;
+  width: min(20rem, calc(100% - 2 * var(--space-2)));
+  max-height: calc(100% - 12px - 2 * var(--space-2));
+  overflow: auto;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: var(--radius-inner);
+  background: rgb(0 0 0 / 86%);
+  color: var(--text);
+  font-size: var(--text-14);
+  line-height: 1.45;
+  pointer-events: none;
+}
+.arena-page .arena-endorsement-card p {
+  margin: 0;
+}
+.arena-page .arena-endorsement-card .arena-endorsement-heading {
+  margin-bottom: var(--space-2);
+  font-weight: 700;
+}
+.arena-page .arena-endorsement-shares {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0 0 var(--space-2);
+}
+.arena-page .arena-endorsement-shares dt {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--text-12);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.arena-page .arena-endorsement-shares dd {
+  margin: 0;
+  font-family: var(--font-number);
+  font-size: var(--text-24);
+}
+.arena-page
+  .arena-endorsement-card
+  :is(.arena-endorsement-counts, .arena-endorsement-footer) {
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.arena-page .arena-endorsement-card .arena-endorsement-footer {
+  margin-top: var(--space-2);
+}
 @media (hover: none) {
   .arena-page .arena-workspace .arena-video-expand {
     opacity: 1;
@@ -2779,12 +2882,6 @@ textarea::placeholder {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.arena-page .arena-about-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
-  gap: var(--space-5);
-  align-items: start;
-}
 .arena-page .arena-info {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2807,54 +2904,6 @@ textarea::placeholder {
 }
 .arena-page .arena-info dd {
   margin: 0;
-}
-.arena-page .arena-sentiment {
-  padding: var(--space-4);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-inner);
-}
-.arena-page .arena-workspace .arena-sentiment h3 {
-  margin-bottom: var(--space-3);
-  font-size: var(--text-14);
-}
-.arena-page .arena-sentiment h3 small {
-  display: block;
-  margin-top: 2px;
-  color: var(--muted);
-  font-size: var(--text-12);
-  font-weight: 400;
-}
-.arena-page .arena-sentiment-bar {
-  height: 8px;
-  overflow: hidden;
-  border-radius: var(--radius-pill);
-  background: var(--answer-no);
-}
-.arena-page .arena-sentiment-bar span {
-  display: block;
-  width: var(--yes-share, 0%);
-  height: 100%;
-  border-radius: var(--radius-pill);
-  background: var(--answer-yes);
-  transition: width 0.5s ease;
-}
-.arena-page .arena-sentiment-bar[data-empty="true"] {
-  background: var(--raised);
-}
-.arena-page .arena-sentiment-values {
-  display: flex;
-  justify-content: space-between;
-  margin-top: var(--space-2);
-  font-family: var(--font-number);
-  font-size: var(--text-20);
-}
-.arena-page .arena-sentiment-values strong {
-  font-weight: 400;
-}
-.arena-page .arena-about .arena-sentiment p {
-  margin-top: var(--space-2);
-  color: var(--muted);
-  font-size: var(--text-12);
 }
 .arena-page
   .arena-about
@@ -3542,9 +3591,6 @@ textarea::placeholder {
   .arena-page .arena-clock {
     font-size: var(--text-24);
   }
-  .arena-page .arena-about-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 /* 600–959px: one column. The panel follows the scoreboard, then the
    Outline | Chat tabs, then the rest. */
@@ -3677,7 +3723,6 @@ textarea::placeholder {
   .live-outline {
     margin-top: var(--space-4);
   }
-  .arena-page .arena-about-grid,
   .arena-page .arena-info {
     grid-template-columns: minmax(0, 1fr);
   }

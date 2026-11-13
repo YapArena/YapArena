@@ -247,7 +247,14 @@ if (root) {
     serverOffset = Date.parse(value.serverNow) - Date.now();
     // Item d: the chart shows revealed windows from this same public read,
     // for signed-in and signed-out viewers alike.
-    shareStakeWindows({ debateId, windows: value.windows });
+    // Decision 0015: the bar on the video reads the debate figure from it too.
+    shareStakeWindows({
+      debateId,
+      windows: value.windows,
+      endorsement: value.endorsement ?? null,
+      revealMode: value.revealMode,
+      revealAt: value.revealAt,
+    });
   }
   // With readSummary false, the balance already shown stays: at a window
   // boundary only the windows and this viewer's rounds change, unless a
