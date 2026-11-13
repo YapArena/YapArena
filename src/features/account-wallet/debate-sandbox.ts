@@ -52,6 +52,7 @@ import {
   type SandboxBuckets,
 } from "./sandbox-repository.ts";
 import type { TreasuryBalances } from "./treasury-monitor.ts";
+import { debateEndorsement } from "../endorsement/repository.ts";
 
 // Same A4 algorithm and ordinary human schedule. This asset is new: one YC
 // contract has a 0.01 USDC quote, NOT the historical YAP atomic face value.
@@ -1950,17 +1951,22 @@ export function createCoinDebateSandbox(
         };
       });
     },
+    // The turn windows and the debate's last-answer figure (Decision 0015),
+    // read in one snapshot so the video bar agrees with the turn bars.
     async publicWindows(debateId: string) {
       resource(debateId);
-      const row = (
-        await database.query<{
-          eventStatus: string;
-          serverNow: Date;
-          revealMode: RevealMode;
-          revealAt: Date | null;
-          windows: TurnWindow[];
-        }>(
-          `SELECT d.status AS "eventStatus", clock_timestamp() AS "serverNow",
+      return withTransaction(
+        database,
+        async (client) => {
+          const row = (
+            await client.query<{
+              eventStatus: string;
+              serverNow: Date;
+              revealMode: RevealMode;
+              revealAt: Date | null;
+              windows: TurnWindow[];
+            }>(
+              `SELECT d.status AS "eventStatus", clock_timestamp() AS "serverNow",
             COALESCE(m.mode,'five_day') AS "revealMode",
             CASE WHEN COALESCE(m.mode,'five_day')='five_day' AND d.status IN ${endedStatuses}
               THEN d.live_ended_at+INTERVAL '${REVEAL_CLOSE_HOURS} hours' END AS "revealAt",
@@ -1979,10 +1985,15 @@ export function createCoinDebateSandbox(
           LEFT JOIN coin_debate_reveal_modes m ON m.debate_id=d.id
           LEFT JOIN recording_clocks c ON c.debate_id=d.id
           WHERE d.id=$1 AND d.publication_state='published' AND t.publication_state='published'`,
-          [debateId, rail],
-        )
-      ).rows[0];
-      return row ? { debateId, ...row } : null;
+              [debateId, rail],
+            )
+          ).rows[0];
+          if (!row) return null;
+          const endorsement = await debateEndorsement(client, debateId, rail);
+          return { debateId, ...row, endorsement };
+        },
+        { isolation: "repeatable read", readOnly: true },
+      );
     },
     // The coin loop's one-second step: void unavailable debates' rounds, settle
     // due rounds, then open turn windows. Each step runs in its own

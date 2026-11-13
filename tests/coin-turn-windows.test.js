@@ -120,6 +120,79 @@ describe("public turn windows route", () => {
     assert.deepEqual(response.body, body);
   });
 
+  // Decision 0015: the window list carries the debate's last-answer figure,
+  // read in the same read-only snapshot as the windows.
+  it("adds the debate's endorsement from one read-only snapshot", async () => {
+    const statements = [];
+    const answer = (userId, side, at, turnNumber) => ({
+      userId,
+      side,
+      createdAt: `2026-11-13T12:00:0${at}.000000Z`,
+      revealedAt: `2026-11-13T12:0${turnNumber}:00.000000Z`,
+      debateId: id,
+      turnNumber,
+      roundId: `r${turnNumber}`,
+    });
+    const database = {
+      async query() {
+        throw new Error("publicWindows must use its transaction's client");
+      },
+      async connect() {
+        return {
+          async query(sql) {
+            statements.push(sql);
+            if (sql.includes('AS "eventStatus"'))
+              return {
+                rows: [
+                  {
+                    eventStatus: "live",
+                    serverNow: new Date("2026-11-13T12:10:00Z"),
+                    revealMode: "per_round",
+                    revealAt: null,
+                    windows: [],
+                  },
+                ],
+              };
+            if (sql.includes("JOIN coin_debate_orders o"))
+              return {
+                rows: [
+                  answer("alice", "YES", 1, 1),
+                  answer("bob", "NO", 2, 1),
+                  answer("alice", "NO", 3, 2),
+                  answer("chloe", "YES", 4, 2),
+                ],
+              };
+            return { rows: [] };
+          },
+          release() {},
+        };
+      },
+    };
+    const sandbox = createCoinDebateSandbox(database, "simulation", {
+      turnWindows: true,
+    });
+    const response = await request(app(sandbox.publicWindows)).get(
+      `/api/public/debates/${id}/windows`,
+    );
+    assert.equal(response.status, 200);
+    assert.equal(response.headers["cache-control"], "no-store");
+    assert.deepEqual(response.body.endorsement, {
+      throughTurn: 2,
+      yes: 1,
+      accounts: 3,
+      previous: { throughTurn: 1, yes: 1, accounts: 2 },
+      switched: { toYes: 0, toNo: 1, cameBack: 0 },
+      multiAnswerAccounts: 1,
+    });
+    assert.equal(
+      statements[0],
+      "BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY",
+    );
+    assert.equal(statements.at(-1), "COMMIT");
+    // Counts only: no account ids leave the server.
+    assert.doesNotMatch(JSON.stringify(response.body), /alice|bob|chloe/);
+  });
+
   it("answers 404 for an unknown or malformed debate", async () => {
     const server = app(async () => null);
     assert.equal(
