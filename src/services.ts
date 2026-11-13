@@ -1,6 +1,7 @@
 import type { Pool } from "pg";
 import { createA4Repository } from "./features/a4/repository.ts";
 import { createCoinDebateSandbox } from "./features/account-wallet/debate-sandbox.ts";
+import { createEndorsementRecorder } from "./features/endorsement/recorder.ts";
 import {
   createLiveDebateMonitor,
   createTreasuryMonitor,
@@ -214,6 +215,10 @@ export function createServices({
         logger,
       })
     : undefined;
+  // Decision 0015: the endorsement points, on the same rail as the coin loop.
+  const endorsement = config.coinSandboxEnabled
+    ? createEndorsementRecorder(database, "simulation")
+    : undefined;
 
   return Object.freeze({
     identity,
@@ -242,6 +247,7 @@ export function createServices({
     background: {
       a4,
       coinDebates,
+      endorsement,
       coinTreasury: coinDebates
         ? coinMonitor(coinDebates, config.coinTreasuryAlertUsdc, logger)
         : undefined,

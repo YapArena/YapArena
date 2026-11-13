@@ -147,6 +147,8 @@ const applicationTables = [
   // First-run build plan PR 10: web push for "Notify me".
   "web_push_subscriptions",
   "web_push_deliveries",
+  // Decision 0015: the last-answer endorsement rate's stored points.
+  "endorsement_points",
 ];
 const container = `yaparena-isolation-${randomUUID().slice(0, 8)}`;
 const evidenceDirectory = `/tmp/${container}-evidence`;
