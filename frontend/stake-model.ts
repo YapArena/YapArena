@@ -7,6 +7,7 @@ import {
   formatPrice,
   formatSignedCoins,
 } from "./lib/coin-format.js";
+import type { DebateEndorsement } from "../src/features/endorsement/types.ts";
 
 export type StakeSide = "YES" | "NO";
 export type SpeakingSide = "A" | "B";
@@ -65,6 +66,10 @@ export interface PublicWindows {
   revealMode: "five_day" | "per_round";
   revealAt: string | null;
   windows: PublicWindow[];
+  /** Decision 0015: the debate's last-answer figure; an older server omits it. */
+  endorsement?: DebateEndorsement | null;
+  /** The figure through each counted turn, oldest first; an older server omits it. */
+  endorsementTurns?: DebateEndorsement[];
 }
 
 /** One round in the signed-in view, with this viewer's own order. */

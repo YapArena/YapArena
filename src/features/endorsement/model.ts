@@ -156,3 +156,16 @@ export function latestDebateFigure(answers: readonly EndorsementAnswer[]) {
   const turn = highestTurn(answers);
   return turn === null ? null : debateFigure(answers, turn);
 }
+
+/**
+ * The debate figure through each counted turn, in turn order, so a replay's
+ * bar can follow the playing turn. The last one is latestDebateFigure.
+ */
+export function debateFigures(
+  answers: readonly EndorsementAnswer[],
+): DebateEndorsement[] {
+  const turns = [...new Set(answers.map((answer) => answer.turnNumber))].sort(
+    (a, b) => a - b,
+  );
+  return turns.flatMap((turn) => debateFigure(answers, turn) ?? []);
+}

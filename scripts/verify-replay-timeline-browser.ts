@@ -22,7 +22,11 @@ import { createDiscoveryRouter } from "../dist/features/discovery/router.js";
 // final outline labels come from fixture answers to the public reads, and
 // the replay position from synthetic yap:playback events, as the replay
 // player sends them. It also clicks the stage's Play replay and Join as
-// viewer buttons with a real mouse. No database, media or hosted service is
+// viewer buttons with a real mouse, and checks that the last-answer bar on
+// the video's bottom edge (Decision 0015) takes only its own strip, the
+// visible 6 px over a replay's native controls, and that on a replay it shows
+// the playing turn's figure the moment the position reaches that turn. No
+// database, media or hosted service is
 // involved. With REPLAY_TIMELINE_ARTIFACT_DIR set it saves phone screenshots.
 
 type DiscoveryOptions = Parameters<typeof createDiscoveryRouter>[0];
@@ -129,6 +133,28 @@ function windows(revealed: boolean, count = 10, recorded = true) {
   });
 }
 let windowList = windows(true);
+// Decision 0015: the debate's last-answer figure in the window list, for a
+// debate whose question is the topic title.
+const endorsement = {
+  throughTurn: 10,
+  yes: 47,
+  accounts: 100,
+  previous: { throughTurn: 9, yes: 45, accounts: 98 },
+  switched: { toYes: 6, toNo: 3, cameBack: 1 },
+  multiAnswerAccounts: 30,
+};
+// The figure through each turn, which a replay follows: turn N has 37 + N
+// Yes answers of 100, so turn 10 matches the latest figure above. Empty
+// until step 15, so the steps before it show the latest figure.
+const figureThrough = (turn: number) => ({
+  ...endorsement,
+  throughTurn: turn,
+  yes: 37 + turn,
+  accounts: 100,
+  previous:
+    turn > 1 ? { throughTurn: turn - 1, yes: 36 + turn, accounts: 100 } : null,
+});
+let endorsementTurns: ReturnType<typeof figureThrough>[] = [];
 
 let browser: Browser | undefined, server: Server | undefined;
 try {
@@ -144,6 +170,7 @@ try {
       },
       mediaEnabled: true,
       applicationOrigin: "http://localhost",
+      endorsementBar: true,
     }),
   );
   server = app.listen(0, "127.0.0.1");
@@ -199,6 +226,12 @@ try {
           revealMode: "five_day",
           revealAt: windowList[0]?.revealAt ?? null,
           windows: windowList,
+          endorsement:
+            debate.proposition === topic.title &&
+            windowList.every((window) => window.state === "settled")
+              ? endorsement
+              : null,
+          endorsementTurns,
         },
       });
     // The turns' final outline labels, which label revealed turns.
@@ -231,10 +264,12 @@ try {
   async function open(
     width: number,
     height: number,
+    hasTouch = false,
   ): Promise<{ context: BrowserContext; page: Page; errors: string[] }> {
     const context = await browser!.newContext({
       viewport: { width, height },
       serviceWorkers: "block",
+      hasTouch,
     });
     await context.route(`${origin}/api/**`, answer);
     // The replay video records the positions the page sets, and reports
@@ -864,22 +899,56 @@ try {
     );
     await page.mouse.click(x, y);
   };
+  // What takes the pointer at the middle of the video's bottom edge, a few
+  // pixels up: the last-answer bar or what lies under it.
+  const bottomEdge = (page: Page) =>
+    page.evaluate(() => {
+      const surface = document
+        .querySelector("[data-arena-video]")!
+        .getBoundingClientRect();
+      const x = surface.left + surface.width / 2;
+      const at = (up: number) => {
+        const top = document.elementFromPoint(x, surface.bottom - up);
+        return top?.closest("[data-endorsement-bar]")
+          ? "bar"
+          : (top?.tagName.toLowerCase() ?? null);
+      };
+      return { 3: at(3), 9: at(9), 24: at(24) };
+    });
+  // Step 13 shows the bar: the debate asks its topic's question.
+  const counted = { ...base, proposition: topic.title };
   for (const [width, height] of [
     [390, 844],
     [768, 1024],
     [1440, 900],
   ] as const) {
-    debate = base;
+    debate = counted;
     windowList = windows(true);
     {
       const { context, page, errors } = await open(width, height);
+      await page
+        .locator('[data-endorsement-bar][data-empty="false"]')
+        .waitFor();
+      // Before Play the bar's 12 px hit area takes the bottom strip.
+      assert.deepEqual(
+        await bottomEdge(page),
+        { 3: "bar", 9: "bar", 24: "div" },
+        `bar hit area at ${width}px`,
+      );
       await clickCentre(page, "[data-media-replay]", width);
       await page.locator("[data-media-replay-video]:not([hidden])").waitFor();
       assert.equal(await page.evaluate(() => window.plays), 1);
+      // Over the replay video only its visible 6 px: the native controls
+      // above take the pointer.
+      assert.deepEqual(
+        await bottomEdge(page),
+        { 3: "bar", 9: "video", 24: "video" },
+        `native controls covered at ${width}px`,
+      );
       assert.deepEqual(errors, []);
       await context.close();
     }
-    debate = { ...base, status: "live", liveEndedAt: null };
+    debate = { ...counted, status: "live", liveEndedAt: null };
     windowList = windows(false, 3, false);
     {
       const { context, page, errors } = await open(width, height);
@@ -895,6 +964,249 @@ try {
     }
   }
   results.stageButtonsTakeClicks = true;
+  results.endorsementBarLeavesNativeControls = true;
+
+  // 14. The last-answer bar itself (Decision 0015): empty with its reveal
+  //     note before a five-day debate's close and filled after; keyboard
+  //     focus, Enter and Escape; a tap toggles it on a phone; it stays on the
+  //     bottom edge in expanded mode; the overlay chat above it still takes
+  //     clicks at 1440 px; nothing scrolls sideways; no serious axe issues.
+  const barState = (page: Page) =>
+    page.evaluate(() => {
+      const bar = document.querySelector<HTMLElement>(
+        "[data-endorsement-bar]",
+      )!;
+      const card = document.querySelector<HTMLElement>(
+        "[data-endorsement-card]",
+      )!;
+      return {
+        empty: bar.dataset.empty,
+        value: bar.getAttribute("aria-valuetext"),
+        open: !card.hidden,
+        text: card.textContent,
+      };
+    });
+  {
+    debate = { ...counted, status: "ended" };
+    windowList = windows(false);
+    const { context, page, errors } = await open(1440, 900);
+    await page.waitForFunction(() =>
+      document
+        .querySelector("[data-endorsement-card]")
+        ?.textContent?.includes("5 days after the debate"),
+    );
+    const before = await barState(page);
+    assert.equal(before.empty, "true");
+    assert.equal(before.value, "No results revealed yet");
+    assert.match(
+      before.text!,
+      /Answers stay hidden until .+, 5 days after the debate\./,
+    );
+    assert.equal(before.open, false);
+    await context.close();
+    assert.deepEqual(errors, []);
+  }
+  {
+    debate = counted;
+    windowList = windows(true);
+    const { context, page, errors } = await open(1440, 900);
+    const bar = page.locator('[data-endorsement-bar][data-empty="false"]');
+    await bar.waitFor();
+    const filled = await barState(page);
+    assert.equal(
+      filled.value,
+      "47% Yes, Free for everyone; 53% No, Fix service first; 100 accounts",
+    );
+    assert.equal(
+      await bar.evaluate((element) =>
+        getComputedStyle(element).getPropertyValue("--yes-share"),
+      ),
+      "47%",
+    );
+    // Keyboard: focus opens, Escape closes, Enter toggles.
+    await bar.focus();
+    assert.equal((await barState(page)).open, true);
+    assert.match(
+      (await barState(page)).text!,
+      /Last answers in this debate.*47%.*53%.*47 Yes · 53 No · 100 accounts · through turn 10.*Since turn 9: \+1 pt Yes.*10 accounts changed answer: 6 to Yes, 3 to No, 1 changed back.*Not a vote, a price or a forecast\./,
+    );
+    await page.keyboard.press("Escape");
+    assert.equal((await barState(page)).open, false);
+    await page.keyboard.press("Enter");
+    assert.equal((await barState(page)).open, true);
+    await page.keyboard.press("Enter");
+    assert.equal((await barState(page)).open, false);
+    // The card stays inside the video.
+    await page.keyboard.press("Enter");
+    const inside = await page.evaluate(() => {
+      const surface = document
+        .querySelector("[data-arena-video]")!
+        .getBoundingClientRect();
+      const card = document
+        .querySelector("[data-endorsement-card]")!
+        .getBoundingClientRect();
+      return (
+        card.left >= surface.left &&
+        card.right <= surface.right &&
+        card.top >= surface.top &&
+        card.bottom <= surface.bottom
+      );
+    });
+    assert.equal(inside, true);
+    await page.keyboard.press("Escape");
+    // The overlay chat's composer above the bar still takes the pointer.
+    assert.equal(
+      await page.evaluate(() => {
+        const input = document
+          .querySelector("#community-chat-body")!
+          .getBoundingClientRect();
+        const top = document.elementFromPoint(
+          input.left + input.width / 2,
+          input.top + input.height / 2,
+        );
+        return top?.id ?? top?.getAttribute("class");
+      }),
+      "community-chat-body",
+    );
+    // Expanded mode keeps the bar on the video's bottom edge.
+    await page.locator("[data-video-expand]").click();
+    assert.deepEqual(
+      await page.evaluate(() => {
+        const surface = document
+          .querySelector("[data-arena-video].is-expanded")!
+          .getBoundingClientRect();
+        const bar = document
+          .querySelector("[data-endorsement-bar]")!
+          .getBoundingClientRect();
+        return {
+          bottom: Math.round(surface.bottom - bar.bottom),
+          width: Math.round(surface.width - bar.width),
+          height: Math.round(bar.height),
+        };
+      }),
+      { bottom: 0, width: 0, height: 6 },
+    );
+    await page.keyboard.press("Escape");
+    // No serious accessibility problems with the bar and its card.
+    await bar.focus();
+    await page.addScriptTag({ content: axe.source });
+    const violations = await page.evaluate(async () => {
+      const run = await window.axe.run(
+        document.querySelector(".arena-watch")!,
+        {
+          runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
+        },
+      );
+      return run.violations
+        .filter((item) => ["serious", "critical"].includes(item.impact ?? ""))
+        .map((item) => ({
+          id: item.id,
+          nodes: item.nodes.map((node) => node.target),
+        }));
+    });
+    assert.deepEqual(violations, []);
+    assert.deepEqual(errors, []);
+    await context.close();
+  }
+  {
+    // A tap toggles the card on a phone, and a tap elsewhere closes it.
+    const { context, page, errors } = await open(390, 844, true);
+    const bar = page.locator('[data-endorsement-bar][data-empty="false"]');
+    await bar.waitFor();
+    await bar.scrollIntoViewIfNeeded();
+    const box = (await bar.boundingBox())!;
+    await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+    assert.equal((await barState(page)).open, true);
+    await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+    assert.equal((await barState(page)).open, false);
+    await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+    assert.equal((await barState(page)).open, true);
+    await page.touchscreen.tap(box.x + box.width / 2, box.y - 120);
+    assert.equal((await barState(page)).open, false);
+    assert.equal(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+      true,
+    );
+    assert.deepEqual(errors, []);
+    await context.close();
+  }
+  results.endorsementBar = true;
+
+  // 15. On a replay the bar follows the playing turn: empty before turn 1,
+  //     each turn's figure from its first second, back again on a seek. The
+  //     change lands in the same task as the position report, and the fill
+  //     slides for 0.12 s at most.
+  {
+    debate = counted;
+    windowList = windows(true);
+    endorsementTurns = Array.from({ length: 10 }, (_, index) =>
+      figureThrough(index + 1),
+    );
+    const { context, page, errors } = await open(1440, 900);
+    const bar = page.locator('[data-endorsement-bar][data-empty="false"]');
+    await bar.waitFor();
+    // Before the replay reports a position: the latest figure.
+    assert.equal(await bar.getAttribute("aria-valuenow"), "47");
+    // Dispatches a position and reads the bar in the same task.
+    const at = (position: number) =>
+      page.evaluate(
+        ([id, seconds]) => {
+          window.dispatchEvent(
+            new CustomEvent("yap:playback", {
+              detail: { debateId: id, positionSeconds: seconds, playing: true },
+            }),
+          );
+          const element = document.querySelector<HTMLElement>(
+            "[data-endorsement-bar]",
+          )!;
+          return {
+            empty: element.dataset.empty,
+            now: element.getAttribute("aria-valuenow"),
+            share: element.style.getPropertyValue("--yes-share"),
+            status:
+              document.querySelector(".arena-endorsement-status")
+                ?.textContent ?? null,
+          };
+        },
+        [debateId, position] as const,
+      );
+    assert.deepEqual(await at(0), {
+      empty: "true",
+      now: "0",
+      share: "0%",
+      status: "Fills as each turn plays.",
+    });
+    assert.deepEqual(await at(start(1)), {
+      empty: "false",
+      now: "38",
+      share: "38%",
+      status: null,
+    });
+    assert.equal((await at(start(3) + 0.5)).now, "40");
+    assert.equal((await at(start(7) + 30)).now, "44");
+    // Seeking back shows the earlier turn again.
+    assert.equal((await at(start(2))).now, "39");
+    assert.equal((await at(start(10) + 59)).now, "47");
+    await bar.focus();
+    assert.match(
+      (await barState(page)).text!,
+      /through turn 10.*Since turn 9: \+1 pt Yes/,
+    );
+    assert.equal((await at(start(4))).now, "41");
+    assert.match((await barState(page)).text!, /through turn 4.*Since turn 3/);
+    assert.equal(
+      await page
+        .locator(".arena-endorsement-fill")
+        .evaluate((element) => getComputedStyle(element).transitionDuration),
+      "0.12s",
+    );
+    assert.deepEqual(errors, []);
+    await context.close();
+    endorsementTurns = [];
+  }
+  results.endorsementBarFollowsReplay = true;
 
   console.log(JSON.stringify({ replayTimelineBrowser: "PASS", ...results }));
 } finally {

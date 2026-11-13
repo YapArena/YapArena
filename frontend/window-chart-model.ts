@@ -3,6 +3,7 @@
 // AI outline through S's windowArgumentLabel contract (Decision 0012). No DOM
 // access, so tests can import the built module.
 import type { OutlineTimeline } from "../src/features/outline/public-types.ts";
+import type { DebateEndorsement } from "../src/features/endorsement/types.ts";
 import type { Fraction, RoundPoint } from "./arena-types.js";
 import { windowArgumentLabel } from "./arena-chart.js";
 
@@ -31,6 +32,12 @@ declare global {
     "yap:stake-windows": CustomEvent<{
       debateId: string;
       windows: RevealedWindow[];
+      // Decision 0015: the debate's last-answer figure from the same read,
+      // and when its answers are revealed, for the bar on the video.
+      endorsement?: DebateEndorsement | null;
+      endorsementTurns?: DebateEndorsement[];
+      revealMode?: "five_day" | "per_round";
+      revealAt?: string | null;
     }>;
     // The signed-in viewer's own limits (on the yes scale) by window id,
     // from the panel's private read, so the price inspector can mark them.

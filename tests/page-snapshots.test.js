@@ -1,6 +1,7 @@
 // Byte-for-byte snapshots of every server-rendered page. They guard markup
 // refactors: an unexpected escaping or structure change fails here. Update
 // deliberately: node --test --test-update-snapshots tests/page-snapshots.test.js
+import assert from "node:assert/strict";
 import { it } from "node:test";
 import {
   activity,
@@ -179,6 +180,58 @@ it("renders a debate", (t) => {
   snapshot(t, web.renderDebate(origin, debate, true, null));
   // Live topic queue on (Decision 0011): the banner container above the video.
   snapshot(t, web.renderDebate(origin, debate, false, null, true));
+  // Decision 0015: the last-answer bar on the video, with turn windows on, for
+  // a debate asking its topic's question; plain Yes and No once the founder
+  // reviews the topic as "side A is not yes".
+  const counted = { ...debate, proposition: debate.topic.title };
+  const withBar = (value) =>
+    web.renderDebate(
+      origin,
+      value,
+      false,
+      null,
+      false,
+      undefined,
+      undefined,
+      true,
+    );
+  snapshot(t, withBar({ ...counted, status: "live" }));
+  snapshot(t, withBar({ ...counted, status: "replay", sideAIsYes: false }));
+});
+
+it("shows the last-answer bar only for a counted debate with turn windows on", () => {
+  const counted = {
+    ...debate,
+    status: "live",
+    proposition: debate.topic.title,
+  };
+  const page = (value, bar) =>
+    web.renderDebate(
+      origin,
+      value,
+      false,
+      null,
+      false,
+      undefined,
+      undefined,
+      bar,
+    );
+  const shown = page(counted, true);
+  assert.match(shown, /data-endorsement-bar/);
+  assert.match(shown, /endorsement-bar\.js/);
+  assert.match(shown, /data-side-a="For" data-side-b="Against"/);
+  assert.doesNotMatch(shown, /data-side-a-is-yes/);
+  // Turn windows off, or a debate asking its own question: no bar, no script.
+  for (const hidden of [page(counted, false), page(debate, true)]) {
+    assert.doesNotMatch(hidden, /data-endorsement-bar|endorsement-bar\.js/);
+    assert.doesNotMatch(hidden, /counts each account's last answer/);
+  }
+  // D2: the About card no longer has a latest result bar.
+  assert.doesNotMatch(shown, /arena-sentiment|Latest result/);
+  assert.match(
+    page({ ...counted, sideAIsYes: false }, true),
+    /data-side-a-is-yes="false"/,
+  );
 });
 
 it("renders a profile", (t) => {

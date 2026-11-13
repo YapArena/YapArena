@@ -2,14 +2,14 @@
 // windows shows "Results by turn": one bar per turn, filled in as each
 // window is revealed (item d), labelled from each turn's final AI outline
 // (direction BC1's replay board). Otherwise, with Bots mode on, it shows the
-// public bot history: the shared synthetic activity chart, price inspector,
-// sentiment and argument endorsements. Bots mode itself (runs, commitments,
+// public bot history: the shared synthetic activity chart, price inspector
+// and argument endorsements. Bots mode itself (runs, commitments,
 // receipts) lives on /coins; this module reads only public, already
 // revealed aggregates.
 import type { OutlineTimeline } from "../src/features/outline/public-types.ts";
 import type { RoundPoint, SharedActivity, Timeline } from "./arena-types.js";
 /* global document, window */
-import { createRoundChart, sharePercent } from "./arena-chart.js";
+import { createRoundChart } from "./arena-chart.js";
 import { createPriceInspector } from "./arena-price.js";
 import { watchRoom } from "./community-stream.js";
 import { seekReplay } from "./replay-seek.js";
@@ -154,20 +154,6 @@ if (root) {
       }
     }
   }
-  function renderSentiment(point: RoundPoint, caption: string, kind: string) {
-    const pct = sharePercent(point.share);
-    ui("yes").textContent = pct === null ? "—" : pct.toFixed(1) + "%";
-    ui("no").textContent = pct === null ? "—" : (100 - pct).toFixed(1) + "%";
-    ui("sentiment-caption").textContent = caption;
-    ui("sentiment-bar").dataset.empty = String(pct === null);
-    ui("sentiment-bar").setAttribute(
-      "aria-label",
-      pct === null
-        ? `No ${kind.toLowerCase()} endorsements`
-        : `${kind} YES ${pct.toFixed(1)}%, NO ${(100 - pct).toFixed(1)}%`,
-    );
-    ui("sentiment-bar").style.setProperty("--yes-share", (pct ?? 0) + "%");
-  }
   // Item d: the turn windows replace the bot history on this chart once one
   // is revealed, or straight away without bot history. Each turn is a bar;
   // only revealed turns show a result.
@@ -203,8 +189,6 @@ if (root) {
       points.find((point) => point.number === selected) ?? null,
       "Turn",
     );
-    ui("scope").textContent = "Yap Coins · revealed turn windows";
-    renderSentiment(latest, `Yap Coins · turn ${latest.number}`, "Revealed");
   }
   function renderShared() {
     const revealed = windowPoints(windows, timeline).map((point) => ({
@@ -227,14 +211,7 @@ if (root) {
     ui("volume").textContent = money(shared.totals.premium, 2);
     ui("participants").textContent =
       `${shared.totals.botCommitments.toLocaleString()} synthetic bot endorsements · ${shared.totals.humanCommitments} shared participant endorsements`;
-    ui("scope").textContent =
-      "Shared simulation · seeded bots + opted-in mixed and observer rounds";
     ui("sync").textContent = "● Synthetic activity · updates after settlement";
-    renderSentiment(
-      defaultPrice!,
-      `Synthetic / shared round ${defaultPrice!.number}`,
-      "Synthetic",
-    );
     ui("round-label").textContent = `Round ${shared.items.at(-1)!.number}`;
     ui("round-state").textContent = "synthetic";
     ui("countdown").textContent = "Shared settled history";
@@ -332,8 +309,6 @@ if (root) {
           chart.clear("Shared history is unavailable.");
           prices.clear();
           ui("volume").textContent = "— Yap Coins";
-          ui("yes").textContent = "—";
-          ui("no").textContent = "—";
         }
         return;
       }

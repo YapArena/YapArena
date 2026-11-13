@@ -57,6 +57,12 @@ export interface PublicDebate {
    * of them at most. Null when the rules don't specify usable timings.
    */
   timing?: { turnCount: number; turnSeconds: number } | null;
+  /**
+   * Decision 0015 (D4): false when the founder's latest review of the topic
+   * says side A does not answer yes. Read with a single debate only, and
+   * present only then; otherwise side A answers yes.
+   */
+  sideAIsYes?: false;
 }
 
 export interface PublicList<T> {

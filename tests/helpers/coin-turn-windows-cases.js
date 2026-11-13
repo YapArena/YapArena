@@ -105,19 +105,22 @@ describe(
     // Live fixtures are demos so they never compete for the featured slot
     // that featured-postgres checks in parallel.
     // Recorded as per-round so windows settle at their cutoff (F11).
+    // Most fixtures ask their own question, so they are not counted in the
+    // last-answer figure (Decision 0015); "Turn windows" is the topic title.
     async function liveDebate({
       status = "live",
       deadline = "60 seconds",
       reveal = "per_round",
+      proposition = "Should each turn be one trading window?",
     } = {}) {
       const id = (
         await owner.query(
           `INSERT INTO debates(slug,topic_id,proposition,status,publication_state,rules_version,
             rules_snapshot,live_started_at,is_demo)
-          VALUES($1,$2,'Should each turn be one trading window?',$3,'published','preview-1',
+          VALUES($1,$2,$4,$3,'published','preview-1',
             '{"initial_speaking_time_seconds":60,"maximum_duration_seconds":600}',
             clock_timestamp()-INTERVAL '1 second',true) RETURNING id`,
-          [`turn-windows-${randomUUID()}`, topicId, status],
+          [`turn-windows-${randomUUID()}`, topicId, status, proposition],
         )
       ).rows[0].id;
       await owner.query(
@@ -566,6 +569,106 @@ describe(
       const pending = (await windows.publicWindows(fiveDay)).windows[0];
       assert.equal(pending.state, "open");
       assert.equal(pending.pricing, null);
+    });
+
+    // Decision 0015: the debate's last-answer figure rides on the window
+    // list, counting only settled, revealed turns whose earlier turns are
+    // closed, and only when the question is the topic title.
+    it("adds the debate's last-answer figure once its turns are revealed", async () => {
+      const traders = [];
+      for (let index = 0; index < 3; index++) traders.push(await funded());
+      const answer = (trader, roundId, side) =>
+        windows.submit(traders[trader], roundId, randomUUID(), {
+          side,
+          limit: side === "YES" ? "0.6" : "0.4",
+          quantity: 10,
+        });
+      const debateId = await liveDebate({ proposition: "Turn windows" });
+      await windows.openTurnWindows(20, [debateId]);
+      const [first] = await rounds(debateId);
+      await answer(0, first.id, "YES");
+      await answer(1, first.id, "YES");
+      await answer(2, first.id, "NO");
+      await nextTurn(debateId);
+      await windows.openTurnWindows(20, [debateId]);
+      const second = (await rounds(debateId)).find((r) => r.turn_number === 2);
+      await answer(0, second.id, "NO");
+      await answer(2, second.id, "YES");
+      assert.equal(
+        (await windows.publicWindows(debateId)).endorsement,
+        null,
+        "nothing before a reveal",
+      );
+      // Turn 2 settles first: it waits for turn 1 (closed-turn rule).
+      await close(second.id);
+      await windows.advance(20);
+      assert.equal(
+        (await rounds(debateId)).find((r) => r.turn_number === 2).state,
+        "settled",
+      );
+      assert.deepEqual(
+        (await windows.publicWindows(debateId)).endorsementTurns,
+        [],
+      );
+      await close(first.id);
+      await windows.advance(20);
+      const revealed = await windows.publicWindows(debateId);
+      // The figure through each counted turn, for a replay to follow.
+      assert.deepEqual(revealed.endorsementTurns[0], {
+        throughTurn: 1,
+        yes: 2,
+        accounts: 3,
+        previous: null,
+        switched: { toYes: 0, toNo: 0, cameBack: 0 },
+        multiAnswerAccounts: 0,
+      });
+      assert.deepEqual(revealed.endorsementTurns[1], revealed.endorsement);
+      assert.deepEqual((await windows.publicWindows(debateId)).endorsement, {
+        throughTurn: 2,
+        yes: 2,
+        accounts: 3,
+        previous: { throughTurn: 1, yes: 2, accounts: 3 },
+        switched: { toYes: 1, toNo: 1, cameBack: 0 },
+        multiAnswerAccounts: 2,
+      });
+      // The fold equals the SQL reference: each account's last answer.
+      const reference = (
+        await owner.query(
+          `WITH kept AS (SELECT DISTINCT ON (o.user_id) o.side FROM coin_debate_orders o
+             JOIN coin_debate_rounds r ON r.id=o.round_id WHERE r.debate_id=$1
+             ORDER BY o.user_id, o.created_at DESC, r.revealed_at DESC, r.turn_number DESC, r.id DESC)
+           SELECT count(*) FILTER (WHERE side='YES')::int AS yes, count(*)::int AS accounts FROM kept`,
+          [debateId],
+        )
+      ).rows[0];
+      assert.deepEqual(reference, { yes: 2, accounts: 3 });
+      // A debate asking its own question keeps its per-turn results only.
+      const own = await liveDebate();
+      await windows.openTurnWindows(20, [own]);
+      const [ownRound] = await rounds(own);
+      await answer(0, ownRound.id, "YES");
+      await close(ownRound.id);
+      await windows.advance(20);
+      const ownView = await windows.publicWindows(own);
+      assert.ok(ownView.windows[0].pricing);
+      assert.equal(ownView.endorsement, null);
+      // Five-day: answers stay out until the 120-hour close.
+      const fiveDay = await liveDebate({
+        reveal: "five_day",
+        proposition: "Turn windows",
+      });
+      await windows.openTurnWindows(20, [fiveDay]);
+      const [locked] = await rounds(fiveDay);
+      await answer(1, locked.id, "NO");
+      await close(locked.id);
+      await owner.query(
+        "UPDATE debates SET status='ended',live_ended_at=clock_timestamp() WHERE id=$1",
+        [fiveDay],
+      );
+      await windows.advance(20);
+      const hidden = await windows.publicWindows(fiveDay);
+      assert.equal(hidden.endorsement, null);
+      assert.deepEqual(hidden.endorsementTurns, [], "no turn before the close");
     });
 
     // Turn windows' places in time, seconds before one shared instant

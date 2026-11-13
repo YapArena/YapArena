@@ -157,6 +157,7 @@ export function createDiscoveryRouter({
   firstRunWelcome = false,
   firstRunTips = false,
   pushKey,
+  endorsementBar = false,
   signedIn = async () => false,
 }: {
   discovery: Repository;
@@ -181,6 +182,8 @@ export function createDiscoveryRouter({
   firstRunTips?: boolean;
   // Web push for "Notify me" (first-run build plan PR 10): the VAPID public key, when push is on.
   pushKey?: string;
+  // Decision 0015: the debate's last-answer bar on the video, with turn windows on.
+  endorsementBar?: boolean;
   // Whether the request carries a valid session; / sends those readers to /home.
   signedIn?: (request: Request) => Promise<boolean>;
 }) {
@@ -481,6 +484,7 @@ export function createDiscoveryRouter({
               ? { state: await liveOutline.snapshot(debate.id) }
               : undefined,
             pushKey,
+            endorsementBar,
           ),
         )
       : html(response, renderNotFound(origin), 404);
