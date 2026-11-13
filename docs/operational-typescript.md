@@ -42,6 +42,9 @@ owner-only command that suspends or reinstates one account, with no `.env` loadi
 HTTP listener; see [suspending an account](operations.md#suspend-or-reinstate-an-account).
 `set-topic-category.ts` is checked there too: an owner-only command that changes one topic's
 category with a recorded reason; see [changing a topic's category](operations.md#change-a-topics-category).
+`topic-answer-sides.ts` is checked there too: an owner-only command that lists published topics
+with their side labels and records the founder's review of which side answers yes; see
+[reviewing which side answers yes](operations.md#review-which-side-answers-yes).
 `generate-web-push-keys.ts` is checked there as well: a one-time command that prints a VAPID key
 pair for web push and reads or stores nothing; see [web push](operations.md#web-push-for-notify-me).
 
