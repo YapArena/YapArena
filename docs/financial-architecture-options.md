@@ -107,36 +107,36 @@ What the code does today (verified on `6b076ce`):
 
 ## 3. Decisions
 
-| ID  | Decision                                                                                                                                                                                                           | Status   | Date       | PRD      |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ---------- | -------- |
-| F01 | Architecture (c): balances and positions live only in the internal ledger                                                                                                                                          | Founder  | 2026-10-23 | D16      |
-| F02 | One YapArena treasury wallet holds the USDC; owed winnings are protected by a ledger reserve, not a second wallet, while no user deposits exist                                                                    | Founder  | 2026-10-23 | D16      |
-| F03 | Every payout is signed on a hardware key (for example the founder's Tangem) after manual review; no live key on a server                                                                                           | Founder  | 2026-10-23 | D16      |
-| F04 | Settlement asset USDC on **Base**                                                                                                                                                                                  | Founder  | 2026-10-23 | D16      |
-| F05 | Balances are USDC claims; users carry depeg or issuer-freeze risk, disclosed in the terms                                                                                                                          | Founder  | 2026-10-23 | D16      |
-| F06 | **Phase 1 accepts no user money.** Users play with free YC under the approved grant rules; only grant profits funded by the promotional budget are withdrawable. Purchases return in a later phase                 | Founder  | 2026-10-23 | D16      |
-| F07 | Phone verification before a user's first withdrawal; one phone number per account's withdrawals; manual review stays                                                                                               | Founder  | 2026-10-23 | D19      |
-| F08 | A4 runs debate markets in phase 1                                                                                                                                                                                  | Founder  | 2026-10-24 | D17      |
-| F09 | **No debate winner, permanently.** The curve parameter s is retired                                                                                                                                                | Founder  | 2026-10-24 | D16      |
-| F10 | One-minute A4 rounds during the live debate. Each minute is a replay timestamp: replay viewers join the round for the minute playing, never an earlier one; those orders settle at the close                       | Founder  | 2026-10-24 | D19      |
-| F11 | Reveal mode per debate, chosen at creation and locked when the first round opens: five-day (default, mandatory for user-created debates) or per-round (founder-created debates only, live participation only)      | Founder  | 2026-10-24 | D17, D19 |
-| F12 | Before reveal a participant sees their own order, the round's drawn price once one exists, and a participant count that includes replay joiners immediately; sides never                                           | Founder  | 2026-10-24 | D17      |
-| F13 | The founder gives up routine viewing of hidden tallies: incident-only access, each access logged with reason. No personal founder orders in A4 rounds                                                              | Founder  | 2026-10-24 | D19      |
-| F14 | Debaters may not endorse in their own debate nor trade its topic's idea market while it is hidden                                                                                                                  | Founder  | 2026-10-24 | D19      |
-| F15 | Only unopened rounds can be voided (current A4 behaviour)                                                                                                                                                          | Founder  | 2026-10-24 | D19      |
-| F16 | After reveal, mistakes get a visible append-only correction note, a recomputed combined figure and the approved original-source balance correction; idea trades in between stand                                   | Founder  | 2026-10-24 | D16, D19 |
-| F17 | No fees in phase 1                                                                                                                                                                                                 | Founder  | 2026-10-24 | D16      |
-| F18 | Topic combined figure: quantity-weighted, exponentially decaying share of all committed revealed orders, 30-day half-life (formula in section 4). Graphs may show other windows                                    | Founder  | 2026-10-24 | D16      |
-| F19 | The ideas market ships in phase 1 on YC: one YES/NO market per topic                                                                                                                                               | Founder  | 2026-10-24 | D18      |
-| F20 | Ideas units are backed and redeemable: anyone may lock 1 YC to create a YES+NO pair, and any pair redeems for 1 YC                                                                                                 | Founder  | 2026-10-24 | D18      |
-| F21 | The founder provides early liquidity as a pair-backed market maker                                                                                                                                                 | Founder  | 2026-10-24 | D18      |
-| F22 | A topic's market opens around its combined figure; a topic without a revealed debate has no market yet                                                                                                             | Founder  | 2026-10-24 | D16, D18 |
-| F23 | Continuous limit-order book, price-time priority, partial fills; orders rest until cancelled; 0.001 YC price step, whole units, A4 rounding (pay rounds up, receive rounds down, dust to a visible system account) | Founder  | 2026-10-24 | D16, D17 |
-| F24 | A closed or duplicate topic pauses trading and cancels open orders; nothing is force-settled; pairs stay redeemable; duplicates are linked, not merged                                                             | Founder  | 2026-10-24 | D18      |
-| F25 | Idea-market profit follows the same grant rules as debates and can become withdrawable                                                                                                                             | Founder  | 2026-10-24 | D18      |
-| —   | Deposit provider, routes and conversion for the paid phase                                                                                                                                                         | Deferred | —          | D16      |
-| —   | Fee rates for the paid phase                                                                                                                                                                                       | Deferred | —          | D16      |
-| —   | Sponsor revenue split between debaters, until a sponsor contract exists                                                                                                                                            | Deferred | —          | D19      |
+| ID  | Decision                                                                                                                                                                                                                                             | Status   | Date       | PRD      |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------- | -------- |
+| F01 | Architecture (c): balances and positions live only in the internal ledger                                                                                                                                                                            | Founder  | 2026-10-23 | D16      |
+| F02 | One YapArena treasury wallet holds the USDC; owed winnings are protected by a ledger reserve, not a second wallet, while no user deposits exist                                                                                                      | Founder  | 2026-10-23 | D16      |
+| F03 | Every payout is signed on a hardware key (for example the founder's Tangem) after manual review; no live key on a server                                                                                                                             | Founder  | 2026-10-23 | D16      |
+| F04 | Settlement asset USDC on **Base**                                                                                                                                                                                                                    | Founder  | 2026-10-23 | D16      |
+| F05 | Balances are USDC claims; users carry depeg or issuer-freeze risk, disclosed in the terms                                                                                                                                                            | Founder  | 2026-10-23 | D16      |
+| F06 | **Phase 1 accepts no user money.** Users play with free YC under the approved grant rules; only grant profits funded by the promotional budget are withdrawable. Purchases return in a later phase                                                   | Founder  | 2026-10-23 | D16      |
+| F07 | Phone verification before a user's first withdrawal; one phone number per account's withdrawals; manual review stays                                                                                                                                 | Founder  | 2026-10-23 | D19      |
+| F08 | A4 runs debate markets in phase 1                                                                                                                                                                                                                    | Founder  | 2026-10-24 | D17      |
+| F09 | **No debate winner, permanently.** The curve parameter s is retired                                                                                                                                                                                  | Founder  | 2026-10-24 | D16      |
+| F10 | One-minute A4 rounds during the live debate. Each minute is a replay timestamp: replay viewers join the round for the minute playing, never an earlier one; those orders settle at the close                                                         | Founder  | 2026-10-24 | D19      |
+| F11 | Reveal mode per debate, chosen at creation and locked when the first round opens: five-day (default, mandatory for user-created debates) or per-round (founder-created debates only, live participation only)                                        | Founder  | 2026-10-24 | D17, D19 |
+| F12 | Before reveal a participant sees their own order, the round's drawn price once one exists, and a participant count that includes replay joiners immediately; sides never                                                                             | Founder  | 2026-10-24 | D17      |
+| F13 | The founder gives up routine viewing of hidden tallies: incident-only access, each access logged with reason. No personal founder orders in A4 rounds                                                                                                | Founder  | 2026-10-24 | D19      |
+| F14 | Debaters may not endorse in their own debate nor trade its topic's idea market while it is hidden                                                                                                                                                    | Founder  | 2026-10-24 | D19      |
+| F15 | Only unopened rounds can be voided (current A4 behaviour)                                                                                                                                                                                            | Founder  | 2026-10-24 | D19      |
+| F16 | After reveal, mistakes get a visible append-only correction note, a recomputed combined figure and the approved original-source balance correction; idea trades in between stand                                                                     | Founder  | 2026-10-24 | D16, D19 |
+| F17 | No fees in phase 1                                                                                                                                                                                                                                   | Founder  | 2026-10-24 | D16      |
+| F18 | Topic figure: the share of accounts whose last revealed answer on the topic is YES, one answer per account, unweighted ([Decision 0015](decisions/0015-last-answer-endorsement.md); rules in section 4). Its history shows a point per revealed turn | Founder  | 2026-11-13 | D16      |
+| F19 | The ideas market ships in phase 1 on YC: one YES/NO market per topic                                                                                                                                                                                 | Founder  | 2026-10-24 | D18      |
+| F20 | Ideas units are backed and redeemable: anyone may lock 1 YC to create a YES+NO pair, and any pair redeems for 1 YC                                                                                                                                   | Founder  | 2026-10-24 | D18      |
+| F21 | The founder provides early liquidity as a pair-backed market maker                                                                                                                                                                                   | Founder  | 2026-10-24 | D18      |
+| F22 | A topic's market opens around its topic figure (F18, amended 2026-11-13); a topic without a revealed debate has no market yet                                                                                                                        | Founder  | 2026-10-24 | D16, D18 |
+| F23 | Continuous limit-order book, price-time priority, partial fills; orders rest until cancelled; 0.001 YC price step, whole units, A4 rounding (pay rounds up, receive rounds down, dust to a visible system account)                                   | Founder  | 2026-10-24 | D16, D17 |
+| F24 | A closed or duplicate topic pauses trading and cancels open orders; nothing is force-settled; pairs stay redeemable; duplicates are linked, not merged                                                                                               | Founder  | 2026-10-24 | D18      |
+| F25 | Idea-market profit follows the same grant rules as debates and can become withdrawable                                                                                                                                                               | Founder  | 2026-10-24 | D18      |
+| —   | Deposit provider, routes and conversion for the paid phase                                                                                                                                                                                           | Deferred | —          | D16      |
+| —   | Fee rates for the paid phase                                                                                                                                                                                                                         | Deferred | —          | D16      |
+| —   | Sponsor revenue split between debaters, until a sponsor contract exists                                                                                                                                                                              | Deferred | —          | D19      |
 
 Consequences derived by the author (analysis, not founder decisions):
 
@@ -148,7 +148,7 @@ Consequences derived by the author (analysis, not founder decisions):
   promotional budget, including idea-market gains (F25). The finite-treasury admission rule must
   also cover idea-market exposure, and payouts need wash-trading checks across linked accounts.
 - **Zero participation.** An empty round has no offer and undefined settlement (A4); it adds
-  nothing to the combined figure. F22 means such topics have no idea market until something is
+  nothing to the topic figure. F22 means such topics have no idea market until something is
   revealed.
 
 ## 4. Hidden tallies in the chosen design
@@ -170,19 +170,18 @@ Residual channels the reviewer should assess:
 | Founder incident access          | Direct knowledge                                                     | Logged and reasoned (F13)                      |
 | Public speech, receipts shared   | Expectations                                                         | Outside any guarantee (PRD section 5)          |
 
-Combined figure (F18), for topic _t_, over every committed order _o_ in revealed, non-void
-rounds, with quantity _q_, side _s_, round reveal time _r_ and computation time _T_:
+Topic figure (F18, [Decision 0015](decisions/0015-last-answer-endorsement.md), replacing the
+quantity-weighted, 30-day decaying share approved on 2026-10-24). For topic _t_, take every order
+in a settled, revealed turn window of a published, non-demo debate whose question is the topic
+title, counting a debate's turns only once every earlier turn is settled or void (a five-day
+debate only once all of its windows are). Order each account's answers by order time, then reveal
+time, turn and round, and keep its last one:
 
-    w(o) = 0.5 ^ ((T - r(o)) / 30 days)
-    combined(t) = sum over YES orders of q·w  /  sum over all orders of q·w
+    figure(t) = accounts whose last answer is YES  /  accounts with an answer
 
-It is labelled "money-weighted support", not a probability. Market prices bound but need not equal
-average belief ([Manski](https://nber.org/papers/w10359);
-[Wolfers and Zitzewitz](https://www.frbsf.org/research-and-insights/publications/working-papers/interpreting-prediction-market-prices-as-probabilities/)),
-and recency weighting improved crowd aggregates in
-[Atanasov et al. 2017](https://pubsonline.informs.org/stoken/default+domain/EC-crowds/full/10.1287/mnsc.2015.2374).
-The 30-day half-life is a versioned starting value, not a research result. Only revealed rounds
-count, so the figure cannot leak hidden data. A
+Each account counts once; quantities, limits and results are not read. It is labelled "Not a
+vote, a price or a forecast." Only revealed rounds count, so the figure cannot leak hidden data,
+and it changes only at a reveal. A
 [2024 follow-up](https://Www.Gwern.net/doc/statistics/prediction/2024-atanasov.pdf) found an
 automated market maker (LMSR) outperformed continuous order books on low-activity questions; this
 is noted for the founder's market-making rule, not decided.
@@ -195,7 +194,7 @@ PRD; the rows below stay as written until the founder revises them.
 | PRD row | Confirmed text (short)                         | Phase 1 per this brief                               |
 | ------- | ---------------------------------------------- | ---------------------------------------------------- |
 | D01     | Both markets ship with real-money crypto       | Both ship, on free YC with withdrawable grant profit |
-| D02–D03 | Pooled money baseline; fee-free paid bootstrap | Decaying quantity-weighted figure; new topics wait   |
+| D02–D03 | Pooled money baseline; fee-free paid bootstrap | Last-answer share of accounts (F18); new topics wait |
 | D04–D05 | Money-share winner; continuous curve           | No winner, permanently (F09)                         |
 | D06–D07 | Paired event tokens; draw/void refunds         | A4 center counterparty; void unopened rounds only    |
 | D08     | Founder liquidity counts as support            | No founder A4 orders; founder makes the ideas market |
@@ -243,7 +242,7 @@ disabled):
 - A4 one-minute rounds, replay joining by video minute with no return to earlier rounds, reveal
   mode at creation and its lock, live-only per-round debates, immediate participant count, and
   the debater and founder exclusions (F10–F14). A4 and `debate-sandbox.ts` are the base.
-- Visible correction records and combined-figure recomputation (F16, F18); topic history
+- Visible correction records and topic-figure recomputation (F16, F18); topic history
   graphs with alternative windows.
 - Ideas market in the sandbox on YC: pair mint/redeem, limit-order book, 0.001 tick, topic
   pause and linking, founder market-maker account, finite-treasury coverage of idea exposure,

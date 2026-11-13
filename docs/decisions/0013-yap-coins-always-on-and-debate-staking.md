@@ -45,7 +45,7 @@ is an A4 endorsement in one turn's 60-second window; there is no winner (F09).
   button, each with a text label (amended 2026-10-30: no icon). The word "bet" is not used.
 - Yes and No belong only to the question. A turn names its speaker by display name and topic side
   label ("Turn 3 · Maya speaking (People first)"); side A is not the yes side, and no speaker is
-  coloured by answer.
+  coloured by answer. Amended 2026-11-13 (below): side A answers yes.
 - A "read of the room" slider ("What share will say yes this turn?") sets the A4 limit: the yes
   ceiling is the read, the no ceiling is 100 minus it. A plain maximum price is under "Set a
   maximum price instead".
@@ -134,3 +134,12 @@ change to the debate chart's code:
   line chart and price inspector until a turn is revealed, as before.
 - What a chart shows is unchanged: revealed windows only, from the public window list, labelled
   from each turn's final AI outline.
+
+## Amendment, 2026-11-13 (founder, last-answer endorsement rate)
+
+[Decision 0015](0015-last-answer-endorsement.md) makes side A the yes side: side A answers yes to
+the topic's question and side B answers no, and new challenges always use the topic title as their
+question. Yes and No still belong to the question, the turn line still names the speaker's side
+label, and no speaker is coloured by answer. Stored side labels are not swapped; a topic the founder
+reviews as "side A is not yes" shows plain Yes and No. The About tab's latest result bar is removed
+when the debate figure's bar on the video ships.
