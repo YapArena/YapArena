@@ -2,13 +2,22 @@
 // its card. It reads the figure from the answer panel's window list
 // (frontend/stake-windows.ts), so it adds no request of its own, and it never
 // announces anything live: aria-valuetext is read when the bar has focus.
+// On a replay it follows the replay player's yap:playback position: each
+// turn's figure shows as soon as that turn plays.
 import {
   barView,
   cardLeft,
+  shownEndorsement,
   type BarLabels,
   type BarView,
+  type TurnStart,
 } from "./endorsement-bar-model.js";
-import { onDebateEndorsement } from "./stake-windows.js";
+import {
+  onDebateEndorsement,
+  onStakeWindows,
+  type DebateEndorsementView,
+} from "./stake-windows.js";
+import { isTurnWindow } from "./turn-results-model.js";
 
 function line(className: string, text: string) {
   const element = document.createElement("p");
@@ -84,7 +93,13 @@ function start(bar: HTMLElement, card: HTMLElement, debateId: string) {
     if (card.hidden) open();
     else close();
   }
+  let signature = "";
   function render(next: BarView) {
+    // The replay reports its position about four times a second; only a
+    // different figure touches the page.
+    const nextSignature = JSON.stringify(next);
+    if (nextSignature === signature) return;
+    signature = nextSignature;
     view = next;
     bar.dataset.empty = String(next.empty);
     bar.style.setProperty("--yes-share", `${next.yesPercent}%`);
@@ -97,9 +112,42 @@ function start(bar: HTMLElement, card: HTMLElement, debateId: string) {
   // Until the first window read arrives, the card says when results come
   // for a per-round debate; the read replaces it.
   card.replaceChildren(...cardContent(view));
-  onDebateEndorsement(debateId, (next) =>
-    render(barView({ ...next, now: Date.now() }, labels)),
-  );
+  let figure: DebateEndorsementView | null = null;
+  let starts: TurnStart[] = [];
+  let position: number | null = null;
+  function update() {
+    if (!figure) return;
+    const shown = shownEndorsement({
+      latest: figure.endorsement,
+      turns: figure.turns,
+      starts,
+      position,
+    });
+    render(barView({ ...figure, ...shown, now: Date.now() }, labels));
+  }
+  onDebateEndorsement(debateId, (next) => {
+    figure = next;
+    update();
+  });
+  onStakeWindows(debateId, (windows) => {
+    starts = windows.filter(isTurnWindow).flatMap((window) =>
+      window.recording
+        ? [
+            {
+              turnNumber: window.turnNumber,
+              startSeconds: window.recording.startSeconds,
+            },
+          ]
+        : [],
+    );
+    update();
+  });
+  // Only the replay player sends this; a live debate keeps the latest figure.
+  window.addEventListener("yap:playback", (event) => {
+    if (event.detail.debateId !== debateId) return;
+    position = event.detail.positionSeconds;
+    update();
+  });
 
   bar.addEventListener("pointerenter", (event) => {
     if (event.pointerType === "mouse") open();

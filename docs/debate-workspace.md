@@ -190,8 +190,11 @@ and each revealed window's aggregate pricing for every viewer. Since
 [Decision 0015](decisions/0015-last-answer-endorsement.md) it also carries `endorsement`: the
 debate's last-answer figure through its latest counted turn (counts only, never account ids), read
 with the windows in one read-only, repeatable-read snapshot, and null before the first reveal, for
-every five-day debate until its close, and for a debate whose question is not the topic title. The
-answer panel shares it with the windows, and the bar on the video's bottom edge shows it (see
+every five-day debate until its close, and for a debate whose question is not the topic title.
+`endorsementTurns` lists the same figure through each counted turn, oldest first (empty in the
+same cases), so a replay's bar follows the playing turn without another read. The panel reads the
+list as soon as a `window` signal arrives, then its spread refresh follows for the viewer's own
+rounds. The answer panel shares it with the windows, and the bar on the video's bottom edge shows it (see
 [the debate page design](debate-page-design.md#stage)). This workspace's YAP round controls
 are unchanged; the YC round bar and ticket on this page belong to the betting interface work
 (Decision 0013).

@@ -24,7 +24,9 @@ import { createDiscoveryRouter } from "../dist/features/discovery/router.js";
 // player sends them. It also clicks the stage's Play replay and Join as
 // viewer buttons with a real mouse, and checks that the last-answer bar on
 // the video's bottom edge (Decision 0015) takes only its own strip, the
-// visible 6 px over a replay's native controls. No database, media or hosted service is
+// visible 6 px over a replay's native controls, and that on a replay it shows
+// the playing turn's figure the moment the position reaches that turn. No
+// database, media or hosted service is
 // involved. With REPLAY_TIMELINE_ARTIFACT_DIR set it saves phone screenshots.
 
 type DiscoveryOptions = Parameters<typeof createDiscoveryRouter>[0];
@@ -141,6 +143,18 @@ const endorsement = {
   switched: { toYes: 6, toNo: 3, cameBack: 1 },
   multiAnswerAccounts: 30,
 };
+// The figure through each turn, which a replay follows: turn N has 37 + N
+// Yes answers of 100, so turn 10 matches the latest figure above. Empty
+// until step 15, so the steps before it show the latest figure.
+const figureThrough = (turn: number) => ({
+  ...endorsement,
+  throughTurn: turn,
+  yes: 37 + turn,
+  accounts: 100,
+  previous:
+    turn > 1 ? { throughTurn: turn - 1, yes: 36 + turn, accounts: 100 } : null,
+});
+let endorsementTurns: ReturnType<typeof figureThrough>[] = [];
 
 let browser: Browser | undefined, server: Server | undefined;
 try {
@@ -217,6 +231,7 @@ try {
             windowList.every((window) => window.state === "settled")
               ? endorsement
               : null,
+          endorsementTurns,
         },
       });
     // The turns' final outline labels, which label revealed turns.
@@ -1118,6 +1133,80 @@ try {
     await context.close();
   }
   results.endorsementBar = true;
+
+  // 15. On a replay the bar follows the playing turn: empty before turn 1,
+  //     each turn's figure from its first second, back again on a seek. The
+  //     change lands in the same task as the position report, and the fill
+  //     slides for 0.12 s at most.
+  {
+    debate = counted;
+    windowList = windows(true);
+    endorsementTurns = Array.from({ length: 10 }, (_, index) =>
+      figureThrough(index + 1),
+    );
+    const { context, page, errors } = await open(1440, 900);
+    const bar = page.locator('[data-endorsement-bar][data-empty="false"]');
+    await bar.waitFor();
+    // Before the replay reports a position: the latest figure.
+    assert.equal(await bar.getAttribute("aria-valuenow"), "47");
+    // Dispatches a position and reads the bar in the same task.
+    const at = (position: number) =>
+      page.evaluate(
+        ([id, seconds]) => {
+          window.dispatchEvent(
+            new CustomEvent("yap:playback", {
+              detail: { debateId: id, positionSeconds: seconds, playing: true },
+            }),
+          );
+          const element = document.querySelector<HTMLElement>(
+            "[data-endorsement-bar]",
+          )!;
+          return {
+            empty: element.dataset.empty,
+            now: element.getAttribute("aria-valuenow"),
+            share: element.style.getPropertyValue("--yes-share"),
+            status:
+              document.querySelector(".arena-endorsement-status")
+                ?.textContent ?? null,
+          };
+        },
+        [debateId, position] as const,
+      );
+    assert.deepEqual(await at(0), {
+      empty: "true",
+      now: "0",
+      share: "0%",
+      status: "Fills as each turn plays.",
+    });
+    assert.deepEqual(await at(start(1)), {
+      empty: "false",
+      now: "38",
+      share: "38%",
+      status: null,
+    });
+    assert.equal((await at(start(3) + 0.5)).now, "40");
+    assert.equal((await at(start(7) + 30)).now, "44");
+    // Seeking back shows the earlier turn again.
+    assert.equal((await at(start(2))).now, "39");
+    assert.equal((await at(start(10) + 59)).now, "47");
+    await bar.focus();
+    assert.match(
+      (await barState(page)).text!,
+      /through turn 10.*Since turn 9: \+1 pt Yes/,
+    );
+    assert.equal((await at(start(4))).now, "41");
+    assert.match((await barState(page)).text!, /through turn 4.*Since turn 3/);
+    assert.equal(
+      await page
+        .locator(".arena-endorsement-fill")
+        .evaluate((element) => getComputedStyle(element).transitionDuration),
+      "0.12s",
+    );
+    assert.deepEqual(errors, []);
+    await context.close();
+    endorsementTurns = [];
+  }
+  results.endorsementBarFollowsReplay = true;
 
   console.log(JSON.stringify({ replayTimelineBrowser: "PASS", ...results }));
 } finally {

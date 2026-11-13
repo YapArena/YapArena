@@ -52,7 +52,7 @@ import {
   type SandboxBuckets,
 } from "./sandbox-repository.ts";
 import type { TreasuryBalances } from "./treasury-monitor.ts";
-import { debateEndorsement } from "../endorsement/repository.ts";
+import { debateEndorsementTurns } from "../endorsement/repository.ts";
 
 // Same A4 algorithm and ordinary human schedule. This asset is new: one YC
 // contract has a 0.01 USDC quote, NOT the historical YAP atomic face value.
@@ -1989,8 +1989,10 @@ export function createCoinDebateSandbox(
             )
           ).rows[0];
           if (!row) return null;
-          const endorsement = await debateEndorsement(client, debateId, rail);
-          return { debateId, ...row, endorsement };
+          // The figure through each counted turn too, so a replay's bar
+          // follows the playing turn without another read.
+          const figures = await debateEndorsementTurns(client, debateId, rail);
+          return { debateId, ...row, ...figures };
         },
         { isolation: "repeatable read", readOnly: true },
       );

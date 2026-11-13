@@ -12,6 +12,7 @@ const {
   changeText,
   emptyStatus,
   revealTime,
+  shownEndorsement,
   switchText,
   yesPercent,
 } = await import("../public/endorsement-bar-model.js");
@@ -196,4 +197,45 @@ it("keeps the card inside the surface, centred on the share's edge", () => {
   assert.equal(cardLeft(1000, 300, 98), 692);
   // A card wider than the surface starts at the margin.
   assert.equal(cardLeft(200, 320, 50), 8);
+});
+
+it("follows the replay's playing turn and shows the latest otherwise", () => {
+  const turn = (throughTurn) => figure({ throughTurn, previous: null });
+  const turns = [turn(1), turn(2), turn(4)];
+  const latest = turns.at(-1);
+  // Turn 3 was void; each turn starts 60 s after the one before.
+  const starts = [1, 2, 3, 4].map((turnNumber) => ({
+    turnNumber,
+    startSeconds: 30 + 60 * (turnNumber - 1),
+  }));
+  const shown = (position, overrides = {}) =>
+    shownEndorsement({ latest, turns, starts, position, ...overrides });
+  // Live: no replay position.
+  assert.deepEqual(shown(null), { endorsement: latest, waiting: false });
+  // Before turn 1 starts the bar waits.
+  assert.deepEqual(shown(0), { endorsement: null, waiting: true });
+  // A turn's figure shows from its first second.
+  assert.equal(shown(30).endorsement, turns[0]);
+  assert.equal(shown(89.9).endorsement, turns[0]);
+  assert.equal(shown(90).endorsement, turns[1]);
+  // The void turn keeps the figure before it.
+  assert.equal(shown(150).endorsement, turns[1]);
+  assert.equal(shown(210).endorsement, turns[2]);
+  // Past the end, and seeking back, follow the position.
+  assert.equal(shown(9999).endorsement, latest);
+  assert.equal(shown(31).endorsement, turns[0]);
+  // Without places in the recording, or before any reveal, the latest.
+  assert.deepEqual(shown(31, { starts: [] }), {
+    endorsement: latest,
+    waiting: false,
+  });
+  assert.deepEqual(shown(31, { turns: [], latest: null }), {
+    endorsement: null,
+    waiting: false,
+  });
+  // Waiting says why the bar is empty.
+  assert.equal(
+    barView(input(null, { waiting: true }), labels).card.status,
+    "Fills as each turn plays.",
+  );
 });

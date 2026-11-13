@@ -97,7 +97,7 @@ sideways.
 - **Endorsement bar ([Decision 0015](decisions/0015-last-answer-endorsement.md)):** the
   debate's last-answer figure on the video's bottom edge, the surface's last child, on debates
   with turn windows whose question is the topic title. A 6 px track (black at 55%, 1 px white top
-  edge at 16%) with a white fill at the Yes share, animating its width over 0.5 s (none under
+  edge at 16%) with a white fill at the Yes share, animating its width over 0.12 s (none under
   reduced motion), clipped by the surface's rounded corners, at z-index 5: above the frames and
   the overlay chat, below the chat and Enlarge buttons. Its hit area is 12 px tall, below the
   overlay chat, and shrinks to the visible 6 px while the replay video shows, so the native
@@ -115,8 +115,10 @@ sideways.
   Yes and No instead of the side labels. Before a reveal the bar is empty and the card says "Fills
   after each turn's answers are revealed." or, for a five-day debate, "Answers stay hidden until
   Nov 18 at 3:00 PM EST, 5 days after the debate." It reads the `endorsement` block of the window
-  list (`frontend/endorsement-bar.ts`, wording in `frontend/endorsement-bar-model.ts`) and does
-  not follow replay playback.
+  list (`frontend/endorsement-bar.ts`, wording in `frontend/endorsement-bar-model.ts`). On a
+  replay it follows playback: from each turn's first second it shows the figure through that turn
+  (`endorsementTurns`), a void turn keeps the one before, and before turn 1 it is empty with "Fills
+  as each turn plays."; a seek changes it at once.
 - **Scoreboard:** two cards (48 px avatar, or "?" before a speaker is named; name, "@handle ·
   speaking / listening / next", the
   side pill, filled white while that side has the floor) and the turn clock between them, with

@@ -16,6 +16,8 @@ export interface BarInput {
   revealMode: "five_day" | "per_round";
   revealAt: string | null;
   now: number;
+  /** A replay that has not reached its first counted turn yet. */
+  waiting?: boolean;
 }
 
 export interface BarShare {
@@ -100,6 +102,7 @@ export function switchText(endorsement: DebateEndorsement) {
 
 /** Why the bar is empty: before a reveal, or a closed debate nobody answered. */
 export function emptyStatus(input: Omit<BarInput, "endorsement">) {
+  if (input.waiting) return "Fills as each turn plays.";
   if (input.revealMode === "per_round")
     return "Fills after each turn's answers are revealed.";
   const at = input.revealAt === null ? Number.NaN : Date.parse(input.revealAt);
@@ -166,4 +169,38 @@ export function cardLeft(
   const centre = (surfaceWidth * yesShare) / 100;
   const largest = Math.max(margin, surfaceWidth - cardWidth - margin);
   return Math.min(largest, Math.max(margin, centre - cardWidth / 2));
+}
+
+/** Where a turn starts in the replay's recording. */
+export interface TurnStart {
+  turnNumber: number;
+  startSeconds: number;
+}
+
+/**
+ * What the bar shows. Live, and on a replay whose turns have no place in
+ * the recording, the latest figure. On a replay, the figure through the turn
+ * playing (the last one whose start the position has reached), so a seek or
+ * a new turn changes the bar at once; before the first counted turn it waits.
+ */
+export function shownEndorsement(input: {
+  latest: DebateEndorsement | null;
+  turns: readonly DebateEndorsement[];
+  starts: readonly TurnStart[];
+  position: number | null;
+}): { endorsement: DebateEndorsement | null; waiting: boolean } {
+  const { latest, turns, starts, position } = input;
+  if (position === null || !starts.length || !turns.length)
+    return { endorsement: latest, waiting: false };
+  let playing: number | null = null;
+  for (const start of starts)
+    if (
+      start.startSeconds <= position &&
+      (playing === null || start.turnNumber > playing)
+    )
+      playing = start.turnNumber;
+  let shown: DebateEndorsement | null = null;
+  if (playing !== null)
+    for (const turn of turns) if (turn.throughTurn <= playing) shown = turn;
+  return { endorsement: shown, waiting: shown === null };
 }

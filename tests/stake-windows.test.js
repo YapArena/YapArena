@@ -118,10 +118,12 @@ it("shares the viewer's own limits the same way, latest first, per debate", asyn
 // from the same read, with when its answers are revealed.
 it("shares the debate's last-answer figure from each window read", async () => {
   const figure = { throughTurn: 2, yes: 1, accounts: 3 };
+  const turns = [{ throughTurn: 1, yes: 1, accounts: 2 }, figure];
   shareStakeWindows({
     debateId: "d1",
     windows: read(1),
     endorsement: figure,
+    endorsementTurns: turns,
     revealMode: "per_round",
     revealAt: null,
   });
@@ -131,12 +133,13 @@ it("shares the debate's last-answer figure from each window read", async () => {
   assert.deepEqual(seen, []);
   await settle();
   assert.deepEqual(seen, [
-    { endorsement: figure, revealMode: "per_round", revealAt: null },
+    { endorsement: figure, turns, revealMode: "per_round", revealAt: null },
   ]);
   // An older server's read carries no figure: the bar stays empty.
   shareStakeWindows({ debateId: "d1", windows: read(2) });
   assert.deepEqual(seen.at(-1), {
     endorsement: null,
+    turns: [],
     revealMode: "five_day",
     revealAt: null,
   });

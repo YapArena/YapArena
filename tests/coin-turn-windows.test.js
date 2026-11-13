@@ -184,6 +184,22 @@ describe("public turn windows route", () => {
       switched: { toYes: 0, toNo: 1, cameBack: 0 },
       multiAnswerAccounts: 1,
     });
+    // The figure through each counted turn, for a replay to follow.
+    assert.deepEqual(
+      response.body.endorsementTurns.map((turn) => [
+        turn.throughTurn,
+        turn.yes,
+        turn.accounts,
+      ]),
+      [
+        [1, 1, 2],
+        [2, 1, 3],
+      ],
+    );
+    assert.deepEqual(
+      response.body.endorsementTurns[1],
+      response.body.endorsement,
+    );
     assert.equal(
       statements[0],
       "BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY",

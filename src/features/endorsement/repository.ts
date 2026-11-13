@@ -2,7 +2,7 @@
 // the stored topic points. Every exclusion lives in SQL, so the PostgreSQL
 // suites test it; the counting itself is model.ts.
 import type { Pool } from "pg";
-import { latestDebateFigure } from "./model.ts";
+import { debateFigures, latestDebateFigure } from "./model.ts";
 import type {
   DebateEndorsement,
   EndorsementAnswer,
@@ -111,6 +111,22 @@ export async function debateEndorsement(
   rail: string,
 ): Promise<DebateEndorsement | null> {
   return latestDebateFigure(await debateAnswers(database, debateId, rail));
+}
+
+/**
+ * The debate figure through each counted turn, oldest first, and the latest
+ * one: what the bar shows live, and what it follows on a replay.
+ */
+export async function debateEndorsementTurns(
+  database: Queryable,
+  debateId: string,
+  rail: string,
+): Promise<{
+  endorsement: DebateEndorsement | null;
+  endorsementTurns: DebateEndorsement[];
+}> {
+  const turns = debateFigures(await debateAnswers(database, debateId, rail));
+  return { endorsement: turns.at(-1) ?? null, endorsementTurns: turns };
 }
 
 const LINK_COLUMNS = `CASE WHEN d.publication_state='published' AND NOT d.is_demo

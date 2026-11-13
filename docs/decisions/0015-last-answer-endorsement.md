@@ -95,7 +95,9 @@ between.
   hit area that shrinks to 6 px over the native replay controls) with a card on hover, focus or
   tap: both shares and counts, the change since the previous counted turn and how many accounts
   changed answer. It stays empty before the first reveal and, for five-day debates, until the
-  close. Layout in [the debate page design](../debate-page-design.md#stage).
+  close. Live, a reveal reaches it as soon as the room's signal does; on a replay it shows the
+  figure through the turn playing, changing the moment a turn starts or the viewer seeks (founder,
+  2026-11-13). Layout in [the debate page design](../debate-page-design.md#stage).
 - **Topic page:** "Where viewers ended up": the figure, its last debate and the number of debates
   counted, each counted debate's final share, "How answers changed" and the history chart (one
   point per revealed turn, placed by order rather than time). Layout in

@@ -35,6 +35,7 @@ declare global {
       // Decision 0015: the debate's last-answer figure from the same read,
       // and when its answers are revealed, for the bar on the video.
       endorsement?: DebateEndorsement | null;
+      endorsementTurns?: DebateEndorsement[];
       revealMode?: "five_day" | "per_round";
       revealAt?: string | null;
     }>;

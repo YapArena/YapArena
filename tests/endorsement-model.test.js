@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import {
   compareAnswers,
   debateFigure,
+  debateFigures,
   emptySwitching,
   foldAnswers,
   latestDebateFigure,
@@ -185,6 +186,18 @@ describe("debate figure", () => {
     assert.equal(figure.yes, 1);
     assert.equal(figure.accounts, 2);
     assert.deepEqual(figure.switched, { toYes: 0, toNo: 0, cameBack: 0 });
+  });
+
+  it("gives the figure through each counted turn, oldest first", () => {
+    const figures = debateFigures(turns);
+    assert.deepEqual(
+      figures.map((figure) => figure.throughTurn),
+      [1, 2, 4],
+    );
+    assert.deepEqual(figures[0], debateFigure(turns, 1));
+    assert.deepEqual(figures[1], debateFigure(turns, 2));
+    assert.deepEqual(figures.at(-1), latestDebateFigure(turns));
+    assert.deepEqual(debateFigures([]), []);
   });
 
   it("ignores turns after the one it counts through", () => {

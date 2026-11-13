@@ -252,6 +252,7 @@ if (root) {
       debateId,
       windows: value.windows,
       endorsement: value.endorsement ?? null,
+      endorsementTurns: value.endorsementTurns ?? [],
       revealMode: value.revealMode,
       revealAt: value.revealAt,
     });
@@ -885,11 +886,28 @@ if (root) {
   // when a window opens, closes or settles.
   const ownOpen = () =>
     rounds.some((round) => round.own && round.state === "open");
+  // The public window list is the same for every viewer, and the server
+  // shares overlapping reads of it, so a signal reads it at once: a reveal
+  // reaches the turn bars and the bar on the video (Decision 0015) without
+  // waiting. The spread refresh still follows, for this viewer's own rounds
+  // and in case this read joined one that began before the change.
+  const readWindowsNow = () => {
+    const current = generation;
+    void loadWindows().then(
+      () => {
+        if (current === generation) render();
+      },
+      () => {
+        // The spread refresh reads it again.
+      },
+    );
+  };
   watchRoom({
     room: debateId,
     topics: ["window"],
     events: window,
     signal() {
+      readWindowsNow();
       window.clearTimeout(refreshTimer);
       refreshTimer = spread(ownOpen());
     },

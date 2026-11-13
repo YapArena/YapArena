@@ -1493,7 +1493,8 @@ textarea::placeholder {
   left: 0;
   width: var(--yes-share, 0%);
   background: #fff;
-  transition: width 0.5s ease;
+  /* Snappy: a new turn's figure lands within a frame or two. */
+  transition: width 0.12s ease-out;
 }
 .arena-page .arena-endorsement[data-empty="true"] .arena-endorsement-fill {
   display: none;

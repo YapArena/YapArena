@@ -68,6 +68,8 @@ export interface PublicWindows {
   windows: PublicWindow[];
   /** Decision 0015: the debate's last-answer figure; an older server omits it. */
   endorsement?: DebateEndorsement | null;
+  /** The figure through each counted turn, oldest first; an older server omits it. */
+  endorsementTurns?: DebateEndorsement[];
 }
 
 /** One round in the signed-in view, with this viewer's own order. */

@@ -45,6 +45,8 @@ export function onStakeWindows(
 /** Decision 0015: the debate's last-answer figure and its reveal timing. */
 export interface DebateEndorsementView {
   endorsement: DebateEndorsement | null;
+  /** The figure through each counted turn, oldest first. */
+  turns: DebateEndorsement[];
   revealMode: "five_day" | "per_round";
   revealAt: string | null;
 }
@@ -52,6 +54,7 @@ export interface DebateEndorsementView {
 function endorsementView(detail: StakeWindows): DebateEndorsementView {
   return {
     endorsement: detail.endorsement ?? null,
+    turns: detail.endorsementTurns ?? [],
     revealMode: detail.revealMode ?? "five_day",
     revealAt: detail.revealAt ?? null,
   };

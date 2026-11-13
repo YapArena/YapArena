@@ -606,9 +606,23 @@ describe(
         (await rounds(debateId)).find((r) => r.turn_number === 2).state,
         "settled",
       );
-      assert.equal((await windows.publicWindows(debateId)).endorsement, null);
+      assert.deepEqual(
+        (await windows.publicWindows(debateId)).endorsementTurns,
+        [],
+      );
       await close(first.id);
       await windows.advance(20);
+      const revealed = await windows.publicWindows(debateId);
+      // The figure through each counted turn, for a replay to follow.
+      assert.deepEqual(revealed.endorsementTurns[0], {
+        throughTurn: 1,
+        yes: 2,
+        accounts: 3,
+        previous: null,
+        switched: { toYes: 0, toNo: 0, cameBack: 0 },
+        multiAnswerAccounts: 0,
+      });
+      assert.deepEqual(revealed.endorsementTurns[1], revealed.endorsement);
       assert.deepEqual((await windows.publicWindows(debateId)).endorsement, {
         throughTurn: 2,
         yes: 2,
@@ -652,7 +666,9 @@ describe(
         [fiveDay],
       );
       await windows.advance(20);
-      assert.equal((await windows.publicWindows(fiveDay)).endorsement, null);
+      const hidden = await windows.publicWindows(fiveDay);
+      assert.equal(hidden.endorsement, null);
+      assert.deepEqual(hidden.endorsementTurns, [], "no turn before the close");
     });
 
     // Turn windows' places in time, seconds before one shared instant
