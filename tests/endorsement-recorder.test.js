@@ -255,6 +255,8 @@ describe("endorsement reads", () => {
       ),
       null,
     );
+    assert.deepEqual(await repository.topicHistory("t1"), []);
+    assert.deepEqual(await repository.debateResults("t1"), []);
   });
 
   it("computes the debate bar on read, on the caller's client and rail", async () => {
