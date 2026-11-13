@@ -1,6 +1,6 @@
 // The debate and topic cards of the site kit (docs/site-design.md#cards).
 // Explore, Topics, topic pages and profiles list them; Home and Live follow.
-import { html } from "../../platform/html.ts";
+import { html, type SafeHtml } from "../../platform/html.ts";
 import { inscription } from "./kit-web.ts";
 import { personSlot } from "./avatar-web.ts";
 import type { PublicDebate, PublicTopic } from "./repository.ts";
@@ -44,8 +44,9 @@ export function statusTag(status: PublicDebate["status"]) {
 // speakers' panes, which show whenever there is no still), then the topic, the
 // proposition and both speakers. The whole card is the link. The media router
 // serves stills for replays and finalized debates only; frontend/site.ts hides
-// one that fails to load.
-export function debateCard(debate: PublicDebate) {
+// one that fails to load. A topic page adds a counted debate's final figure
+// under its speakers (Decision 0015).
+export function debateCard(debate: PublicDebate, extra: SafeHtml | "" = "") {
   const { speakerA, speakerB, topic } = debate;
   const still = debate.status === "replay" || debate.status === "finalized";
   const stamp =
@@ -56,7 +57,7 @@ export function debateCard(debate: PublicDebate) {
         : "Debate archive";
   const nameA = speakerA?.displayName ?? topic.sideALabel;
   const nameB = speakerB?.displayName ?? topic.sideBLabel;
-  return html`<article class="dcard"><div class="dcard-thumb"><span class="dcard-panes" aria-hidden="true"><span class="dcard-pane">${personSlot(speakerA, 48)}</span><span class="dcard-pane">${personSlot(speakerB, 48)}</span></span>${still ? html`<img class="dcard-still" src="/api/media/events/${debate.id}/thumbnail" alt="" loading="lazy" decoding="async">` : ""}${statusTag(debate.status)}<span class="dcard-stamp">${stamp}</span></div><div class="dcard-body"><p class="dcard-meta"><span>${topic.title}</span>${demoTag(debate.isDemo)}</p><h3 class="dcard-title"><a href="/debates/${path(debate.slug)}">${debate.proposition}</a></h3><p class="dcard-people">${personSlot(speakerA, 24)}<span>${nameA}</span>${versus}${personSlot(speakerB, 24)}<span>${nameB}</span></p></div></article>`;
+  return html`<article class="dcard"><div class="dcard-thumb"><span class="dcard-panes" aria-hidden="true"><span class="dcard-pane">${personSlot(speakerA, 48)}</span><span class="dcard-pane">${personSlot(speakerB, 48)}</span></span>${still ? html`<img class="dcard-still" src="/api/media/events/${debate.id}/thumbnail" alt="" loading="lazy" decoding="async">` : ""}${statusTag(debate.status)}<span class="dcard-stamp">${stamp}</span></div><div class="dcard-body"><p class="dcard-meta"><span>${topic.title}</span>${demoTag(debate.isDemo)}</p><h3 class="dcard-title"><a href="/debates/${path(debate.slug)}">${debate.proposition}</a></h3><p class="dcard-people">${personSlot(speakerA, 24)}<span>${nameA}</span>${versus}${personSlot(speakerB, 24)}<span>${nameB}</span></p>${extra}</div></article>`;
 }
 
 // A topic: the title in Forum, the summary (three lines at most) and its two

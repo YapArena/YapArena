@@ -25,9 +25,10 @@ import { changeText } from "../src/features/discovery/homepage-view.ts";
 import { html } from "../src/platform/html.ts";
 
 // Lines draw from left to right the first time each graph is seen on screen.
+// The topic page's endorsement history (topic-chart.ts) draws the same way.
 const DRAW_MS = 1500;
 const drawn = new Set<string>();
-function reveal(svg: SVGSVGElement, key: string) {
+export function reveal(svg: SVGSVGElement, key: string) {
   svg.classList.remove("is-pending", "is-drawing");
   if (
     drawn.has(key) ||

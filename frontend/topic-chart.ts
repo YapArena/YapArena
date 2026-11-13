@@ -1,88 +1,221 @@
-// A topic's endorsement history on its page (src/features/discovery/
-// topic-history-web.ts): the chart the home used to show, drawn with the same
-// geometry and bound with the same pointer, touch and keyboard inspection
-// (frontend/homepage-chart.ts). The metric and period buttons redraw it, and
-// so does a change of width.
-import type { HomeIdea } from "../src/features/discovery/homepage-model.ts";
+// A topic's figure after each revealed turn (Decision 0015), drawn by
+// src/features/discovery/topic-endorsement-web.ts. This redraws it for the
+// chart's width and the chosen range (All, 1D, 1W or 1M) and inspects it like
+// the home's chart: the pointer, a tap (touch pins it until a tap elsewhere)
+// or the arrow keys on a hidden slider move a square marker from point to
+// point, and a label beside it names the turn and the figure then.
 import {
-  chartGeometry,
-  type HomeMetric,
-  type HomeRange,
-} from "../src/features/discovery/homepage-chart.ts";
-import { bindHomepageChart } from "./homepage-chart.js";
+  changeSince,
+  pointText,
+  topicEndorsementGeometry,
+  wholePercent,
+  yesShare,
+  type TopicChartData,
+  type TopicRange,
+} from "../src/features/discovery/topic-endorsement-chart.ts";
+import { html } from "../src/platform/html.ts";
+import { reveal } from "./homepage-chart.js";
 
 /* global window, document, ResizeObserver, requestAnimationFrame, cancelAnimationFrame */
-// Selectors and dataset values below come from topicHistoryMarkup(); non-null
-// assertions state its guarantees.
-interface ChartDataset extends DOMStringMap {
-  metric?: HomeMetric;
-  range?: HomeRange;
+// SVG setAttribute accepts numeric coordinates through existing WebIDL string coercion.
+interface NumericCoordinates {
+  setAttribute(name: "x" | "y" | "width", value: number): void;
 }
-type ChartButton = HTMLButtonElement & { readonly dataset: ChartDataset };
+interface RangeDataset extends DOMStringMap {
+  range?: TopicRange;
+}
+type RangeButton = HTMLButtonElement & { readonly dataset: RangeDataset };
 
+// Selectors below come from topicHistoryMarkup(); non-null assertions state
+// its guarantees.
 const root = document.querySelector<HTMLElement>("[data-topic-history]");
 const template = document.getElementById(
-  "topic-history-data",
+  "topic-endorsement-data",
 ) as HTMLTemplateElement | null;
 
 if (root && template) {
-  const m: HomeIdea = JSON.parse(template.content.textContent!);
+  const data: TopicChartData = JSON.parse(template.content.textContent!);
   const svg = root.querySelector<SVGSVGElement>("#ya-chart")!;
-  const buttons = [
-    ...root.querySelectorAll<ChartButton>("[data-metric],[data-range]"),
-  ];
-  let metric: HomeMetric = "endorsement";
-  let range: HomeRange = "1D";
-  let chart: ReturnType<typeof bindHomepageChart> | undefined;
-  let reset: (() => void) | undefined;
+  const legend = root.querySelector<HTMLElement>("#ya-legend")!;
+  const label = root.querySelector<HTMLElement>("#ya-metric-label")!;
+  const change = root.querySelector<HTMLElement>("#ya-change")!;
+  const tooltip = root.querySelector<HTMLElement>("#ya-chart-tooltip")!;
+  const resting = label.textContent ?? "";
+  const buttons = [...root.querySelectorAll<RangeButton>("[data-range]")];
+  let range: TopicRange = "All";
   let frame = 0;
   let width = 0;
+  let stop: (() => void) | undefined;
+  let reset: (() => void) | undefined;
+
+  // The hidden slider the keyboard inspects the chart with.
+  const control = document.createElement("label");
+  control.className = "ya-scrub-control";
+  control.innerHTML =
+    html`<span>Explore the topic figure's history</span><input type="range" min="0" step="1" aria-label="Explore the topic figure's history">`.toString();
+  svg.insertAdjacentElement("afterend", control);
+  const slider = control.querySelector("input")!;
+
+  function setChange(text: string) {
+    change.textContent = text;
+    change.classList.toggle("down", text.startsWith("−"));
+  }
 
   function draw() {
-    chart?.destroy();
+    stop?.();
     const box = svg.getBoundingClientRect();
     width = box.width;
-    const c = chartGeometry(m, metric, range, box.width, false, box.height);
-    svg.setAttribute("viewBox", `0 0 ${c.w} ${c.h}`);
-    svg.dataset.latestRound = m.activity?.items.at(-1)?.id ?? "";
-    svg.innerHTML = c.markup.toString();
-    chart = bindHomepageChart({
-      root: root!,
-      svg,
-      m,
-      metric,
+    const c = topicEndorsementGeometry(
+      data.points,
       range,
-      c,
-      activate(next) {
-        reset = next;
+      box.width,
+      box.height,
+    );
+    svg.setAttribute("viewBox", `0 0 ${c.w} ${c.h}`);
+    svg.innerHTML = c.markup.toString();
+    const clip = svg.querySelector<SVGRectElement & NumericCoordinates>(
+      "[data-chart-clip]",
+    );
+    const marker = svg.querySelector<SVGRectElement & NumericCoordinates>(
+      "[data-chart-hover-marker]",
+    );
+    const last = c.shown.length - 1;
+    const lifecycle = new AbortController(),
+      signal = lifecycle.signal;
+    const stopReveal = reveal(svg, `topic:${range}`);
+    let pinned = false,
+      active = false,
+      pending = 0,
+      raf = 0;
+    slider.max = String(Math.max(0, last));
+    slider.value = String(Math.max(0, last));
+    slider.disabled = last < 0;
+
+    function latest() {
+      const point = c.shown[last];
+      legend.textContent = point ? `${wholePercent(yesShare(point))}%` : "—";
+      label.textContent = resting;
+      setChange(changeSince(c.shown));
+      // The keyboard starts again from the latest point.
+      slider.value = String(Math.max(0, last));
+      slider.removeAttribute("aria-valuetext");
+    }
+    function rest() {
+      cancelAnimationFrame(raf);
+      raf = 0;
+      pinned = false;
+      svg.classList.remove("is-scrubbing");
+      clip?.setAttribute("width", c.w);
+      if (active) {
+        tooltip.classList.remove("is-visible");
+        tooltip.setAttribute("aria-hidden", "true");
+        active = false;
+        if (reset === rest) reset = undefined;
+      }
+      latest();
+    }
+    function show(index: number) {
+      const point = c.shown[index];
+      if (!point) return;
+      active = true;
+      reset = rest;
+      const x = c.x(index),
+        y = c.y(c.values[index]!);
+      const text = pointText(point);
+      clip?.setAttribute("width", x);
+      marker?.setAttribute("x", x - 5);
+      marker?.setAttribute("y", y - 5);
+      svg.classList.add("is-scrubbing");
+      legend.textContent = text.value;
+      label.textContent = text.head;
+      setChange(changeSince(c.shown, index));
+      tooltip.querySelector("[data-tip-head]")!.textContent = text.head;
+      tooltip.querySelector("[data-tip-value]")!.textContent = text.value;
+      tooltip.querySelector("[data-tip-rest]")!.textContent = text.rest;
+      tooltip.classList.add("is-visible");
+      tooltip.setAttribute("aria-hidden", "false");
+      const rect = svg.getBoundingClientRect(),
+        base = root!.getBoundingClientRect(),
+        tip = tooltip.getBoundingClientRect(),
+        sx = rect.left - base.left + (x * rect.width) / c.w,
+        sy = rect.top - base.top + (y * rect.height) / c.h;
+      // Beside the marker, flipping left near the edge.
+      tooltip.style.left =
+        (sx + 12 + tip.width > base.width - 8 ? sx - 12 - tip.width : sx + 12) +
+        "px";
+      tooltip.style.top = sy - tip.height / 2 + "px";
+      slider.value = String(index);
+      slider.setAttribute("aria-valuetext", text.label);
+    }
+    function request(event: PointerEvent) {
+      const rect = svg.getBoundingClientRect();
+      pending = c.nearest(((event.clientX - rect.left) * c.w) / rect.width);
+      if (!raf)
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          show(pending);
+        });
+    }
+    svg.addEventListener(
+      "pointermove",
+      (event) => {
+        if (!pinned || event.pointerType === "touch") request(event);
       },
-      deactivate(previous) {
-        if (reset === previous) reset = undefined;
+      { signal },
+    );
+    svg.addEventListener(
+      "pointerleave",
+      () => {
+        if (!pinned) rest();
       },
-      pin() {},
+      { signal },
+    );
+    svg.addEventListener(
+      "pointerdown",
+      (event) => {
+        if (event.pointerType !== "touch") return;
+        pinned = !pinned;
+        if (pinned) request(event);
+        else rest();
+      },
+      { signal },
+    );
+    svg.addEventListener("pointercancel", rest, { signal });
+    slider.addEventListener("input", () => show(Number(slider.value)), {
+      signal,
     });
+    slider.addEventListener("focus", () => show(Number(slider.value)), {
+      signal,
+    });
+    slider.addEventListener("blur", rest, { signal });
+    slider.addEventListener(
+      "keydown",
+      (event) => {
+        if (event.key !== "Escape") return;
+        rest();
+        slider.blur();
+      },
+      { signal },
+    );
+    latest();
+    stop = () => {
+      stopReveal();
+      lifecycle.abort();
+      rest();
+    };
   }
 
   root.addEventListener("click", (event) => {
-    const button = (event.target as Element).closest<ChartButton>(
-      "[data-metric],[data-range]",
+    const button = (event.target as Element).closest<RangeButton>(
+      "[data-range]",
     );
-    if (!button) return;
-    if (button.dataset.metric) metric = button.dataset.metric;
-    if (button.dataset.range) range = button.dataset.range;
+    if (!button?.dataset.range) return;
+    range = button.dataset.range;
     for (const other of buttons)
-      other.setAttribute(
-        "aria-pressed",
-        String(
-          other.dataset.metric
-            ? other.dataset.metric === metric
-            : other.dataset.range === range,
-        ),
-      );
+      other.setAttribute("aria-pressed", String(other === button));
     draw();
   });
-  // A tap anywhere else on the page ends a touch inspection, as it did on
-  // the home.
+  // A tap anywhere else on the page ends a touch inspection.
   document.addEventListener("pointerdown", (event) => {
     if (!(event.target as Element).closest(".ya-chart,.ya-scrub-control"))
       reset?.();

@@ -23,8 +23,8 @@ process.env.RENDER_GIT_COMMIT = "0123456789abcdef0123456789abcdef01234567";
 const web = await import("../dist/features/discovery/web.js");
 const community = await import("../dist/features/community/web.js");
 const legal = await import("../dist/features/discovery/legal-web.js");
-const { topicHistory } =
-  await import("../dist/features/discovery/topic-history-web.js");
+const { emptyEndorsementView, endorsementView } =
+  await import("./endorsement-fixtures.js");
 const { renderMeasurementDashboard } =
   await import("../dist/features/measurement/web.js");
 
@@ -124,16 +124,29 @@ it("renders a topic", (t) => {
   );
   // Live topic queue on (Decision 0011); the hostile labels prove escaping.
   snapshot(t, web.renderTopic(origin, hostileTopic, empty, true));
-  // With shared rounds, the topic shows its endorsement history.
+  // Decision 0015: with revealed turns, where viewers ended up, each counted
+  // debate's final figure and the figure's history.
   snapshot(
     t,
     web.renderTopic(
       origin,
       hostileTopic,
-      empty,
+      list([debate, hostileDebate]),
       false,
-      topicHistory(hostileTopic, activity),
+      endorsementView,
     ),
+  );
+  // Before the first reveal, and for a topic reviewed as "side A is not yes".
+  snapshot(
+    t,
+    web.renderTopic(origin, hostileTopic, empty, false, emptyEndorsementView),
+  );
+  snapshot(
+    t,
+    web.renderTopic(origin, topic, empty, false, {
+      ...endorsementView,
+      sideAIsYes: false,
+    }),
   );
 });
 

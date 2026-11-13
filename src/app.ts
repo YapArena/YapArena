@@ -189,6 +189,7 @@ export function createApp({
   firstRun = { welcome: false, tips: false },
   landingFont,
   publicBots,
+  topicEndorsement,
   metrics = createMetrics(),
   metricsToken,
   applicationOrigin,
@@ -252,6 +253,10 @@ export function createApp({
   // The licensed landing headline font, read from LANDING_FONT_FILE at startup.
   landingFont?: Buffer;
   publicBots?: ReturnType<typeof createPublicBotRepository>;
+  // Decision 0015: the topic page's last-answer figure, with Yap Coins on.
+  topicEndorsement?: Parameters<
+    typeof createDiscoveryRouter
+  >[0]["topicEndorsement"];
   metrics?: ReturnType<typeof createMetrics>;
   metricsToken?: string;
   applicationOrigin?: string;
@@ -522,6 +527,7 @@ export function createApp({
       createDiscoveryRouter({
         discovery,
         publicBots,
+        topicEndorsement,
         homepageReferenceEnabled:
           homepageReferenceEnabled && environment !== "production",
         a4Enabled: a4?.mode !== undefined && a4.mode !== "disabled",

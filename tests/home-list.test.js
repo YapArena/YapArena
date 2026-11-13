@@ -1,6 +1,6 @@
 // The home as a debate list (first-run plan PR 6): the lists, the top slot's
 // order on quiet days, the chips, the words, the page and the topic page's
-// endorsement history.
+// last-answer figure (Decision 0015).
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import express from "express";
@@ -26,19 +26,12 @@ import {
   homeListMarkup,
 } from "../dist/features/discovery/home-list-view.js";
 import {
-  topicHistory,
-  topicHistoryMarkup,
-} from "../dist/features/discovery/topic-history-web.js";
+  emptyEndorsementView,
+  endorsementView,
+} from "./endorsement-fixtures.js";
 import { createDiscoveryRouter } from "../dist/features/discovery/router.js";
 import { renderHome, renderTopic } from "../dist/features/discovery/web.js";
-import {
-  activity,
-  debate,
-  empty,
-  hostileText,
-  list,
-  topic,
-} from "./page-fixtures.js";
+import { debate, empty, hostileText, list, topic } from "./page-fixtures.js";
 
 const HOUR = 3_600_000;
 const now = new Date("2026-11-06T18:00:00Z");
@@ -695,52 +688,73 @@ describe("the home and topic routes", () => {
     assert.equal((await request(broken).get("/home?reference=1")).status, 404);
   });
 
-  it("shows a topic's endorsement history once it has rounds", async () => {
-    const page = (publicBots) =>
-      request(app({ publicBots })).get(`/topics/${topic.slug}`);
-    const withHistory = await page({
-      topics: async (ids) => ({ [ids[0]]: activity }),
-    });
-    assert.equal(withHistory.status, 200);
-    assert.match(withHistory.text, /data-topic-history/);
-    assert.match(withHistory.text, /<svg id="ya-chart" class="ya-chart"/);
-    assert.match(
-      withHistory.text,
-      /<script type="module" src="\/assets\/topic-chart\.js\?v=/,
-    );
-    // No rounds, a failed read or no shared history at all: debates only.
-    for (const bots of [
-      { topics: async (ids) => ({ [ids[0]]: { ...activity, items: [] } }) },
-      {
-        topics: async () => {
-          throw new Error("offline");
+  it("shows a topic's last-answer figure and its history (Decision 0015)", async () => {
+    const asked = [];
+    const page = (options) =>
+      request(app(options)).get(`/topics/${topic.slug}`);
+    const shown = await page({
+      topicEndorsement: {
+        topic: async (id) => {
+          asked.push(id);
+          return endorsementView;
         },
       },
-      undefined,
+      // The shared bot history no longer reaches the topic page (D3).
+      publicBots: {
+        topics: async () => {
+          throw new Error("the topic page must not read bot history");
+        },
+      },
+    });
+    assert.deepEqual(asked, [topic.id]);
+    assert.equal(shown.status, 200);
+    assert.equal(shown.headers["cache-control"], "no-store");
+    assert.match(shown.text, /data-topic-endorsement/);
+    assert.match(shown.text, /Where viewers ended up/);
+    assert.match(shown.text, /data-topic-history/);
+    assert.match(shown.text, /<svg id="ya-chart" class="ya-chart"/);
+    assert.match(
+      shown.text,
+      /<script type="module" src="\/assets\/topic-chart\.js\?v=/,
+    );
+    assert.doesNotMatch(shown.text, /Shared simulation|data-metric=/);
+    // The figure sits above the debates and the history below them.
+    assert.ok(
+      shown.text.indexOf("data-topic-endorsement") <
+        shown.text.indexOf('id="topic-debates"'),
+    );
+    assert.ok(
+      shown.text.indexOf('id="topic-debates"') <
+        shown.text.indexOf("data-topic-history"),
+    );
+    // Before a turn is revealed: the figure's section says when it starts,
+    // with no chart and no script.
+    const before = await page({
+      topicEndorsement: { topic: async () => emptyEndorsementView },
+    });
+    assert.match(before.text, /The figure starts when a debate's first turn/);
+    assert.doesNotMatch(before.text, /data-topic-history|topic-chart\.js/);
+    // A failed read, or Yap Coins off: debates only.
+    for (const options of [
+      {
+        topicEndorsement: {
+          topic: async () => {
+            throw new Error("offline");
+          },
+        },
+      },
+      {},
     ]) {
-      const quiet = await page(bots);
+      const quiet = await page(options);
       assert.equal(quiet.status, 200);
-      assert.doesNotMatch(quiet.text, /data-topic-history|topic-chart\.js/);
+      assert.doesNotMatch(
+        quiet.text,
+        /data-topic-endorsement|data-topic-history|topic-chart\.js/,
+      );
     }
-  });
-
-  it("draws the history with the home's chart and its labels", () => {
-    assert.equal(topicHistory(topic, undefined), null);
-    assert.equal(topicHistory(topic, { ...activity, items: [] }), null);
-    const m = topicHistory(topic, activity);
-    assert.deepEqual(m.points, [52, 47]);
-    assert.equal(m.href, `/topics/${topic.slug}`);
-    const section = String(topicHistoryMarkup(m));
-    assert.match(section, /Endorsement history/);
-    assert.match(section, /id="ya-legend">47%</);
-    assert.match(section, /data-metric="price" aria-pressed="false">Price</);
-    assert.match(section, /data-range="1D" aria-pressed="true">1D</);
-    assert.match(section, /class="ya-linepath"/);
-    assert.match(section, /id="ya-chart-tooltip"/);
-    assert.match(section, /<template id="topic-history-data">/);
     assert.doesNotMatch(
       renderTopic(origin, topic, empty),
-      /data-topic-history/,
+      /data-topic-endorsement|data-topic-history/,
     );
   });
 });

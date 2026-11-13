@@ -870,10 +870,70 @@ html:has(.queue-create-dialog[open]) {
   }
 }
 
-/* ---- A topic's endorsement history (topic-history-web.ts) ---------------
-   The chart that used to sit on the home, with the same look: one white line
-   on five dotted guides, ending on a square pixel that pulses, drawn left to
-   right the first time it is seen. */
+/* ---- Where viewers ended up (topic-endorsement-web.ts, Decision 0015) ---
+   The topic's last-answer figure and how answers changed, side by side from
+   960 px, stacked below. */
+.topic-figure-grid {
+  display: grid;
+  gap: var(--space-4);
+}
+@media (min-width: 960px) {
+  .topic-figure-grid {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+}
+.topic-figure,
+.topic-changes {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.topic-figure p,
+.topic-changes p {
+  margin: 0;
+}
+.topic-figure-lead {
+  color: var(--text);
+  font-size: var(--text-20);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.topic-figure-lead .num {
+  font-family: var(--font-number);
+  font-size: var(--text-28);
+  font-weight: 400;
+}
+.topic-figure-note,
+.topic-figure-meta,
+.topic-figure-empty,
+.topic-changes p {
+  color: var(--muted);
+  font-size: var(--text-14);
+  line-height: 1.5;
+}
+.topic-changes-title {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-16);
+}
+/* A counted debate's final figure on its card. */
+.dcard-final {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+.dcard-final .num {
+  color: var(--text);
+  font-family: var(--font-number);
+  font-size: var(--text-16);
+  font-weight: 400;
+}
+
+/* ---- A topic's endorsement history (topic-endorsement-web.ts) -----------
+   The figure after each revealed turn, with the home chart's look: one white
+   line on five dotted guides, ending on a square pixel that pulses, drawn left
+   to right the first time it is seen. */
 .topic-history {
   position: relative;
   /* The chart's hidden label keeps its last position; nothing here may widen
@@ -1045,13 +1105,16 @@ html:has(.queue-create-dialog[open]) {
 .topic-history .ya-chart.is-scrubbing .ya-endpoint {
   opacity: 0;
 }
-/* The small "Oct 19 55%" label beside the marker. */
+/* The label beside the marker: "Nov 12 · Turn 4 · …" over "47% Yes · 3,491
+   accounts". */
 .topic-history .ya-chart-tooltip {
   position: absolute;
   z-index: 20;
   top: 0;
   left: 0;
-  padding: 2px var(--space-2);
+  display: grid;
+  max-width: min(22rem, calc(100% - var(--space-4)));
+  padding: var(--space-1) var(--space-2);
   border: 1px solid var(--control-border);
   border-radius: 8px;
   background: rgb(0 0 0 / 0.85);
@@ -1067,6 +1130,11 @@ html:has(.queue-create-dialog[open]) {
   font-family: var(--font-number);
   font-size: var(--text-14);
   font-weight: 400;
+}
+/* The debate's title may be long: the head line ends with an ellipsis. */
+.topic-history .ya-chart-tooltip [data-tip-head] {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .topic-history .ya-chart-tooltip.is-visible {
   opacity: 1;
