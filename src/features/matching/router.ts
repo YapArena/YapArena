@@ -136,13 +136,13 @@ function requestInput(body: unknown) {
     )
   )
     return null;
+  // The question is always the topic's title (Decision 0015). Pages served before that change
+  // still send "proposition"; it is accepted and ignored for one release, then removed.
   const { kind, topicSlug, targetHandle, requestedSide } = value;
-  const proposition = text(value.proposition, 240, 10);
   if (
     (kind !== "direct" && kind !== "queue") ||
     typeof topicSlug !== "string" ||
     !slugPattern.test(topicSlug) ||
-    !proposition ||
     (requestedSide !== "A" && requestedSide !== "B")
   )
     return null;
@@ -164,7 +164,6 @@ function requestInput(body: unknown) {
     kind: kind as "direct" | "queue",
     topicSlug,
     targetHandle: typeof targetHandle === "string" ? targetHandle : undefined,
-    proposition,
     requestedSide: requestedSide as "A" | "B",
     liveOpinions,
   };

@@ -454,13 +454,9 @@ function challengeBody(data: Record<string, FormDataEntryValue>) {
     throw new Error(
       "Choose a person from the suggestions or type their handle.",
     );
-  const proposition = String(data.proposition ?? "").trim();
-  if (proposition.length < 10)
-    throw new Error("Write a proposition of at least 10 characters.");
   const base = {
     kind: "direct",
     topicSlug: data.topicSlug,
-    proposition,
     requestedSide: data.requestedSide,
     targetHandle,
     liveOpinions: data.liveOpinions === "on",
@@ -585,7 +581,6 @@ requestForm.addEventListener("submit", async (event) => {
     const body = {
       kind: data.kind,
       topicSlug: data.topicSlug,
-      proposition: data.proposition,
       requestedSide: data.requestedSide,
       scheduledAt: scheduledAt.toISOString(),
       ...(data.kind === "direct" ? { targetHandle: data.targetHandle } : {}),

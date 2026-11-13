@@ -948,7 +948,6 @@ async function runtimeChecks(
       kind: "direct",
       topicSlug: topic.slug,
       targetHandle: "bob",
-      proposition: "Does the database boundary work?",
       requestedSide: "A",
       scheduledAt: new Date(Date.now() + 3 * 60 * 60 * 1000),
     });
@@ -1125,7 +1124,6 @@ async function runtimeChecks(
       kind: "direct",
       topicSlug: topic.slug,
       targetHandle: "bob",
-      proposition: "Will an expired request be cleaned up?",
       requestedSide: "A",
       scheduledAt: new Date(Date.now() + 3 * 60 * 60 * 1000),
     });

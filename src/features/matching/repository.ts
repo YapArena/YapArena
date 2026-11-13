@@ -716,7 +716,6 @@ export function createMatchingRepository(
         kind: RequestKind;
         topicSlug: string;
         targetHandle?: string;
-        proposition: string;
         requestedSide: Side;
         // The open list's single time, or a challenge's only proposed time.
         scheduledAt?: Date;
@@ -798,8 +797,8 @@ export function createMatchingRepository(
           throw new MatchConflictError(
             `you can have ${OPEN_CHALLENGES_LIMIT} open challenges at a time`,
           );
-        const topic = await client.query<{ id: string }>(
-          "SELECT id FROM topics WHERE slug = $1 AND publication_state = 'published'",
+        const topic = await client.query<{ id: string; title: string }>(
+          "SELECT id, title FROM topics WHERE slug = $1 AND publication_state = 'published'",
           [input.topicSlug],
         );
         if (!topic.rows[0]) throw new MatchNotFoundError("topic not found");
@@ -854,7 +853,9 @@ export function createMatchingRepository(
             userId,
             targetId,
             topic.rows[0].id,
-            input.proposition,
+            // The question is always the topic's title (Decision 0015); acceptance copies it
+            // to the debate, so only debates whose question is the title count in its figure.
+            topic.rows[0].title,
             input.requestedSide,
             scheduledAt,
             expiresAt,

@@ -174,7 +174,6 @@ describe(
         kind: "direct",
         topicSlug: slug,
         targetHandle: b.handle,
-        proposition: "Cities should ban cars downtown",
         requestedSide: "A",
         proposedTimes: [new Date(Date.now() + 3 * 60 * 60 * 1000)],
       });
