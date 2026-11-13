@@ -98,8 +98,8 @@ same stylesheet for its topic cards.
 - **Topic page**: the title in Forum beside one card holding both sides (under it below 1000 px).
   With the queue on, each side has a "Queue for this side" button described by the side's name;
   a side you queued for lights up and its button turns white.
-  Once it has shared rounds, its endorsement history follows its debates
-  ([Topic history](#topic-history)); the last-answer figure will replace it.
+  With Yap Coins on, "Where viewers ended up" sits above its debates and the figure's history
+  below them ([Topic history](#topic-history)).
 - **Profile**: the avatar in a 96 px slot (72 on phones) beside the name, @handle, bio and Follow.
 - **Empty lists** show the emblem, today's words and Clear search; inside a topic or profile, a
   quieter note without the emblem.
@@ -157,35 +157,33 @@ code is removed in PR 7, which keeps what topic pages use (below).
 
 ## Topic history
 
-A topic page shows its endorsement history once it has shared rounds
-(`src/features/discovery/topic-history-web.ts`, `frontend/topic-chart.ts`, styles at the end of
-`public/explore.css`): the chart that used to sit on the home, under the topic's debates. It reuses
-the home's idea model (`publicHomepage()`), geometry (`homepage-chart.ts`) and inspection
-(`frontend/homepage-chart.ts`, `changeText()` from `homepage-view.ts`): one white line on five
-dotted guides, five dates, a square end pixel that pulses; hover, a tap or the keyboard shows a
-square marker with "Oct 19 55%". Endorsement or Price, 1D, 1W or 1M. It shows the history the page
-was served, and a topic without rounds shows no chart.
-
-Planned ([Decision 0015](decisions/0015-last-answer-endorsement.md), pull request 4): the shared
-simulation chart gives way to the topic's last-answer figure, read from stored
-`endorsement_points`.
+With Yap Coins on, a topic page shows its last-answer figure
+([Decision 0015](decisions/0015-last-answer-endorsement.md)), read from the stored
+`endorsement_points` (`src/features/endorsement/topic-page.ts`,
+`src/features/discovery/topic-endorsement-web.ts`, `frontend/topic-chart.ts`, styles at the end of
+`public/explore.css`). The shared bot simulation chart no longer shows here; it stays on debate
+pages. If the figure can't be read, the page shows its debates alone.
 
 - **Where viewers ended up** (kicker "Last answers"), above Debates: "Of **3,491** accounts,
-  **47%** last answered YES (**People first**). Not a vote, a price or a forecast." and "Last
+  **47%** last answered Yes (**People first**). Not a vote, a price or a forecast." and "Last
   debate: Nov 12, 2026 · 14 debates counted" (the live end date of the debate behind the latest
   point). A topic reviewed as "side A is not yes" reads "…last answered Yes." with no side label.
+  Before any turn is revealed the card reads "The figure starts when a debate's first turn is
+  revealed. Answers in 5-day debates are revealed 5 days after the debate ends."
+- **How answers changed**, beside the figure from 960 px (under it below): accounts that
+  answered more than once, the share that changed answer (kept the new side or came back),
+  changes per answer pair within and between debates, and the share of changes toward Yes.
 - **Debate cards** of counted debates get one line: "Final: 52% Yes · 140 accounts".
-- **How answers changed**, under the figure: accounts that answered more than once, the share
-  that changed answer (kept the new side or came back), changes per answer pair within and between
-  debates, and the share of changes toward Yes.
-- **History chart:** the same line, guides, end pixel and inspection as today, with one point per
-  revealed turn placed by its order (five-day points share a reveal time), dates of the points
-  under the line, and a ±3 point margin. All (default), 1D, 1W and 1M count back from the latest
-  point and keep at least the latest debate's points; the Endorsement/Price switch goes. The
-  tooltip reads "Nov 12 · Turn 4 · {debate}" over "**47%** Yes · 3,491 accounts"; the meta line
-  says each point counts every account's last answer once a turn is revealed, and the change since
-  the first point in range. Without points the section keeps a line saying the figure starts with
-  a debate's first revealed turn, and that five-day debates reveal five days after they end.
+- **Endorsement history** (kicker "After each revealed turn"), under the debates once a turn is
+  revealed: the home's line, five dotted guides, end pixel and inspection
+  (`chartGuides`, `chartLine` and `chartEnd` in `homepage-chart.ts`), with one point per revealed
+  turn placed by its order, since a five-day debate's points share a reveal time. Five dates (times
+  in 1D) of the points under the line, and a ±3 point margin within 0–100%. All (default), 1D, 1W
+  and 1M count back from the latest point and keep at least the latest debate's points. Hover, a
+  tap or the arrow keys on a hidden slider snap a square marker to a point, with "Nov 12 · Turn 4 ·
+  {debate}" over "**47%** Yes · 3,491 accounts" beside it; the meta line says "Each point counts
+  every account's last answer once a turn is revealed." and the change since the first point
+  shown ("+3 pts since Nov 5").
 
 ## Live
 

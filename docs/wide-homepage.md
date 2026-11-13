@@ -1,6 +1,11 @@
 # Wide homepage
 
-> **Current state (2026-11-06, first-run plan PR 6):** `/home` is now a list of debates
+> **Current state (2026-11-13, [Decision 0015](decisions/0015-last-answer-endorsement.md)):** the
+> topic page no longer draws this chart's idea history. Its last-answer history reuses the chart's
+> guides, line, end pixel and draw-on-reveal (`chartGuides`, `chartLine` and `chartEnd` in
+> `homepage-chart.ts`, `reveal` in `frontend/homepage-chart.ts`), which PR 7 must keep.
+
+> **Earlier state (2026-11-06, first-run plan PR 6):** `/home` is now a list of debates
 > ([site design](site-design.md#home)). This page describes the trending home it replaced. Its
 > code stays in place, unused, until PR 7 removes it; its chart now draws each topic's history on
 > the topic page ([topic history](site-design.md#topic-history)). `/home?reference=1` is not found
