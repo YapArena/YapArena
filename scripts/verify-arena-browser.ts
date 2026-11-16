@@ -681,6 +681,79 @@ export async function verifyArenaBrowser({
     });
     await page.screenshot({ path: directory + "/phone-watch-landscape.png" });
     await page.setViewportSize({ width: 390, height: 844 });
+    // Point 7: a turn the viewer answered is revealed. A read of the
+    // viewer's rounds without the result, then one with it, as the answer
+    // panel shares them; the plate pops on the camera seam and announces
+    // the result once.
+    await page.evaluate((debateId) => {
+      const turn = (net: string | null) => ({
+        id: "verify-plate-window",
+        kind: "turn",
+        turnNumber: 99,
+        side: "A",
+        state: net === null ? "open" : "settled",
+        voidReason: null,
+        opensAt: new Date().toISOString(),
+        closesAt: new Date().toISOString(),
+        revealMode: "per_round",
+        revealAt: null,
+        participants: 2,
+        eligibility: { canTakePosition: false, reason: "closed", via: null },
+        own: { side: "YES", limit: "0.60", quantity: 25, requestId: "r" },
+        ...(net === null
+          ? {}
+          : {
+              outcome: {
+                executed: true,
+                premium: "135000",
+                fee: "0",
+                payout: "158500",
+                net,
+              },
+            }),
+      });
+      for (const net of [null, "23500"])
+        window.dispatchEvent(
+          new CustomEvent("yap:stake-rounds", {
+            detail: { debateId, limits: {}, rounds: [turn(net)] },
+          }),
+        );
+    }, debate.id);
+    const plate = page.locator("[data-watch-plate] .watch-result");
+    await plate.waitFor();
+    assert.equal(
+      await page
+        .locator("[data-watch-plate] [data-watch-result-status]")
+        .textContent(),
+      "Turn 99: you won 2.35 Yap Coins.",
+    );
+    assert.equal(await plate.getAttribute("aria-hidden"), "true");
+    assert.equal(
+      await plate.locator(".watch-result-word").textContent(),
+      "YOU WON",
+    );
+    const seam = await page.evaluate(() => {
+      const anchor = document
+        .querySelector(".watch-result-anchor")!
+        .getBoundingClientRect();
+      // The cameras fill the screen above the dock.
+      const screen = document
+        .querySelector("[data-arena-video]")!
+        .getBoundingClientRect();
+      const dock = document
+        .querySelector(".watch-dock")!
+        .getBoundingClientRect();
+      return Math.abs(anchor.y - (screen.y + (dock.y - screen.y) / 2));
+    });
+    assert.ok(seam <= 1, `the plate centres on the camera seam (${seam} px)`);
+    await page.waitForTimeout(1500);
+    assert.equal(
+      await plate.locator(".watch-result-amt").textContent(),
+      "+2.35",
+    );
+    await page.screenshot({ path: directory + "/phone-watch-result.png" });
+    await plate.waitFor({ state: "detached", timeout: 5000 });
+    checks.phoneResultPlate = true;
     // Point 5: a dock key opens the answer sheet over the full screen, named
     // for its side, with the five full-screen sizes and one key naming the
     // terms as they change. It needs an open turn window this account can
