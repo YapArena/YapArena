@@ -19,6 +19,7 @@ import {
   onStakeWindowsStale,
 } from "./stake-windows.js";
 import { createTurnBars } from "./turn-results.js";
+import { PHONE_WATCH_QUERY } from "./watch-phone.js";
 import {
   isTurnWindow,
   latestRevealed,
@@ -96,6 +97,7 @@ if (root) {
   // This viewer's own limits by window id, from the answer panel.
   let ownLimits: Record<string, string> = {};
   const phone = matchMedia("(max-width: 599px)");
+  const watchPhone = matchMedia(PHONE_WATCH_QUERY);
   const calm = matchMedia("(prefers-reduced-motion: reduce)");
   let selectedTurn: number | null = null;
   let position: number | null = null;
@@ -113,8 +115,14 @@ if (root) {
           behavior: calm.matches ? "auto" : "smooth",
         });
       }
-      // On a replay, choosing a turn plays it.
-      if (replay && column.recording) seekReplay(column.recording.startSeconds);
+      // On a replay, choosing a turn plays it. On a phone, where a replay
+      // plays only in full screen (Decision 0016), a row shows its price
+      // draw and only moves a replay that already started; the timeline
+      // under the video starts it.
+      if (replay && column.recording)
+        seekReplay(column.recording.startSeconds, {
+          start: !watchPhone.matches,
+        });
     },
     phone,
   );

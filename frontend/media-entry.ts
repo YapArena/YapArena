@@ -620,6 +620,9 @@ if (root) {
     leave.hidden = true;
     mute.hidden = true;
     void disconnectRoom();
+    // Join as viewer comes back at once, not at the next status read: on a
+    // phone, Back from the full screen leaves, and Join opens it again.
+    viewerButton.hidden = eventStatus !== "live";
     say("You left the live debate.");
   });
   mute.addEventListener("click", () => {

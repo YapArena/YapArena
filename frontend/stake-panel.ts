@@ -289,6 +289,18 @@ if (root) {
           round.own ? [[round.id, round.own.limit]] : [],
         ),
       ),
+      positions: Object.fromEntries(
+        view.flatMap((round) =>
+          round.own
+            ? [
+                [
+                  round.id,
+                  { side: round.own.side, quantity: round.own.quantity },
+                ],
+              ]
+            : [],
+        ),
+      ),
     });
     // A reveal changes the balance everywhere on the page.
     const revealed = resultsSummary(view).revealed.length;

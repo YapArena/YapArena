@@ -7,6 +7,7 @@
 import {
   barView,
   cardLeft,
+  dockReadout,
   shownEndorsement,
   type BarLabels,
   type BarView,
@@ -93,11 +94,18 @@ function start(bar: HTMLElement, card: HTMLElement, debateId: string) {
     if (card.hidden) open();
     else close();
   }
+  // Decision 0016 (D1): the line the bar shows in the phone full screen's
+  // dock; hidden elsewhere, and from screen readers (the meter's value says it).
+  const readout = {
+    yes: bar.querySelector<HTMLElement>("[data-endorsement-yes]"),
+    no: bar.querySelector<HTMLElement>("[data-endorsement-no]"),
+    note: bar.querySelector<HTMLElement>("[data-endorsement-note]"),
+  };
   let signature = "";
-  function render(next: BarView) {
+  function render(next: BarView, accounts: number) {
     // The replay reports its position about four times a second; only a
     // different figure touches the page.
-    const nextSignature = JSON.stringify(next);
+    const nextSignature = JSON.stringify([next, accounts]);
     if (nextSignature === signature) return;
     signature = nextSignature;
     view = next;
@@ -105,6 +113,10 @@ function start(bar: HTMLElement, card: HTMLElement, debateId: string) {
     bar.style.setProperty("--yes-share", `${next.yesPercent}%`);
     bar.setAttribute("aria-valuenow", String(next.yesPercent));
     bar.setAttribute("aria-valuetext", next.valueText);
+    const line = dockReadout(next, accounts);
+    if (readout.yes) readout.yes.textContent = line.empty ? "" : `${line.yes}%`;
+    if (readout.no) readout.no.textContent = line.empty ? "" : `${line.no}%`;
+    if (readout.note) readout.note.textContent = line.note;
     card.replaceChildren(...cardContent(next));
     place();
   }
@@ -123,7 +135,10 @@ function start(bar: HTMLElement, card: HTMLElement, debateId: string) {
       starts,
       position,
     });
-    render(barView({ ...figure, ...shown, now: Date.now() }, labels));
+    render(
+      barView({ ...figure, ...shown, now: Date.now() }, labels),
+      shown.endorsement?.accounts ?? 0,
+    );
   }
   onDebateEndorsement(debateId, (next) => {
     figure = next;
@@ -170,8 +185,12 @@ function start(bar: HTMLElement, card: HTMLElement, debateId: string) {
     pressing = null;
   });
   bar.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") close();
-    else if (event.key === "Enter" || event.key === " ") {
+    if (event.key === "Escape") {
+      // Escape puts the open card away first; it closes nothing else
+      // (the phone full screen) on the same press.
+      if (!card.hidden) event.preventDefault();
+      close();
+    } else if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       toggle();
     }

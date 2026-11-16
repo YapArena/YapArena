@@ -7,9 +7,10 @@
 /**
  * Seeks the replay video, keeping it playing or paused. Before the replay
  * has loaded, it presses Play replay and seeks once the recording's length
- * is known. False when the replay can't be played from here yet.
+ * is known. False when the replay can't be played from here yet. With
+ * `start: false` it only moves a replay that has already loaded.
  */
-export function seekReplay(seconds: number) {
+export function seekReplay(seconds: number, { start: press = true } = {}) {
   const section = document.querySelector<HTMLElement>("[data-media-event]");
   const video = section?.querySelector<HTMLVideoElement>(
     "[data-media-replay-video]",
@@ -19,6 +20,7 @@ export function seekReplay(seconds: number) {
     video.currentTime = seconds;
     return true;
   }
+  if (!press) return false;
   const start = section.querySelector<HTMLButtonElement>("[data-media-replay]");
   if (!start || start.hidden || start.disabled) return false;
   video.addEventListener(

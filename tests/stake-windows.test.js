@@ -6,6 +6,7 @@ import { beforeEach, it } from "node:test";
 
 const {
   onDebateEndorsement,
+  onStakePositions,
   onStakeRounds,
   onStakeWindows,
   onStakeWindowsStale,
@@ -112,6 +113,24 @@ it("shares the viewer's own limits the same way, latest first, per debate", asyn
     limits: {},
   });
   assert.equal(events.length, 4);
+});
+
+// Decision 0016: the phone full screen's keys read the viewer's own side and
+// size from the same private read; an older read without them gives none.
+it("shares the viewer's own positions with the limits", async () => {
+  const position = { side: "YES", quantity: 25 };
+  shareStakeRounds({
+    debateId: "d1",
+    limits: { w1: "0.58" },
+    positions: { w1: position },
+  });
+  const seen = [];
+  onStakePositions("d1", (positions) => seen.push(positions));
+  onStakePositions("d2", (positions) => seen.push(positions));
+  await settle();
+  assert.deepEqual(seen, [{ w1: position }]);
+  shareStakeRounds({ debateId: "d1", limits: {} });
+  assert.deepEqual(seen, [{ w1: position }, {}]);
 });
 
 // Decision 0015: the bar on the video takes the debate's last-answer figure

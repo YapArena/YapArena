@@ -686,6 +686,17 @@ try {
       page.locator("[data-price-order] .arena-price-chip b").allTextContents();
     await page.locator('[data-turn-bar="3"] button').click();
     await card.waitFor({ state: "visible" });
+    // Decision 0016: on a phone the row shows its price draw and doesn't
+    // start the replay, which would open the full screen over the card.
+    assert.deepEqual(
+      await page.evaluate(() => ({
+        plays: window.plays,
+        watch:
+          document.querySelector<HTMLElement>("[data-arena]")!.dataset.watch ??
+          null,
+      })),
+      { plays: 0, watch: null },
+    );
     assert.equal(
       await page
         .locator('[data-turn-bar="3"] button')
@@ -938,13 +949,47 @@ try {
       await clickCentre(page, "[data-media-replay]", width);
       await page.locator("[data-media-replay-video]:not([hidden])").waitFor();
       assert.equal(await page.evaluate(() => window.plays), 1);
+      if (width < 600) {
+        // Decision 0016: on a phone the replay plays only in the full
+        // screen, with the bar in its dock (D1). Back pauses it and gives
+        // the page its stage, bar and Play replay again.
+        await page.locator('[data-arena][data-watch="open"]').waitFor();
+        assert.equal(
+          await page.evaluate(() =>
+            Boolean(
+              document.querySelector("[data-watch-bar] [data-endorsement-bar]"),
+            ),
+          ),
+          true,
+        );
+        await page.getByRole("button", { name: "Show controls" }).click();
+        await page.getByRole("button", { name: "Back", exact: true }).click();
+        assert.deepEqual(
+          await page.evaluate(() => ({
+            watch:
+              document.querySelector<HTMLElement>("[data-arena]")!.dataset
+                .watch ?? null,
+            paused: document.querySelector<HTMLVideoElement>(
+              "[data-media-replay-video]",
+            )!.paused,
+          })),
+          { watch: null, paused: true },
+        );
+        assert.deepEqual(
+          await bottomEdge(page),
+          { 3: "bar", 9: "bar", 24: "div" },
+          `bar back on the page at ${width}px`,
+        );
+        assert.ok(await page.locator("[data-media-replay]").isVisible());
+      }
       // Over the replay video only its visible 6 px: the native controls
       // above take the pointer.
-      assert.deepEqual(
-        await bottomEdge(page),
-        { 3: "bar", 9: "video", 24: "video" },
-        `native controls covered at ${width}px`,
-      );
+      else
+        assert.deepEqual(
+          await bottomEdge(page),
+          { 3: "bar", 9: "video", 24: "video" },
+          `native controls covered at ${width}px`,
+        );
       assert.deepEqual(errors, []);
       await context.close();
     }

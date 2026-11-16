@@ -124,3 +124,23 @@ export function onStakeRounds(
     if (latest?.debateId === debateId) listener(latest.limits);
   });
 }
+
+type StakePositions = NonNullable<StakeRounds["positions"]>;
+
+/**
+ * Decision 0016: calls `listener` with the viewer's own side and size by
+ * window id, exactly as onStakeRounds.
+ */
+export function onStakePositions(
+  debateId: string,
+  listener: (positions: StakePositions) => void,
+) {
+  window.addEventListener("yap:stake-rounds", (event) => {
+    if (event.detail.debateId === debateId)
+      listener(event.detail.positions ?? {});
+  });
+  queueMicrotask(() => {
+    const latest = window.yapStakeRounds;
+    if (latest?.debateId === debateId) listener(latest.positions ?? {});
+  });
+}
