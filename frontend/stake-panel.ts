@@ -18,6 +18,7 @@ import {
   ceilingText,
   checkingTurnText,
   clock,
+  confirmText,
   debatesHere,
   lastPosition,
   liveWindow,
@@ -42,6 +43,8 @@ import {
   signedCoins,
   speakerLine,
   ticketTerms,
+  watchSize,
+  watchSizeChoices,
   type PublicWindow,
   type PublicWindows,
   type StakeRound,
@@ -118,6 +121,17 @@ if (root) {
   const review = one<HTMLDialogElement>("[data-stake-review]");
   const reviewTerms = one("[data-stake-review-terms]");
   const term = (name: string) => one(`[data-stake-term="${name}"]`);
+  // Decision 0016: while the phone's full screen is open, the ticket is its
+  // answer sheet: the side word and clock on top, the full screen's sizes,
+  // the read and one button naming the terms.
+  const arena = root.closest<HTMLElement>("[data-arena]");
+  const watching = () => arena?.dataset.watch === "open";
+  const watchSide = one("[data-stake-watch-side]");
+  const watchClock = one("[data-stake-watch-clock]");
+  const repeatLine = one<HTMLButtonElement>("[data-stake-repeat-line]");
+  const sizeChips = [
+    ...root.querySelectorAll<HTMLButtonElement>("[data-stake-size]"),
+  ];
 
   const store = sessionStore();
   let windows: PublicWindows | null = null;
@@ -181,9 +195,7 @@ if (root) {
   function applySize(value: number) {
     size = value;
     sizeInput.value = String(value);
-    for (const chip of root!.querySelectorAll<HTMLButtonElement>(
-      "[data-stake-size]",
-    ))
+    for (const chip of sizeChips)
       chip.setAttribute(
         "aria-pressed",
         String(Number(chip.dataset.stakeSize) === value),
@@ -396,7 +408,10 @@ if (root) {
     };
   }
   function cents() {
-    const manual = advanced.open ? parseCeiling(ceilingInput.value) : null;
+    // The full screen's sheet has no maximum price field, so its read sets
+    // the price there.
+    const manual =
+      advanced.open && !watching() ? parseCeiling(ceilingInput.value) : null;
     return manual ?? ceilingCents(side ?? "YES", Number(readInput.value));
   }
   // The most a position pays per contract: its limit is on the yes scale.
@@ -434,6 +449,11 @@ if (root) {
         "is-ending",
         current.via === "live" && left <= 10,
       );
+      watchClock.textContent = turnClock.textContent;
+      watchClock.classList.toggle(
+        "is-ending",
+        current.via === "live" && left <= 10,
+      );
       progress.hidden = current.via !== "live";
       progress.setAttribute("aria-valuenow", String(Math.round(remaining)));
       progress.setAttribute("aria-valuetext", `${left} seconds left`);
@@ -450,6 +470,7 @@ if (root) {
     turnBar.hidden = eventStatus !== "live";
     progress.hidden = true;
     turnClock.textContent = "";
+    watchClock.textContent = "";
     if (eventStatus === "live") {
       turnTitle.textContent = "Between turns";
       meta.textContent = "The next window opens when the next speaker starts.";
@@ -526,7 +547,24 @@ if (root) {
     }
     const showTicket = Boolean(open && signedIn && side);
     ticket.hidden = !showTicket;
+    const watch = watching();
+    // Each context shows its own chips (the full screen has no typed size);
+    // a size the full screen has no chip for moves to its nearest one there.
+    for (const chip of sizeChips)
+      if (chip.dataset.sizeSet)
+        chip.hidden = chip.dataset.sizeSet !== (watch ? "watch" : "page");
+    watchSide.textContent = side ? sideName(side) : "";
+    if (side) {
+      ticket.dataset.side = side;
+      watchSide.dataset.side = side;
+    }
     if (!showTicket || !side || !current) return;
+    if (
+      watch &&
+      (!watchSizeChoices.some((choice) => choice === size) ||
+        parseSize(sizeInput.value) === null)
+    )
+      applySize(watchSize(size));
     const value = cents();
     const terms = ticketTerms(size, value);
     readOut.textContent = `${readInput.value}%`;
@@ -546,11 +584,13 @@ if (root) {
     else if (errorLine.dataset.shortfall === "true") errorLine.textContent = "";
     errorLine.dataset.shortfall = String(Boolean(short));
     confirm.disabled = busy || Boolean(short);
-    confirm.textContent = `${
-      closedTurn !== null && closedTurn !== current.turnNumber
-        ? `Use for turn ${current.turnNumber} · `
-        : "Place "
-    }${sideName(side)} · ${size} · max ${terms.mostYouCanLose}`;
+    confirm.textContent = confirmText({
+      side,
+      size,
+      cents: value,
+      turnNumber: current.turnNumber,
+      closedTurn,
+    });
   }
   function renderReceipt(current: Target | null) {
     const own = current?.round?.own;
@@ -584,6 +624,15 @@ if (root) {
     repeat.hidden = !last?.own;
     repeat.disabled = busy;
     if (last?.own) repeat.textContent = repeatLabel(last.own);
+    // The full screen's sheet opens with a side already picked, so it keeps
+    // the offer as one line under its chips (Decision 0016, D7).
+    const again =
+      watching() && joinable(current) && signedIn && side && !current.round?.own
+        ? lastPosition(rounds, current.turnNumber)
+        : null;
+    repeatLine.hidden = !again?.own;
+    repeatLine.disabled = busy;
+    if (again?.own) repeatLine.textContent = repeatLabel(again.own);
   }
   function renderReady() {
     ready.hidden = !(
@@ -753,16 +802,21 @@ if (root) {
         explaining = true;
       }
       render();
-      sizeInput.focus();
+      // The full screen's sheet has no typed size: focus its chosen chip.
+      (watching()
+        ? (sizeChips.find(
+            (chip) =>
+              !chip.hidden && chip.getAttribute("aria-pressed") === "true",
+          ) ?? confirm)
+        : sizeInput
+      ).focus();
     });
-  for (const chip of root.querySelectorAll<HTMLButtonElement>(
-    "[data-stake-size]",
-  ))
+  for (const chip of sizeChips)
     chip.addEventListener("click", () => {
       applySize(Number(chip.dataset.stakeSize));
       render();
     });
-  repeat.addEventListener("click", () => {
+  function sameAsLast() {
     const current = target();
     const last = current ? lastPosition(rounds, current.turnNumber) : null;
     if (!last?.own) return;
@@ -774,7 +828,15 @@ if (root) {
     errorLine.textContent = "";
     render();
     confirm.focus();
-  });
+  }
+  repeat.addEventListener("click", sameAsLast);
+  repeatLine.addEventListener("click", sameAsLast);
+  // Opening or closing the full screen switches the ticket's look and sizes.
+  if (arena)
+    new MutationObserver(render).observe(arena, {
+      attributes: true,
+      attributeFilter: ["data-watch"],
+    });
   for (const chip of root.querySelectorAll<HTMLButtonElement>(
     "[data-stake-ready-size]",
   ))

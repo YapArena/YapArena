@@ -110,6 +110,20 @@ export interface StakeRound {
 
 export const sizeChoices = [5, 10, 25, 50, 100] as const;
 export const maximumSize = 100;
+/** Decision 0016: the full-screen answer sheet's sizes, with no typed size. */
+export const watchSizeChoices = [10, 25, 50, 75, 100] as const;
+
+/**
+ * A size the full-screen sheet can show: the size itself when it is one of
+ * its chips, else the nearest chip, the smaller one on a tie. The page's
+ * typed sizes and its 5 chip have no chip there.
+ */
+export function watchSize(size: number) {
+  let best: number = watchSizeChoices[0];
+  for (const choice of watchSizeChoices)
+    if (Math.abs(choice - size) < Math.abs(best - size)) best = choice;
+  return best;
+}
 
 /** Whole cents per contract (1–99) for a read of the yes share (1–99 %). */
 export function ceilingCents(side: StakeSide, readPercent: number) {
@@ -158,6 +172,25 @@ export function ticketTerms(size: number, cents: number) {
     reserved: coins(size * 100),
     mostYouCanLose: coins(size * cents),
   };
+}
+
+/**
+ * The confirm button, which names the exact terms (Decision 0013): "Place
+ * Yes · 25 · max 14.50 YC", or "Use for turn 8 · …" once the turn it was
+ * opened for closed.
+ */
+export function confirmText(ticket: {
+  side: StakeSide;
+  size: number;
+  cents: number;
+  turnNumber: number;
+  closedTurn: number | null;
+}) {
+  const lead =
+    ticket.closedTurn !== null && ticket.closedTurn !== ticket.turnNumber
+      ? `Use for turn ${ticket.turnNumber} · `
+      : "Place ";
+  return `${lead}${ticket.side === "YES" ? "Yes" : "No"} · ${ticket.size} · max ${ticketTerms(ticket.size, ticket.cents).mostYouCanLose}`;
 }
 
 /** A result in Yap Coins from atomic units: "+3.40 YC", "no gain or loss". */

@@ -6,6 +6,7 @@ import {
   ceilingText,
   clock,
   coins,
+  confirmText,
   debatesHere,
   lastPosition,
   liveWindow,
@@ -28,8 +29,11 @@ import {
   resultsSummary,
   secondsLeft,
   signedCoins,
+  sizeChoices,
   speakerLine,
   ticketTerms,
+  watchSize,
+  watchSizeChoices,
 } from "../public/stake-model.js";
 
 const at = (seconds) => new Date(Date.UTC(2026, 9, 26, 18, 0, seconds));
@@ -90,6 +94,62 @@ describe("betting panel terms (Decision 0013)", () => {
     assert.equal(price(5), "0.05 YC");
     assert.equal(price(100), "1.00 YC");
     assert.equal(reservedAtoms(10), 100_000n);
+  });
+
+  // Decision 0016, point 5: the full screen's answer sheet.
+  it("offers the full screen its own sizes and keeps the page's", () => {
+    assert.deepEqual([...watchSizeChoices], [10, 25, 50, 75, 100]);
+    assert.deepEqual([...sizeChoices], [5, 10, 25, 50, 100]);
+    for (const size of watchSizeChoices) assert.equal(watchSize(size), size);
+  });
+
+  it("moves a size the full screen has no chip for to the nearest one", () => {
+    // The page's 5 chip and its typed sizes.
+    assert.equal(watchSize(5), 10);
+    assert.equal(watchSize(1), 10);
+    assert.equal(watchSize(30), 25);
+    assert.equal(watchSize(64), 75);
+    assert.equal(watchSize(90), 100);
+    assert.equal(watchSize(60), 50);
+    assert.equal(watchSize(37), 25);
+    assert.equal(watchSize(38), 50);
+    // Halfway keeps the smaller size, so it never risks more.
+    assert.equal(watchSize(17.5), 10);
+    assert.equal(watchSize(62.5), 50);
+  });
+
+  it("names the exact terms on the confirm button as the size or read changes", () => {
+    const ticket = (overrides) => ({
+      side: "YES",
+      size: 25,
+      cents: 58,
+      turnNumber: 7,
+      closedTurn: null,
+      ...overrides,
+    });
+    assert.equal(confirmText(ticket()), "Place Yes · 25 · max 14.50 YC");
+    assert.equal(
+      confirmText(ticket({ size: 75 })),
+      "Place Yes · 75 · max 43.50 YC",
+    );
+    // A No read of 58% yes pays at most 42 hundredths per contract.
+    assert.equal(
+      confirmText(ticket({ side: "NO", cents: 42 })),
+      "Place No · 25 · max 10.50 YC",
+    );
+    assert.equal(
+      confirmText(ticket({ size: 100, cents: 99 })),
+      "Place Yes · 100 · max 99 YC",
+    );
+    // After the turn it was opened for closed, it says which turn it joins.
+    assert.equal(
+      confirmText(ticket({ closedTurn: 6 })),
+      "Use for turn 7 · Yes · 25 · max 14.50 YC",
+    );
+    assert.equal(
+      confirmText(ticket({ closedTurn: 7 })),
+      "Place Yes · 25 · max 14.50 YC",
+    );
   });
 
   it("accepts only whole sizes from 1 to 100 and prices from 1 to 99 cents", () => {
