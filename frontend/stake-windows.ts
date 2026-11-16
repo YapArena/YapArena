@@ -6,6 +6,7 @@
 // limits (yap:stake-rounds) are shared the same way for the price inspector.
 import type { RevealedWindow } from "./window-chart-model.js";
 import type { DebateEndorsement } from "../src/features/endorsement/types.ts";
+import type { StakeRound } from "./stake-model.js";
 
 type StakeWindows = WindowEventMap["yap:stake-windows"]["detail"];
 type StakeRounds = WindowEventMap["yap:stake-rounds"]["detail"];
@@ -155,4 +156,30 @@ export function onStakePositions(
     const latest = window.yapStakeRounds;
     if (latest?.debateId === debateId) listener(latest.positions ?? {});
   });
+}
+
+/**
+ * Decision 0016: calls `listener` with this debate's rounds from each of the
+ * viewer's reads, the latest one already shared first, exactly as
+ * onStakeRounds. A read without rounds is skipped. Returns a function that
+ * stops the calls.
+ */
+export function onOwnRounds(
+  debateId: string,
+  listener: (rounds: StakeRound[]) => void,
+) {
+  let stopped = false;
+  const deliver = (detail: StakeRounds | undefined) => {
+    if (detail?.debateId === debateId && detail.rounds) listener(detail.rounds);
+  };
+  const receive = (event: WindowEventMap["yap:stake-rounds"]) =>
+    deliver(event.detail);
+  window.addEventListener("yap:stake-rounds", receive);
+  queueMicrotask(() => {
+    if (!stopped) deliver(window.yapStakeRounds);
+  });
+  return () => {
+    stopped = true;
+    window.removeEventListener("yap:stake-rounds", receive);
+  };
 }

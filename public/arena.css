@@ -6044,6 +6044,514 @@ html.watch-open .cookie-choice {
   font-weight: 400;
 }
 
+/* Decision 0016 — turn result plate */
+/* When a turn the viewer answered is revealed, a pixel-framed plate pops in
+   mid-screen on the phone's full screen (frontend/turn-result-plate.ts). A
+   win flashes a square shockwave and bursts green and white pixel bits; a
+   loss shakes and drops red shards; breaking even stays white and still.
+   The plate centres on its host, or on the point the host's
+   --watch-result-x and --watch-result-y name. Under reduced motion it only
+   fades. */
+/* In the full screen it centres on the camera seam when vertical. When
+   horizontal it sits over the cameras, above the answer cluster: 150 px
+   down a 390 px screen, and 136 px left of centre while the chat is open
+   (Proto-H). */
+.arena-page .arena-workspace[data-watch="open"] .watch-plate {
+  --watch-result-y: var(--watch-seam);
+}
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
+  .watch-plate {
+  --watch-result-y: 38.5%;
+}
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"][data-watch-chat="open"]
+  .watch-plate {
+  --watch-result-x: calc(50% - 136px);
+}
+.watch-result {
+  --watch-result-ink: var(--text);
+  --watch-result-on: var(--on-acid);
+  --watch-result-glow: rgb(255 255 255 / 14%);
+  --watch-result-alt: var(--acid);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.watch-result[data-tone="win"] {
+  --watch-result-ink: var(--answer-yes);
+  --watch-result-on: var(--on-yes);
+  /* --answer-yes at 30%. */
+  --watch-result-glow: rgb(47 191 113 / 30%);
+}
+.watch-result[data-tone="loss"] {
+  --watch-result-ink: var(--answer-no);
+  --watch-result-on: var(--on-no);
+  /* --answer-no at 24%. */
+  --watch-result-glow: rgb(255 83 108 / 24%);
+  --watch-result-alt: var(--muted);
+}
+.watch-result-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--watch-result-x, 50%) var(--watch-result-y, 50%),
+    var(--watch-result-glow),
+    transparent 62%
+  );
+  opacity: 0;
+  animation: watch-result-flash 1.4s ease-out forwards;
+}
+.watch-result-anchor {
+  position: absolute;
+  left: var(--watch-result-x, 50%);
+  top: var(--watch-result-y, 50%);
+  width: 0;
+  height: 0;
+}
+.watch-result-wave {
+  position: absolute;
+  left: -70px;
+  top: -70px;
+  box-sizing: border-box;
+  width: 140px;
+  height: 140px;
+  border: 4px solid var(--watch-result-ink);
+  opacity: 0;
+  animation: watch-result-wave 0.7s steps(7) 0.08s forwards;
+}
+.watch-result-ray {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform: rotate(var(--watch-result-angle, 0deg));
+}
+.watch-result-bit {
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  background: var(--watch-result-ink);
+  opacity: 0;
+  animation: watch-result-far 1s steps(10) forwards;
+  animation-delay: var(--watch-result-delay, 0.1s);
+}
+.watch-result-bit.watch-result-alt {
+  background: var(--watch-result-alt);
+}
+.watch-result-bit.watch-result-near {
+  animation-name: watch-result-near;
+}
+.watch-result-bit.watch-result-drop {
+  animation-name: watch-result-drop;
+  animation-duration: 1.2s;
+}
+.watch-result-bit.watch-result-small {
+  left: -3px;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+}
+.watch-result-centre {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+}
+.watch-result-plate {
+  width: 248px;
+  animation: watch-result-pop 3.6s ease-out forwards;
+}
+/* Stepped pixel corners: 8 px on the plate, 6 px on the coin. */
+.watch-result-px {
+  clip-path: polygon(
+    0 8px,
+    4px 8px,
+    4px 4px,
+    8px 4px,
+    8px 0,
+    calc(100% - 8px) 0,
+    calc(100% - 8px) 4px,
+    calc(100% - 4px) 4px,
+    calc(100% - 4px) 8px,
+    100% 8px,
+    100% calc(100% - 8px),
+    calc(100% - 4px) calc(100% - 8px),
+    calc(100% - 4px) calc(100% - 4px),
+    calc(100% - 8px) calc(100% - 4px),
+    calc(100% - 8px) 100%,
+    8px 100%,
+    8px calc(100% - 4px),
+    4px calc(100% - 4px),
+    4px calc(100% - 8px),
+    0 calc(100% - 8px)
+  );
+}
+.watch-result-frame {
+  padding: 3px;
+  background: var(--watch-result-ink);
+}
+.watch-result-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px 14px;
+  background: #0b0b0b;
+}
+.watch-result-word {
+  color: var(--watch-result-ink);
+  font-family: var(--font-number);
+  font-size: 18px;
+  letter-spacing: 0.16em;
+}
+.watch-result-figure {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.watch-result-amt {
+  display: inline-block;
+  color: var(--text);
+  font-family: var(--font-number);
+  font-size: 50px;
+  line-height: 1;
+  white-space: nowrap;
+  /* The ding grows away from the coin, so the 8 px gap holds. */
+  transform-origin: 100% 50%;
+  animation: watch-result-ding 0.32s ease-out 1.05s;
+}
+.watch-result-coin {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  background: var(--watch-result-ink);
+  color: var(--watch-result-on);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  clip-path: polygon(
+    0 6px,
+    3px 6px,
+    3px 3px,
+    6px 3px,
+    6px 0,
+    calc(100% - 6px) 0,
+    calc(100% - 6px) 3px,
+    calc(100% - 3px) 3px,
+    calc(100% - 3px) 6px,
+    100% 6px,
+    100% calc(100% - 6px),
+    calc(100% - 3px) calc(100% - 6px),
+    calc(100% - 3px) calc(100% - 3px),
+    calc(100% - 6px) calc(100% - 3px),
+    calc(100% - 6px) 100%,
+    6px 100%,
+    6px calc(100% - 3px),
+    3px calc(100% - 3px),
+    3px calc(100% - 6px),
+    0 calc(100% - 6px)
+  );
+}
+.watch-result-streak {
+  margin-top: 2px;
+  padding: 5px 10px;
+  background: var(--acid);
+  color: var(--on-acid);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+.watch-result-shake {
+  animation: watch-result-shake 0.5s steps(1) 0.35s;
+}
+@keyframes watch-result-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  9% {
+    opacity: 1;
+    transform: scale(1.14);
+  }
+  14% {
+    transform: scale(0.95);
+  }
+  19% {
+    transform: scale(1);
+  }
+  84% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.72);
+  }
+}
+@keyframes watch-result-shake {
+  0% {
+    transform: translateX(-7px);
+  }
+  17% {
+    transform: translateX(7px);
+  }
+  33% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  67% {
+    transform: translateX(-2px);
+  }
+  83% {
+    transform: translateX(2px);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes watch-result-flash {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes watch-result-wave {
+  0% {
+    opacity: 1;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+@keyframes watch-result-far {
+  0% {
+    opacity: 1;
+    transform: translateY(-90px);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-230px);
+  }
+}
+@keyframes watch-result-near {
+  0% {
+    opacity: 1;
+    transform: translateY(-80px);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-170px);
+  }
+}
+@keyframes watch-result-drop {
+  0% {
+    opacity: 1;
+    transform: translateY(-70px);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-160px);
+  }
+}
+@keyframes watch-result-ding {
+  50% {
+    transform: scale(1.14);
+  }
+}
+@keyframes watch-result-fade {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  8%,
+  84% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .watch-result-bit,
+  .watch-result-wave,
+  .watch-result-flash {
+    display: none;
+  }
+  .watch-result-plate {
+    animation: watch-result-fade 3.6s forwards;
+  }
+  .watch-result-shake,
+  .watch-result-amt {
+    animation: none;
+  }
+}
+
+/* Decision 0016 — replay split and pause */
+/* A vertical replay (data-watch-replay="split") draws each side's camera
+   from the one recording into a canvas in its camera box
+   (frontend/replay-split.ts). The video keeps the sound and the time
+   unseen: it stays rendered, because a phone browser may stop decoding a
+   video that is display: none. */
+.arena-page [data-media-replay-video][data-replay-split] {
+  opacity: 0;
+  pointer-events: none;
+}
+.arena-page [data-watch-cam] > canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+}
+/* Horizontal shows the recording as it is, filling the screen: each half of
+   a side-by-side recording fills its camera box. */
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
+  .arena-video-surface
+  > video[data-media-replay-video] {
+  object-fit: cover;
+}
+/* The listener's camera dims on a replay too, where each box holds one
+   side: split vertically, or a recording with fixed sides ("sides-v1")
+   side by side. A LiveKit grid recording side by side can't tell its
+   sides apart, so nothing dims over it. */
+.arena-page
+  .arena-workspace[data-watch-phase="running"]:is(
+    [data-watch-replay="split"],
+    [data-watch-replay="sides"]
+  )
+  .watch-cam::after {
+  opacity: var(--watch-dim, 0.18);
+}
+/* D9: the replay's only control, a round key on the seam (placed by the
+   shell's .watch-pause rule; frontend/replay-pause.ts). The shell's pause
+   glyph while the replay plays, a triangle while it doesn't. */
+.arena-page [data-watch-pause] {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 45%);
+  color: var(--acid);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.arena-page [data-watch-pause] > svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 2.2;
+}
+.arena-page [data-watch-pause][data-replay-state="paused"] > svg {
+  display: none;
+}
+.arena-page [data-watch-pause][data-replay-state="paused"]::before {
+  content: "";
+  width: 18px;
+  height: 22px;
+  margin-left: 4px;
+  background: currentColor;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+.arena-page [data-watch-pause]:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
+}
+/* Vertical: the key sits in the middle of side A's camera, clear of both
+   name tags on the seam, the clock ring, the top row and the rail. */
+.arena-page .arena-workspace[data-watch="open"] .watch-pause {
+  top: calc(var(--watch-seam) / 2);
+}
+/* Horizontal: centred over the cameras, in the band between the name tags
+   (the shell puts them at 76px, 44px tall) and the question at its tallest
+   (132px from the bottom, three 15px lines at 1.3). */
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
+  .watch-pause {
+  --watch-pause-above: calc(76px + 44px);
+  --watch-pause-below: calc(132px + 3 * 15px * 1.3);
+  top: calc((var(--watch-pause-above) + 100% - var(--watch-pause-below)) / 2);
+}
+/* While the browser holds the sound back, Enable sound is what starts the
+   replay, in the key's place. */
+.arena-page
+  .arena-video-surface:has([data-watch-sound]:not([hidden]))
+  [data-watch-pause] {
+  display: none;
+}
+
+/* The top pill in the full screen stops short of ···: the secondary text
+   gives way with an ellipsis, the status and the time stay whole. On a
+   replay it reads "REPLAY 0:02 / 1:10": nobody watches a replay live. */
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .arena-video-surface
+  > .arena-video-status {
+  max-width: calc(
+    100% - max(8px, env(safe-area-inset-left, 0px)) - 48px -
+      max(8px, env(safe-area-inset-right, 0px)) - 52px
+  );
+  overflow: hidden;
+}
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
+  .arena-video-surface
+  > .arena-video-status {
+  max-width: calc(
+    100% - max(50px, env(safe-area-inset-left, 0px)) - 52px -
+      max(50px, env(safe-area-inset-right, 0px)) - 52px
+  );
+}
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .arena-video-status
+  > :is(.arena-broadcast-badge, .arena-watch-time) {
+  flex: none;
+}
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .arena-video-status
+  > :is(.arena-demo, .arena-watch-count) {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.arena-page
+  .arena-workspace[data-watch="open"]:is(
+    [data-debate-status="replay"],
+    [data-debate-status="finalized"]
+  )
+  .arena-video-status
+  .arena-watch-count {
+  display: none;
+}
+
 /* Decision 0016 — ··· sheet (D7). The full screen's ··· opens a sheet with
    the page's own Outline, About, "Your positions", "Get ready" defaults,
    "Set a maximum price instead" and the review pop-up switch

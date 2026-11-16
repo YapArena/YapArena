@@ -295,7 +295,9 @@ if (root) {
     if (current !== generation) return;
     rounds = view;
     if (debatesHere(view)) debater = true;
-    // The price inspector marks this viewer's own limit on revealed turns.
+    // The price inspector marks this viewer's own limit on revealed turns;
+    // the phone's full screen shows each position on its keys and pops each
+    // result as it is revealed.
     shareStakeRounds({
       debateId,
       limits: Object.fromEntries(
@@ -315,6 +317,7 @@ if (root) {
             : [],
         ),
       ),
+      rounds: view,
     });
     // A reveal changes the balance everywhere on the page.
     const revealed = resultsSummary(view).revealed.length;
