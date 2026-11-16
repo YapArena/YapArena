@@ -5154,7 +5154,9 @@ html.watch-open .cookie-choice {
   --watch-key-face: var(--answer-no);
   --watch-key-ink: var(--on-no);
 }
-.arena-page .arena-workspace .watch-key:active:not(:disabled) {
+.arena-page
+  .arena-workspace
+  .watch-key:active:not(:disabled, [aria-disabled="true"]) {
   box-shadow: inset 0 -2px 0 rgb(0 0 0 / 24%);
   transform: translateY(2px);
 }
@@ -5164,7 +5166,7 @@ html.watch-open .cookie-choice {
     inset 0 0 0 3px var(--acid),
     inset 0 -5px 0 rgb(0 0 0 / 24%);
 }
-.arena-page .arena-workspace .watch-key:disabled {
+.arena-page .arena-workspace .watch-key:is(:disabled, [aria-disabled="true"]) {
   cursor: default;
 }
 .arena-page .arena-workspace .watch-key[data-look="off"] {
@@ -5518,14 +5520,17 @@ html.watch-open .cookie-choice {
    the approved prototype's sheet: the side word and the clock, the full
    screen's size chips, the read, one key naming the exact terms and the
    final line. The page's own answer bar, tablets and computers keep the
-   ticket above; the side head and the 75 chip never show there. */
+   ticket above; the side head and the 75 chip never show there. These rules
+   come after the shell's and match its specificity, so they refine its
+   placement: the sheet stays above the full screen (1000) and under the
+   cookie banner (1020). */
 .arena-page .stake-watch-head {
   display: none;
 }
-[data-arena][data-watch="open"] .stake-panel[data-sheet] {
+.arena-page [data-arena][data-watch="open"] .stake-panel[data-sheet] {
   position: fixed;
   inset: auto 0 0;
-  z-index: 90;
+  z-index: 1010;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -5541,7 +5546,7 @@ html.watch-open .cookie-choice {
   box-shadow: none;
   color: var(--text);
 }
-[data-arena][data-watch="open"] .stake-panel[data-sheet]::before {
+.arena-page [data-arena][data-watch="open"] .stake-panel[data-sheet]::before {
   content: "";
   flex: none;
   align-self: center;
@@ -5550,7 +5555,8 @@ html.watch-open .cookie-choice {
   border-radius: 2px;
   background: var(--control-border);
 }
-[data-arena][data-watch="open"]
+.arena-page
+  [data-arena][data-watch="open"]
   .stake-panel[data-sheet]
   :is(
     .stake-sheet-close,
@@ -5573,24 +5579,34 @@ html.watch-open .cookie-choice {
   ) {
   display: none;
 }
-[data-arena][data-watch="open"] .stake-panel[data-sheet] .stake-watch-head {
+.arena-page
+  [data-arena][data-watch="open"]
+  .stake-panel[data-sheet]
+  .stake-watch-head {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-[data-arena][data-watch="open"] .stake-panel[data-sheet] .stake-watch-side {
+.arena-page
+  [data-arena][data-watch="open"]
+  .stake-panel[data-sheet]
+  .stake-watch-side {
   margin: 0 auto 0 0;
   color: var(--answer-yes);
   font: 400 32px / 1 var(--font-number);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-[data-arena][data-watch="open"]
+.arena-page
+  [data-arena][data-watch="open"]
   .stake-panel[data-sheet]
   .stake-watch-side[data-side="NO"] {
   color: var(--answer-no);
 }
-[data-arena][data-watch="open"] .stake-panel[data-sheet] .stake-watch-clock {
+.arena-page
+  [data-arena][data-watch="open"]
+  .stake-panel[data-sheet]
+  .stake-watch-clock {
   display: inline-flex;
   align-items: center;
   height: 28px;
@@ -5601,17 +5617,22 @@ html.watch-open .cookie-choice {
   font: 400 16px / 1 var(--font-number);
   font-variant-numeric: tabular-nums;
 }
-[data-arena][data-watch="open"]
+.arena-page
+  [data-arena][data-watch="open"]
   .stake-panel[data-sheet]
   .stake-watch-clock:empty {
   display: none;
 }
-[data-arena][data-watch="open"]
+.arena-page
+  [data-arena][data-watch="open"]
   .stake-panel[data-sheet]
   .stake-watch-clock.is-ending {
   color: var(--warning);
 }
-[data-arena][data-watch="open"] .stake-panel[data-sheet] .stake-watch-close {
+.arena-page
+  [data-arena][data-watch="open"]
+  .stake-panel[data-sheet]
+  .stake-watch-close {
   display: grid;
   place-items: center;
   width: 44px;
@@ -5623,7 +5644,8 @@ html.watch-open .cookie-choice {
   background: transparent;
   color: var(--text);
 }
-[data-arena][data-watch="open"]
+.arena-page
+  [data-arena][data-watch="open"]
   .stake-panel[data-sheet]
   .stake-watch-close
   svg {
@@ -5631,24 +5653,41 @@ html.watch-open .cookie-choice {
   height: 22px;
   stroke-width: 1.8;
 }
-[data-arena][data-watch="open"] .stake-panel[data-sheet] .stake-status {
+.arena-page
+  [data-arena][data-watch="open"]
+  .stake-panel[data-sheet]
+  .stake-status {
   margin: 0;
 }
-[data-arena][data-watch="open"] .stake-panel[data-sheet] .stake-ticket {
+.arena-page
+  [data-arena][data-watch="open"]
+  .stake-panel[data-sheet]
+  .stake-ticket {
   gap: 16px;
   margin-top: 0;
 }
-[data-arena][data-watch="open"] .stake-panel[data-sheet] .stake-size legend {
+.arena-page
+  [data-arena][data-watch="open"]
+  .stake-panel[data-sheet]
+  .stake-size
+  legend {
   margin-bottom: 8px;
   color: var(--muted);
   font-size: var(--text-12);
 }
-[data-arena][data-watch="open"] .stake-panel[data-sheet] .stake-chips {
+.arena-page
+  [data-arena][data-watch="open"]
+  .stake-panel[data-sheet]
+  .stake-chips {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
 }
-[data-arena][data-watch="open"] .stake-panel[data-sheet] .stake-chips button {
+.arena-page
+  [data-arena][data-watch="open"]
+  .stake-panel[data-sheet]
+  .stake-chips
+  button {
   height: 44px;
   min-height: 44px;
   padding: 0;
@@ -5658,7 +5697,8 @@ html.watch-open .cookie-choice {
   color: var(--text);
   font-weight: 700;
 }
-[data-arena][data-watch="open"]
+.arena-page
+  [data-arena][data-watch="open"]
   .stake-panel[data-sheet]
   .stake-chips
   button[aria-pressed="true"] {
@@ -5667,7 +5707,10 @@ html.watch-open .cookie-choice {
   color: var(--on-acid);
 }
 /* "Same as last turn", one line under the chips (D7). */
-[data-arena][data-watch="open"] .stake-panel[data-sheet] .stake-repeat-line {
+.arena-page
+  [data-arena][data-watch="open"]
+  .stake-panel[data-sheet]
+  .stake-repeat-line {
   align-self: flex-start;
   min-height: 32px;
   margin-top: -8px;
@@ -5680,25 +5723,36 @@ html.watch-open .cookie-choice {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-[data-arena][data-watch="open"] .stake-panel[data-sheet] .stake-read {
+.arena-page
+  [data-arena][data-watch="open"]
+  .stake-panel[data-sheet]
+  .stake-read {
   row-gap: 6px;
   color: var(--text);
   font-size: 13px;
 }
-[data-arena][data-watch="open"]
+.arena-page
+  [data-arena][data-watch="open"]
   .stake-panel[data-sheet]
   .stake-read-row
   output {
   font: 400 26px / 1 var(--font-number);
 }
-[data-arena][data-watch="open"] .stake-panel[data-sheet] .stake-read-row input {
+.arena-page
+  [data-arena][data-watch="open"]
+  .stake-panel[data-sheet]
+  .stake-read-row
+  input {
   height: 30px;
   margin: 0;
   accent-color: var(--acid);
 }
 /* The place key: the side's solid colour, stepped pixel corners and a
    key-cap edge that presses down, like the full screen's Yes and No. */
-[data-arena][data-watch="open"] .stake-panel[data-sheet] .stake-confirm {
+.arena-page
+  [data-arena][data-watch="open"]
+  .stake-panel[data-sheet]
+  .stake-confirm {
   height: 56px;
   min-height: 56px;
   padding: 0 12px;
@@ -5734,20 +5788,23 @@ html.watch-open .cookie-choice {
     transform 0.06s,
     box-shadow 0.06s;
 }
-[data-arena][data-watch="open"]
+.arena-page
+  [data-arena][data-watch="open"]
   .stake-panel[data-sheet]
   .stake-ticket[data-side="NO"]
   .stake-confirm {
   background: var(--answer-no);
   color: var(--on-no);
 }
-[data-arena][data-watch="open"]
+.arena-page
+  [data-arena][data-watch="open"]
   .stake-panel[data-sheet]
   .stake-confirm:active:not(:disabled) {
   transform: translateY(2px);
   box-shadow: inset 0 -2px 0 rgb(0 0 0 / 24%);
 }
-[data-arena][data-watch="open"]
+.arena-page
+  [data-arena][data-watch="open"]
   .stake-panel[data-sheet]
   .stake-confirm:focus-visible {
   outline: none;
@@ -5755,7 +5812,8 @@ html.watch-open .cookie-choice {
     inset 0 0 0 3px var(--acid),
     inset 0 -5px 0 rgb(0 0 0 / 24%);
 }
-[data-arena][data-watch="open"]
+.arena-page
+  [data-arena][data-watch="open"]
   .stake-panel[data-sheet]
   .stake-confirm:disabled {
   background: #1b1b1b;
@@ -5763,14 +5821,18 @@ html.watch-open .cookie-choice {
   box-shadow: none;
   opacity: 1;
 }
-[data-arena][data-watch="open"] .stake-panel[data-sheet] .stake-final {
+.arena-page
+  [data-arena][data-watch="open"]
+  .stake-panel[data-sheet]
+  .stake-final {
   margin-top: -6px;
   color: var(--muted);
   font-size: var(--text-12);
   text-align: center;
 }
 /* Horizontal: a side sheet over the right camera. */
-[data-arena][data-watch="open"][data-watch-orientation="horizontal"]
+.arena-page
+  [data-arena][data-watch="open"][data-watch-orientation="horizontal"]
   .stake-panel[data-sheet] {
   inset: 0 0 0 auto;
   width: min(392px, 100%);
@@ -5781,21 +5843,23 @@ html.watch-open .cookie-choice {
   border-left: 1px solid var(--line);
   border-radius: 22px 0 0 22px;
 }
-[data-arena][data-watch="open"][data-watch-orientation="horizontal"]
+.arena-page
+  [data-arena][data-watch="open"][data-watch-orientation="horizontal"]
   .stake-panel[data-sheet]::before {
   display: none;
 }
 @media (prefers-reduced-motion: no-preference) {
-  [data-arena][data-watch="open"] .stake-panel[data-sheet] {
+  .arena-page [data-arena][data-watch="open"] .stake-panel[data-sheet] {
     animation: watch-sheet-up 0.3s var(--ease-expo);
   }
-  [data-arena][data-watch="open"][data-watch-orientation="horizontal"]
+  .arena-page
+    [data-arena][data-watch="open"][data-watch-orientation="horizontal"]
     .stake-panel[data-sheet] {
     animation-name: watch-sheet-in;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-arena][data-watch="open"] .stake-panel[data-sheet] {
+  .arena-page [data-arena][data-watch="open"] .stake-panel[data-sheet] {
     animation: none;
   }
 }

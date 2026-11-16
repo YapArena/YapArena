@@ -43,6 +43,7 @@ import {
   signedCoins,
   speakerLine,
   ticketTerms,
+  watchSheetName,
   watchSize,
   watchSizeChoices,
   type PublicWindow,
@@ -704,6 +705,22 @@ if (root) {
     balanceLine.textContent = summary
       ? `Available: ${formatCoins(spendable(summary.balances))}`
       : "";
+    nameSheet();
+  }
+  // Decision 0016: over the full screen the sheet is "Your answer: Yes", not
+  // "Do you agree?", which it doesn't show there.
+  function nameSheet() {
+    const name =
+      watching() && "sheet" in root!.dataset ? watchSheetName(side) : null;
+    if (name) {
+      root!.setAttribute("role", "dialog");
+      root!.setAttribute("aria-label", name);
+      root!.removeAttribute("aria-labelledby");
+    } else if (root!.hasAttribute("aria-label")) {
+      root!.removeAttribute("role");
+      root!.removeAttribute("aria-label");
+      root!.setAttribute("aria-labelledby", "stake-question");
+    }
   }
 
   // Places the ticket on the window the viewer sees, or, from the review
@@ -731,6 +748,7 @@ if (root) {
     errorLine.textContent = "";
     render();
     let roundId = current.id;
+    let done = false;
     try {
       if (current.via === "live") {
         const joined = await coinApi<{ id: string }>(
@@ -756,6 +774,7 @@ if (root) {
         ),
       );
       placed();
+      done = true;
       await refresh();
     } catch (error) {
       // Read again first: the balance for the message, and after a lost
@@ -768,15 +787,22 @@ if (root) {
       if (
         apiErrorStatus(error) === undefined &&
         rounds.find((round) => round.id === roundId)?.own
-      )
+      ) {
         placed();
-      else {
+        done = true;
+      } else {
         if (failure.closed) closedTurn = current.turnNumber;
         errorLine.textContent = failure.text;
       }
     } finally {
       busy = false;
       render();
+      // Decision 0016: in the full screen, a placed answer closes the sheet.
+      // The rounds were read again first, so the key it returns focus to
+      // already names the position ("Yes · 25"); the receipt stays in the
+      // panel and the position in "Your positions".
+      if (done && watching() && "sheet" in root!.dataset)
+        delete root!.dataset.sheet;
     }
   }
 
@@ -802,14 +828,19 @@ if (root) {
         explaining = true;
       }
       render();
-      // The full screen's sheet has no typed size: focus its chosen chip.
-      (watching()
-        ? (sizeChips.find(
-            (chip) =>
-              !chip.hidden && chip.getAttribute("aria-pressed") === "true",
-          ) ?? confirm)
-        : sizeInput
-      ).focus();
+      if (!watching()) {
+        sizeInput.focus();
+        return;
+      }
+      // The full screen's sheet has no typed size: its chosen chip takes
+      // focus once the sheet shows (debate-layout.ts opens it after this).
+      requestAnimationFrame(() => {
+        const chip = sizeChips.find(
+          (item) =>
+            !item.hidden && item.getAttribute("aria-pressed") === "true",
+        );
+        if (!ticket.hidden) (chip ?? confirm).focus({ preventScroll: true });
+      });
     });
   for (const chip of sizeChips)
     chip.addEventListener("click", () => {
@@ -831,12 +862,16 @@ if (root) {
   }
   repeat.addEventListener("click", sameAsLast);
   repeatLine.addEventListener("click", sameAsLast);
-  // Opening or closing the full screen switches the ticket's look and sizes.
-  if (arena)
-    new MutationObserver(render).observe(arena, {
-      attributes: true,
-      attributeFilter: ["data-watch"],
-    });
+  // Opening or closing the full screen (frontend/watch-screen.ts) switches
+  // the ticket's look and sizes.
+  window.addEventListener("yap:watch", (event) => {
+    if (event.detail.debateId === debateId) render();
+  });
+  // As the full screen's answer sheet it is a dialog named for its side.
+  new MutationObserver(nameSheet).observe(root, {
+    attributes: true,
+    attributeFilter: ["data-sheet"],
+  });
   for (const chip of root.querySelectorAll<HTMLButtonElement>(
     "[data-stake-ready-size]",
   ))

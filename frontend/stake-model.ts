@@ -193,6 +193,11 @@ export function confirmText(ticket: {
   return `${lead}${ticket.side === "YES" ? "Yes" : "No"} · ${ticket.size} · max ${ticketTerms(ticket.size, ticket.cents).mostYouCanLose}`;
 }
 
+/** Decision 0016: the full screen's answer sheet's name, "Your answer: Yes". */
+export function watchSheetName(side: StakeSide | null) {
+  return side ? `Your answer: ${side === "YES" ? "Yes" : "No"}` : "Your answer";
+}
+
 /** A result in Yap Coins from atomic units: "+3.40 YC", "no gain or loss". */
 export function signedCoins(atoms: string | bigint) {
   return formatSignedCoins(atoms);

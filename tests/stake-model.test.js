@@ -32,6 +32,7 @@ import {
   sizeChoices,
   speakerLine,
   ticketTerms,
+  watchSheetName,
   watchSize,
   watchSizeChoices,
 } from "../public/stake-model.js";
@@ -116,6 +117,13 @@ describe("betting panel terms (Decision 0013)", () => {
     // Halfway keeps the smaller size, so it never risks more.
     assert.equal(watchSize(17.5), 10);
     assert.equal(watchSize(62.5), 50);
+  });
+
+  it("names the full screen's answer sheet for its side, not the question", () => {
+    assert.equal(watchSheetName("YES"), "Your answer: Yes");
+    assert.equal(watchSheetName("NO"), "Your answer: No");
+    // After placing, the side is cleared while the sheet closes.
+    assert.equal(watchSheetName(null), "Your answer");
   });
 
   it("names the exact terms on the confirm button as the size or read changes", () => {
