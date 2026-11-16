@@ -1121,6 +1121,23 @@ try {
     assert.equal((await barState(page)).open, false);
     await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
     assert.equal((await barState(page)).open, true);
+    // The card is opaque and shows whole inside the phone's video, footer
+    // included, without scrolling.
+    assert.deepEqual(
+      await page.evaluate(() => {
+        const card = document.querySelector<HTMLElement>(
+          "[data-endorsement-card]",
+        )!;
+        const surface = card.parentElement!.getBoundingClientRect();
+        const box = card.getBoundingClientRect();
+        return {
+          background: getComputedStyle(card).backgroundColor,
+          scrolls: card.scrollHeight > card.clientHeight + 1,
+          inside: box.top >= surface.top && box.bottom <= surface.bottom,
+        };
+      }),
+      { background: "rgb(0, 0, 0)", scrolls: false, inside: true },
+    );
     await page.touchscreen.tap(box.x + box.width / 2, box.y - 120);
     assert.equal((await barState(page)).open, false);
     assert.equal(

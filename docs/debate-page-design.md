@@ -104,9 +104,11 @@ sideways.
   controls keep their clicks. It is a `role="meter"` ("Viewers' last answers", its value text
   "47% Yes, People first; 53% No, Markets first; 3,491 accounts") with a 2 px focus outline inset
   in the surface, always visible, and stays on the bottom edge in expanded mode. Hovering with a
-  mouse, keyboard focus, a tap, Enter or Space opens a card above it (black at 86%, 12 px radius,
+  mouse, keyboard focus, a tap, Enter or Space opens a card above it (opaque black, 12 px radius,
   at most 20rem wide), centred on the share's edge and kept inside the surface: "Last answers in
-  this debate", each side's label and share in Forum 24 px, "1,640 Yes · 1,851 No · 3,491 accounts
+  this debate", each side's label and share in Forum 24 px (below 600 px wide, Forum 20 px with
+  the label beside it on one line, and tighter spacing, so the card fits a phone's inline video
+  whole), "1,640 Yes · 1,851 No · 3,491 accounts
   · through turn 6", the change since the previous counted turn ("Since turn 5: +2 pts Yes", "No
   change since turn 5" or "First revealed turn"), how many accounts changed answer ("120 accounts
   changed answer: 70 to Yes, 38 to No, 12 changed back" or "No one changed answer") and "Not a
