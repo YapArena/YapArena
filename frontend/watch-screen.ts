@@ -148,6 +148,8 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
       "aria-label",
       next.chat ? "Hide chat" : "Show chat",
     );
+    if (next.sheet === "more" && previous.sheet !== "more") lendToMore();
+    if (previous.sheet === "more" && next.sheet !== "more") returnFromMore();
     for (const [name, sheet] of sheets) sheet.hidden = next.sheet !== name;
     // The Turns sheet's body follows the window reads only while it shows.
     if (next.sheet === "turns" && !stopTurns && turnsBody)
@@ -170,6 +172,42 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
     }
   }
   const dispatch = (action: WatchAction) => apply(watchReducer(state, action));
+
+  // D7: the ··· sheet shows the page's own Outline, About, positions, "Get
+  // ready" defaults, maximum price and review switch. Each element moves
+  // into its slot while the sheet is open, keeping its listeners and state,
+  // and goes back to a marker at its place on the page when it closes.
+  const lent = [
+    ["outline", arena.querySelector<HTMLElement>("#arena-outline")],
+    ["about", arena.querySelector<HTMLElement>("#arena-about")],
+    [
+      "positions",
+      panel?.querySelector<HTMLElement>("[data-stake-positions-wrap]"),
+    ],
+    ["ready", panel?.querySelector<HTMLElement>("[data-stake-ready]")],
+    ["advanced", panel?.querySelector<HTMLElement>("[data-stake-advanced]")],
+    [
+      "review",
+      panel
+        ?.querySelector<HTMLElement>("[data-stake-review-choice]")
+        ?.closest<HTMLElement>("label"),
+    ],
+  ] as const;
+  const markers = new Map<HTMLElement, Comment>();
+  function lendToMore() {
+    for (const [name, element] of lent) {
+      const slot = one(`[data-more-slot="${name}"]`);
+      if (!element || !slot || markers.has(element)) continue;
+      const marker = document.createComment(`watch-more ${name}`);
+      element.before(marker);
+      markers.set(element, marker);
+      slot.append(element);
+    }
+  }
+  function returnFromMore() {
+    for (const [element, marker] of markers) marker.replaceWith(element);
+    markers.clear();
+  }
 
   function open(from: HTMLElement | null) {
     if (state.open || !phone.matches) return;

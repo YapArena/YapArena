@@ -84,6 +84,10 @@ never plays the video inline.
   share sheet, else Copy event link). On shorter phones the rail moves down and drops its words.
 - **Tap controls:** a tap on the picture ("Show controls", a real button) shows Back, ···, the
   question at the bottom and the name tags with their avatars; they start hidden.
+- **··· sheet (D7):** rows for Outline, About and Get ready, then Your positions, "Set a maximum
+  price instead" and the review pop-up switch. They are the page's own elements, moved into the
+  sheet while it is open and put back when it closes, so they keep their state and behaviour; Get
+  ready shows whatever the debate's state.
 - **Horizontal:** until its own pass, the cameras side by side with the bar over Yes · clock · No
   centred at the bottom, and Chat and Turns.
 

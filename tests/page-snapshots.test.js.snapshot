@@ -406,7 +406,7 @@ exports[`renders a debate 1`] = `
 <span class="watch-sheet-handle" aria-hidden="true">
 </span>
 <div class="watch-sheet-head">
-<h2 id="watch-more-title" class="sr-only">More</h2>
+<h2 id="watch-more-title">More</h2>
 <button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
 <svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
 <path d="M6 6l12 12M18 6 6 18"/>
@@ -414,6 +414,23 @@ exports[`renders a debate 1`] = `
 </button>
 </div>
 <div class="watch-sheet-body" data-more-sheet-body>
+<details class="watch-more-item">
+<summary>About</summary>
+<div class="watch-more-slot" data-more-slot="about">
+</div>
+</details>
+<div class="watch-more-slot watch-more-positions" data-more-slot="positions">
+<p class="watch-more-empty">Your positions · none yet</p>
+</div>
+<details class="watch-more-item">
+<summary>Get ready</summary>
+<div class="watch-more-slot" data-more-slot="ready">
+</div>
+</details>
+<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
+</div>
+<div class="watch-more-slot watch-more-line" data-more-slot="review">
+</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -1215,7 +1232,7 @@ exports[`renders a debate 10`] = `
 <span class="watch-sheet-handle" aria-hidden="true">
 </span>
 <div class="watch-sheet-head">
-<h2 id="watch-more-title" class="sr-only">More</h2>
+<h2 id="watch-more-title">More</h2>
 <button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
 <svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
 <path d="M6 6l12 12M18 6 6 18"/>
@@ -1223,6 +1240,23 @@ exports[`renders a debate 10`] = `
 </button>
 </div>
 <div class="watch-sheet-body" data-more-sheet-body>
+<details class="watch-more-item">
+<summary>About</summary>
+<div class="watch-more-slot" data-more-slot="about">
+</div>
+</details>
+<div class="watch-more-slot watch-more-positions" data-more-slot="positions">
+<p class="watch-more-empty">Your positions · none yet</p>
+</div>
+<details class="watch-more-item">
+<summary>Get ready</summary>
+<div class="watch-more-slot" data-more-slot="ready">
+</div>
+</details>
+<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
+</div>
+<div class="watch-more-slot watch-more-line" data-more-slot="review">
+</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -2032,7 +2066,7 @@ exports[`renders a debate 11`] = `
 <span class="watch-sheet-handle" aria-hidden="true">
 </span>
 <div class="watch-sheet-head">
-<h2 id="watch-more-title" class="sr-only">More</h2>
+<h2 id="watch-more-title">More</h2>
 <button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
 <svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
 <path d="M6 6l12 12M18 6 6 18"/>
@@ -2040,6 +2074,23 @@ exports[`renders a debate 11`] = `
 </button>
 </div>
 <div class="watch-sheet-body" data-more-sheet-body>
+<details class="watch-more-item">
+<summary>About</summary>
+<div class="watch-more-slot" data-more-slot="about">
+</div>
+</details>
+<div class="watch-more-slot watch-more-positions" data-more-slot="positions">
+<p class="watch-more-empty">Your positions · none yet</p>
+</div>
+<details class="watch-more-item">
+<summary>Get ready</summary>
+<div class="watch-more-slot" data-more-slot="ready">
+</div>
+</details>
+<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
+</div>
+<div class="watch-more-slot watch-more-line" data-more-slot="review">
+</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -2846,7 +2897,7 @@ exports[`renders a debate 12`] = `
 <span class="watch-sheet-handle" aria-hidden="true">
 </span>
 <div class="watch-sheet-head">
-<h2 id="watch-more-title" class="sr-only">More</h2>
+<h2 id="watch-more-title">More</h2>
 <button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
 <svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
 <path d="M6 6l12 12M18 6 6 18"/>
@@ -2854,6 +2905,23 @@ exports[`renders a debate 12`] = `
 </button>
 </div>
 <div class="watch-sheet-body" data-more-sheet-body>
+<details class="watch-more-item">
+<summary>About</summary>
+<div class="watch-more-slot" data-more-slot="about">
+</div>
+</details>
+<div class="watch-more-slot watch-more-positions" data-more-slot="positions">
+<p class="watch-more-empty">Your positions · none yet</p>
+</div>
+<details class="watch-more-item">
+<summary>Get ready</summary>
+<div class="watch-more-slot" data-more-slot="ready">
+</div>
+</details>
+<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
+</div>
+<div class="watch-more-slot watch-more-line" data-more-slot="review">
+</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -3654,7 +3722,7 @@ exports[`renders a debate 2`] = `
 <span class="watch-sheet-handle" aria-hidden="true">
 </span>
 <div class="watch-sheet-head">
-<h2 id="watch-more-title" class="sr-only">More</h2>
+<h2 id="watch-more-title">More</h2>
 <button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
 <svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
 <path d="M6 6l12 12M18 6 6 18"/>
@@ -3662,6 +3730,23 @@ exports[`renders a debate 2`] = `
 </button>
 </div>
 <div class="watch-sheet-body" data-more-sheet-body>
+<details class="watch-more-item">
+<summary>About</summary>
+<div class="watch-more-slot" data-more-slot="about">
+</div>
+</details>
+<div class="watch-more-slot watch-more-positions" data-more-slot="positions">
+<p class="watch-more-empty">Your positions · none yet</p>
+</div>
+<details class="watch-more-item">
+<summary>Get ready</summary>
+<div class="watch-more-slot" data-more-slot="ready">
+</div>
+</details>
+<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
+</div>
+<div class="watch-more-slot watch-more-line" data-more-slot="review">
+</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -4451,7 +4536,7 @@ exports[`renders a debate 3`] = `
 <span class="watch-sheet-handle" aria-hidden="true">
 </span>
 <div class="watch-sheet-head">
-<h2 id="watch-more-title" class="sr-only">More</h2>
+<h2 id="watch-more-title">More</h2>
 <button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
 <svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
 <path d="M6 6l12 12M18 6 6 18"/>
@@ -4459,6 +4544,23 @@ exports[`renders a debate 3`] = `
 </button>
 </div>
 <div class="watch-sheet-body" data-more-sheet-body>
+<details class="watch-more-item">
+<summary>About</summary>
+<div class="watch-more-slot" data-more-slot="about">
+</div>
+</details>
+<div class="watch-more-slot watch-more-positions" data-more-slot="positions">
+<p class="watch-more-empty">Your positions · none yet</p>
+</div>
+<details class="watch-more-item">
+<summary>Get ready</summary>
+<div class="watch-more-slot" data-more-slot="ready">
+</div>
+</details>
+<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
+</div>
+<div class="watch-more-slot watch-more-line" data-more-slot="review">
+</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -5256,7 +5358,7 @@ exports[`renders a debate 4`] = `
 <span class="watch-sheet-handle" aria-hidden="true">
 </span>
 <div class="watch-sheet-head">
-<h2 id="watch-more-title" class="sr-only">More</h2>
+<h2 id="watch-more-title">More</h2>
 <button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
 <svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
 <path d="M6 6l12 12M18 6 6 18"/>
@@ -5264,6 +5366,23 @@ exports[`renders a debate 4`] = `
 </button>
 </div>
 <div class="watch-sheet-body" data-more-sheet-body>
+<details class="watch-more-item">
+<summary>About</summary>
+<div class="watch-more-slot" data-more-slot="about">
+</div>
+</details>
+<div class="watch-more-slot watch-more-positions" data-more-slot="positions">
+<p class="watch-more-empty">Your positions · none yet</p>
+</div>
+<details class="watch-more-item">
+<summary>Get ready</summary>
+<div class="watch-more-slot" data-more-slot="ready">
+</div>
+</details>
+<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
+</div>
+<div class="watch-more-slot watch-more-line" data-more-slot="review">
+</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -6059,7 +6178,7 @@ exports[`renders a debate 5`] = `
 <span class="watch-sheet-handle" aria-hidden="true">
 </span>
 <div class="watch-sheet-head">
-<h2 id="watch-more-title" class="sr-only">More</h2>
+<h2 id="watch-more-title">More</h2>
 <button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
 <svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
 <path d="M6 6l12 12M18 6 6 18"/>
@@ -6067,6 +6186,23 @@ exports[`renders a debate 5`] = `
 </button>
 </div>
 <div class="watch-sheet-body" data-more-sheet-body>
+<details class="watch-more-item">
+<summary>About</summary>
+<div class="watch-more-slot" data-more-slot="about">
+</div>
+</details>
+<div class="watch-more-slot watch-more-positions" data-more-slot="positions">
+<p class="watch-more-empty">Your positions · none yet</p>
+</div>
+<details class="watch-more-item">
+<summary>Get ready</summary>
+<div class="watch-more-slot" data-more-slot="ready">
+</div>
+</details>
+<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
+</div>
+<div class="watch-more-slot watch-more-line" data-more-slot="review">
+</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -6856,7 +6992,7 @@ exports[`renders a debate 6`] = `
 <span class="watch-sheet-handle" aria-hidden="true">
 </span>
 <div class="watch-sheet-head">
-<h2 id="watch-more-title" class="sr-only">More</h2>
+<h2 id="watch-more-title">More</h2>
 <button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
 <svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
 <path d="M6 6l12 12M18 6 6 18"/>
@@ -6864,6 +7000,23 @@ exports[`renders a debate 6`] = `
 </button>
 </div>
 <div class="watch-sheet-body" data-more-sheet-body>
+<details class="watch-more-item">
+<summary>About</summary>
+<div class="watch-more-slot" data-more-slot="about">
+</div>
+</details>
+<div class="watch-more-slot watch-more-positions" data-more-slot="positions">
+<p class="watch-more-empty">Your positions · none yet</p>
+</div>
+<details class="watch-more-item">
+<summary>Get ready</summary>
+<div class="watch-more-slot" data-more-slot="ready">
+</div>
+</details>
+<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
+</div>
+<div class="watch-more-slot watch-more-line" data-more-slot="review">
+</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -7655,7 +7808,7 @@ exports[`renders a debate 7`] = `
 <span class="watch-sheet-handle" aria-hidden="true">
 </span>
 <div class="watch-sheet-head">
-<h2 id="watch-more-title" class="sr-only">More</h2>
+<h2 id="watch-more-title">More</h2>
 <button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
 <svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
 <path d="M6 6l12 12M18 6 6 18"/>
@@ -7663,6 +7816,23 @@ exports[`renders a debate 7`] = `
 </button>
 </div>
 <div class="watch-sheet-body" data-more-sheet-body>
+<details class="watch-more-item">
+<summary>About</summary>
+<div class="watch-more-slot" data-more-slot="about">
+</div>
+</details>
+<div class="watch-more-slot watch-more-positions" data-more-slot="positions">
+<p class="watch-more-empty">Your positions · none yet</p>
+</div>
+<details class="watch-more-item">
+<summary>Get ready</summary>
+<div class="watch-more-slot" data-more-slot="ready">
+</div>
+</details>
+<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
+</div>
+<div class="watch-more-slot watch-more-line" data-more-slot="review">
+</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -8460,7 +8630,7 @@ exports[`renders a debate 8`] = `
 <span class="watch-sheet-handle" aria-hidden="true">
 </span>
 <div class="watch-sheet-head">
-<h2 id="watch-more-title" class="sr-only">More</h2>
+<h2 id="watch-more-title">More</h2>
 <button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
 <svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
 <path d="M6 6l12 12M18 6 6 18"/>
@@ -8468,6 +8638,23 @@ exports[`renders a debate 8`] = `
 </button>
 </div>
 <div class="watch-sheet-body" data-more-sheet-body>
+<details class="watch-more-item">
+<summary>About</summary>
+<div class="watch-more-slot" data-more-slot="about">
+</div>
+</details>
+<div class="watch-more-slot watch-more-positions" data-more-slot="positions">
+<p class="watch-more-empty">Your positions · none yet</p>
+</div>
+<details class="watch-more-item">
+<summary>Get ready</summary>
+<div class="watch-more-slot" data-more-slot="ready">
+</div>
+</details>
+<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
+</div>
+<div class="watch-more-slot watch-more-line" data-more-slot="review">
+</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -9328,7 +9515,7 @@ exports[`renders a debate 9`] = `
 <span class="watch-sheet-handle" aria-hidden="true">
 </span>
 <div class="watch-sheet-head">
-<h2 id="watch-more-title" class="sr-only">More</h2>
+<h2 id="watch-more-title">More</h2>
 <button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
 <svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
 <path d="M6 6l12 12M18 6 6 18"/>
@@ -9336,6 +9523,23 @@ exports[`renders a debate 9`] = `
 </button>
 </div>
 <div class="watch-sheet-body" data-more-sheet-body>
+<details class="watch-more-item">
+<summary>About</summary>
+<div class="watch-more-slot" data-more-slot="about">
+</div>
+</details>
+<div class="watch-more-slot watch-more-positions" data-more-slot="positions">
+<p class="watch-more-empty">Your positions · none yet</p>
+</div>
+<details class="watch-more-item">
+<summary>Get ready</summary>
+<div class="watch-more-slot" data-more-slot="ready">
+</div>
+</details>
+<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
+</div>
+<div class="watch-more-slot watch-more-line" data-more-slot="review">
+</div>
 </div>
 </section>
 </div>\\n      </div>

@@ -6043,3 +6043,172 @@ html.watch-open .cookie-choice {
   color: var(--muted);
   font-weight: 400;
 }
+
+/* Decision 0016 — ··· sheet (D7). The full screen's ··· opens a sheet with
+   the page's own Outline, About, "Your positions", "Get ready" defaults,
+   "Set a maximum price instead" and the review pop-up switch
+   (frontend/watch-screen.ts moves them in while it is open). Outline, About
+   and Get ready open as rows; the rest keep their own controls. */
+.arena-page .watch-sheet[data-watch-sheet="more"] .watch-sheet-body {
+  display: flex;
+  flex-direction: column;
+}
+.arena-page .watch-more-item,
+.arena-page .watch-more-positions,
+.arena-page .watch-more-line {
+  border-bottom: 1px solid var(--line);
+}
+.arena-page .watch-more-item > summary,
+.arena-page .watch-sheet .stake-positions > summary,
+.arena-page .watch-sheet .stake-advanced > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 52px;
+  color: var(--text);
+  font: 700 var(--text-16) / 1.2 var(--font-body);
+  text-decoration: none;
+  list-style: none;
+  cursor: pointer;
+}
+.arena-page .watch-more-item > summary::-webkit-details-marker,
+.arena-page
+  .watch-sheet
+  :is(.stake-positions, .stake-advanced)
+  > summary::-webkit-details-marker {
+  display: none;
+}
+/* A chevron that turns down when the row is open. */
+.arena-page .watch-more-item > summary::after,
+.arena-page
+  .watch-sheet
+  :is(.stake-positions, .stake-advanced)
+  > summary::after {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-right: 4px;
+  border-right: 1.8px solid currentColor;
+  border-bottom: 1.8px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.2s var(--ease-expo);
+}
+.arena-page .watch-more-item[open] > summary::after,
+.arena-page
+  .watch-sheet
+  :is(.stake-positions, .stake-advanced)[open]
+  > summary::after {
+  transform: rotate(45deg);
+}
+.arena-page .watch-more-item > summary:focus-visible,
+.arena-page
+  .watch-sheet
+  :is(.stake-positions, .stake-advanced)
+  > summary:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 2px;
+}
+.arena-page .watch-more-slot {
+  padding-bottom: var(--space-4);
+}
+.arena-page :is(.watch-more-positions, .watch-more-line) {
+  padding-bottom: 0;
+}
+.arena-page .watch-more-empty {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+.arena-page
+  .watch-more-positions:has(> .stake-positions:not([hidden]))
+  .watch-more-empty {
+  display: none;
+}
+.arena-page .watch-sheet :is(.stake-positions, .stake-ready) {
+  margin: 0;
+}
+.arena-page .watch-sheet .stake-positions ul {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-14);
+  line-height: 20px;
+}
+.arena-page .watch-sheet .stake-advanced[open] {
+  padding-bottom: var(--space-4);
+}
+/* The defaults form shows here whatever the debate's state: they open
+   every ticket. Its own heading is the row's. */
+[data-a4-inline] .watch-sheet [data-more-slot="ready"] > .stake-ready[hidden] {
+  display: flex !important;
+}
+.arena-page .watch-sheet .stake-ready {
+  padding-top: 0;
+  border-top: 0;
+}
+.arena-page .watch-sheet .stake-ready h3,
+.arena-page
+  .watch-sheet
+  [data-more-slot]
+  :is(#live-outline-title, .arena-section-title) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.arena-page .watch-sheet .stake-review-choice {
+  min-height: 52px;
+  color: var(--text);
+  font-size: var(--text-14);
+}
+.arena-page .watch-sheet [data-more-slot="outline"] > .live-outline {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+.arena-page .watch-sheet [data-more-slot="outline"] .live-outline-body {
+  height: auto;
+  max-height: 45svh;
+  margin-top: 0;
+}
+.arena-page .watch-sheet [data-more-slot="about"] > .arena-about {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0;
+  background: transparent;
+}
+/* Horizontal: Turns and ··· are side sheets over the right camera, like the
+   answer sheet. */
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-sheet {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: auto;
+  width: min(392px, 100%);
+  height: auto;
+  max-height: none;
+  margin: 0;
+  padding: 18px max(52px, env(safe-area-inset-right, 0px)) 14px 22px;
+  border-top: 0;
+  border-left: 1px solid var(--line);
+  border-radius: 22px 0 0 22px;
+  animation-name: watch-side-sheet;
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-sheet-handle {
+  display: none;
+}
+@keyframes watch-side-sheet {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+}

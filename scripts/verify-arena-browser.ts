@@ -748,6 +748,33 @@ export async function verifyArenaBrowser({
     await page
       .locator('[data-watch-sheet="turns"]')
       .waitFor({ state: "hidden" });
+    // D7: ··· lends the page's own About, maximum price and review switch
+    // to its sheet, and puts them back when it closes.
+    await page.getByRole("button", { name: "More", exact: true }).click();
+    const lent = () =>
+      page.evaluate(() => {
+        const sheet = document.querySelector('[data-watch-sheet="more"]')!;
+        return [
+          "#arena-about",
+          "[data-stake-advanced]",
+          "[data-stake-review-choice]",
+          "[data-stake-ready]",
+        ].map((selector) => sheet.contains(document.querySelector(selector)));
+      });
+    assert.deepEqual(await lent(), [true, true, true, true]);
+    await page.keyboard.press("Escape");
+    await page
+      .locator('[data-watch-sheet="more"]')
+      .waitFor({ state: "hidden" });
+    assert.deepEqual(await lent(), [false, false, false, false]);
+    assert.equal(
+      await page.evaluate(() =>
+        document
+          .querySelector("[data-stake-ticket]")!
+          .contains(document.querySelector("[data-stake-advanced]")),
+      ),
+      true,
+    );
     await page.getByRole("button", { name: "Back", exact: true }).click();
     assert.equal(
       await page.locator("[data-arena]").getAttribute("data-watch"),
