@@ -30,10 +30,12 @@ import {
 } from "./debate-layout-model.js";
 import type { PublicWindow, StakeSide } from "./stake-model.js";
 import { onStakePositions, onStakeWindows } from "./stake-windows.js";
+import { watchTurnResults } from "./turn-result-plate.js";
 import { isTurnWindow } from "./turn-results-model.js";
 import { mountReplaySplit } from "./replay-split.js";
 import { mountPauseKey } from "./replay-pause.js";
 import { replayBadgeWords, replayWatchMode } from "./replay-split-model.js";
+import { mountTurnsSheet } from "./turns-sheet.js";
 
 declare global {
   interface WindowEventMap {
@@ -108,6 +110,8 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
   let sheetOpener: HTMLElement | null = null;
   let keyOpener: HTMLButtonElement | null = null;
   let timer = 0;
+  const turnsBody = one("[data-turns-sheet-body]");
+  let stopTurns: (() => void) | null = null;
 
   // ---- Open, close and what they change on the page ----
   function orientation() {
@@ -149,6 +153,13 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
       next.chat ? "Hide chat" : "Show chat",
     );
     for (const [name, sheet] of sheets) sheet.hidden = next.sheet !== name;
+    // The Turns sheet's body follows the window reads only while it shows.
+    if (next.sheet === "turns" && !stopTurns && turnsBody)
+      stopTurns = mountTurnsSheet(turnsBody);
+    else if (next.sheet !== "turns" && stopTurns) {
+      stopTurns();
+      stopTurns = null;
+    }
     // A sheet takes focus when it opens and gives it back when it closes.
     if (next.sheet && next.sheet !== previous.sheet)
       sheets
@@ -230,6 +241,22 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
   phone.addEventListener("change", () => {
     if (!phone.matches) close(false);
   });
+
+  // Point 7: the viewer's own turn results pop on the plate layer. It
+  // watches from page start on a phone, so a result revealed while the full
+  // screen is closed counts as seen and never pops later.
+  const plateLayer = one("[data-watch-plate]");
+  let stopPlate: (() => void) | null = null;
+  function syncPlate() {
+    if (phone.matches && plateLayer && !stopPlate)
+      stopPlate = watchTurnResults(plateLayer, { debateId });
+    else if (!phone.matches && stopPlate) {
+      stopPlate();
+      stopPlate = null;
+    }
+  }
+  syncPlate();
+  phone.addEventListener("change", syncPlate);
   window.addEventListener("resize", () => {
     if (state.open && arena.dataset.watchOrientation !== orientation()) {
       arena.dataset.watchOrientation = orientation();
@@ -429,17 +456,27 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
       return {
         key,
         disabled,
+        // After placing, the keys only say what was placed. They stay
+        // focusable, so the answer sheet can give focus back to "Yes · 25".
+        focusable: placed !== null,
         look: keyLook(side, placed, disabled),
         text: keyText(side, placed),
       };
     });
     const signature = JSON.stringify(
-      looks.map(({ disabled, look, text }) => [disabled, look, text]),
+      looks.map(({ disabled, focusable, look, text }) => [
+        disabled,
+        focusable,
+        look,
+        text,
+      ]),
     );
     if (signature === keySignature) return;
     keySignature = signature;
-    for (const { key, disabled, look, text } of looks) {
-      key.disabled = disabled;
+    for (const { key, disabled, focusable, look, text } of looks) {
+      key.disabled = disabled && !focusable;
+      if (disabled && focusable) key.setAttribute("aria-disabled", "true");
+      else key.removeAttribute("aria-disabled");
       key.dataset.look = look;
       key.textContent = text;
     }
@@ -454,6 +491,7 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
   }
   for (const key of keys)
     key.addEventListener("click", () => {
+      if (key.getAttribute("aria-disabled") === "true") return;
       const source = stakeSide(key.dataset.watchKey === "NO" ? "NO" : "YES");
       if (!source || source.disabled) return;
       keyOpener = key;

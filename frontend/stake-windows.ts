@@ -6,6 +6,7 @@
 // limits (yap:stake-rounds) are shared the same way for the price inspector.
 import type { RevealedWindow } from "./window-chart-model.js";
 import type { DebateEndorsement } from "../src/features/endorsement/types.ts";
+import type { StakeRound } from "./stake-model.js";
 
 type StakeWindows = WindowEventMap["yap:stake-windows"]["detail"];
 type StakeRounds = WindowEventMap["yap:stake-rounds"]["detail"];
@@ -27,18 +28,24 @@ export function shareStakeWindows(detail: StakeWindows) {
  * Calls `listener` with this debate's windows from each read: the latest one
  * already shared, if any, then every new one. The latest one comes once the
  * calling module's own code has run, so the listener can use everything the
- * module declares after this call.
+ * module declares after this call. Aborting `signal` stops it.
  */
 export function onStakeWindows(
   debateId: string,
   listener: (windows: RevealedWindow[]) => void,
+  signal?: AbortSignal,
 ) {
-  window.addEventListener("yap:stake-windows", (event) => {
-    if (event.detail.debateId === debateId) listener(event.detail.windows);
-  });
+  window.addEventListener(
+    "yap:stake-windows",
+    (event) => {
+      if (event.detail.debateId === debateId) listener(event.detail.windows);
+    },
+    { signal },
+  );
   queueMicrotask(() => {
     const latest = window.yapStakeWindows;
-    if (latest?.debateId === debateId) listener(latest.windows);
+    if (latest?.debateId === debateId && !signal?.aborted)
+      listener(latest.windows);
   });
 }
 
@@ -67,14 +74,20 @@ function endorsementView(detail: StakeWindows): DebateEndorsementView {
 export function onDebateEndorsement(
   debateId: string,
   listener: (view: DebateEndorsementView) => void,
+  signal?: AbortSignal,
 ) {
-  window.addEventListener("yap:stake-windows", (event) => {
-    if (event.detail.debateId === debateId)
-      listener(endorsementView(event.detail));
-  });
+  window.addEventListener(
+    "yap:stake-windows",
+    (event) => {
+      if (event.detail.debateId === debateId)
+        listener(endorsementView(event.detail));
+    },
+    { signal },
+  );
   queueMicrotask(() => {
     const latest = window.yapStakeWindows;
-    if (latest?.debateId === debateId) listener(endorsementView(latest));
+    if (latest?.debateId === debateId && !signal?.aborted)
+      listener(endorsementView(latest));
   });
 }
 
@@ -143,4 +156,30 @@ export function onStakePositions(
     const latest = window.yapStakeRounds;
     if (latest?.debateId === debateId) listener(latest.positions ?? {});
   });
+}
+
+/**
+ * Decision 0016: calls `listener` with this debate's rounds from each of the
+ * viewer's reads, the latest one already shared first, exactly as
+ * onStakeRounds. A read without rounds is skipped. Returns a function that
+ * stops the calls.
+ */
+export function onOwnRounds(
+  debateId: string,
+  listener: (rounds: StakeRound[]) => void,
+) {
+  let stopped = false;
+  const deliver = (detail: StakeRounds | undefined) => {
+    if (detail?.debateId === debateId && detail.rounds) listener(detail.rounds);
+  };
+  const receive = (event: WindowEventMap["yap:stake-rounds"]) =>
+    deliver(event.detail);
+  window.addEventListener("yap:stake-rounds", receive);
+  queueMicrotask(() => {
+    if (!stopped) deliver(window.yapStakeRounds);
+  });
+  return () => {
+    stopped = true;
+    window.removeEventListener("yap:stake-rounds", receive);
+  };
 }

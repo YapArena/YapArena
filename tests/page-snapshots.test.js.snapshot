@@ -486,6 +486,17 @@ exports[`renders a debate 1`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
+<div class="stake-watch-head">
+<h2 class="stake-watch-side" data-stake-watch-side>
+</h2>
+<span class="stake-watch-clock" data-stake-watch-clock>
+</span>
+<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -539,17 +550,21 @@ exports[`renders a debate 1`] = `
 </form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
+<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
+</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 <label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
 </label>
 </fieldset>
+<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
+</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -1280,6 +1295,17 @@ exports[`renders a debate 10`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
+<div class="stake-watch-head">
+<h2 class="stake-watch-side" data-stake-watch-side>
+</h2>
+<span class="stake-watch-clock" data-stake-watch-clock>
+</span>
+<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -1333,17 +1359,21 @@ exports[`renders a debate 10`] = `
 </form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
+<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
+</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 <label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
 </label>
 </fieldset>
+<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
+</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -2080,6 +2110,17 @@ exports[`renders a debate 11`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
+<div class="stake-watch-head">
+<h2 class="stake-watch-side" data-stake-watch-side>
+</h2>
+<span class="stake-watch-clock" data-stake-watch-clock>
+</span>
+<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -2133,17 +2174,21 @@ exports[`renders a debate 11`] = `
 </form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
+<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
+</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 <label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
 </label>
 </fieldset>
+<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
+</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -2970,6 +3015,17 @@ exports[`renders a debate 12`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
+<div class="stake-watch-head">
+<h2 class="stake-watch-side" data-stake-watch-side>
+</h2>
+<span class="stake-watch-clock" data-stake-watch-clock>
+</span>
+<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -3023,17 +3079,21 @@ exports[`renders a debate 12`] = `
 </form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
+<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
+</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 <label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
 </label>
 </fieldset>
+<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
+</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -3672,6 +3732,17 @@ exports[`renders a debate 2`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
+<div class="stake-watch-head">
+<h2 class="stake-watch-side" data-stake-watch-side>
+</h2>
+<span class="stake-watch-clock" data-stake-watch-clock>
+</span>
+<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -3725,17 +3796,21 @@ exports[`renders a debate 2`] = `
 </form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
+<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
+</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 <label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
 </label>
 </fieldset>
+<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
+</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -4545,6 +4620,17 @@ exports[`renders a debate 3`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
+<div class="stake-watch-head">
+<h2 class="stake-watch-side" data-stake-watch-side>
+</h2>
+<span class="stake-watch-clock" data-stake-watch-clock>
+</span>
+<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -4598,17 +4684,21 @@ exports[`renders a debate 3`] = `
 </form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
+<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
+</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 <label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
 </label>
 </fieldset>
+<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
+</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -5335,6 +5425,17 @@ exports[`renders a debate 4`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
+<div class="stake-watch-head">
+<h2 class="stake-watch-side" data-stake-watch-side>
+</h2>
+<span class="stake-watch-clock" data-stake-watch-clock>
+</span>
+<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -5388,17 +5489,21 @@ exports[`renders a debate 4`] = `
 </form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
+<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
+</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 <label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
 </label>
 </fieldset>
+<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
+</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -6034,6 +6139,17 @@ exports[`renders a debate 5`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
+<div class="stake-watch-head">
+<h2 class="stake-watch-side" data-stake-watch-side>
+</h2>
+<span class="stake-watch-clock" data-stake-watch-clock>
+</span>
+<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -6087,17 +6203,21 @@ exports[`renders a debate 5`] = `
 </form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
+<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
+</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 <label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
 </label>
 </fieldset>
+<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
+</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -6816,6 +6936,17 @@ exports[`renders a debate 6`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
+<div class="stake-watch-head">
+<h2 class="stake-watch-side" data-stake-watch-side>
+</h2>
+<span class="stake-watch-clock" data-stake-watch-clock>
+</span>
+<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -6869,17 +7000,21 @@ exports[`renders a debate 6`] = `
 </form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
+<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
+</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 <label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
 </label>
 </fieldset>
+<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
+</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -7600,6 +7735,17 @@ exports[`renders a debate 7`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
+<div class="stake-watch-head">
+<h2 class="stake-watch-side" data-stake-watch-side>
+</h2>
+<span class="stake-watch-clock" data-stake-watch-clock>
+</span>
+<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -7653,17 +7799,21 @@ exports[`renders a debate 7`] = `
 </form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
+<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
+</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 <label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
 </label>
 </fieldset>
+<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
+</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -8391,6 +8541,17 @@ exports[`renders a debate 8`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
+<div class="stake-watch-head">
+<h2 class="stake-watch-side" data-stake-watch-side>
+</h2>
+<span class="stake-watch-clock" data-stake-watch-clock>
+</span>
+<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -8444,17 +8605,21 @@ exports[`renders a debate 8`] = `
 </form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
+<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
+</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 <label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
 </label>
 </fieldset>
+<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
+</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -9243,6 +9408,17 @@ exports[`renders a debate 9`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
+<div class="stake-watch-head">
+<h2 class="stake-watch-side" data-stake-watch-side>
+</h2>
+<span class="stake-watch-clock" data-stake-watch-clock>
+</span>
+<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -9296,17 +9472,21 @@ exports[`renders a debate 9`] = `
 </form>
 <form class="stake-ticket" data-stake-ticket hidden>
 <fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
+<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
+</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" aria-pressed="false">5</button>
+<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
+<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 <label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
 </label>
 </fieldset>
+<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
+</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>

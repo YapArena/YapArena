@@ -653,9 +653,170 @@ export async function verifyArenaBrowser({
     assert.equal(sideBySide.orientation, "horizontal");
     await page.screenshot({ path: directory + "/phone-watch-landscape.png" });
     await page.setViewportSize({ width: 390, height: 844 });
-    // Turns opens its sheet; Escape closes it, then the full screen.
+    // Point 7: a turn the viewer answered is revealed. A read of the
+    // viewer's rounds without the result, then one with it, as the answer
+    // panel shares them; the plate pops on the camera seam and announces
+    // the result once.
+    await page.evaluate((debateId) => {
+      const turn = (net: string | null) => ({
+        id: "verify-plate-window",
+        kind: "turn",
+        turnNumber: 99,
+        side: "A",
+        state: net === null ? "open" : "settled",
+        voidReason: null,
+        opensAt: new Date().toISOString(),
+        closesAt: new Date().toISOString(),
+        revealMode: "per_round",
+        revealAt: null,
+        participants: 2,
+        eligibility: { canTakePosition: false, reason: "closed", via: null },
+        own: { side: "YES", limit: "0.60", quantity: 25, requestId: "r" },
+        ...(net === null
+          ? {}
+          : {
+              outcome: {
+                executed: true,
+                premium: "135000",
+                fee: "0",
+                payout: "158500",
+                net,
+              },
+            }),
+      });
+      for (const net of [null, "23500"])
+        window.dispatchEvent(
+          new CustomEvent("yap:stake-rounds", {
+            detail: { debateId, limits: {}, rounds: [turn(net)] },
+          }),
+        );
+    }, debate.id);
+    const plate = page.locator("[data-watch-plate] .watch-result");
+    await plate.waitFor();
+    assert.equal(
+      await page
+        .locator("[data-watch-plate] [data-watch-result-status]")
+        .textContent(),
+      "Turn 99: you won 2.35 Yap Coins.",
+    );
+    assert.equal(await plate.getAttribute("aria-hidden"), "true");
+    assert.equal(
+      await plate.locator(".watch-result-word").textContent(),
+      "YOU WON",
+    );
+    const seam = await page.evaluate(() => {
+      const anchor = document
+        .querySelector(".watch-result-anchor")!
+        .getBoundingClientRect();
+      // The cameras fill the screen above the dock.
+      const screen = document
+        .querySelector("[data-arena-video]")!
+        .getBoundingClientRect();
+      const dock = document
+        .querySelector(".watch-dock")!
+        .getBoundingClientRect();
+      return Math.abs(anchor.y - (screen.y + (dock.y - screen.y) / 2));
+    });
+    assert.ok(seam <= 1, `the plate centres on the camera seam (${seam} px)`);
+    await page.waitForTimeout(1500);
+    assert.equal(
+      await plate.locator(".watch-result-amt").textContent(),
+      "+2.35",
+    );
+    await page.screenshot({ path: directory + "/phone-watch-result.png" });
+    await plate.waitFor({ state: "detached", timeout: 5000 });
+    checks.phoneResultPlate = true;
+    // Point 5: a dock key opens the answer sheet over the full screen, named
+    // for its side, with the five full-screen sizes and one key naming the
+    // terms as they change. It needs an open turn window this account can
+    // answer; without one the keys stay off and the check says so.
+    const yesKey = page.locator('[data-watch-key="YES"]');
+    const answerable = await page
+      .waitForFunction(
+        () =>
+          !document.querySelector<HTMLButtonElement>('[data-watch-key="YES"]')!
+            .disabled,
+        {},
+        { timeout: 5000 },
+      )
+      .then(
+        () => true,
+        () => false,
+      );
+    if (answerable) {
+      await yesKey.click();
+      const sheet = page.getByRole("dialog", { name: "Your answer: Yes" });
+      await sheet.waitFor();
+      const ticket = () =>
+        page.evaluate(() => {
+          const panel =
+            document.querySelector<HTMLElement>("[data-stake-panel]")!;
+          const shown = (node: Element) =>
+            (node as HTMLElement).checkVisibility();
+          return {
+            chips: [...panel.querySelectorAll("[data-stake-size]")]
+              .filter(shown)
+              .map((chip) => chip.textContent),
+            typed: shown(panel.querySelector('input[name="size"]')!),
+            terms: shown(panel.querySelector(".stake-terms")!),
+            question: shown(panel.querySelector(".stake-question")!),
+            side: panel.querySelector("[data-stake-watch-side]")!.textContent,
+            place: panel.querySelector("[data-stake-confirm]")!.textContent,
+            final: shown(panel.querySelector(".stake-final")!),
+            above:
+              Number(getComputedStyle(panel).zIndex) >
+              Number(
+                getComputedStyle(document.querySelector("[data-arena-video]")!)
+                  .zIndex,
+              ),
+          };
+        });
+      await sheet.getByRole("button", { name: "25", exact: true }).click();
+      const opened = await ticket();
+      assert.deepEqual(opened.chips, ["10", "25", "50", "75", "100"]);
+      assert.deepEqual(
+        [opened.typed, opened.terms, opened.question, opened.final],
+        [false, false, false, true],
+      );
+      assert.equal(opened.side, "Yes");
+      assert.ok(opened.above);
+      assert.match(opened.place!, /^Place Yes · 25 · max \d+(\.\d\d)? YC$/);
+      // The key follows the size and the read at once.
+      await sheet.getByRole("button", { name: "75", exact: true }).click();
+      await page
+        .locator('[data-stake-ticket] input[name="read"]')
+        .evaluate((input: HTMLInputElement) => {
+          input.value = "40";
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+      assert.equal((await ticket()).place, "Place Yes · 75 · max 30 YC");
+      await page.screenshot({ path: directory + "/phone-watch-answer.png" });
+      // Escape closes it and gives focus back to the key.
+      await page.keyboard.press("Escape");
+      await sheet.waitFor({ state: "hidden" });
+      assert.equal(
+        await page.evaluate(
+          () =>
+            (document.activeElement as HTMLElement | null)?.dataset.watchKey,
+        ),
+        "YES",
+      );
+      checks.phoneAnswerSheet = true;
+    } else checks.phoneAnswerSheetNoOpenWindow = true;
+    // Turns opens its sheet with the debate's turns in its body; Escape
+    // closes it, then the full screen.
     await page.getByRole("button", { name: "Turns", exact: true }).click();
     await page.locator('[data-watch-sheet="turns"]').waitFor();
+    const turnsBody = page.locator("[data-turns-sheet-body]");
+    await turnsBody.locator(".turns-sheet-heading").first().waitFor();
+    const turnsText = (await turnsBody.textContent()) ?? "";
+    assert.ok(
+      turnsText.includes("Last answers in this debate") ||
+        turnsText.includes("Share who said yes, each turn"),
+    );
+    assert.ok(!turnsText.includes("Not a vote"));
+    await page.screenshot({ path: directory + "/phone-watch-turns.png" });
+    checks.phoneTurnsSheet = true;
     await page.keyboard.press("Escape");
     await page
       .locator('[data-watch-sheet="turns"]')

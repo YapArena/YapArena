@@ -6,6 +6,7 @@ import { beforeEach, it } from "node:test";
 
 const {
   onDebateEndorsement,
+  onOwnRounds,
   onStakePositions,
   onStakeRounds,
   onStakeWindows,
@@ -133,6 +134,32 @@ it("shares the viewer's own positions with the limits", async () => {
   assert.deepEqual(seen, [{ w1: position }, {}]);
 });
 
+// Decision 0016: the phone's result plate reads the rounds themselves; a read
+// without them is skipped.
+it("shares the viewer's rounds the same way and stops on request", async () => {
+  const first = [{ id: "w1", turnNumber: 1 }];
+  const second = [...first, { id: "w2", turnNumber: 2 }];
+  shareStakeRounds({ debateId: "d1", limits: {}, rounds: first });
+  const seen = [];
+  const stop = onOwnRounds("d1", (rounds) => seen.push(rounds));
+  assert.deepEqual(seen, []);
+  await settle();
+  assert.deepEqual(seen, [first]);
+  shareStakeRounds({ debateId: "d2", limits: {}, rounds: [] });
+  shareStakeRounds({ debateId: "d1", limits: {}, rounds: second });
+  shareStakeRounds({ debateId: "d1", limits: {} });
+  assert.deepEqual(seen, [first, second]);
+  stop();
+  shareStakeRounds({ debateId: "d1", limits: {}, rounds: first });
+  assert.equal(seen.length, 2);
+
+  // Stopped before the start-up delivery: nothing arrives.
+  const late = [];
+  onOwnRounds("d1", (rounds) => late.push(rounds))();
+  await settle();
+  assert.deepEqual(late, []);
+});
+
 // Decision 0015: the bar on the video takes the debate's last-answer figure
 // from the same read, with when its answers are revealed.
 it("shares the debate's last-answer figure from each window read", async () => {
@@ -173,4 +200,32 @@ it("marks the Results tab stale after a failed read until the next read arrives"
   shareStakeWindows({ debateId: "d2", windows: read(1) });
   shareStakeWindows({ debateId: "d1", windows: read(2) });
   assert.deepEqual(stale, [true, false]);
+});
+
+// Decision 0016: the full screen's Turns sheet listens only while it is open.
+it("stops a listener once its signal aborts, before or after the first read", async () => {
+  shareStakeWindows({ debateId: "d1", windows: read(1) });
+  const windows = [];
+  const figures = [];
+  const early = new AbortController();
+  onStakeWindows("d1", (value) => windows.push(value), early.signal);
+  onDebateEndorsement("d1", (value) => figures.push(value), early.signal);
+  // Aborted before the kept read is delivered: nothing arrives.
+  early.abort();
+  await settle();
+  shareStakeWindows({ debateId: "d1", windows: read(2) });
+  assert.deepEqual(windows, []);
+  assert.deepEqual(figures, []);
+  const later = new AbortController();
+  onStakeWindows("d1", (value) => windows.push(value), later.signal);
+  onDebateEndorsement("d1", (value) => figures.push(value), later.signal);
+  await settle();
+  shareStakeWindows({ debateId: "d1", windows: read(3) });
+  later.abort();
+  shareStakeWindows({ debateId: "d1", windows: read(4) });
+  assert.deepEqual(windows, [read(2), read(3)]);
+  assert.deepEqual(
+    figures.map((figure) => figure.endorsement),
+    [null, null],
+  );
 });

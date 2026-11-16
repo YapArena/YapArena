@@ -52,6 +52,16 @@ export function formatHundredths(hundredths: number) {
 }
 
 /**
+ * A whole number of hundredths with two decimals, thousands separators and no
+ * unit or sign: "0.50", "1.00", "1,234.50". Decision 0016's result plate
+ * counts up in these, so the figure keeps its width while it moves.
+ */
+export function formatFixedHundredths(hundredths: number) {
+  const value = Math.max(0, Math.round(hundredths));
+  return `${grouped(BigInt(Math.floor(value / 100)))}.${String(value % 100).padStart(2, "0")}`;
+}
+
+/**
  * A price per contract always shows two decimals, "0.54 YC" or "1.00 YC",
  * so prices line up.
  */
