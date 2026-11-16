@@ -457,6 +457,15 @@ export async function verifyArenaBrowser({
     assert.equal(await media.evaluate((n) => n.isConnected), true);
     assert.equal(await chat.evaluate((n) => n.isConnected), true);
     checks.expandEscapeRestoreExactBounds = true;
+    // Decision 0016: computers keep today's page; the phone full screen's
+    // parts never show.
+    assert.equal(
+      await page
+        .locator("[data-watch-ui]")
+        .evaluate((node) => getComputedStyle(node).display),
+      "none",
+    );
+    checks.desktopHasNoPhoneFullScreen = true;
     phase = "desktop screenshot";
     await page.screenshot({ path: directory + "/desktop.png", fullPage: true });
     phase = "preserved live DOM";
@@ -584,6 +593,90 @@ export async function verifyArenaBrowser({
     );
     await page.emulateMedia({ reducedMotion: "no-preference" });
     checks.reducedMotionHoverCorners = true;
+    phase = "phone full screen";
+    // Decision 0016: on a phone, Join as viewer opens the full screen over
+    // the whole page. Without a media provider the button may stay hidden;
+    // pressing it still opens the full screen while the join fails.
+    const viewer = page.locator("[data-media-viewer]");
+    if (!(await viewer.isVisible()))
+      await viewer.evaluate((node: HTMLElement) => {
+        node.hidden = false;
+      });
+    await viewer.click();
+    await page.locator('[data-arena][data-watch="open"]').waitFor();
+    const fullScreen = () =>
+      page.evaluate(() => {
+        const surface = document
+          .querySelector("[data-arena-video]")!
+          .getBoundingClientRect();
+        const arena = document.querySelector<HTMLElement>("[data-arena]")!;
+        return {
+          covers:
+            surface.x === 0 &&
+            surface.y === 0 &&
+            surface.width === window.innerWidth &&
+            surface.height === window.innerHeight,
+          scrolls: document.documentElement.scrollWidth > window.innerWidth,
+          locked: document.documentElement.classList.contains("watch-open"),
+          orientation: arena.dataset.watchOrientation,
+          controls: arena.dataset.watchControls,
+          back: getComputedStyle(document.querySelector("[data-watch-back]")!)
+            .visibility,
+          dialog:
+            document
+              .querySelector("[data-arena-video]")!
+              .getAttribute("aria-modal") === "true",
+        };
+      });
+    assert.deepEqual(await fullScreen(), {
+      covers: true,
+      scrolls: false,
+      locked: true,
+      orientation: "vertical",
+      controls: "hidden",
+      back: "hidden",
+      dialog: true,
+    });
+    // A tap on the picture shows Back, ···, the question and the name tags.
+    await page.getByRole("button", { name: "Show controls" }).click();
+    assert.equal((await fullScreen()).back, "visible");
+    await page.screenshot({ path: directory + "/phone-watch.png" });
+    await page.setViewportSize({ width: 320, height: 640 });
+    const narrowWatch = await fullScreen();
+    assert.ok(narrowWatch.covers && !narrowWatch.scrolls);
+    await page.setViewportSize({ width: 844, height: 390 });
+    await page
+      .locator('[data-arena][data-watch-orientation="horizontal"]')
+      .waitFor();
+    const sideBySide = await fullScreen();
+    assert.ok(sideBySide.covers && !sideBySide.scrolls);
+    assert.equal(sideBySide.orientation, "horizontal");
+    await page.screenshot({ path: directory + "/phone-watch-landscape.png" });
+    await page.setViewportSize({ width: 390, height: 844 });
+    // Turns opens its sheet; Escape closes it, then the full screen.
+    await page.getByRole("button", { name: "Turns", exact: true }).click();
+    await page.locator('[data-watch-sheet="turns"]').waitFor();
+    await page.keyboard.press("Escape");
+    await page
+      .locator('[data-watch-sheet="turns"]')
+      .waitFor({ state: "hidden" });
+    await page.getByRole("button", { name: "Back", exact: true }).click();
+    assert.equal(
+      await page.locator("[data-arena]").getAttribute("data-watch"),
+      null,
+    );
+    assert.equal(
+      await page.evaluate(() =>
+        document.documentElement.classList.contains("watch-open"),
+      ),
+      false,
+    );
+    assert.ok(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    );
+    checks.phoneFullScreen = true;
     phase = "search";
     // On phones the top row has no search icon: Explore's two lists search
     // from a field in the top row instead (docs/site-design.md). From 600 to

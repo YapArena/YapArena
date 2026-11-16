@@ -15,6 +15,7 @@ import {
 } from "./debate-layout-model.js";
 import type { PublicWindow } from "./stake-model.js";
 import { onStakeWindows } from "./stake-windows.js";
+import { PHONE_WATCH_QUERY } from "./watch-phone.js";
 import type { RevealedWindow } from "./window-chart-model.js";
 
 // The panel sends its whole public window list; the chart's event type
@@ -136,7 +137,11 @@ if (arena) {
   };
   const start = surface?.getBoundingClientRect();
   let roomy = start ? fits(start.width, start.height) : true;
-  const inPanel = () => narrow.matches || !roomy;
+  // Decision 0016: while the phone full screen is open, chat is its overlay
+  // (frontend/watch-screen.ts says when).
+  const watchChat = arena.querySelector<HTMLElement>("[data-watch-chat]");
+  let watching = false;
+  const inPanel = () => (narrow.matches || !roomy) && !watching;
   if (tablist && insight) {
     const tabs = [
       ...tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
@@ -173,9 +178,11 @@ if (arena) {
       const panel = inPanel();
       if (chat && chatTab) {
         chatTab.hidden = !panel;
-        const target = panel ? insight : surface;
+        const target =
+          watching && watchChat ? watchChat : panel ? insight : surface;
         if (target && chat.parentElement !== target) {
-          if (panel) tablist!.after(chat);
+          if (target === watchChat) watchChat.append(chat);
+          else if (panel) tablist!.after(chat);
           else surface!.insertBefore(chat, chatHome);
         }
       }
@@ -184,8 +191,19 @@ if (arena) {
       const selected = tabs.find(
         (tab) => tab.getAttribute("aria-selected") === "true" && !tab.hidden,
       );
-      select(selected ?? usable()[0]!);
+      // Back from the full screen, the Chat tab is selected again if it was.
+      const resumed = !watching && resumeChat && chatTab && !chatTab.hidden;
+      if (!watching) resumeChat = false;
+      select(resumed ? chatTab : (selected ?? usable()[0]!));
     }
+    let resumeChat = false;
+    window.addEventListener("yap:watch", (event) => {
+      if (event.detail.debateId !== debateId || event.detail.open === watching)
+        return;
+      if (event.detail.open) resumeChat = arena!.dataset.tab === "chat";
+      watching = event.detail.open;
+      sync();
+    });
     tablist.addEventListener("click", (event) => {
       const tab = (event.target as Element).closest<HTMLButtonElement>(
         '[role="tab"]',
@@ -274,7 +292,8 @@ if (arena) {
 
   // Phones: picking Yes or No opens the pinned answer bar as a sheet. Back
   // or Escape closes it and returns focus to the answer picked.
-  const phone = matchMedia("(max-width: 599px)");
+  // Decision 0016: also a landscape phone, where the full screen opens it.
+  const phone = matchMedia(PHONE_WATCH_QUERY);
   if (panel) {
     let picked: HTMLButtonElement | null = null;
     const close = () => {

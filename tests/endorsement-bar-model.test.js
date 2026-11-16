@@ -10,6 +10,7 @@ const {
   barView,
   cardLeft,
   changeText,
+  dockReadout,
   emptyStatus,
   revealTime,
   shownEndorsement,
@@ -238,4 +239,19 @@ it("follows the replay's playing turn and shows the latest otherwise", () => {
     barView(input(null, { waiting: true }), labels).card.status,
     "Fills as each turn plays.",
   );
+});
+
+it("writes the dock's line in the phone full screen (Decision 0016)", () => {
+  assert.deepEqual(dockReadout(barView(input(figure()), labels), 3491), {
+    empty: false,
+    yes: 47,
+    no: 53,
+    note: "last answers · 3,491",
+  });
+  assert.deepEqual(dockReadout(barView(input(null), labels), 0), {
+    empty: true,
+    yes: 0,
+    no: 0,
+    note: "No results revealed yet",
+  });
 });

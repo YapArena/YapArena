@@ -4180,3 +4180,1335 @@ textarea::placeholder {
   background: transparent;
   color: #f4f4f4;
 }
+
+/* Decision 0016 — full-screen shell. On a phone (under 600 px wide, or a
+   landscape viewport under 500 px tall: PHONE_WATCH_QUERY in
+   frontend/watch-phone.ts), a debate is watched only in full screen. The
+   video surface itself becomes the full screen while [data-arena] has
+   data-watch="open" (frontend/watch-screen.ts); its own parts are
+   [data-watch-ui], hidden everywhere else. Vertical is Proto-V at 390 × 844:
+   side A over side B in the top 82%, the clock ring on the seam, the rail
+   under it, and the 146 px dock with the last-answer bar and Yes/No. */
+@property --watch-spent {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 0%;
+}
+.arena-page .watch-ui {
+  display: none;
+}
+@media (max-width: 599px), (orientation: landscape) and (max-height: 499px) {
+  /* No Enlarge on phones; the page's video doesn't play in the page. A
+     paused replay goes back behind "Play replay". */
+  .arena-page .arena-workspace .arena-video-expand {
+    display: none;
+  }
+  .arena-page
+    .arena-workspace:not([data-watch="open"])
+    .arena-video-surface
+    > video[data-media-replay-video] {
+    display: none;
+  }
+  .arena-page
+    .arena-workspace:not([data-watch="open"])
+    .arena-video-surface:not(:has(.media-videos > video))
+    .arena-video-empty {
+    display: flex;
+  }
+}
+
+/* The takeover: fixed over the header, the tab row and the footer, clear of
+   the safe areas, with the page's scroll locked under it. */
+html.watch-open,
+html.watch-open body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+html.watch-open .cookie-choice {
+  z-index: 1020;
+}
+.arena-page .arena-workspace[data-watch="open"] .arena-watch {
+  container-type: normal;
+}
+.arena-page .arena-workspace[data-watch="open"] .arena-video-surface {
+  --watch-dock: max(146px, calc(112px + env(safe-area-inset-bottom, 0px)));
+  --watch-top: max(env(safe-area-inset-top, 0px), 6px);
+  --watch-cams: calc(100% - var(--watch-dock));
+  --watch-seam: calc(var(--watch-cams) / 2);
+  --watch-ink: #f4f4f4;
+  --watch-soft: #c9c9c9;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: 0;
+  width: auto;
+  max-width: none;
+  height: 100vh;
+  height: 100svh;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 0;
+  background: var(--bg);
+  color: var(--watch-ink);
+  font-family: var(--font-body);
+  overscroll-behavior: contain;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.arena-page .arena-workspace[data-watch="open"] .watch-ui {
+  display: contents;
+}
+/* The page's own corners, frames and buttons stay out of the full screen. */
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .arena-video-surface
+  > :is(
+    .arena-video-topic,
+    .arena-video-empty,
+    .arena-frames,
+    .arena-chat-toggle,
+    .arena-video-expand
+  ) {
+  display: none;
+}
+.arena-page .arena-workspace[data-watch="open"] .watch-ui [hidden] {
+  display: none;
+}
+
+/* Cameras: side A over side B, 2 px apart, each cropped to fill. */
+.arena-page .arena-workspace[data-watch="open"] .media-videos {
+  inset: 0 0 auto;
+  height: var(--watch-cams);
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  background: var(--bg);
+}
+.arena-page .arena-workspace[data-watch="open"] .media-videos video {
+  grid-column: 1;
+  object-fit: cover;
+  background: var(--bg);
+}
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .media-videos
+  video[data-side="A"] {
+  grid-row: 1;
+}
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .media-videos
+  video[data-side="B"] {
+  grid-row: 2;
+}
+/* Until PR 5 splits it, a replay shows whole, letterboxed in the cameras. */
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .arena-video-surface
+  > video[data-media-replay-video] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--watch-cams);
+  object-fit: contain;
+}
+.arena-page .watch-cams {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+  height: var(--watch-cams);
+  pointer-events: none;
+}
+.arena-page .watch-cam {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+/* The listener's camera dims; between turns both do a little. */
+.arena-page .watch-cam::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #000;
+  opacity: var(--watch-dim, 0.18);
+  transition: opacity 0.25s ease-out;
+}
+/* Until PR 5 splits a replay into the two cameras, nothing dims over it. */
+.arena-page
+  .arena-workspace:is(
+    [data-debate-status="replay"],
+    [data-debate-status="finalized"]
+  )
+  .watch-cam::after {
+  opacity: 0;
+}
+.arena-page
+  .arena-workspace[data-watch-phase="running"]:is(
+    [data-active-side="A"],
+    [data-active-side="B"]
+  )
+  .watch-cam {
+  --watch-dim: 0.34;
+}
+.arena-page
+  .arena-workspace[data-watch-phase="running"][data-active-side="A"]
+  .watch-cam[data-watch-cam="A"],
+.arena-page
+  .arena-workspace[data-watch-phase="running"][data-active-side="B"]
+  .watch-cam[data-watch-cam="B"] {
+  --watch-dim: 0;
+}
+/* A tap on the picture shows or hides the controls. */
+.arena-page .arena-workspace .watch-stage {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  height: var(--watch-cams);
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: default;
+}
+.arena-page .arena-workspace .watch-stage:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: -4px;
+}
+.arena-page .watch-shade {
+  position: absolute;
+  right: 0;
+  left: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.arena-page .watch-shade-top {
+  top: 0;
+  height: calc(var(--watch-top) + 100px);
+  background: linear-gradient(rgb(0 0 0 / 66%), rgb(0 0 0 / 0%));
+}
+.arena-page .watch-shade-bottom {
+  bottom: var(--watch-dock);
+  height: 138px;
+  background: linear-gradient(rgb(0 0 0 / 0%), rgb(0 0 0 / 30%));
+}
+.arena-page
+  .arena-workspace:is([data-watch-controls="shown"], [data-watch-chat="open"])
+  .watch-shade-bottom {
+  background: linear-gradient(rgb(0 0 0 / 0%), rgb(0 0 0 / 78%));
+}
+
+/* The turn bar: one segment per turn. */
+.arena-page .watch-segments {
+  position: absolute;
+  top: calc(var(--watch-top) + 3px);
+  right: 16px;
+  left: 16px;
+  z-index: 4;
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 3px;
+  pointer-events: none;
+}
+.arena-page .watch-segment {
+  position: relative;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 26%);
+}
+.arena-page .watch-segment[data-done] {
+  background: var(--acid);
+}
+.arena-page .watch-segment::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--fill, 0%);
+  background: var(--acid);
+}
+
+/* The top row: Back, LIVE with the watching count, and ···. */
+.arena-page .arena-workspace .watch-icon {
+  position: absolute;
+  top: calc(var(--watch-top) + 15px);
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--watch-ink);
+}
+.arena-page .watch-back {
+  left: max(8px, env(safe-area-inset-left, 0px));
+}
+.arena-page .watch-more {
+  right: max(8px, env(safe-area-inset-right, 0px));
+}
+.arena-page .watch-svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .arena-video-surface
+  > .arena-video-status {
+  top: calc(var(--watch-top) + 23px);
+  right: auto;
+  left: calc(max(8px, env(safe-area-inset-left, 0px)) + 48px);
+  gap: 6px;
+  max-width: calc(100% - 112px);
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  background: rgb(0 0 0 / 50%);
+  color: var(--watch-ink);
+  font-size: var(--text-12);
+  opacity: 1;
+}
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .arena-video-status
+  .arena-broadcast-badge {
+  gap: 6px;
+  letter-spacing: 0.08em;
+}
+.arena-page .arena-workspace[data-watch="open"] .arena-live-dot {
+  width: 7px;
+  height: 7px;
+}
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .arena-video-status
+  :is(.arena-watch-count, .arena-watch-time) {
+  color: var(--watch-soft);
+}
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .arena-video-status
+  :is(.arena-watch-count, .arena-watch-time)::before {
+  content: none;
+}
+
+/* The controls a tap shows: Back, ···, the name tags and the question.
+   They start hidden (D4). */
+.arena-page [data-watch-control] {
+  transition:
+    opacity 0.25s ease-out,
+    visibility 0s;
+}
+.arena-page
+  .arena-workspace[data-watch-controls="hidden"]
+  [data-watch-control] {
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 0.25s ease-out,
+    visibility 0s 0.25s;
+}
+
+/* Name tags hug the seam; the speaker's is solid white. */
+.arena-page .watch-tags {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 5;
+  height: var(--watch-cams);
+  pointer-events: none;
+}
+.arena-page .watch-tag {
+  position: absolute;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  max-width: calc(100% - 116px);
+  height: 44px;
+  margin: 0;
+  padding: 0 14px 0 5px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: var(--radius-pill);
+  background: rgb(0 0 0 / 58%);
+  color: var(--watch-ink);
+  transition:
+    background-color 0.25s ease-out,
+    color 0.25s ease-out,
+    border-color 0.25s ease-out;
+}
+.arena-page .watch-tag[data-side="A"] {
+  bottom: calc(50% + 11px);
+}
+.arena-page .watch-tag[data-side="B"] {
+  top: calc(50% + 11px);
+}
+.arena-page .watch-tag-avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  font-weight: 700;
+}
+.arena-page .watch-tag-who {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  line-height: 1.15;
+}
+.arena-page .watch-tag-who > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.arena-page .watch-tag-who strong {
+  font-size: var(--text-14);
+}
+.arena-page .watch-tag-who span {
+  color: var(--watch-soft);
+  font-size: var(--text-12);
+}
+.arena-page .watch-eq,
+.arena-page .watch-tag-next {
+  display: none;
+  flex: none;
+  margin-left: 4px;
+}
+.arena-page .watch-tag-next {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.arena-page
+  .arena-workspace[data-watch-phase="running"][data-active-side="A"]
+  .watch-tag[data-side="A"],
+.arena-page
+  .arena-workspace[data-watch-phase="running"][data-active-side="B"]
+  .watch-tag[data-side="B"] {
+  border-color: var(--acid);
+  background: var(--acid);
+  color: var(--on-acid);
+}
+.arena-page
+  .arena-workspace[data-watch-phase="running"][data-active-side="A"]
+  .watch-tag[data-side="A"]
+  .watch-tag-who
+  span,
+.arena-page
+  .arena-workspace[data-watch-phase="running"][data-active-side="B"]
+  .watch-tag[data-side="B"]
+  .watch-tag-who
+  span {
+  color: #3d3d3d;
+}
+.arena-page
+  .arena-workspace[data-watch-phase="running"][data-active-side="A"]
+  .watch-tag[data-side="A"]
+  .watch-eq,
+.arena-page
+  .arena-workspace[data-watch-phase="running"][data-active-side="B"]
+  .watch-tag[data-side="B"]
+  .watch-eq {
+  display: inline-flex;
+}
+.arena-page
+  .arena-workspace[data-watch-next="A"]
+  .watch-tag[data-side="A"]
+  .watch-tag-next,
+.arena-page
+  .arena-workspace[data-watch-next="B"]
+  .watch-tag[data-side="B"]
+  .watch-tag-next {
+  display: inline;
+}
+.arena-page .watch-eq {
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+.arena-page .watch-eq i {
+  display: block;
+  width: 3px;
+  height: 8px;
+  border-radius: 1px;
+  background: currentColor;
+  animation: watch-eq 0.9s ease-in-out infinite;
+}
+.arena-page .watch-eq i:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.arena-page .watch-eq i:nth-child(3) {
+  animation-delay: 0.4s;
+}
+@keyframes watch-eq {
+  0%,
+  100% {
+    height: 4px;
+  }
+  50% {
+    height: 12px;
+  }
+}
+
+/* The turn clock: a 76 px ring on the seam, coral in the last 10 s, "NEXT"
+   and the next speaker between turns. */
+.arena-page .watch-clock {
+  --watch-ring: var(--acid);
+  position: absolute;
+  top: calc(var(--watch-seam) - 38px);
+  right: max(16px, env(safe-area-inset-right, 0px));
+  z-index: 5;
+  box-sizing: border-box;
+  width: 76px;
+  height: 76px;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 50%;
+  background: rgb(0 0 0 / 80%);
+  pointer-events: none;
+}
+.arena-page .watch-clock[data-warn="true"] {
+  --watch-ring: var(--warning);
+}
+.arena-page .watch-ring {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 16%);
+  -webkit-mask:
+    radial-gradient(
+      circle at center,
+      transparent 22px,
+      #000 23px 31px,
+      transparent 32px
+    ),
+    repeating-conic-gradient(#000 0 6deg, transparent 6deg 9deg);
+  -webkit-mask-composite: source-in;
+  mask:
+    radial-gradient(
+      circle at center,
+      transparent 22px,
+      #000 23px 31px,
+      transparent 32px
+    ),
+    repeating-conic-gradient(#000 0 6deg, transparent 6deg 9deg);
+  mask-composite: intersect;
+}
+.arena-page .arena-workspace[data-watch-phase="running"] .watch-ring {
+  --watch-spent: var(--spent, 0%);
+  background: conic-gradient(
+    rgb(255 255 255 / 16%) 0 var(--watch-spent),
+    var(--watch-ring) var(--watch-spent) 100%
+  );
+  transition: --watch-spent 0.25s linear;
+}
+.arena-page .watch-clock-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.arena-page .watch-clock-time {
+  font-family: var(--font-number);
+  font-size: 17px;
+}
+.arena-page .arena-workspace[data-watch-phase="running"] .watch-clock-time {
+  color: var(--watch-ring);
+  font-size: 21px;
+}
+.arena-page .watch-clock-next,
+.arena-page .watch-clock-turn {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+.arena-page .watch-clock-next {
+  display: none;
+  margin-bottom: 3px;
+  letter-spacing: 0.14em;
+}
+.arena-page .arena-workspace[data-watch-phase="between"] .watch-clock-next {
+  display: block;
+}
+.arena-page .watch-clock-turn {
+  margin-top: 3px;
+}
+.arena-page .watch-clock-turn:empty,
+.arena-page .watch-clock-time:empty {
+  display: none;
+}
+
+/* The rail, always shown: Chat, Turns and Share. */
+.arena-page .watch-rail {
+  position: absolute;
+  top: calc(var(--watch-seam) + 91px);
+  right: max(10px, env(safe-area-inset-right, 0px));
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.arena-page .arena-workspace .watch-rail-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--watch-ink);
+}
+.arena-page .watch-rail .watch-round {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 45%);
+}
+.arena-page .watch-rail-button[aria-pressed="true"] .watch-round {
+  background: var(--acid);
+  color: var(--on-acid);
+}
+.arena-page .watch-rail-button:focus-visible {
+  outline: none;
+}
+.arena-page .watch-rail-button:focus-visible .watch-round {
+  outline: 2px solid var(--acid);
+  outline-offset: 2px;
+}
+.arena-page .watch-rail-label {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Chat: the page's own chat, translucent over the lower camera with its
+   composer, until Chat is pressed again. */
+.arena-page .watch-chat {
+  position: absolute;
+  right: 78px;
+  bottom: calc(var(--watch-dock) + 10px);
+  left: 16px;
+  z-index: 6;
+  display: none;
+  max-height: calc(var(--watch-seam) - 56px);
+}
+.arena-page .arena-workspace[data-watch-chat="open"] .watch-chat {
+  display: flex;
+}
+.arena-page .watch-chat > .arena-chat {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.arena-page
+  .watch-chat
+  > .arena-chat
+  > :is(.live-chat-heading, .chat-older, .chat-status),
+.arena-page .watch-chat .arena-chat form .form-help,
+.arena-page .watch-chat .community-message-avatar,
+.arena-page
+  .watch-chat
+  .community-message-meta:not(:has(.community-message-delivery:not(:empty))) {
+  display: none;
+}
+.arena-page .watch-chat .live-chat-state:empty {
+  display: none;
+}
+.arena-page .watch-chat .live-chat-state,
+.arena-page .watch-chat .arena-chat form :is(p) {
+  margin: 0;
+  color: var(--watch-soft);
+  font-size: var(--text-12);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 80%);
+}
+.arena-page .watch-chat .arena-chat .community-messages {
+  display: flex;
+  flex: 0 1 186px;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  max-height: 186px;
+  -webkit-mask-image: linear-gradient(rgb(0 0 0 / 0%), #000 34%);
+  mask-image: linear-gradient(rgb(0 0 0 / 0%), #000 34%);
+}
+.arena-page .watch-chat .community-messages > :first-child {
+  margin-top: auto;
+}
+.arena-page .watch-chat .arena-chat .community-messages > li {
+  padding: 0;
+  color: #e6e6e6;
+  font-size: 13px;
+  line-height: 1.3;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 80%);
+}
+.arena-page .watch-chat .arena-chat .community-message-author {
+  color: var(--watch-ink);
+  font-size: 13px;
+}
+.arena-page .watch-chat .arena-chat .community-message-content {
+  margin: 0;
+}
+.arena-page .watch-chat .arena-chat form {
+  margin: 0;
+}
+.arena-page .watch-chat .arena-chat-compose {
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 3px 0 14px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: var(--radius-pill);
+  background: rgb(255 255 255 / 12%);
+}
+.arena-page .arena-workspace .watch-chat .arena-chat-compose textarea {
+  max-height: 36px;
+  padding: 8px 0;
+  color: var(--watch-ink);
+}
+.arena-page .watch-chat .arena-chat-compose textarea::placeholder {
+  color: var(--muted);
+}
+.arena-page .arena-workspace .watch-chat .arena-chat-compose button {
+  width: 32px;
+  height: 32px;
+  min-height: 0;
+  background: var(--acid);
+}
+.arena-page .arena-workspace .watch-chat .chat-new {
+  align-self: center;
+  min-height: 32px;
+  font-size: var(--text-12);
+}
+
+/* The question, small, at the bottom above the dock (D3). */
+.arena-page .watch-question {
+  position: absolute;
+  right: 78px;
+  bottom: calc(var(--watch-dock) + 11px);
+  left: 16px;
+  z-index: 5;
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: #ececec;
+  font-family: var(--font-number);
+  font-size: 15px;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+.arena-page .arena-workspace[data-watch-chat="open"] .watch-question {
+  display: none;
+}
+/* While no picture plays: the media's status line, and Enable sound. */
+.arena-page .watch-status {
+  position: absolute;
+  top: calc(var(--watch-seam) / 2);
+  right: 24px;
+  left: 24px;
+  z-index: 5;
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-14);
+  text-align: center;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.arena-page
+  .arena-video-surface:is(
+    :has(.media-videos > video),
+    :has(> video[data-media-replay-video]:not([hidden]))
+  )
+  .watch-status {
+  display: none;
+}
+.arena-page .arena-workspace .watch-sound {
+  position: absolute;
+  top: calc(var(--watch-seam) / 2 + 28px);
+  left: 50%;
+  z-index: 5;
+  min-height: 40px;
+  border: 0;
+  background: var(--acid);
+  color: var(--on-acid);
+  transform: translateX(-50%);
+}
+.arena-page .watch-toast {
+  position: absolute;
+  top: calc(var(--watch-top) + 68px);
+  left: 50%;
+  z-index: 8;
+  max-width: calc(100% - 32px);
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: rgb(0 0 0 / 72%);
+  font-size: var(--text-12);
+  transform: translateX(-50%);
+  animation: watch-toast 0.35s var(--ease-expo);
+}
+.arena-page .watch-toast:empty {
+  display: none;
+}
+@keyframes watch-toast {
+  from {
+    opacity: 0;
+    translate: 0 -8px;
+  }
+}
+/* PR 5's replay pause key sits here, centred on the cameras. */
+.arena-page .arena-workspace .watch-pause {
+  position: absolute;
+  top: var(--watch-seam);
+  left: 50%;
+  z-index: 5;
+  transform: translate(-50%, -50%);
+}
+/* PR 3's turn result plate covers the whole screen without taking taps. */
+.arena-page .watch-plate {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+/* The dock: the last-answer bar, then Yes and No. */
+.arena-page .watch-dock {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 7;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-sizing: border-box;
+  height: var(--watch-dock);
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) 0
+    max(16px, env(safe-area-inset-left, 0px));
+  background: var(--bg);
+}
+.arena-page .watch-bar {
+  position: relative;
+}
+.arena-page .watch-bar:empty {
+  display: none;
+}
+/* D1: in the dock the bar is a line of figures over a 4 px track; a tap
+   still opens its card, above the dock. */
+.arena-page .arena-workspace[data-watch="open"] .watch-bar .arena-endorsement {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  height: auto;
+  padding-bottom: 10px;
+  background: transparent;
+  box-shadow: none;
+}
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .watch-bar
+  .arena-endorsement::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 4px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 16%);
+}
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .watch-bar
+  .arena-endorsement-fill {
+  top: auto;
+  bottom: 0;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--acid);
+}
+.arena-page .arena-endorsement-readout {
+  display: none;
+}
+.arena-page .watch-bar .arena-endorsement-readout {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  color: var(--muted);
+  font-size: var(--text-12);
+  line-height: 22px;
+}
+.arena-page .watch-bar .arena-endorsement-readout b {
+  color: var(--watch-ink);
+  font-family: var(--font-number);
+  font-size: 18px;
+  font-weight: 400;
+}
+.arena-page .watch-bar .arena-endorsement-note {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.arena-page
+  .watch-bar
+  .arena-endorsement[data-empty="true"]
+  :is(.arena-endorsement-yes, .arena-endorsement-no) {
+  display: none;
+}
+.arena-page
+  .watch-bar
+  .arena-endorsement[data-empty="true"]
+  .arena-endorsement-readout {
+  justify-content: center;
+}
+.arena-page .watch-bar .arena-endorsement-card {
+  bottom: calc(100% + 8px);
+  max-height: 50svh;
+}
+.arena-page .watch-keys {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+/* Answer keys: solid side colours, stepped pixel corners like the Pixel
+   Yappers and the clock's ring, and a key-cap edge that presses down. */
+.arena-page .arena-workspace .watch-key {
+  --watch-key-face: var(--answer-yes);
+  --watch-key-ink: var(--on-yes);
+  height: 58px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--watch-key-face);
+  box-shadow: inset 0 -5px 0 rgb(0 0 0 / 24%);
+  color: var(--watch-key-ink);
+  font: 400 25px / 1 var(--font-number);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  clip-path: polygon(
+    0 8px,
+    4px 8px,
+    4px 4px,
+    8px 4px,
+    8px 0,
+    calc(100% - 8px) 0,
+    calc(100% - 8px) 4px,
+    calc(100% - 4px) 4px,
+    calc(100% - 4px) 8px,
+    100% 8px,
+    100% calc(100% - 8px),
+    calc(100% - 4px) calc(100% - 8px),
+    calc(100% - 4px) calc(100% - 4px),
+    calc(100% - 8px) calc(100% - 4px),
+    calc(100% - 8px) 100%,
+    8px 100%,
+    8px calc(100% - 4px),
+    4px calc(100% - 4px),
+    4px calc(100% - 8px),
+    0 calc(100% - 8px)
+  );
+  transition:
+    transform 0.06s,
+    box-shadow 0.06s;
+}
+.arena-page .arena-workspace .watch-key[data-watch-key="NO"] {
+  --watch-key-face: var(--answer-no);
+  --watch-key-ink: var(--on-no);
+}
+.arena-page .arena-workspace .watch-key:active:not(:disabled) {
+  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 24%);
+  transform: translateY(2px);
+}
+.arena-page .arena-workspace .watch-key:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 3px var(--acid),
+    inset 0 -5px 0 rgb(0 0 0 / 24%);
+}
+.arena-page .arena-workspace .watch-key:disabled {
+  cursor: default;
+}
+.arena-page .arena-workspace .watch-key[data-look="off"] {
+  --watch-key-face: #1b1b1b;
+  --watch-key-ink: #6f6f6f;
+  box-shadow: none;
+}
+.arena-page .arena-workspace .watch-key[data-look="placed"] {
+  --watch-key-face: #174f31;
+  --watch-key-ink: #bfeed4;
+  box-shadow: none;
+}
+.arena-page
+  .arena-workspace
+  .watch-key[data-watch-key="NO"][data-look="placed"] {
+  --watch-key-face: #5c1f29;
+  --watch-key-ink: #ffd0d7;
+}
+
+/* Turns and ··· open bottom sheets over the full screen. */
+.arena-page .watch-sheet {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+  max-height: calc(100% - var(--watch-top) - 48px);
+  margin-inline: auto;
+  padding: 10px 20px max(30px, env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-top: 1px solid var(--line);
+  border-radius: 22px 22px 0 0;
+  background: var(--panel);
+  animation: watch-sheet 0.3s var(--ease-expo);
+}
+.arena-page .watch-sheet[data-watch-sheet="turns"] {
+  height: 544px;
+}
+.arena-page .watch-sheet:focus-visible {
+  outline: none;
+}
+@keyframes watch-sheet {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+}
+.arena-page .watch-sheet-handle {
+  flex: none;
+  align-self: center;
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--control-border);
+}
+.arena-page .watch-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.arena-page .arena-workspace .watch-sheet-head h2 {
+  margin: 0;
+  font-family: var(--font-number);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.1;
+}
+.arena-page .arena-workspace .watch-sheet-head .watch-round {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  min-height: 0;
+  margin-left: auto;
+  padding: 0;
+  border: 1px solid var(--control-border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--watch-ink);
+}
+
+/* The answer sheet (frontend/debate-layout.ts) opens over the full screen. */
+.arena-page .arena-workspace[data-watch="open"] .stake-panel[data-sheet] {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1010;
+  max-height: 85svh;
+  margin: 0 auto;
+  padding-bottom: max(var(--space-4), env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  box-shadow:
+    0 -16px 40px rgb(0 0 0 / 60%),
+    0 -1px 0 var(--line);
+}
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .stake-panel[data-sheet]
+  .stake-sheet-close {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-3) calc(var(--space-2) * -1);
+  padding: 0 var(--space-3) 0 var(--space-1);
+  border-color: transparent;
+  background: transparent;
+}
+.arena-page .arena-workspace[data-watch="open"] .stake-sheet-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Shorter phones keep the rail clear of the clock: the rail moves down to
+   the dock, then drops its words (each button keeps its name), then the
+   clock steps left of the rail. */
+@media (max-height: 785px) {
+  .arena-page .arena-workspace[data-watch-orientation="vertical"] .watch-rail {
+    top: auto;
+    bottom: calc(var(--watch-dock) + 12px);
+    gap: 8px;
+  }
+}
+@media (max-height: 671px) {
+  .arena-page .arena-workspace[data-watch-orientation="vertical"] .watch-rail {
+    gap: 10px;
+  }
+  .arena-page
+    .arena-workspace[data-watch-orientation="vertical"]
+    .watch-rail-label {
+    display: none;
+  }
+}
+@media (max-height: 579px) {
+  .arena-page .arena-workspace[data-watch-orientation="vertical"] .watch-clock {
+    right: 66px;
+  }
+}
+
+/* Horizontal, until PR 4: the cameras side by side, the last-answer bar
+   over Yes · clock · No centred at the bottom, and Chat and Turns. */
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
+  .arena-video-surface {
+  --watch-dock: 0px;
+  --watch-top: max(env(safe-area-inset-top, 0px), 0px);
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .media-videos {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .media-videos
+  video[data-side] {
+  grid-row: 1;
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .media-videos
+  video[data-side="A"] {
+  grid-column: 1;
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .media-videos
+  video[data-side="B"] {
+  grid-column: 2;
+}
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-cams {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-segments {
+  top: 12px;
+  right: 60px;
+  left: 60px;
+  gap: 4px;
+}
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-icon {
+  top: 22px;
+}
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-back {
+  left: max(50px, env(safe-area-inset-left, 0px));
+}
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
+  .arena-video-surface
+  > .arena-video-status {
+  top: 30px;
+  left: calc(max(50px, env(safe-area-inset-left, 0px)) + 52px);
+}
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-more {
+  right: max(50px, env(safe-area-inset-right, 0px));
+}
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-tag {
+  top: 76px;
+  bottom: auto;
+  max-width: calc(50% - 72px);
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-tag[data-side="A"] {
+  left: max(56px, env(safe-area-inset-left, 0px));
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-tag[data-side="B"] {
+  right: max(56px, env(safe-area-inset-right, 0px));
+  left: auto;
+  flex-direction: row-reverse;
+  padding: 0 5px 0 14px;
+  text-align: right;
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-tag[data-side="B"]
+  .watch-tag-who {
+  align-items: flex-end;
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-shade-top {
+  height: 120px;
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-shade-bottom {
+  bottom: 0;
+  height: 170px;
+  background: linear-gradient(rgb(0 0 0 / 0%), rgb(0 0 0 / 72%));
+}
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-rail {
+  top: 142px;
+  bottom: auto;
+  right: max(52px, env(safe-area-inset-right, 0px));
+  gap: 10px;
+}
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-share {
+  display: none;
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-rail
+  .watch-round {
+  width: 44px;
+  height: 44px;
+}
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-dock {
+  right: auto;
+  bottom: max(14px, env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  width: min(360px, calc(100% - 240px));
+  height: auto;
+  padding: 0;
+  background: transparent;
+  transform: translateX(-50%);
+}
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-keys {
+  column-gap: 96px;
+}
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-clock {
+  top: auto;
+  right: auto;
+  bottom: calc(max(14px, env(safe-area-inset-bottom, 0px)) - 7px);
+  left: 50%;
+  z-index: 8;
+  width: 72px;
+  height: 72px;
+  transform: translateX(-50%);
+}
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-ring {
+  inset: 4px;
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-question {
+  right: auto;
+  bottom: 132px;
+  left: 50%;
+  width: min(440px, calc(100% - 240px));
+  text-align: center;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 70%);
+  transform: translateX(-50%);
+}
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-chat {
+  top: 132px;
+  right: max(108px, env(safe-area-inset-right, 0px));
+  bottom: 14px;
+  left: auto;
+  width: 236px;
+  max-height: none;
+  box-sizing: border-box;
+  padding: 10px 10px 8px 12px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: var(--radius-card);
+  background: rgb(0 0 0 / 50%);
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-chat
+  .arena-chat
+  .community-messages {
+  flex: 1 1 auto;
+  max-height: none;
+}
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-sheet,
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
+  .stake-panel[data-sheet] {
+  width: min(100%, 480px);
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-sheet[data-watch-sheet="turns"] {
+  height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arena-page .watch-eq i {
+    height: 8px;
+    animation: none;
+  }
+  .arena-page .watch-cam::after,
+  .arena-page :is(.watch-tag, [data-watch-control]),
+  .arena-page .arena-workspace[data-watch-controls] [data-watch-control],
+  .arena-page .arena-workspace[data-watch-phase="running"] .watch-ring {
+    transition: none;
+  }
+  .arena-page :is(.watch-toast, .watch-sheet) {
+    animation: none;
+  }
+}

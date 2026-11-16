@@ -61,6 +61,32 @@ On phones the bar steps aside while the chat composer has focus or the cookie ba
 `scroll-padding-bottom` keeps focused elements clear of it. No width from 320 px up scrolls
 sideways.
 
+### Phone full screen
+
+[Decision 0016](decisions/0016-phone-full-screen-watch.md). A phone is `PHONE_WATCH_QUERY` in
+`frontend/watch-phone.ts`: under 600 px wide, or landscape under 500 px tall. There, Join as viewer
+or Play replay opens the full screen (`frontend/watch-screen.ts`), and the page has no Enlarge and
+never plays the video inline.
+
+- **Takeover:** the video surface itself, fixed over the header, the tab row and the footer at
+  `100svh` with safe-area padding, the page's scroll locked (`html.watch-open`). It is a modal
+  dialog named by the question, with focus kept inside. `[data-arena]` carries `data-watch="open"`
+  and `data-watch-orientation`. Back, Escape or the browser's back closes it: a live debate is
+  left, a replay pauses where it was, and focus returns to the button that opened it.
+- **Vertical:** side A's camera over side B's in the top 82% (`object-fit: cover`), the listener's
+  camera dimmed; the 76 px turn clock on the seam (coral in the last 10 s, "NEXT" and the next
+  speaker between turns) and the turn bar along the top; the 146 px dock with the last-answer bar
+  (a line of figures over a 4 px track; a tap still opens its card) above the Yes and No keys.
+  The keys press the answer panel's own Yes and No, so the answer sheet opens over the full screen
+  and gives focus back to the key; after placing, the key reads "Yes · 25" and the other dims.
+- **Always shown:** LIVE with the watching count, and the rail: Chat (the page's own chat,
+  translucent over the lower camera with its composer), Turns (a sheet) and Share (the system
+  share sheet, else Copy event link). On shorter phones the rail moves down and drops its words.
+- **Tap controls:** a tap on the picture ("Show controls", a real button) shows Back, ···, the
+  question at the bottom and the name tags with their avatars; they start hidden.
+- **Horizontal:** until its own pass, the cameras side by side with the bar over Yes · clock · No
+  centred at the bottom, and Chat and Turns.
+
 ## Stage
 
 - **Video:** flat `#0f0f0f` when empty, 16 px radius on wide screens. Participant videos are

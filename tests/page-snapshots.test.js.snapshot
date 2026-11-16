@@ -262,7 +262,161 @@ exports[`renders a debate 1`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>
 </svg>
-</button>\\n      </div>
+</button>
+<div class="watch-ui" data-watch-ui>
+<button type="button" class="watch-stage" data-watch-stage aria-label="Show controls" aria-expanded="false">
+</button>
+<div class="watch-cams" data-watch-cams aria-hidden="true">
+<div class="watch-cam" data-watch-cam="A">
+</div>
+<div class="watch-cam" data-watch-cam="B">
+</div>
+</div>
+<div class="watch-shade watch-shade-top" aria-hidden="true">
+</div>
+<div class="watch-shade watch-shade-bottom" aria-hidden="true">
+</div>
+<div class="watch-segments" data-watch-segments role="img" aria-label="Turns">
+</div>
+<button type="button" class="watch-icon watch-back" data-watch-back data-watch-control aria-label="Back">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M15 5l-7 7 7 7"/>
+</svg>
+</button>
+<button type="button" class="watch-icon watch-more" data-watch-open="more" data-watch-control aria-label="More" aria-haspopup="dialog">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="5" cy="12" r="1.2"/>
+<circle cx="12" cy="12" r="1.2"/>
+<circle cx="19" cy="12" r="1.2"/>
+</svg>
+</button>
+<div class="watch-tags" data-watch-control>
+<p class="watch-tag" data-side="A">
+<img class="watch-tag-avatar" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+<span class="watch-tag-who">
+<strong>Alex Public</strong>
+<span>For</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+<p class="watch-tag" data-side="B">
+<span class="watch-tag-avatar" aria-hidden="true">?</span>
+<span class="watch-tag-who">
+<strong>Speaker to be announced</strong>
+<span>Against</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+</div>
+<div class="watch-clock" data-watch-clock role="timer">
+<span class="watch-ring" aria-hidden="true">
+</span>
+<span class="watch-clock-face" aria-hidden="true">
+<span class="watch-clock-next">NEXT</span>
+<span class="watch-clock-time" data-watch-clock-time>
+</span>
+<span class="watch-clock-turn" data-watch-clock-turn>
+</span>
+</span>
+</div>
+<div class="watch-rail">
+<button type="button" class="watch-rail-button" data-watch-chat-toggle aria-label="Show chat" aria-pressed="false">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4 5h16v11H9l-5 4z"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Chat</span>
+</button>
+<button type="button" class="watch-rail-button" data-watch-open="turns" aria-label="Turns" aria-haspopup="dialog">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Turns</span>
+</button>
+<button type="button" class="watch-rail-button watch-share" data-watch-share aria-label="Share">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v6h14v-6"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Share</span>
+</button>
+</div>
+<div class="watch-chat" data-watch-chat>
+</div>
+<p class="watch-question" id="watch-question" data-watch-control>Should we debate this?</p>
+<p class="watch-status" data-watch-status aria-hidden="true">
+</p>
+<p class="watch-toast" data-watch-toast role="status" aria-live="polite">
+</p>
+<button type="button" class="watch-sound" data-watch-sound hidden>Enable sound</button>
+<button type="button" class="watch-pause" data-watch-pause data-watch-control aria-label="Pause" hidden>
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M9 5v14M15 5v14"/>
+</svg>
+</button>
+<div class="watch-dock" data-watch-dock>
+<div class="watch-bar" data-watch-bar>
+</div>
+<div class="watch-keys" role="group" aria-label="Your answer">
+<button type="button" class="watch-key" data-watch-key="YES" data-look="off" disabled>Yes</button>
+<button type="button" class="watch-key" data-watch-key="NO" data-look="off" disabled>No</button>
+</div>
+</div>
+<div class="watch-plate" data-watch-plate>
+</div>
+<section class="watch-sheet" data-watch-sheet="turns" role="dialog" aria-labelledby="watch-turns-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-turns-title">Turns</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-turns-sheet-body>
+</div>
+</section>
+<section class="watch-sheet" data-watch-sheet="more" role="dialog" aria-labelledby="watch-more-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-more-title" class="sr-only">More</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-more-sheet-body>
+</div>
+</section>
+</div>\\n      </div>
 </div>\\n      <div class="media-status-row">
 <p data-media-status role="status" aria-live="polite">Checking media availability…</p>
 <p data-media-microphone role="status" aria-live="polite" hidden>
@@ -608,6 +762,8 @@ exports[`renders a debate 1`] = `
 <script type="module" src="/assets/debate-layout.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/turn-clock.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/watch-screen.js?v=0123456789ab">
 </script>\\n  </div>
 </main>
 <footer class="site-footer">
@@ -900,7 +1056,161 @@ exports[`renders a debate 10`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>
 </svg>
-</button>\\n      </div>
+</button>
+<div class="watch-ui" data-watch-ui>
+<button type="button" class="watch-stage" data-watch-stage aria-label="Show controls" aria-expanded="false">
+</button>
+<div class="watch-cams" data-watch-cams aria-hidden="true">
+<div class="watch-cam" data-watch-cam="A">
+</div>
+<div class="watch-cam" data-watch-cam="B">
+</div>
+</div>
+<div class="watch-shade watch-shade-top" aria-hidden="true">
+</div>
+<div class="watch-shade watch-shade-bottom" aria-hidden="true">
+</div>
+<div class="watch-segments" data-watch-segments role="img" aria-label="Turns">
+</div>
+<button type="button" class="watch-icon watch-back" data-watch-back data-watch-control aria-label="Back">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M15 5l-7 7 7 7"/>
+</svg>
+</button>
+<button type="button" class="watch-icon watch-more" data-watch-open="more" data-watch-control aria-label="More" aria-haspopup="dialog">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="5" cy="12" r="1.2"/>
+<circle cx="12" cy="12" r="1.2"/>
+<circle cx="19" cy="12" r="1.2"/>
+</svg>
+</button>
+<div class="watch-tags" data-watch-control>
+<p class="watch-tag" data-side="A">
+<img class="watch-tag-avatar" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+<span class="watch-tag-who">
+<strong>Alex Public</strong>
+<span>For</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+<p class="watch-tag" data-side="B">
+<span class="watch-tag-avatar" aria-hidden="true">?</span>
+<span class="watch-tag-who">
+<strong>Speaker to be announced</strong>
+<span>Against</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+</div>
+<div class="watch-clock" data-watch-clock role="timer">
+<span class="watch-ring" aria-hidden="true">
+</span>
+<span class="watch-clock-face" aria-hidden="true">
+<span class="watch-clock-next">NEXT</span>
+<span class="watch-clock-time" data-watch-clock-time>
+</span>
+<span class="watch-clock-turn" data-watch-clock-turn>
+</span>
+</span>
+</div>
+<div class="watch-rail">
+<button type="button" class="watch-rail-button" data-watch-chat-toggle aria-label="Show chat" aria-pressed="false">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4 5h16v11H9l-5 4z"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Chat</span>
+</button>
+<button type="button" class="watch-rail-button" data-watch-open="turns" aria-label="Turns" aria-haspopup="dialog">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Turns</span>
+</button>
+<button type="button" class="watch-rail-button watch-share" data-watch-share aria-label="Share">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v6h14v-6"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Share</span>
+</button>
+</div>
+<div class="watch-chat" data-watch-chat>
+</div>
+<p class="watch-question" id="watch-question" data-watch-control>Should we debate this?</p>
+<p class="watch-status" data-watch-status aria-hidden="true">
+</p>
+<p class="watch-toast" data-watch-toast role="status" aria-live="polite">
+</p>
+<button type="button" class="watch-sound" data-watch-sound hidden>Enable sound</button>
+<button type="button" class="watch-pause" data-watch-pause data-watch-control aria-label="Pause" hidden>
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M9 5v14M15 5v14"/>
+</svg>
+</button>
+<div class="watch-dock" data-watch-dock>
+<div class="watch-bar" data-watch-bar>
+</div>
+<div class="watch-keys" role="group" aria-label="Your answer">
+<button type="button" class="watch-key" data-watch-key="YES" data-look="off" disabled>Yes</button>
+<button type="button" class="watch-key" data-watch-key="NO" data-look="off" disabled>No</button>
+</div>
+</div>
+<div class="watch-plate" data-watch-plate>
+</div>
+<section class="watch-sheet" data-watch-sheet="turns" role="dialog" aria-labelledby="watch-turns-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-turns-title">Turns</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-turns-sheet-body>
+</div>
+</section>
+<section class="watch-sheet" data-watch-sheet="more" role="dialog" aria-labelledby="watch-more-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-more-title" class="sr-only">More</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-more-sheet-body>
+</div>
+</section>
+</div>\\n      </div>
 </div>\\n      <div class="media-status-row">
 <p data-media-status role="status" aria-live="polite">Checking media availability…</p>
 <p data-media-microphone role="status" aria-live="polite" hidden>
@@ -1247,6 +1557,8 @@ exports[`renders a debate 10`] = `
 </script>
 <script type="module" src="/assets/turn-clock.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/watch-screen.js?v=0123456789ab">
+</script>
 <script type="module" src="/assets/debate-notify.js?v=0123456789ab">
 </script>\\n  </div>
 </main>
@@ -1533,10 +1845,173 @@ exports[`renders a debate 11`] = `
 </svg>
 </button>
 <div class="arena-endorsement" data-endorsement-bar data-debate-id="33333333-3333-4333-8333-333333333333" data-empty="true" role="meter" tabindex="0" aria-label="Viewers' last answers" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="No results revealed yet" aria-describedby="arena-endorsement-card" data-side-a="For" data-side-b="Against">
+<span class="arena-endorsement-readout" aria-hidden="true">
+<span class="arena-endorsement-yes">
+<b data-endorsement-yes>
+</b> Yes</span>
+<span class="arena-endorsement-note" data-endorsement-note>No results revealed yet</span>
+<span class="arena-endorsement-no">No <b data-endorsement-no>
+</b>
+</span>
+</span>
 <span class="arena-endorsement-fill">
 </span>
 </div>
 <div class="arena-endorsement-card" id="arena-endorsement-card" role="tooltip" data-endorsement-card hidden>
+</div>
+<div class="watch-ui" data-watch-ui>
+<button type="button" class="watch-stage" data-watch-stage aria-label="Show controls" aria-expanded="false">
+</button>
+<div class="watch-cams" data-watch-cams aria-hidden="true">
+<div class="watch-cam" data-watch-cam="A">
+</div>
+<div class="watch-cam" data-watch-cam="B">
+</div>
+</div>
+<div class="watch-shade watch-shade-top" aria-hidden="true">
+</div>
+<div class="watch-shade watch-shade-bottom" aria-hidden="true">
+</div>
+<div class="watch-segments" data-watch-segments role="img" aria-label="Turns">
+</div>
+<button type="button" class="watch-icon watch-back" data-watch-back data-watch-control aria-label="Back">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M15 5l-7 7 7 7"/>
+</svg>
+</button>
+<button type="button" class="watch-icon watch-more" data-watch-open="more" data-watch-control aria-label="More" aria-haspopup="dialog">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="5" cy="12" r="1.2"/>
+<circle cx="12" cy="12" r="1.2"/>
+<circle cx="19" cy="12" r="1.2"/>
+</svg>
+</button>
+<div class="watch-tags" data-watch-control>
+<p class="watch-tag" data-side="A">
+<img class="watch-tag-avatar" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+<span class="watch-tag-who">
+<strong>Alex Public</strong>
+<span>For</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+<p class="watch-tag" data-side="B">
+<span class="watch-tag-avatar" aria-hidden="true">?</span>
+<span class="watch-tag-who">
+<strong>Speaker to be announced</strong>
+<span>Against</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+</div>
+<div class="watch-clock" data-watch-clock role="timer">
+<span class="watch-ring" aria-hidden="true">
+</span>
+<span class="watch-clock-face" aria-hidden="true">
+<span class="watch-clock-next">NEXT</span>
+<span class="watch-clock-time" data-watch-clock-time>
+</span>
+<span class="watch-clock-turn" data-watch-clock-turn>
+</span>
+</span>
+</div>
+<div class="watch-rail">
+<button type="button" class="watch-rail-button" data-watch-chat-toggle aria-label="Show chat" aria-pressed="false">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4 5h16v11H9l-5 4z"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Chat</span>
+</button>
+<button type="button" class="watch-rail-button" data-watch-open="turns" aria-label="Turns" aria-haspopup="dialog">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Turns</span>
+</button>
+<button type="button" class="watch-rail-button watch-share" data-watch-share aria-label="Share">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v6h14v-6"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Share</span>
+</button>
+</div>
+<div class="watch-chat" data-watch-chat>
+</div>
+<p class="watch-question" id="watch-question" data-watch-control>Public topic</p>
+<p class="watch-status" data-watch-status aria-hidden="true">
+</p>
+<p class="watch-toast" data-watch-toast role="status" aria-live="polite">
+</p>
+<button type="button" class="watch-sound" data-watch-sound hidden>Enable sound</button>
+<button type="button" class="watch-pause" data-watch-pause data-watch-control aria-label="Pause" hidden>
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M9 5v14M15 5v14"/>
+</svg>
+</button>
+<div class="watch-dock" data-watch-dock>
+<div class="watch-bar" data-watch-bar>
+</div>
+<div class="watch-keys" role="group" aria-label="Your answer">
+<button type="button" class="watch-key" data-watch-key="YES" data-look="off" disabled>Yes</button>
+<button type="button" class="watch-key" data-watch-key="NO" data-look="off" disabled>No</button>
+</div>
+</div>
+<div class="watch-plate" data-watch-plate>
+</div>
+<section class="watch-sheet" data-watch-sheet="turns" role="dialog" aria-labelledby="watch-turns-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-turns-title">Turns</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-turns-sheet-body>
+</div>
+</section>
+<section class="watch-sheet" data-watch-sheet="more" role="dialog" aria-labelledby="watch-more-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-more-title" class="sr-only">More</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-more-sheet-body>
+</div>
+</section>
 </div>\\n      </div>
 </div>\\n      <div class="media-status-row">
 <p data-media-status role="status" aria-live="polite">Checking media availability…</p>
@@ -1882,6 +2357,8 @@ exports[`renders a debate 11`] = `
 </script>
 <script type="module" src="/assets/turn-clock.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/watch-screen.js?v=0123456789ab">
+</script>
 <script type="module" src="/assets/endorsement-bar.js?v=0123456789ab">
 </script>\\n  </div>
 </main>
@@ -2167,10 +2644,173 @@ exports[`renders a debate 12`] = `
 </svg>
 </button>
 <div class="arena-endorsement" data-endorsement-bar data-debate-id="33333333-3333-4333-8333-333333333333" data-empty="true" role="meter" tabindex="0" aria-label="Viewers' last answers" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="No results revealed yet" aria-describedby="arena-endorsement-card" data-side-a="For" data-side-b="Against" data-side-a-is-yes="false">
+<span class="arena-endorsement-readout" aria-hidden="true">
+<span class="arena-endorsement-yes">
+<b data-endorsement-yes>
+</b> Yes</span>
+<span class="arena-endorsement-note" data-endorsement-note>No results revealed yet</span>
+<span class="arena-endorsement-no">No <b data-endorsement-no>
+</b>
+</span>
+</span>
 <span class="arena-endorsement-fill">
 </span>
 </div>
 <div class="arena-endorsement-card" id="arena-endorsement-card" role="tooltip" data-endorsement-card hidden>
+</div>
+<div class="watch-ui" data-watch-ui>
+<button type="button" class="watch-stage" data-watch-stage aria-label="Show controls" aria-expanded="false">
+</button>
+<div class="watch-cams" data-watch-cams aria-hidden="true">
+<div class="watch-cam" data-watch-cam="A">
+</div>
+<div class="watch-cam" data-watch-cam="B">
+</div>
+</div>
+<div class="watch-shade watch-shade-top" aria-hidden="true">
+</div>
+<div class="watch-shade watch-shade-bottom" aria-hidden="true">
+</div>
+<div class="watch-segments" data-watch-segments role="img" aria-label="Turns">
+</div>
+<button type="button" class="watch-icon watch-back" data-watch-back data-watch-control aria-label="Back">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M15 5l-7 7 7 7"/>
+</svg>
+</button>
+<button type="button" class="watch-icon watch-more" data-watch-open="more" data-watch-control aria-label="More" aria-haspopup="dialog">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="5" cy="12" r="1.2"/>
+<circle cx="12" cy="12" r="1.2"/>
+<circle cx="19" cy="12" r="1.2"/>
+</svg>
+</button>
+<div class="watch-tags" data-watch-control>
+<p class="watch-tag" data-side="A">
+<img class="watch-tag-avatar" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+<span class="watch-tag-who">
+<strong>Alex Public</strong>
+<span>For</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+<p class="watch-tag" data-side="B">
+<span class="watch-tag-avatar" aria-hidden="true">?</span>
+<span class="watch-tag-who">
+<strong>Speaker to be announced</strong>
+<span>Against</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+</div>
+<div class="watch-clock" data-watch-clock role="timer">
+<span class="watch-ring" aria-hidden="true">
+</span>
+<span class="watch-clock-face" aria-hidden="true">
+<span class="watch-clock-next">NEXT</span>
+<span class="watch-clock-time" data-watch-clock-time>
+</span>
+<span class="watch-clock-turn" data-watch-clock-turn>
+</span>
+</span>
+</div>
+<div class="watch-rail">
+<button type="button" class="watch-rail-button" data-watch-chat-toggle aria-label="Show chat" aria-pressed="false">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4 5h16v11H9l-5 4z"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Chat</span>
+</button>
+<button type="button" class="watch-rail-button" data-watch-open="turns" aria-label="Turns" aria-haspopup="dialog">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Turns</span>
+</button>
+<button type="button" class="watch-rail-button watch-share" data-watch-share aria-label="Share">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v6h14v-6"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Share</span>
+</button>
+</div>
+<div class="watch-chat" data-watch-chat>
+</div>
+<p class="watch-question" id="watch-question" data-watch-control>Public topic</p>
+<p class="watch-status" data-watch-status aria-hidden="true">
+</p>
+<p class="watch-toast" data-watch-toast role="status" aria-live="polite">
+</p>
+<button type="button" class="watch-sound" data-watch-sound hidden>Enable sound</button>
+<button type="button" class="watch-pause" data-watch-pause data-watch-control aria-label="Pause" hidden>
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M9 5v14M15 5v14"/>
+</svg>
+</button>
+<div class="watch-dock" data-watch-dock>
+<div class="watch-bar" data-watch-bar>
+</div>
+<div class="watch-keys" role="group" aria-label="Your answer">
+<button type="button" class="watch-key" data-watch-key="YES" data-look="off" disabled>Yes</button>
+<button type="button" class="watch-key" data-watch-key="NO" data-look="off" disabled>No</button>
+</div>
+</div>
+<div class="watch-plate" data-watch-plate>
+</div>
+<section class="watch-sheet" data-watch-sheet="turns" role="dialog" aria-labelledby="watch-turns-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-turns-title">Turns</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-turns-sheet-body>
+</div>
+</section>
+<section class="watch-sheet" data-watch-sheet="more" role="dialog" aria-labelledby="watch-more-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-more-title" class="sr-only">More</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-more-sheet-body>
+</div>
+</section>
 </div>\\n      </div>
 </div>
 <div class="arena-timeline" data-replay-timeline data-waiting role="group" aria-label="Replay timeline by turn">
@@ -2521,6 +3161,8 @@ exports[`renders a debate 12`] = `
 <script type="module" src="/assets/debate-layout.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/turn-clock.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/watch-screen.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/replay-timeline.js?v=0123456789ab">
 </script>
@@ -2808,7 +3450,161 @@ exports[`renders a debate 2`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>
 </svg>
-</button>\\n      </div>
+</button>
+<div class="watch-ui" data-watch-ui>
+<button type="button" class="watch-stage" data-watch-stage aria-label="Show controls" aria-expanded="false">
+</button>
+<div class="watch-cams" data-watch-cams aria-hidden="true">
+<div class="watch-cam" data-watch-cam="A">
+</div>
+<div class="watch-cam" data-watch-cam="B">
+</div>
+</div>
+<div class="watch-shade watch-shade-top" aria-hidden="true">
+</div>
+<div class="watch-shade watch-shade-bottom" aria-hidden="true">
+</div>
+<div class="watch-segments" data-watch-segments role="img" aria-label="Turns">
+</div>
+<button type="button" class="watch-icon watch-back" data-watch-back data-watch-control aria-label="Back">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M15 5l-7 7 7 7"/>
+</svg>
+</button>
+<button type="button" class="watch-icon watch-more" data-watch-open="more" data-watch-control aria-label="More" aria-haspopup="dialog">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="5" cy="12" r="1.2"/>
+<circle cx="12" cy="12" r="1.2"/>
+<circle cx="19" cy="12" r="1.2"/>
+</svg>
+</button>
+<div class="watch-tags" data-watch-control>
+<p class="watch-tag" data-side="A">
+<img class="watch-tag-avatar" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+<span class="watch-tag-who">
+<strong>Alex Public</strong>
+<span>For</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+<p class="watch-tag" data-side="B">
+<span class="watch-tag-avatar" aria-hidden="true">?</span>
+<span class="watch-tag-who">
+<strong>Speaker to be announced</strong>
+<span>Against</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+</div>
+<div class="watch-clock" data-watch-clock role="timer">
+<span class="watch-ring" aria-hidden="true">
+</span>
+<span class="watch-clock-face" aria-hidden="true">
+<span class="watch-clock-next">NEXT</span>
+<span class="watch-clock-time" data-watch-clock-time>
+</span>
+<span class="watch-clock-turn" data-watch-clock-turn>
+</span>
+</span>
+</div>
+<div class="watch-rail">
+<button type="button" class="watch-rail-button" data-watch-chat-toggle aria-label="Show chat" aria-pressed="false">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4 5h16v11H9l-5 4z"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Chat</span>
+</button>
+<button type="button" class="watch-rail-button" data-watch-open="turns" aria-label="Turns" aria-haspopup="dialog">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Turns</span>
+</button>
+<button type="button" class="watch-rail-button watch-share" data-watch-share aria-label="Share">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v6h14v-6"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Share</span>
+</button>
+</div>
+<div class="watch-chat" data-watch-chat>
+</div>
+<p class="watch-question" id="watch-question" data-watch-control>Should we debate this?</p>
+<p class="watch-status" data-watch-status aria-hidden="true">
+</p>
+<p class="watch-toast" data-watch-toast role="status" aria-live="polite">
+</p>
+<button type="button" class="watch-sound" data-watch-sound hidden>Enable sound</button>
+<button type="button" class="watch-pause" data-watch-pause data-watch-control aria-label="Pause" hidden>
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M9 5v14M15 5v14"/>
+</svg>
+</button>
+<div class="watch-dock" data-watch-dock>
+<div class="watch-bar" data-watch-bar>
+</div>
+<div class="watch-keys" role="group" aria-label="Your answer">
+<button type="button" class="watch-key" data-watch-key="YES" data-look="off" disabled>Yes</button>
+<button type="button" class="watch-key" data-watch-key="NO" data-look="off" disabled>No</button>
+</div>
+</div>
+<div class="watch-plate" data-watch-plate>
+</div>
+<section class="watch-sheet" data-watch-sheet="turns" role="dialog" aria-labelledby="watch-turns-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-turns-title">Turns</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-turns-sheet-body>
+</div>
+</section>
+<section class="watch-sheet" data-watch-sheet="more" role="dialog" aria-labelledby="watch-more-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-more-title" class="sr-only">More</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-more-sheet-body>
+</div>
+</section>
+</div>\\n      </div>
 </div>\\n      <div class="media-status-row">
 <p data-media-status role="status" aria-live="polite">Checking media availability…</p>
 <p data-media-microphone role="status" aria-live="polite" hidden>
@@ -3152,6 +3948,8 @@ exports[`renders a debate 2`] = `
 <script type="module" src="/assets/debate-layout.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/turn-clock.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/watch-screen.js?v=0123456789ab">
 </script>\\n  </div>
 </main>
 <footer class="site-footer">
@@ -3434,7 +4232,161 @@ exports[`renders a debate 3`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>
 </svg>
-</button>\\n      </div>
+</button>
+<div class="watch-ui" data-watch-ui>
+<button type="button" class="watch-stage" data-watch-stage aria-label="Show controls" aria-expanded="false">
+</button>
+<div class="watch-cams" data-watch-cams aria-hidden="true">
+<div class="watch-cam" data-watch-cam="A">
+</div>
+<div class="watch-cam" data-watch-cam="B">
+</div>
+</div>
+<div class="watch-shade watch-shade-top" aria-hidden="true">
+</div>
+<div class="watch-shade watch-shade-bottom" aria-hidden="true">
+</div>
+<div class="watch-segments" data-watch-segments role="img" aria-label="Turns">
+</div>
+<button type="button" class="watch-icon watch-back" data-watch-back data-watch-control aria-label="Back">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M15 5l-7 7 7 7"/>
+</svg>
+</button>
+<button type="button" class="watch-icon watch-more" data-watch-open="more" data-watch-control aria-label="More" aria-haspopup="dialog">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="5" cy="12" r="1.2"/>
+<circle cx="12" cy="12" r="1.2"/>
+<circle cx="19" cy="12" r="1.2"/>
+</svg>
+</button>
+<div class="watch-tags" data-watch-control>
+<p class="watch-tag" data-side="A">
+<img class="watch-tag-avatar" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+<span class="watch-tag-who">
+<strong>Alex Public</strong>
+<span>For</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+<p class="watch-tag" data-side="B">
+<span class="watch-tag-avatar" aria-hidden="true">?</span>
+<span class="watch-tag-who">
+<strong>Speaker to be announced</strong>
+<span>Against</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+</div>
+<div class="watch-clock" data-watch-clock role="timer">
+<span class="watch-ring" aria-hidden="true">
+</span>
+<span class="watch-clock-face" aria-hidden="true">
+<span class="watch-clock-next">NEXT</span>
+<span class="watch-clock-time" data-watch-clock-time>
+</span>
+<span class="watch-clock-turn" data-watch-clock-turn>
+</span>
+</span>
+</div>
+<div class="watch-rail">
+<button type="button" class="watch-rail-button" data-watch-chat-toggle aria-label="Show chat" aria-pressed="false">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4 5h16v11H9l-5 4z"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Chat</span>
+</button>
+<button type="button" class="watch-rail-button" data-watch-open="turns" aria-label="Turns" aria-haspopup="dialog">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Turns</span>
+</button>
+<button type="button" class="watch-rail-button watch-share" data-watch-share aria-label="Share">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v6h14v-6"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Share</span>
+</button>
+</div>
+<div class="watch-chat" data-watch-chat>
+</div>
+<p class="watch-question" id="watch-question" data-watch-control>Should we debate this?</p>
+<p class="watch-status" data-watch-status aria-hidden="true">
+</p>
+<p class="watch-toast" data-watch-toast role="status" aria-live="polite">
+</p>
+<button type="button" class="watch-sound" data-watch-sound hidden>Enable sound</button>
+<button type="button" class="watch-pause" data-watch-pause data-watch-control aria-label="Pause" hidden>
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M9 5v14M15 5v14"/>
+</svg>
+</button>
+<div class="watch-dock" data-watch-dock>
+<div class="watch-bar" data-watch-bar>
+</div>
+<div class="watch-keys" role="group" aria-label="Your answer">
+<button type="button" class="watch-key" data-watch-key="YES" data-look="off" disabled>Yes</button>
+<button type="button" class="watch-key" data-watch-key="NO" data-look="off" disabled>No</button>
+</div>
+</div>
+<div class="watch-plate" data-watch-plate>
+</div>
+<section class="watch-sheet" data-watch-sheet="turns" role="dialog" aria-labelledby="watch-turns-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-turns-title">Turns</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-turns-sheet-body>
+</div>
+</section>
+<section class="watch-sheet" data-watch-sheet="more" role="dialog" aria-labelledby="watch-more-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-more-title" class="sr-only">More</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-more-sheet-body>
+</div>
+</section>
+</div>\\n      </div>
 </div>
 <div class="arena-timeline" data-replay-timeline data-waiting role="group" aria-label="Replay timeline by turn">
 <ol class="arena-timeline-list" data-replay-timeline-list>
@@ -3785,6 +4737,8 @@ exports[`renders a debate 3`] = `
 </script>
 <script type="module" src="/assets/turn-clock.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/watch-screen.js?v=0123456789ab">
+</script>
 <script type="module" src="/assets/replay-timeline.js?v=0123456789ab">
 </script>\\n  </div>
 </main>
@@ -4068,7 +5022,161 @@ exports[`renders a debate 4`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>
 </svg>
-</button>\\n      </div>
+</button>
+<div class="watch-ui" data-watch-ui>
+<button type="button" class="watch-stage" data-watch-stage aria-label="Show controls" aria-expanded="false">
+</button>
+<div class="watch-cams" data-watch-cams aria-hidden="true">
+<div class="watch-cam" data-watch-cam="A">
+</div>
+<div class="watch-cam" data-watch-cam="B">
+</div>
+</div>
+<div class="watch-shade watch-shade-top" aria-hidden="true">
+</div>
+<div class="watch-shade watch-shade-bottom" aria-hidden="true">
+</div>
+<div class="watch-segments" data-watch-segments role="img" aria-label="Turns">
+</div>
+<button type="button" class="watch-icon watch-back" data-watch-back data-watch-control aria-label="Back">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M15 5l-7 7 7 7"/>
+</svg>
+</button>
+<button type="button" class="watch-icon watch-more" data-watch-open="more" data-watch-control aria-label="More" aria-haspopup="dialog">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="5" cy="12" r="1.2"/>
+<circle cx="12" cy="12" r="1.2"/>
+<circle cx="19" cy="12" r="1.2"/>
+</svg>
+</button>
+<div class="watch-tags" data-watch-control>
+<p class="watch-tag" data-side="A">
+<img class="watch-tag-avatar" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+<span class="watch-tag-who">
+<strong>Alex Public</strong>
+<span>For</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+<p class="watch-tag" data-side="B">
+<span class="watch-tag-avatar" aria-hidden="true">?</span>
+<span class="watch-tag-who">
+<strong>Speaker to be announced</strong>
+<span>Against</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+</div>
+<div class="watch-clock" data-watch-clock role="timer">
+<span class="watch-ring" aria-hidden="true">
+</span>
+<span class="watch-clock-face" aria-hidden="true">
+<span class="watch-clock-next">NEXT</span>
+<span class="watch-clock-time" data-watch-clock-time>
+</span>
+<span class="watch-clock-turn" data-watch-clock-turn>
+</span>
+</span>
+</div>
+<div class="watch-rail">
+<button type="button" class="watch-rail-button" data-watch-chat-toggle aria-label="Show chat" aria-pressed="false">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4 5h16v11H9l-5 4z"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Chat</span>
+</button>
+<button type="button" class="watch-rail-button" data-watch-open="turns" aria-label="Turns" aria-haspopup="dialog">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Turns</span>
+</button>
+<button type="button" class="watch-rail-button watch-share" data-watch-share aria-label="Share">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v6h14v-6"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Share</span>
+</button>
+</div>
+<div class="watch-chat" data-watch-chat>
+</div>
+<p class="watch-question" id="watch-question" data-watch-control>Should we debate this?</p>
+<p class="watch-status" data-watch-status aria-hidden="true">
+</p>
+<p class="watch-toast" data-watch-toast role="status" aria-live="polite">
+</p>
+<button type="button" class="watch-sound" data-watch-sound hidden>Enable sound</button>
+<button type="button" class="watch-pause" data-watch-pause data-watch-control aria-label="Pause" hidden>
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M9 5v14M15 5v14"/>
+</svg>
+</button>
+<div class="watch-dock" data-watch-dock>
+<div class="watch-bar" data-watch-bar>
+</div>
+<div class="watch-keys" role="group" aria-label="Your answer">
+<button type="button" class="watch-key" data-watch-key="YES" data-look="off" disabled>Yes</button>
+<button type="button" class="watch-key" data-watch-key="NO" data-look="off" disabled>No</button>
+</div>
+</div>
+<div class="watch-plate" data-watch-plate>
+</div>
+<section class="watch-sheet" data-watch-sheet="turns" role="dialog" aria-labelledby="watch-turns-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-turns-title">Turns</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-turns-sheet-body>
+</div>
+</section>
+<section class="watch-sheet" data-watch-sheet="more" role="dialog" aria-labelledby="watch-more-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-more-title" class="sr-only">More</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-more-sheet-body>
+</div>
+</section>
+</div>\\n      </div>
 </div>
 <div class="arena-timeline" data-replay-timeline data-waiting role="group" aria-label="Replay timeline by turn">
 <ol class="arena-timeline-list" data-replay-timeline-list>
@@ -4419,6 +5527,8 @@ exports[`renders a debate 4`] = `
 </script>
 <script type="module" src="/assets/turn-clock.js?v=0123456789ab">
 </script>
+<script type="module" src="/assets/watch-screen.js?v=0123456789ab">
+</script>
 <script type="module" src="/assets/replay-timeline.js?v=0123456789ab">
 </script>\\n  </div>
 </main>
@@ -4700,7 +5810,161 @@ exports[`renders a debate 5`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>
 </svg>
-</button>\\n      </div>
+</button>
+<div class="watch-ui" data-watch-ui>
+<button type="button" class="watch-stage" data-watch-stage aria-label="Show controls" aria-expanded="false">
+</button>
+<div class="watch-cams" data-watch-cams aria-hidden="true">
+<div class="watch-cam" data-watch-cam="A">
+</div>
+<div class="watch-cam" data-watch-cam="B">
+</div>
+</div>
+<div class="watch-shade watch-shade-top" aria-hidden="true">
+</div>
+<div class="watch-shade watch-shade-bottom" aria-hidden="true">
+</div>
+<div class="watch-segments" data-watch-segments role="img" aria-label="Turns">
+</div>
+<button type="button" class="watch-icon watch-back" data-watch-back data-watch-control aria-label="Back">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M15 5l-7 7 7 7"/>
+</svg>
+</button>
+<button type="button" class="watch-icon watch-more" data-watch-open="more" data-watch-control aria-label="More" aria-haspopup="dialog">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="5" cy="12" r="1.2"/>
+<circle cx="12" cy="12" r="1.2"/>
+<circle cx="19" cy="12" r="1.2"/>
+</svg>
+</button>
+<div class="watch-tags" data-watch-control>
+<p class="watch-tag" data-side="A">
+<img class="watch-tag-avatar" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+<span class="watch-tag-who">
+<strong>Alex Public</strong>
+<span>For</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+<p class="watch-tag" data-side="B">
+<span class="watch-tag-avatar" aria-hidden="true">?</span>
+<span class="watch-tag-who">
+<strong>Speaker to be announced</strong>
+<span>Against</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+</div>
+<div class="watch-clock" data-watch-clock role="timer">
+<span class="watch-ring" aria-hidden="true">
+</span>
+<span class="watch-clock-face" aria-hidden="true">
+<span class="watch-clock-next">NEXT</span>
+<span class="watch-clock-time" data-watch-clock-time>
+</span>
+<span class="watch-clock-turn" data-watch-clock-turn>
+</span>
+</span>
+</div>
+<div class="watch-rail">
+<button type="button" class="watch-rail-button" data-watch-chat-toggle aria-label="Show chat" aria-pressed="false">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4 5h16v11H9l-5 4z"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Chat</span>
+</button>
+<button type="button" class="watch-rail-button" data-watch-open="turns" aria-label="Turns" aria-haspopup="dialog">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Turns</span>
+</button>
+<button type="button" class="watch-rail-button watch-share" data-watch-share aria-label="Share">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v6h14v-6"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Share</span>
+</button>
+</div>
+<div class="watch-chat" data-watch-chat>
+</div>
+<p class="watch-question" id="watch-question" data-watch-control>Should we debate this?</p>
+<p class="watch-status" data-watch-status aria-hidden="true">
+</p>
+<p class="watch-toast" data-watch-toast role="status" aria-live="polite">
+</p>
+<button type="button" class="watch-sound" data-watch-sound hidden>Enable sound</button>
+<button type="button" class="watch-pause" data-watch-pause data-watch-control aria-label="Pause" hidden>
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M9 5v14M15 5v14"/>
+</svg>
+</button>
+<div class="watch-dock" data-watch-dock>
+<div class="watch-bar" data-watch-bar>
+</div>
+<div class="watch-keys" role="group" aria-label="Your answer">
+<button type="button" class="watch-key" data-watch-key="YES" data-look="off" disabled>Yes</button>
+<button type="button" class="watch-key" data-watch-key="NO" data-look="off" disabled>No</button>
+</div>
+</div>
+<div class="watch-plate" data-watch-plate>
+</div>
+<section class="watch-sheet" data-watch-sheet="turns" role="dialog" aria-labelledby="watch-turns-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-turns-title">Turns</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-turns-sheet-body>
+</div>
+</section>
+<section class="watch-sheet" data-watch-sheet="more" role="dialog" aria-labelledby="watch-more-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-more-title" class="sr-only">More</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-more-sheet-body>
+</div>
+</section>
+</div>\\n      </div>
 </div>\\n      <div class="media-status-row">
 <p data-media-status role="status" aria-live="polite">Checking media availability…</p>
 <p data-media-microphone role="status" aria-live="polite" hidden>
@@ -5046,6 +6310,8 @@ exports[`renders a debate 5`] = `
 <script type="module" src="/assets/debate-layout.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/turn-clock.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/watch-screen.js?v=0123456789ab">
 </script>\\n  </div>
 </main>
 <footer class="site-footer">
@@ -5326,7 +6592,161 @@ exports[`renders a debate 6`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>
 </svg>
-</button>\\n      </div>
+</button>
+<div class="watch-ui" data-watch-ui>
+<button type="button" class="watch-stage" data-watch-stage aria-label="Show controls" aria-expanded="false">
+</button>
+<div class="watch-cams" data-watch-cams aria-hidden="true">
+<div class="watch-cam" data-watch-cam="A">
+</div>
+<div class="watch-cam" data-watch-cam="B">
+</div>
+</div>
+<div class="watch-shade watch-shade-top" aria-hidden="true">
+</div>
+<div class="watch-shade watch-shade-bottom" aria-hidden="true">
+</div>
+<div class="watch-segments" data-watch-segments role="img" aria-label="Turns">
+</div>
+<button type="button" class="watch-icon watch-back" data-watch-back data-watch-control aria-label="Back">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M15 5l-7 7 7 7"/>
+</svg>
+</button>
+<button type="button" class="watch-icon watch-more" data-watch-open="more" data-watch-control aria-label="More" aria-haspopup="dialog">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="5" cy="12" r="1.2"/>
+<circle cx="12" cy="12" r="1.2"/>
+<circle cx="19" cy="12" r="1.2"/>
+</svg>
+</button>
+<div class="watch-tags" data-watch-control>
+<p class="watch-tag" data-side="A">
+<img class="watch-tag-avatar" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+<span class="watch-tag-who">
+<strong>Alex Public</strong>
+<span>For</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+<p class="watch-tag" data-side="B">
+<span class="watch-tag-avatar" aria-hidden="true">?</span>
+<span class="watch-tag-who">
+<strong>Speaker to be announced</strong>
+<span>Against</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+</div>
+<div class="watch-clock" data-watch-clock role="timer">
+<span class="watch-ring" aria-hidden="true">
+</span>
+<span class="watch-clock-face" aria-hidden="true">
+<span class="watch-clock-next">NEXT</span>
+<span class="watch-clock-time" data-watch-clock-time>
+</span>
+<span class="watch-clock-turn" data-watch-clock-turn>
+</span>
+</span>
+</div>
+<div class="watch-rail">
+<button type="button" class="watch-rail-button" data-watch-chat-toggle aria-label="Show chat" aria-pressed="false">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4 5h16v11H9l-5 4z"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Chat</span>
+</button>
+<button type="button" class="watch-rail-button" data-watch-open="turns" aria-label="Turns" aria-haspopup="dialog">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Turns</span>
+</button>
+<button type="button" class="watch-rail-button watch-share" data-watch-share aria-label="Share">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v6h14v-6"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Share</span>
+</button>
+</div>
+<div class="watch-chat" data-watch-chat>
+</div>
+<p class="watch-question" id="watch-question" data-watch-control>Should we debate this?</p>
+<p class="watch-status" data-watch-status aria-hidden="true">
+</p>
+<p class="watch-toast" data-watch-toast role="status" aria-live="polite">
+</p>
+<button type="button" class="watch-sound" data-watch-sound hidden>Enable sound</button>
+<button type="button" class="watch-pause" data-watch-pause data-watch-control aria-label="Pause" hidden>
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M9 5v14M15 5v14"/>
+</svg>
+</button>
+<div class="watch-dock" data-watch-dock>
+<div class="watch-bar" data-watch-bar>
+</div>
+<div class="watch-keys" role="group" aria-label="Your answer">
+<button type="button" class="watch-key" data-watch-key="YES" data-look="off" disabled>Yes</button>
+<button type="button" class="watch-key" data-watch-key="NO" data-look="off" disabled>No</button>
+</div>
+</div>
+<div class="watch-plate" data-watch-plate>
+</div>
+<section class="watch-sheet" data-watch-sheet="turns" role="dialog" aria-labelledby="watch-turns-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-turns-title">Turns</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-turns-sheet-body>
+</div>
+</section>
+<section class="watch-sheet" data-watch-sheet="more" role="dialog" aria-labelledby="watch-more-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-more-title" class="sr-only">More</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-more-sheet-body>
+</div>
+</section>
+</div>\\n      </div>
 </div>\\n      <div class="media-status-row">
 <p data-media-status role="status" aria-live="polite">Checking media availability…</p>
 <p data-media-microphone role="status" aria-live="polite" hidden>
@@ -5672,6 +7092,8 @@ exports[`renders a debate 6`] = `
 <script type="module" src="/assets/debate-layout.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/turn-clock.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/watch-screen.js?v=0123456789ab">
 </script>\\n  </div>
 </main>
 <footer class="site-footer">
@@ -5954,7 +7376,161 @@ exports[`renders a debate 7`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>
 </svg>
-</button>\\n      </div>
+</button>
+<div class="watch-ui" data-watch-ui>
+<button type="button" class="watch-stage" data-watch-stage aria-label="Show controls" aria-expanded="false">
+</button>
+<div class="watch-cams" data-watch-cams aria-hidden="true">
+<div class="watch-cam" data-watch-cam="A">
+</div>
+<div class="watch-cam" data-watch-cam="B">
+</div>
+</div>
+<div class="watch-shade watch-shade-top" aria-hidden="true">
+</div>
+<div class="watch-shade watch-shade-bottom" aria-hidden="true">
+</div>
+<div class="watch-segments" data-watch-segments role="img" aria-label="Turns">
+</div>
+<button type="button" class="watch-icon watch-back" data-watch-back data-watch-control aria-label="Back">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M15 5l-7 7 7 7"/>
+</svg>
+</button>
+<button type="button" class="watch-icon watch-more" data-watch-open="more" data-watch-control aria-label="More" aria-haspopup="dialog">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="5" cy="12" r="1.2"/>
+<circle cx="12" cy="12" r="1.2"/>
+<circle cx="19" cy="12" r="1.2"/>
+</svg>
+</button>
+<div class="watch-tags" data-watch-control>
+<p class="watch-tag" data-side="A">
+<span class="watch-tag-avatar" aria-hidden="true">?</span>
+<span class="watch-tag-who">
+<strong>Speaker to be announced</strong>
+<span>For</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+<p class="watch-tag" data-side="B">
+<img class="watch-tag-avatar" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
+<span class="watch-tag-who">
+<strong>Morgan Lee</strong>
+<span>Against</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+</div>
+<div class="watch-clock" data-watch-clock role="timer">
+<span class="watch-ring" aria-hidden="true">
+</span>
+<span class="watch-clock-face" aria-hidden="true">
+<span class="watch-clock-next">NEXT</span>
+<span class="watch-clock-time" data-watch-clock-time>
+</span>
+<span class="watch-clock-turn" data-watch-clock-turn>
+</span>
+</span>
+</div>
+<div class="watch-rail">
+<button type="button" class="watch-rail-button" data-watch-chat-toggle aria-label="Show chat" aria-pressed="false">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4 5h16v11H9l-5 4z"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Chat</span>
+</button>
+<button type="button" class="watch-rail-button" data-watch-open="turns" aria-label="Turns" aria-haspopup="dialog">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Turns</span>
+</button>
+<button type="button" class="watch-rail-button watch-share" data-watch-share aria-label="Share">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v6h14v-6"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Share</span>
+</button>
+</div>
+<div class="watch-chat" data-watch-chat>
+</div>
+<p class="watch-question" id="watch-question" data-watch-control>Should we debate this?</p>
+<p class="watch-status" data-watch-status aria-hidden="true">
+</p>
+<p class="watch-toast" data-watch-toast role="status" aria-live="polite">
+</p>
+<button type="button" class="watch-sound" data-watch-sound hidden>Enable sound</button>
+<button type="button" class="watch-pause" data-watch-pause data-watch-control aria-label="Pause" hidden>
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M9 5v14M15 5v14"/>
+</svg>
+</button>
+<div class="watch-dock" data-watch-dock>
+<div class="watch-bar" data-watch-bar>
+</div>
+<div class="watch-keys" role="group" aria-label="Your answer">
+<button type="button" class="watch-key" data-watch-key="YES" data-look="off" disabled>Yes</button>
+<button type="button" class="watch-key" data-watch-key="NO" data-look="off" disabled>No</button>
+</div>
+</div>
+<div class="watch-plate" data-watch-plate>
+</div>
+<section class="watch-sheet" data-watch-sheet="turns" role="dialog" aria-labelledby="watch-turns-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-turns-title">Turns</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-turns-sheet-body>
+</div>
+</section>
+<section class="watch-sheet" data-watch-sheet="more" role="dialog" aria-labelledby="watch-more-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-more-title" class="sr-only">More</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-more-sheet-body>
+</div>
+</section>
+</div>\\n      </div>
 </div>\\n      <div class="media-status-row">
 <p data-media-status role="status" aria-live="polite">Checking media availability…</p>
 <p data-media-microphone role="status" aria-live="polite" hidden>
@@ -6300,6 +7876,8 @@ exports[`renders a debate 7`] = `
 <script type="module" src="/assets/debate-layout.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/turn-clock.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/watch-screen.js?v=0123456789ab">
 </script>\\n  </div>
 </main>
 <footer class="site-footer">
@@ -6588,7 +8166,161 @@ exports[`renders a debate 8`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>
 </svg>
-</button>\\n      </div>
+</button>
+<div class="watch-ui" data-watch-ui>
+<button type="button" class="watch-stage" data-watch-stage aria-label="Show controls" aria-expanded="false">
+</button>
+<div class="watch-cams" data-watch-cams aria-hidden="true">
+<div class="watch-cam" data-watch-cam="A">
+</div>
+<div class="watch-cam" data-watch-cam="B">
+</div>
+</div>
+<div class="watch-shade watch-shade-top" aria-hidden="true">
+</div>
+<div class="watch-shade watch-shade-bottom" aria-hidden="true">
+</div>
+<div class="watch-segments" data-watch-segments role="img" aria-label="Turns">
+</div>
+<button type="button" class="watch-icon watch-back" data-watch-back data-watch-control aria-label="Back">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M15 5l-7 7 7 7"/>
+</svg>
+</button>
+<button type="button" class="watch-icon watch-more" data-watch-open="more" data-watch-control aria-label="More" aria-haspopup="dialog">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="5" cy="12" r="1.2"/>
+<circle cx="12" cy="12" r="1.2"/>
+<circle cx="19" cy="12" r="1.2"/>
+</svg>
+</button>
+<div class="watch-tags" data-watch-control>
+<p class="watch-tag" data-side="A">
+<img class="watch-tag-avatar" src="/assets/avatars/yap-crab.svg?v=0123456789ab" alt="">
+<span class="watch-tag-who">
+<strong>Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</strong>
+<span>Side A &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+<p class="watch-tag" data-side="B">
+<img class="watch-tag-avatar" src="/assets/avatars/yap-frog.svg?v=0123456789ab" alt="">
+<span class="watch-tag-who">
+<strong>Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</strong>
+<span>Side B &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+</div>
+<div class="watch-clock" data-watch-clock role="timer">
+<span class="watch-ring" aria-hidden="true">
+</span>
+<span class="watch-clock-face" aria-hidden="true">
+<span class="watch-clock-next">NEXT</span>
+<span class="watch-clock-time" data-watch-clock-time>
+</span>
+<span class="watch-clock-turn" data-watch-clock-turn>
+</span>
+</span>
+</div>
+<div class="watch-rail">
+<button type="button" class="watch-rail-button" data-watch-chat-toggle aria-label="Show chat" aria-pressed="false">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4 5h16v11H9l-5 4z"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Chat</span>
+</button>
+<button type="button" class="watch-rail-button" data-watch-open="turns" aria-label="Turns" aria-haspopup="dialog">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Turns</span>
+</button>
+<button type="button" class="watch-rail-button watch-share" data-watch-share aria-label="Share">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v6h14v-6"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Share</span>
+</button>
+</div>
+<div class="watch-chat" data-watch-chat>
+</div>
+<p class="watch-question" id="watch-question" data-watch-control>Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</p>
+<p class="watch-status" data-watch-status aria-hidden="true">
+</p>
+<p class="watch-toast" data-watch-toast role="status" aria-live="polite">
+</p>
+<button type="button" class="watch-sound" data-watch-sound hidden>Enable sound</button>
+<button type="button" class="watch-pause" data-watch-pause data-watch-control aria-label="Pause" hidden>
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M9 5v14M15 5v14"/>
+</svg>
+</button>
+<div class="watch-dock" data-watch-dock>
+<div class="watch-bar" data-watch-bar>
+</div>
+<div class="watch-keys" role="group" aria-label="Your answer">
+<button type="button" class="watch-key" data-watch-key="YES" data-look="off" disabled>Yes</button>
+<button type="button" class="watch-key" data-watch-key="NO" data-look="off" disabled>No</button>
+</div>
+</div>
+<div class="watch-plate" data-watch-plate>
+</div>
+<section class="watch-sheet" data-watch-sheet="turns" role="dialog" aria-labelledby="watch-turns-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-turns-title">Turns</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-turns-sheet-body>
+</div>
+</section>
+<section class="watch-sheet" data-watch-sheet="more" role="dialog" aria-labelledby="watch-more-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-more-title" class="sr-only">More</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-more-sheet-body>
+</div>
+</section>
+</div>\\n      </div>
 </div>\\n      <div class="media-status-row">
 <p data-media-status role="status" aria-live="polite">Checking media availability…</p>
 <p data-media-microphone role="status" aria-live="polite" hidden>
@@ -7004,6 +8736,8 @@ exports[`renders a debate 8`] = `
 <script type="module" src="/assets/debate-layout.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/turn-clock.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/watch-screen.js?v=0123456789ab">
 </script>\\n  </div>
 </main>
 <footer class="site-footer">
@@ -7285,7 +9019,161 @@ exports[`renders a debate 9`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>
 </svg>
-</button>\\n      </div>
+</button>
+<div class="watch-ui" data-watch-ui>
+<button type="button" class="watch-stage" data-watch-stage aria-label="Show controls" aria-expanded="false">
+</button>
+<div class="watch-cams" data-watch-cams aria-hidden="true">
+<div class="watch-cam" data-watch-cam="A">
+</div>
+<div class="watch-cam" data-watch-cam="B">
+</div>
+</div>
+<div class="watch-shade watch-shade-top" aria-hidden="true">
+</div>
+<div class="watch-shade watch-shade-bottom" aria-hidden="true">
+</div>
+<div class="watch-segments" data-watch-segments role="img" aria-label="Turns">
+</div>
+<button type="button" class="watch-icon watch-back" data-watch-back data-watch-control aria-label="Back">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M15 5l-7 7 7 7"/>
+</svg>
+</button>
+<button type="button" class="watch-icon watch-more" data-watch-open="more" data-watch-control aria-label="More" aria-haspopup="dialog">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<circle cx="5" cy="12" r="1.2"/>
+<circle cx="12" cy="12" r="1.2"/>
+<circle cx="19" cy="12" r="1.2"/>
+</svg>
+</button>
+<div class="watch-tags" data-watch-control>
+<p class="watch-tag" data-side="A">
+<img class="watch-tag-avatar" src="/assets/avatars/yap-owl.svg?v=0123456789ab" alt="">
+<span class="watch-tag-who">
+<strong>Alex Public</strong>
+<span>For</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+<p class="watch-tag" data-side="B">
+<span class="watch-tag-avatar" aria-hidden="true">?</span>
+<span class="watch-tag-who">
+<strong>Speaker to be announced</strong>
+<span>Against</span>
+</span>
+<span class="watch-eq" aria-hidden="true">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="watch-tag-next" aria-hidden="true">NEXT</span>
+<span class="sr-only" data-watch-tag-state>
+</span>
+</p>
+</div>
+<div class="watch-clock" data-watch-clock role="timer">
+<span class="watch-ring" aria-hidden="true">
+</span>
+<span class="watch-clock-face" aria-hidden="true">
+<span class="watch-clock-next">NEXT</span>
+<span class="watch-clock-time" data-watch-clock-time>
+</span>
+<span class="watch-clock-turn" data-watch-clock-turn>
+</span>
+</span>
+</div>
+<div class="watch-rail">
+<button type="button" class="watch-rail-button" data-watch-chat-toggle aria-label="Show chat" aria-pressed="false">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4 5h16v11H9l-5 4z"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Chat</span>
+</button>
+<button type="button" class="watch-rail-button" data-watch-open="turns" aria-label="Turns" aria-haspopup="dialog">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M5 20V11M10 20V5M15 20v-7M20 20V8"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Turns</span>
+</button>
+<button type="button" class="watch-rail-button watch-share" data-watch-share aria-label="Share">
+<span class="watch-round">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v6h14v-6"/>
+</svg>
+</span>
+<span class="watch-rail-label" aria-hidden="true">Share</span>
+</button>
+</div>
+<div class="watch-chat" data-watch-chat>
+</div>
+<p class="watch-question" id="watch-question" data-watch-control>Should we debate this?</p>
+<p class="watch-status" data-watch-status aria-hidden="true">
+</p>
+<p class="watch-toast" data-watch-toast role="status" aria-live="polite">
+</p>
+<button type="button" class="watch-sound" data-watch-sound hidden>Enable sound</button>
+<button type="button" class="watch-pause" data-watch-pause data-watch-control aria-label="Pause" hidden>
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M9 5v14M15 5v14"/>
+</svg>
+</button>
+<div class="watch-dock" data-watch-dock>
+<div class="watch-bar" data-watch-bar>
+</div>
+<div class="watch-keys" role="group" aria-label="Your answer">
+<button type="button" class="watch-key" data-watch-key="YES" data-look="off" disabled>Yes</button>
+<button type="button" class="watch-key" data-watch-key="NO" data-look="off" disabled>No</button>
+</div>
+</div>
+<div class="watch-plate" data-watch-plate>
+</div>
+<section class="watch-sheet" data-watch-sheet="turns" role="dialog" aria-labelledby="watch-turns-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-turns-title">Turns</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-turns-sheet-body>
+</div>
+</section>
+<section class="watch-sheet" data-watch-sheet="more" role="dialog" aria-labelledby="watch-more-title" tabindex="-1" hidden>
+<span class="watch-sheet-handle" aria-hidden="true">
+</span>
+<div class="watch-sheet-head">
+<h2 id="watch-more-title" class="sr-only">More</h2>
+<button type="button" class="watch-round" data-watch-sheet-close aria-label="Close">
+<svg class="watch-svg" viewBox="0 0 24 24" aria-hidden="true">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
+<div class="watch-sheet-body" data-more-sheet-body>
+</div>
+</section>
+</div>\\n      </div>
 </div>\\n      <div class="media-status-row">
 <p data-media-status role="status" aria-live="polite">Checking media availability…</p>
 <p data-media-microphone role="status" aria-live="polite" hidden>
@@ -7699,6 +9587,8 @@ exports[`renders a debate 9`] = `
 <script type="module" src="/assets/debate-layout.js?v=0123456789ab">
 </script>
 <script type="module" src="/assets/turn-clock.js?v=0123456789ab">
+</script>
+<script type="module" src="/assets/watch-screen.js?v=0123456789ab">
 </script>\\n  </div>
 </main>
 <footer class="site-footer">

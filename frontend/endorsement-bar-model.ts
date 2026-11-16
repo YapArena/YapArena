@@ -156,6 +156,25 @@ export function barView(input: BarInput, labels: BarLabels): BarView {
   };
 }
 
+/** Decision 0016 (D1): the bar's line in the phone full screen's dock. */
+export interface DockReadout {
+  empty: boolean;
+  yes: number;
+  no: number;
+  /** "last answers · 641", or why the bar is empty. */
+  note: string;
+}
+
+export function dockReadout(view: BarView, accounts: number): DockReadout {
+  if (view.empty) return { empty: true, yes: 0, no: 0, note: view.valueText };
+  return {
+    empty: false,
+    yes: view.yesPercent,
+    no: 100 - view.yesPercent,
+    note: `last answers · ${count(accounts)}`,
+  };
+}
+
 /**
  * The card's left edge inside the surface: centred on the share's boundary,
  * flipped back inside near either edge (the chart tooltip's rule).

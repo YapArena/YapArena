@@ -44,6 +44,9 @@ declare global {
     "yap:stake-rounds": CustomEvent<{
       debateId: string;
       limits: Record<string, string>;
+      // Decision 0016: the viewer's side and size by window id, for the
+      // phone full screen's answer keys ("Yes · 25").
+      positions?: Record<string, { side: "YES" | "NO"; quantity: number }>;
     }>;
     // The panel's last window read failed, so the chart's turns may be stale
     // until the next yap:stake-windows.
