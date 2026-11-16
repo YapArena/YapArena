@@ -57,6 +57,9 @@ const splitBundles = {
 const scriptBundles = {
   "replay-entry": "replay.bundle",
   homepage: "homepage.bundle",
+  // Decision 0016: the page LiveKit egress records, with its own copy of
+  // livekit-client so it loads as one classic script.
+  "recording-template": "recording.bundle",
 };
 const bundleEntries = [
   ...Object.keys(splitBundles),

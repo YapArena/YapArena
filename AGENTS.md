@@ -24,7 +24,7 @@ The Node.js 24 service uses strict TypeScript in `src/`. Keep reusable infrastru
 - `npm ci` installs the locked dependencies from `package-lock.json`.
 - `docker compose up --detach --wait db` starts local PostgreSQL.
 - `npm run dev` builds and watches frontend assets and runs the API with reload, loading a separate runtime-only `.env.runtime` file.
-- `npm run build` checks operational and frontend sources, compiles server TypeScript, and generates all browser JavaScript and the four bundles (`media`, `replay`, `hero-live` and `homepage`).
+- `npm run build` checks operational and frontend sources, compiles server TypeScript, and generates all browser JavaScript and the five bundles (`media`, `replay`, `hero-live`, `homepage` and `recording`).
 - `npm run typecheck:operations` checks the edge worker and critical database/release automation in separate strict compiler projects; see [the source inventory](docs/operational-typescript.md).
 - `npm run typecheck:frontend` checks the source inventory, strict browser types, isolated service-worker types, and the frontend build tool. `npm run typecheck` includes this gate.
 - `npm run check:fast` runs lint, format, the tracked-file policy (`npm run check:files`), type checks and the unit tests, without PostgreSQL or coverage thresholds (about 30 seconds). Run it before pushing.

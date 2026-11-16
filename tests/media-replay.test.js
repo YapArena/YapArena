@@ -21,6 +21,7 @@ function fixture({ native = true, supported = true, preview = false } = {}) {
     textTracks: [{ mode: "showing" }],
     hidden: true,
     muted: false,
+    dataset: {},
     addEventListener(event, fn) {
       if (!handlers.has(event)) handlers.set(event, new Set());
       handlers.get(event).add(fn);
@@ -200,6 +201,25 @@ it("prepares one native replay and preserves position, speed, captions and pause
   f.player.destroy();
   assert.equal(f.jobs.size, 0);
   for (const handlers of f.handlers.values()) assert.equal(handlers.size, 0);
+});
+it("marks the video with the recording's camera layout from each grant", async () => {
+  const f = fixture();
+  f.setGrantProvider((count) => ({
+    type: "mp4",
+    url: `https://media.example/${count}.mp4`,
+    expiresIn: 300,
+    expiresAt: new Date(Date.now() + 300000).toISOString(),
+    ...(count === 1 ? {} : { layout: "sides-v1" }),
+  }));
+  await f.player.prepare();
+  // Older servers send no layout; every recording before it is LiveKit's grid.
+  assert.equal(f.video.dataset.replayLayout, "livekit-grid");
+  await f.player.start();
+  f.player.online();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(f.requests, 2);
+  assert.equal(f.video.dataset.replayLayout, "sides-v1");
+  f.player.destroy();
 });
 it("starts cold HLS at the low rendition then enables adaptation with bounded preload", async () => {
   const f = fixture({ native: false });

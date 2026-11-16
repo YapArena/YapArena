@@ -16,6 +16,12 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { createReplayAccess, replayPrefix } from "./replay.ts";
 import { createReplayThumbnailStorage } from "./replay-thumbnail.ts";
+import {
+  GRID_LAYOUT,
+  SIDES_LAYOUT,
+  livekitConnectSources,
+  type CompositeLayout,
+} from "./recording-template.ts";
 import type { TurnHint } from "../transcription/protocol.ts";
 
 /** LiveKit room of one debate. */
@@ -39,6 +45,9 @@ export interface MediaProviderConfig {
   replayEdgeUrl?: string;
   replaySigningSecret?: string;
   replayEdgeRooms?: readonly string[];
+  // Decision 0016: the public URL of YapArena's recording page
+  // (recording-template.ts). Unset, recordings use LiveKit's grid page.
+  recordingTemplateUrl?: string;
 }
 
 // LiveKit reports a recording file's start in Unix nanoseconds; 0 is unknown.
@@ -145,6 +154,10 @@ export function createMediaProvider(
     publicUrl: config.livekitPublicUrl,
     adaptiveReplay: Boolean(config.replayEdgeUrl),
     playbackOrigin,
+    // The LiveKit hosts the recording page may connect to.
+    recordingConnectSources: Object.freeze(
+      livekitConnectSources([config.livekitUrl, config.livekitPublicUrl]),
+    ),
     playbackOrigins: Object.freeze(
       config.replayEdgeUrl
         ? [...new Set([playbackOrigin, storageOrigin])]
@@ -241,12 +254,20 @@ export function createMediaProvider(
           }),
         },
       });
+      // With a template URL, egress records YapArena's page: side A on the
+      // left, side B on the right. The layout is stored with the recording so
+      // replays know where each camera is.
+      const layout: CompositeLayout = config.recordingTemplateUrl
+        ? SIDES_LAYOUT
+        : GRID_LAYOUT;
       const result = await egress.startRoomCompositeEgress(
         roomName(id),
         output,
-        { layout: "grid" },
+        config.recordingTemplateUrl
+          ? { layout, customBaseUrl: config.recordingTemplateUrl }
+          : { layout: "grid" },
       );
-      return { egressId: result.egressId, key };
+      return { egressId: result.egressId, key, layout };
     },
     async stopRecording(egressId: string) {
       await egress.stopEgress(egressId);

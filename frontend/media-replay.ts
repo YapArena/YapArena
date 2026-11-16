@@ -183,6 +183,8 @@ export function createReplayPlayer({
       captions.src = access.captionsUrl || captions.dataset.originalSrc!;
     video.preload = "metadata";
     video.crossOrigin = access.type === "hls" ? "anonymous" : null;
+    // Decision 0016: where each camera sits, for the phone's split replay.
+    video.dataset.replayLayout = access.layout ?? "livekit-grid";
     if (PlaybackHls) {
       const Hls = PlaybackHls;
       // Preserve the existing option even though this SDK type omits it.

@@ -227,10 +227,16 @@ describe("media API", () => {
     );
     f.event.status = "replay";
     f.state.recordingStatus = "ready";
+    // Decision 0016: the grant names where each camera sits.
+    f.state.compositeLayout = "livekit-grid";
+    const grant = (await request(f.app).get(`/api/media/events/${id}/replay`))
+      .body;
+    assert.equal(grant.expiresIn, 3600);
+    assert.equal(grant.layout, "livekit-grid");
+    f.state.compositeLayout = "sides-v1";
     assert.equal(
-      (await request(f.app).get(`/api/media/events/${id}/replay`)).body
-        .expiresIn,
-      3600,
+      (await request(f.app).get(`/api/media/events/${id}/replay`)).body.layout,
+      "sides-v1",
     );
     assert.match(
       (await request(f.app).get(`/api/media/events/${id}/captions.vtt`)).text,

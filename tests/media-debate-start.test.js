@@ -4,6 +4,9 @@ import { createDebateStart } from "../dist/features/media/debate-start.js";
 import { MediaConflictError } from "../dist/features/media/repository.js";
 
 const debateId = "44444444-4444-4444-8444-444444444444";
+// The fake recording: its file and, for Decision 0016, the page that made it.
+const recordingFile = "recording.mp4";
+const layout = "sides-v1";
 
 function fixture({
   connected = 2,
@@ -15,8 +18,8 @@ function fixture({
   const calls = [];
   const errors = [];
   const media = {
-    async start(_id, egress, key) {
-      calls.push(`start:${egress}:${key}`);
+    async start(_id, egress, key, layout) {
+      calls.push(`start:${egress}:${key}:${layout}`);
     },
     async get() {
       return { debateId, state: "running" };
@@ -34,7 +37,7 @@ function fixture({
     },
     async beginRecording() {
       calls.push("beginRecording");
-      return { egressId: "egress-1", key: "recording.mp4" };
+      return { egressId: "egress-1", key: recordingFile, layout };
     },
     async setTurn(_id, side) {
       calls.push(`setTurn:${side}`);
@@ -74,7 +77,8 @@ describe("shared debate start", () => {
     const result = await f.start();
     assert.deepEqual(f.calls, [
       "beginRecording",
-      "start:egress-1:recording.mp4",
+      // Decision 0016: the recording's layout is stored with it.
+      "start:egress-1:recording.mp4:sides-v1",
       "transition:9:start:both ready",
       "setTurn:A",
     ]);
