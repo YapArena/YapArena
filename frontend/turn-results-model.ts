@@ -41,6 +41,15 @@ export interface TurnColumn {
 
 export type Names = Record<SpeakingSide, string>;
 
+/** "MC" for "Maya Chen", as on the scoreboard's avatars. */
+export const initials = (name: string) =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0]!.toUpperCase())
+    .join("");
+
 // The betting panel shares its whole public window list; the chart's event
 // type names only the fields the chart reads.
 export const isTurnWindow = (window: RevealedWindow): window is PublicWindow =>

@@ -174,3 +174,31 @@ it("marks the Results tab stale after a failed read until the next read arrives"
   shareStakeWindows({ debateId: "d1", windows: read(2) });
   assert.deepEqual(stale, [true, false]);
 });
+
+// Decision 0016: the full screen's Turns sheet listens only while it is open.
+it("stops a listener once its signal aborts, before or after the first read", async () => {
+  shareStakeWindows({ debateId: "d1", windows: read(1) });
+  const windows = [];
+  const figures = [];
+  const early = new AbortController();
+  onStakeWindows("d1", (value) => windows.push(value), early.signal);
+  onDebateEndorsement("d1", (value) => figures.push(value), early.signal);
+  // Aborted before the kept read is delivered: nothing arrives.
+  early.abort();
+  await settle();
+  shareStakeWindows({ debateId: "d1", windows: read(2) });
+  assert.deepEqual(windows, []);
+  assert.deepEqual(figures, []);
+  const later = new AbortController();
+  onStakeWindows("d1", (value) => windows.push(value), later.signal);
+  onDebateEndorsement("d1", (value) => figures.push(value), later.signal);
+  await settle();
+  shareStakeWindows({ debateId: "d1", windows: read(3) });
+  later.abort();
+  shareStakeWindows({ debateId: "d1", windows: read(4) });
+  assert.deepEqual(windows, [read(2), read(3)]);
+  assert.deepEqual(
+    figures.map((figure) => figure.endorsement),
+    [null, null],
+  );
+});
