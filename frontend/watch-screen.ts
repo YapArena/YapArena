@@ -30,6 +30,7 @@ import {
 } from "./debate-layout-model.js";
 import type { PublicWindow, StakeSide } from "./stake-model.js";
 import { onStakePositions, onStakeWindows } from "./stake-windows.js";
+import { watchTurnResults } from "./turn-result-plate.js";
 import { isTurnWindow } from "./turn-results-model.js";
 
 declare global {
@@ -225,6 +226,22 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
   phone.addEventListener("change", () => {
     if (!phone.matches) close(false);
   });
+
+  // Point 7: the viewer's own turn results pop on the plate layer. It
+  // watches from page start on a phone, so a result revealed while the full
+  // screen is closed counts as seen and never pops later.
+  const plateLayer = one("[data-watch-plate]");
+  let stopPlate: (() => void) | null = null;
+  function syncPlate() {
+    if (phone.matches && plateLayer && !stopPlate)
+      stopPlate = watchTurnResults(plateLayer, { debateId });
+    else if (!phone.matches && stopPlate) {
+      stopPlate();
+      stopPlate = null;
+    }
+  }
+  syncPlate();
+  phone.addEventListener("change", syncPlate);
   window.addEventListener("resize", () => {
     if (state.open && arena.dataset.watchOrientation !== orientation()) {
       arena.dataset.watchOrientation = orientation();

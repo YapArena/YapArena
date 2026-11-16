@@ -5521,6 +5521,23 @@ html.watch-open .cookie-choice {
    The plate centres on its host, or on the point the host's
    --watch-result-x and --watch-result-y name. Under reduced motion it only
    fades. */
+/* In the full screen it centres on the camera seam when vertical. When
+   horizontal it sits over the cameras, above the answer cluster: 150 px
+   down a 390 px screen, and 136 px left of centre while the chat is open
+   (Proto-H). */
+.arena-page .arena-workspace[data-watch="open"] .watch-plate {
+  --watch-result-y: var(--watch-seam);
+}
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
+  .watch-plate {
+  --watch-result-y: 38.5%;
+}
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"][data-watch-chat="open"]
+  .watch-plate {
+  --watch-result-x: calc(50% - 136px);
+}
 .watch-result {
   --watch-result-ink: var(--text);
   --watch-result-on: var(--on-acid);
@@ -5673,6 +5690,8 @@ html.watch-open .cookie-choice {
   font-size: 50px;
   line-height: 1;
   white-space: nowrap;
+  /* The ding grows away from the coin, so the 8 px gap holds. */
+  transform-origin: 100% 50%;
   animation: watch-result-ding 0.32s ease-out 1.05s;
 }
 .watch-result-coin {
