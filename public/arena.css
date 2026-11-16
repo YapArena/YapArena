@@ -4215,6 +4215,13 @@ textarea::placeholder {
     .arena-video-empty {
     display: flex;
   }
+  /* With no native controls showing, the last-answer bar keeps its 12 px. */
+  .arena-page
+    .arena-workspace:not([data-watch="open"])
+    .arena-video-surface
+    .arena-endorsement::before {
+    height: 12px;
+  }
 }
 
 /* The takeover: fixed over the header, the tab row and the footer, clear of
