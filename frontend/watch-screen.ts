@@ -33,7 +33,7 @@ import { onStakePositions, onStakeWindows } from "./stake-windows.js";
 import { isTurnWindow } from "./turn-results-model.js";
 import { mountReplaySplit } from "./replay-split.js";
 import { mountPauseKey } from "./replay-pause.js";
-import { replayWatchMode } from "./replay-split-model.js";
+import { replayBadgeWords, replayWatchMode } from "./replay-split-model.js";
 
 declare global {
   interface WindowEventMap {
@@ -248,6 +248,12 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
   const pauseKey = one<HTMLButtonElement>("[data-watch-pause]");
   const camA = one('[data-watch-cam="A"]');
   const camB = one('[data-watch-cam="B"]');
+  // The top pill says just "Replay", whatever the replay's status, beside
+  // the playback time; the page's own pill keeps its words.
+  const badge = surface.querySelector<HTMLElement>(
+    ".arena-video-status .arena-broadcast-badge",
+  );
+  const pageBadge = badge?.textContent ?? "";
   let unmountPause: (() => void) | null = null;
   let unmountSplit: (() => void) | null = null;
   function syncReplay() {
@@ -283,6 +289,8 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
     // Where each camera box holds one side, the listener's camera dims.
     if (mode) arena!.dataset.watchReplay = mode;
     else delete arena!.dataset.watchReplay;
+    const words = replayBadgeWords(mode, pageBadge);
+    if (badge && badge.textContent !== words) badge.textContent = words;
   }
   // The recording's layout arrives with the replay grant.
   replayVideo?.addEventListener("loadedmetadata", syncReplay);

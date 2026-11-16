@@ -102,6 +102,17 @@ export function replayWatchMode(input: {
   return input.layout === "sides-v1" ? "sides" : "whole";
 }
 
+/**
+ * The status word in the full screen's top pill: "Replay" while a replay is
+ * open there, whether or not it is finalized; the page's own word otherwise.
+ */
+export function replayBadgeWords(
+  mode: ReturnType<typeof replayWatchMode>,
+  pageWords: string,
+): string {
+  return mode ? "Replay" : pageWords;
+}
+
 export interface DrawCall {
   sx: number;
   sy: number;

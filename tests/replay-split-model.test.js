@@ -14,9 +14,22 @@ const {
   compositeTiles,
   coverCrop,
   drawCall,
+  replayBadgeWords,
   replayWatchMode,
   sideSources,
 } = await import("../public/replay-split-model.js");
+
+describe("the full screen's top pill on a replay", () => {
+  it("says Replay while open, and the page's words once closed", () => {
+    for (const mode of ["split", "sides", "whole"])
+      assert.equal(replayBadgeWords(mode, "Finalized replay"), "Replay");
+    assert.equal(
+      replayBadgeWords(null, "Finalized replay"),
+      "Finalized replay",
+    );
+    assert.equal(replayBadgeWords(null, "Replay"), "Replay");
+  });
+});
 
 describe("a recording's layout", () => {
   it("is exact halves for YapArena's own egress page", () => {

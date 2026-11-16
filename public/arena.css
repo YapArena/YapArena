@@ -5587,3 +5587,72 @@ html.watch-open .cookie-choice {
   outline: 2px solid var(--acid);
   outline-offset: 3px;
 }
+/* Vertical: the key sits in the middle of side A's camera, clear of both
+   name tags on the seam, the clock ring, the top row and the rail. */
+.arena-page .arena-workspace[data-watch="open"] .watch-pause {
+  top: calc(var(--watch-seam) / 2);
+}
+/* Horizontal: centred over the cameras, in the band between the name tags
+   (the shell puts them at 76px, 44px tall) and the question at its tallest
+   (132px from the bottom, three 15px lines at 1.3). */
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
+  .watch-pause {
+  --watch-pause-above: calc(76px + 44px);
+  --watch-pause-below: calc(132px + 3 * 15px * 1.3);
+  top: calc((var(--watch-pause-above) + 100% - var(--watch-pause-below)) / 2);
+}
+/* While the browser holds the sound back, Enable sound is what starts the
+   replay, in the key's place. */
+.arena-page
+  .arena-video-surface:has([data-watch-sound]:not([hidden]))
+  [data-watch-pause] {
+  display: none;
+}
+
+/* The top pill in the full screen stops short of ···: the secondary text
+   gives way with an ellipsis, the status and the time stay whole. On a
+   replay it reads "REPLAY 0:02 / 1:10": nobody watches a replay live. */
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .arena-video-surface
+  > .arena-video-status {
+  max-width: calc(
+    100% - max(8px, env(safe-area-inset-left, 0px)) - 48px -
+      max(8px, env(safe-area-inset-right, 0px)) - 52px
+  );
+  overflow: hidden;
+}
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
+  .arena-video-surface
+  > .arena-video-status {
+  max-width: calc(
+    100% - max(50px, env(safe-area-inset-left, 0px)) - 52px -
+      max(50px, env(safe-area-inset-right, 0px)) - 52px
+  );
+}
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .arena-video-status
+  > :is(.arena-broadcast-badge, .arena-watch-time) {
+  flex: none;
+}
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .arena-video-status
+  > :is(.arena-demo, .arena-watch-count) {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.arena-page
+  .arena-workspace[data-watch="open"]:is(
+    [data-debate-status="replay"],
+    [data-debate-status="finalized"]
+  )
+  .arena-video-status
+  .arena-watch-count {
+  display: none;
+}
