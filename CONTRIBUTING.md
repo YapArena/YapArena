@@ -145,8 +145,9 @@ browser-safe shared implementations in `src/features/`. Never edit or commit gen
   `tsconfig.frontend-build.json` (the isolated Node build tool). `npm run typecheck` and the normal
   `npm run check` CI gate include it.
 - `npm run build:frontend` emits every executable `frontend/**/*.ts` module to the corresponding
-  `public/**/*.js` path and builds the four bundles `media.bundle.js`, `replay.bundle.js`,
-  `hero-live.bundle.js` and `homepage.bundle.js`. Bundle entries emit only their bundle, and
+  `public/**/*.js` path and builds the five bundles `media.bundle.js`, `replay.bundle.js`,
+  `hero-live.bundle.js`, `homepage.bundle.js` and `recording.bundle.js` (the page LiveKit egress
+  records, Decision 0016). Bundle entries emit only their bundle, and
   type-only modules produce no asset. `media.bundle.js` and `hero-live.bundle.js` are ES modules
   that share code such as `livekit-client` through content-hashed `public/chunks/` files, which
   the server caches as immutable without a `?v=` revision. Run the type check before this focused

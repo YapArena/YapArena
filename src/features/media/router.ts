@@ -142,7 +142,12 @@ export function createMediaRouter({
     )
       return response.status(404).json({ error: "replay not available" });
     try {
-      return response.json(await provider.replayAccess(state.recordingKey));
+      // Decision 0016: where each camera sits in the recording, so a phone
+      // can cut side A and side B out of it.
+      return response.json({
+        ...(await provider.replayAccess(state.recordingKey)),
+        layout: state.compositeLayout,
+      });
     } catch (error) {
       request.log.error({ error, id }, "replay object unavailable");
       return response

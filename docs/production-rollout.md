@@ -1045,6 +1045,7 @@ it from staging, and never reuse it there.
 | `MEDIA_S3_BUCKET`                                          | ✓   | ✓    | ✓       | `yaparena-production-media` (dashboard)                               | Differs                     |
 | `MEDIA_S3_ACCESS_KEY`, `MEDIA_S3_SECRET_KEY`               | ✓   | ✓    | ✓       | Web and jobs: the read key; encoder: the encoder key (7.2, dashboard) | Own                         |
 | `MEDIA_EGRESS_S3_ACCESS_KEY`, `MEDIA_EGRESS_S3_SECRET_KEY` | ✓   | ✓    |         | The egress key from 7.2 (dashboard)                                   | Own                         |
+| `MEDIA_RECORDING_TEMPLATE_URL`                             | ✓   | ✓    |         | `https://yaparena.com/recording-template/` once verified on staging   | Differs                     |
 | `MEDIA_REPLAY_EDGE_URL`                                    | ✓   |      |         | `https://replay.yaparena.com` (dashboard)                             | Differs                     |
 | `MEDIA_REPLAY_SIGNING_SECRET`                              | ✓   |      |         | `<SIGNING_SECRET>` from 7.3 (dashboard)                               | Own                         |
 | `MEDIA_REPLAY_PACKAGING_ENABLED`                           | ✓   |      | ✓       | `true` (dashboard)                                                    | Same                        |

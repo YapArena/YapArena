@@ -148,7 +148,13 @@ their words, and the word "bet" is not used on the page.
 
 ## Engineering notes
 
-- **Replays.** A replay is one side-by-side recording (LiveKit composite, grid layout).
+- **Replays.** A replay is one side-by-side recording (LiveKit room-composite egress).
+  - New recordings use the site's own recording page (`/recording-template/`, layout
+    `sides-v1`): side A's camera fills the left half and side B's the right half, edge to edge,
+    for the whole recording. Recordings made before it, or without
+    `MEDIA_RECORDING_TEMPLATE_URL`, use LiveKit's grid page (`livekit-grid`), where the left camera
+    is whoever LiveKit sorted first. Each recording stores its layout, and the replay grant returns
+    it as `layout`.
   - Horizontal shows it as it is.
   - Vertical keeps one hidden video and draws each half into its own canvas, one per camera. The
     sound, seeking and the `yap:playback` event stay on the video element.

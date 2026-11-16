@@ -1,0 +1,47 @@
+/* Decision 0016 — the page LiveKit egress records (/recording-template/).
+   Side A's camera fills the left half and side B's the right half: no gap,
+   no corners, no rings and no labels, black where a side has no camera.
+   At egress's default 1280 × 720 each half is 640 × 720. */
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+.recording {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100vw;
+  height: 100vh;
+}
+
+.recording-side {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  background: #000;
+}
+
+.recording-side video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.recording-side video[hidden] {
+  display: none;
+}
+
+/* LiveKit's error box: egress reads its text when the page cannot start. */
+.error {
+  position: fixed;
+  inset: auto 0 0;
+  padding: 8px;
+  color: #fff;
+  font: 16px/1.4 sans-serif;
+  background: #800;
+}

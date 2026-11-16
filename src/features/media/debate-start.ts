@@ -32,14 +32,20 @@ export function createDebateStart({
     reason: string;
     logger: Pick<Logger, "error">;
   }) {
-    let recording: { egressId: string; key: string } | undefined;
+    let recording:
+      Awaited<ReturnType<typeof provider.beginRecording>> | undefined;
     try {
       if ((await provider.connectedSpeakers(debateId)) !== 2)
         throw new MediaConflictError(
           "both speakers must be connected before start",
         );
       recording = await provider.beginRecording(debateId);
-      await media.start(debateId, recording.egressId, recording.key);
+      await media.start(
+        debateId,
+        recording.egressId,
+        recording.key,
+        recording.layout,
+      );
       const event = await matching.operatorTransition(
         actorUserId,
         debateId,

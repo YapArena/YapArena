@@ -110,6 +110,7 @@ function fake() {
         recordingStatus: "recording",
         recordingKey: values[3],
         hasCaptions: false,
+        compositeLayout: values[4],
       };
       return result([media]);
     }
@@ -305,6 +306,17 @@ describe("durable media lifecycle", () => {
     const state = await f.repository.start(id, "egress", "key");
     assert.equal(state.activeSide, "A");
     assert.equal(state.recordingStatus, "recording");
+    // Decision 0016: a start without a layout is LiveKit's grid page.
+    assert.equal(state.compositeLayout, "livekit-grid");
+    const insert = f.seen.find(({ sql }) =>
+      sql.startsWith("INSERT INTO debate_media"),
+    );
+    assert.match(insert.sql, /recording_key, composite_layout\)/);
+    assert.match(insert.sql, /composite_layout AS "compositeLayout"/);
+    await f.repository.undoFailedStart(id);
+    f.event.status = "ready";
+    const sides = await f.repository.start(id, "egress", "key", "sides-v1");
+    assert.equal(sides.compositeLayout, "sides-v1");
     await f.repository.undoFailedStart(id);
     assert.equal(await f.repository.get(id), null);
     f.event.status = "scheduled";

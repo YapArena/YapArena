@@ -1,6 +1,7 @@
 import type { Pool, PoolClient } from "pg";
 import { createSharedRead } from "../../platform/shared-read.ts";
 import { withTransaction } from "../../platform/transaction.ts";
+import type { CompositeLayout } from "./recording-template.ts";
 
 export class MediaConflictError extends Error {}
 export class MediaNotFoundError extends Error {}
@@ -20,6 +21,8 @@ export interface MediaState {
   recordingStatus: "pending" | "recording" | "processing" | "ready" | "failed";
   recordingKey: string | null;
   hasCaptions: boolean;
+  /** Where each camera sits in the recording (Decision 0016). */
+  compositeLayout: CompositeLayout;
 }
 
 const fields = `debate_id AS "debateId", state, active_side AS "activeSide",
@@ -27,7 +30,8 @@ const fields = `debate_id AS "debateId", state, active_side AS "activeSide",
   remaining_ms AS "remainingMs", active_ms AS "activeMs",
   last_resumed_at AS "lastResumedAt", revision, incident,
   egress_id AS "egressId", recording_status AS "recordingStatus",
-  recording_key AS "recordingKey", captions_vtt IS NOT NULL AS "hasCaptions"`;
+  recording_key AS "recordingKey", captions_vtt IS NOT NULL AS "hasCaptions",
+  composite_layout AS "compositeLayout"`;
 
 type Rules = {
   initial_speaking_time_seconds?: number;
@@ -224,7 +228,12 @@ export function createMediaRepository(
           "camera and microphone check required before readiness",
         );
     },
-    async start(debateId: string, egressId: string, key: string) {
+    async start(
+      debateId: string,
+      egressId: string,
+      key: string,
+      layout: CompositeLayout = "livekit-grid",
+    ) {
       return withTransaction(db, async (client) => {
         const result = await client.query<{
           status: string;
@@ -241,10 +250,10 @@ export function createMediaRepository(
         const state = await client.query<MediaState>(
           `INSERT INTO debate_media
           (debate_id, state, active_side, turn_number, turn_deadline_at, remaining_ms,
-           last_resumed_at, egress_id, recording_status, recording_key)
+           last_resumed_at, egress_id, recording_status, recording_key, composite_layout)
           VALUES ($1, 'running', 'A', 1, CURRENT_TIMESTAMP + ($3::integer * INTERVAL '1 millisecond'),
-                  $3, CURRENT_TIMESTAMP, $2, 'recording', $4) RETURNING ${fields}`,
-          [debateId, egressId, turnMs, key],
+                  $3, CURRENT_TIMESTAMP, $2, 'recording', $4, $5) RETURNING ${fields}`,
+          [debateId, egressId, turnMs, key, layout],
         );
         return state.rows[0]!;
       });

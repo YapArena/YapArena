@@ -167,6 +167,32 @@ with **Object Read & Write** access to `MEDIA_S3_BUCKET`. Confirm the S3 endpoin
 same Cloudflare account. Replace both Render secrets together and redeploy before starting a new
 trial. [Cloudflare identifies 401 as missing or invalid credentials](https://developers.cloudflare.com/r2/api/error-codes/).
 
+### Record side A left and side B right
+
+Without further settings, recordings use LiveKit's grid page, which puts whoever joined first on
+the left and can swap the cameras mid-recording. [Decision 0016](decisions/0016-phone-full-screen-watch.md)
+needs every new recording laid out the same way, so the site serves its own recording page at
+`/recording-template/`: side A's camera fills the left half and side B's the right half, edge to
+edge, black when a side has no camera, with both speakers' sound. Each recording stores which page
+made it (`debate_media.composite_layout`: `sides-v1` or `livekit-grid`), and the replay grant
+returns it as `layout`. Recordings made before the switch keep `livekit-grid`.
+
+1. Apply migration `1794844777000` (owner, as for every migration) **before** deploying the
+   version that writes `composite_layout`.
+2. Deploy that version. Open `https://<staging-host>/recording-template/` in a browser: it shows a
+   red "missing required params url and token" bar on black, and its response has
+   `X-Robots-Tag: noindex, nofollow` and its own `Content-Security-Policy`.
+3. Set `MEDIA_RECORDING_TEMPLATE_URL=https://<staging-host>/recording-template/` on **web and the
+   jobs worker** (web starts debates from the ready route, the jobs worker starts matchmade ones),
+   and redeploy both. Unset, the app keeps LiveKit's grid page.
+4. Run a debate with two speakers on separate devices, joining in the order B then A, and have side
+   A leave and rejoin once mid-debate. In the finished recording check that side A is on the left
+   and side B on the right for the whole file, each 640 × 720 at 1280 × 720 with no gap, corners,
+   ring or name tag; both voices are heard; the half of a speaker with the camera off or away is
+   black; and the replay grant (`/api/media/events/<id>/replay`) says `"layout":"sides-v1"`. If
+   the recording fails with a template or page-load error (the egress's error in the LiveKit
+   dashboard), unset the variable to go back to the grid page.
+
 ## Enable turn trading windows
 
 [Decision 0012](decisions/0012-live-argument-outline.md) makes each live speaking turn one Yap Coins
