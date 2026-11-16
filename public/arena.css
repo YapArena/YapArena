@@ -5262,25 +5262,31 @@ html.watch-open .cookie-choice {
   color: var(--watch-ink);
 }
 
-/* The answer sheet (frontend/debate-layout.ts) opens over the full screen. */
+/* The answer sheet (frontend/debate-layout.ts) opens over the full screen.
+   Its look is the answer sheet's own block; here it only rises above the
+   full screen, and in horizontal it gets the right-side geometry it needs
+   where the phone block's bottom sheet doesn't apply. The :where() rules
+   give way to the answer sheet's block. */
 .arena-page .arena-workspace[data-watch="open"] .stake-panel[data-sheet] {
   position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
   z-index: 1010;
-  max-height: 85svh;
-  margin: 0 auto;
-  padding-bottom: max(var(--space-4), env(safe-area-inset-bottom, 0px));
+}
+:where(
+    .arena-page
+      .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
+  )
+  .stake-panel[data-sheet] {
+  inset: 0 0 0 auto;
+  width: min(392px, 100%);
+  max-height: none;
+  margin: 0;
+  padding: 18px max(52px, env(safe-area-inset-right, 0px)) 14px 22px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  border-radius: var(--radius-card) var(--radius-card) 0 0;
-  box-shadow:
-    0 -16px 40px rgb(0 0 0 / 60%),
-    0 -1px 0 var(--line);
+  border-left: 1px solid var(--line);
+  border-radius: 22px 0 0 22px;
 }
-.arena-page
-  .arena-workspace[data-watch="open"]
+:where(.arena-page .arena-workspace[data-watch="open"])
   .stake-panel[data-sheet]
   .stake-sheet-close {
   display: inline-flex;
@@ -5292,14 +5298,14 @@ html.watch-open .cookie-choice {
   border-color: transparent;
   background: transparent;
 }
-.arena-page .arena-workspace[data-watch="open"] .stake-sheet-close svg {
+:where(.arena-page .arena-workspace[data-watch="open"]) .stake-sheet-close svg {
   width: 20px;
   height: 20px;
 }
 
-/* Shorter phones keep the rail clear of the clock: the rail moves down to
-   the dock, then drops its words (each button keeps its name), then the
-   clock steps left of the rail. */
+/* Shorter phones keep the rail clear of the clock and the dock: the rail
+   moves down to the dock, then tightens to 42 px buttons, then drops its
+   words (each button keeps its name), then the clock steps left of it. */
 @media (max-height: 785px) {
   .arena-page .arena-workspace[data-watch-orientation="vertical"] .watch-rail {
     top: auto;
@@ -5308,6 +5314,23 @@ html.watch-open .cookie-choice {
   }
 }
 @media (max-height: 671px) {
+  .arena-page .arena-workspace[data-watch-orientation="vertical"] .watch-rail {
+    gap: 6px;
+  }
+  .arena-page
+    .arena-workspace[data-watch-orientation="vertical"]
+    .watch-rail-button {
+    gap: 3px;
+  }
+  .arena-page
+    .arena-workspace[data-watch-orientation="vertical"]
+    .watch-rail
+    .watch-round {
+    width: 42px;
+    height: 42px;
+  }
+}
+@media (max-height: 633px) {
   .arena-page .arena-workspace[data-watch-orientation="vertical"] .watch-rail {
     gap: 10px;
   }
@@ -5323,13 +5346,31 @@ html.watch-open .cookie-choice {
   }
 }
 
-/* Horizontal, until PR 4: the cameras side by side, the last-answer bar
-   over Yes · clock · No centred at the bottom, and Chat and Turns. */
+/* Horizontal (Proto-H at 844 × 390): A | B side by side, the name tags in
+   the outer top corners, LIVE beside ···, and the answer cluster centred on
+   the seam at the bottom: the last-answer bar, then Yes · clock · No, Yes
+   under side A (D2). The question sits small above it (D3). Chat is a
+   translucent column over the right camera and moves the cluster and the
+   question left; a sheet over the right camera hides the rail, B's tag, the
+   question and the cluster. */
 .arena-page
   .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
   .arena-video-surface {
   --watch-dock: 0px;
-  --watch-top: max(env(safe-area-inset-top, 0px), 0px);
+  --watch-top: 0px;
+  --watch-side: max(50px, env(safe-area-inset-left, 0px));
+  --watch-end: max(50px, env(safe-area-inset-right, 0px));
+  --cluster-width: min(360px, calc(100% - 2 * var(--watch-side)));
+  --cluster-left: calc((100% - var(--cluster-width)) / 2);
+}
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"][data-watch-chat="open"]
+  .arena-video-surface {
+  --cluster-width: min(
+    360px,
+    calc(100% - 378px - max(16px, env(safe-area-inset-left, 0px)))
+  );
+  --cluster-left: calc(100% - 378px - var(--cluster-width));
 }
 .arena-page
   .arena-workspace[data-watch-orientation="horizontal"]
@@ -5361,42 +5402,59 @@ html.watch-open .cookie-choice {
 }
 .arena-page
   .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-shade-top {
+  height: 120px;
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-shade-bottom {
+  bottom: 0;
+  height: 170px;
+  background: linear-gradient(rgb(0 0 0 / 0%), rgb(0 0 0 / 72%));
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
   .watch-segments {
   top: 12px;
-  right: 60px;
-  left: 60px;
+  right: calc(var(--watch-end) + 10px);
+  left: calc(var(--watch-side) + 10px);
   gap: 4px;
 }
 .arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-icon {
   top: 22px;
 }
 .arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-back {
-  left: max(50px, env(safe-area-inset-left, 0px));
+  left: var(--watch-side);
 }
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-more {
+  right: var(--watch-end);
+}
+/* LIVE sits beside ···, at the end of the top row. */
 .arena-page
   .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
   .arena-video-surface
   > .arena-video-status {
   top: 30px;
-  left: calc(max(50px, env(safe-area-inset-left, 0px)) + 52px);
+  right: calc(var(--watch-end) + 52px);
+  left: auto;
 }
-.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-more {
-  right: max(50px, env(safe-area-inset-right, 0px));
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-tags {
+  height: 100%;
 }
 .arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-tag {
   top: 76px;
   bottom: auto;
-  max-width: calc(50% - 72px);
+  max-width: calc(50% - var(--watch-side) - 16px);
 }
 .arena-page
   .arena-workspace[data-watch-orientation="horizontal"]
   .watch-tag[data-side="A"] {
-  left: max(56px, env(safe-area-inset-left, 0px));
+  left: calc(var(--watch-side) + 6px);
 }
 .arena-page
   .arena-workspace[data-watch-orientation="horizontal"]
   .watch-tag[data-side="B"] {
-  right: max(56px, env(safe-area-inset-right, 0px));
+  right: calc(var(--watch-end) + 6px);
   left: auto;
   flex-direction: row-reverse;
   padding: 0 5px 0 14px;
@@ -5410,21 +5468,22 @@ html.watch-open .cookie-choice {
 }
 .arena-page
   .arena-workspace[data-watch-orientation="horizontal"]
-  .watch-shade-top {
-  height: 120px;
+  .watch-tag[data-side="B"]
+  :is(.watch-eq, .watch-tag-next) {
+  margin-right: 4px;
+  margin-left: 0;
+}
+/* The rail: Chat and Turns. */
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-rail {
+  top: 142px;
+  right: calc(var(--watch-end) + 2px);
+  bottom: auto;
+  gap: 10px;
 }
 .arena-page
   .arena-workspace[data-watch-orientation="horizontal"]
-  .watch-shade-bottom {
-  bottom: 0;
-  height: 170px;
-  background: linear-gradient(rgb(0 0 0 / 0%), rgb(0 0 0 / 72%));
-}
-.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-rail {
-  top: 142px;
-  bottom: auto;
-  right: max(52px, env(safe-area-inset-right, 0px));
-  gap: 10px;
+  .watch-rail-button {
+  gap: 2px;
 }
 .arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-share {
   display: none;
@@ -5436,47 +5495,121 @@ html.watch-open .cookie-choice {
   width: 44px;
   height: 44px;
 }
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-rail-label {
+  display: block;
+}
+/* The answer cluster. */
 .arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-dock {
   right: auto;
   bottom: max(14px, env(safe-area-inset-bottom, 0px));
-  left: 50%;
-  width: min(360px, calc(100% - 240px));
+  left: var(--cluster-left);
+  width: var(--cluster-width);
   height: auto;
   padding: 0;
   background: transparent;
-  transform: translateX(-50%);
+}
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
+  .watch-bar
+  .arena-endorsement {
+  padding-bottom: 9px;
+}
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
+  .watch-bar
+  .arena-endorsement::before {
+  background: rgb(255 255 255 / 18%);
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-bar
+  .arena-endorsement-readout {
+  color: var(--watch-soft);
+  line-height: 21px;
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-bar
+  .arena-endorsement-readout
+  b {
+  font-size: 17px;
 }
 .arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-keys {
   column-gap: 96px;
 }
+.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-key {
+  height: 54px;
+  font-size: 24px;
+}
 .arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-clock {
   top: auto;
   right: auto;
-  bottom: calc(max(14px, env(safe-area-inset-bottom, 0px)) - 7px);
-  left: 50%;
+  bottom: calc(max(14px, env(safe-area-inset-bottom, 0px)) - 9px);
+  left: calc(var(--cluster-left) + var(--cluster-width) / 2 - 36px);
   z-index: 8;
   width: 72px;
   height: 72px;
-  transform: translateX(-50%);
+  background: rgb(0 0 0 / 82%);
 }
 .arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-ring {
-  inset: 4px;
+  inset: 5px;
+  -webkit-mask:
+    radial-gradient(
+      circle at center,
+      transparent 21px,
+      #000 22px 30px,
+      transparent 31px
+    ),
+    repeating-conic-gradient(#000 0 6deg, transparent 6deg 9deg);
+  -webkit-mask-composite: source-in;
+  mask:
+    radial-gradient(
+      circle at center,
+      transparent 21px,
+      #000 22px 30px,
+      transparent 31px
+    ),
+    repeating-conic-gradient(#000 0 6deg, transparent 6deg 9deg);
+  mask-composite: intersect;
 }
+.arena-page
+  .arena-workspace[data-watch-phase="running"][data-watch-orientation="horizontal"]
+  .watch-clock-time {
+  font-size: 20px;
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-clock-time {
+  font-size: 16px;
+}
+/* The question, centred over the cluster. */
 .arena-page
   .arena-workspace[data-watch-orientation="horizontal"]
   .watch-question {
   right: auto;
   bottom: 132px;
-  left: 50%;
-  width: min(440px, calc(100% - 240px));
+  left: max(
+    var(--watch-side),
+    calc(var(--cluster-left) + var(--cluster-width) / 2 - 220px)
+  );
+  width: min(440px, calc(100% - 2 * var(--watch-side)));
   text-align: center;
   text-shadow: 0 1px 3px rgb(0 0 0 / 70%);
-  transform: translateX(-50%);
+  pointer-events: none;
 }
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"][data-watch-chat="open"]
+  .watch-question {
+  display: -webkit-box;
+  width: min(440px, calc(100% - 378px - var(--watch-side)));
+}
+/* Chat over the right camera. */
 .arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-chat {
   top: 132px;
-  right: max(108px, env(safe-area-inset-right, 0px));
-  bottom: 14px;
+  right: calc(var(--watch-end) + 58px);
+  bottom: max(14px, env(safe-area-inset-bottom, 0px));
   left: auto;
   width: 236px;
   max-height: none;
@@ -5489,21 +5622,43 @@ html.watch-open .cookie-choice {
 .arena-page
   .arena-workspace[data-watch-orientation="horizontal"]
   .watch-chat
-  .arena-chat
-  .community-messages {
-  flex: 1 1 auto;
-  max-height: none;
-}
-.arena-page .arena-workspace[data-watch-orientation="horizontal"] .watch-sheet,
-.arena-page
-  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
-  .stake-panel[data-sheet] {
-  width: min(100%, 480px);
+  > .arena-chat {
+  gap: 8px;
 }
 .arena-page
   .arena-workspace[data-watch-orientation="horizontal"]
-  .watch-sheet[data-watch-sheet="turns"] {
-  height: auto;
+  .watch-chat
+  .arena-chat
+  .community-messages {
+  flex: 1 1 auto;
+  gap: 7px;
+  max-height: none;
+  -webkit-mask-image: linear-gradient(rgb(0 0 0 / 0%), #000 30%);
+  mask-image: linear-gradient(rgb(0 0 0 / 0%), #000 30%);
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-chat
+  .arena-chat-compose {
+  padding-left: 12px;
+}
+/* A sheet over the right camera takes its place. */
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"][data-watch-layer]
+  :is(
+    .watch-rail,
+    .watch-tag[data-side="B"],
+    .watch-question,
+    .watch-dock,
+    .watch-clock,
+    .watch-chat
+  ) {
+  display: none;
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-status {
+  top: 50%;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -6195,7 +6350,8 @@ html.watch-open .cookie-choice {
   height: auto;
   max-height: none;
   margin: 0;
-  padding: 18px max(52px, env(safe-area-inset-right, 0px)) 14px 22px;
+  gap: 10px;
+  padding: 14px max(52px, env(safe-area-inset-right, 0px)) 14px 22px;
   border-top: 0;
   border-left: 1px solid var(--line);
   border-radius: 22px 0 0 22px;
@@ -6205,6 +6361,12 @@ html.watch-open .cookie-choice {
   .arena-workspace[data-watch-orientation="horizontal"]
   .watch-sheet-handle {
   display: none;
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-sheet-head
+  h2 {
+  font-size: 24px;
 }
 @keyframes watch-side-sheet {
   from {

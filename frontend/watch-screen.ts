@@ -136,8 +136,10 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
         "watchChat",
         "watchPhase",
         "watchNext",
+        "watchLayer",
       ])
         delete arena!.dataset[name];
+    if (next.open) showLayer(next);
     stage.setAttribute(
       "aria-label",
       next.controls ? "Hide controls" : "Show controls",
@@ -172,6 +174,14 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
     }
   }
   const dispatch = (action: WatchAction) => apply(watchReducer(state, action));
+  // The sheet over the full screen, if any: horizontal moves the rail, B's
+  // tag, the question, the cluster and chat out of a side sheet's way.
+  function showLayer(current: WatchState) {
+    const layer =
+      current.sheet ?? (panel && "sheet" in panel.dataset ? "answer" : null);
+    if (layer) arena!.dataset.watchLayer = layer;
+    else delete arena!.dataset.watchLayer;
+  }
 
   // D7: the ··· sheet shows the page's own Outline, About, positions, "Get
   // ready" defaults, maximum price and review switch. Each element moves
@@ -461,6 +471,7 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
     new MutationObserver(() => {
       if (!state.open) return;
       const sheet = "sheet" in panel.dataset;
+      showLayer(state);
       surface!.inert = sheet;
       if (sheet) {
         surface!.removeAttribute("aria-modal");

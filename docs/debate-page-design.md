@@ -81,15 +81,21 @@ never plays the video inline.
   and gives focus back to the key; after placing, the key reads "Yes · 25" and the other dims.
 - **Always shown:** LIVE with the watching count, and the rail: Chat (the page's own chat,
   translucent over the lower camera with its composer), Turns (a sheet) and Share (the system
-  share sheet, else Copy event link). On shorter phones the rail moves down and drops its words.
+  share sheet, else Copy event link). On shorter phones the rail moves down to the dock, then
+  tightens to 42 px buttons (from 671 px tall), and drops its words only under 634 px.
 - **Tap controls:** a tap on the picture ("Show controls", a real button) shows Back, ···, the
   question at the bottom and the name tags with their avatars; they start hidden.
 - **··· sheet (D7):** rows for Outline, About and Get ready, then Your positions, "Set a maximum
   price instead" and the review pop-up switch. They are the page's own elements, moved into the
   sheet while it is open and put back when it closes, so they keep their state and behaviour; Get
   ready shows whatever the debate's state.
-- **Horizontal:** until its own pass, the cameras side by side with the bar over Yes · clock · No
-  centred at the bottom, and Chat and Turns.
+- **Horizontal (Proto-H, 844 × 390):** A | B side by side, the name tags in the outer top corners,
+  LIVE beside ···, and a 360 px answer cluster centred on the seam 14 px from the bottom: the
+  last-answer bar, then Yes · 72 px clock · No with Yes under side A (D2). The question sits
+  small above it, centred (D3). The rail is Chat and Turns. Chat is a 236 px translucent column
+  over the right camera and moves the cluster and question left. Turns, ··· and the answer sheet
+  are 392 px right-side sheets, and while one is open the rail, B's tag, the question, the
+  cluster and chat step aside.
 
 ## Stage
 

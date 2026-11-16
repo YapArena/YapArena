@@ -651,6 +651,34 @@ export async function verifyArenaBrowser({
     const sideBySide = await fullScreen();
     assert.ok(sideBySide.covers && !sideBySide.scrolls);
     assert.equal(sideBySide.orientation, "horizontal");
+    // Horizontal (Proto-H): Yes · clock · No centred on the seam with Yes
+    // under side A (D2), the name tags in the outer top corners, and a rail
+    // of Chat and Turns only.
+    const cluster = await page.evaluate(() => {
+      const box = (selector: string) =>
+        document.querySelector(selector)!.getBoundingClientRect();
+      const yes = box('[data-watch-key="YES"]');
+      const no = box('[data-watch-key="NO"]');
+      const clock = box("[data-watch-clock]");
+      const middle = window.innerWidth / 2;
+      return {
+        yesUnderA: yes.right <= middle && no.left >= middle,
+        clockOnSeam: Math.abs(clock.left + clock.width / 2 - middle) <= 1,
+        clockBetween: clock.left >= yes.right && clock.right <= no.left,
+        tagsOutside:
+          box('.watch-tag[data-side="A"]').right <= middle &&
+          box('.watch-tag[data-side="B"]').left >= middle,
+        share: getComputedStyle(document.querySelector("[data-watch-share]")!)
+          .display,
+      };
+    });
+    assert.deepEqual(cluster, {
+      yesUnderA: true,
+      clockOnSeam: true,
+      clockBetween: true,
+      tagsOutside: true,
+      share: "none",
+    });
     await page.screenshot({ path: directory + "/phone-watch-landscape.png" });
     await page.setViewportSize({ width: 390, height: 844 });
     // Point 5: a dock key opens the answer sheet over the full screen, named
