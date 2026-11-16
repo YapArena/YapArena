@@ -86,7 +86,7 @@ A phone is a viewport under 600 px wide, or a landscape viewport under 500 px ta
     - Outline (live AI argument outline);
     - About;
     - Your positions;
-    - "Get ready" defaults;
+    - "Get ready" defaults (removed by the amendment below);
     - "Set a maximum price instead";
     - the review pop-up switch.
   - The answer sheet keeps "Same as last turn" as one line under the chips.
@@ -98,6 +98,32 @@ A phone is a viewport under 600 px wide, or a landscape viewport under 500 px ta
   - On a replay, the only control is pause and play: a centred key that shows and hides with the
     other tap controls. There is no seek bar and there are no native video controls.
   - A live debate cannot be paused.
+
+## Amended 2026-11-16: one ticket everywhere
+
+The founder, the same day: "make the answer sheet the standard everywhere people can place bets,
+remove the get ready thing." This amends point 5 and D7 above, and Decision 0013's ticket layout
+and its "Get ready" bullet. Decision 0013's other rules stand: the key names the exact terms, Yes
+is green and No is red with their words, and the word "bet" is not used on the page.
+
+- **One ticket.** Point 5's answer sheet is the only ticket, wherever a viewer can answer: in the
+  rail on computers and tablets (where the ticket is today, not a pop-up), in the phone page's
+  answer sheet and over the full screen. It has the side word and the clock (and a close button
+  where it is a sheet), the size chips 10 · 25 · 50 · 75 · 100, "Same as last turn" as one line
+  under them, the read slider with its value, one key naming the exact terms that updates as the
+  size or read changes, and "Final once placed. Yap Coins are play money with no cash value."
+- **Gone from the ticket, everywhere:** the 5 chip and the typed size ("Contracts"), the terms
+  list ("Reserved now", "Most you can lose", "You get back", fee, results), the "You'll pay at
+  most" line, the turn number and the question. A size without a chip (an earlier position's
+  size) moves to the nearest chip.
+- **"Get ready" is removed:** the form, its saved defaults and its ··· row. The ticket opens at 10
+  contracts and a 50% read and keeps the last size and read used on the page.
+- **Kept:** "Set a maximum price instead" and the review pop-up switch stay as small secondary
+  controls under the key (collapsed, as before), and in the full screen's ··· sheet. With a
+  maximum price set, the key names its terms. The review pop-up, the receipt, the results card
+  and "Your positions" are unchanged.
+- **Phone page sheet:** the pinned answer bar opens the same sheet as the full screen; outside the
+  full screen it keeps the receipt, balance, results and positions under the ticket.
 
 ## Engineering notes
 

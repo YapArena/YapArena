@@ -56,7 +56,8 @@ is an A4 endorsement in one turn's 60-second window; there is no winner (F09).
 - The next turn offers "Same as last turn", which pre-fills the ticket with the previous
   position's side, size and read; it still needs the confirm tap. Before a scheduled debate
   starts, "Get ready" saves a default size and read on the device, and every ticket opens with
-  them. Neither places anything by itself.
+  them. Neither places anything by itself. Amended 2026-11-16 ([Decision 0016](0016-phone-full-screen-watch.md#amended-2026-11-16-one-ticket-everywhere)):
+  "Get ready" is removed and the ticket has one layout everywhere.
 - At reveal, a results card lists each revealed position (price from the position's side, final
   yes share and result) under a total; positions still locked stay in "Your positions".
 - Five-day reveal stays for user-created debates (F11): live viewers see their receipt and the
