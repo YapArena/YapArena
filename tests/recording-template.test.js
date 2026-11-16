@@ -263,8 +263,14 @@ describe("recording page route", () => {
       page,
       /<script defer src="\/assets\/recording\.bundle\.js\?v=[0-9a-f]{12}"><\/script>/,
     );
-    // No inline script or style, which the policy would block.
-    assert.doesNotMatch(page, /<script>|<style|style="/);
+    // No inline script or style, which the policy would block: every script
+    // element is the one external bundle, and there is no style element or
+    // style attribute.
+    const scripts = page.split("<script").length - 1;
+    assert.equal(scripts, 1);
+    assert.equal(page.split('<script defer src="/assets/').length - 1, 1);
+    assert.equal(page.includes("<style"), false);
+    assert.equal(page.includes("style="), false);
   });
 
   it("exists only with media, and tolerates a provider without sources", async () => {

@@ -4,6 +4,9 @@ import { createDebateStart } from "../dist/features/media/debate-start.js";
 import { MediaConflictError } from "../dist/features/media/repository.js";
 
 const debateId = "44444444-4444-4444-8444-444444444444";
+// The fake recording: its file and, for Decision 0016, the page that made it.
+const recordingFile = "recording.mp4";
+const layout = "sides-v1";
 
 function fixture({
   connected = 2,
@@ -34,7 +37,7 @@ function fixture({
     },
     async beginRecording() {
       calls.push("beginRecording");
-      return { egressId: "egress-1", key: "recording.mp4", layout: "sides-v1" };
+      return { egressId: "egress-1", key: recordingFile, layout };
     },
     async setTurn(_id, side) {
       calls.push(`setTurn:${side}`);
