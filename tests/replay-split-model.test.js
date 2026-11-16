@@ -7,13 +7,44 @@ import { describe, it } from "node:test";
 const {
   BACKING_LIMITS,
   REPLAY_COMPOSITE,
+  SIDES_COMPOSITE,
   backingSize,
   cameraInTile,
+  compositeFor,
   compositeTiles,
   coverCrop,
   drawCall,
+  replayWatchMode,
   sideSources,
 } = await import("../public/replay-split-model.js");
+
+describe("a recording's layout", () => {
+  it("is exact halves for YapArena's own egress page", () => {
+    assert.equal(compositeFor("sides-v1"), SIDES_COMPOSITE);
+    const { A, B } = sideSources({ width: 1280, height: 720 }, SIDES_COMPOSITE);
+    // 640 × 720 each, 1 px in from every edge so the seam never bleeds.
+    assert.deepEqual(A, { x: 1, y: 1, width: 638, height: 718 });
+    assert.deepEqual(B, { x: 641, y: 1, width: 638, height: 718 });
+    const small = sideSources({ width: 426, height: 240 }, SIDES_COMPOSITE);
+    near(small.B, { x: (641 * 426) / 1280, width: (638 * 426) / 1280 });
+  });
+
+  it("is LiveKit's grid for older, named or unknown recordings", () => {
+    for (const name of ["livekit-grid", undefined, "sides-v2", ""])
+      assert.equal(compositeFor(name), REPLAY_COMPOSITE);
+  });
+
+  it("decides how the full screen shows a replay", () => {
+    const mode = (open, orientation, layout) =>
+      replayWatchMode({ open, orientation, layout });
+    assert.equal(mode(false, "vertical", "sides-v1"), null);
+    assert.equal(mode(true, "vertical", undefined), "split");
+    assert.equal(mode(true, "vertical", "sides-v1"), "split");
+    assert.equal(mode(true, "horizontal", "sides-v1"), "sides");
+    assert.equal(mode(true, "horizontal", "livekit-grid"), "whole");
+    assert.equal(mode(true, "horizontal", undefined), "whole");
+  });
+});
 
 function near(actual, expected, message) {
   for (const key of Object.keys(expected))

@@ -9,8 +9,8 @@
 // without breaking anything.
 import {
   BACKING_LIMITS,
-  REPLAY_COMPOSITE,
   backingSize,
+  compositeFor,
   drawCall,
   type BackingLimits,
   type CompositeLayout,
@@ -25,8 +25,12 @@ export interface ReplaySplitOptions {
   video: HTMLVideoElement;
   canvasA: HTMLCanvasElement;
   canvasB: HTMLCanvasElement;
-  /** Where each camera sits in the recording (replay-split-model.ts). */
-  layout?: CompositeLayout;
+  /**
+   * Where each camera sits in the recording (replay-split-model.ts), or a
+   * function read at every draw, for a layout that is known only once the
+   * replay grant arrives. The video's data-replay-layout by default.
+   */
+  layout?: CompositeLayout | (() => CompositeLayout);
   limits?: BackingLimits;
   /** The current device pixel ratio; window.devicePixelRatio by default. */
   pixelRatio?: () => number;
@@ -47,7 +51,7 @@ export function mountReplaySplit({
   video,
   canvasA,
   canvasB,
-  layout = REPLAY_COMPOSITE,
+  layout = () => compositeFor(video.dataset.replayLayout),
   limits = BACKING_LIMITS,
   pixelRatio = () => window.devicePixelRatio,
 }: ReplaySplitOptions): () => void {
@@ -86,13 +90,14 @@ export function mountReplaySplit({
     )
       return;
     const frame: Size = { width: video.videoWidth, height: video.videoHeight };
+    const composite = typeof layout === "function" ? layout() : layout;
     for (const { side, canvas, context } of targets) {
       if (!context) continue;
       const call = drawCall(
         frame,
         side,
         { width: canvas.width, height: canvas.height },
-        layout,
+        composite,
       );
       if (!call) continue;
       context.drawImage(

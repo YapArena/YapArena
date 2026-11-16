@@ -14,8 +14,10 @@
 //   cover`); a portrait camera is fitted whole (`contain`) with bars at its
 //   sides. Tiles have 8 px rounded corners and a 2.5 px ring while that
 //   person speaks; `inset` trims both off.
-// - The left tile is the camera LiveKit sorted first, not a fixed side: see
-//   `leftSide`.
+// - The left tile is the camera LiveKit sorted first (the speaker who joined
+//   first, or after a reconnection the one speaking), not a fixed side: see
+//   `leftSide`. Recordings from YapArena's own egress page fix the sides
+//   instead (SIDES_COMPOSITE below).
 // The packaged HLS renditions scale the whole picture without padding
 // (replay-packaging.ts), so the tiles keep their place in proportion.
 
@@ -59,6 +61,46 @@ export const REPLAY_COMPOSITE: CompositeLayout = {
   inset: 4,
   leftSide: "A",
 };
+
+// Recordings made with YapArena's own egress page (composite layout
+// "sides-v1"): side A's camera fills the left half and side B's the right,
+// each cover-fitted, with no gap, corners or speaking ring. The 1 px inset
+// keeps the other half from bleeding in across the seam once a rendition is
+// scaled down.
+export const SIDES_COMPOSITE: CompositeLayout = {
+  width: 1280,
+  height: 720,
+  gap: 0,
+  inset: 1,
+  leftSide: "A",
+};
+
+/**
+ * The geometry for a recording's composite layout, as the replay grant names
+ * it (`video.dataset.replayLayout`): "sides-v1", or LiveKit's grid for
+ * "livekit-grid", older recordings and anything unknown.
+ */
+export function compositeFor(layout: string | undefined): CompositeLayout {
+  return layout === "sides-v1" ? SIDES_COMPOSITE : REPLAY_COMPOSITE;
+}
+
+/**
+ * How a replay shows in the phone full screen, or null when it isn't open:
+ * - "split": vertical, each camera drawn into its own box;
+ * - "sides": horizontal, the recording as it is, side A on the left half;
+ * - "whole": horizontal, a LiveKit grid recording as it is, whose sides
+ *   can't be told apart.
+ * The cameras dim for the listener only where each box holds one known side.
+ */
+export function replayWatchMode(input: {
+  open: boolean;
+  orientation: "vertical" | "horizontal";
+  layout: string | undefined;
+}): "split" | "sides" | "whole" | null {
+  if (!input.open) return null;
+  if (input.orientation === "vertical") return "split";
+  return input.layout === "sides-v1" ? "sides" : "whole";
+}
 
 export interface DrawCall {
   sx: number;

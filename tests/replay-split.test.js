@@ -277,6 +277,35 @@ describe("replay split", () => {
     assert.equal(canvasB.draws.length, 1);
     assert.equal(canvasB.width, 390);
   });
+
+  it("follows the recording's layout once the replay grant names it", () => {
+    const { video, canvasA, canvasB } = mount();
+    assert.equal(canvasB.draws.at(-1)[1], 648, "LiveKit's grid until then");
+    video.dataset.replayLayout = "sides-v1";
+    video.emit("loadeddata");
+    assert.equal(canvasA.draws.at(-1)[1], 1);
+    assert.equal(canvasB.draws.at(-1)[1], 641, "side B is the right half");
+  });
+
+  it("takes a fixed layout", () => {
+    const video = fakeVideo();
+    const canvasA = fakeCanvas();
+    const canvasB = fakeCanvas();
+    mountReplaySplit({
+      video,
+      canvasA,
+      canvasB,
+      layout: {
+        width: 1280,
+        height: 720,
+        gap: 0,
+        inset: 0,
+        leftSide: "B",
+      },
+    });
+    assert.equal(canvasA.draws[0][1], 640);
+    assert.equal(canvasB.draws[0][1], 0);
+  });
 });
 
 function fakeButton() {
