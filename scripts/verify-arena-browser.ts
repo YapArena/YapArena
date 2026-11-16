@@ -651,8 +651,109 @@ export async function verifyArenaBrowser({
     const sideBySide = await fullScreen();
     assert.ok(sideBySide.covers && !sideBySide.scrolls);
     assert.equal(sideBySide.orientation, "horizontal");
+    // Horizontal (Proto-H): Yes · clock · No centred on the seam with Yes
+    // under side A (D2), the name tags in the outer top corners, and a rail
+    // of Chat and Turns only.
+    const cluster = await page.evaluate(() => {
+      const box = (selector: string) =>
+        document.querySelector(selector)!.getBoundingClientRect();
+      const yes = box('[data-watch-key="YES"]');
+      const no = box('[data-watch-key="NO"]');
+      const clock = box("[data-watch-clock]");
+      const middle = window.innerWidth / 2;
+      return {
+        yesUnderA: yes.right <= middle && no.left >= middle,
+        clockOnSeam: Math.abs(clock.left + clock.width / 2 - middle) <= 1,
+        clockBetween: clock.left >= yes.right && clock.right <= no.left,
+        tagsOutside:
+          box('.watch-tag[data-side="A"]').right <= middle &&
+          box('.watch-tag[data-side="B"]').left >= middle,
+        share: getComputedStyle(document.querySelector("[data-watch-share]")!)
+          .display,
+      };
+    });
+    assert.deepEqual(cluster, {
+      yesUnderA: true,
+      clockOnSeam: true,
+      clockBetween: true,
+      tagsOutside: true,
+      share: "none",
+    });
     await page.screenshot({ path: directory + "/phone-watch-landscape.png" });
     await page.setViewportSize({ width: 390, height: 844 });
+    // Point 7: a turn the viewer answered is revealed. A read of the
+    // viewer's rounds without the result, then one with it, as the answer
+    // panel shares them; the plate pops on the camera seam and announces
+    // the result once.
+    await page.evaluate((debateId) => {
+      const turn = (net: string | null) => ({
+        id: "verify-plate-window",
+        kind: "turn",
+        turnNumber: 99,
+        side: "A",
+        state: net === null ? "open" : "settled",
+        voidReason: null,
+        opensAt: new Date().toISOString(),
+        closesAt: new Date().toISOString(),
+        revealMode: "per_round",
+        revealAt: null,
+        participants: 2,
+        eligibility: { canTakePosition: false, reason: "closed", via: null },
+        own: { side: "YES", limit: "0.60", quantity: 25, requestId: "r" },
+        ...(net === null
+          ? {}
+          : {
+              outcome: {
+                executed: true,
+                premium: "135000",
+                fee: "0",
+                payout: "158500",
+                net,
+              },
+            }),
+      });
+      for (const net of [null, "23500"])
+        window.dispatchEvent(
+          new CustomEvent("yap:stake-rounds", {
+            detail: { debateId, limits: {}, rounds: [turn(net)] },
+          }),
+        );
+    }, debate.id);
+    const plate = page.locator("[data-watch-plate] .watch-result");
+    await plate.waitFor();
+    assert.equal(
+      await page
+        .locator("[data-watch-plate] [data-watch-result-status]")
+        .textContent(),
+      "Turn 99: you won 2.35 Yap Coins.",
+    );
+    assert.equal(await plate.getAttribute("aria-hidden"), "true");
+    assert.equal(
+      await plate.locator(".watch-result-word").textContent(),
+      "YOU WON",
+    );
+    const seam = await page.evaluate(() => {
+      const anchor = document
+        .querySelector(".watch-result-anchor")!
+        .getBoundingClientRect();
+      // The cameras fill the screen above the dock.
+      const screen = document
+        .querySelector("[data-arena-video]")!
+        .getBoundingClientRect();
+      const dock = document
+        .querySelector(".watch-dock")!
+        .getBoundingClientRect();
+      return Math.abs(anchor.y - (screen.y + (dock.y - screen.y) / 2));
+    });
+    assert.ok(seam <= 1, `the plate centres on the camera seam (${seam} px)`);
+    await page.waitForTimeout(1500);
+    assert.equal(
+      await plate.locator(".watch-result-amt").textContent(),
+      "+2.35",
+    );
+    await page.screenshot({ path: directory + "/phone-watch-result.png" });
+    await plate.waitFor({ state: "detached", timeout: 5000 });
+    checks.phoneResultPlate = true;
     // Point 5: a dock key opens the answer sheet over the full screen, named
     // for its side, with the five full-screen sizes and one key naming the
     // terms as they change. It needs an open turn window this account can
@@ -748,6 +849,33 @@ export async function verifyArenaBrowser({
     await page
       .locator('[data-watch-sheet="turns"]')
       .waitFor({ state: "hidden" });
+    // D7: ··· lends the page's own About, maximum price and review switch
+    // to its sheet, and puts them back when it closes.
+    await page.getByRole("button", { name: "More", exact: true }).click();
+    const lent = () =>
+      page.evaluate(() => {
+        const sheet = document.querySelector('[data-watch-sheet="more"]')!;
+        return [
+          "#arena-about",
+          "[data-stake-advanced]",
+          "[data-stake-review-choice]",
+          "[data-stake-ready]",
+        ].map((selector) => sheet.contains(document.querySelector(selector)));
+      });
+    assert.deepEqual(await lent(), [true, true, true, true]);
+    await page.keyboard.press("Escape");
+    await page
+      .locator('[data-watch-sheet="more"]')
+      .waitFor({ state: "hidden" });
+    assert.deepEqual(await lent(), [false, false, false, false]);
+    assert.equal(
+      await page.evaluate(() =>
+        document
+          .querySelector("[data-stake-ticket]")!
+          .contains(document.querySelector("[data-stake-advanced]")),
+      ),
+      true,
+    );
     await page.getByRole("button", { name: "Back", exact: true }).click();
     assert.equal(
       await page.locator("[data-arena]").getAttribute("data-watch"),

@@ -204,7 +204,8 @@ if (root) {
   }
   function applyReadySize(value: number) {
     readySize.value = String(value);
-    for (const chip of root!.querySelectorAll<HTMLButtonElement>(
+    // The form's own chips: the phone full screen's ··· sheet borrows it.
+    for (const chip of ready.querySelectorAll<HTMLButtonElement>(
       "[data-stake-ready-size]",
     ))
       chip.setAttribute(
@@ -294,7 +295,9 @@ if (root) {
     if (current !== generation) return;
     rounds = view;
     if (debatesHere(view)) debater = true;
-    // The price inspector marks this viewer's own limit on revealed turns.
+    // The price inspector marks this viewer's own limit on revealed turns;
+    // the phone's full screen shows each position on its keys and pops each
+    // result as it is revealed.
     shareStakeRounds({
       debateId,
       limits: Object.fromEntries(
@@ -314,6 +317,7 @@ if (root) {
             : [],
         ),
       ),
+      rounds: view,
     });
     // A reveal changes the balance everywhere on the page.
     const revealed = resultsSummary(view).revealed.length;
@@ -409,10 +413,10 @@ if (root) {
     };
   }
   function cents() {
-    // The full screen's sheet has no maximum price field, so its read sets
-    // the price there.
-    const manual =
-      advanced.open && !watching() ? parseCeiling(ceilingInput.value) : null;
+    // "Set a maximum price instead" applies wherever it is set: in the
+    // phone full screen it is in the ··· sheet (D7), and the place key
+    // names the terms it gives.
+    const manual = advanced.open ? parseCeiling(ceilingInput.value) : null;
     return manual ?? ceilingCents(side ?? "YES", Number(readInput.value));
   }
   // The most a position pays per contract: its limit is on the yes scale.

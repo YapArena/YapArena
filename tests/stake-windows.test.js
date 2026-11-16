@@ -6,6 +6,7 @@ import { beforeEach, it } from "node:test";
 
 const {
   onDebateEndorsement,
+  onOwnRounds,
   onStakePositions,
   onStakeRounds,
   onStakeWindows,
@@ -131,6 +132,32 @@ it("shares the viewer's own positions with the limits", async () => {
   assert.deepEqual(seen, [{ w1: position }]);
   shareStakeRounds({ debateId: "d1", limits: {} });
   assert.deepEqual(seen, [{ w1: position }, {}]);
+});
+
+// Decision 0016: the phone's result plate reads the rounds themselves; a read
+// without them is skipped.
+it("shares the viewer's rounds the same way and stops on request", async () => {
+  const first = [{ id: "w1", turnNumber: 1 }];
+  const second = [...first, { id: "w2", turnNumber: 2 }];
+  shareStakeRounds({ debateId: "d1", limits: {}, rounds: first });
+  const seen = [];
+  const stop = onOwnRounds("d1", (rounds) => seen.push(rounds));
+  assert.deepEqual(seen, []);
+  await settle();
+  assert.deepEqual(seen, [first]);
+  shareStakeRounds({ debateId: "d2", limits: {}, rounds: [] });
+  shareStakeRounds({ debateId: "d1", limits: {}, rounds: second });
+  shareStakeRounds({ debateId: "d1", limits: {} });
+  assert.deepEqual(seen, [first, second]);
+  stop();
+  shareStakeRounds({ debateId: "d1", limits: {}, rounds: first });
+  assert.equal(seen.length, 2);
+
+  // Stopped before the start-up delivery: nothing arrives.
+  const late = [];
+  onOwnRounds("d1", (rounds) => late.push(rounds))();
+  await settle();
+  assert.deepEqual(late, []);
 });
 
 // Decision 0015: the bar on the video takes the debate's last-answer figure

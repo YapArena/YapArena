@@ -5,6 +5,7 @@
 import type { OutlineTimeline } from "../src/features/outline/public-types.ts";
 import type { DebateEndorsement } from "../src/features/endorsement/types.ts";
 import type { Fraction, RoundPoint } from "./arena-types.js";
+import type { StakeRound } from "./stake-model.js";
 import { windowArgumentLabel } from "./arena-chart.js";
 
 /**
@@ -47,6 +48,9 @@ declare global {
       // Decision 0016: the viewer's side and size by window id, for the
       // phone full screen's answer keys ("Yes · 25").
       positions?: Record<string, { side: "YES" | "NO"; quantity: number }>;
+      // Decision 0016: the rounds themselves, so the phone full screen can
+      // pop each of the viewer's results as it is revealed.
+      rounds?: StakeRound[];
     }>;
     // The panel's last window read failed, so the chart's turns may be stale
     // until the next yap:stake-windows.
