@@ -135,10 +135,16 @@ their words, and the word "bet" is not used on the page.
   last size and read used on the page.
 
 - **The ··· sheet** keeps Outline, About and Your positions.
-- **Unchanged:** the page's "Do you agree?" with Yes and No that open the ticket, the receipt, the
-  results card and "Your positions" outside the full screen, and the header balance. On the phone
-  page the pinned answer bar opens the same sheet as the full screen, with the receipt, results
-  and positions under the ticket as before.
+- **No heading or question on the panel.** Asked whether to remove the panel's "Do you agree?"
+  heading and question too, the founder answered: "Yes, remove them". The answer panel in the
+  rail and the phone's pinned answer bar start with Yes and No, and the panel is named "Answer
+  this turn" for screen readers. This supersedes Decision 0013's "The panel asks 'Do you agree?'"
+  bullet. The debate's question stays where else the page shows it (the page title, the video and
+  the full screen).
+- **Unchanged:** the page's Yes and No that open the ticket, the receipt, the results card and
+  "Your positions" outside the full screen, and the header balance. On the phone page the pinned
+  answer bar opens the same sheet as the full screen, with the receipt, results and positions
+  under the ticket as before.
 
 ## Engineering notes
 

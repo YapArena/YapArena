@@ -43,6 +43,8 @@ is an A4 endorsement in one turn's 60-second window; there is no winner (F09).
   while the pointer is over the video.
 - The panel asks "Do you agree?" about the debate's proposition, with a green Yes and a red No
   button, each with a text label (amended 2026-10-30: no icon). The word "bet" is not used.
+  Amended 2026-11-16 ([Decision 0016](0016-phone-full-screen-watch.md#amended-2026-11-16-one-ticket-everywhere)):
+  the panel shows no "Do you agree?" heading or question; Yes and No start it.
 - Yes and No belong only to the question. A turn names its speaker by display name and topic side
   label ("Turn 3 · Maya speaking (People first)"); side A is not the yes side, and no speaker is
   coloured by answer. Amended 2026-11-13 (below): side A answers yes.

@@ -489,7 +489,7 @@ exports[`renders a debate 1`] = `
 </span>
 <span class="arena-side-pill">Against</span>
 </div>
-</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
+</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-label="Answer this turn">
 <button type="button" class="stake-sheet-close" data-sheet-close>
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
@@ -507,19 +507,14 @@ exports[`renders a debate 1`] = `
 </div>
 </div>
 <p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
-<h2 class="stake-question" id="stake-question">
-<span class="sr-only">Do you agree?</span>
-<span class="ins" aria-hidden="true">do yov agree?</span>
-</h2>
-<p class="stake-proposition">Should we debate this?</p>
 <div class="stake-sides" role="group" aria-label="Your answer">
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
 <form class="stake-ticket" data-stake-ticket hidden>
 <div class="stake-ticket-head">
-<h3 class="stake-ticket-side" data-stake-ticket-side>
-</h3>
+<h2 class="stake-ticket-side" data-stake-ticket-side>
+</h2>
 <span class="stake-ticket-clock" data-stake-ticket-clock>
 </span>
 <button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
@@ -1224,7 +1219,7 @@ exports[`renders a debate 10`] = `
 </span>
 <span class="arena-side-pill">Against</span>
 </div>
-</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
+</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-label="Answer this turn">
 <button type="button" class="stake-sheet-close" data-sheet-close>
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
@@ -1242,19 +1237,14 @@ exports[`renders a debate 10`] = `
 </div>
 </div>
 <p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
-<h2 class="stake-question" id="stake-question">
-<span class="sr-only">Do you agree?</span>
-<span class="ins" aria-hidden="true">do yov agree?</span>
-</h2>
-<p class="stake-proposition">Should we debate this?</p>
 <div class="stake-sides" role="group" aria-label="Your answer">
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
 <form class="stake-ticket" data-stake-ticket hidden>
 <div class="stake-ticket-head">
-<h3 class="stake-ticket-side" data-stake-ticket-side>
-</h3>
+<h2 class="stake-ticket-side" data-stake-ticket-side>
+</h2>
 <span class="stake-ticket-clock" data-stake-ticket-clock>
 </span>
 <button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
@@ -1965,7 +1955,7 @@ exports[`renders a debate 11`] = `
 </span>
 <span class="arena-side-pill">Against</span>
 </div>
-</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="live" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
+</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="live" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-label="Answer this turn">
 <button type="button" class="stake-sheet-close" data-sheet-close>
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
@@ -1983,19 +1973,14 @@ exports[`renders a debate 11`] = `
 </div>
 </div>
 <p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
-<h2 class="stake-question" id="stake-question">
-<span class="sr-only">Do you agree?</span>
-<span class="ins" aria-hidden="true">do yov agree?</span>
-</h2>
-<p class="stake-proposition">Public topic</p>
 <div class="stake-sides" role="group" aria-label="Your answer">
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
 <form class="stake-ticket" data-stake-ticket hidden>
 <div class="stake-ticket-head">
-<h3 class="stake-ticket-side" data-stake-ticket-side>
-</h3>
+<h2 class="stake-ticket-side" data-stake-ticket-side>
+</h2>
 <span class="stake-ticket-clock" data-stake-ticket-clock>
 </span>
 <button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
@@ -2796,7 +2781,7 @@ exports[`renders a debate 12`] = `
 <div data-shared-argument-list>
 </div>
 </section>
-</section>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer and the AI outline">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="replay" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
+</section>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer and the AI outline">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="replay" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-label="Answer this turn">
 <button type="button" class="stake-sheet-close" data-sheet-close>
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
@@ -2814,19 +2799,14 @@ exports[`renders a debate 12`] = `
 </div>
 </div>
 <p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
-<h2 class="stake-question" id="stake-question">
-<span class="sr-only">Do you agree?</span>
-<span class="ins" aria-hidden="true">do yov agree?</span>
-</h2>
-<p class="stake-proposition">Public topic</p>
 <div class="stake-sides" role="group" aria-label="Your answer">
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
 <form class="stake-ticket" data-stake-ticket hidden>
 <div class="stake-ticket-head">
-<h3 class="stake-ticket-side" data-stake-ticket-side>
-</h3>
+<h2 class="stake-ticket-side" data-stake-ticket-side>
+</h2>
 <span class="stake-ticket-clock" data-stake-ticket-clock>
 </span>
 <button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
@@ -3439,7 +3419,7 @@ exports[`renders a debate 2`] = `
 </span>
 <span class="arena-side-pill">Against</span>
 </div>
-</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="live" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
+</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="live" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-label="Answer this turn">
 <button type="button" class="stake-sheet-close" data-sheet-close>
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
@@ -3457,19 +3437,14 @@ exports[`renders a debate 2`] = `
 </div>
 </div>
 <p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
-<h2 class="stake-question" id="stake-question">
-<span class="sr-only">Do you agree?</span>
-<span class="ins" aria-hidden="true">do yov agree?</span>
-</h2>
-<p class="stake-proposition">Should we debate this?</p>
 <div class="stake-sides" role="group" aria-label="Your answer">
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
 <form class="stake-ticket" data-stake-ticket hidden>
 <div class="stake-ticket-head">
-<h3 class="stake-ticket-side" data-stake-ticket-side>
-</h3>
+<h2 class="stake-ticket-side" data-stake-ticket-side>
+</h2>
 <span class="stake-ticket-clock" data-stake-ticket-clock>
 </span>
 <button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
@@ -4253,7 +4228,7 @@ exports[`renders a debate 3`] = `
 <div data-shared-argument-list>
 </div>
 </section>
-</section>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer and the AI outline">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="replay" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
+</section>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer and the AI outline">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="replay" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-label="Answer this turn">
 <button type="button" class="stake-sheet-close" data-sheet-close>
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
@@ -4271,19 +4246,14 @@ exports[`renders a debate 3`] = `
 </div>
 </div>
 <p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
-<h2 class="stake-question" id="stake-question">
-<span class="sr-only">Do you agree?</span>
-<span class="ins" aria-hidden="true">do yov agree?</span>
-</h2>
-<p class="stake-proposition">Should we debate this?</p>
 <div class="stake-sides" role="group" aria-label="Your answer">
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
 <form class="stake-ticket" data-stake-ticket hidden>
 <div class="stake-ticket-head">
-<h3 class="stake-ticket-side" data-stake-ticket-side>
-</h3>
+<h2 class="stake-ticket-side" data-stake-ticket-side>
+</h2>
 <span class="stake-ticket-clock" data-stake-ticket-clock>
 </span>
 <button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
@@ -4984,7 +4954,7 @@ exports[`renders a debate 4`] = `
 <div data-shared-argument-list>
 </div>
 </section>
-</section>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer and the AI outline">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="finalized" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
+</section>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer and the AI outline">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="finalized" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-label="Answer this turn">
 <button type="button" class="stake-sheet-close" data-sheet-close>
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
@@ -5002,19 +4972,14 @@ exports[`renders a debate 4`] = `
 </div>
 </div>
 <p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
-<h2 class="stake-question" id="stake-question">
-<span class="sr-only">Do you agree?</span>
-<span class="ins" aria-hidden="true">do yov agree?</span>
-</h2>
-<p class="stake-proposition">Should we debate this?</p>
 <div class="stake-sides" role="group" aria-label="Your answer">
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
 <form class="stake-ticket" data-stake-ticket hidden>
 <div class="stake-ticket-head">
-<h3 class="stake-ticket-side" data-stake-ticket-side>
-</h3>
+<h2 class="stake-ticket-side" data-stake-ticket-side>
+</h2>
 <span class="stake-ticket-clock" data-stake-ticket-clock>
 </span>
 <button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
@@ -5624,7 +5589,7 @@ exports[`renders a debate 5`] = `
 </span>
 <span class="arena-side-pill">Against</span>
 </div>
-</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="cancelled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
+</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="cancelled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-label="Answer this turn">
 <button type="button" class="stake-sheet-close" data-sheet-close>
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
@@ -5642,19 +5607,14 @@ exports[`renders a debate 5`] = `
 </div>
 </div>
 <p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
-<h2 class="stake-question" id="stake-question">
-<span class="sr-only">Do you agree?</span>
-<span class="ins" aria-hidden="true">do yov agree?</span>
-</h2>
-<p class="stake-proposition">Should we debate this?</p>
 <div class="stake-sides" role="group" aria-label="Your answer">
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
 <form class="stake-ticket" data-stake-ticket hidden>
 <div class="stake-ticket-head">
-<h3 class="stake-ticket-side" data-stake-ticket-side>
-</h3>
+<h2 class="stake-ticket-side" data-stake-ticket-side>
+</h2>
 <span class="stake-ticket-clock" data-stake-ticket-clock>
 </span>
 <button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
@@ -6347,7 +6307,7 @@ exports[`renders a debate 6`] = `
 </span>
 <span class="arena-side-pill">Against</span>
 </div>
-</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="void_review" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
+</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="void_review" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-label="Answer this turn">
 <button type="button" class="stake-sheet-close" data-sheet-close>
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
@@ -6365,19 +6325,14 @@ exports[`renders a debate 6`] = `
 </div>
 </div>
 <p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
-<h2 class="stake-question" id="stake-question">
-<span class="sr-only">Do you agree?</span>
-<span class="ins" aria-hidden="true">do yov agree?</span>
-</h2>
-<p class="stake-proposition">Should we debate this?</p>
 <div class="stake-sides" role="group" aria-label="Your answer">
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
 <form class="stake-ticket" data-stake-ticket hidden>
 <div class="stake-ticket-head">
-<h3 class="stake-ticket-side" data-stake-ticket-side>
-</h3>
+<h2 class="stake-ticket-side" data-stake-ticket-side>
+</h2>
 <span class="stake-ticket-clock" data-stake-ticket-clock>
 </span>
 <button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
@@ -7072,7 +7027,7 @@ exports[`renders a debate 7`] = `
 </span>
 <span class="arena-side-pill">Against</span>
 </div>
-</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Speaker A" data-speaker-b="Morgan Lee" data-side-a="For" data-side-b="Against" data-scheduled-at="" aria-labelledby="stake-question">
+</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Speaker A" data-speaker-b="Morgan Lee" data-side-a="For" data-side-b="Against" data-scheduled-at="" aria-label="Answer this turn">
 <button type="button" class="stake-sheet-close" data-sheet-close>
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
@@ -7090,19 +7045,14 @@ exports[`renders a debate 7`] = `
 </div>
 </div>
 <p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
-<h2 class="stake-question" id="stake-question">
-<span class="sr-only">Do you agree?</span>
-<span class="ins" aria-hidden="true">do yov agree?</span>
-</h2>
-<p class="stake-proposition">Should we debate this?</p>
 <div class="stake-sides" role="group" aria-label="Your answer">
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
 <form class="stake-ticket" data-stake-ticket hidden>
 <div class="stake-ticket-head">
-<h3 class="stake-ticket-side" data-stake-ticket-side>
-</h3>
+<h2 class="stake-ticket-side" data-stake-ticket-side>
+</h2>
 <span class="stake-ticket-clock" data-stake-ticket-clock>
 </span>
 <button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
@@ -7804,7 +7754,7 @@ exports[`renders a debate 8`] = `
 </span>
 <span class="arena-side-pill">Side B &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</span>
 </div>
-</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="55555555-5555-4555-8555-555555555555" data-debate-slug="hostile-debate" data-debate-status="live" data-speaker-a="Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-speaker-b="Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-side-a="Side A &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-side-b="Side B &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
+</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="55555555-5555-4555-8555-555555555555" data-debate-slug="hostile-debate" data-debate-status="live" data-speaker-a="Name &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-speaker-b="Morgan &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-side-a="Side A &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-side-b="Side B &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-label="Answer this turn">
 <button type="button" class="stake-sheet-close" data-sheet-close>
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
@@ -7822,19 +7772,14 @@ exports[`renders a debate 8`] = `
 </div>
 </div>
 <p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
-<h2 class="stake-question" id="stake-question">
-<span class="sr-only">Do you agree?</span>
-<span class="ins" aria-hidden="true">do yov agree?</span>
-</h2>
-<p class="stake-proposition">Proposition &lt;b&gt;&amp;amp;&lt;/b&gt; &quot;quoted&quot; &#39;single&#39; &amp; &lt;</p>
 <div class="stake-sides" role="group" aria-label="Your answer">
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
 <form class="stake-ticket" data-stake-ticket hidden>
 <div class="stake-ticket-head">
-<h3 class="stake-ticket-side" data-stake-ticket-side>
-</h3>
+<h2 class="stake-ticket-side" data-stake-ticket-side>
+</h2>
 <span class="stake-ticket-clock" data-stake-ticket-clock>
 </span>
 <button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
@@ -8597,7 +8542,7 @@ exports[`renders a debate 9`] = `
 </span>
 <span class="arena-side-pill">Against</span>
 </div>
-</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-labelledby="stake-question">
+</div>\\n    </section>\\n    <aside class="arena-rail" aria-label="Your answer, the AI outline and results">\\n      <section class="stake-panel" data-stake-panel data-debate-id="33333333-3333-4333-8333-333333333333" data-debate-slug="public-debate" data-debate-status="scheduled" data-speaker-a="Alex Public" data-speaker-b="Speaker B" data-side-a="For" data-side-b="Against" data-scheduled-at="2026-10-01T17:00:00.000Z" aria-label="Answer this turn">
 <button type="button" class="stake-sheet-close" data-sheet-close>
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
@@ -8615,19 +8560,14 @@ exports[`renders a debate 9`] = `
 </div>
 </div>
 <p class="stake-status" data-stake-status role="status" aria-live="polite">Checking this debate's Yap Coins rounds…</p>
-<h2 class="stake-question" id="stake-question">
-<span class="sr-only">Do you agree?</span>
-<span class="ins" aria-hidden="true">do yov agree?</span>
-</h2>
-<p class="stake-proposition">Should we debate this?</p>
 <div class="stake-sides" role="group" aria-label="Your answer">
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
 <form class="stake-ticket" data-stake-ticket hidden>
 <div class="stake-ticket-head">
-<h3 class="stake-ticket-side" data-stake-ticket-side>
-</h3>
+<h2 class="stake-ticket-side" data-stake-ticket-side>
+</h2>
 <span class="stake-ticket-clock" data-stake-ticket-clock>
 </span>
 <button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">

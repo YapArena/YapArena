@@ -42,7 +42,7 @@ the two equal.
 The type scale is 12, 14, 16, 20, 24, 28 and 40 px; nothing is smaller than 12 px. arena.css's
 older `--yes` (white) and `--no` stay for other pages.
 
-Labels in Dydema Capitals ("Do you agree?", "Chat", "AI outline", "Results by turn", "About this
+Labels in Dydema Capitals ("Chat", "AI outline", "Results by turn", "About this
 debate", stage titles, the turn label) are visible capitals with U shown as V, hidden from screen
 readers, plus a visually hidden real spelling, rendered with `inscribe()`
 (`src/features/discovery/inscribe.ts`). Digits and punctuation fall back to Forum. The debate page
@@ -180,9 +180,10 @@ never plays the video inline.
 
 ## Rail
 
-- **Answer panel:** a `#0f0f0f` card, 24 px padding. "Do you agree?" in Dydema 28 px; the
-  proposition in Forum 20/26. Yes and No are 48 px pills with their word only, a 12% tint and
-  1 px border, solid with dark text when pressed. The turn and time line is kept for screen
+- **Answer panel:** a `#0f0f0f` card, 24 px padding, named "Answer this turn" for screen readers.
+  It has no heading or question (Decision 0016, amended 2026-11-16): Yes and No start the card.
+  They are 48 px pills with their word only, a 12% tint and 1 px border, solid with dark text when
+  pressed. The turn and time line is kept for screen
   readers only; the clock shows it. The receipt sits in a bordered box with a green check.
 - **Ticket (Decision 0016, amended 2026-11-16):** one ticket wherever a viewer answers, holding
   only the approved answer sheet's parts: under Yes and No in this card, and as the phone's
@@ -263,8 +264,9 @@ never plays the video inline.
 ## Accessibility
 
 Focus rings are 2 px `#f8f8f8` with a 3 px offset (drawn inside scroll boxes and the video; an
-outline card's ring goes round the whole card). Headings: the question (`h1`), then "Do you
-agree?", "Chat", "AI outline", "Results by turn" and "About this debate" (`h2`). The rail is a
+outline card's ring goes round the whole card). Headings: the question (`h1`), then "Chat",
+"AI outline", "Results by turn" and "About this debate" (`h2`); the ticket's side word is an
+`h2` once a side is picked. The rail is a
 labelled `aside`. On phones the outline's tab and heading are "Arguments". Yes and No carry words and colours; the speaking state carries a word, a border
 and the lit video frame. Reduced motion removes the hover fades, the frame and outline
 transitions, the outline highlight, the clock's motion and the sheet animation.

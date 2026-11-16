@@ -63,6 +63,11 @@ export async function verifyArenaBrowser({
       const ticket = panel.querySelector<HTMLElement>("[data-stake-ticket]")!;
       const head = ticket.querySelector<HTMLElement>(".stake-ticket-head")!;
       return {
+        // No heading or question above Yes and No; the panel is named.
+        name: panel.getAttribute("aria-label"),
+        sides: [...panel.querySelectorAll("[data-stake-side]")].map(
+          (button) => button.textContent,
+        ),
         parts: [...ticket.children].map((node) => node.className),
         head: [...head.children].map((node) => node.className),
         legend: ticket.querySelector("legend")?.textContent,
@@ -88,12 +93,15 @@ export async function verifyArenaBrowser({
           "Review in a pop-up",
           "How it works",
           "Available:",
+          "Do you agree?",
         ].filter((text) => (panel.textContent ?? "").includes(text)),
       };
     });
     assert.deepEqual(
       shape,
       {
+        name: "Answer this turn",
+        sides: ["Yes", "No"],
         parts: [
           "stake-ticket-head",
           "stake-size",
@@ -894,7 +902,7 @@ export async function verifyArenaBrowser({
             typed: panel.querySelector('input[name="size"]') !== null,
             terms:
               panel.querySelector("[data-stake-ticket] .stake-terms") !== null,
-            question: shown(panel.querySelector(".stake-question")!),
+            question: (panel.textContent ?? "").includes("Do you agree?"),
             side: panel.querySelector("[data-stake-ticket-side]")!.textContent,
             place: panel.querySelector("[data-stake-confirm]")!.textContent,
             final: shown(panel.querySelector(".stake-final")!),

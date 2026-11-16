@@ -1948,21 +1948,11 @@ textarea::placeholder {
 .arena-page .stake-panel :is(.stake-status, .stake-error, .stake-meta):empty {
   display: none;
 }
-.arena-page .stake-panel .stake-question {
-  margin-top: 0;
-  font-size: var(--text-28);
-  line-height: 1.2;
-}
-.arena-page .stake-panel .stake-proposition {
-  margin-top: var(--space-2);
-  font-family: var(--font-number);
-  font-size: var(--text-20);
-  line-height: 26px;
-}
+/* No heading or question above Yes and No (Decision 0016, amended
+   2026-11-16): they start the card. */
 .arena-page .stake-sides {
   display: flex;
   gap: var(--space-2);
-  margin-top: var(--space-4);
 }
 .arena-page .arena-workspace .stake-side {
   flex: 1;
@@ -3713,8 +3703,8 @@ textarea::placeholder {
   .arena-page .arena-workspace #arena-chart-title {
     font-size: var(--text-20);
   }
-  /* The pinned answer bar: the question, the window count, the proposition
-     on one line, and Yes and No. */
+  /* The pinned answer bar: the window count, then Yes and No (no question
+     since Decision 0016's 2026-11-16 amendment). */
   .arena-page .stake-panel {
     order: 10;
     position: sticky;
@@ -3728,16 +3718,13 @@ textarea::placeholder {
   }
   .arena-page .stake-panel:not([data-sheet]) {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
-      "question meta"
-      "proposition proposition"
-      "sides sides";
-    column-gap: var(--space-2);
+      "meta"
+      "sides";
+    row-gap: var(--space-2);
   }
-  .arena-page
-    .stake-panel:not([data-sheet])
-    > :not(.stake-turn, .stake-question, .stake-proposition, .stake-sides) {
+  .arena-page .stake-panel:not([data-sheet]) > :not(.stake-turn, .stake-sides) {
     display: none;
   }
   .arena-page .stake-panel:not([data-sheet]) .stake-turn {
@@ -3748,41 +3735,22 @@ textarea::placeholder {
   }
   .arena-page .stake-panel:not([data-sheet]) .stake-meta {
     grid-area: meta;
-    align-self: baseline;
-    text-align: right;
-  }
-  .arena-page .stake-panel:not([data-sheet]) .stake-question {
-    grid-area: question;
-    margin: 0;
-    font-size: var(--text-20);
-  }
-  .arena-page .stake-panel:not([data-sheet]) .stake-proposition {
-    grid-area: proposition;
-    margin-top: 2px;
-    overflow: hidden;
-    color: var(--button-text);
-    font-size: var(--text-16);
-    line-height: 20px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
   .arena-page .stake-panel:not([data-sheet]) .stake-sides {
     grid-area: sides;
-    margin-top: var(--space-3);
   }
   /* A first-run tip (FIRST_RUN_TIPS_ENABLED) takes the bar's top row while it
      shows. */
   .arena-page .stake-panel:not([data-sheet]):has(> .first-run-tip) {
     grid-template-areas:
-      "tip tip"
-      "question meta"
-      "proposition proposition"
-      "sides sides";
+      "tip"
+      "meta"
+      "sides";
   }
   .arena-page .stake-panel:not([data-sheet]) > .first-run-tip {
     display: grid;
     grid-area: tip;
-    margin: 0 0 var(--space-3);
+    margin: 0 0 var(--space-1);
   }
   /* The sheet the bar opens is in "Decision 0016 — answer sheet" below. */
   /* The bar never covers the composer or the cookie banner: it steps aside
@@ -5618,13 +5586,7 @@ html.watch-open .cookie-choice {
 .arena-page
   .arena-workspace
   .stake-panel[data-sheet]
-  :is(
-    .stake-sheet-close,
-    .stake-turn,
-    .stake-question,
-    .stake-proposition,
-    .stake-sides
-  ) {
+  :is(.stake-sheet-close, .stake-turn, .stake-sides) {
   display: none;
 }
 .arena-page

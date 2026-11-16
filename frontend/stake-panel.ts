@@ -1,4 +1,4 @@
-// The debate betting panel (Decision 0013): "Do you agree?" with Yes and No,
+// The debate answer panel (Decision 0013): Yes and No about the question,
 // one position per turn window, placed live or from the replay. The server
 // keeps every rule; this controller shows the current window, the viewer's
 // terms and receipts, and never shows side totals before the reveal.
@@ -585,20 +585,16 @@ if (root) {
     renderPositions();
     nameSheet();
   }
-  // Decision 0016: as a phone's sheet, on the page or over the full screen,
-  // the ticket is "Your answer: Yes", not "Do you agree?", which it doesn't
-  // show there.
+  // Decision 0016: the panel is "Answer this turn" (it shows no question
+  // since 2026-11-16); as a phone's sheet, on the page or over the full
+  // screen, it is a dialog named for its side, "Your answer: Yes".
   function nameSheet() {
-    const name = "sheet" in root!.dataset ? watchSheetName(side) : null;
-    if (name) {
-      root!.setAttribute("role", "dialog");
+    const sheet = "sheet" in root!.dataset;
+    const name = sheet ? watchSheetName(side) : "Answer this turn";
+    if (sheet) root!.setAttribute("role", "dialog");
+    else root!.removeAttribute("role");
+    if (root!.getAttribute("aria-label") !== name)
       root!.setAttribute("aria-label", name);
-      root!.removeAttribute("aria-labelledby");
-    } else if (root!.hasAttribute("aria-label")) {
-      root!.removeAttribute("role");
-      root!.removeAttribute("aria-label");
-      root!.setAttribute("aria-labelledby", "stake-question");
-    }
   }
 
   // Places the ticket on the window the viewer sees.
