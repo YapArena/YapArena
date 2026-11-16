@@ -8,19 +8,13 @@ import {
   coins,
   confirmText,
   debatesHere,
-  lastPosition,
   liveWindow,
-  parseCeiling,
-  parseDefaults,
-  parseSize,
   percent,
   placementError,
   waitText,
   positionStatus,
   price,
-  readFromLimit,
   reasonText,
-  repeatLabel,
   replayRound,
   replayWindow,
   resultLine,
@@ -33,8 +27,6 @@ import {
   speakerLine,
   ticketTerms,
   watchSheetName,
-  watchSize,
-  watchSizeChoices,
 } from "../public/stake-model.js";
 
 const at = (seconds) => new Date(Date.UTC(2026, 9, 26, 18, 0, seconds));
@@ -97,29 +89,12 @@ describe("betting panel terms (Decision 0013)", () => {
     assert.equal(reservedAtoms(10), 100_000n);
   });
 
-  // Decision 0016, point 5: the full screen's answer sheet.
-  it("offers the full screen its own sizes and keeps the page's", () => {
-    assert.deepEqual([...watchSizeChoices], [10, 25, 50, 75, 100]);
-    assert.deepEqual([...sizeChoices], [5, 10, 25, 50, 100]);
-    for (const size of watchSizeChoices) assert.equal(watchSize(size), size);
+  // Decision 0016, amended 2026-11-16: one ticket wherever a viewer answers.
+  it("offers the same five sizes everywhere, with no typed size", () => {
+    assert.deepEqual([...sizeChoices], [10, 25, 50, 75, 100]);
   });
 
-  it("moves a size the full screen has no chip for to the nearest one", () => {
-    // The page's 5 chip and its typed sizes.
-    assert.equal(watchSize(5), 10);
-    assert.equal(watchSize(1), 10);
-    assert.equal(watchSize(30), 25);
-    assert.equal(watchSize(64), 75);
-    assert.equal(watchSize(90), 100);
-    assert.equal(watchSize(60), 50);
-    assert.equal(watchSize(37), 25);
-    assert.equal(watchSize(38), 50);
-    // Halfway keeps the smaller size, so it never risks more.
-    assert.equal(watchSize(17.5), 10);
-    assert.equal(watchSize(62.5), 50);
-  });
-
-  it("names the full screen's answer sheet for its side, not the question", () => {
+  it("names a phone's answer sheet for its side, not the question", () => {
     assert.equal(watchSheetName("YES"), "Your answer: Yes");
     assert.equal(watchSheetName("NO"), "Your answer: No");
     // After placing, the side is cleared while the sheet closes.
@@ -158,19 +133,6 @@ describe("betting panel terms (Decision 0013)", () => {
       confirmText(ticket({ closedTurn: 7 })),
       "Place Yes · 25 · max 14.50 YC",
     );
-  });
-
-  it("accepts only whole sizes from 1 to 100 and prices from 1 to 99 cents", () => {
-    assert.equal(parseSize("25"), 25);
-    assert.equal(parseSize(" 100 "), 100);
-    for (const text of ["0", "101", "2.5", "-3", "", "1e2", "ten"])
-      assert.equal(parseSize(text), null, text);
-    assert.equal(parseCeiling("62"), 62);
-    assert.equal(parseCeiling("62¢"), 62);
-    assert.equal(parseCeiling("0.62"), 62);
-    assert.equal(parseCeiling(".6"), 60);
-    for (const text of ["0", "100", "1.5", "abc", "", "0.001"])
-      assert.equal(parseCeiling(text), null, text);
   });
 
   it("formats signed results from atomic units, 10,000 per Yap Coin", () => {
@@ -342,7 +304,7 @@ describe("betting panel terms (Decision 0013)", () => {
   });
 });
 
-describe("results, repeat and get-ready defaults (Decision 0013)", () => {
+describe("results (Decision 0013)", () => {
   const own = (side, limit, quantity) => ({
     side,
     limit,
@@ -359,56 +321,6 @@ describe("results, repeat and get-ready defaults (Decision 0013)", () => {
       pricing: { price: fraction(price), share: fraction(share) },
       outcome: { executed, premium: "0", fee: "0", payout: "0", net },
     });
-
-  it("recovers the read from a position's yes-scale limit on both sides", () => {
-    // A Yes at read 62 sends 0.62; a No at read 62 sends 0.38, limit 0.62.
-    assert.equal(readFromLimit("0.62"), 62);
-    assert.equal(readFromLimit("0.620000"), 62);
-    assert.equal(readFromLimit("0"), 1);
-    assert.equal(readFromLimit("1"), 99);
-  });
-
-  it("offers the latest earlier position as the next turn's repeat", () => {
-    const rounds = [
-      round({ id: "a", turnNumber: 1, own: own("YES", "0.40", 5) }),
-      round({ id: "b", turnNumber: 3, own: own("NO", "0.62", 25) }),
-      round({ id: "c", turnNumber: 2, own: null }),
-      round({ id: "d", turnNumber: 4, own: own("YES", "0.50", 10) }),
-      round({
-        id: "m",
-        kind: "manual",
-        turnNumber: null,
-        own: own("YES", "0.9", 1),
-      }),
-    ];
-    assert.equal(lastPosition(rounds, 4)?.id, "b");
-    assert.equal(lastPosition(rounds, 2)?.id, "a");
-    assert.equal(lastPosition(rounds, 1), null);
-    assert.equal(
-      repeatLabel(own("NO", "0.62", 25)),
-      "Same as last turn · No · 25 · read 62%",
-    );
-  });
-
-  it("accepts only whole saved defaults within the ticket's ranges", () => {
-    assert.deepEqual(parseDefaults('{"size":25,"read":60}'), {
-      size: 25,
-      read: 60,
-    });
-    for (const text of [
-      null,
-      "",
-      "not json",
-      "[]",
-      '{"size":25}',
-      '{"size":0,"read":60}',
-      '{"size":101,"read":60}',
-      '{"size":2.5,"read":60}',
-      '{"size":25,"read":100}',
-      '{"size":"25","read":60}',
-    ])
-      assert.equal(parseDefaults(text), null, String(text));
-  });
 
   it("totals revealed positions and keeps locked ones apart", () => {
     const summary = resultsSummary([

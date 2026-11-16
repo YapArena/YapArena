@@ -48,6 +48,116 @@ export async function verifyArenaBrowser({
     assert.ok(r.ok(), `${path}: ${r.status()} ${data.error ?? ""}`);
     return data;
   }
+  // Decision 0016, amended 2026-11-16: one ticket wherever a viewer answers,
+  // in the rail and in a phone's answer sheet, holding only the approved
+  // answer sheet's parts: the side word, the clock and (in a sheet) close;
+  // "Size" with five chips; the read; one key naming the terms as they
+  // change; the final line. The error line shows only with an error. Gone:
+  // the typed size, the terms list, "Get ready", "Same as last turn", the
+  // maximum price, the review pop-up and its switch, the one-time
+  // explanation and the balance line. Answering needs an open turn window
+  // this account can answer; without one the check sees only the markup.
+  async function checkTicket(where: string, sheet: boolean) {
+    const shape = await page.evaluate(() => {
+      const panel = document.querySelector<HTMLElement>("[data-stake-panel]")!;
+      const ticket = panel.querySelector<HTMLElement>("[data-stake-ticket]")!;
+      const head = ticket.querySelector<HTMLElement>(".stake-ticket-head")!;
+      return {
+        // No heading or question above Yes and No; the panel is named.
+        name: panel.getAttribute("aria-label"),
+        sides: [...panel.querySelectorAll("[data-stake-side]")].map(
+          (button) => button.textContent,
+        ),
+        parts: [...ticket.children].map((node) => node.className),
+        head: [...head.children].map((node) => node.className),
+        legend: ticket.querySelector("legend")?.textContent,
+        chips: [...ticket.querySelectorAll("[data-stake-size]")].map(
+          (chip) => chip.textContent,
+        ),
+        read: ticket.querySelector(".stake-read")?.firstChild?.textContent,
+        final: ticket.querySelector(".stake-final")?.textContent,
+        removed: [
+          "[data-stake-ready]",
+          "[data-stake-repeat-line]",
+          "[data-stake-advanced]",
+          "[data-stake-review-choice]",
+          "[data-stake-review]",
+          "[data-stake-balance]",
+          ".stake-terms",
+          'input[name="size"]',
+        ].filter((selector) => panel.querySelector(selector) !== null),
+        words: [
+          "Get ready",
+          "Same as last turn",
+          "maximum price",
+          "Review in a pop-up",
+          "How it works",
+          "Available:",
+          "Do you agree?",
+        ].filter((text) => (panel.textContent ?? "").includes(text)),
+      };
+    });
+    assert.deepEqual(
+      shape,
+      {
+        name: "Answer this turn",
+        sides: ["Yes", "No"],
+        parts: [
+          "stake-ticket-head",
+          "stake-size",
+          "stake-read",
+          "stake-error",
+          "stake-confirm",
+          "stake-final",
+        ],
+        head: ["stake-ticket-side", "stake-ticket-clock", "stake-ticket-close"],
+        legend: "Size",
+        chips: ["10", "25", "50", "75", "100"],
+        read: "What share will say yes this turn?",
+        final:
+          "Final once placed. Yap Coins are play money with no cash value.",
+        removed: [],
+        words: [],
+      },
+      where,
+    );
+    const yes = page.locator('[data-stake-panel] [data-stake-side="YES"]');
+    if (!(await yes.isVisible()) || (await yes.isDisabled())) {
+      checks[`${where}TicketMarkupOnly`] = true;
+      return;
+    }
+    await yes.click();
+    const ticket = page.locator("[data-stake-ticket]");
+    await ticket.waitFor();
+    const dialog = page.getByRole("dialog", { name: "Your answer: Yes" });
+    if (sheet) await dialog.waitFor();
+    await ticket.getByRole("button", { name: "75", exact: true }).click();
+    await ticket
+      .locator('input[name="read"]')
+      .evaluate((input: HTMLInputElement) => {
+        input.value = "40";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    assert.equal(
+      await ticket.locator("[data-stake-ticket-side]").textContent(),
+      "Yes",
+    );
+    assert.equal(
+      await ticket.locator("[data-stake-confirm]").textContent(),
+      "Place Yes · 75 · max 30 YC",
+    );
+    // No one-time explanation and no balance line once it shows either.
+    const panelText =
+      (await page.locator("[data-stake-panel]").textContent()) ?? "";
+    assert.ok(!panelText.includes("How it works"), where);
+    assert.ok(!panelText.includes("Available:"), where);
+    await page.screenshot({ path: `${directory}/${where}-ticket.png` });
+    if (sheet) {
+      await page.keyboard.press("Escape");
+      await dialog.waitFor({ state: "hidden" });
+    }
+    checks[`${where}Ticket`] = true;
+  }
   try {
     await signInForTest(
       context,
@@ -521,6 +631,8 @@ export async function verifyArenaBrowser({
       [],
     );
     checks.axeNoSeriousViolations = true;
+    phase = "desktop ticket";
+    await checkTicket("desktop", false);
     phase = "mobile";
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload();
@@ -537,6 +649,8 @@ export async function verifyArenaBrowser({
       bar.y >= 0 && bar.y + bar.height <= 844 + 1 && bar.y > 844 / 2,
       "the answer bar shows at the bottom of the first screen",
     );
+    // Yes in the bar opens the same ticket as a sheet.
+    await checkTicket("phone", true);
     // The rail panel's tabs follow the WAI pattern; on phones chat is one
     // of them, after the AI outline when the outline is on.
     const tabs = page.locator("[data-arena-tabs]");
@@ -785,10 +899,11 @@ export async function verifyArenaBrowser({
             chips: [...panel.querySelectorAll("[data-stake-size]")]
               .filter(shown)
               .map((chip) => chip.textContent),
-            typed: shown(panel.querySelector('input[name="size"]')!),
-            terms: shown(panel.querySelector(".stake-terms")!),
-            question: shown(panel.querySelector(".stake-question")!),
-            side: panel.querySelector("[data-stake-watch-side]")!.textContent,
+            typed: panel.querySelector('input[name="size"]') !== null,
+            terms:
+              panel.querySelector("[data-stake-ticket] .stake-terms") !== null,
+            question: (panel.textContent ?? "").includes("Do you agree?"),
+            side: panel.querySelector("[data-stake-ticket-side]")!.textContent,
             place: panel.querySelector("[data-stake-confirm]")!.textContent,
             final: shown(panel.querySelector(".stake-final")!),
             above:
@@ -849,33 +964,27 @@ export async function verifyArenaBrowser({
     await page
       .locator('[data-watch-sheet="turns"]')
       .waitFor({ state: "hidden" });
-    // D7: ··· lends the page's own About, maximum price and review switch
-    // to its sheet, and puts them back when it closes.
+    // D7: ··· lends the page's own About and positions to its sheet, and
+    // puts them back when it closes. Since 2026-11-16 it has no "Get
+    // ready", maximum price or review switch (Decision 0016, amended).
     await page.getByRole("button", { name: "More", exact: true }).click();
     const lent = () =>
       page.evaluate(() => {
         const sheet = document.querySelector('[data-watch-sheet="more"]')!;
-        return [
-          "#arena-about",
-          "[data-stake-advanced]",
-          "[data-stake-review-choice]",
-          "[data-stake-ready]",
-        ].map((selector) => sheet.contains(document.querySelector(selector)));
+        return ["#arena-about", "[data-stake-positions-wrap]"].map((selector) =>
+          sheet.contains(document.querySelector(selector)),
+        );
       });
-    assert.deepEqual(await lent(), [true, true, true, true]);
+    assert.deepEqual(await lent(), [true, true]);
+    const moreText =
+      (await page.locator('[data-watch-sheet="more"]').textContent()) ?? "";
+    for (const gone of ["Get ready", "maximum price", "Review in a pop-up"])
+      assert.ok(!moreText.includes(gone), gone);
     await page.keyboard.press("Escape");
     await page
       .locator('[data-watch-sheet="more"]')
       .waitFor({ state: "hidden" });
-    assert.deepEqual(await lent(), [false, false, false, false]);
-    assert.equal(
-      await page.evaluate(() =>
-        document
-          .querySelector("[data-stake-ticket]")!
-          .contains(document.querySelector("[data-stake-advanced]")),
-      ),
-      true,
-    );
+    assert.deepEqual(await lent(), [false, false]);
     await page.getByRole("button", { name: "Back", exact: true }).click();
     assert.equal(
       await page.locator("[data-arena]").getAttribute("data-watch"),
@@ -958,6 +1067,10 @@ export async function verifyArenaBrowser({
     await page.waitForURL("**/debates?q=walkability");
     assert.ok(await page.locator(".dcard").count());
     checks.headerSearch = true;
+    phase = "tablet ticket";
+    await page.goto(base + "/debates/" + debateSlug);
+    await page.locator("[data-stake-panel]").waitFor();
+    await checkTicket("tablet", false);
     phase = "replay layout and uninterrupted playback";
     await setReplay();
     await page.setViewportSize({ width: 1440, height: 1050 });

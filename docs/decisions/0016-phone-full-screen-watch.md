@@ -86,10 +86,11 @@ A phone is a viewport under 600 px wide, or a landscape viewport under 500 px ta
     - Outline (live AI argument outline);
     - About;
     - Your positions;
-    - "Get ready" defaults;
-    - "Set a maximum price instead";
-    - the review pop-up switch.
-  - The answer sheet keeps "Same as last turn" as one line under the chips.
+    - "Get ready" defaults (removed by the amendment below);
+    - "Set a maximum price instead" (removed by the amendment below);
+    - the review pop-up switch (removed by the amendment below).
+  - The answer sheet keeps "Same as last turn" as one line under the chips (removed by the
+    amendment below).
   - The scoreboard cards are replaced by the name tags.
   - Live captions, when on, sit just above the dock.
   - Copy event link becomes Share (the system share sheet where available).
@@ -98,6 +99,52 @@ A phone is a viewport under 600 px wide, or a landscape viewport under 500 px ta
   - On a replay, the only control is pause and play: a centred key that shows and hides with the
     other tap controls. There is no seek bar and there are no native video controls.
   - A live debate cannot be paused.
+
+## Amended 2026-11-16: one ticket everywhere
+
+The founder, the same day: "make the answer sheet the standard everywhere people can place bets,
+remove the get ready thing." Then, about the review pop-up and the other parts the first build
+kept: "there wasn't this in the prototype snapshots, only put what was in the snapshots." This
+amends point 5 and D7 above (D7's "Get ready" row, its maximum price and review rows, and "Same as
+last turn" under the chips), and Decision 0013's ticket layout and its bullets on "Set a maximum
+price instead", the review pop-up, the one-time explanation, "Same as last turn" and "Get ready".
+Decision 0013's other rules stand: the key names the exact terms, Yes is green and No is red with
+their words, and the word "bet" is not used on the page.
+
+- **One ticket, only the approved sheet's parts.** Point 5's answer sheet, as in the approved
+  prototype, is the only ticket wherever a viewer can answer: in the rail on computers and
+  tablets (where the ticket is today, not a pop-up), in the phone page's answer sheet and over the
+  full screen. It has the side word and the clock (and a close button where it is a sheet),
+  "Size" with the chips 10 · 25 · 50 · 75 · 100, "What share will say yes this turn?" with its
+  value and the slider, one key naming the exact terms that updates as the size or read changes,
+  and "Final once placed. Yap Coins are play money with no cash value." Nothing else is in it; an
+  error line shows under the read only when something goes wrong.
+- **Gone from the ticket, everywhere:** the 5 chip and the typed size ("Contracts"), the terms
+  list ("Reserved now", "Most you can lose", "You get back", fee, results), the "You'll pay at
+  most" line, the turn number and the question.
+- **Removed from the product:**
+  - "Get ready", its saved defaults and its ··· row;
+  - "Set a maximum price instead": the read alone sets the price;
+  - the review pop-up and its switch: placing is immediate once the key is pressed;
+  - the one-time "How it works" explanation;
+  - "Same as last turn" (approved in D7, superseded by this instruction);
+  - the "Available: N YC" line under the ticket (the header keeps the balance).
+
+  The panel deletes their device keys (`yaparena-stake-defaults`, `yaparena-stake-review`,
+  `yaparena-stake-explained`) once. The ticket opens at 10 contracts and a 50% read and keeps the
+  last size and read used on the page.
+
+- **The ··· sheet** keeps Outline, About and Your positions.
+- **No heading or question on the panel.** Asked whether to remove the panel's "Do you agree?"
+  heading and question too, the founder answered: "Yes, remove them". The answer panel in the
+  rail and the phone's pinned answer bar start with Yes and No, and the panel is named "Answer
+  this turn" for screen readers. This supersedes Decision 0013's "The panel asks 'Do you agree?'"
+  bullet. The debate's question stays where else the page shows it (the page title, the video and
+  the full screen).
+- **Unchanged:** the page's Yes and No that open the ticket, the receipt, the results card and
+  "Your positions" outside the full screen, and the header balance. On the phone page the pinned
+  answer bar opens the same sheet as the full screen, with the receipt, results and positions
+  under the ticket as before.
 
 ## Engineering notes
 
