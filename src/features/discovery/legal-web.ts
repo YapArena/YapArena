@@ -555,14 +555,6 @@ const storageList = table(
       cell("Until you clear site data"),
     ],
     [
-      cell("yaparena-stake-review, -explained"),
-      cell("Strictly necessary"),
-      cell(
-        "Whether to show the review step, and that you’ve seen the explanation.",
-      ),
-      cell("Until you clear site data"),
-    ],
-    [
       cell("yaparena-results-seen"),
       cell("Strictly necessary"),
       cell("Which Yap Coins results you’ve already seen."),

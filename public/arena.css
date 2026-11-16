@@ -1937,7 +1937,7 @@ textarea::placeholder {
   background: var(--acid);
   transition: width 1s linear;
 }
-.arena-page .stake-panel :is(.stake-status, .stake-final, .stake-balance) {
+.arena-page .stake-panel :is(.stake-status, .stake-final) {
   color: var(--muted);
   font-size: var(--text-12);
   line-height: 16px;
@@ -1945,9 +1945,7 @@ textarea::placeholder {
 .arena-page .stake-panel .stake-status {
   margin: 0 0 var(--space-4);
 }
-.arena-page
-  .stake-panel
-  :is(.stake-status, .stake-error, .stake-meta, .stake-balance):empty {
+.arena-page .stake-panel :is(.stake-status, .stake-error, .stake-meta):empty {
   display: none;
 }
 .arena-page .stake-panel .stake-question {
@@ -2010,11 +2008,10 @@ textarea::placeholder {
   cursor: not-allowed;
   opacity: 0.45;
 }
-/* The ticket (Decision 0016, amended 2026-11-16): the same contents
-   wherever a viewer answers, in the rail, the phone's answer sheet and the
-   full screen. The side word and the clock, the size chips, "Same as last
-   turn", the read, one key naming the exact terms and the final line; the
-   maximum price and the review switch below as small secondary controls. */
+/* The ticket (Decision 0016, amended 2026-11-16): only the approved answer
+   sheet's parts, wherever a viewer answers (the rail, the phone's answer
+   sheet and the full screen). The side word and the clock, the size chips,
+   the read, one key naming the exact terms and the final line. */
 .arena-page .stake-ticket {
   display: flex;
   flex-direction: column;
@@ -2090,20 +2087,6 @@ textarea::placeholder {
   border-color: var(--acid);
   background: var(--acid);
   color: var(--on-acid);
-}
-/* "Same as last turn", one line under the chips (D7). */
-.arena-page .arena-workspace .stake-repeat-line {
-  align-self: flex-start;
-  min-height: 32px;
-  margin-top: -8px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--button-text);
-  font: 400 var(--text-12) / 1.3 var(--font-body);
-  text-align: left;
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 /* The read: its question and value on one line, the slider below. */
 .arena-page .stake-read {
@@ -2199,8 +2182,7 @@ textarea::placeholder {
   margin-top: -6px;
   text-align: center;
 }
-/* "Set a maximum price instead" and the review switch: small, below. */
-.arena-page :is(.stake-advanced, .stake-positions) summary {
+.arena-page .stake-positions summary {
   min-height: 24px;
   color: var(--button-text);
   font-size: var(--text-12);
@@ -2208,61 +2190,6 @@ textarea::placeholder {
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
-}
-.arena-page .stake-advanced label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin-top: var(--space-2);
-  color: var(--muted);
-  font-size: var(--text-12);
-}
-.arena-page .stake-advanced input {
-  width: 7rem;
-  height: 40px;
-  padding: 0 var(--space-3);
-  font-size: var(--text-14);
-}
-.arena-page .stake-ticket :is(.stake-advanced, .stake-review-choice) {
-  margin-top: -8px;
-}
-.arena-page .stake-review-choice {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: 24px;
-  color: var(--muted);
-  font-size: var(--text-12);
-}
-.arena-page .stake-review-choice input {
-  width: 24px;
-  height: 24px;
-  margin: 0;
-  accent-color: var(--acid);
-}
-/* The review pop-up's terms. */
-.arena-page .stake-panel .stake-terms {
-  display: grid;
-  gap: var(--space-1);
-  margin: 0;
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--line);
-  font-size: var(--text-14);
-  line-height: 20px;
-}
-.arena-page .stake-terms div {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-.arena-page .stake-terms dt {
-  color: var(--muted);
-}
-.arena-page .stake-terms dd {
-  margin: 0;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
 }
 /* The receipt: a bordered inner box with a green check. */
 .arena-page .stake-receipt {
@@ -2294,9 +2221,6 @@ textarea::placeholder {
   color: var(--muted);
   font-size: var(--text-12);
   line-height: 16px;
-}
-.arena-page .stake-panel .stake-balance {
-  margin-top: var(--space-4);
 }
 .arena-page .stake-signin {
   margin-top: var(--space-4);
@@ -2336,41 +2260,6 @@ textarea::placeholder {
 }
 .arena-page .stake-positions ul {
   margin-top: var(--space-2);
-}
-.arena-page .stake-review {
-  max-width: 360px;
-  padding: var(--space-5);
-  border: 1px solid var(--control-border);
-  border-radius: var(--radius-card);
-  background: var(--panel);
-  color: var(--text);
-}
-.arena-page .stake-review h2 {
-  margin: 0 0 var(--space-3);
-  font-size: var(--text-20);
-}
-.arena-page .stake-review > p {
-  color: var(--muted);
-  font-size: var(--text-12);
-}
-.arena-page .stake-review-actions {
-  display: flex;
-  gap: var(--space-2);
-}
-.arena-page .stake-review-actions button {
-  flex: 1;
-  min-height: 44px;
-  padding: 0 var(--space-4);
-  border: 1px solid var(--control-border);
-  border-radius: var(--radius-pill);
-  background: var(--raised);
-  color: var(--button-text);
-  font-weight: 700;
-}
-.arena-page .stake-review-actions [data-stake-review-place] {
-  border: 0;
-  background: var(--primary-gradient);
-  color: var(--on-acid);
 }
 @media (prefers-reduced-motion: reduce) {
   .arena-page .stake-progress span {
@@ -5695,9 +5584,8 @@ html.watch-open .cookie-choice {
    answer bar and over the full screen alike: the ticket under a handle, with
    its close button. Back shows instead while there is no ticket to show
    (signed out, the window closed). Over the full screen the sheet rises
-   above it (1010, under the cookie banner's 1020), leaves the maximum
-   price, the review switch, the balance and the positions to the ··· sheet,
-   and in horizontal is a side sheet over the right camera. The ticket's own
+   above it (1010, under the cookie banner's 1020), leaves the results and
+   the positions to the ··· sheet, and in horizontal is a side sheet over the right camera. The ticket's own
    look is with the answer panel's rules above. */
 .arena-page .arena-workspace .stake-panel[data-sheet] {
   position: fixed;
@@ -5786,14 +5674,7 @@ html.watch-open .cookie-choice {
 .arena-page
   .arena-workspace[data-watch="open"]
   .stake-panel[data-sheet]
-  :is(
-    .stake-advanced,
-    .stake-review-choice,
-    .stake-balance,
-    .stake-results,
-    .stake-positions,
-    .first-run-tip
-  ) {
+  :is(.stake-results, .stake-positions, .first-run-tip) {
   display: none;
 }
 .arena-page
@@ -6504,23 +6385,20 @@ html.watch-open .cookie-choice {
   display: none;
 }
 
-/* Decision 0016 — ··· sheet (D7). The full screen's ··· opens a sheet with
-   the page's own Outline, About, "Your positions", "Get ready" defaults,
-   "Set a maximum price instead" and the review pop-up switch
-   (frontend/watch-screen.ts moves them in while it is open). Outline, About
-   and Get ready open as rows; the rest keep their own controls. */
+/* Decision 0016 — ··· sheet (D7, amended 2026-11-16). The full screen's ···
+   opens a sheet with the page's own Outline, About and "Your positions"
+   (frontend/watch-screen.ts moves them in while it is open). Outline and
+   About open as rows; the positions keep their own control. */
 .arena-page .watch-sheet[data-watch-sheet="more"] .watch-sheet-body {
   display: flex;
   flex-direction: column;
 }
 .arena-page .watch-more-item,
-.arena-page .watch-more-positions,
-.arena-page .watch-more-line {
+.arena-page .watch-more-positions {
   border-bottom: 1px solid var(--line);
 }
 .arena-page .watch-more-item > summary,
-.arena-page .watch-sheet .stake-positions > summary,
-.arena-page .watch-sheet .stake-advanced > summary {
+.arena-page .watch-sheet .stake-positions > summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -6533,18 +6411,12 @@ html.watch-open .cookie-choice {
   cursor: pointer;
 }
 .arena-page .watch-more-item > summary::-webkit-details-marker,
-.arena-page
-  .watch-sheet
-  :is(.stake-positions, .stake-advanced)
-  > summary::-webkit-details-marker {
+.arena-page .watch-sheet .stake-positions > summary::-webkit-details-marker {
   display: none;
 }
 /* A chevron that turns down when the row is open. */
 .arena-page .watch-more-item > summary::after,
-.arena-page
-  .watch-sheet
-  :is(.stake-positions, .stake-advanced)
-  > summary::after {
+.arena-page .watch-sheet .stake-positions > summary::after {
   content: "";
   flex: none;
   width: 8px;
@@ -6556,24 +6428,18 @@ html.watch-open .cookie-choice {
   transition: transform 0.2s var(--ease-expo);
 }
 .arena-page .watch-more-item[open] > summary::after,
-.arena-page
-  .watch-sheet
-  :is(.stake-positions, .stake-advanced)[open]
-  > summary::after {
+.arena-page .watch-sheet .stake-positions[open] > summary::after {
   transform: rotate(45deg);
 }
 .arena-page .watch-more-item > summary:focus-visible,
-.arena-page
-  .watch-sheet
-  :is(.stake-positions, .stake-advanced)
-  > summary:focus-visible {
+.arena-page .watch-sheet .stake-positions > summary:focus-visible {
   outline: 2px solid var(--acid);
   outline-offset: 2px;
 }
 .arena-page .watch-more-slot {
   padding-bottom: var(--space-4);
 }
-.arena-page :is(.watch-more-positions, .watch-more-line) {
+.arena-page .watch-more-positions {
   padding-bottom: 0;
 }
 .arena-page .watch-more-empty {
@@ -6597,9 +6463,6 @@ html.watch-open .cookie-choice {
   font-size: var(--text-14);
   line-height: 20px;
 }
-.arena-page .watch-sheet .stake-advanced[open] {
-  padding-bottom: var(--space-4);
-}
 .arena-page
   .watch-sheet
   [data-more-slot]
@@ -6611,11 +6474,6 @@ html.watch-open .cookie-choice {
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
-}
-.arena-page .watch-sheet .stake-review-choice {
-  min-height: 52px;
-  color: var(--text);
-  font-size: var(--text-14);
 }
 .arena-page .watch-sheet [data-more-slot="outline"] > .live-outline {
   display: flex;

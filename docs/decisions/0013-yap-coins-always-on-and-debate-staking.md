@@ -48,16 +48,18 @@ is an A4 endorsement in one turn's 60-second window; there is no winner (F09).
   coloured by answer. Amended 2026-11-13 (below): side A answers yes.
 - A "read of the room" slider ("What share will say yes this turn?") sets the A4 limit: the yes
   ceiling is the read, the no ceiling is 100 minus it. A plain maximum price is under "Set a
-  maximum price instead".
+  maximum price instead". Amended 2026-11-16 ([Decision 0016](0016-phone-full-screen-watch.md#amended-2026-11-16-one-ticket-everywhere)): "Set a maximum price instead" is removed;
+  the read alone sets the price.
 - One confirm button names the exact terms. A review pop-up is optional, remembered per device. A
-  one-time explanation shows the first time the ticket opens on a device.
+  one-time explanation shows the first time the ticket opens on a device. Amended 2026-11-16
+  ([Decision 0016](0016-phone-full-screen-watch.md#amended-2026-11-16-one-ticket-everywhere)): the review pop-up and the one-time explanation are removed; placing is immediate.
 - A window that closes before the viewer confirms reserves nothing; the ticket keeps its values
   and offers the next turn.
 - The next turn offers "Same as last turn", which pre-fills the ticket with the previous
   position's side, size and read; it still needs the confirm tap. Before a scheduled debate
   starts, "Get ready" saves a default size and read on the device, and every ticket opens with
   them. Neither places anything by itself. Amended 2026-11-16 ([Decision 0016](0016-phone-full-screen-watch.md#amended-2026-11-16-one-ticket-everywhere)):
-  "Get ready" is removed and the ticket has one layout everywhere.
+  "Same as last turn" and "Get ready" are removed, and the ticket has one layout everywhere.
 - At reveal, a results card lists each revealed position (price from the position's side, final
   yes share and result) under a total; positions still locked stay in "Your positions".
 - Five-day reveal stays for user-created debates (F11): live viewers see their receipt and the

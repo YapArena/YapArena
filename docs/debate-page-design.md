@@ -85,10 +85,10 @@ never plays the video inline.
   tightens to 42 px buttons (from 671 px tall), and drops its words only under 634 px.
 - **Tap controls:** a tap on the picture ("Show controls", a real button) shows Back, ···, the
   question at the bottom and the name tags with their avatars; they start hidden.
-- **··· sheet (D7):** rows for Outline and About, then Your positions, "Set a maximum price
-  instead" and the review pop-up switch ("Get ready" was removed on 2026-11-16). They are the
-  page's own elements, moved into the sheet while it is open and put back when it closes, so they
-  keep their state and behaviour.
+- **··· sheet (D7):** rows for Outline and About, then Your positions ("Get ready", the maximum
+  price and the review switch were removed on 2026-11-16). They are the page's own elements,
+  moved into the sheet while it is open and put back when it closes, so they keep their state and
+  behaviour.
 - **Horizontal (Proto-H, 844 × 390):** A | B side by side, the name tags in the outer top corners,
   LIVE beside ···, and a 360 px answer cluster centred on the seam 14 px from the bottom: the
   last-answer bar, then Yes · 72 px clock · No with Yes under side A (D2). The question sits
@@ -184,23 +184,22 @@ never plays the video inline.
   proposition in Forum 20/26. Yes and No are 48 px pills with their word only, a 12% tint and
   1 px border, solid with dark text when pressed. The turn and time line is kept for screen
   readers only; the clock shows it. The receipt sits in a bordered box with a green check.
-- **Ticket (Decision 0016, amended 2026-11-16):** one ticket wherever a viewer answers: under Yes
-  and No in this card, and as the phone's answer sheet. The side word (Forum 32 px caps, green
-  or red) and the clock pill; "Size" and the chips 10 · 25 · 50 · 75 · 100 (44 px pills, no
-  typed size); "Same as last turn" as one underlined line under them; "What share will say yes
-  this turn?" with the read in Forum 26 px over the slider; one 56 px pixel-corner key in the
-  side's colour naming the exact terms ("Place Yes · 25 · max 14.50 YC"), updating as the size
-  or read changes; then "Final once placed. Yap Coins are play money with no cash value." Below
-  it, small and secondary: "Set a maximum price instead" (collapsed) and the review pop-up
-  switch. No turn number, question, terms list, "Reserved now", "Most you can lose", fee or "pay
-  at most" line. There is no "Get ready": the ticket opens at 10 contracts and a 50% read and
-  keeps the last ones used on the page.
+- **Ticket (Decision 0016, amended 2026-11-16):** one ticket wherever a viewer answers, holding
+  only the approved answer sheet's parts: under Yes and No in this card, and as the phone's
+  answer sheet. The side word (Forum 32 px caps, green or red) and the clock pill; "Size" and the
+  chips 10 · 25 · 50 · 75 · 100 (44 px pills, no typed size); "What share will say yes this
+  turn?" with the read in Forum 26 px over the slider; one 56 px pixel-corner key in the side's
+  colour naming the exact terms ("Place Yes · 25 · max 14.50 YC"), updating as the size or read
+  changes; then "Final once placed. Yap Coins are play money with no cash value." An error line
+  shows above the key only when something goes wrong. Nothing else: no turn number, question,
+  terms list, maximum price, review pop-up, "Same as last turn", "Get ready", explanation or
+  balance line. It opens at 10 contracts and a 50% read and keeps the last ones used on the page;
+  the key places at once.
 - **Phone answer sheet:** Yes or No in the pinned answer bar, or a key in the full screen, opens
   the ticket as a bottom sheet (22 px top corners, a handle, a round close button, named "Your
   answer: Yes"); Back shows instead while there is no ticket to show. On the page the receipt,
-  balance, results and "Your positions" stay under it as before; over the full screen the
-  maximum price, review switch and positions are in the ··· sheet, and a placed answer closes
-  the sheet.
+  results and "Your positions" stay under it as before; over the full screen the positions are in
+  the ··· sheet, and a placed answer closes the sheet.
 - **Tabs panel:** a `#0f0f0f` card filling the rest of the rail, with pill tabs (WAI tabs pattern:
   arrows, Home and End). Each panel's heading is visually hidden; the tab names it.
 - **AI outline:** the current turn first, then earlier turns, newest first, each under "Turn 3 ·

@@ -422,10 +422,6 @@ exports[`renders a debate 1`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
-</div>
-<div class="watch-more-slot watch-more-line" data-more-slot="review">
-</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -542,8 +538,6 @@ exports[`renders a debate 1`] = `
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 </fieldset>
-<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
-</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -554,18 +548,9 @@ exports[`renders a debate 1`] = `
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
-<p class="stake-balance" data-stake-balance>
-</p>
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
@@ -582,16 +567,6 @@ exports[`renders a debate 1`] = `
 <ul data-stake-positions>
 </ul>
 </details>
-<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
-<h2 id="stake-review-title">Review your position</h2>
-<dl class="stake-terms" data-stake-review-terms>
-</dl>
-<p>Final once placed. You can't edit or cancel it.</p>
-<div class="stake-review-actions">
-<button type="button" class="button" data-stake-review-place>Place it</button>
-<button type="button" data-stake-review-back>Back</button>
-</div>
-</dialog>
 </section>\\n      <section class="arena-insight" data-insight aria-label="AI outline, results and about">
 <div class="arena-tabs" role="tablist" aria-label="Show" data-arena-tabs>
 <button type="button" role="tab" id="arena-tab-chat" aria-controls="arena-chat" aria-selected="false" tabindex="-1">Chat<span data-chat-unseen>
@@ -1182,10 +1157,6 @@ exports[`renders a debate 10`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
-</div>
-<div class="watch-more-slot watch-more-line" data-more-slot="review">
-</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -1302,8 +1273,6 @@ exports[`renders a debate 10`] = `
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 </fieldset>
-<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
-</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -1314,18 +1283,9 @@ exports[`renders a debate 10`] = `
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
-<p class="stake-balance" data-stake-balance>
-</p>
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
@@ -1342,16 +1302,6 @@ exports[`renders a debate 10`] = `
 <ul data-stake-positions>
 </ul>
 </details>
-<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
-<h2 id="stake-review-title">Review your position</h2>
-<dl class="stake-terms" data-stake-review-terms>
-</dl>
-<p>Final once placed. You can't edit or cancel it.</p>
-<div class="stake-review-actions">
-<button type="button" class="button" data-stake-review-place>Place it</button>
-<button type="button" data-stake-review-back>Back</button>
-</div>
-</dialog>
 </section>\\n      <section class="arena-insight" data-insight aria-label="AI outline, results and about">
 <div class="arena-tabs" role="tablist" aria-label="Show" data-arena-tabs>
 <button type="button" role="tab" id="arena-tab-chat" aria-controls="arena-chat" aria-selected="false" tabindex="-1">Chat<span data-chat-unseen>
@@ -1950,10 +1900,6 @@ exports[`renders a debate 11`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
-</div>
-<div class="watch-more-slot watch-more-line" data-more-slot="review">
-</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -2068,8 +2014,6 @@ exports[`renders a debate 11`] = `
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 </fieldset>
-<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
-</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -2080,18 +2024,9 @@ exports[`renders a debate 11`] = `
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
-<p class="stake-balance" data-stake-balance>
-</p>
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
@@ -2108,16 +2043,6 @@ exports[`renders a debate 11`] = `
 <ul data-stake-positions>
 </ul>
 </details>
-<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
-<h2 id="stake-review-title">Review your position</h2>
-<dl class="stake-terms" data-stake-review-terms>
-</dl>
-<p>Final once placed. You can't edit or cancel it.</p>
-<div class="stake-review-actions">
-<button type="button" class="button" data-stake-review-place>Place it</button>
-<button type="button" data-stake-review-back>Back</button>
-</div>
-</dialog>
 </section>\\n      <section class="arena-insight" data-insight aria-label="AI outline, results and about">
 <div class="arena-tabs" role="tablist" aria-label="Show" data-arena-tabs>
 <button type="button" role="tab" id="arena-tab-chat" aria-controls="arena-chat" aria-selected="false" tabindex="-1">Chat<span data-chat-unseen>
@@ -2715,10 +2640,6 @@ exports[`renders a debate 12`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
-</div>
-<div class="watch-more-slot watch-more-line" data-more-slot="review">
-</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -2924,8 +2845,6 @@ exports[`renders a debate 12`] = `
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 </fieldset>
-<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
-</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -2936,18 +2855,9 @@ exports[`renders a debate 12`] = `
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
-<p class="stake-balance" data-stake-balance>
-</p>
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
@@ -2964,16 +2874,6 @@ exports[`renders a debate 12`] = `
 <ul data-stake-positions>
 </ul>
 </details>
-<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
-<h2 id="stake-review-title">Review your position</h2>
-<dl class="stake-terms" data-stake-review-terms>
-</dl>
-<p>Final once placed. You can't edit or cancel it.</p>
-<div class="stake-review-actions">
-<button type="button" class="button" data-stake-review-place>Place it</button>
-<button type="button" data-stake-review-back>Back</button>
-</div>
-</dialog>
 </section>\\n      <section class="arena-insight" data-insight aria-label="AI outline and about">
 <div class="arena-tabs" role="tablist" aria-label="Show" data-arena-tabs>
 <button type="button" role="tab" id="arena-tab-chat" aria-controls="arena-chat" aria-selected="false" tabindex="-1">Chat<span data-chat-unseen>
@@ -3474,10 +3374,6 @@ exports[`renders a debate 2`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
-</div>
-<div class="watch-more-slot watch-more-line" data-more-slot="review">
-</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -3592,8 +3488,6 @@ exports[`renders a debate 2`] = `
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 </fieldset>
-<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
-</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -3604,18 +3498,9 @@ exports[`renders a debate 2`] = `
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
-<p class="stake-balance" data-stake-balance>
-</p>
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
@@ -3632,16 +3517,6 @@ exports[`renders a debate 2`] = `
 <ul data-stake-positions>
 </ul>
 </details>
-<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
-<h2 id="stake-review-title">Review your position</h2>
-<dl class="stake-terms" data-stake-review-terms>
-</dl>
-<p>Final once placed. You can't edit or cancel it.</p>
-<div class="stake-review-actions">
-<button type="button" class="button" data-stake-review-place>Place it</button>
-<button type="button" data-stake-review-back>Back</button>
-</div>
-</dialog>
 </section>\\n      <section class="arena-insight" data-insight aria-label="AI outline, results and about">
 <div class="arena-tabs" role="tablist" aria-label="Show" data-arena-tabs>
 <button type="button" role="tab" id="arena-tab-chat" aria-controls="arena-chat" aria-selected="false" tabindex="-1">Chat<span data-chat-unseen>
@@ -4222,10 +4097,6 @@ exports[`renders a debate 3`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
-</div>
-<div class="watch-more-slot watch-more-line" data-more-slot="review">
-</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -4431,8 +4302,6 @@ exports[`renders a debate 3`] = `
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 </fieldset>
-<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
-</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -4443,18 +4312,9 @@ exports[`renders a debate 3`] = `
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
-<p class="stake-balance" data-stake-balance>
-</p>
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
@@ -4471,16 +4331,6 @@ exports[`renders a debate 3`] = `
 <ul data-stake-positions>
 </ul>
 </details>
-<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
-<h2 id="stake-review-title">Review your position</h2>
-<dl class="stake-terms" data-stake-review-terms>
-</dl>
-<p>Final once placed. You can't edit or cancel it.</p>
-<div class="stake-review-actions">
-<button type="button" class="button" data-stake-review-place>Place it</button>
-<button type="button" data-stake-review-back>Back</button>
-</div>
-</dialog>
 </section>\\n      <section class="arena-insight" data-insight aria-label="AI outline and about">
 <div class="arena-tabs" role="tablist" aria-label="Show" data-arena-tabs>
 <button type="button" role="tab" id="arena-tab-chat" aria-controls="arena-chat" aria-selected="false" tabindex="-1">Chat<span data-chat-unseen>
@@ -4978,10 +4828,6 @@ exports[`renders a debate 4`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
-</div>
-<div class="watch-more-slot watch-more-line" data-more-slot="review">
-</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -5187,8 +5033,6 @@ exports[`renders a debate 4`] = `
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 </fieldset>
-<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
-</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -5199,18 +5043,9 @@ exports[`renders a debate 4`] = `
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
-<p class="stake-balance" data-stake-balance>
-</p>
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
@@ -5227,16 +5062,6 @@ exports[`renders a debate 4`] = `
 <ul data-stake-positions>
 </ul>
 </details>
-<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
-<h2 id="stake-review-title">Review your position</h2>
-<dl class="stake-terms" data-stake-review-terms>
-</dl>
-<p>Final once placed. You can't edit or cancel it.</p>
-<div class="stake-review-actions">
-<button type="button" class="button" data-stake-review-place>Place it</button>
-<button type="button" data-stake-review-back>Back</button>
-</div>
-</dialog>
 </section>\\n      <section class="arena-insight" data-insight aria-label="AI outline and about">
 <div class="arena-tabs" role="tablist" aria-label="Show" data-arena-tabs>
 <button type="button" role="tab" id="arena-tab-chat" aria-controls="arena-chat" aria-selected="false" tabindex="-1">Chat<span data-chat-unseen>
@@ -5732,10 +5557,6 @@ exports[`renders a debate 5`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
-</div>
-<div class="watch-more-slot watch-more-line" data-more-slot="review">
-</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -5852,8 +5673,6 @@ exports[`renders a debate 5`] = `
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 </fieldset>
-<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
-</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -5864,18 +5683,9 @@ exports[`renders a debate 5`] = `
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
-<p class="stake-balance" data-stake-balance>
-</p>
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
@@ -5892,16 +5702,6 @@ exports[`renders a debate 5`] = `
 <ul data-stake-positions>
 </ul>
 </details>
-<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
-<h2 id="stake-review-title">Review your position</h2>
-<dl class="stake-terms" data-stake-review-terms>
-</dl>
-<p>Final once placed. You can't edit or cancel it.</p>
-<div class="stake-review-actions">
-<button type="button" class="button" data-stake-review-place>Place it</button>
-<button type="button" data-stake-review-back>Back</button>
-</div>
-</dialog>
 </section>\\n      <section class="arena-insight" data-insight aria-label="AI outline, results and about">
 <div class="arena-tabs" role="tablist" aria-label="Show" data-arena-tabs>
 <button type="button" role="tab" id="arena-tab-chat" aria-controls="arena-chat" aria-selected="false" tabindex="-1">Chat<span data-chat-unseen>
@@ -6480,10 +6280,6 @@ exports[`renders a debate 6`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
-</div>
-<div class="watch-more-slot watch-more-line" data-more-slot="review">
-</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -6600,8 +6396,6 @@ exports[`renders a debate 6`] = `
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 </fieldset>
-<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
-</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -6612,18 +6406,9 @@ exports[`renders a debate 6`] = `
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
-<p class="stake-balance" data-stake-balance>
-</p>
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
@@ -6640,16 +6425,6 @@ exports[`renders a debate 6`] = `
 <ul data-stake-positions>
 </ul>
 </details>
-<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
-<h2 id="stake-review-title">Review your position</h2>
-<dl class="stake-terms" data-stake-review-terms>
-</dl>
-<p>Final once placed. You can't edit or cancel it.</p>
-<div class="stake-review-actions">
-<button type="button" class="button" data-stake-review-place>Place it</button>
-<button type="button" data-stake-review-back>Back</button>
-</div>
-</dialog>
 </section>\\n      <section class="arena-insight" data-insight aria-label="AI outline, results and about">
 <div class="arena-tabs" role="tablist" aria-label="Show" data-arena-tabs>
 <button type="button" role="tab" id="arena-tab-chat" aria-controls="arena-chat" aria-selected="false" tabindex="-1">Chat<span data-chat-unseen>
@@ -7230,10 +7005,6 @@ exports[`renders a debate 7`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
-</div>
-<div class="watch-more-slot watch-more-line" data-more-slot="review">
-</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -7350,8 +7121,6 @@ exports[`renders a debate 7`] = `
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 </fieldset>
-<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
-</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -7362,18 +7131,9 @@ exports[`renders a debate 7`] = `
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
-<p class="stake-balance" data-stake-balance>
-</p>
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
@@ -7390,16 +7150,6 @@ exports[`renders a debate 7`] = `
 <ul data-stake-positions>
 </ul>
 </details>
-<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
-<h2 id="stake-review-title">Review your position</h2>
-<dl class="stake-terms" data-stake-review-terms>
-</dl>
-<p>Final once placed. You can't edit or cancel it.</p>
-<div class="stake-review-actions">
-<button type="button" class="button" data-stake-review-place>Place it</button>
-<button type="button" data-stake-review-back>Back</button>
-</div>
-</dialog>
 </section>\\n      <section class="arena-insight" data-insight aria-label="AI outline, results and about">
 <div class="arena-tabs" role="tablist" aria-label="Show" data-arena-tabs>
 <button type="button" role="tab" id="arena-tab-chat" aria-controls="arena-chat" aria-selected="false" tabindex="-1">Chat<span data-chat-unseen>
@@ -7986,10 +7736,6 @@ exports[`renders a debate 8`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
-</div>
-<div class="watch-more-slot watch-more-line" data-more-slot="review">
-</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -8107,8 +7853,6 @@ exports[`renders a debate 8`] = `
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 </fieldset>
-<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
-</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -8119,18 +7863,9 @@ exports[`renders a debate 8`] = `
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
-<p class="stake-balance" data-stake-balance>
-</p>
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fhostile-debate">Sign in to answer →</a>
 </p>
@@ -8147,16 +7882,6 @@ exports[`renders a debate 8`] = `
 <ul data-stake-positions>
 </ul>
 </details>
-<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
-<h2 id="stake-review-title">Review your position</h2>
-<dl class="stake-terms" data-stake-review-terms>
-</dl>
-<p>Final once placed. You can't edit or cancel it.</p>
-<div class="stake-review-actions">
-<button type="button" class="button" data-stake-review-place>Place it</button>
-<button type="button" data-stake-review-back>Back</button>
-</div>
-</dialog>
 </section>\\n      <section class="arena-insight" data-insight aria-label="AI outline, results and about">
 <div class="arena-tabs" role="tablist" aria-label="Show" data-arena-tabs>
 <button type="button" role="tab" id="arena-tab-chat" aria-controls="arena-chat" aria-selected="false" tabindex="-1">Chat<span data-chat-unseen>
@@ -8805,10 +8530,6 @@ exports[`renders a debate 9`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<div class="watch-more-slot watch-more-line" data-more-slot="advanced">
-</div>
-<div class="watch-more-slot watch-more-line" data-more-slot="review">
-</div>
 </div>
 </section>
 </div>\\n      </div>
@@ -8925,8 +8646,6 @@ exports[`renders a debate 9`] = `
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
 </fieldset>
-<button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
-</button>
 <label class="stake-read" data-stake-read-wrap>What share will say yes this turn?<span class="stake-read-row">
 <input type="range" name="read" min="1" max="99" step="1" value="50">
 <output data-stake-read-out>50%</output>
@@ -8937,18 +8656,9 @@ exports[`renders a debate 9`] = `
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
-<p class="stake-balance" data-stake-balance>
-</p>
 <p class="stake-signin" data-stake-signin hidden>
 <a href="/account?next=%2Fdebates%2Fpublic-debate">Sign in to answer →</a>
 </p>
@@ -8965,16 +8675,6 @@ exports[`renders a debate 9`] = `
 <ul data-stake-positions>
 </ul>
 </details>
-<dialog class="information-card stake-review" data-stake-review aria-labelledby="stake-review-title">
-<h2 id="stake-review-title">Review your position</h2>
-<dl class="stake-terms" data-stake-review-terms>
-</dl>
-<p>Final once placed. You can't edit or cancel it.</p>
-<div class="stake-review-actions">
-<button type="button" class="button" data-stake-review-place>Place it</button>
-<button type="button" data-stake-review-back>Back</button>
-</div>
-</dialog>
 </section>\\n      <section class="arena-insight" data-insight aria-label="AI outline, results and about">
 <div class="arena-tabs" role="tablist" aria-label="Show" data-arena-tabs>
 <button type="button" role="tab" id="arena-tab-chat" aria-controls="arena-chat" aria-selected="false" tabindex="-1">Chat<span data-chat-unseen>
@@ -20684,12 +20384,6 @@ exports[`renders the privacy, terms and cookie pages 3`] = `
 <th scope="row">yaparena-home-intro</th>
 <td data-label="Category">Strictly necessary</td>
 <td data-label="Purpose">Remembers that you closed the introduction on Home.</td>
-<td data-label="Duration">Until you clear site data</td>
-</tr>
-<tr>
-<th scope="row">yaparena-stake-review, -explained</th>
-<td data-label="Category">Strictly necessary</td>
-<td data-label="Purpose">Whether to show the review step, and that you’ve seen the explanation.</td>
 <td data-label="Duration">Until you clear site data</td>
 </tr>
 <tr>

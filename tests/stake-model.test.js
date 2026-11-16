@@ -5,21 +5,16 @@ import {
   ceilingCents,
   ceilingText,
   clock,
-  chipSize,
   coins,
   confirmText,
   debatesHere,
-  lastPosition,
   liveWindow,
-  parseCeiling,
   percent,
   placementError,
   waitText,
   positionStatus,
   price,
-  readFromLimit,
   reasonText,
-  repeatLabel,
   replayRound,
   replayWindow,
   resultLine,
@@ -97,22 +92,6 @@ describe("betting panel terms (Decision 0013)", () => {
   // Decision 0016, amended 2026-11-16: one ticket wherever a viewer answers.
   it("offers the same five sizes everywhere, with no typed size", () => {
     assert.deepEqual([...sizeChoices], [10, 25, 50, 75, 100]);
-    for (const size of sizeChoices) assert.equal(chipSize(size), size);
-  });
-
-  it("moves a size without a chip to the nearest one", () => {
-    // The old 5 chip, old typed sizes and old saved defaults.
-    assert.equal(chipSize(5), 10);
-    assert.equal(chipSize(1), 10);
-    assert.equal(chipSize(30), 25);
-    assert.equal(chipSize(64), 75);
-    assert.equal(chipSize(90), 100);
-    assert.equal(chipSize(60), 50);
-    assert.equal(chipSize(37), 25);
-    assert.equal(chipSize(38), 50);
-    // Halfway keeps the smaller size, so it never risks more.
-    assert.equal(chipSize(17.5), 10);
-    assert.equal(chipSize(62.5), 50);
   });
 
   it("names a phone's answer sheet for its side, not the question", () => {
@@ -154,15 +133,6 @@ describe("betting panel terms (Decision 0013)", () => {
       confirmText(ticket({ closedTurn: 7 })),
       "Place Yes · 25 · max 14.50 YC",
     );
-  });
-
-  it("accepts only prices from 1 to 99 cents", () => {
-    assert.equal(parseCeiling("62"), 62);
-    assert.equal(parseCeiling("62¢"), 62);
-    assert.equal(parseCeiling("0.62"), 62);
-    assert.equal(parseCeiling(".6"), 60);
-    for (const text of ["0", "100", "1.5", "abc", "", "0.001"])
-      assert.equal(parseCeiling(text), null, text);
   });
 
   it("formats signed results from atomic units, 10,000 per Yap Coin", () => {
@@ -334,7 +304,7 @@ describe("betting panel terms (Decision 0013)", () => {
   });
 });
 
-describe("results, repeat and get-ready defaults (Decision 0013)", () => {
+describe("results (Decision 0013)", () => {
   const own = (side, limit, quantity) => ({
     side,
     limit,
@@ -351,41 +321,6 @@ describe("results, repeat and get-ready defaults (Decision 0013)", () => {
       pricing: { price: fraction(price), share: fraction(share) },
       outcome: { executed, premium: "0", fee: "0", payout: "0", net },
     });
-
-  it("recovers the read from a position's yes-scale limit on both sides", () => {
-    // A Yes at read 62 sends 0.62; a No at read 62 sends 0.38, limit 0.62.
-    assert.equal(readFromLimit("0.62"), 62);
-    assert.equal(readFromLimit("0.620000"), 62);
-    assert.equal(readFromLimit("0"), 1);
-    assert.equal(readFromLimit("1"), 99);
-  });
-
-  it("offers the latest earlier position as the next turn's repeat", () => {
-    const rounds = [
-      round({ id: "a", turnNumber: 1, own: own("YES", "0.40", 5) }),
-      round({ id: "b", turnNumber: 3, own: own("NO", "0.62", 25) }),
-      round({ id: "c", turnNumber: 2, own: null }),
-      round({ id: "d", turnNumber: 4, own: own("YES", "0.50", 10) }),
-      round({
-        id: "m",
-        kind: "manual",
-        turnNumber: null,
-        own: own("YES", "0.9", 1),
-      }),
-    ];
-    assert.equal(lastPosition(rounds, 4)?.id, "b");
-    assert.equal(lastPosition(rounds, 2)?.id, "a");
-    assert.equal(lastPosition(rounds, 1), null);
-    assert.equal(
-      repeatLabel(own("NO", "0.62", 25)),
-      "Same as last turn · No · 25 · read 62%",
-    );
-    // A position placed with a size that has no chip offers the nearest.
-    assert.equal(
-      repeatLabel(own("YES", "0.40", 37)),
-      "Same as last turn · Yes · 25 · read 40%",
-    );
-  });
 
   it("totals revealed positions and keeps locked ones apart", () => {
     const summary = resultsSummary([

@@ -20,17 +20,12 @@ import {
   clock,
   confirmText,
   debatesHere,
-  lastPosition,
   liveWindow,
-  chipSize,
-  parseCeiling,
   percent,
   placementError,
   positionStatus,
   price,
-  readFromLimit,
   reasonText,
-  repeatLabel,
   replayRound,
   replayUntimed,
   replayWindow,
@@ -41,7 +36,6 @@ import {
   secondsLeft,
   signedCoins,
   speakerLine,
-  ticketTerms,
   watchSheetName,
   type PublicWindow,
   type PublicWindows,
@@ -86,15 +80,9 @@ if (root) {
     '[data-stake-ticket] input[name="read"]',
   );
   const readOut = one("[data-stake-read-out]");
-  const advanced = one<HTMLDetailsElement>("[data-stake-advanced]");
-  const ceilingInput = one<HTMLInputElement>(
-    '[data-stake-ticket] input[name="ceiling"]',
-  );
-  const reviewChoice = one<HTMLInputElement>("[data-stake-review-choice]");
   const errorLine = one("[data-stake-error]");
   const confirm = one<HTMLButtonElement>("[data-stake-confirm]");
   const receipt = one("[data-stake-receipt]");
-  const balanceLine = one("[data-stake-balance]");
   const signIn = one("[data-stake-signin]");
   const positionsWrap = one<HTMLDetailsElement>("[data-stake-positions-wrap]");
   const positionsList = one("[data-stake-positions]");
@@ -102,8 +90,6 @@ if (root) {
   const results = one("[data-stake-results]");
   const resultsTitle = one("[data-stake-results-title]");
   const resultsList = one("[data-stake-results-list]");
-  const review = one<HTMLDialogElement>("[data-stake-review]");
-  const reviewTerms = one("[data-stake-review-terms]");
   // Decision 0016 (amended 2026-11-16): one ticket wherever a viewer
   // answers, with the side word and clock on top, the five size chips, the
   // read and one key naming the terms. On a phone it is a sheet, also over
@@ -112,7 +98,6 @@ if (root) {
   const watching = () => arena?.dataset.watch === "open";
   const ticketSide = one("[data-stake-ticket-side]");
   const ticketClock = one("[data-stake-ticket-clock]");
-  const repeatLine = one<HTMLButtonElement>("[data-stake-repeat-line]");
   const sizeChips = [
     ...root.querySelectorAll<HTMLButtonElement>("[data-stake-size]"),
   ];
@@ -139,9 +124,6 @@ if (root) {
   let loadFailed = false;
   // After a refused read, the server's Retry-After, as a time.
   let waitUntil = 0;
-  let explaining = false;
-  // The window the review pop-up shows; "Place it" places only on it.
-  let reviewed: { id: string; turnNumber: number } | null = null;
   // Revealed positions last seen, so a new reveal updates every balance.
   let revealedSeen: number | null = null;
   const keys = new Map<string, string>();
@@ -159,35 +141,24 @@ if (root) {
       minute: "2-digit",
       timeZoneName: "short",
     });
-  // Per-device conveniences only; the panel works without storage.
-  const stored = (name: string) => {
+  // Decision 0016, amended 2026-11-16: the ticket holds only the approved
+  // answer sheet's parts. "Get ready" with its saved defaults, the review
+  // pop-up and the one-time explanation are gone, so the device keeps none
+  // of their choices: the ticket opens at 10 contracts and a 50% read, then
+  // keeps the last size and read used on this page.
+  for (const name of [
+    "yaparena-stake-defaults",
+    "yaparena-stake-review",
+    "yaparena-stake-explained",
+  ])
     try {
-      return localStorage.getItem(name);
+      localStorage.removeItem(name);
     } catch {
-      return null;
+      // Storage may be unavailable; nothing was saved then.
     }
-  };
-  const remember = (name: string, value: string) => {
-    try {
-      localStorage.setItem(name, value);
-    } catch {
-      // Private windows may refuse storage; the choice lasts for this page.
-    }
-  };
-  reviewChoice.checked = stored("yaparena-stake-review") === "1";
-  // "Get ready" and its saved defaults are gone (Decision 0016, amended
-  // 2026-11-16): the ticket opens at 10 contracts and a 50% read, then keeps
-  // the last size and read used on this page. A device that saved defaults
-  // drops them.
-  try {
-    localStorage.removeItem("yaparena-stake-defaults");
-  } catch {
-    // Storage may be unavailable; nothing was saved then.
-  }
-  // The ticket's size and its chips move together; a size with no chip
-  // moves to the nearest one.
+  // The ticket's size and its chips move together.
   function applySize(value: number) {
-    size = chipSize(value);
+    size = value;
     for (const chip of sizeChips)
       chip.setAttribute(
         "aria-pressed",
@@ -383,12 +354,10 @@ if (root) {
       via: "replay",
     };
   }
+  // The read alone sets the price: the yes ceiling is the read, the no
+  // ceiling 100 minus it.
   function cents() {
-    // "Set a maximum price instead" applies wherever it is set: in the
-    // phone full screen it is in the ··· sheet (D7), and the place key
-    // names the terms it gives.
-    const manual = advanced.open ? parseCeiling(ceilingInput.value) : null;
-    return manual ?? ceilingCents(side ?? "YES", Number(readInput.value));
+    return ceilingCents(side ?? "YES", Number(readInput.value));
   }
   // The most a position pays per contract: its limit is on the yes scale.
   function paidCents(own: NonNullable<StakeRound["own"]>) {
@@ -460,8 +429,6 @@ if (root) {
       return "Couldn't load this debate's Yap Coins rounds. They refresh automatically.";
     if (!current && closedTurn !== null && side)
       return `Turn ${closedTurn}'s window closed before you confirmed. Nothing was reserved.`;
-    if (explaining && side && current)
-      return "How it works: answer for this turn, then set how much you'll risk. Each contract pays the final share of people who answered your way, up to 1 YC. Final once placed.";
     if (unavailable) return "Yap Coins rounds aren't open on this debate.";
     if (eventStatus === "cancelled" || eventStatus === "void_review")
       return "This debate isn't taking answers. Any Yap Coins you placed are refunded.";
@@ -568,18 +535,6 @@ if (root) {
       }),
     );
   }
-  // The next turn offers the last position again as one line under the
-  // chips (Decision 0016, D7); it fills the ticket and still needs the
-  // confirm tap.
-  function renderRepeat(current: Target | null) {
-    const again =
-      joinable(current) && signedIn && side && !current.round?.own
-        ? lastPosition(rounds, current.turnNumber)
-        : null;
-    repeatLine.hidden = !again?.own;
-    repeatLine.disabled = busy;
-    if (again?.own) repeatLine.textContent = repeatLabel(again.own);
-  }
   // Revealed positions move from "Your positions" to the results card.
   function renderResults() {
     const outcome = resultsSummary(rounds);
@@ -619,30 +574,15 @@ if (root) {
       ? `You have ${formatCoins(available)}, less than this size reserves. Lower the size.`
       : "";
   }
-  // The review pop-up names one window. If another takes its place, the
-  // pop-up closes and nothing is reserved.
-  function checkReview(current: Target | null) {
-    if (!review.open || !reviewed || current?.id === reviewed.id) return;
-    const turn = reviewed.turnNumber;
-    reviewed = null;
-    review.close();
-    closedTurn = turn;
-    errorLine.textContent = `Turn ${turn}'s window closed before you confirmed. Nothing was reserved.`;
-  }
   function render() {
     const current = target();
-    checkReview(current);
     renderTurn(current);
     const text = statusText(current);
     if (status.textContent !== text) status.textContent = text;
     renderTicket(current);
-    renderRepeat(current);
     renderReceipt(current);
     renderResults();
     renderPositions();
-    balanceLine.textContent = summary
-      ? `Available: ${formatCoins(spendable(summary.balances))}`
-      : "";
     nameSheet();
   }
   // Decision 0016: as a phone's sheet, on the page or over the full screen,
@@ -661,19 +601,10 @@ if (root) {
     }
   }
 
-  // Places the ticket on the window the viewer sees, or, from the review
-  // pop-up, only on the window it showed.
-  async function place(expected?: { id: string; turnNumber: number }) {
+  // Places the ticket on the window the viewer sees.
+  async function place() {
     const current = target();
-    if (!side || busy) return;
-    if (!current || (expected && current.id !== expected.id)) {
-      if (expected) {
-        closedTurn = expected.turnNumber;
-        errorLine.textContent = `Turn ${expected.turnNumber}'s window closed before you confirmed. Nothing was reserved.`;
-        render();
-      }
-      return;
-    }
+    if (!side || busy || !current) return;
     if (shortfall()) return render();
     const chosen = side;
     const value = cents();
@@ -747,7 +678,6 @@ if (root) {
   function placed() {
     closedTurn = null;
     side = null;
-    explaining = false;
     errorLine.textContent = "";
     window.dispatchEvent(new Event("yap:coins-changed"));
   }
@@ -760,11 +690,6 @@ if (root) {
         return;
       }
       side = button.dataset.stakeSide === "NO" ? "NO" : "YES";
-      // A one-time explanation on this device, shown while the ticket is open.
-      if (stored("yaparena-stake-explained") !== "1") {
-        remember("yaparena-stake-explained", "1");
-        explaining = true;
-      }
       render();
       // The chosen size chip takes focus once the ticket shows: on a phone
       // debate-layout.ts opens the sheet after this click.
@@ -780,20 +705,6 @@ if (root) {
       applySize(Number(chip.dataset.stakeSize));
       render();
     });
-  function sameAsLast() {
-    const current = target();
-    const last = current ? lastPosition(rounds, current.turnNumber) : null;
-    if (!last?.own) return;
-    side = last.own.side;
-    applySize(last.own.quantity);
-    readInput.value = String(readFromLimit(last.own.limit));
-    advanced.open = false;
-    ceilingInput.value = "";
-    errorLine.textContent = "";
-    render();
-    confirm.focus();
-  }
-  repeatLine.addEventListener("click", sameAsLast);
   // Opening or closing the full screen (frontend/watch-screen.ts) changes
   // where the sheet sits and how it is named.
   window.addEventListener("yap:watch", (event) => {
@@ -805,61 +716,11 @@ if (root) {
     attributeFilter: ["data-sheet"],
   });
   readInput.addEventListener("input", render);
-  ceilingInput.addEventListener("input", () => {
-    errorLine.textContent =
-      ceilingInput.value && parseCeiling(ceilingInput.value) === null
-        ? "Enter a maximum price from 0.01 to 0.99 YC."
-        : "";
-    render();
-  });
-  // Only the confirm button places an answer; Enter in the field does not.
-  ceilingInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") event.preventDefault();
-  });
-  advanced.addEventListener("toggle", render);
-  reviewChoice.addEventListener("change", () =>
-    remember("yaparena-stake-review", reviewChoice.checked ? "1" : "0"),
-  );
+  // Placing is immediate: the key names the exact terms (Decision 0013).
   ticket.addEventListener("submit", (event) => {
     event.preventDefault();
-    if (!side) return;
-    if (!reviewChoice.checked) return void place();
-    const current = target();
-    if (!current) return;
-    if (shortfall()) return render();
-    const terms = ticketTerms(size, cents());
-    reviewTerms.replaceChildren(
-      ...[
-        ["Answer", `${sideName(side)} · turn ${current.turnNumber}`],
-        ["Size", `${size} contracts`],
-        ["Most you can lose", terms.mostYouCanLose],
-        ["Results", resultsText(current.round)],
-      ].map(([name, value]) => {
-        const row = document.createElement("div");
-        const label = document.createElement("dt");
-        const text = document.createElement("dd");
-        label.textContent = name!;
-        text.textContent = value!;
-        row.append(label, text);
-        return row;
-      }),
-    );
-    reviewed = { id: current.id, turnNumber: current.turnNumber };
-    review.showModal();
+    void place();
   });
-  one("[data-stake-review-place]").addEventListener("click", () => {
-    const shown = reviewed;
-    reviewed = null;
-    review.close();
-    if (shown) void place(shown);
-  });
-  one("[data-stake-review-back]").addEventListener("click", () =>
-    review.close(),
-  );
-  review.addEventListener("close", () => {
-    reviewed = null;
-  });
-
   // Decision 0012 (F10): the replay player announces what's playing.
   window.addEventListener("yap:playback", (event) => {
     if (event.detail.debateId !== debateId) return;

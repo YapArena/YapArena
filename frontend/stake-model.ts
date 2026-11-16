@@ -114,17 +114,6 @@ export interface StakeRound {
  */
 export const sizeChoices = [10, 25, 50, 75, 100] as const;
 
-/**
- * A size the ticket can show: the size itself when it is one of its chips,
- * else the nearest chip, the smaller one on a tie. Positions placed with a
- * typed size or the old 5 chip have no chip of their own.
- */
-export function chipSize(size: number) {
-  let best: number = sizeChoices[0];
-  for (const choice of sizeChoices)
-    if (Math.abs(choice - size) < Math.abs(best - size)) best = choice;
-  return best;
-}
 /** Whole cents per contract (1–99) for a read of the yes share (1–99 %). */
 export function ceilingCents(side: StakeSide, readPercent: number) {
   const read = Math.min(99, Math.max(1, Math.round(readPercent)));
@@ -134,16 +123,6 @@ export function ceilingCents(side: StakeSide, readPercent: number) {
 /** The submit body's ceiling, a decimal from 0 to 1 with two places. */
 export function ceilingText(cents: number) {
   return `0.${String(cents).padStart(2, "0")}`;
-}
-
-/** Cents per contract (1–99) from a typed maximum price, or null. */
-export function parseCeiling(text: string) {
-  const match = /^0?\.([0-9]{1,2})$|^([0-9]{1,2})¢?$/.exec(text.trim());
-  if (!match) return null;
-  const cents = match[1]
-    ? Number(match[1].padEnd(2, "0"))
-    : Number(match[2] ?? "0");
-  return cents >= 1 && cents <= 99 ? cents : null;
 }
 
 /** Yap Coins from hundredths of a coin: "10 YC", "5.40 YC". */
@@ -338,40 +317,6 @@ export function canAnswer(viewer: {
 
 /** The panel's line while a signed-in viewer waits for a turn's eligibility. */
 export const checkingTurnText = "Checking whether you can answer this turn…";
-
-/**
- * The read (1–99 %) behind a position's yes-scale limit. A Yes ceiling is the
- * read and a No ceiling is 100 minus it, so the limit is the read either way.
- */
-export function readFromLimit(limit: string) {
-  return Math.min(99, Math.max(1, Math.round(Number(limit) * 100)));
-}
-
-/** The viewer's latest turn position before a turn, for "Same as last turn". */
-export function lastPosition(
-  rounds: readonly StakeRound[],
-  beforeTurn: number,
-) {
-  let last: StakeRound | null = null;
-  for (const round of rounds)
-    if (
-      round.kind === "turn" &&
-      round.own &&
-      round.turnNumber !== null &&
-      round.turnNumber < beforeTurn &&
-      (last === null || round.turnNumber > (last.turnNumber ?? 0))
-    )
-      last = round;
-  return last;
-}
-
-/**
- * "Same as last turn · Yes · 10 · read 62%", with the size the ticket will
- * use: a size without a chip moves to the nearest one.
- */
-export function repeatLabel(own: NonNullable<StakeRound["own"]>) {
-  return `Same as last turn · ${own.side === "YES" ? "Yes" : "No"} · ${chipSize(own.quantity)} · read ${readFromLimit(own.limit)}%`;
-}
 
 const byTurn = (a: StakeRound, b: StakeRound) =>
   (a.turnNumber ?? 0) - (b.turnNumber ?? 0);
