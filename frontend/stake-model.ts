@@ -108,23 +108,23 @@ export interface StakeRound {
   };
 }
 
-export const sizeChoices = [5, 10, 25, 50, 100] as const;
-export const maximumSize = 100;
-/** Decision 0016: the full-screen answer sheet's sizes, with no typed size. */
-export const watchSizeChoices = [10, 25, 50, 75, 100] as const;
+/**
+ * The ticket's sizes (Decision 0016, amended 2026-11-16): the same five
+ * chips wherever a viewer answers, with no typed size.
+ */
+export const sizeChoices = [10, 25, 50, 75, 100] as const;
 
 /**
- * A size the full-screen sheet can show: the size itself when it is one of
- * its chips, else the nearest chip, the smaller one on a tie. The page's
- * typed sizes and its 5 chip have no chip there.
+ * A size the ticket can show: the size itself when it is one of its chips,
+ * else the nearest chip, the smaller one on a tie. Positions placed with a
+ * typed size or the old 5 chip have no chip of their own.
  */
-export function watchSize(size: number) {
-  let best: number = watchSizeChoices[0];
-  for (const choice of watchSizeChoices)
+export function chipSize(size: number) {
+  let best: number = sizeChoices[0];
+  for (const choice of sizeChoices)
     if (Math.abs(choice - size) < Math.abs(best - size)) best = choice;
   return best;
 }
-
 /** Whole cents per contract (1–99) for a read of the yes share (1–99 %). */
 export function ceilingCents(side: StakeSide, readPercent: number) {
   const read = Math.min(99, Math.max(1, Math.round(readPercent)));
@@ -134,13 +134,6 @@ export function ceilingCents(side: StakeSide, readPercent: number) {
 /** The submit body's ceiling, a decimal from 0 to 1 with two places. */
 export function ceilingText(cents: number) {
   return `0.${String(cents).padStart(2, "0")}`;
-}
-
-/** A whole size from 1 to 100, or null when the text isn't one. */
-export function parseSize(text: string) {
-  if (!/^[1-9][0-9]{0,2}$/.test(text.trim())) return null;
-  const size = Number(text.trim());
-  return size <= maximumSize ? size : null;
 }
 
 /** Cents per contract (1–99) from a typed maximum price, or null. */
@@ -372,44 +365,12 @@ export function lastPosition(
   return last;
 }
 
-/** "Same as last turn · Yes · 10 · read 62%". */
+/**
+ * "Same as last turn · Yes · 10 · read 62%", with the size the ticket will
+ * use: a size without a chip moves to the nearest one.
+ */
 export function repeatLabel(own: NonNullable<StakeRound["own"]>) {
-  return `Same as last turn · ${own.side === "YES" ? "Yes" : "No"} · ${own.quantity} · read ${readFromLimit(own.limit)}%`;
-}
-
-/** A size and read saved on this device with "Get ready". */
-export interface StakeDefaults {
-  size: number;
-  read: number;
-}
-
-/** Saved "Get ready" defaults from device storage, or null when unusable. */
-export function parseDefaults(text: string | null): StakeDefaults | null {
-  if (!text) return null;
-  let value: unknown;
-  try {
-    value = JSON.parse(text);
-  } catch {
-    return null;
-  }
-  if (
-    typeof value !== "object" ||
-    value === null ||
-    !("size" in value) ||
-    !("read" in value)
-  )
-    return null;
-  const { size, read } = value;
-  return typeof size === "number" &&
-    typeof read === "number" &&
-    Number.isInteger(size) &&
-    Number.isInteger(read) &&
-    size >= 1 &&
-    size <= maximumSize &&
-    read >= 1 &&
-    read <= 99
-    ? { size, read }
-    : null;
+  return `Same as last turn · ${own.side === "YES" ? "Yes" : "No"} · ${chipSize(own.quantity)} · read ${readFromLimit(own.limit)}%`;
 }
 
 const byTurn = (a: StakeRound, b: StakeRound) =>

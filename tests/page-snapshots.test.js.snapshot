@@ -422,11 +422,6 @@ exports[`renders a debate 1`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<details class="watch-more-item">
-<summary>Get ready</summary>
-<div class="watch-more-slot" data-more-slot="ready">
-</div>
-</details>
 <div class="watch-more-slot watch-more-line" data-more-slot="advanced">
 </div>
 <div class="watch-more-slot watch-more-line" data-more-slot="review">
@@ -503,17 +498,6 @@ exports[`renders a debate 1`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
-<div class="stake-watch-head">
-<h2 class="stake-watch-side" data-stake-watch-side>
-</h2>
-<span class="stake-watch-clock" data-stake-watch-clock>
-</span>
-<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
-<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M6 6l12 12M18 6 6 18"/>
-</svg>
-</button>
-</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -536,49 +520,27 @@ exports[`renders a debate 1`] = `
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
-<button type="button" class="stake-repeat" data-stake-repeat hidden>
-</button>
-<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
-<h3 id="stake-ready-title">
-<span class="sr-only">Get ready</span>
-<span class="ins" aria-hidden="true">get ready</span>
-</h3>
-<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
-<fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
-<div class="stake-chips">
-<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
-<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
-<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
-<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
-</div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
-</fieldset>
-<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
-<input type="range" name="read" min="1" max="99" step="1" value="50">
-<output data-stake-ready-read-out>50%</output>
-</span>
-</label>
-<button type="submit" class="stake-ready-save">Save on this device</button>
-<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
-</p>
-</form>
 <form class="stake-ticket" data-stake-ticket hidden>
+<div class="stake-ticket-head">
+<h3 class="stake-ticket-side" data-stake-ticket-side>
+</h3>
+<span class="stake-ticket-clock" data-stake-ticket-clock>
+</span>
+<button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <fieldset class="stake-size">
-<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
-</legend>
+<legend>Size</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
+<button type="button" data-stake-size="75" aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
 </fieldset>
 <button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
 </button>
@@ -587,46 +549,18 @@ exports[`renders a debate 1`] = `
 <output data-stake-read-out>50%</output>
 </span>
 </label>
-<p class="stake-ceiling" data-stake-ceiling>
-</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<dl class="stake-terms">
-<div>
-<dt>Reserved now</dt>
-<dd data-stake-term="reserved">
-</dd>
-</div>
-<div>
-<dt>Most you can lose</dt>
-<dd data-stake-term="lose">
-</dd>
-</div>
-<div>
-<dt>You get back</dt>
-<dd data-stake-term="back">
-</dd>
-</div>
-<div>
-<dt>Fee</dt>
-<dd>None</dd>
-</div>
-<div>
-<dt>Results</dt>
-<dd data-stake-term="results">
-</dd>
-</div>
-</dl>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 <p class="stake-error" data-stake-error role="alert">
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
+</label>
+</details>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -1248,11 +1182,6 @@ exports[`renders a debate 10`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<details class="watch-more-item">
-<summary>Get ready</summary>
-<div class="watch-more-slot" data-more-slot="ready">
-</div>
-</details>
 <div class="watch-more-slot watch-more-line" data-more-slot="advanced">
 </div>
 <div class="watch-more-slot watch-more-line" data-more-slot="review">
@@ -1329,17 +1258,6 @@ exports[`renders a debate 10`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
-<div class="stake-watch-head">
-<h2 class="stake-watch-side" data-stake-watch-side>
-</h2>
-<span class="stake-watch-clock" data-stake-watch-clock>
-</span>
-<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
-<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M6 6l12 12M18 6 6 18"/>
-</svg>
-</button>
-</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -1362,49 +1280,27 @@ exports[`renders a debate 10`] = `
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
-<button type="button" class="stake-repeat" data-stake-repeat hidden>
-</button>
-<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
-<h3 id="stake-ready-title">
-<span class="sr-only">Get ready</span>
-<span class="ins" aria-hidden="true">get ready</span>
-</h3>
-<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
-<fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
-<div class="stake-chips">
-<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
-<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
-<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
-<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
-</div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
-</fieldset>
-<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
-<input type="range" name="read" min="1" max="99" step="1" value="50">
-<output data-stake-ready-read-out>50%</output>
-</span>
-</label>
-<button type="submit" class="stake-ready-save">Save on this device</button>
-<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
-</p>
-</form>
 <form class="stake-ticket" data-stake-ticket hidden>
+<div class="stake-ticket-head">
+<h3 class="stake-ticket-side" data-stake-ticket-side>
+</h3>
+<span class="stake-ticket-clock" data-stake-ticket-clock>
+</span>
+<button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <fieldset class="stake-size">
-<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
-</legend>
+<legend>Size</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
+<button type="button" data-stake-size="75" aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
 </fieldset>
 <button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
 </button>
@@ -1413,46 +1309,18 @@ exports[`renders a debate 10`] = `
 <output data-stake-read-out>50%</output>
 </span>
 </label>
-<p class="stake-ceiling" data-stake-ceiling>
-</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<dl class="stake-terms">
-<div>
-<dt>Reserved now</dt>
-<dd data-stake-term="reserved">
-</dd>
-</div>
-<div>
-<dt>Most you can lose</dt>
-<dd data-stake-term="lose">
-</dd>
-</div>
-<div>
-<dt>You get back</dt>
-<dd data-stake-term="back">
-</dd>
-</div>
-<div>
-<dt>Fee</dt>
-<dd>None</dd>
-</div>
-<div>
-<dt>Results</dt>
-<dd data-stake-term="results">
-</dd>
-</div>
-</dl>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 <p class="stake-error" data-stake-error role="alert">
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
+</label>
+</details>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -2082,11 +1950,6 @@ exports[`renders a debate 11`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<details class="watch-more-item">
-<summary>Get ready</summary>
-<div class="watch-more-slot" data-more-slot="ready">
-</div>
-</details>
 <div class="watch-more-slot watch-more-line" data-more-slot="advanced">
 </div>
 <div class="watch-more-slot watch-more-line" data-more-slot="review">
@@ -2161,17 +2024,6 @@ exports[`renders a debate 11`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
-<div class="stake-watch-head">
-<h2 class="stake-watch-side" data-stake-watch-side>
-</h2>
-<span class="stake-watch-clock" data-stake-watch-clock>
-</span>
-<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
-<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M6 6l12 12M18 6 6 18"/>
-</svg>
-</button>
-</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -2194,49 +2046,27 @@ exports[`renders a debate 11`] = `
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
-<button type="button" class="stake-repeat" data-stake-repeat hidden>
-</button>
-<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
-<h3 id="stake-ready-title">
-<span class="sr-only">Get ready</span>
-<span class="ins" aria-hidden="true">get ready</span>
-</h3>
-<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
-<fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
-<div class="stake-chips">
-<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
-<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
-<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
-<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
-</div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
-</fieldset>
-<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
-<input type="range" name="read" min="1" max="99" step="1" value="50">
-<output data-stake-ready-read-out>50%</output>
-</span>
-</label>
-<button type="submit" class="stake-ready-save">Save on this device</button>
-<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
-</p>
-</form>
 <form class="stake-ticket" data-stake-ticket hidden>
+<div class="stake-ticket-head">
+<h3 class="stake-ticket-side" data-stake-ticket-side>
+</h3>
+<span class="stake-ticket-clock" data-stake-ticket-clock>
+</span>
+<button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <fieldset class="stake-size">
-<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
-</legend>
+<legend>Size</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
+<button type="button" data-stake-size="75" aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
 </fieldset>
 <button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
 </button>
@@ -2245,46 +2075,18 @@ exports[`renders a debate 11`] = `
 <output data-stake-read-out>50%</output>
 </span>
 </label>
-<p class="stake-ceiling" data-stake-ceiling>
-</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<dl class="stake-terms">
-<div>
-<dt>Reserved now</dt>
-<dd data-stake-term="reserved">
-</dd>
-</div>
-<div>
-<dt>Most you can lose</dt>
-<dd data-stake-term="lose">
-</dd>
-</div>
-<div>
-<dt>You get back</dt>
-<dd data-stake-term="back">
-</dd>
-</div>
-<div>
-<dt>Fee</dt>
-<dd>None</dd>
-</div>
-<div>
-<dt>Results</dt>
-<dd data-stake-term="results">
-</dd>
-</div>
-</dl>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 <p class="stake-error" data-stake-error role="alert">
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
+</label>
+</details>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -2913,11 +2715,6 @@ exports[`renders a debate 12`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<details class="watch-more-item">
-<summary>Get ready</summary>
-<div class="watch-more-slot" data-more-slot="ready">
-</div>
-</details>
 <div class="watch-more-slot watch-more-line" data-more-slot="advanced">
 </div>
 <div class="watch-more-slot watch-more-line" data-more-slot="review">
@@ -3083,17 +2880,6 @@ exports[`renders a debate 12`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
-<div class="stake-watch-head">
-<h2 class="stake-watch-side" data-stake-watch-side>
-</h2>
-<span class="stake-watch-clock" data-stake-watch-clock>
-</span>
-<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
-<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M6 6l12 12M18 6 6 18"/>
-</svg>
-</button>
-</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -3116,49 +2902,27 @@ exports[`renders a debate 12`] = `
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
-<button type="button" class="stake-repeat" data-stake-repeat hidden>
-</button>
-<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
-<h3 id="stake-ready-title">
-<span class="sr-only">Get ready</span>
-<span class="ins" aria-hidden="true">get ready</span>
-</h3>
-<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
-<fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
-<div class="stake-chips">
-<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
-<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
-<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
-<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
-</div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
-</fieldset>
-<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
-<input type="range" name="read" min="1" max="99" step="1" value="50">
-<output data-stake-ready-read-out>50%</output>
-</span>
-</label>
-<button type="submit" class="stake-ready-save">Save on this device</button>
-<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
-</p>
-</form>
 <form class="stake-ticket" data-stake-ticket hidden>
+<div class="stake-ticket-head">
+<h3 class="stake-ticket-side" data-stake-ticket-side>
+</h3>
+<span class="stake-ticket-clock" data-stake-ticket-clock>
+</span>
+<button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <fieldset class="stake-size">
-<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
-</legend>
+<legend>Size</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
+<button type="button" data-stake-size="75" aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
 </fieldset>
 <button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
 </button>
@@ -3167,46 +2931,18 @@ exports[`renders a debate 12`] = `
 <output data-stake-read-out>50%</output>
 </span>
 </label>
-<p class="stake-ceiling" data-stake-ceiling>
-</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<dl class="stake-terms">
-<div>
-<dt>Reserved now</dt>
-<dd data-stake-term="reserved">
-</dd>
-</div>
-<div>
-<dt>Most you can lose</dt>
-<dd data-stake-term="lose">
-</dd>
-</div>
-<div>
-<dt>You get back</dt>
-<dd data-stake-term="back">
-</dd>
-</div>
-<div>
-<dt>Fee</dt>
-<dd>None</dd>
-</div>
-<div>
-<dt>Results</dt>
-<dd data-stake-term="results">
-</dd>
-</div>
-</dl>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 <p class="stake-error" data-stake-error role="alert">
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
+</label>
+</details>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -3738,11 +3474,6 @@ exports[`renders a debate 2`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<details class="watch-more-item">
-<summary>Get ready</summary>
-<div class="watch-more-slot" data-more-slot="ready">
-</div>
-</details>
 <div class="watch-more-slot watch-more-line" data-more-slot="advanced">
 </div>
 <div class="watch-more-slot watch-more-line" data-more-slot="review">
@@ -3817,17 +3548,6 @@ exports[`renders a debate 2`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
-<div class="stake-watch-head">
-<h2 class="stake-watch-side" data-stake-watch-side>
-</h2>
-<span class="stake-watch-clock" data-stake-watch-clock>
-</span>
-<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
-<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M6 6l12 12M18 6 6 18"/>
-</svg>
-</button>
-</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -3850,49 +3570,27 @@ exports[`renders a debate 2`] = `
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
-<button type="button" class="stake-repeat" data-stake-repeat hidden>
-</button>
-<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
-<h3 id="stake-ready-title">
-<span class="sr-only">Get ready</span>
-<span class="ins" aria-hidden="true">get ready</span>
-</h3>
-<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
-<fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
-<div class="stake-chips">
-<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
-<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
-<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
-<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
-</div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
-</fieldset>
-<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
-<input type="range" name="read" min="1" max="99" step="1" value="50">
-<output data-stake-ready-read-out>50%</output>
-</span>
-</label>
-<button type="submit" class="stake-ready-save">Save on this device</button>
-<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
-</p>
-</form>
 <form class="stake-ticket" data-stake-ticket hidden>
+<div class="stake-ticket-head">
+<h3 class="stake-ticket-side" data-stake-ticket-side>
+</h3>
+<span class="stake-ticket-clock" data-stake-ticket-clock>
+</span>
+<button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <fieldset class="stake-size">
-<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
-</legend>
+<legend>Size</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
+<button type="button" data-stake-size="75" aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
 </fieldset>
 <button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
 </button>
@@ -3901,46 +3599,18 @@ exports[`renders a debate 2`] = `
 <output data-stake-read-out>50%</output>
 </span>
 </label>
-<p class="stake-ceiling" data-stake-ceiling>
-</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<dl class="stake-terms">
-<div>
-<dt>Reserved now</dt>
-<dd data-stake-term="reserved">
-</dd>
-</div>
-<div>
-<dt>Most you can lose</dt>
-<dd data-stake-term="lose">
-</dd>
-</div>
-<div>
-<dt>You get back</dt>
-<dd data-stake-term="back">
-</dd>
-</div>
-<div>
-<dt>Fee</dt>
-<dd>None</dd>
-</div>
-<div>
-<dt>Results</dt>
-<dd data-stake-term="results">
-</dd>
-</div>
-</dl>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 <p class="stake-error" data-stake-error role="alert">
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
+</label>
+</details>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -4552,11 +4222,6 @@ exports[`renders a debate 3`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<details class="watch-more-item">
-<summary>Get ready</summary>
-<div class="watch-more-slot" data-more-slot="ready">
-</div>
-</details>
 <div class="watch-more-slot watch-more-line" data-more-slot="advanced">
 </div>
 <div class="watch-more-slot watch-more-line" data-more-slot="review">
@@ -4722,17 +4387,6 @@ exports[`renders a debate 3`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
-<div class="stake-watch-head">
-<h2 class="stake-watch-side" data-stake-watch-side>
-</h2>
-<span class="stake-watch-clock" data-stake-watch-clock>
-</span>
-<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
-<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M6 6l12 12M18 6 6 18"/>
-</svg>
-</button>
-</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -4755,49 +4409,27 @@ exports[`renders a debate 3`] = `
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
-<button type="button" class="stake-repeat" data-stake-repeat hidden>
-</button>
-<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
-<h3 id="stake-ready-title">
-<span class="sr-only">Get ready</span>
-<span class="ins" aria-hidden="true">get ready</span>
-</h3>
-<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
-<fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
-<div class="stake-chips">
-<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
-<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
-<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
-<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
-</div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
-</fieldset>
-<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
-<input type="range" name="read" min="1" max="99" step="1" value="50">
-<output data-stake-ready-read-out>50%</output>
-</span>
-</label>
-<button type="submit" class="stake-ready-save">Save on this device</button>
-<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
-</p>
-</form>
 <form class="stake-ticket" data-stake-ticket hidden>
+<div class="stake-ticket-head">
+<h3 class="stake-ticket-side" data-stake-ticket-side>
+</h3>
+<span class="stake-ticket-clock" data-stake-ticket-clock>
+</span>
+<button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <fieldset class="stake-size">
-<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
-</legend>
+<legend>Size</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
+<button type="button" data-stake-size="75" aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
 </fieldset>
 <button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
 </button>
@@ -4806,46 +4438,18 @@ exports[`renders a debate 3`] = `
 <output data-stake-read-out>50%</output>
 </span>
 </label>
-<p class="stake-ceiling" data-stake-ceiling>
-</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<dl class="stake-terms">
-<div>
-<dt>Reserved now</dt>
-<dd data-stake-term="reserved">
-</dd>
-</div>
-<div>
-<dt>Most you can lose</dt>
-<dd data-stake-term="lose">
-</dd>
-</div>
-<div>
-<dt>You get back</dt>
-<dd data-stake-term="back">
-</dd>
-</div>
-<div>
-<dt>Fee</dt>
-<dd>None</dd>
-</div>
-<div>
-<dt>Results</dt>
-<dd data-stake-term="results">
-</dd>
-</div>
-</dl>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 <p class="stake-error" data-stake-error role="alert">
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
+</label>
+</details>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -5374,11 +4978,6 @@ exports[`renders a debate 4`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<details class="watch-more-item">
-<summary>Get ready</summary>
-<div class="watch-more-slot" data-more-slot="ready">
-</div>
-</details>
 <div class="watch-more-slot watch-more-line" data-more-slot="advanced">
 </div>
 <div class="watch-more-slot watch-more-line" data-more-slot="review">
@@ -5544,17 +5143,6 @@ exports[`renders a debate 4`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
-<div class="stake-watch-head">
-<h2 class="stake-watch-side" data-stake-watch-side>
-</h2>
-<span class="stake-watch-clock" data-stake-watch-clock>
-</span>
-<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
-<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M6 6l12 12M18 6 6 18"/>
-</svg>
-</button>
-</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -5577,49 +5165,27 @@ exports[`renders a debate 4`] = `
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
-<button type="button" class="stake-repeat" data-stake-repeat hidden>
-</button>
-<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
-<h3 id="stake-ready-title">
-<span class="sr-only">Get ready</span>
-<span class="ins" aria-hidden="true">get ready</span>
-</h3>
-<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
-<fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
-<div class="stake-chips">
-<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
-<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
-<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
-<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
-</div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
-</fieldset>
-<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
-<input type="range" name="read" min="1" max="99" step="1" value="50">
-<output data-stake-ready-read-out>50%</output>
-</span>
-</label>
-<button type="submit" class="stake-ready-save">Save on this device</button>
-<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
-</p>
-</form>
 <form class="stake-ticket" data-stake-ticket hidden>
+<div class="stake-ticket-head">
+<h3 class="stake-ticket-side" data-stake-ticket-side>
+</h3>
+<span class="stake-ticket-clock" data-stake-ticket-clock>
+</span>
+<button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <fieldset class="stake-size">
-<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
-</legend>
+<legend>Size</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
+<button type="button" data-stake-size="75" aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
 </fieldset>
 <button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
 </button>
@@ -5628,46 +5194,18 @@ exports[`renders a debate 4`] = `
 <output data-stake-read-out>50%</output>
 </span>
 </label>
-<p class="stake-ceiling" data-stake-ceiling>
-</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<dl class="stake-terms">
-<div>
-<dt>Reserved now</dt>
-<dd data-stake-term="reserved">
-</dd>
-</div>
-<div>
-<dt>Most you can lose</dt>
-<dd data-stake-term="lose">
-</dd>
-</div>
-<div>
-<dt>You get back</dt>
-<dd data-stake-term="back">
-</dd>
-</div>
-<div>
-<dt>Fee</dt>
-<dd>None</dd>
-</div>
-<div>
-<dt>Results</dt>
-<dd data-stake-term="results">
-</dd>
-</div>
-</dl>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 <p class="stake-error" data-stake-error role="alert">
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
+</label>
+</details>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -6194,11 +5732,6 @@ exports[`renders a debate 5`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<details class="watch-more-item">
-<summary>Get ready</summary>
-<div class="watch-more-slot" data-more-slot="ready">
-</div>
-</details>
 <div class="watch-more-slot watch-more-line" data-more-slot="advanced">
 </div>
 <div class="watch-more-slot watch-more-line" data-more-slot="review">
@@ -6275,17 +5808,6 @@ exports[`renders a debate 5`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
-<div class="stake-watch-head">
-<h2 class="stake-watch-side" data-stake-watch-side>
-</h2>
-<span class="stake-watch-clock" data-stake-watch-clock>
-</span>
-<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
-<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M6 6l12 12M18 6 6 18"/>
-</svg>
-</button>
-</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -6308,49 +5830,27 @@ exports[`renders a debate 5`] = `
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
-<button type="button" class="stake-repeat" data-stake-repeat hidden>
-</button>
-<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
-<h3 id="stake-ready-title">
-<span class="sr-only">Get ready</span>
-<span class="ins" aria-hidden="true">get ready</span>
-</h3>
-<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
-<fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
-<div class="stake-chips">
-<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
-<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
-<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
-<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
-</div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
-</fieldset>
-<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
-<input type="range" name="read" min="1" max="99" step="1" value="50">
-<output data-stake-ready-read-out>50%</output>
-</span>
-</label>
-<button type="submit" class="stake-ready-save">Save on this device</button>
-<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
-</p>
-</form>
 <form class="stake-ticket" data-stake-ticket hidden>
+<div class="stake-ticket-head">
+<h3 class="stake-ticket-side" data-stake-ticket-side>
+</h3>
+<span class="stake-ticket-clock" data-stake-ticket-clock>
+</span>
+<button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <fieldset class="stake-size">
-<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
-</legend>
+<legend>Size</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
+<button type="button" data-stake-size="75" aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
 </fieldset>
 <button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
 </button>
@@ -6359,46 +5859,18 @@ exports[`renders a debate 5`] = `
 <output data-stake-read-out>50%</output>
 </span>
 </label>
-<p class="stake-ceiling" data-stake-ceiling>
-</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<dl class="stake-terms">
-<div>
-<dt>Reserved now</dt>
-<dd data-stake-term="reserved">
-</dd>
-</div>
-<div>
-<dt>Most you can lose</dt>
-<dd data-stake-term="lose">
-</dd>
-</div>
-<div>
-<dt>You get back</dt>
-<dd data-stake-term="back">
-</dd>
-</div>
-<div>
-<dt>Fee</dt>
-<dd>None</dd>
-</div>
-<div>
-<dt>Results</dt>
-<dd data-stake-term="results">
-</dd>
-</div>
-</dl>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 <p class="stake-error" data-stake-error role="alert">
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
+</label>
+</details>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -7008,11 +6480,6 @@ exports[`renders a debate 6`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<details class="watch-more-item">
-<summary>Get ready</summary>
-<div class="watch-more-slot" data-more-slot="ready">
-</div>
-</details>
 <div class="watch-more-slot watch-more-line" data-more-slot="advanced">
 </div>
 <div class="watch-more-slot watch-more-line" data-more-slot="review">
@@ -7089,17 +6556,6 @@ exports[`renders a debate 6`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
-<div class="stake-watch-head">
-<h2 class="stake-watch-side" data-stake-watch-side>
-</h2>
-<span class="stake-watch-clock" data-stake-watch-clock>
-</span>
-<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
-<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M6 6l12 12M18 6 6 18"/>
-</svg>
-</button>
-</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -7122,49 +6578,27 @@ exports[`renders a debate 6`] = `
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
-<button type="button" class="stake-repeat" data-stake-repeat hidden>
-</button>
-<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
-<h3 id="stake-ready-title">
-<span class="sr-only">Get ready</span>
-<span class="ins" aria-hidden="true">get ready</span>
-</h3>
-<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
-<fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
-<div class="stake-chips">
-<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
-<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
-<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
-<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
-</div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
-</fieldset>
-<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
-<input type="range" name="read" min="1" max="99" step="1" value="50">
-<output data-stake-ready-read-out>50%</output>
-</span>
-</label>
-<button type="submit" class="stake-ready-save">Save on this device</button>
-<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
-</p>
-</form>
 <form class="stake-ticket" data-stake-ticket hidden>
+<div class="stake-ticket-head">
+<h3 class="stake-ticket-side" data-stake-ticket-side>
+</h3>
+<span class="stake-ticket-clock" data-stake-ticket-clock>
+</span>
+<button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <fieldset class="stake-size">
-<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
-</legend>
+<legend>Size</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
+<button type="button" data-stake-size="75" aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
 </fieldset>
 <button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
 </button>
@@ -7173,46 +6607,18 @@ exports[`renders a debate 6`] = `
 <output data-stake-read-out>50%</output>
 </span>
 </label>
-<p class="stake-ceiling" data-stake-ceiling>
-</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<dl class="stake-terms">
-<div>
-<dt>Reserved now</dt>
-<dd data-stake-term="reserved">
-</dd>
-</div>
-<div>
-<dt>Most you can lose</dt>
-<dd data-stake-term="lose">
-</dd>
-</div>
-<div>
-<dt>You get back</dt>
-<dd data-stake-term="back">
-</dd>
-</div>
-<div>
-<dt>Fee</dt>
-<dd>None</dd>
-</div>
-<div>
-<dt>Results</dt>
-<dd data-stake-term="results">
-</dd>
-</div>
-</dl>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 <p class="stake-error" data-stake-error role="alert">
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
+</label>
+</details>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -7824,11 +7230,6 @@ exports[`renders a debate 7`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<details class="watch-more-item">
-<summary>Get ready</summary>
-<div class="watch-more-slot" data-more-slot="ready">
-</div>
-</details>
 <div class="watch-more-slot watch-more-line" data-more-slot="advanced">
 </div>
 <div class="watch-more-slot watch-more-line" data-more-slot="review">
@@ -7905,17 +7306,6 @@ exports[`renders a debate 7`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
-<div class="stake-watch-head">
-<h2 class="stake-watch-side" data-stake-watch-side>
-</h2>
-<span class="stake-watch-clock" data-stake-watch-clock>
-</span>
-<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
-<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M6 6l12 12M18 6 6 18"/>
-</svg>
-</button>
-</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -7938,49 +7328,27 @@ exports[`renders a debate 7`] = `
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
-<button type="button" class="stake-repeat" data-stake-repeat hidden>
-</button>
-<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
-<h3 id="stake-ready-title">
-<span class="sr-only">Get ready</span>
-<span class="ins" aria-hidden="true">get ready</span>
-</h3>
-<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
-<fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
-<div class="stake-chips">
-<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
-<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
-<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
-<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
-</div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
-</fieldset>
-<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
-<input type="range" name="read" min="1" max="99" step="1" value="50">
-<output data-stake-ready-read-out>50%</output>
-</span>
-</label>
-<button type="submit" class="stake-ready-save">Save on this device</button>
-<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
-</p>
-</form>
 <form class="stake-ticket" data-stake-ticket hidden>
+<div class="stake-ticket-head">
+<h3 class="stake-ticket-side" data-stake-ticket-side>
+</h3>
+<span class="stake-ticket-clock" data-stake-ticket-clock>
+</span>
+<button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <fieldset class="stake-size">
-<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
-</legend>
+<legend>Size</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
+<button type="button" data-stake-size="75" aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
 </fieldset>
 <button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
 </button>
@@ -7989,46 +7357,18 @@ exports[`renders a debate 7`] = `
 <output data-stake-read-out>50%</output>
 </span>
 </label>
-<p class="stake-ceiling" data-stake-ceiling>
-</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<dl class="stake-terms">
-<div>
-<dt>Reserved now</dt>
-<dd data-stake-term="reserved">
-</dd>
-</div>
-<div>
-<dt>Most you can lose</dt>
-<dd data-stake-term="lose">
-</dd>
-</div>
-<div>
-<dt>You get back</dt>
-<dd data-stake-term="back">
-</dd>
-</div>
-<div>
-<dt>Fee</dt>
-<dd>None</dd>
-</div>
-<div>
-<dt>Results</dt>
-<dd data-stake-term="results">
-</dd>
-</div>
-</dl>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 <p class="stake-error" data-stake-error role="alert">
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
+</label>
+</details>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -8646,11 +7986,6 @@ exports[`renders a debate 8`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<details class="watch-more-item">
-<summary>Get ready</summary>
-<div class="watch-more-slot" data-more-slot="ready">
-</div>
-</details>
 <div class="watch-more-slot watch-more-line" data-more-slot="advanced">
 </div>
 <div class="watch-more-slot watch-more-line" data-more-slot="review">
@@ -8728,17 +8063,6 @@ exports[`renders a debate 8`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
-<div class="stake-watch-head">
-<h2 class="stake-watch-side" data-stake-watch-side>
-</h2>
-<span class="stake-watch-clock" data-stake-watch-clock>
-</span>
-<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
-<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M6 6l12 12M18 6 6 18"/>
-</svg>
-</button>
-</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -8761,49 +8085,27 @@ exports[`renders a debate 8`] = `
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
-<button type="button" class="stake-repeat" data-stake-repeat hidden>
-</button>
-<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
-<h3 id="stake-ready-title">
-<span class="sr-only">Get ready</span>
-<span class="ins" aria-hidden="true">get ready</span>
-</h3>
-<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
-<fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
-<div class="stake-chips">
-<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
-<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
-<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
-<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
-</div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
-</fieldset>
-<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
-<input type="range" name="read" min="1" max="99" step="1" value="50">
-<output data-stake-ready-read-out>50%</output>
-</span>
-</label>
-<button type="submit" class="stake-ready-save">Save on this device</button>
-<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
-</p>
-</form>
 <form class="stake-ticket" data-stake-ticket hidden>
+<div class="stake-ticket-head">
+<h3 class="stake-ticket-side" data-stake-ticket-side>
+</h3>
+<span class="stake-ticket-clock" data-stake-ticket-clock>
+</span>
+<button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <fieldset class="stake-size">
-<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
-</legend>
+<legend>Size</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
+<button type="button" data-stake-size="75" aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
 </fieldset>
 <button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
 </button>
@@ -8812,46 +8114,18 @@ exports[`renders a debate 8`] = `
 <output data-stake-read-out>50%</output>
 </span>
 </label>
-<p class="stake-ceiling" data-stake-ceiling>
-</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<dl class="stake-terms">
-<div>
-<dt>Reserved now</dt>
-<dd data-stake-term="reserved">
-</dd>
-</div>
-<div>
-<dt>Most you can lose</dt>
-<dd data-stake-term="lose">
-</dd>
-</div>
-<div>
-<dt>You get back</dt>
-<dd data-stake-term="back">
-</dd>
-</div>
-<div>
-<dt>Fee</dt>
-<dd>None</dd>
-</div>
-<div>
-<dt>Results</dt>
-<dd data-stake-term="results">
-</dd>
-</div>
-</dl>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 <p class="stake-error" data-stake-error role="alert">
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
+</label>
+</details>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -9531,11 +8805,6 @@ exports[`renders a debate 9`] = `
 <div class="watch-more-slot watch-more-positions" data-more-slot="positions">
 <p class="watch-more-empty">Your positions · none yet</p>
 </div>
-<details class="watch-more-item">
-<summary>Get ready</summary>
-<div class="watch-more-slot" data-more-slot="ready">
-</div>
-</details>
 <div class="watch-more-slot watch-more-line" data-more-slot="advanced">
 </div>
 <div class="watch-more-slot watch-more-line" data-more-slot="review">
@@ -9612,17 +8881,6 @@ exports[`renders a debate 9`] = `
 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M15 6l-6 6 6 6"/>
 </svg>Back</button>
-<div class="stake-watch-head">
-<h2 class="stake-watch-side" data-stake-watch-side>
-</h2>
-<span class="stake-watch-clock" data-stake-watch-clock>
-</span>
-<button type="button" class="stake-watch-close" data-sheet-close aria-label="Close">
-<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M6 6l12 12M18 6 6 18"/>
-</svg>
-</button>
-</div>
 <div class="stake-turn" data-stake-turn hidden>
 <strong class="stake-turn-title" data-stake-turn-title>
 </strong>
@@ -9645,49 +8903,27 @@ exports[`renders a debate 9`] = `
 <button type="button" class="stake-side stake-yes" data-stake-side="YES" aria-pressed="false" disabled>Yes</button>
 <button type="button" class="stake-side stake-no" data-stake-side="NO" aria-pressed="false" disabled>No</button>
 </div>
-<button type="button" class="stake-repeat" data-stake-repeat hidden>
-</button>
-<form class="stake-ready" data-stake-ready aria-labelledby="stake-ready-title" hidden>
-<h3 id="stake-ready-title">
-<span class="sr-only">Get ready</span>
-<span class="ins" aria-hidden="true">get ready</span>
-</h3>
-<p>Save your usual size and read on this device. The ticket opens with them when the debate starts; you still confirm each answer.</p>
-<fieldset class="stake-size">
-<legend>Size · each contract pays 0–1 YC</legend>
-<div class="stake-chips">
-<button type="button" data-stake-ready-size="5" aria-pressed="false">5</button>
-<button type="button" data-stake-ready-size="10" aria-pressed="true">10</button>
-<button type="button" data-stake-ready-size="25" aria-pressed="false">25</button>
-<button type="button" data-stake-ready-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-ready-size="100" aria-pressed="false">100</button>
-</div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
-</fieldset>
-<label class="stake-read">Your usual read: what share will say yes?<span class="stake-read-row">
-<input type="range" name="read" min="1" max="99" step="1" value="50">
-<output data-stake-ready-read-out>50%</output>
-</span>
-</label>
-<button type="submit" class="stake-ready-save">Save on this device</button>
-<p class="stake-ready-note" data-stake-ready-note role="status" aria-live="polite">
-</p>
-</form>
 <form class="stake-ticket" data-stake-ticket hidden>
+<div class="stake-ticket-head">
+<h3 class="stake-ticket-side" data-stake-ticket-side>
+</h3>
+<span class="stake-ticket-clock" data-stake-ticket-clock>
+</span>
+<button type="button" class="stake-ticket-close" data-sheet-close aria-label="Close">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M6 6l12 12M18 6 6 18"/>
+</svg>
+</button>
+</div>
 <fieldset class="stake-size">
-<legend>Size<span class="stake-size-pays"> · each contract pays 0–1 YC</span>
-</legend>
+<legend>Size</legend>
 <div class="stake-chips">
-<button type="button" data-stake-size="5" data-size-set="page" aria-pressed="false">5</button>
 <button type="button" data-stake-size="10" aria-pressed="true">10</button>
 <button type="button" data-stake-size="25" aria-pressed="false">25</button>
 <button type="button" data-stake-size="50" aria-pressed="false">50</button>
-<button type="button" data-stake-size="75" data-size-set="watch" hidden aria-pressed="false">75</button>
+<button type="button" data-stake-size="75" aria-pressed="false">75</button>
 <button type="button" data-stake-size="100" aria-pressed="false">100</button>
 </div>
-<label class="stake-size-input">Contracts<input name="size" inputmode="numeric" value="10" autocomplete="off" required>
-</label>
 </fieldset>
 <button type="button" class="stake-repeat-line" data-stake-repeat-line hidden>
 </button>
@@ -9696,46 +8932,18 @@ exports[`renders a debate 9`] = `
 <output data-stake-read-out>50%</output>
 </span>
 </label>
-<p class="stake-ceiling" data-stake-ceiling>
-</p>
-<details class="stake-advanced" data-stake-advanced>
-<summary>Set a maximum price instead</summary>
-<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
-</label>
-</details>
-<dl class="stake-terms">
-<div>
-<dt>Reserved now</dt>
-<dd data-stake-term="reserved">
-</dd>
-</div>
-<div>
-<dt>Most you can lose</dt>
-<dd data-stake-term="lose">
-</dd>
-</div>
-<div>
-<dt>You get back</dt>
-<dd data-stake-term="back">
-</dd>
-</div>
-<div>
-<dt>Fee</dt>
-<dd>None</dd>
-</div>
-<div>
-<dt>Results</dt>
-<dd data-stake-term="results">
-</dd>
-</div>
-</dl>
-<label class="stake-review-choice">
-<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 <p class="stake-error" data-stake-error role="alert">
 </p>
 <button type="submit" class="stake-confirm" data-stake-confirm>
 </button>
 <p class="stake-final">Final once placed. Yap Coins are play money with no cash value.</p>
+<details class="stake-advanced" data-stake-advanced>
+<summary>Set a maximum price instead</summary>
+<label>Maximum price per contract (0.01–0.99 YC)<input name="ceiling" inputmode="decimal" autocomplete="off" placeholder="0.50">
+</label>
+</details>
+<label class="stake-review-choice">
+<input type="checkbox" data-stake-review-choice> Review in a pop-up before placing</label>
 </form>
 <div class="stake-receipt" data-stake-receipt hidden>
 </div>
@@ -21479,9 +20687,9 @@ exports[`renders the privacy, terms and cookie pages 3`] = `
 <td data-label="Duration">Until you clear site data</td>
 </tr>
 <tr>
-<th scope="row">yaparena-stake-defaults, -review, -explained</th>
+<th scope="row">yaparena-stake-review, -explained</th>
 <td data-label="Category">Strictly necessary</td>
-<td data-label="Purpose">Your Yap Coins ticket defaults, whether to show the review step, and that you’ve seen the explanation.</td>
+<td data-label="Purpose">Whether to show the review step, and that you’ve seen the explanation.</td>
 <td data-label="Duration">Until you clear site data</td>
 </tr>
 <tr>

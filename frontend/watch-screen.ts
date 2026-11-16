@@ -187,8 +187,9 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
     else delete arena!.dataset.watchLayer;
   }
 
-  // D7: the ··· sheet shows the page's own Outline, About, positions, "Get
-  // ready" defaults, maximum price and review switch. Each element moves
+  // D7: the ··· sheet shows the page's own Outline, About, positions,
+  // maximum price and review switch ("Get ready" was removed on
+  // 2026-11-16). Each element moves
   // into its slot while the sheet is open, keeping its listeners and state,
   // and goes back to a marker at its place on the page when it closes.
   const lent = [
@@ -198,7 +199,6 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
       "positions",
       panel?.querySelector<HTMLElement>("[data-stake-positions-wrap]"),
     ],
-    ["ready", panel?.querySelector<HTMLElement>("[data-stake-ready]")],
     ["advanced", panel?.querySelector<HTMLElement>("[data-stake-advanced]")],
     [
       "review",

@@ -1937,9 +1937,7 @@ textarea::placeholder {
   background: var(--acid);
   transition: width 1s linear;
 }
-.arena-page
-  .stake-panel
-  :is(.stake-status, .stake-ceiling, .stake-final, .stake-balance) {
+.arena-page .stake-panel :is(.stake-status, .stake-final, .stake-balance) {
   color: var(--muted);
   font-size: var(--text-12);
   line-height: 16px;
@@ -1949,13 +1947,7 @@ textarea::placeholder {
 }
 .arena-page
   .stake-panel
-  :is(
-    .stake-status,
-    .stake-error,
-    .stake-meta,
-    .stake-balance,
-    .stake-ready-note
-  ):empty {
+  :is(.stake-status, .stake-error, .stake-meta, .stake-balance):empty {
   display: none;
 }
 .arena-page .stake-panel .stake-question {
@@ -2018,31 +2010,52 @@ textarea::placeholder {
   cursor: not-allowed;
   opacity: 0.45;
 }
-.arena-page .arena-workspace :is(.stake-repeat, .stake-ready-save) {
-  width: 100%;
-  margin-top: var(--space-2);
-}
-.arena-page .arena-workspace .stake-repeat {
-  border-color: transparent;
-  background: transparent;
-}
-.arena-page :is(.stake-ticket, .stake-ready) {
+/* The ticket (Decision 0016, amended 2026-11-16): the same contents
+   wherever a viewer answers, in the rail, the phone's answer sheet and the
+   full screen. The side word and the clock, the size chips, "Same as last
+   turn", the read, one key naming the exact terms and the final line; the
+   maximum price and the review switch below as small secondary controls. */
+.arena-page .stake-ticket {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: 16px;
   margin-top: var(--space-5);
 }
-.arena-page .stake-ready {
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--line);
+.arena-page .stake-ticket-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.arena-page .stake-panel .stake-ready h3 {
-  font-size: var(--text-20);
+.arena-page .arena-workspace .stake-ticket-side {
+  margin: 0 auto 0 0;
+  color: var(--answer-yes);
+  font: 400 32px / 1 var(--font-number);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
-.arena-page .stake-ready > p {
-  color: var(--muted);
-  font-size: var(--text-14);
-  line-height: 20px;
+.arena-page .arena-workspace .stake-ticket-side[data-side="NO"] {
+  color: var(--answer-no);
+}
+.arena-page .stake-ticket-clock {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  color: var(--acid);
+  font: 400 16px / 1 var(--font-number);
+  font-variant-numeric: tabular-nums;
+}
+.arena-page .stake-ticket-clock:empty {
+  display: none;
+}
+.arena-page .stake-ticket-clock.is-ending {
+  color: var(--warning);
+}
+/* Close shows only where the ticket is a sheet. */
+.arena-page .stake-ticket-close {
+  display: none;
 }
 .arena-page .stake-size {
   display: grid;
@@ -2052,40 +2065,45 @@ textarea::placeholder {
   border: 0;
 }
 .arena-page .stake-size legend {
-  margin: 0 0 var(--space-2);
+  margin: 0 0 8px;
   padding: 0;
   color: var(--muted);
   font-size: var(--text-12);
 }
 .arena-page .stake-chips {
-  display: flex;
-  gap: var(--space-2);
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
 }
 .arena-page .arena-workspace .stake-chips button {
-  flex: 1;
   min-width: 0;
-  min-height: 40px;
+  height: 44px;
+  min-height: 44px;
   padding: 0;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
   background: transparent;
+  color: var(--text);
+  font-weight: 700;
 }
 .arena-page .arena-workspace .stake-chips button[aria-pressed="true"] {
   border-color: var(--acid);
   background: var(--acid);
   color: var(--on-acid);
 }
-.arena-page :is(.stake-size-input, .stake-advanced label) {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  color: var(--muted);
-  font-size: var(--text-12);
-}
-.arena-page :is(.stake-size-input, .stake-advanced) input {
-  width: 7rem;
-  height: 40px;
-  padding: 0 var(--space-3);
-  font-size: var(--text-14);
+/* "Same as last turn", one line under the chips (D7). */
+.arena-page .arena-workspace .stake-repeat-line {
+  align-self: flex-start;
+  min-height: 32px;
+  margin-top: -8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--button-text);
+  font: 400 var(--text-12) / 1.3 var(--font-body);
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 /* The read: its question and value on one line, the slider below. */
 .arena-page .stake-read {
@@ -2096,8 +2114,9 @@ textarea::placeholder {
     "range range";
   align-items: baseline;
   column-gap: var(--space-3);
-  color: var(--muted);
-  font-size: var(--text-12);
+  row-gap: 6px;
+  color: var(--text);
+  font-size: 13px;
 }
 .arena-page .stake-read-row {
   display: contents;
@@ -2105,16 +2124,82 @@ textarea::placeholder {
 .arena-page .stake-read-row output {
   grid-area: value;
   color: var(--text);
-  font-family: var(--font-number);
-  font-size: var(--text-24);
-  line-height: 1;
+  font: 400 26px / 1 var(--font-number);
 }
 .arena-page .stake-read-row input {
   grid-area: range;
   width: 100%;
-  margin: var(--space-2) 0 0;
+  height: 30px;
+  margin: 0;
   accent-color: var(--acid);
 }
+.arena-page .stake-panel .stake-error {
+  color: #ffb4bf;
+  font-size: var(--text-12);
+}
+/* The place key: the side's solid colour, stepped pixel corners and a
+   key-cap edge that presses down, like the full screen's Yes and No. */
+.arena-page .arena-workspace .stake-confirm {
+  height: 56px;
+  min-height: 56px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 0;
+  background: var(--answer-yes);
+  color: var(--on-yes);
+  font: 700 16px / 1.2 var(--font-body);
+  clip-path: polygon(
+    0 8px,
+    4px 8px,
+    4px 4px,
+    8px 4px,
+    8px 0,
+    calc(100% - 8px) 0,
+    calc(100% - 8px) 4px,
+    calc(100% - 4px) 4px,
+    calc(100% - 4px) 8px,
+    100% 8px,
+    100% calc(100% - 8px),
+    calc(100% - 4px) calc(100% - 8px),
+    calc(100% - 4px) calc(100% - 4px),
+    calc(100% - 8px) calc(100% - 4px),
+    calc(100% - 8px) 100%,
+    8px 100%,
+    8px calc(100% - 4px),
+    4px calc(100% - 4px),
+    4px calc(100% - 8px),
+    0 calc(100% - 8px)
+  );
+  box-shadow: inset 0 -5px 0 rgb(0 0 0 / 24%);
+  transition:
+    transform 0.06s,
+    box-shadow 0.06s;
+}
+.arena-page .arena-workspace .stake-ticket[data-side="NO"] .stake-confirm {
+  background: var(--answer-no);
+  color: var(--on-no);
+}
+.arena-page .arena-workspace .stake-confirm:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 24%);
+}
+.arena-page .arena-workspace .stake-confirm:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 3px var(--acid),
+    inset 0 -5px 0 rgb(0 0 0 / 24%);
+}
+.arena-page .arena-workspace .stake-confirm:disabled {
+  background: #1b1b1b;
+  color: #6f6f6f;
+  box-shadow: none;
+  opacity: 1;
+}
+.arena-page .stake-panel .stake-final {
+  margin-top: -6px;
+  text-align: center;
+}
+/* "Set a maximum price instead" and the review switch: small, below. */
 .arena-page :is(.stake-advanced, .stake-positions) summary {
   min-height: 24px;
   color: var(--button-text);
@@ -2125,8 +2210,38 @@ textarea::placeholder {
   cursor: pointer;
 }
 .arena-page .stake-advanced label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
   margin-top: var(--space-2);
+  color: var(--muted);
+  font-size: var(--text-12);
 }
+.arena-page .stake-advanced input {
+  width: 7rem;
+  height: 40px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-14);
+}
+.arena-page .stake-ticket :is(.stake-advanced, .stake-review-choice) {
+  margin-top: -8px;
+}
+.arena-page .stake-review-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 24px;
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.arena-page .stake-review-choice input {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--acid);
+}
+/* The review pop-up's terms. */
 .arena-page .stake-panel .stake-terms {
   display: grid;
   gap: var(--space-1);
@@ -2148,35 +2263,6 @@ textarea::placeholder {
   margin: 0;
   text-align: right;
   font-variant-numeric: tabular-nums;
-}
-.arena-page .stake-review-choice {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: 24px;
-  color: var(--muted);
-  font-size: var(--text-12);
-}
-.arena-page .stake-review-choice input {
-  width: 24px;
-  height: 24px;
-  margin: 0;
-  accent-color: var(--acid);
-}
-.arena-page .stake-panel .stake-error {
-  color: #ffb4bf;
-  font-size: var(--text-12);
-}
-.arena-page .arena-workspace .stake-confirm {
-  min-height: 48px;
-  border: 0;
-  background: var(--primary-gradient);
-  color: var(--on-acid);
-  font-size: var(--text-16);
-}
-.arena-page .stake-panel .stake-final {
-  margin-top: calc(var(--space-2) * -1);
-  text-align: center;
 }
 /* The receipt: a bordered inner box with a green check. */
 .arena-page .stake-receipt {
@@ -3809,35 +3895,7 @@ textarea::placeholder {
     grid-area: tip;
     margin: 0 0 var(--space-3);
   }
-  /* The sheet: the bar opens upward over the page and scrolls. */
-  .arena-page .stake-panel[data-sheet] {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 40;
-    max-height: 85svh;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    margin: 0;
-    box-shadow:
-      0 -16px 40px rgb(0 0 0 / 60%),
-      0 -1px 0 var(--line);
-  }
-  .arena-page .arena-workspace .stake-panel[data-sheet] .stake-sheet-close {
-    display: inline-flex;
-    align-items: center;
-    align-self: flex-start;
-    gap: var(--space-1);
-    margin: 0 0 var(--space-3) calc(var(--space-2) * -1);
-    padding: 0 var(--space-3) 0 var(--space-1);
-    border-color: transparent;
-    background: transparent;
-  }
-  .arena-page .stake-sheet-close svg {
-    width: 20px;
-    height: 20px;
-  }
+  /* The sheet the bar opens is in "Decision 0016 — answer sheet" below. */
   /* The bar never covers the composer or the cookie banner: it steps aside
      while the composer has focus or the banner is open. */
   .arena-page
@@ -3845,17 +3903,6 @@ textarea::placeholder {
     .stake-panel:not([data-sheet]),
   .arena-page:has(.cookie-choice:not([hidden])) .stake-panel:not([data-sheet]) {
     display: none;
-  }
-}
-@media (max-width: 599px) and (prefers-reduced-motion: no-preference) {
-  .arena-page .stake-panel[data-sheet] {
-    animation: arena-sheet-in 0.3s var(--ease-expo);
-  }
-}
-@keyframes arena-sheet-in {
-  from {
-    transform: translateY(24px);
-    opacity: 0.6;
   }
 }
 
@@ -5263,46 +5310,12 @@ html.watch-open .cookie-choice {
 }
 
 /* The answer sheet (frontend/debate-layout.ts) opens over the full screen.
-   Its look is the answer sheet's own block; here it only rises above the
-   full screen, and in horizontal it gets the right-side geometry it needs
-   where the phone block's bottom sheet doesn't apply. The :where() rules
-   give way to the answer sheet's block. */
+   Its look, and its side-sheet geometry in horizontal, are the answer
+   sheet's own block; here it only rises above the full screen. */
 .arena-page .arena-workspace[data-watch="open"] .stake-panel[data-sheet] {
   position: fixed;
   z-index: 1010;
 }
-:where(
-    .arena-page
-      .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
-  )
-  .stake-panel[data-sheet] {
-  inset: 0 0 0 auto;
-  width: min(392px, 100%);
-  max-height: none;
-  margin: 0;
-  padding: 18px max(52px, env(safe-area-inset-right, 0px)) 14px 22px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  border-left: 1px solid var(--line);
-  border-radius: 22px 0 0 22px;
-}
-:where(.arena-page .arena-workspace[data-watch="open"])
-  .stake-panel[data-sheet]
-  .stake-sheet-close {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  gap: var(--space-1);
-  margin: 0 0 var(--space-3) calc(var(--space-2) * -1);
-  padding: 0 var(--space-3) 0 var(--space-1);
-  border-color: transparent;
-  background: transparent;
-}
-:where(.arena-page .arena-workspace[data-watch="open"]) .stake-sheet-close svg {
-  width: 20px;
-  height: 20px;
-}
-
 /* Shorter phones keep the rail clear of the clock and the dock: the rail
    moves down to the dock, then tightens to 42 px buttons, then drops its
    words (each button keeps its name), then the clock steps left of it. */
@@ -5677,22 +5690,19 @@ html.watch-open .cookie-choice {
   }
 }
 
-/* Decision 0016 — answer sheet
-   While the phone's full screen is open, Yes or No opens the answer panel as
-   the approved prototype's sheet: the side word and the clock, the full
-   screen's size chips, the read, one key naming the exact terms and the
-   final line. The page's own answer bar, tablets and computers keep the
-   ticket above; the side head and the 75 chip never show there. These rules
-   come after the shell's and match its specificity, so they refine its
-   placement: the sheet stays above the full screen (1000) and under the
-   cookie banner (1020). */
-.arena-page .stake-watch-head {
-  display: none;
-}
-.arena-page [data-arena][data-watch="open"] .stake-panel[data-sheet] {
+/* Decision 0016 — answer sheet (amended 2026-11-16: one ticket everywhere)
+   On a phone, Yes or No opens the ticket as a bottom sheet, from the page's
+   answer bar and over the full screen alike: the ticket under a handle, with
+   its close button. Back shows instead while there is no ticket to show
+   (signed out, the window closed). Over the full screen the sheet rises
+   above it (1010, under the cookie banner's 1020), leaves the maximum
+   price, the review switch, the balance and the positions to the ··· sheet,
+   and in horizontal is a side sheet over the right camera. The ticket's own
+   look is with the answer panel's rules above. */
+.arena-page .arena-workspace .stake-panel[data-sheet] {
   position: fixed;
   inset: auto 0 0;
-  z-index: 1010;
+  z-index: 40;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -5705,10 +5715,10 @@ html.watch-open .cookie-choice {
   border-top: 1px solid var(--line);
   border-radius: 22px 22px 0 0;
   background: var(--panel);
-  box-shadow: none;
+  box-shadow: 0 -16px 40px rgb(0 0 0 / 60%);
   color: var(--text);
 }
-.arena-page [data-arena][data-watch="open"] .stake-panel[data-sheet]::before {
+.arena-page .arena-workspace .stake-panel[data-sheet]::before {
   content: "";
   flex: none;
   align-self: center;
@@ -5718,83 +5728,41 @@ html.watch-open .cookie-choice {
   background: var(--control-border);
 }
 .arena-page
-  [data-arena][data-watch="open"]
+  .arena-workspace
   .stake-panel[data-sheet]
   :is(
     .stake-sheet-close,
     .stake-turn,
     .stake-question,
     .stake-proposition,
-    .stake-sides,
-    .stake-repeat,
-    .stake-ready,
-    .stake-size-pays,
-    .stake-size-input,
-    .stake-ceiling,
-    .stake-advanced,
-    .stake-terms,
-    .stake-review-choice,
-    .stake-balance,
-    .stake-results,
-    .stake-positions,
-    .first-run-tip
+    .stake-sides
   ) {
   display: none;
 }
 .arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-watch-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-watch-side {
-  margin: 0 auto 0 0;
-  color: var(--answer-yes);
-  font: 400 32px / 1 var(--font-number);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-watch-side[data-side="NO"] {
-  color: var(--answer-no);
-}
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-watch-clock {
+  .arena-workspace
+  .stake-panel[data-sheet]:has(> .stake-ticket[hidden])
+  > .stake-sheet-close {
   display: inline-flex;
   align-items: center;
-  height: 28px;
-  padding: 0 10px;
-  border: 1px solid var(--control-border);
-  border-radius: var(--radius-pill);
-  color: var(--acid);
-  font: 400 16px / 1 var(--font-number);
-  font-variant-numeric: tabular-nums;
+  align-self: flex-start;
+  gap: var(--space-1);
+  margin: 0 0 0 calc(var(--space-2) * -1);
+  padding: 0 var(--space-3) 0 var(--space-1);
+  border-color: transparent;
+  background: transparent;
 }
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-watch-clock:empty {
-  display: none;
+.arena-page .stake-sheet-close svg {
+  width: 20px;
+  height: 20px;
 }
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-watch-clock.is-ending {
-  color: var(--warning);
+.arena-page .arena-workspace .stake-panel[data-sheet] .stake-status {
+  margin: 0;
 }
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-watch-close {
+.arena-page .arena-workspace .stake-panel[data-sheet] .stake-ticket {
+  margin-top: 0;
+}
+.arena-page .arena-workspace .stake-panel[data-sheet] .stake-ticket-close {
   display: grid;
   place-items: center;
   width: 44px;
@@ -5806,195 +5774,30 @@ html.watch-open .cookie-choice {
   background: transparent;
   color: var(--text);
 }
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-watch-close
-  svg {
+.arena-page .stake-ticket-close svg {
   width: 22px;
   height: 22px;
   stroke-width: 1.8;
 }
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-status {
-  margin: 0;
-}
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-ticket {
-  gap: 16px;
-  margin-top: 0;
-}
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-size
-  legend {
-  margin-bottom: 8px;
-  color: var(--muted);
-  font-size: var(--text-12);
-}
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-chips {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
-}
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-chips
-  button {
-  height: 44px;
-  min-height: 44px;
-  padding: 0;
-  border: 1px solid var(--control-border);
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--text);
-  font-weight: 700;
-}
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-chips
-  button[aria-pressed="true"] {
-  border-color: var(--acid);
-  background: var(--acid);
-  color: var(--on-acid);
-}
-/* "Same as last turn", one line under the chips (D7). */
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-repeat-line {
-  align-self: flex-start;
-  min-height: 32px;
-  margin-top: -8px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--button-text);
-  font: 400 var(--text-12) / 1.3 var(--font-body);
-  text-align: left;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-read {
-  row-gap: 6px;
-  color: var(--text);
-  font-size: 13px;
-}
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-read-row
-  output {
-  font: 400 26px / 1 var(--font-number);
-}
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-read-row
-  input {
-  height: 30px;
-  margin: 0;
-  accent-color: var(--acid);
-}
-/* The place key: the side's solid colour, stepped pixel corners and a
-   key-cap edge that presses down, like the full screen's Yes and No. */
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-confirm {
-  height: 56px;
-  min-height: 56px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 0;
-  background: var(--answer-yes);
-  color: var(--on-yes);
-  font: 700 16px / 1.2 var(--font-body);
-  clip-path: polygon(
-    0 8px,
-    4px 8px,
-    4px 4px,
-    8px 4px,
-    8px 0,
-    calc(100% - 8px) 0,
-    calc(100% - 8px) 4px,
-    calc(100% - 4px) 4px,
-    calc(100% - 4px) 8px,
-    100% 8px,
-    100% calc(100% - 8px),
-    calc(100% - 4px) calc(100% - 8px),
-    calc(100% - 4px) calc(100% - 4px),
-    calc(100% - 8px) calc(100% - 4px),
-    calc(100% - 8px) 100%,
-    8px 100%,
-    8px calc(100% - 4px),
-    4px calc(100% - 4px),
-    4px calc(100% - 8px),
-    0 calc(100% - 8px)
-  );
-  box-shadow: inset 0 -5px 0 rgb(0 0 0 / 24%);
-  transition:
-    transform 0.06s,
-    box-shadow 0.06s;
-}
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-ticket[data-side="NO"]
-  .stake-confirm {
-  background: var(--answer-no);
-  color: var(--on-no);
-}
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-confirm:active:not(:disabled) {
-  transform: translateY(2px);
-  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 24%);
-}
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-confirm:focus-visible {
-  outline: none;
-  box-shadow:
-    inset 0 0 0 3px var(--acid),
-    inset 0 -5px 0 rgb(0 0 0 / 24%);
-}
-.arena-page
-  [data-arena][data-watch="open"]
-  .stake-panel[data-sheet]
-  .stake-confirm:disabled {
-  background: #1b1b1b;
-  color: #6f6f6f;
+/* Over the full screen. */
+.arena-page .arena-workspace[data-watch="open"] .stake-panel[data-sheet] {
   box-shadow: none;
-  opacity: 1;
 }
 .arena-page
-  [data-arena][data-watch="open"]
+  .arena-workspace[data-watch="open"]
   .stake-panel[data-sheet]
-  .stake-final {
-  margin-top: -6px;
-  color: var(--muted);
-  font-size: var(--text-12);
-  text-align: center;
+  :is(
+    .stake-advanced,
+    .stake-review-choice,
+    .stake-balance,
+    .stake-results,
+    .stake-positions,
+    .first-run-tip
+  ) {
+  display: none;
 }
-/* Horizontal: a side sheet over the right camera. */
 .arena-page
-  [data-arena][data-watch="open"][data-watch-orientation="horizontal"]
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
   .stake-panel[data-sheet] {
   inset: 0 0 0 auto;
   width: min(392px, 100%);
@@ -6006,23 +5809,18 @@ html.watch-open .cookie-choice {
   border-radius: 22px 0 0 22px;
 }
 .arena-page
-  [data-arena][data-watch="open"][data-watch-orientation="horizontal"]
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
   .stake-panel[data-sheet]::before {
   display: none;
 }
 @media (prefers-reduced-motion: no-preference) {
-  .arena-page [data-arena][data-watch="open"] .stake-panel[data-sheet] {
+  .arena-page .arena-workspace .stake-panel[data-sheet] {
     animation: watch-sheet-up 0.3s var(--ease-expo);
   }
   .arena-page
-    [data-arena][data-watch="open"][data-watch-orientation="horizontal"]
+    .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
     .stake-panel[data-sheet] {
     animation-name: watch-sheet-in;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .arena-page [data-arena][data-watch="open"] .stake-panel[data-sheet] {
-    animation: none;
   }
 }
 @keyframes watch-sheet-up {
@@ -6037,7 +5835,6 @@ html.watch-open .cookie-choice {
     opacity: 0;
   }
 }
-
 /* Decision 0016 — turns sheet
    The body of the full screen's Turns sheet (frontend/turns-sheet.ts): the
    debate's last answers, then one bar per revealed turn around a dashed 50%
@@ -6792,7 +6589,7 @@ html.watch-open .cookie-choice {
   .watch-more-empty {
   display: none;
 }
-.arena-page .watch-sheet :is(.stake-positions, .stake-ready) {
+.arena-page .watch-sheet .stake-positions {
   margin: 0;
 }
 .arena-page .watch-sheet .stake-positions ul {
@@ -6803,16 +6600,6 @@ html.watch-open .cookie-choice {
 .arena-page .watch-sheet .stake-advanced[open] {
   padding-bottom: var(--space-4);
 }
-/* The defaults form shows here whatever the debate's state: they open
-   every ticket. Its own heading is the row's. */
-[data-a4-inline] .watch-sheet [data-more-slot="ready"] > .stake-ready[hidden] {
-  display: flex !important;
-}
-.arena-page .watch-sheet .stake-ready {
-  padding-top: 0;
-  border-top: 0;
-}
-.arena-page .watch-sheet .stake-ready h3,
 .arena-page
   .watch-sheet
   [data-more-slot]

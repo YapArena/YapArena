@@ -22,9 +22,8 @@ import {
   debatesHere,
   lastPosition,
   liveWindow,
+  chipSize,
   parseCeiling,
-  parseDefaults,
-  parseSize,
   percent,
   placementError,
   positionStatus,
@@ -44,8 +43,6 @@ import {
   speakerLine,
   ticketTerms,
   watchSheetName,
-  watchSize,
-  watchSizeChoices,
   type PublicWindow,
   type PublicWindows,
   type StakeRound,
@@ -85,14 +82,10 @@ if (root) {
     ...root.querySelectorAll<HTMLButtonElement>("[data-stake-side]"),
   ];
   const ticket = one<HTMLFormElement>("[data-stake-ticket]");
-  const sizeInput = one<HTMLInputElement>(
-    '[data-stake-ticket] input[name="size"]',
-  );
   const readInput = one<HTMLInputElement>(
     '[data-stake-ticket] input[name="read"]',
   );
   const readOut = one("[data-stake-read-out]");
-  const ceilingNote = one("[data-stake-ceiling]");
   const advanced = one<HTMLDetailsElement>("[data-stake-advanced]");
   const ceilingInput = one<HTMLInputElement>(
     '[data-stake-ticket] input[name="ceiling"]',
@@ -106,29 +99,19 @@ if (root) {
   const positionsWrap = one<HTMLDetailsElement>("[data-stake-positions-wrap]");
   const positionsList = one("[data-stake-positions]");
   const positionsCount = one("[data-stake-positions-count]");
-  const repeat = one<HTMLButtonElement>("[data-stake-repeat]");
-  const ready = one<HTMLFormElement>("[data-stake-ready]");
-  const readySize = one<HTMLInputElement>(
-    '[data-stake-ready] input[name="size"]',
-  );
-  const readyRead = one<HTMLInputElement>(
-    '[data-stake-ready] input[name="read"]',
-  );
-  const readyReadOut = one("[data-stake-ready-read-out]");
-  const readyNote = one("[data-stake-ready-note]");
   const results = one("[data-stake-results]");
   const resultsTitle = one("[data-stake-results-title]");
   const resultsList = one("[data-stake-results-list]");
   const review = one<HTMLDialogElement>("[data-stake-review]");
   const reviewTerms = one("[data-stake-review-terms]");
-  const term = (name: string) => one(`[data-stake-term="${name}"]`);
-  // Decision 0016: while the phone's full screen is open, the ticket is its
-  // answer sheet: the side word and clock on top, the full screen's sizes,
-  // the read and one button naming the terms.
+  // Decision 0016 (amended 2026-11-16): one ticket wherever a viewer
+  // answers, with the side word and clock on top, the five size chips, the
+  // read and one key naming the terms. On a phone it is a sheet, also over
+  // the full screen.
   const arena = root.closest<HTMLElement>("[data-arena]");
   const watching = () => arena?.dataset.watch === "open";
-  const watchSide = one("[data-stake-watch-side]");
-  const watchClock = one("[data-stake-watch-clock]");
+  const ticketSide = one("[data-stake-ticket-side]");
+  const ticketClock = one("[data-stake-ticket-clock]");
   const repeatLine = one<HTMLButtonElement>("[data-stake-repeat-line]");
   const sizeChips = [
     ...root.querySelectorAll<HTMLButtonElement>("[data-stake-size]"),
@@ -192,36 +175,24 @@ if (root) {
     }
   };
   reviewChoice.checked = stored("yaparena-stake-review") === "1";
-  // The ticket's size and its chips move together.
+  // "Get ready" and its saved defaults are gone (Decision 0016, amended
+  // 2026-11-16): the ticket opens at 10 contracts and a 50% read, then keeps
+  // the last size and read used on this page. A device that saved defaults
+  // drops them.
+  try {
+    localStorage.removeItem("yaparena-stake-defaults");
+  } catch {
+    // Storage may be unavailable; nothing was saved then.
+  }
+  // The ticket's size and its chips move together; a size with no chip
+  // moves to the nearest one.
   function applySize(value: number) {
-    size = value;
-    sizeInput.value = String(value);
+    size = chipSize(value);
     for (const chip of sizeChips)
       chip.setAttribute(
         "aria-pressed",
-        String(Number(chip.dataset.stakeSize) === value),
+        String(Number(chip.dataset.stakeSize) === size),
       );
-  }
-  function applyReadySize(value: number) {
-    readySize.value = String(value);
-    // The form's own chips: the phone full screen's ··· sheet borrows it.
-    for (const chip of ready.querySelectorAll<HTMLButtonElement>(
-      "[data-stake-ready-size]",
-    ))
-      chip.setAttribute(
-        "aria-pressed",
-        String(Number(chip.dataset.stakeReadySize) === value),
-      );
-  }
-  // "Get ready" defaults saved on this device open every ticket.
-  const defaultsKey = "yaparena-stake-defaults";
-  const defaults = parseDefaults(stored(defaultsKey));
-  if (defaults) {
-    applySize(defaults.size);
-    readInput.value = String(defaults.read);
-    applyReadySize(defaults.size);
-    readyRead.value = String(defaults.read);
-    readyReadOut.textContent = `${defaults.read}%`;
   }
 
   async function coinApi<T>(
@@ -454,8 +425,8 @@ if (root) {
         "is-ending",
         current.via === "live" && left <= 10,
       );
-      watchClock.textContent = turnClock.textContent;
-      watchClock.classList.toggle(
+      ticketClock.textContent = turnClock.textContent;
+      ticketClock.classList.toggle(
         "is-ending",
         current.via === "live" && left <= 10,
       );
@@ -475,7 +446,7 @@ if (root) {
     turnBar.hidden = eventStatus !== "live";
     progress.hidden = true;
     turnClock.textContent = "";
-    watchClock.textContent = "";
+    ticketClock.textContent = "";
     if (eventStatus === "live") {
       turnTitle.textContent = "Between turns";
       meta.textContent = "The next window opens when the next speaker starts.";
@@ -552,38 +523,16 @@ if (root) {
     }
     const showTicket = Boolean(open && signedIn && side);
     ticket.hidden = !showTicket;
-    const watch = watching();
-    // Each context shows its own chips (the full screen has no typed size);
-    // a size the full screen has no chip for moves to its nearest one there.
-    for (const chip of sizeChips)
-      if (chip.dataset.sizeSet)
-        chip.hidden = chip.dataset.sizeSet !== (watch ? "watch" : "page");
-    watchSide.textContent = side ? sideName(side) : "";
+    ticketSide.textContent = side ? sideName(side) : "";
     if (side) {
       ticket.dataset.side = side;
-      watchSide.dataset.side = side;
+      ticketSide.dataset.side = side;
     }
     if (!showTicket || !side || !current) return;
-    if (
-      watch &&
-      (!watchSizeChoices.some((choice) => choice === size) ||
-        parseSize(sizeInput.value) === null)
-    )
-      applySize(watchSize(size));
     const value = cents();
-    const terms = ticketTerms(size, value);
     readOut.textContent = `${readInput.value}%`;
-    ceilingNote.textContent = `You'll pay at most ${price(value)} per contract.`;
-    term("reserved").textContent = terms.reserved;
-    term("lose").textContent = terms.mostYouCanLose;
-    term("back").textContent =
-      `${size} × final ${sideName(side).toLowerCase()} share`;
-    term("results").textContent =
-      current.round?.revealMode === "per_round" ||
-      windows?.revealMode === "per_round"
-        ? "When this turn's window closes"
-        : resultsText(current.round);
-    // "Reserved now" must fit the balance before the confirm tap.
+    // What a position reserves (one coin per contract) must fit the balance
+    // before the confirm tap.
     const short = shortfall();
     if (short) errorLine.textContent = short;
     else if (errorLine.dataset.shortfall === "true") errorLine.textContent = "";
@@ -619,31 +568,17 @@ if (root) {
       }),
     );
   }
-  // The next turn offers the last position again; it pre-fills the ticket
-  // and still needs the confirm tap.
+  // The next turn offers the last position again as one line under the
+  // chips (Decision 0016, D7); it fills the ticket and still needs the
+  // confirm tap.
   function renderRepeat(current: Target | null) {
-    const last =
-      joinable(current) && signedIn && !side && !current.round?.own
-        ? lastPosition(rounds, current.turnNumber)
-        : null;
-    repeat.hidden = !last?.own;
-    repeat.disabled = busy;
-    if (last?.own) repeat.textContent = repeatLabel(last.own);
-    // The full screen's sheet opens with a side already picked, so it keeps
-    // the offer as one line under its chips (Decision 0016, D7).
     const again =
-      watching() && joinable(current) && signedIn && side && !current.round?.own
+      joinable(current) && signedIn && side && !current.round?.own
         ? lastPosition(rounds, current.turnNumber)
         : null;
     repeatLine.hidden = !again?.own;
     repeatLine.disabled = busy;
     if (again?.own) repeatLine.textContent = repeatLabel(again.own);
-  }
-  function renderReady() {
-    ready.hidden = !(
-      windows &&
-      (windows.eventStatus === "scheduled" || windows.eventStatus === "ready")
-    );
   }
   // Revealed positions move from "Your positions" to the results card.
   function renderResults() {
@@ -702,7 +637,6 @@ if (root) {
     if (status.textContent !== text) status.textContent = text;
     renderTicket(current);
     renderRepeat(current);
-    renderReady();
     renderReceipt(current);
     renderResults();
     renderPositions();
@@ -711,11 +645,11 @@ if (root) {
       : "";
     nameSheet();
   }
-  // Decision 0016: over the full screen the sheet is "Your answer: Yes", not
-  // "Do you agree?", which it doesn't show there.
+  // Decision 0016: as a phone's sheet, on the page or over the full screen,
+  // the ticket is "Your answer: Yes", not "Do you agree?", which it doesn't
+  // show there.
   function nameSheet() {
-    const name =
-      watching() && "sheet" in root!.dataset ? watchSheetName(side) : null;
+    const name = "sheet" in root!.dataset ? watchSheetName(side) : null;
     if (name) {
       root!.setAttribute("role", "dialog");
       root!.setAttribute("aria-label", name);
@@ -832,16 +766,11 @@ if (root) {
         explaining = true;
       }
       render();
-      if (!watching()) {
-        sizeInput.focus();
-        return;
-      }
-      // The full screen's sheet has no typed size: its chosen chip takes
-      // focus once the sheet shows (debate-layout.ts opens it after this).
+      // The chosen size chip takes focus once the ticket shows: on a phone
+      // debate-layout.ts opens the sheet after this click.
       requestAnimationFrame(() => {
         const chip = sizeChips.find(
-          (item) =>
-            !item.hidden && item.getAttribute("aria-pressed") === "true",
+          (item) => item.getAttribute("aria-pressed") === "true",
         );
         if (!ticket.hidden) (chip ?? confirm).focus({ preventScroll: true });
       });
@@ -864,54 +793,16 @@ if (root) {
     render();
     confirm.focus();
   }
-  repeat.addEventListener("click", sameAsLast);
   repeatLine.addEventListener("click", sameAsLast);
-  // Opening or closing the full screen (frontend/watch-screen.ts) switches
-  // the ticket's look and sizes.
+  // Opening or closing the full screen (frontend/watch-screen.ts) changes
+  // where the sheet sits and how it is named.
   window.addEventListener("yap:watch", (event) => {
     if (event.detail.debateId === debateId) render();
   });
-  // As the full screen's answer sheet it is a dialog named for its side.
+  // As a sheet it is a dialog named for its side.
   new MutationObserver(nameSheet).observe(root, {
     attributes: true,
     attributeFilter: ["data-sheet"],
-  });
-  for (const chip of root.querySelectorAll<HTMLButtonElement>(
-    "[data-stake-ready-size]",
-  ))
-    chip.addEventListener("click", () =>
-      applyReadySize(Number(chip.dataset.stakeReadySize)),
-    );
-  readyRead.addEventListener("input", () => {
-    readyReadOut.textContent = `${readyRead.value}%`;
-  });
-  ready.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const chosen = parseSize(readySize.value);
-    if (chosen === null) {
-      readyNote.textContent =
-        "Enter a whole number of contracts from 1 to 100.";
-      return;
-    }
-    const read = Number(readyRead.value);
-    const saved = JSON.stringify({ size: chosen, read });
-    remember(defaultsKey, saved);
-    applyReadySize(chosen);
-    applySize(chosen);
-    readInput.value = String(read);
-    readyNote.textContent =
-      stored(defaultsKey) === saved
-        ? `Saved on this device. Your ticket will open with ${chosen} contracts and a ${read}% read.`
-        : `This browser didn't save it, so the ticket uses ${chosen} contracts and a ${read}% read on this page only.`;
-    render();
-  });
-  sizeInput.addEventListener("input", () => {
-    const value = parseSize(sizeInput.value);
-    errorLine.textContent = value
-      ? ""
-      : "Enter a whole number of contracts from 1 to 100.";
-    if (value) size = value;
-    render();
   });
   readInput.addEventListener("input", render);
   ceilingInput.addEventListener("input", () => {
@@ -921,22 +812,17 @@ if (root) {
         : "";
     render();
   });
-  // Only the confirm button places an answer; Enter in a field does not.
-  for (const field of [sizeInput, ceilingInput])
-    field.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") event.preventDefault();
-    });
+  // Only the confirm button places an answer; Enter in the field does not.
+  ceilingInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") event.preventDefault();
+  });
   advanced.addEventListener("toggle", render);
   reviewChoice.addEventListener("change", () =>
     remember("yaparena-stake-review", reviewChoice.checked ? "1" : "0"),
   );
   ticket.addEventListener("submit", (event) => {
     event.preventDefault();
-    if (!side || parseSize(sizeInput.value) === null) {
-      errorLine.textContent =
-        "Enter a whole number of contracts from 1 to 100.";
-      return;
-    }
+    if (!side) return;
     if (!reviewChoice.checked) return void place();
     const current = target();
     if (!current) return;

@@ -5,14 +5,13 @@ import {
   ceilingCents,
   ceilingText,
   clock,
+  chipSize,
   coins,
   confirmText,
   debatesHere,
   lastPosition,
   liveWindow,
   parseCeiling,
-  parseDefaults,
-  parseSize,
   percent,
   placementError,
   waitText,
@@ -33,8 +32,6 @@ import {
   speakerLine,
   ticketTerms,
   watchSheetName,
-  watchSize,
-  watchSizeChoices,
 } from "../public/stake-model.js";
 
 const at = (seconds) => new Date(Date.UTC(2026, 9, 26, 18, 0, seconds));
@@ -97,29 +94,28 @@ describe("betting panel terms (Decision 0013)", () => {
     assert.equal(reservedAtoms(10), 100_000n);
   });
 
-  // Decision 0016, point 5: the full screen's answer sheet.
-  it("offers the full screen its own sizes and keeps the page's", () => {
-    assert.deepEqual([...watchSizeChoices], [10, 25, 50, 75, 100]);
-    assert.deepEqual([...sizeChoices], [5, 10, 25, 50, 100]);
-    for (const size of watchSizeChoices) assert.equal(watchSize(size), size);
+  // Decision 0016, amended 2026-11-16: one ticket wherever a viewer answers.
+  it("offers the same five sizes everywhere, with no typed size", () => {
+    assert.deepEqual([...sizeChoices], [10, 25, 50, 75, 100]);
+    for (const size of sizeChoices) assert.equal(chipSize(size), size);
   });
 
-  it("moves a size the full screen has no chip for to the nearest one", () => {
-    // The page's 5 chip and its typed sizes.
-    assert.equal(watchSize(5), 10);
-    assert.equal(watchSize(1), 10);
-    assert.equal(watchSize(30), 25);
-    assert.equal(watchSize(64), 75);
-    assert.equal(watchSize(90), 100);
-    assert.equal(watchSize(60), 50);
-    assert.equal(watchSize(37), 25);
-    assert.equal(watchSize(38), 50);
+  it("moves a size without a chip to the nearest one", () => {
+    // The old 5 chip, old typed sizes and old saved defaults.
+    assert.equal(chipSize(5), 10);
+    assert.equal(chipSize(1), 10);
+    assert.equal(chipSize(30), 25);
+    assert.equal(chipSize(64), 75);
+    assert.equal(chipSize(90), 100);
+    assert.equal(chipSize(60), 50);
+    assert.equal(chipSize(37), 25);
+    assert.equal(chipSize(38), 50);
     // Halfway keeps the smaller size, so it never risks more.
-    assert.equal(watchSize(17.5), 10);
-    assert.equal(watchSize(62.5), 50);
+    assert.equal(chipSize(17.5), 10);
+    assert.equal(chipSize(62.5), 50);
   });
 
-  it("names the full screen's answer sheet for its side, not the question", () => {
+  it("names a phone's answer sheet for its side, not the question", () => {
     assert.equal(watchSheetName("YES"), "Your answer: Yes");
     assert.equal(watchSheetName("NO"), "Your answer: No");
     // After placing, the side is cleared while the sheet closes.
@@ -160,11 +156,7 @@ describe("betting panel terms (Decision 0013)", () => {
     );
   });
 
-  it("accepts only whole sizes from 1 to 100 and prices from 1 to 99 cents", () => {
-    assert.equal(parseSize("25"), 25);
-    assert.equal(parseSize(" 100 "), 100);
-    for (const text of ["0", "101", "2.5", "-3", "", "1e2", "ten"])
-      assert.equal(parseSize(text), null, text);
+  it("accepts only prices from 1 to 99 cents", () => {
     assert.equal(parseCeiling("62"), 62);
     assert.equal(parseCeiling("62¢"), 62);
     assert.equal(parseCeiling("0.62"), 62);
@@ -388,26 +380,11 @@ describe("results, repeat and get-ready defaults (Decision 0013)", () => {
       repeatLabel(own("NO", "0.62", 25)),
       "Same as last turn · No · 25 · read 62%",
     );
-  });
-
-  it("accepts only whole saved defaults within the ticket's ranges", () => {
-    assert.deepEqual(parseDefaults('{"size":25,"read":60}'), {
-      size: 25,
-      read: 60,
-    });
-    for (const text of [
-      null,
-      "",
-      "not json",
-      "[]",
-      '{"size":25}',
-      '{"size":0,"read":60}',
-      '{"size":101,"read":60}',
-      '{"size":2.5,"read":60}',
-      '{"size":25,"read":100}',
-      '{"size":"25","read":60}',
-    ])
-      assert.equal(parseDefaults(text), null, String(text));
+    // A position placed with a size that has no chip offers the nearest.
+    assert.equal(
+      repeatLabel(own("YES", "0.40", 37)),
+      "Same as last turn · Yes · 25 · read 40%",
+    );
   });
 
   it("totals revealed positions and keeps locked ones apart", () => {
