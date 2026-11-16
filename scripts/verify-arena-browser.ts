@@ -726,9 +726,97 @@ export async function verifyArenaBrowser({
     await page.screenshot({ path: directory + "/phone-watch-result.png" });
     await plate.waitFor({ state: "detached", timeout: 5000 });
     checks.phoneResultPlate = true;
-    // Turns opens its sheet; Escape closes it, then the full screen.
+    // Point 5: a dock key opens the answer sheet over the full screen, named
+    // for its side, with the five full-screen sizes and one key naming the
+    // terms as they change. It needs an open turn window this account can
+    // answer; without one the keys stay off and the check says so.
+    const yesKey = page.locator('[data-watch-key="YES"]');
+    const answerable = await page
+      .waitForFunction(
+        () =>
+          !document.querySelector<HTMLButtonElement>('[data-watch-key="YES"]')!
+            .disabled,
+        {},
+        { timeout: 5000 },
+      )
+      .then(
+        () => true,
+        () => false,
+      );
+    if (answerable) {
+      await yesKey.click();
+      const sheet = page.getByRole("dialog", { name: "Your answer: Yes" });
+      await sheet.waitFor();
+      const ticket = () =>
+        page.evaluate(() => {
+          const panel =
+            document.querySelector<HTMLElement>("[data-stake-panel]")!;
+          const shown = (node: Element) =>
+            (node as HTMLElement).checkVisibility();
+          return {
+            chips: [...panel.querySelectorAll("[data-stake-size]")]
+              .filter(shown)
+              .map((chip) => chip.textContent),
+            typed: shown(panel.querySelector('input[name="size"]')!),
+            terms: shown(panel.querySelector(".stake-terms")!),
+            question: shown(panel.querySelector(".stake-question")!),
+            side: panel.querySelector("[data-stake-watch-side]")!.textContent,
+            place: panel.querySelector("[data-stake-confirm]")!.textContent,
+            final: shown(panel.querySelector(".stake-final")!),
+            above:
+              Number(getComputedStyle(panel).zIndex) >
+              Number(
+                getComputedStyle(document.querySelector("[data-arena-video]")!)
+                  .zIndex,
+              ),
+          };
+        });
+      await sheet.getByRole("button", { name: "25", exact: true }).click();
+      const opened = await ticket();
+      assert.deepEqual(opened.chips, ["10", "25", "50", "75", "100"]);
+      assert.deepEqual(
+        [opened.typed, opened.terms, opened.question, opened.final],
+        [false, false, false, true],
+      );
+      assert.equal(opened.side, "Yes");
+      assert.ok(opened.above);
+      assert.match(opened.place!, /^Place Yes · 25 · max \d+(\.\d\d)? YC$/);
+      // The key follows the size and the read at once.
+      await sheet.getByRole("button", { name: "75", exact: true }).click();
+      await page
+        .locator('[data-stake-ticket] input[name="read"]')
+        .evaluate((input: HTMLInputElement) => {
+          input.value = "40";
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+      assert.equal((await ticket()).place, "Place Yes · 75 · max 30 YC");
+      await page.screenshot({ path: directory + "/phone-watch-answer.png" });
+      // Escape closes it and gives focus back to the key.
+      await page.keyboard.press("Escape");
+      await sheet.waitFor({ state: "hidden" });
+      assert.equal(
+        await page.evaluate(
+          () =>
+            (document.activeElement as HTMLElement | null)?.dataset.watchKey,
+        ),
+        "YES",
+      );
+      checks.phoneAnswerSheet = true;
+    } else checks.phoneAnswerSheetNoOpenWindow = true;
+    // Turns opens its sheet with the debate's turns in its body; Escape
+    // closes it, then the full screen.
     await page.getByRole("button", { name: "Turns", exact: true }).click();
     await page.locator('[data-watch-sheet="turns"]').waitFor();
+    const turnsBody = page.locator("[data-turns-sheet-body]");
+    await turnsBody.locator(".turns-sheet-heading").first().waitFor();
+    const turnsText = (await turnsBody.textContent()) ?? "";
+    assert.ok(
+      turnsText.includes("Last answers in this debate") ||
+        turnsText.includes("Share who said yes, each turn"),
+    );
+    assert.ok(!turnsText.includes("Not a vote"));
+    await page.screenshot({ path: directory + "/phone-watch-turns.png" });
+    checks.phoneTurnsSheet = true;
     await page.keyboard.press("Escape");
     await page
       .locator('[data-watch-sheet="turns"]')

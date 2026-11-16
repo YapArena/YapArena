@@ -9,6 +9,7 @@ import {
   barScale,
   barShape,
   captionParts,
+  initials,
   percents,
   phoneColumns,
   rowLine,
@@ -16,14 +17,7 @@ import {
   type TurnColumn,
 } from "./turn-results-model.js";
 
-/** "MC" for "Maya Chen", as on the scoreboard's avatars. */
-export const initials = (name: string) =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0]!.toUpperCase())
-    .join("");
+export { initials };
 
 export interface TurnBarsView {
   columns: readonly TurnColumn[];
