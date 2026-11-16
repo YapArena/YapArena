@@ -673,6 +673,19 @@ describe("configuration", () => {
       }).media.livekitUrl,
       "https://media.example",
     );
+    // LiveKit egress opens the recording page only over HTTPS in production.
+    assert.throws(
+      () =>
+        loadConfig({
+          DATABASE_URL: databaseUrl,
+          ...production,
+          MEDIA_RECORDING_TEMPLATE_URL:
+            "http://arena.example/recording-template/",
+          NODE_ENV: "production",
+          APP_ORIGIN: "https://arena.example",
+        }),
+      /MEDIA_RECORDING_TEMPLATE_URL must be an HTTPS page address/,
+    );
     assert.throws(
       () =>
         loadConfig({
@@ -1031,6 +1044,52 @@ describe("per-process secrets", () => {
         MEDIA_ADMISSION_SECRET: admission,
       }).unusedSecrets,
       [],
+    );
+  });
+
+  it("accepts the recording page address for LiveKit Egress (Decision 0016)", () => {
+    const template = "https://arena.example/recording-template/";
+    // Web starts recordings from the ready route and jobs from automatic start.
+    for (const load of [loadConfig, jobs])
+      assert.equal(
+        load({ ...base, ...media, MEDIA_RECORDING_TEMPLATE_URL: template })
+          .media.recordingTemplateUrl,
+        template,
+      );
+    const unset = loadConfig({ ...base, ...media }).media;
+    assert.equal("recordingTemplateUrl" in unset, false);
+    // Outside production a local page can be tried with a local LiveKit.
+    assert.equal(
+      loadConfig({
+        ...base,
+        ...media,
+        NODE_ENV: "development",
+        MEDIA_RECORDING_TEMPLATE_URL:
+          "http://localhost:3000/recording-template/",
+      }).media.recordingTemplateUrl,
+      "http://localhost:3000/recording-template/",
+    );
+    for (const value of [
+      "not a url",
+      "ftp://arena.example/recording-template/",
+      "https://user:pass@arena.example/recording-template/",
+      "https://arena.example/recording-template/?layout=grid",
+      "https://arena.example/recording-template/#top",
+      "https://arena.example/recording-template",
+    ])
+      assert.throws(
+        () =>
+          loadConfig({
+            ...base,
+            ...media,
+            MEDIA_RECORDING_TEMPLATE_URL: value,
+          }),
+        /MEDIA_RECORDING_TEMPLATE_URL must be/,
+        value,
+      );
+    assert.throws(
+      () => loadConfig({ ...base, MEDIA_RECORDING_TEMPLATE_URL: template }),
+      /the recording template requires media configuration/,
     );
   });
 

@@ -18,6 +18,7 @@ import type { SseResponse } from "./platform/sse.ts";
 import { createMediaTelemetry } from "./features/media/telemetry.ts";
 import type { createMediaRepository } from "./features/media/repository.ts";
 import type { createMediaProvider } from "./features/media/provider.ts";
+import { createRecordingTemplateRouter } from "./features/media/recording-template.ts";
 import type { createCommunityRepository } from "./features/community/repository.ts";
 import type { createCommunityStreams } from "./features/community/streams.ts";
 import type { createMeasurementRepository } from "./features/measurement/repository.ts";
@@ -491,6 +492,14 @@ export function createApp({
     ? createProductActionRecorder({ measurement, environment })
     : undefined;
 
+  // Decision 0016: the page LiveKit egress records, with its own policy. Its
+  // script and style come from /assets, which discovery serves.
+  if (mediaProvider)
+    app.use(
+      createRecordingTemplateRouter({
+        connectSources: mediaProvider.recordingConnectSources ?? [],
+      }),
+    );
   if (discovery) {
     app.get("/sw.js", (_request, response) => {
       response

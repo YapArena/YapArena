@@ -405,3 +405,36 @@ it("uploads recordings with the separate Egress key when one is configured", asy
     ],
   );
 });
+it("records YapArena's sides page when a template URL is configured, else LiveKit's grid", async (t) => {
+  // Decision 0016: side A left and side B right in every new recording.
+  const requests = [];
+  t.mock.method(
+    EgressClient.prototype,
+    "startRoomCompositeEgress",
+    async (room, _output, options) => {
+      requests.push({ room, options });
+      return { egressId: `synthetic-egress-${requests.length}` };
+    },
+  );
+  const grid = await createMediaProvider(config).beginRecording(id);
+  assert.equal(grid.layout, "livekit-grid");
+  assert.equal(grid.egressId, "synthetic-egress-1");
+  const template = "https://arena.example/recording-template/";
+  const sides = await createMediaProvider({
+    ...config,
+    recordingTemplateUrl: template,
+  }).beginRecording(id);
+  assert.equal(sides.layout, "sides-v1");
+  assert.match(sides.key, new RegExp(`^debates/${id}/[0-9a-f-]{36}\\.mp4$`));
+  assert.deepEqual(requests, [
+    { room: `debate-${id}`, options: { layout: "grid" } },
+    {
+      room: `debate-${id}`,
+      options: { layout: "sides-v1", customBaseUrl: template },
+    },
+  ]);
+  assert.deepEqual(createMediaProvider(config).recordingConnectSources, [
+    "wss://live.example",
+    "https://live.example",
+  ]);
+});

@@ -27,12 +27,20 @@ export interface MediaGrant {
   token: string;
   url: string;
 }
+/**
+ * Where each camera sits in a recording (Decision 0016): `sides-v1` is
+ * YapArena's recording page, side A filling the left half and side B the
+ * right; `livekit-grid` is LiveKit's grid page, used before it.
+ */
+export type CompositeLayout = "sides-v1" | "livekit-grid";
 export interface ReplayGrant {
   type: "hls" | "mp4";
   url: string;
   captionsUrl?: string;
   expiresAt: string;
   expiresIn: number;
+  /** Older servers omit it; their recordings are all `livekit-grid`. */
+  layout?: CompositeLayout;
 }
 export interface MediaResponses {
   "": MediaSnapshot;

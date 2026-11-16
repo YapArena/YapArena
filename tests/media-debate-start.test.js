@@ -15,8 +15,8 @@ function fixture({
   const calls = [];
   const errors = [];
   const media = {
-    async start(_id, egress, key) {
-      calls.push(`start:${egress}:${key}`);
+    async start(_id, egress, key, layout) {
+      calls.push(`start:${egress}:${key}:${layout}`);
     },
     async get() {
       return { debateId, state: "running" };
@@ -34,7 +34,7 @@ function fixture({
     },
     async beginRecording() {
       calls.push("beginRecording");
-      return { egressId: "egress-1", key: "recording.mp4" };
+      return { egressId: "egress-1", key: "recording.mp4", layout: "sides-v1" };
     },
     async setTurn(_id, side) {
       calls.push(`setTurn:${side}`);
@@ -74,7 +74,8 @@ describe("shared debate start", () => {
     const result = await f.start();
     assert.deepEqual(f.calls, [
       "beginRecording",
-      "start:egress-1:recording.mp4",
+      // Decision 0016: the recording's layout is stored with it.
+      "start:egress-1:recording.mp4:sides-v1",
       "transition:9:start:both ready",
       "setTurn:A",
     ]);

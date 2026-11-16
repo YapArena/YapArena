@@ -181,6 +181,35 @@ function parseReplayEncoder(
   });
 }
 
+// Decision 0016: the public address of the recording page that LiveKit egress
+// opens (/recording-template/ on this site). Unset, recordings use LiveKit's
+// own grid page, so local media without a public address still records.
+function parseRecordingTemplate(
+  value: string | undefined,
+  nodeEnvironment: string,
+) {
+  if (!value) return undefined;
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error("MEDIA_RECORDING_TEMPLATE_URL must be a URL");
+  }
+  if (
+    !["http:", "https:"].includes(url.protocol) ||
+    (nodeEnvironment === "production" && url.protocol !== "https:") ||
+    url.username ||
+    url.password ||
+    url.search ||
+    url.hash ||
+    !url.pathname.endsWith("/")
+  )
+    throw new Error(
+      "MEDIA_RECORDING_TEMPLATE_URL must be an HTTPS page address ending in / with no query",
+    );
+  return url.href;
+}
+
 function parseMedia(
   environment: NodeJS.ProcessEnv,
   nodeEnvironment: string,
@@ -208,6 +237,8 @@ function parseMedia(
       throw new Error("replay edge requires media configuration");
     if (environment.MEDIA_EGRESS_S3_ACCESS_KEY)
       throw new Error("recording upload keys require media configuration");
+    if (environment.MEDIA_RECORDING_TEMPLATE_URL)
+      throw new Error("the recording template requires media configuration");
     return undefined;
   }
   if (set.length !== names.length)
@@ -237,7 +268,12 @@ function parseMedia(
     )
       throw new Error("invalid public media S3 endpoint");
   }
+  const recordingTemplateUrl = parseRecordingTemplate(
+    environment.MEDIA_RECORDING_TEMPLATE_URL,
+    nodeEnvironment,
+  );
   return Object.freeze({
+    ...(recordingTemplateUrl ? { recordingTemplateUrl } : {}),
     livekitUrl: environment.LIVEKIT_URL!,
     livekitPublicUrl: environment.LIVEKIT_PUBLIC_URL!,
     livekitKey: environment.LIVEKIT_API_KEY!,
