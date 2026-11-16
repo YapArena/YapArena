@@ -5514,10 +5514,11 @@ html.watch-open .cookie-choice {
 }
 
 /* Decision 0016 — replay split and pause */
-/* A vertical phone replay draws each camera of the one recording into its
-   own canvas (frontend/replay-split.ts). The video keeps the sound and the
-   time unseen: it stays rendered, because a phone browser may stop decoding
-   a video that is display: none. */
+/* A vertical replay (data-watch-replay="split") draws each side's camera
+   from the one recording into a canvas in its camera box
+   (frontend/replay-split.ts). The video keeps the sound and the time
+   unseen: it stays rendered, because a phone browser may stop decoding a
+   video that is display: none. */
 .arena-page [data-media-replay-video][data-replay-split] {
   opacity: 0;
   pointer-events: none;
@@ -5528,14 +5529,30 @@ html.watch-open .cookie-choice {
   height: 100%;
   background: var(--bg);
 }
-/* D9: the replay's only control, a round key centred on the picture
-   (frontend/replay-pause.ts). Two bars while the replay plays, a triangle
-   while it doesn't. */
+/* Horizontal shows the recording as it is, filling the screen: each half of
+   a side-by-side recording fills its camera box. */
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
+  .arena-video-surface
+  > video[data-media-replay-video] {
+  object-fit: cover;
+}
+/* The listener's camera dims on a replay too, where each box holds one
+   side: split vertically, or a recording with fixed sides ("sides-v1")
+   side by side. A LiveKit grid recording side by side can't tell its
+   sides apart, so nothing dims over it. */
+.arena-page
+  .arena-workspace[data-watch-phase="running"]:is(
+    [data-watch-replay="split"],
+    [data-watch-replay="sides"]
+  )
+  .watch-cam::after {
+  opacity: var(--watch-dim, 0.18);
+}
+/* D9: the replay's only control, a round key on the seam (placed by the
+   shell's .watch-pause rule; frontend/replay-pause.ts). The shell's pause
+   glyph while the replay plays, a triangle while it doesn't. */
 .arena-page [data-watch-pause] {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 3;
   display: grid;
   place-items: center;
   width: 64px;
@@ -5548,22 +5565,21 @@ html.watch-open .cookie-choice {
   background: rgb(0 0 0 / 45%);
   color: var(--acid);
   cursor: pointer;
-  transform: translate(-50%, -50%);
   -webkit-tap-highlight-color: transparent;
 }
-.arena-page [data-watch-pause]::before {
-  content: "";
-  box-sizing: border-box;
-  width: 12px;
-  height: 18px;
-  border-inline: 3px solid currentColor;
-  border-radius: 1px;
+.arena-page [data-watch-pause] > svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 2.2;
+}
+.arena-page [data-watch-pause][data-replay-state="paused"] > svg {
+  display: none;
 }
 .arena-page [data-watch-pause][data-replay-state="paused"]::before {
-  width: 16px;
+  content: "";
+  width: 18px;
+  height: 22px;
   margin-left: 4px;
-  border: 0;
-  border-radius: 0;
   background: currentColor;
   clip-path: polygon(0 0, 100% 50%, 0 100%);
 }

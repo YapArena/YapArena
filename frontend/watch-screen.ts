@@ -31,6 +31,9 @@ import {
 import type { PublicWindow, StakeSide } from "./stake-model.js";
 import { onStakePositions, onStakeWindows } from "./stake-windows.js";
 import { isTurnWindow } from "./turn-results-model.js";
+import { mountReplaySplit } from "./replay-split.js";
+import { mountPauseKey } from "./replay-pause.js";
+import { replayWatchMode } from "./replay-split-model.js";
 
 declare global {
   interface WindowEventMap {
@@ -177,6 +180,7 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
       // Without a history entry, the browser's back leaves the page.
     }
     announce(true);
+    syncReplay();
     tick();
     timer = window.setInterval(tick, 250);
     stage.focus({ preventScroll: true });
@@ -191,6 +195,7 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
       if (replayVideo && !replayVideo.paused) replayVideo.pause();
     }
     apply(watchReducer(state, { type: "close" }));
+    syncReplay();
     window.clearInterval(timer);
     root.classList.remove("watch-open");
     surface!.removeAttribute("role");
@@ -228,9 +233,59 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
   window.addEventListener("resize", () => {
     if (state.open && arena.dataset.watchOrientation !== orientation()) {
       arena.dataset.watchOrientation = orientation();
+      syncReplay();
       announce(true);
     }
   });
+
+  // ---- A replay: the split cameras and the pause key ----
+  // Vertical, side A's and side B's parts of the one recording are drawn into
+  // the two camera boxes (frontend/replay-split.ts) while the video keeps the
+  // sound and the time unseen; horizontal shows the recording as it is. D9:
+  // the pause key is a replay's only control. It replaces the native
+  // controls and shows and hides with the other tap controls; a live debate
+  // never has it.
+  const pauseKey = one<HTMLButtonElement>("[data-watch-pause]");
+  const camA = one('[data-watch-cam="A"]');
+  const camB = one('[data-watch-cam="B"]');
+  let unmountPause: (() => void) | null = null;
+  let unmountSplit: (() => void) | null = null;
+  function syncReplay() {
+    if (!replay || !replayVideo) return;
+    const mode = replayWatchMode({
+      open: state.open,
+      orientation: orientation(),
+      layout: replayVideo.dataset.replayLayout,
+    });
+    if (mode && pauseKey && !unmountPause) {
+      pauseKey.hidden = false;
+      unmountPause = mountPauseKey(pauseKey, replayVideo);
+    } else if (!mode && unmountPause) {
+      unmountPause();
+      unmountPause = null;
+      if (pauseKey) pauseKey.hidden = true;
+    }
+    if (mode === "split" && !unmountSplit && camA && camB) {
+      const canvasA = document.createElement("canvas");
+      const canvasB = document.createElement("canvas");
+      camA.prepend(canvasA);
+      camB.prepend(canvasB);
+      const stop = mountReplaySplit({ video: replayVideo, canvasA, canvasB });
+      unmountSplit = () => {
+        stop();
+        canvasA.remove();
+        canvasB.remove();
+      };
+    } else if (mode !== "split" && unmountSplit) {
+      unmountSplit();
+      unmountSplit = null;
+    }
+    // Where each camera box holds one side, the listener's camera dims.
+    if (mode) arena!.dataset.watchReplay = mode;
+    else delete arena!.dataset.watchReplay;
+  }
+  // The recording's layout arrives with the replay grant.
+  replayVideo?.addEventListener("loadedmetadata", syncReplay);
   window.addEventListener("popstate", () => {
     if (state.open) close(true, true);
   });
