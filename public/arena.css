@@ -5512,3 +5512,348 @@ html.watch-open .cookie-choice {
     animation: none;
   }
 }
+
+/* Decision 0016 — turn result plate */
+/* When a turn the viewer answered is revealed, a pixel-framed plate pops in
+   mid-screen on the phone's full screen (frontend/turn-result-plate.ts). A
+   win flashes a square shockwave and bursts green and white pixel bits; a
+   loss shakes and drops red shards; breaking even stays white and still.
+   The plate centres on its host, or on the point the host's
+   --watch-result-x and --watch-result-y name. Under reduced motion it only
+   fades. */
+.watch-result {
+  --watch-result-ink: var(--text);
+  --watch-result-on: var(--on-acid);
+  --watch-result-glow: rgb(255 255 255 / 14%);
+  --watch-result-alt: var(--acid);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.watch-result[data-tone="win"] {
+  --watch-result-ink: var(--answer-yes);
+  --watch-result-on: var(--on-yes);
+  /* --answer-yes at 30%. */
+  --watch-result-glow: rgb(47 191 113 / 30%);
+}
+.watch-result[data-tone="loss"] {
+  --watch-result-ink: var(--answer-no);
+  --watch-result-on: var(--on-no);
+  /* --answer-no at 24%. */
+  --watch-result-glow: rgb(255 83 108 / 24%);
+  --watch-result-alt: var(--muted);
+}
+.watch-result-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--watch-result-x, 50%) var(--watch-result-y, 50%),
+    var(--watch-result-glow),
+    transparent 62%
+  );
+  opacity: 0;
+  animation: watch-result-flash 1.4s ease-out forwards;
+}
+.watch-result-anchor {
+  position: absolute;
+  left: var(--watch-result-x, 50%);
+  top: var(--watch-result-y, 50%);
+  width: 0;
+  height: 0;
+}
+.watch-result-wave {
+  position: absolute;
+  left: -70px;
+  top: -70px;
+  box-sizing: border-box;
+  width: 140px;
+  height: 140px;
+  border: 4px solid var(--watch-result-ink);
+  opacity: 0;
+  animation: watch-result-wave 0.7s steps(7) 0.08s forwards;
+}
+.watch-result-ray {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform: rotate(var(--watch-result-angle, 0deg));
+}
+.watch-result-bit {
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  background: var(--watch-result-ink);
+  opacity: 0;
+  animation: watch-result-far 1s steps(10) forwards;
+  animation-delay: var(--watch-result-delay, 0.1s);
+}
+.watch-result-bit.watch-result-alt {
+  background: var(--watch-result-alt);
+}
+.watch-result-bit.watch-result-near {
+  animation-name: watch-result-near;
+}
+.watch-result-bit.watch-result-drop {
+  animation-name: watch-result-drop;
+  animation-duration: 1.2s;
+}
+.watch-result-bit.watch-result-small {
+  left: -3px;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+}
+.watch-result-centre {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+}
+.watch-result-plate {
+  width: 248px;
+  animation: watch-result-pop 3.6s ease-out forwards;
+}
+/* Stepped pixel corners: 8 px on the plate, 6 px on the coin. */
+.watch-result-px {
+  clip-path: polygon(
+    0 8px,
+    4px 8px,
+    4px 4px,
+    8px 4px,
+    8px 0,
+    calc(100% - 8px) 0,
+    calc(100% - 8px) 4px,
+    calc(100% - 4px) 4px,
+    calc(100% - 4px) 8px,
+    100% 8px,
+    100% calc(100% - 8px),
+    calc(100% - 4px) calc(100% - 8px),
+    calc(100% - 4px) calc(100% - 4px),
+    calc(100% - 8px) calc(100% - 4px),
+    calc(100% - 8px) 100%,
+    8px 100%,
+    8px calc(100% - 4px),
+    4px calc(100% - 4px),
+    4px calc(100% - 8px),
+    0 calc(100% - 8px)
+  );
+}
+.watch-result-frame {
+  padding: 3px;
+  background: var(--watch-result-ink);
+}
+.watch-result-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px 14px;
+  background: #0b0b0b;
+}
+.watch-result-word {
+  color: var(--watch-result-ink);
+  font-family: var(--font-number);
+  font-size: 18px;
+  letter-spacing: 0.16em;
+}
+.watch-result-figure {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.watch-result-amt {
+  display: inline-block;
+  color: var(--text);
+  font-family: var(--font-number);
+  font-size: 50px;
+  line-height: 1;
+  white-space: nowrap;
+  animation: watch-result-ding 0.32s ease-out 1.05s;
+}
+.watch-result-coin {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  background: var(--watch-result-ink);
+  color: var(--watch-result-on);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  clip-path: polygon(
+    0 6px,
+    3px 6px,
+    3px 3px,
+    6px 3px,
+    6px 0,
+    calc(100% - 6px) 0,
+    calc(100% - 6px) 3px,
+    calc(100% - 3px) 3px,
+    calc(100% - 3px) 6px,
+    100% 6px,
+    100% calc(100% - 6px),
+    calc(100% - 3px) calc(100% - 6px),
+    calc(100% - 3px) calc(100% - 3px),
+    calc(100% - 6px) calc(100% - 3px),
+    calc(100% - 6px) 100%,
+    6px 100%,
+    6px calc(100% - 3px),
+    3px calc(100% - 3px),
+    3px calc(100% - 6px),
+    0 calc(100% - 6px)
+  );
+}
+.watch-result-streak {
+  margin-top: 2px;
+  padding: 5px 10px;
+  background: var(--acid);
+  color: var(--on-acid);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+.watch-result-shake {
+  animation: watch-result-shake 0.5s steps(1) 0.35s;
+}
+@keyframes watch-result-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  9% {
+    opacity: 1;
+    transform: scale(1.14);
+  }
+  14% {
+    transform: scale(0.95);
+  }
+  19% {
+    transform: scale(1);
+  }
+  84% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.72);
+  }
+}
+@keyframes watch-result-shake {
+  0% {
+    transform: translateX(-7px);
+  }
+  17% {
+    transform: translateX(7px);
+  }
+  33% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  67% {
+    transform: translateX(-2px);
+  }
+  83% {
+    transform: translateX(2px);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes watch-result-flash {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes watch-result-wave {
+  0% {
+    opacity: 1;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+@keyframes watch-result-far {
+  0% {
+    opacity: 1;
+    transform: translateY(-90px);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-230px);
+  }
+}
+@keyframes watch-result-near {
+  0% {
+    opacity: 1;
+    transform: translateY(-80px);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-170px);
+  }
+}
+@keyframes watch-result-drop {
+  0% {
+    opacity: 1;
+    transform: translateY(-70px);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-160px);
+  }
+}
+@keyframes watch-result-ding {
+  50% {
+    transform: scale(1.14);
+  }
+}
+@keyframes watch-result-fade {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  8%,
+  84% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .watch-result-bit,
+  .watch-result-wave,
+  .watch-result-flash {
+    display: none;
+  }
+  .watch-result-plate {
+    animation: watch-result-fade 3.6s forwards;
+  }
+  .watch-result-shake,
+  .watch-result-amt {
+    animation: none;
+  }
+}
