@@ -1361,5 +1361,64 @@ describe(
         /this window is not open/,
       );
     });
+
+    it("stops a window's orders and viewers once its turn ends, before its cutoff", async () => {
+      const context = await funded(),
+        late = await funded();
+      for (const loop of [windows, duels]) {
+        const debateId = await liveDebate();
+        await loop.openTurnWindows(20, [debateId]);
+        const [first] = await rounds(debateId);
+        await loop.submit(context, first.id, randomUUID(), {
+          side: "YES",
+          limit: "0.6",
+          quantity: 10,
+        });
+        // The turn ends early: the clock moves on while the first window's
+        // cutoff is still a minute away.
+        await nextTurn(debateId);
+        assert.ok(first.closes_at.getTime() > Date.now());
+        await assert.rejects(
+          loop.submit(late, first.id, randomUUID(), {
+            side: "NO",
+            limit: "0.4",
+            quantity: 10,
+          }),
+          (error) => error.code === "window_closed",
+        );
+        const before = (await loop.view(late, debateId)).find(
+          (r) => r.id === first.id,
+        );
+        assert.equal(before.eligibility.reason, "closed");
+        // The running turn's window takes orders; joining returns it.
+        const second = await loop.create(late, debateId, randomUUID());
+        assert.notEqual(second.id, first.id);
+        await loop.submit(late, second.id, randomUUID(), {
+          side: "NO",
+          limit: "0.4",
+          quantity: 10,
+        });
+        // The first window still settles at its own cutoff, not earlier.
+        assert.equal((await rounds(debateId))[0].state, "open");
+        await close(first.id);
+        await loop.advance(20);
+        assert.equal(
+          (await rounds(debateId)).find((r) => r.id === first.id).state,
+          "settled",
+        );
+        if (loop === duels) {
+          // A heartbeat now counts only in the running turn's window.
+          await loop.recordPresence(await actor(), debateId);
+          const client = await runtime.connect();
+          try {
+            assert.equal(await viewersInWindow(client, first.id), 1);
+            assert.equal(await viewersInWindow(client, second.id), 2);
+          } finally {
+            client.release();
+          }
+        }
+      }
+      await reconcile();
+    });
   },
 );

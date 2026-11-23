@@ -67,7 +67,10 @@ web and worker processes alike.
 - **Pauses.** A paused turn keeps its window's cutoff. Speech after the cutoff, when the turn
   resumes, falls outside any window (pull request 2 marks it so).
 - **Early end.** Ending a debate early leaves its last window open until its own cutoff, at most one
-  turn. Rounds stay immutable.
+  turn. Rounds stay immutable. Amended 2026-11-23 (founder, with
+  [Decision 0017](0017-forecast-duels.md)): a window takes live orders only while its turn is still
+  the running turn, so a turn that ends early (an asker who stops) stops its window's orders at once;
+  the window still settles at its own cutoff, and the panel shows the newest open window.
 - **Manual creation during a live debate** (`POST /api/coin-sandbox/debates/:id/rounds`) returns
   the current turn's window, opening it if the loop has not yet, and never a five-minute round.
   Between windows it answers 409. Outside live debates nothing changes: a manual five-minute round

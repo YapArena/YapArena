@@ -173,7 +173,9 @@ rules to let a system account go negative.
 With `TURN_WINDOWS_ENABLED=true` (web and worker), each live speaking turn is one trading window
 whose cutoff is the turn deadline, fixed at opening ([Decision 0012](decisions/0012-live-argument-outline.md)).
 The coin loop opens it within about a second of the turn starting; asking for a round during a
-live debate returns it instead of a five-minute round. Windows settle like any round.
+live debate returns it instead of a five-minute round. A window takes orders only while its turn
+is the running turn: one whose turn ended early stops taking orders then, and still settles at
+its own cutoff. Windows settle like any round.
 
 Whenever the coin sandbox is enabled, the coin loop also voids every open round of a debate that
 became `cancelled` or `void_review`, with reason `debate_unavailable`, and settlement skips such
