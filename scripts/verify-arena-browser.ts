@@ -795,6 +795,13 @@ export async function verifyArenaBrowser({
     });
     await page.screenshot({ path: directory + "/phone-watch-landscape.png" });
     await page.setViewportSize({ width: 390, height: 844 });
+    // The page turns the full screen back upright in its resize handler,
+    // which runs at its next frame, not when setViewportSize returns. Until
+    // then the horizontal rule puts the plate 38.5% down the screen, 63 px
+    // above the vertical seam.
+    await page
+      .locator('[data-arena][data-watch-orientation="vertical"]')
+      .waitFor();
     // Point 7: a turn the viewer answered is revealed. A read of the
     // viewer's rounds without the result, then one with it, as the answer
     // panel shares them; the plate pops on the camera seam and announces
