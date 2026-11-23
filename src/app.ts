@@ -29,6 +29,7 @@ import type { createAccountWallet } from "./features/account-wallet/repository.t
 import type { createMediaAccountRevocation } from "./features/media/account-revocation.ts";
 import { createCoinSandboxRouter } from "./features/account-wallet/sandbox-router.ts";
 import { createTurnWindowRouter } from "./features/account-wallet/window-router.ts";
+import { createMicRouter } from "./features/mic/router.ts";
 import { createDebaterSettingsRouter } from "./features/transcription/settings-router.ts";
 import { createTranscriptionIngestRouter } from "./features/transcription/ingest-router.ts";
 import {
@@ -206,6 +207,7 @@ export function createApp({
   coinSandbox,
   coinWebhook,
   turnWindows,
+  mic,
   debaterSettings,
   transcriptionIngest,
   dispatchTranscriber,
@@ -292,6 +294,8 @@ export function createApp({
   coinWebhook?: RequestHandler;
   // Decision 0012: public turn-window timing, mounted only when enabled.
   turnWindows?: Parameters<typeof createTurnWindowRouter>[0];
+  // Decision 0018: borrow the microphone, mounted only when MIC_ENABLED.
+  mic?: Parameters<typeof createMicRouter>[0]["mic"];
   // Decision 0012: live transcription, mounted only when enabled.
   debaterSettings?: Parameters<typeof createDebaterSettingsRouter>[0];
   transcriptionIngest?: Parameters<typeof createTranscriptionIngestRouter>[0];
@@ -592,6 +596,16 @@ export function createApp({
       }),
     );
   if (turnWindows) app.use(createTurnWindowRouter(turnWindows));
+  if (mic)
+    app.use(
+      createMicRouter({
+        mic,
+        requireAuth: createRequireAuthentication({ sessions, environment }),
+        environment,
+        applicationOrigin: applicationOrigin ?? "http://localhost:3000",
+        sharedRateLimits,
+      }),
+    );
   if (outlines) {
     app.use(createOutlineRouter(outlines));
     app.use(

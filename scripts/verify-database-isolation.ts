@@ -153,6 +153,11 @@ const applicationTables = [
   "topic_answer_reviews",
   "debate_viewers",
   "coin_window_viewers",
+  // Decision 0018: borrow the microphone.
+  "mic_lists",
+  "mic_questions",
+  "mic_pledges",
+  "mic_mics",
 ];
 const container = `yaparena-isolation-${randomUUID().slice(0, 8)}`;
 const evidenceDirectory = `/tmp/${container}-evidence`;
