@@ -29,6 +29,7 @@ import { createUserStreams } from "./platform/user-streams.ts";
 import { ACCOUNT_REVOKED_CHANNEL } from "./platform/auth/sessions.ts";
 import { RESULTS_CHANNEL } from "./features/account-wallet/debate-sandbox.ts";
 import { treasuryStatus } from "./features/account-wallet/treasury-monitor.ts";
+import { createMicRepository } from "./features/mic/repository.ts";
 
 // Builds the web service. dist/server.js runs it for every deployment; the
 // local test identity entry under scripts/ wraps the same application.
@@ -155,6 +156,10 @@ export function createWebServer(
         }
       : undefined,
     turnWindows: config.turnWindowsEnabled ? coinDebates : undefined,
+    // Decision 0018: MIC_ENABLED requires the coin sandbox.
+    mic: config.micEnabled
+      ? createMicRepository(database, "simulation")
+      : undefined,
     debaterSettings,
     transcriptionIngest:
       transcription && config.liveOutline.ingestSecret

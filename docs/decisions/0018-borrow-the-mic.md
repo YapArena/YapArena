@@ -1,8 +1,8 @@
 # Decision 0018 — Borrow the microphone
 
 Status: founder decisions, 2026-11-17 to 2026-11-20, tested in a simulator on 2026-11-20. Pull
-request 1 is built: the pure rules (`src/features/mic/rules.ts`) and their tests. Nothing calls
-them yet, and no debate offers the mic.
+requests 1 and 2a are built (see [How it is built](#how-it-is-built)); no debate offers the mic
+yet.
 
 A viewer can put one question and one follow-up to a debater during a live debate, by voice or by
 text. Viewers compete for that right by pledging Yap Coins (YC) to questions; YC spent on a
@@ -52,6 +52,12 @@ the side, becomes a debater with no veto by the other (S1 to S3, S7). From that 
 trade, submit or pledge in the debate, and keep what they hold (S4, S5). Both seats can change
 hands (S10).
 
+**Paying the debaters (founder, 2026-11-23).** Debaters receive everything as cash-backed YC
+(sandbox `USDC`). A pledger's YC can be grant coins (`YC_PROMO`) or cash-backed; when their pledge is
+spent, its cash-backed part goes to the debaters and its grant part is burned to the grant issuer,
+the center treasury paying the debaters the same amount in cash-backed YC, as A4 pays winners.
+Phase-1 YC still never convert to real USDC.
+
 ## Assumed by this record until the founder says otherwise
 
 The simulator runs these the same way.
@@ -88,10 +94,12 @@ The simulator runs these the same way.
 The [build plan](https://claude.ai/artifact/X3UWh8J7nEAmGSRhGFPjkj) ships in phases, each behind
 `MIC_ENABLED` (off by default) and copied into a debate's rules snapshot when it starts.
 
-1. The pure rules (this pull request).
+1. The pure rules (PR 1).
 2. The list, pledges as `coin_*` ledger holds (reserve, release, payout), firing under a row lock so
    an outbid and a fire cannot both win, the exchange in the turn engine with its own turn numbers,
-   and on-screen text questions.
+   and on-screen text questions. PR 2a is built: the list on PostgreSQL, holds, refunds and the
+   payment to the debaters on the ledger, and the routes; nothing opens a list until the turn
+   engine does in PR 2b.
 3. The asker's live voice, then the synthetic voice.
 4. Keep the asker on and extensions.
 5. Votes, extra lists and the end of the fixed length.

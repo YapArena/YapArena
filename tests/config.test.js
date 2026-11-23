@@ -123,6 +123,7 @@ describe("configuration", () => {
       coinSandboxEnabled: false,
       turnWindowsEnabled: false,
       duelWindowsEnabled: false,
+      micEnabled: false,
       coinSandboxWebhookSecret: undefined,
       coinSandboxTransfersEnabled: false,
       coinTreasuryAlertUsdc: 200000,
@@ -185,6 +186,7 @@ describe("configuration", () => {
         coinSandboxEnabled: false,
         turnWindowsEnabled: false,
         duelWindowsEnabled: false,
+        micEnabled: false,
         coinSandboxWebhookSecret: undefined,
         coinSandboxTransfersEnabled: false,
         coinTreasuryAlertUsdc: 200000,
@@ -342,6 +344,24 @@ describe("configuration", () => {
       assert.throws(
         () => loadConfig({ ...turns, DUEL_WINDOWS_ENABLED: value }),
         /DUEL_WINDOWS_ENABLED must be true or false/,
+      );
+  });
+
+  it("offers the mic only explicitly and only with the coin sandbox", () => {
+    const coins = { DATABASE_URL: databaseUrl, COIN_SANDBOX_ENABLED: "true" };
+    assert.equal(loadConfig(coins).micEnabled, false);
+    assert.equal(
+      loadConfig({ ...coins, MIC_ENABLED: "true" }).micEnabled,
+      true,
+    );
+    assert.throws(
+      () => loadConfig({ DATABASE_URL: databaseUrl, MIC_ENABLED: "true" }),
+      /MIC_ENABLED requires COIN_SANDBOX_ENABLED/,
+    );
+    for (const value of ["1", "TRUE", "yes"])
+      assert.throws(
+        () => loadConfig({ ...coins, MIC_ENABLED: value }),
+        /MIC_ENABLED must be true or false/,
       );
   });
 
