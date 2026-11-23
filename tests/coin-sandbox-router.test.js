@@ -209,12 +209,20 @@ describe("Yap Coins refusals", () => {
           s.status(429).json({ error: "too many attempts; try again shortly" });
         },
       },
-      { create: async () => ({ id: roundId, created: false }) },
+      {
+        create: async () => ({ id: roundId, created: false }),
+        recordPresence: async () => {
+          calls.push("recordPresence");
+          return { present: true };
+        },
+      },
     );
-    // Joining a turn's window and placing an answer, once per turn.
+    // Joining a turn's window and placing an answer, once per turn, and the
+    // viewer heartbeat (Decision 0017).
     for (const path of [
       `/coins/debates/${debateId}/rounds`,
       `/coins/rounds/${roundId}/submit`,
+      `/coins/debates/${debateId}/presence`,
     ]) {
       const response = await post(
         server,
@@ -225,11 +233,39 @@ describe("Yap Coins refusals", () => {
       );
       assert.ok([200, 201].includes(response.status), path);
     }
-    assert.deepEqual(calls, ["submit"]);
+    assert.deepEqual(calls, ["submit", "recordPresence"]);
     // Grants and transfers still count against it.
     for (const path of ["/coins/initialize", "/coins/grants/daily"])
       assert.equal((await post(server, path)).status, 429, path);
     assert.deepEqual(limited, ["/initialize", "/grants/daily"]);
+  });
+  it("record a viewer's heartbeat with no fields", async () => {
+    const seen = [];
+    const { server } = app(
+      {},
+      {
+        recordPresence: async (context, id) => {
+          seen.push([context.userId, id]);
+          return { present: false };
+        },
+      },
+    );
+    const response = await post(server, `/coins/debates/${debateId}/presence`);
+    assert.equal(response.status, 200);
+    assert.deepEqual(response.body, { present: false });
+    assert.deepEqual(seen, [["7", debateId]]);
+    assert.equal(
+      (
+        await post(server, `/coins/debates/${debateId}/presence`, {
+          userId: "8",
+        })
+      ).status,
+      400,
+    );
+    assert.equal(
+      (await post(server, "/coins/debates/not-a-debate/presence")).status,
+      404,
+    );
   });
   it("name a changed account context", async () => {
     const { server } = app();

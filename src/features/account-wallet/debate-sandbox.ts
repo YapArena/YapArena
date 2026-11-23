@@ -15,6 +15,7 @@ import {
   secureSeed,
   validateOrder,
   type Order,
+  type Fraction,
   type Outcome,
   type Terms,
 } from "../a4/engine.ts";
@@ -53,6 +54,17 @@ import {
 } from "./sandbox-repository.ts";
 import type { TreasuryBalances } from "./treasury-monitor.ts";
 import { debateEndorsementTurns } from "../endorsement/repository.ts";
+import {
+  DUEL_RULE,
+  DUEL_TERMS,
+  settleWindow,
+  type DuelTerms,
+} from "../duels/engine.ts";
+import {
+  recordViewer,
+  recordWindowViewer,
+  viewersInWindow,
+} from "../presence/repository.ts";
 
 // Same A4 algorithm and ordinary human schedule. This asset is new: one YC
 // contract has a 0.01 USDC quote, NOT the historical YAP atomic face value.
@@ -64,6 +76,56 @@ export const COIN_DEBATE_TERMS: Readonly<Terms> = Object.freeze({
   capacity: 1001,
 });
 export const COIN_DEBATE_FACE = 10_000n;
+// Decision 0017: with duel windows on, live turn windows settle by forecast
+// duels. A window settles only when at least minViewers signed-in accounts were
+// present at some point while it was open; otherwise every stake is returned.
+export const COIN_DUEL_TERMS: Readonly<DuelTerms & { minViewers: number }> =
+  Object.freeze({ ...DUEL_TERMS, minViewers: 10 });
+type RoundTerms = Terms | typeof COIN_DUEL_TERMS;
+const isDuel = (terms: RoundTerms): terms is typeof COIN_DUEL_TERMS =>
+  terms.rule === DUEL_RULE;
+const feeBpsOf = (terms: RoundTerms) => (isDuel(terms) ? 0 : terms.feeBps);
+// What the center sets aside for one order. Under A4 a payout never exceeds the
+// face value of its contracts. Under duels a winner can receive up to twice its
+// stake, paid before the window's losers have settled (batches settle orders in
+// any order), so the center sets aside twice the stake as a float; it takes no
+// position, and the window releases the whole float.
+const centerBacking = (terms: RoundTerms, quantity: number) =>
+  BigInt(quantity) * COIN_DEBATE_FACE * (isDuel(terms) ? 2n : 1n);
+/** Decision 0017: a duel window's published summary. */
+export interface DuelSummary {
+  rule: typeof DUEL_RULE;
+  // returned_small_room: fewer tickets than the rule needs; returned_few_viewers:
+  // fewer accounts present than minViewers. Both return every stake and
+  // publish no share.
+  status: "settled" | "returned_small_room" | "returned_few_viewers";
+  viewers: number;
+  tickets: number;
+  share: Fraction | null;
+  crowd: Fraction | null;
+  verdict: "YES" | "EVEN" | "NO" | null;
+}
+// One order's outcome as the ledger and the views read it, under either rule.
+// For a duel order, premium is the stake committed (zero when returned) and
+// fee is zero; the duel fields say how its read fared.
+type RoundOutcome = Pick<
+  Outcome,
+  "participant" | "status" | "premium" | "fee" | "payout" | "net"
+> &
+  Partial<Outcome> & {
+    duelsWon?: number;
+    duelsLost?: number;
+  };
+type RoundPricing =
+  | ReturnType<typeof priceRound>
+  | {
+      a: null;
+      b: null;
+      share: Fraction | null;
+      price: null;
+      branch: "duels";
+      reason: DuelSummary["status"];
+    };
 interface Round {
   id: string;
   debate_id: string;
@@ -73,7 +135,7 @@ interface Round {
   turn_side: "A" | "B" | null;
   proposition: string;
   rail: SandboxRail;
-  terms: Terms;
+  terms: RoundTerms;
   seed: string;
   seed_commitment: string;
   opens_at: Date;
@@ -84,15 +146,17 @@ interface Round {
   result: {
     snapshot: Order[];
     snapshotHash: string;
-    pricing: ReturnType<typeof priceRound>;
-    outcomes: Outcome[];
+    pricing: RoundPricing;
+    outcomes: RoundOutcome[];
+    duels?: DuelSummary;
     voidReason?: VoidReason;
     // YA-04: participants whose orders arrived past capacity, refunded unfilled.
     overCapacity?: string[];
   } | null;
   revealed_at: Date | null;
 }
-type VoidReason = "debate_unavailable" | "operator_cancelled";
+// turn_cut: Decision 0017, a turn cut short refunds its window.
+type VoidReason = "debate_unavailable" | "operator_cancelled" | "turn_cut";
 /**
  * F11: a five-day round takes orders until its cutoff and prices and settles
  * at the debate's 120-hour close; a per-round round settles at its cutoff.
@@ -182,7 +246,11 @@ export interface TurnWindow {
    * (revealed), at any number of commitments (founder, 2026-10-26); null
    * before. Never per-user data.
    */
-  pricing: ReturnType<typeof priceRound> | null;
+  pricing: RoundPricing | null;
+  /** Decision 0017: a revealed duel window's summary; absent otherwise. */
+  duels?: DuelSummary | null;
+  /** The rule the window settles under: "a4-v1" or "fd-v1" (Decision 0017). */
+  rule?: string;
 }
 interface StoredOrder {
   user_id: string;
@@ -456,11 +524,79 @@ function busy(error: unknown) {
 const poolExhausted = (error: unknown) =>
   error instanceof Error &&
   error.message === "timeout exceeded when trying to connect";
+/**
+ * Decision 0017: settles a duel window's locked tickets. Every ticket settles
+ * by forecast duels when at least minViewers accounts were present; otherwise,
+ * or below the rule's minimum room, every stake is returned and no share is
+ * published. Orders past capacity are always returned.
+ */
+export function settleDuelWindow(
+  snapshot: Order[],
+  overflow: Order[],
+  terms: typeof COIN_DUEL_TERMS,
+  viewers: number,
+) {
+  const returned = (o: Order, status: string): RoundOutcome => ({
+    participant: o.participant,
+    status,
+    // As an A4 order that did not fill: nothing spent, the stake released.
+    executed: false,
+    premium: "0",
+    fee: "0",
+    payout: String(BigInt(o.quantity) * COIN_DEBATE_FACE),
+    net: "0",
+    duelsWon: 0,
+    duelsLost: 0,
+  });
+  const settlement = settleWindow(snapshot, terms, COIN_DEBATE_FACE);
+  const status: DuelSummary["status"] =
+    settlement.summary.status === "returned_small_room"
+      ? "returned_small_room"
+      : viewers < terms.minViewers
+        ? "returned_few_viewers"
+        : "settled";
+  const settled = status === "settled";
+  const duels: DuelSummary = {
+    rule: DUEL_RULE,
+    status,
+    viewers,
+    tickets: snapshot.length,
+    share: settled ? settlement.summary.share : null,
+    crowd: settled ? settlement.summary.crowd : null,
+    verdict: settled ? settlement.summary.verdict : null,
+  };
+  const outcomes: RoundOutcome[] = [
+    ...(settled
+      ? settlement.outcomes.map((o) => ({
+          participant: o.participant,
+          status: o.status,
+          executed: true,
+          premium: o.stake,
+          fee: "0",
+          payout: o.payout,
+          net: o.net,
+          duelsWon: o.duelsWon,
+          duelsLost: o.duelsLost,
+        }))
+      : snapshot.map((o) => returned(o, status))),
+    ...overflow.map((o) => returned(o, "returned_over_capacity")),
+  ];
+  const pricing: RoundPricing = {
+    a: null,
+    b: null,
+    share: duels.share,
+    price: null,
+    branch: "duels",
+    reason: status,
+  };
+  return { pricing, outcomes, duels };
+}
 export function createCoinDebateSandbox(
   database: Pool,
   rail: SandboxRail,
   options: {
     turnWindows?: boolean;
+    duelWindows?: boolean;
     logger?: { error(details: object, message: string): void };
     // Tests that hold locks on purpose may relax these, and tests may use
     // smaller settlement batches.
@@ -470,6 +606,8 @@ export function createCoinDebateSandbox(
 ) {
   const batch = { ...SETTLEMENT_BATCH, ...options.settlement };
   const turnWindows = options.turnWindows === true;
+  // Decision 0017: new turn windows open under forecast duels.
+  const duelWindows = turnWindows && options.duelWindows === true;
   const requestLimits = options.limits?.request ?? COIN_REQUEST_LIMITS,
     workerLimits = options.limits?.worker ?? COIN_WORKER_LIMITS;
   // Rounds whose settlement threw, kept by this process (founder audit item
@@ -481,10 +619,11 @@ export function createCoinDebateSandbox(
     string,
     {
       key: string;
-      pricing: ReturnType<typeof priceRound>;
-      outcomes: Outcome[];
-      byParticipant: ReadonlyMap<string, Outcome>;
+      pricing: RoundPricing;
+      outcomes: RoundOutcome[];
+      byParticipant: ReadonlyMap<string, RoundOutcome>;
       overCapacity: string[];
+      duels?: DuelSummary;
     }
   >();
   // Measured cost of settling one order once a batch holds its locks, so
@@ -545,7 +684,10 @@ export function createCoinDebateSandbox(
       )
     ).rows[0];
     if (!round) fail("sandbox round not found", 404);
-    if (digest(round.terms) !== digest(COIN_DEBATE_TERMS))
+    if (
+      digest(round.terms) !== digest(COIN_DEBATE_TERMS) &&
+      digest(round.terms) !== digest(COIN_DUEL_TERMS)
+    )
       fail("sandbox debate uses unsupported terms", 503);
     return round;
   }
@@ -694,22 +836,44 @@ export function createCoinDebateSandbox(
       .map(asOrder);
     if (digest(round.seed) !== round.seed_commitment)
       fail("sandbox seed commitment mismatch", 503);
-    const key = digest([round.seed, snapshot, overflow]);
+    // Decision 0017: the accounts present while the window was open. Rows are
+    // insert-only and refused after the cutoff, so the count is fixed here.
+    const viewers = isDuel(round.terms)
+      ? await viewersInWindow(client, round.id)
+      : null;
+    const key = digest([round.seed, snapshot, overflow, viewers]);
     let price = priced.get(roundId);
+    if (price?.key !== key && isDuel(round.terms)) {
+      const duel = settleDuelWindow(snapshot, overflow, round.terms, viewers!);
+      price = {
+        key,
+        ...duel,
+        byParticipant: new Map(duel.outcomes.map((o) => [o.participant, o])),
+        overCapacity: overflow.map((o) => o.participant),
+      };
+      if (overflow.length)
+        options.logger?.error(
+          { roundId, overCapacity: overflow.length },
+          "coin round over capacity; later orders refunded unfilled",
+        );
+      priced.set(roundId, price);
+      if (priced.size > 50) priced.delete(priced.keys().next().value!);
+    }
     if (price?.key !== key) {
+      const a4Terms = round.terms as Terms;
       const pricing = priceRound(
         snapshot,
-        round.terms,
+        a4Terms,
         randomWord(round.seed, "branch"),
         randomWord(round.seed, "price"),
       );
       const outcomes = [
-        ...executeRound(snapshot, round.terms, pricing, COIN_DEBATE_FACE),
+        ...executeRound(snapshot, a4Terms, pricing, COIN_DEBATE_FACE),
         // No price: none of these fills, so each is released in full.
         ...executeRound(
           overflow,
-          round.terms,
-          priceRound([], round.terms, 0n, 0n),
+          a4Terms,
+          priceRound([], a4Terms, 0n, 0n),
           COIN_DEBATE_FACE,
         ),
       ];
@@ -728,7 +892,7 @@ export function createCoinDebateSandbox(
       priced.set(roundId, price);
       if (priced.size > 50) priced.delete(priced.keys().next().value!);
     }
-    const { pricing, outcomes, byParticipant, overCapacity } = price;
+    const { pricing, outcomes, byParticipant, overCapacity, duels } = price;
     const books = await lockSandboxBooks(
       client,
       settling.map(({ order }) => order.user_id),
@@ -919,6 +1083,7 @@ export function createCoinDebateSandbox(
       }),
       pricing,
       outcomes,
+      ...(duels ? { duels } : {}),
       ...(overCapacity.length ? { overCapacity } : {}),
     };
     await client.query(
@@ -966,7 +1131,7 @@ export function createCoinDebateSandbox(
         id,
         rail,
         digest(["turn-window", rail, debateId, turn.turnNumber]),
-        JSON.stringify(COIN_DEBATE_TERMS),
+        JSON.stringify(duelWindows ? COIN_DUEL_TERMS : COIN_DEBATE_TERMS),
         seed,
         digest(seed),
         turn.turnNumber,
@@ -1076,7 +1241,7 @@ export function createCoinDebateSandbox(
           voidReason: reason,
           snapshot: [],
           snapshotHash: digest([roundId, reason]),
-          pricing: priceRound([], round.terms, 0n, 0n),
+          pricing: priceRound([], COIN_DEBATE_TERMS, 0n, 0n),
           outcomes: [],
         }),
       ],
@@ -1218,11 +1383,17 @@ export function createCoinDebateSandbox(
           limit: input.limit,
           quantity: input.quantity,
         };
-        validateOrder(order, round.terms);
+        // Both rules take the same ticket; A4's check reads only the size limit.
+        validateOrder(
+          order,
+          isDuel(round.terms)
+            ? { ...COIN_DEBATE_TERMS, maxQuantity: round.terms.maxQuantity }
+            : round.terms,
+        );
         const terms = {
           rail,
           roundId,
-          rule: RULE,
+          rule: isDuel(round.terms) ? DUEL_RULE : RULE,
           side: input.side,
           limit: input.limit,
           quantity: String(input.quantity),
@@ -1375,6 +1546,7 @@ export function createCoinDebateSandbox(
             )
           ).rows[0]!.total;
         const collateral = BigInt(order.quantity) * COIN_DEBATE_FACE;
+        const backing = centerBacking(round.terms, order.quantity);
         // The center (and, for grant coins, the promotional treasury) backs
         // every contract. When the operator's seed runs low, say so plainly
         // instead of the ledger's generic refusal (docs/coin-sandbox-operations.md).
@@ -1384,14 +1556,18 @@ export function createCoinDebateSandbox(
             503,
             "answers_paused",
           );
-        if (BigInt(await balance(buckets.system.center_available)) < collateral)
+        if (BigInt(await balance(buckets.system.center_available)) < backing)
           paused();
         let plan: ReturnType<typeof planStake>;
         try {
           plan = planStake(
             before.book,
             String(
-              reservation(order.quantity, COIN_DEBATE_FACE, round.terms.feeBps),
+              reservation(
+                order.quantity,
+                COIN_DEBATE_FACE,
+                feeBpsOf(round.terms),
+              ),
             ),
           );
         } catch (error) {
@@ -1426,7 +1602,7 @@ export function createCoinDebateSandbox(
           cash,
           buckets.system.center_available,
           buckets.system.center_reserved,
-          collateral,
+          backing,
         );
         transfer(
           cash,
@@ -1489,7 +1665,7 @@ export function createCoinDebateSandbox(
               order.limit,
               order.quantity,
               JSON.stringify(plan.funding),
-              String(collateral),
+              String(backing),
               String(promotional),
               replayPositionMs,
             ],
@@ -1499,6 +1675,9 @@ export function createCoinDebateSandbox(
             if (refusal) fail(refusal.message, refusal.status, refusal.code);
             throw error;
           });
+        // Decision 0017: placing a ticket counts as being present.
+        if (isDuel(round.terms))
+          await recordWindowViewer(client, round.debate_id, context.userId);
         await appendSandboxBookEvent(client, {
           userId: context.userId,
           snapshot: before,
@@ -1512,7 +1691,7 @@ export function createCoinDebateSandbox(
           metadata: {
             roundId,
             funding: plan.funding,
-            centerReservation: String(collateral),
+            centerReservation: String(backing),
             promotionalReservation: String(promotional),
             rail,
             ...(replayPositionMs === null ? {} : { replayPositionMs }),
@@ -1657,6 +1836,7 @@ export function createCoinDebateSandbox(
                     seed: r.seed,
                     snapshotHash: r.result?.snapshotHash,
                     pricing: r.result?.pricing,
+                    duels: r.result?.duels ?? null,
                     outcome,
                   }
                 : {}),
@@ -1848,6 +2028,63 @@ export function createCoinDebateSandbox(
       }
       return { voided };
     },
+    // Decision 0017: a turn cut short (a mic, a departing debater, the debate
+    // ending) refunds every position in its window in full, under either rule.
+    // Returns the window's id, or null when the turn has no window. A window
+    // already voided is left as it is; one whose settlement has started is
+    // refused.
+    async voidTurnWindow(
+      debateId: string,
+      turnNumber: number,
+      reason: "turn_cut",
+    ) {
+      resource(debateId);
+      if (reason !== "turn_cut") fail("invalid void reason", 400);
+      if (!Number.isSafeInteger(turnNumber) || turnNumber < 1)
+        fail("invalid turn number", 400);
+      return transaction(async (client) => {
+        const round = (
+          await client.query<{ id: string }>(
+            `SELECT id FROM coin_debate_rounds
+            WHERE debate_id=$1 AND rail=$2 AND turn_number=$3`,
+            [debateId, rail, turnNumber],
+          )
+        ).rows[0];
+        if (!round) return { roundId: null, created: false };
+        const role = (
+          await client.query<{ role: string }>("SELECT current_user AS role")
+        ).rows[0]!.role;
+        return {
+          roundId: round.id,
+          ...(await voidOpen(client, round.id, reason, role)),
+        };
+      }, workerLimits);
+    },
+    // Decision 0017: a signed-in viewer's heartbeat from a live debate page.
+    // Records the account as present now and in the turn window open now;
+    // debaters and debates that are not live record nothing.
+    async recordPresence(context: SandboxContext, debateId: string) {
+      resource(debateId);
+      return transaction(async (client) => {
+        // Like a submit, hold the open windows' locks shared: settlement takes
+        // them exclusively, so it never counts viewers while one is recorded.
+        await lockRounds(
+          client,
+          (
+            await client.query<{ id: string }>(
+              `SELECT id FROM coin_debate_rounds WHERE debate_id=$1 AND rail=$2
+              AND turn_number IS NOT NULL AND state='open'`,
+              [debateId, rail],
+            )
+          ).rows.map((row) => row.id),
+          "shared",
+        );
+        await assertCallerSession(client, context);
+        return {
+          present: await recordViewer(client, debateId, context.userId),
+        };
+      });
+    },
     // The treasuries that back every stake (founder D1), for the worker's
     // low-balance warning and /metrics. A plain read without locks; zero
     // before the sandbox's system accounts exist.
@@ -1945,6 +2182,13 @@ export function createCoinDebateSandbox(
                   fee: String(outcome.fee),
                   payout: String(outcome.payout),
                   net: String(outcome.net),
+                  // Decision 0017: how a duel ticket's read fared.
+                  ...(typeof outcome.duelsWon === "number"
+                    ? {
+                        duelsWon: outcome.duelsWon,
+                        duelsLost: Number(outcome.duelsLost),
+                      }
+                    : {}),
                 }
               : null,
           })),
@@ -1972,11 +2216,14 @@ export function createCoinDebateSandbox(
               THEN d.live_ended_at+INTERVAL '${REVEAL_CLOSE_HOURS} hours' END AS "revealAt",
             COALESCE((SELECT json_agg(json_build_object('id',w.id,'turnNumber',w.turn_number,
               'side',w.turn_side,'opensAt',w.opens_at,'closesAt',w.closes_at,'state',w.state,
+              'rule',w.terms->>'rule',
               'voidReason',CASE WHEN w.state='void' THEN w.result->>'voidReason' END,
               'revealMode',w.reveal_mode,'revealAt',${revealAt("w", "d")},
               'recording',${recordingSpan("w", "c")},
               'pricing',CASE WHEN w.state='settled' AND w.revealed_at<=clock_timestamp()
-                THEN w.result->'pricing' END)
+                THEN w.result->'pricing' END,
+              'duels',CASE WHEN w.state='settled' AND w.revealed_at<=clock_timestamp()
+                THEN w.result->'duels' END)
               ORDER BY w.turn_number)
             FROM (SELECT * FROM coin_debate_rounds r WHERE r.debate_id=d.id AND r.rail=$2
               AND r.turn_number IS NOT NULL ORDER BY r.turn_number DESC LIMIT 100) w),
