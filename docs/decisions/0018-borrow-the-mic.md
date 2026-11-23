@@ -1,7 +1,7 @@
 # Decision 0018 — Borrow the microphone
 
 Status: founder decisions, 2026-11-17 to 2026-11-20, tested in a simulator on 2026-11-20. Pull
-requests 1 and 2a are built (see [How it is built](#how-it-is-built)); no debate offers the mic
+requests 1, 2a and 2b are built (see [How it is built](#how-it-is-built)); no debate offers the mic
 yet.
 
 A viewer can put one question and one follow-up to a debater during a live debate, by voice or by
@@ -78,6 +78,9 @@ The simulator runs these the same way.
   waits; YC paid during an empty seat waits for its next occupant; someone who held a seat never
   trades in that debate again.
 - Amounts are whole YC (10,000 atoms each), so halves are exact.
+- Until D1 ships, mic turns (the four exchange turns and the resume turn) do not count toward the
+  rules' maximum length, so a mic never ends a debate mid-exchange; a mic stays live through its
+  resume turn, so a mic fired then queues.
 
 ## Open
 
@@ -99,7 +102,10 @@ The [build plan](https://claude.ai/artifact/X3UWh8J7nEAmGSRhGFPjkj) ships in pha
    an outbid and a fire cannot both win, the exchange in the turn engine with its own turn numbers,
    and on-screen text questions. PR 2a is built: the list on PostgreSQL, holds, refunds and the
    payment to the debaters on the ledger, and the routes; nothing opens a list until the turn
-   engine does in PR 2b.
+   engine does in PR 2b. PR 2b is built: debates that start with the switch on open the list when
+   round 3 ends, a fired mic cuts the running turn (its window refunded after the cut commits, the
+   worker retrying both), each exchange turn and the resume turn get their own turn number and
+   window, and the asker can end their turn early or put their text on screen.
 3. The asker's live voice, then the synthetic voice.
 4. Keep the asker on and extensions.
 5. Votes, extra lists and the end of the fixed length.

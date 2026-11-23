@@ -37,6 +37,7 @@ export function createRuntime({
   media,
   mediaProvider,
   mediaOperations,
+  micTurns,
   logger,
   config,
   verifyDatabase,
@@ -95,6 +96,9 @@ export function createRuntime({
     "stopRecording" | "setTurn"
   >;
   mediaOperations?: { tick(): Promise<void>; stop(): Promise<void> };
+  // Decision 0018: retries starting fired mics and refunding the turns they
+  // cut, after each media clock pass.
+  micTurns?: { recover(): Promise<unknown> };
   logger: Pick<Logger, "info" | "error">;
   config: Pick<ReturnType<typeof loadConfig>, "port" | "host">;
   verifyDatabase: () => Promise<void>;
@@ -162,6 +166,11 @@ export function createRuntime({
       }
     } catch (error) {
       logger.error({ error }, "media clock failed");
+    }
+    try {
+      await micTurns?.recover();
+    } catch (error) {
+      logger.error({ error }, "mic turn recovery failed");
     }
     try {
       if (mediaProvider) {

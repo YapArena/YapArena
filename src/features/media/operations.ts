@@ -16,7 +16,11 @@ async function desired(client: PoolClient, id: string): Promise<Desired> {
   const result = await client.query<Desired>(
     `SELECT m.revision,
     CASE WHEN m.state='running' AND d.status='live' AND d.publication_state='published'
-      AND t.publication_state='published' THEN m.active_side ELSE NULL END AS side,
+      AND t.publication_state='published'
+      -- Decision 0018: in the asker's own turns no debater's microphone opens.
+      AND NOT EXISTS (SELECT 1 FROM mic_turns mt WHERE mt.debate_id=m.debate_id
+        AND mt.turn_number=m.turn_number AND mt.kind IN ('question','followup'))
+      THEN m.active_side ELSE NULL END AS side,
     json_build_object('v',1,'debateStatus',d.status,'mediaState',m.state,
       'turnNumber',m.turn_number,'activeSide',m.active_side,
       'turnDeadlineAt',m.turn_deadline_at) AS hint

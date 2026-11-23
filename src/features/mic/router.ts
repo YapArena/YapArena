@@ -13,6 +13,7 @@ import { createApiRateLimiter } from "../../platform/security.ts";
 import { createSharedRead } from "../../platform/shared-read.ts";
 import type { SharedRateLimits } from "../../platform/shared-abuse.ts";
 import type { MicRepository, PublicMicList } from "./repository.ts";
+import type { MicTurns } from "./turns.ts";
 import { MicError, YC, type Side } from "./rules.ts";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -62,12 +63,18 @@ function id(value: unknown, what: string) {
  * (X-YapArena-Session), as Yap Coins writes do: each holds, refunds or spends
  * the account's coins. Amounts are whole Yap Coins; requestId makes a retry
  * return the first result without moving anything twice.
+ *
+ * With the turn engine (PR 2b), the asker controls their own turns:
+ * POST /api/debates/:id/mic/turn {action:"end"} ends it early, and
+ * POST /api/debates/:id/mic/turn/text {text} puts their typed question on
+ * screen (E9: shown as typed). Only the asker, only in their own turn.
  */
 export function createMicRouter(options: {
   mic: Pick<
     MicRepository,
     "read" | "submitQuestion" | "pledge" | "withdraw" | "fire"
   >;
+  turns?: Pick<MicTurns, "endAskerTurn" | "setAskerText">;
   requireAuth: RequestHandler;
   environment: string;
   applicationOrigin: string;
@@ -188,6 +195,35 @@ export function createMicRouter(options: {
         );
     },
   );
+  const { turns } = options;
+  if (turns) {
+    router.post(
+      "/api/debates/:id/mic/turn",
+      ...writes,
+      async (request, response) => {
+        const debateId = id(request.params.id, "debate");
+        const body = fields(request.body, ["action"]);
+        if (body.action !== "end")
+          throw new MicError("action must be end", 400);
+        response.json(await turns.endAskerTurn(context(request), debateId));
+      },
+    );
+    router.post(
+      "/api/debates/:id/mic/turn/text",
+      ...writes,
+      async (request, response) => {
+        const debateId = id(request.params.id, "debate");
+        const body = fields(request.body, ["text"]);
+        response.json(
+          await turns.setAskerText(
+            context(request),
+            debateId,
+            text(body.text, "text"),
+          ),
+        );
+      },
+    );
+  }
   router.use(
     (
       error: unknown,

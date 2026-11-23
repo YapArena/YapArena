@@ -15,6 +15,7 @@ import {
 } from "./features/matching/push.ts";
 import { createWebPush } from "./platform/web-push.ts";
 import { createMediaRepository } from "./features/media/repository.ts";
+import { createMicTurns } from "./features/mic/turns.ts";
 import { createMediaProvider, debateRoom } from "./features/media/provider.ts";
 import { AgentDispatchClient } from "livekit-server-sdk";
 import { createDebaterSettings } from "./features/transcription/debater-settings.ts";
@@ -95,10 +96,15 @@ export function createServices({
   const measurement = createMeasurementRepository(database);
   const a4 = createA4Repository(database, config.a4Mode, config.a4Funding);
   const media = config.media
-    ? createMediaRepository(database, {
-        enabled: config.replayPackaging.enabled,
-        allowedRooms: config.media.replayEdgeRooms,
-      })
+    ? createMediaRepository(
+        database,
+        {
+          enabled: config.replayPackaging.enabled,
+          allowedRooms: config.media.replayEdgeRooms,
+        },
+        // Decision 0018: each debate keeps the switch it started with.
+        { micEnabled: config.micEnabled },
+      )
     : undefined;
   const replayJobs = config.replayPackaging.enabled
     ? createReplayJobs(database)
@@ -216,6 +222,22 @@ export function createServices({
         logger,
       })
     : undefined;
+  // Decision 0018, PR 2b: the mic in the turn engine. Built whenever the
+  // clock and the coin loop exist, not only while MIC_ENABLED, so a debate
+  // that started with the mic keeps running it after the switch flips off.
+  const micTurns =
+    media && coinDebates
+      ? createMicTurns({
+          database,
+          media,
+          voidTurnWindow: (debateId, turnNumber, reason) =>
+            coinDebates.voidTurnWindow(debateId, turnNumber, reason),
+          onTurn: mediaProvider
+            ? (debateId) => mediaProvider.setTurn(debateId, null)
+            : undefined,
+          logger,
+        })
+      : undefined;
   // Decision 0015: the endorsement points, on the same rail as the coin loop.
   const endorsement = config.coinSandboxEnabled
     ? createEndorsementRecorder(database, "simulation")
@@ -239,6 +261,7 @@ export function createServices({
     sessions,
     accountSecurity,
     coinDebates,
+    micTurns,
     debaterSettings,
     transcription,
     transcriber,
@@ -283,6 +306,7 @@ export function createServices({
       media,
       mediaProvider,
       mediaOperations,
+      micTurns,
       logger,
       config,
       verifyDatabase: () =>

@@ -208,6 +208,7 @@ export function createApp({
   coinWebhook,
   turnWindows,
   mic,
+  micTurns,
   debaterSettings,
   transcriptionIngest,
   dispatchTranscriber,
@@ -296,6 +297,8 @@ export function createApp({
   turnWindows?: Parameters<typeof createTurnWindowRouter>[0];
   // Decision 0018: borrow the microphone, mounted only when MIC_ENABLED.
   mic?: Parameters<typeof createMicRouter>[0]["mic"];
+  // Decision 0018, PR 2b: the asker's own turn controls, with the media clock.
+  micTurns?: Parameters<typeof createMicRouter>[0]["turns"];
   // Decision 0012: live transcription, mounted only when enabled.
   debaterSettings?: Parameters<typeof createDebaterSettingsRouter>[0];
   transcriptionIngest?: Parameters<typeof createTranscriptionIngestRouter>[0];
@@ -600,6 +603,7 @@ export function createApp({
     app.use(
       createMicRouter({
         mic,
+        turns: micTurns,
         requireAuth: createRequireAuthentication({ sessions, environment }),
         environment,
         applicationOrigin: applicationOrigin ?? "http://localhost:3000",
