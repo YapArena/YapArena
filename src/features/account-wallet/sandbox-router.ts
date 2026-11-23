@@ -111,9 +111,9 @@ export function createCoinSandboxRouter(options: {
   // welcome and daily grants, simulated purchases and withdrawals, and error
   // reports. Answering a debate turn (joining its window, then placing) is
   // two writes a turn, at most one answer per window; the per-account limit
-  // above covers it.
+  // above covers it, and the viewer heartbeat (Decision 0017, three a minute).
   const answering = (r: Request) =>
-    /^\/debates\/[0-9a-f-]{36}\/rounds$|^\/rounds\/[0-9a-f-]{36}\/submit$/i.test(
+    /^\/debates\/[0-9a-f-]{36}\/(rounds|presence)$|^\/rounds\/[0-9a-f-]{36}\/submit$/i.test(
       r.path,
     );
   router.use((r, s, next) => {
@@ -217,6 +217,12 @@ export function createCoinSandboxRouter(options: {
     s.status(201).json(
       await debates.create(context(r), id(r.params.id), key(r)),
     );
+  });
+  // Decision 0017: a signed-in viewer's heartbeat while watching a live
+  // debate, which counts them present for its duel windows.
+  router.post("/debates/:id/presence", async (r, s) => {
+    body(r.body, []);
+    s.json(await debates.recordPresence(context(r), id(r.params.id)));
   });
   // Interface 10: the viewer's revealed or voided rounds since a time, for
   // the in-app results notice.

@@ -27,11 +27,14 @@ export function utcText(column: string) {
 
 /**
  * A settled, revealed turn window on the rail, whose earlier turns (every
- * turn, for a five-day debate) are no longer open. Aliases: r is the round.
+ * turn, for a five-day debate) are no longer open. A duel window that
+ * returned every stake (too few tickets or viewers, Decision 0017) publishes
+ * no share and is not counted. Aliases: r is the round.
  */
 export function countedRoundSql(railParameter: string) {
   return `r.rail=${railParameter} AND r.turn_number IS NOT NULL AND r.state='settled'
     AND r.revealed_at<=clock_timestamp()
+    AND COALESCE(r.result->'duels'->>'status','settled')='settled'
     AND NOT EXISTS (SELECT 1 FROM coin_debate_rounds e
       WHERE e.debate_id=r.debate_id AND e.rail=r.rail AND e.turn_number IS NOT NULL
         AND e.state='open' AND (r.reveal_mode='five_day' OR e.turn_number<r.turn_number))`;

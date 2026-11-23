@@ -391,6 +391,12 @@ export function loadConfig(
     throw new Error("TURN_WINDOWS_ENABLED must be true or false");
   if (turnWindows === "true" && coinSandbox !== "true")
     throw new Error("TURN_WINDOWS_ENABLED requires COIN_SANDBOX_ENABLED");
+  // Decision 0017: new live turn windows open under forecast duels.
+  const duelWindows = environment.DUEL_WINDOWS_ENABLED ?? "false";
+  if (!["true", "false"].includes(duelWindows))
+    throw new Error("DUEL_WINDOWS_ENABLED must be true or false");
+  if (duelWindows === "true" && turnWindows !== "true")
+    throw new Error("DUEL_WINDOWS_ENABLED requires TURN_WINDOWS_ENABLED");
   // The simulated purchase, withdrawal and error-report flows (financial
   // brief F06, founder D2/D3): off by default, and never on the production
   // service, where Yap Coins can't be bought or withdrawn.
@@ -670,6 +676,7 @@ export function loadConfig(
     landingFontFile,
     coinSandboxEnabled: coinSandbox === "true",
     turnWindowsEnabled: turnWindows === "true",
+    duelWindowsEnabled: duelWindows === "true",
     coinSandboxWebhookSecret,
     coinSandboxTransfersEnabled: coinTransfers === "true",
     coinTreasuryAlertUsdc,
