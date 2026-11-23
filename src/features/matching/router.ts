@@ -126,7 +126,6 @@ function requestInput(body: unknown) {
           "kind",
           "topicSlug",
           "targetHandle",
-          "proposition",
           "requestedSide",
           "scheduledAt",
           "mode",
@@ -136,8 +135,8 @@ function requestInput(body: unknown) {
     )
   )
     return null;
-  // The question is always the topic's title (Decision 0015). Pages served before that change
-  // still send "proposition"; it is accepted and ignored for one release, then removed.
+  // The question is always the topic's title (Decision 0015), so a body that still names a
+  // "proposition" is refused like any other unknown key.
   const { kind, topicSlug, targetHandle, requestedSide } = value;
   if (
     (kind !== "direct" && kind !== "queue") ||

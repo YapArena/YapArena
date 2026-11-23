@@ -26,7 +26,6 @@ const requestInput = {
   kind: "direct",
   topicSlug: "civil-ai",
   targetHandle: "other-speaker",
-  proposition: "Should cities use AI for public services?",
   requestedSide: "A",
   scheduledAt,
 };
@@ -219,23 +218,24 @@ describe("matching API", () => {
     assert.equal(calls[0][1], "7");
     assert.equal(calls[0][2].requestedSide, "A");
     assert.equal(calls[0][2].scheduledAt.toISOString(), scheduledAt);
-    assert.equal(
-      "proposition" in calls[0][2],
-      false,
-      "the question is the topic's title, so a typed one is ignored (Decision 0015)",
-    );
-    // A page served before the question lock still posts a proposition, which is
-    // ignored whatever it holds; a new page sends none.
-    const current = { ...requestInput };
-    delete current.proposition;
-    for (const input of [current, { ...requestInput, proposition: "short" }]) {
+    assert.equal("proposition" in calls[0][2], false);
+    // The question is the topic's title (Decision 0015): a body that still types
+    // one is refused, whatever it holds.
+    const before = calls.length;
+    for (const proposition of [
+      "Should cities use AI for public services?",
+      "short",
+    ])
       assert.equal(
-        (await authenticated("post", "/api/matching/requests").send(input))
-          .status,
-        201,
+        (
+          await authenticated("post", "/api/matching/requests").send({
+            ...requestInput,
+            proposition,
+          })
+        ).status,
+        400,
       );
-      assert.equal("proposition" in calls.at(-1)[2], false);
-    }
+    assert.equal(calls.length, before);
     assert.equal(
       calls[0][2].liveOpinions,
       false,
@@ -654,7 +654,6 @@ describe("direct challenge routes", () => {
     kind: "direct",
     topicSlug: "civil-ai",
     targetHandle: "other-speaker",
-    proposition: "Should cities use AI for public services?",
     requestedSide: "A",
   };
 
