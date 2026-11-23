@@ -38,9 +38,37 @@ export interface WindowPricing {
   a: Fraction | null;
   b: Fraction | null;
   price: Fraction | null;
-  branch: "targeted" | "exploratory" | "fallback" | "empty";
-  reason: "missing_side" | "nonpositive_interval" | "empty" | null;
+  /** "duels" for a forecast duel window (Decision 0017), which has no price. */
+  branch: "targeted" | "exploratory" | "fallback" | "empty" | "duels";
+  reason:
+    | "missing_side"
+    | "nonpositive_interval"
+    | "empty"
+    | DuelSummary["status"]
+    | null;
 }
+
+/**
+ * Decision 0017: a revealed forecast duel window's summary. A window with
+ * fewer viewers or tickets than the rule needs returns every stake and has no
+ * share, median read or verdict.
+ */
+export interface DuelSummary {
+  rule: "fd-v1";
+  status: "settled" | "returned_small_room" | "returned_few_viewers";
+  viewers: number;
+  tickets: number;
+  share: Fraction | null;
+  crowd: Fraction | null;
+  verdict: "YES" | "EVEN" | "NO" | null;
+}
+
+/** A window's or round's reason for being voided. */
+export type VoidReason =
+  "debate_unavailable" | "operator_cancelled" | "turn_cut";
+
+/** The rule a window settles under; an older server omits it (A4). */
+export const DUEL_RULE = "fd-v1";
 
 /**
  * One turn window in the anonymous list: timing and state, and its pricing
@@ -53,11 +81,15 @@ export interface PublicWindow {
   opensAt: string;
   closesAt: string;
   state: "open" | "settled" | "void";
-  voidReason: "debate_unavailable" | "operator_cancelled" | null;
+  voidReason: VoidReason | null;
   revealMode: "five_day" | "per_round";
   revealAt: string | null;
   recording?: RecordingSpan | null;
   pricing?: WindowPricing | null;
+  /** "a4-v1" or "fd-v1"; absent from servers that predate Decision 0017. */
+  rule?: string;
+  /** A revealed duel window's summary; null or absent otherwise. */
+  duels?: DuelSummary | null;
 }
 export interface PublicWindows {
   debateId: string;
@@ -79,7 +111,7 @@ export interface StakeRound {
   turnNumber: number | null;
   side: SpeakingSide | null;
   state: "open" | "settled" | "void";
-  voidReason: "debate_unavailable" | "operator_cancelled" | null;
+  voidReason: VoidReason | null;
   opensAt: string;
   closesAt: string;
   revealMode: "five_day" | "per_round";
@@ -98,14 +130,27 @@ export interface StakeRound {
     requestId: string;
     replayPositionMs?: number | null;
   } | null;
+  /** The round's terms; a duel round's rule is "fd-v1". */
+  terms?: { rule?: string };
   pricing?: WindowPricing;
+  duels?: DuelSummary | null;
   outcome?: {
     executed: boolean;
     premium: string;
     fee: string;
     payout: string;
     net: string;
+    /** Decision 0017: how a duel ticket's read fared against the others. */
+    duelsWon?: number;
+    duelsLost?: number;
   };
+}
+
+/** True for a forecast duel window or round (Decision 0017). */
+export function isDuel(
+  value: { rule?: string; terms?: { rule?: string } } | null | undefined,
+) {
+  return (value?.rule ?? value?.terms?.rule) === DUEL_RULE;
 }
 
 /**
@@ -149,7 +194,8 @@ export function ticketTerms(size: number, cents: number) {
 /**
  * The confirm button, which names the exact terms (Decision 0013): "Place
  * Yes · 25 · max 14.50 YC", or "Use for turn 8 · …" once the turn it was
- * opened for closed.
+ * opened for closed. In a duel window (Decision 0017) the whole size is at
+ * stake, whatever the read: "Place Yes · 25 · max 25 YC".
  */
 export function confirmText(ticket: {
   side: StakeSide;
@@ -157,12 +203,37 @@ export function confirmText(ticket: {
   cents: number;
   turnNumber: number;
   closedTurn: number | null;
+  duel?: boolean;
 }) {
   const lead =
     ticket.closedTurn !== null && ticket.closedTurn !== ticket.turnNumber
       ? `Use for turn ${ticket.turnNumber} · `
       : "Place ";
-  return `${lead}${ticket.side === "YES" ? "Yes" : "No"} · ${ticket.size} · max ${ticketTerms(ticket.size, ticket.cents).mostYouCanLose}`;
+  const most = ticket.duel
+    ? coins(ticket.size * 100)
+    : ticketTerms(ticket.size, ticket.cents).mostYouCanLose;
+  return `${lead}${ticket.side === "YES" ? "Yes" : "No"} · ${ticket.size} · max ${most}`;
+}
+
+/**
+ * Decision 0017: why a duel window returned every stake, or null when it
+ * settled.
+ */
+export function returnedText(duels: DuelSummary | null | undefined) {
+  if (duels?.status === "returned_few_viewers")
+    return "fewer than 10 viewers · stakes returned";
+  if (duels?.status === "returned_small_room")
+    return "fewer than 5 answers · stakes returned";
+  return null;
+}
+
+/** "your read beat 3 of 5": a duel ticket's duels won out of all it fought. */
+export function duelsText(
+  outcome: Pick<NonNullable<StakeRound["outcome"]>, "duelsWon" | "duelsLost">,
+) {
+  const won = outcome.duelsWon ?? 0,
+    lost = outcome.duelsLost ?? 0;
+  return `your read beat ${won} of ${won + lost}`;
 }
 
 /** Decision 0016: the full screen's answer sheet's name, "Your answer: Yes". */
@@ -363,6 +434,18 @@ export function resultLine(round: StakeRound) {
   if (!own) return "";
   const head = `Turn ${round.turnNumber} · ${own.side === "YES" ? "Yes" : "No"} · ${own.quantity}`;
   if (round.state === "void") return `${head} · voided · refunded`;
+  // Decision 0017: "Turn 3 · Yes · 10 · read 60% · 67% said yes · your read
+  // beat 3 of 5 · +0.31 YC". The money rode on the read, not on Yes or No.
+  if (isDuel(round)) {
+    const parts = [head, `read ${percent(decimalShare(own.limit))}%`];
+    const returned = returnedText(round.duels);
+    if (returned) return [...parts, returned].join(" · ");
+    const share = percent(round.pricing?.share);
+    if (share !== null) parts.push(`${share}% said yes`);
+    if (round.outcome)
+      parts.push(duelsText(round.outcome), signedCoins(round.outcome.net));
+    return parts.join(" · ");
+  }
   const yes = percent(round.pricing?.price);
   const sidePrice = yes === null ? null : own.side === "YES" ? yes : 100 - yes;
   const share = percent(round.pricing?.share);
@@ -381,6 +464,11 @@ export function resultLine(round: StakeRound) {
   return parts.join(" · ");
 }
 
+/** A read's decimal ("0.540000") as a fraction, for percent(). */
+export function decimalShare(limit: string): Fraction {
+  return { n: String(Math.round(Number(limit) * 1_000_000)), d: "1000000" };
+}
+
 /** A position's status line in the "Your positions" list. */
 export function positionStatus(
   round: StakeRound,
@@ -389,7 +477,15 @@ export function positionStatus(
   if (round.state === "void")
     return round.voidReason === "debate_unavailable"
       ? "Voided · refunded (debate cancelled or under review)"
-      : "Voided · refunded";
+      : round.voidReason === "turn_cut"
+        ? "Voided · refunded (the turn was cut short)"
+        : "Voided · refunded";
+  if (round.state === "settled" && round.outcome && isDuel(round)) {
+    const returned = returnedText(round.duels);
+    return returned
+      ? `Returned: ${returned.split(" · ")[0]}`
+      : `Settled: ${signedCoins(round.outcome.net)}`;
+  }
   if (round.state === "settled" && round.outcome)
     return round.outcome.executed
       ? `Settled: ${signedCoins(round.outcome.net)}`
@@ -495,6 +591,45 @@ export function waitText(seconds: number) {
   }
   const minutes = Math.ceil(seconds / 60);
   return `${minutes} ${minutes === 1 ? "minute" : "minutes"}`;
+}
+
+/** How often a watching viewer's page says it is present (Decision 0017). */
+export const PRESENCE_MS = 20_000;
+
+/**
+ * Decision 0017: whether the page should send its presence heartbeat now. A
+ * duel window settles only with enough signed-in viewers present while it is
+ * open, so a signed-in viewer of a live debate who is not one of its debaters
+ * says so every 20 seconds while the page is visible, and at once when a new
+ * duel window opens. A4 windows need no count, so nothing is sent for them.
+ */
+export function presenceDue(state: {
+  eventStatus: string | undefined;
+  signedIn: boolean | null;
+  /** The coin summary loaded, so the request can name its session. */
+  session: boolean;
+  debater: boolean;
+  hidden: boolean;
+  /** The live window taking orders now, if any. */
+  window: Pick<PublicWindow, "id" | "rule"> | null;
+  last: { at: number; windowId: string | null } | null;
+  now: number;
+}) {
+  if (
+    state.eventStatus !== "live" ||
+    state.signedIn !== true ||
+    !state.session ||
+    state.debater ||
+    state.hidden ||
+    !state.window ||
+    !isDuel(state.window)
+  )
+    return false;
+  return (
+    state.last === null ||
+    state.last.windowId !== state.window.id ||
+    state.now - state.last.at >= PRESENCE_MS
+  );
 }
 
 /** True when no window has a span in the recording yet (F10 can't work). */
