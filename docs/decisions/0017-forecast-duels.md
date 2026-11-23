@@ -140,9 +140,10 @@ Decision 0016's ticket is unchanged: Yes and No, the size chips, the read slider
   visible page only. Nothing is sent for A4 windows.
 - **Key.** In a duel window the key names the whole size at stake: "Place Yes · 25 · max 25 YC".
 - **Receipt.** "You said Yes · read 60% · 10 YC at stake", then "Result: 67% said yes · your read
-  beat 3 of 5 · +3.13 YC", or "Result: fewer than 10 viewers · stakes returned".
+  beat 3 of 5 · +3.13 YC", or "Result: stakes returned" for a window short of viewers (founder,
+  2026-11-23: the page names no viewer count).
 - **Results and positions.** "Turn 2 · Yes · 10 · read 60% · 67% said yes · your read beat 3 of 5
-  · +3.13 YC"; a returned window reads "Returned: fewer than 10 viewers" (or "fewer than 5
-  answers"); a cut turn reads "Voided · refunded (the turn was cut short)".
+  · +3.13 YC"; a window short of viewers reads "Stakes returned", one short of answers
+  "Returned: fewer than 5 answers"; a cut turn reads "Voided · refunded (the turn was cut short)".
 - **Unchanged.** The result plate, the results notice, the turn bars and the debate bar read the
   net and the Yes share as before; a returned window shows as a turn with no share.

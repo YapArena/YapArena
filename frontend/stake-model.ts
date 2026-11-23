@@ -216,12 +216,12 @@ export function confirmText(ticket: {
 }
 
 /**
- * Decision 0017: why a duel window returned every stake, or null when it
- * settled.
+ * Decision 0017: a duel window that returned every stake, or null when it
+ * settled. Too few answers is named; a window short of viewers says only
+ * that stakes were returned (founder, 2026-11-23).
  */
 export function returnedText(duels: DuelSummary | null | undefined) {
-  if (duels?.status === "returned_few_viewers")
-    return "fewer than 10 viewers · stakes returned";
+  if (duels?.status === "returned_few_viewers") return "stakes returned";
   if (duels?.status === "returned_small_room")
     return "fewer than 5 answers · stakes returned";
   return null;
@@ -481,10 +481,11 @@ export function positionStatus(
         ? "Voided · refunded (the turn was cut short)"
         : "Voided · refunded";
   if (round.state === "settled" && round.outcome && isDuel(round)) {
-    const returned = returnedText(round.duels);
-    return returned
-      ? `Returned: ${returned.split(" · ")[0]}`
-      : `Settled: ${signedCoins(round.outcome.net)}`;
+    if (round.duels?.status === "returned_small_room")
+      return "Returned: fewer than 5 answers";
+    if (round.duels?.status === "returned_few_viewers")
+      return "Stakes returned";
+    return `Settled: ${signedCoins(round.outcome.net)}`;
   }
   if (round.state === "settled" && round.outcome)
     return round.outcome.executed

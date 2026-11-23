@@ -613,11 +613,11 @@ describe("forecast duel windows (Decision 0017)", () => {
     const few = settled(summary("returned_few_viewers"), outcome);
     assert.equal(
       resultLine(few),
-      "Turn 2 · Yes · 10 · read 60% · fewer than 10 viewers · stakes returned",
+      "Turn 2 · Yes · 10 · read 60% · stakes returned",
     );
     assert.equal(
       positionStatus(few, () => ""),
-      "Returned: fewer than 10 viewers",
+      "Stakes returned",
     );
     const small = settled(summary("returned_small_room"), outcome);
     assert.equal(
