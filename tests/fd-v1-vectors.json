@@ -1,0 +1,6579 @@
+[
+  {
+    "name": "worked example in the spec",
+    "orders": [
+      {
+        "participant": "A",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.60",
+        "quantity": 10
+      },
+      {
+        "participant": "B",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.70",
+        "quantity": 20
+      },
+      {
+        "participant": "C",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.55",
+        "quantity": 10
+      },
+      {
+        "participant": "D",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.66",
+        "quantity": 10
+      },
+      {
+        "participant": "E",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.50",
+        "quantity": 40
+      },
+      {
+        "participant": "F",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.75",
+        "quantity": 10
+      }
+    ],
+    "payouts": ["131325", "250150", "125075", "143375", "237500", "112575"],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [3, 3, 4, 3, 0, 2],
+    "dust": "0"
+  },
+  {
+    "name": "mixed, 8 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.997554",
+        "quantity": 66
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.999241",
+        "quantity": 14
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.938273",
+        "quantity": 77
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.441046",
+        "quantity": 74
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.766025",
+        "quantity": 100
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.787507",
+        "quantity": 99
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.251589",
+        "quantity": 1
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.116115",
+        "quantity": 37
+      }
+    ],
+    "payouts": [
+      "113651",
+      "23100",
+      "389935",
+      "1248373",
+      "1165465",
+      "1015880",
+      "18906",
+      "704685"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [1, 0, 2, 5, 4, 3, 6, 7],
+    "dust": "5"
+  },
+  {
+    "name": "lone YES, 8 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.854340",
+        "quantity": 88
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.329497",
+        "quantity": 27
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.364545",
+        "quantity": 46
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.782206",
+        "quantity": 66
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.758237",
+        "quantity": 44
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.564201",
+        "quantity": 38
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.147732",
+        "quantity": 83
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.605472",
+        "quantity": 40
+      }
+    ],
+    "payouts": [
+      "179259",
+      "430083",
+      "706484",
+      "412632",
+      "315608",
+      "432125",
+      "1420098",
+      "423707"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [0, 6, 5, 1, 2, 4, 7, 3],
+    "dust": "4"
+  },
+  {
+    "name": "everyone YES, 5 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.386761",
+        "quantity": 47
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.095089",
+        "quantity": 52
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.581381",
+        "quantity": 64
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.446109",
+        "quantity": 65
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.908858",
+        "quantity": 77
+      }
+    ],
+    "payouts": ["246126", "88655", "822557", "547053", "1345606"],
+    "status": ["settled", "settled", "settled", "settled", "settled"],
+    "won": [1, 0, 3, 2, 4],
+    "dust": "3"
+  },
+  {
+    "name": "small YES camp, 20 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.550138",
+        "quantity": 34
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.591396",
+        "quantity": 62
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.844285",
+        "quantity": 4
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.803027",
+        "quantity": 17
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.738892",
+        "quantity": 67
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.107559",
+        "quantity": 92
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.492873",
+        "quantity": 19
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.240047",
+        "quantity": 16
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.478985",
+        "quantity": 87
+      },
+      {
+        "participant": "p009",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.974614",
+        "quantity": 70
+      },
+      {
+        "participant": "p010",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.421611",
+        "quantity": 86
+      },
+      {
+        "participant": "p011",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.574775",
+        "quantity": 83
+      },
+      {
+        "participant": "p012",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.502155",
+        "quantity": 52
+      },
+      {
+        "participant": "p013",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.308673",
+        "quantity": 35
+      },
+      {
+        "participant": "p014",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.157122",
+        "quantity": 84
+      },
+      {
+        "participant": "p015",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.480486",
+        "quantity": 67
+      },
+      {
+        "participant": "p016",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.377420",
+        "quantity": 26
+      },
+      {
+        "participant": "p017",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.509156",
+        "quantity": 60
+      },
+      {
+        "participant": "p018",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.866305",
+        "quantity": 64
+      },
+      {
+        "participant": "p019",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.584935",
+        "quantity": 85
+      }
+    ],
+    "payouts": [
+      "273799",
+      "371120",
+      "8638",
+      "44746",
+      "227558",
+      "1690717",
+      "216135",
+      "278505",
+      "1039548",
+      "44144",
+      "1210002",
+      "554247",
+      "568082",
+      "573345",
+      "1525156",
+      "796431",
+      "398023",
+      "631533",
+      "118912",
+      "529351"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [
+      8, 5, 2, 3, 4, 19, 11, 17, 13, 0, 14, 7, 10, 16, 18, 12, 15, 9, 1, 6
+    ],
+    "dust": "8"
+  },
+  {
+    "name": "tied reads, 6 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.500000",
+        "quantity": 59
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.250000",
+        "quantity": 57
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.750000",
+        "quantity": 34
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.250000",
+        "quantity": 55
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.500000",
+        "quantity": 9
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.500000",
+        "quantity": 48
+      }
+    ],
+    "payouts": ["442429", "841130", "44122", "864885", "67489", "359942"],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [1, 4, 0, 4, 1, 1],
+    "dust": "3"
+  },
+  {
+    "name": "lone NO, 8 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.898249",
+        "quantity": 53
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.960999",
+        "quantity": 2
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.473149",
+        "quantity": 75
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.876981",
+        "quantity": 11
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.208448",
+        "quantity": 32
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.046828",
+        "quantity": 97
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.281580",
+        "quantity": 86
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.374604",
+        "quantity": 20
+      }
+    ],
+    "payouts": [
+      "967583",
+      "36695",
+      "1087101",
+      "199870",
+      "192340",
+      "250239",
+      "786808",
+      "239361"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [6, 6, 4, 6, 1, 0, 2, 3],
+    "dust": "3"
+  },
+  {
+    "name": "tight reads, 5 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.477272",
+        "quantity": 63
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.548084",
+        "quantity": 18
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.469811",
+        "quantity": 89
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.527399",
+        "quantity": 54
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.700649",
+        "quantity": 76
+      }
+    ],
+    "payouts": ["878785", "169517", "1188443", "570719", "192533"],
+    "status": ["settled", "settled", "settled", "settled", "settled"],
+    "won": [3, 1, 4, 2, 0],
+    "dust": "3"
+  },
+  {
+    "name": "mixed, 14 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.409371",
+        "quantity": 20
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.206251",
+        "quantity": 49
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.111289",
+        "quantity": 50
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.053870",
+        "quantity": 45
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.979940",
+        "quantity": 99
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.026824",
+        "quantity": 66
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.715961",
+        "quantity": 39
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.958353",
+        "quantity": 16
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.489247",
+        "quantity": 74
+      },
+      {
+        "participant": "p009",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.179027",
+        "quantity": 20
+      },
+      {
+        "participant": "p010",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.217040",
+        "quantity": 56
+      },
+      {
+        "participant": "p011",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.481104",
+        "quantity": 77
+      },
+      {
+        "participant": "p012",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.745414",
+        "quantity": 9
+      },
+      {
+        "participant": "p013",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.035811",
+        "quantity": 26
+      }
+    ],
+    "payouts": [
+      "329205",
+      "701282",
+      "635355",
+      "373315",
+      "167824",
+      "477209",
+      "191785",
+      "36896",
+      "1001342",
+      "271237",
+      "815635",
+      "1224221",
+      "37283",
+      "197404"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [13, 10, 8, 6, 0, 4, 3, 1, 7, 9, 11, 12, 2, 5],
+    "dust": "7"
+  },
+  {
+    "name": "lone YES, 25 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.047434",
+        "quantity": 83
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.879734",
+        "quantity": 7
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.791370",
+        "quantity": 83
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.745480",
+        "quantity": 87
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.135412",
+        "quantity": 83
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.823560",
+        "quantity": 67
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.144411",
+        "quantity": 21
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.195040",
+        "quantity": 50
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.558902",
+        "quantity": 54
+      },
+      {
+        "participant": "p009",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.401798",
+        "quantity": 40
+      },
+      {
+        "participant": "p010",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.183180",
+        "quantity": 34
+      },
+      {
+        "participant": "p011",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.818149",
+        "quantity": 54
+      },
+      {
+        "participant": "p012",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.185558",
+        "quantity": 42
+      },
+      {
+        "participant": "p013",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.466178",
+        "quantity": 16
+      },
+      {
+        "participant": "p014",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.550186",
+        "quantity": 36
+      },
+      {
+        "participant": "p015",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.889056",
+        "quantity": 28
+      },
+      {
+        "participant": "p016",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.999999",
+        "quantity": 12
+      },
+      {
+        "participant": "p017",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.677043",
+        "quantity": 43
+      },
+      {
+        "participant": "p018",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.821364",
+        "quantity": 86
+      },
+      {
+        "participant": "p019",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.028505",
+        "quantity": 46
+      },
+      {
+        "participant": "p020",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.368785",
+        "quantity": 72
+      },
+      {
+        "participant": "p021",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.830265",
+        "quantity": 69
+      },
+      {
+        "participant": "p022",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.650939",
+        "quantity": 92
+      },
+      {
+        "participant": "p023",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.787738",
+        "quantity": 73
+      },
+      {
+        "participant": "p024",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.597515",
+        "quantity": 38
+      }
+    ],
+    "payouts": [
+      "1479819",
+      "3430",
+      "444700",
+      "670216",
+      "1432931",
+      "216297",
+      "361176",
+      "836412",
+      "634215",
+      "539740",
+      "573042",
+      "192970",
+      "706847",
+      "206009",
+      "426814",
+      "12261",
+      "1094",
+      "401816",
+      "289709",
+      "810431",
+      "991288",
+      "193009",
+      "903877",
+      "410625",
+      "421261"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [
+      23, 2, 7, 9, 22, 4, 21, 18, 13, 16, 20, 6, 19, 15, 14, 1, 0, 10, 5, 24,
+      17, 3, 11, 8, 12
+    ],
+    "dust": "11"
+  },
+  {
+    "name": "everyone YES, 23 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.582729",
+        "quantity": 17
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.276522",
+        "quantity": 13
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.179594",
+        "quantity": 14
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.795987",
+        "quantity": 46
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.194505",
+        "quantity": 83
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.531236",
+        "quantity": 41
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.878068",
+        "quantity": 9
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.329883",
+        "quantity": 21
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.065933",
+        "quantity": 2
+      },
+      {
+        "participant": "p009",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.941677",
+        "quantity": 100
+      },
+      {
+        "participant": "p010",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.016179",
+        "quantity": 8
+      },
+      {
+        "participant": "p011",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.024093",
+        "quantity": 40
+      },
+      {
+        "participant": "p012",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.719141",
+        "quantity": 72
+      },
+      {
+        "participant": "p013",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.981583",
+        "quantity": 45
+      },
+      {
+        "participant": "p014",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.478197",
+        "quantity": 78
+      },
+      {
+        "participant": "p015",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.748910",
+        "quantity": 79
+      },
+      {
+        "participant": "p016",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.423824",
+        "quantity": 41
+      },
+      {
+        "participant": "p017",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.622914",
+        "quantity": 60
+      },
+      {
+        "participant": "p018",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.708752",
+        "quantity": 16
+      },
+      {
+        "participant": "p019",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.903139",
+        "quantity": 65
+      },
+      {
+        "participant": "p020",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.968603",
+        "quantity": 33
+      },
+      {
+        "participant": "p021",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.993068",
+        "quantity": 46
+      },
+      {
+        "participant": "p022",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.749912",
+        "quantity": 56
+      }
+    ],
+    "payouts": [
+      "123822",
+      "40713",
+      "24424",
+      "625838",
+      "169575",
+      "259474",
+      "139772",
+      "72505",
+      "1988",
+      "1635237",
+      "3268",
+      "20123",
+      "777389",
+      "745492",
+      "416266",
+      "952510",
+      "175984",
+      "478268",
+      "166588",
+      "1035121",
+      "545202",
+      "762995",
+      "677434"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [
+      10, 5, 3, 16, 4, 9, 17, 6, 2, 19, 0, 1, 13, 21, 8, 14, 7, 11, 12, 18, 20,
+      22, 15
+    ],
+    "dust": "12"
+  },
+  {
+    "name": "small YES camp, 5 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.346604",
+        "quantity": 38
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.806512",
+        "quantity": 16
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.436875",
+        "quantity": 41
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.021254",
+        "quantity": 70
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.207039",
+        "quantity": 72
+      }
+    ],
+    "payouts": ["240032", "10801", "133908", "1093335", "891922"],
+    "status": ["settled", "settled", "settled", "settled", "settled"],
+    "won": [2, 0, 1, 4, 3],
+    "dust": "2"
+  },
+  {
+    "name": "tied reads, 6 tickets (room 2)",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.250000",
+        "quantity": 21
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.250000",
+        "quantity": 5
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.500000",
+        "quantity": 77
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.750000",
+        "quantity": 39
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.750000",
+        "quantity": 17
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.500000",
+        "quantity": 49
+      }
+    ],
+    "payouts": ["71240", "16962", "1020920", "254179", "67019", "649676"],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [0, 0, 4, 2, 0, 4],
+    "dust": "4"
+  },
+  {
+    "name": "lone NO, 12 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.694779",
+        "quantity": 29
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.192379",
+        "quantity": 70
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.752108",
+        "quantity": 70
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.416136",
+        "quantity": 33
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.239343",
+        "quantity": 3
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.567436",
+        "quantity": 62
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.330033",
+        "quantity": 18
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.622487",
+        "quantity": 12
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.579843",
+        "quantity": 5
+      },
+      {
+        "participant": "p009",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.863800",
+        "quantity": 66
+      },
+      {
+        "participant": "p010",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.357263",
+        "quantity": 82
+      },
+      {
+        "participant": "p011",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.779188",
+        "quantity": 41
+      }
+    ],
+    "payouts": [
+      "389432",
+      "100637",
+      "1087884",
+      "241249",
+      "7895",
+      "612999",
+      "78798",
+      "137850",
+      "50249",
+      "1111920",
+      "435695",
+      "655386"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [8, 0, 9, 4, 1, 5, 2, 7, 6, 11, 3, 10],
+    "dust": "6"
+  },
+  {
+    "name": "tight reads, 6 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.711881",
+        "quantity": 81
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.666290",
+        "quantity": 66
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.637757",
+        "quantity": 96
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.602459",
+        "quantity": 30
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.556244",
+        "quantity": 44
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.556908",
+        "quantity": 71
+      }
+    ],
+    "payouts": ["198665", "445614", "911209", "395266", "739083", "1190160"],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [0, 1, 2, 3, 5, 4],
+    "dust": "3"
+  },
+  {
+    "name": "mixed, 20 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.706114",
+        "quantity": 75
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.165983",
+        "quantity": 81
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.508409",
+        "quantity": 1
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.853282",
+        "quantity": 67
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.834002",
+        "quantity": 5
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.088297",
+        "quantity": 39
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.766517",
+        "quantity": 34
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.775443",
+        "quantity": 13
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.019243",
+        "quantity": 69
+      },
+      {
+        "participant": "p009",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.889938",
+        "quantity": 90
+      },
+      {
+        "participant": "p010",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.600445",
+        "quantity": 6
+      },
+      {
+        "participant": "p011",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.399069",
+        "quantity": 69
+      },
+      {
+        "participant": "p012",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.541690",
+        "quantity": 83
+      },
+      {
+        "participant": "p013",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.533475",
+        "quantity": 14
+      },
+      {
+        "participant": "p014",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.768161",
+        "quantity": 50
+      },
+      {
+        "participant": "p015",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.274143",
+        "quantity": 40
+      },
+      {
+        "participant": "p016",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.621513",
+        "quantity": 85
+      },
+      {
+        "participant": "p017",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.170090",
+        "quantity": 38
+      },
+      {
+        "participant": "p018",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.299451",
+        "quantity": 46
+      },
+      {
+        "participant": "p019",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.407489",
+        "quantity": 25
+      }
+    ],
+    "payouts": [
+      "1020792",
+      "690739",
+      "16245",
+      "435911",
+      "37631",
+      "111278",
+      "297744",
+      "107778",
+      "55834",
+      "327905",
+      "95011",
+      "1030002",
+      "1346846",
+      "227380",
+      "433589",
+      "535554",
+      "1245833",
+      "228348",
+      "653931",
+      "401637"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [
+      12, 7, 18, 4, 6, 1, 8, 6, 0, 2, 15, 13, 18, 17, 7, 11, 11, 4, 13, 17
+    ],
+    "dust": "12"
+  },
+  {
+    "name": "lone YES, 25 tickets (room 2)",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.635385",
+        "quantity": 83
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.443183",
+        "quantity": 46
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.945948",
+        "quantity": 100
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.563476",
+        "quantity": 22
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.030946",
+        "quantity": 23
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.151776",
+        "quantity": 21
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.122366",
+        "quantity": 66
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.738599",
+        "quantity": 83
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.882809",
+        "quantity": 48
+      },
+      {
+        "participant": "p009",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.317350",
+        "quantity": 28
+      },
+      {
+        "participant": "p010",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.628617",
+        "quantity": 79
+      },
+      {
+        "participant": "p011",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.111431",
+        "quantity": 42
+      },
+      {
+        "participant": "p012",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.916431",
+        "quantity": 94
+      },
+      {
+        "participant": "p013",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.275325",
+        "quantity": 79
+      },
+      {
+        "participant": "p014",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.123259",
+        "quantity": 45
+      },
+      {
+        "participant": "p015",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.522976",
+        "quantity": 16
+      },
+      {
+        "participant": "p016",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.259026",
+        "quantity": 46
+      },
+      {
+        "participant": "p017",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.478081",
+        "quantity": 75
+      },
+      {
+        "participant": "p018",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.072388",
+        "quantity": 100
+      },
+      {
+        "participant": "p019",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.847688",
+        "quantity": 64
+      },
+      {
+        "participant": "p020",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.278191",
+        "quantity": 97
+      },
+      {
+        "participant": "p021",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.176518",
+        "quantity": 42
+      },
+      {
+        "participant": "p022",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.588855",
+        "quantity": 43
+      },
+      {
+        "participant": "p023",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.941737",
+        "quantity": 93
+      },
+      {
+        "participant": "p024",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.517151",
+        "quantity": 52
+      }
+    ],
+    "payouts": [
+      "630696",
+      "522895",
+      "145668",
+      "205590",
+      "399257",
+      "352508",
+      "1125872",
+      "491748",
+      "198025",
+      "382286",
+      "614105",
+      "719803",
+      "264281",
+      "1161724",
+      "767324",
+      "162152",
+      "693055",
+      "817854",
+      "1732542",
+      "310158",
+      "1419998",
+      "692599",
+      "374205",
+      "152485",
+      "533159"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [
+      6, 13, 0, 9, 24, 19, 21, 5, 3, 14, 7, 22, 2, 16, 20, 10, 17, 12, 23, 4,
+      15, 18, 8, 1, 11
+    ],
+    "dust": "11"
+  },
+  {
+    "name": "everyone YES, 15 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.845548",
+        "quantity": 60
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.722637",
+        "quantity": 45
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.367111",
+        "quantity": 53
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.618516",
+        "quantity": 49
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.463126",
+        "quantity": 96
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.771867",
+        "quantity": 17
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.344953",
+        "quantity": 16
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.882041",
+        "quantity": 57
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.571596",
+        "quantity": 81
+      },
+      {
+        "participant": "p009",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.347887",
+        "quantity": 19
+      },
+      {
+        "participant": "p010",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.129222",
+        "quantity": 35
+      },
+      {
+        "participant": "p011",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.480314",
+        "quantity": 82
+      },
+      {
+        "participant": "p012",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.022775",
+        "quantity": 71
+      },
+      {
+        "participant": "p013",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.706862",
+        "quantity": 53
+      },
+      {
+        "participant": "p014",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.712166",
+        "quantity": 99
+      }
+    ],
+    "payouts": [
+      "1064506",
+      "675977",
+      "198240",
+      "561078",
+      "630840",
+      "277807",
+      "53816",
+      "1039426",
+      "827235",
+      "64869",
+      "74369",
+      "578618",
+      "60516",
+      "768952",
+      "1453741"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [13, 11, 4, 8, 5, 12, 2, 14, 7, 3, 1, 6, 0, 9, 10],
+    "dust": "10"
+  },
+  {
+    "name": "small YES camp, 20 tickets (room 2)",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.888517",
+        "quantity": 82
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.700058",
+        "quantity": 98
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.220109",
+        "quantity": 55
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.346497",
+        "quantity": 8
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.759626",
+        "quantity": 23
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.586071",
+        "quantity": 90
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.350238",
+        "quantity": 75
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.434763",
+        "quantity": 100
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.892685",
+        "quantity": 62
+      },
+      {
+        "participant": "p009",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.039316",
+        "quantity": 97
+      },
+      {
+        "participant": "p010",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.126710",
+        "quantity": 85
+      },
+      {
+        "participant": "p011",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.281693",
+        "quantity": 42
+      },
+      {
+        "participant": "p012",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.219387",
+        "quantity": 59
+      },
+      {
+        "participant": "p013",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.653080",
+        "quantity": 81
+      },
+      {
+        "participant": "p014",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.582761",
+        "quantity": 89
+      },
+      {
+        "participant": "p015",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.806290",
+        "quantity": 2
+      },
+      {
+        "participant": "p016",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.163396",
+        "quantity": 43
+      },
+      {
+        "participant": "p017",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.988900",
+        "quantity": 60
+      },
+      {
+        "participant": "p018",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.705841",
+        "quantity": 22
+      },
+      {
+        "participant": "p019",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.088376",
+        "quantity": 73
+      }
+    ],
+    "payouts": [
+      "177054",
+      "476065",
+      "871737",
+      "104914",
+      "82305",
+      "744442",
+      "974876",
+      "1086478",
+      "128050",
+      "1584108",
+      "1405740",
+      "623200",
+      "919991",
+      "490967",
+      "738647",
+      "6660",
+      "704332",
+      "28892",
+      "103487",
+      "1208047"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [
+      2, 6, 14, 12, 4, 8, 11, 10, 1, 16, 19, 13, 15, 7, 9, 3, 17, 0, 5, 18
+    ],
+    "dust": "8"
+  },
+  {
+    "name": "tied reads, 18 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.750000",
+        "quantity": 76
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.250000",
+        "quantity": 4
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.500000",
+        "quantity": 6
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.750000",
+        "quantity": 66
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.500000",
+        "quantity": 85
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.500000",
+        "quantity": 45
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.500000",
+        "quantity": 33
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.500000",
+        "quantity": 33
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.500000",
+        "quantity": 18
+      },
+      {
+        "participant": "p009",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.500000",
+        "quantity": 33
+      },
+      {
+        "participant": "p010",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.500000",
+        "quantity": 26
+      },
+      {
+        "participant": "p011",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.750000",
+        "quantity": 94
+      },
+      {
+        "participant": "p012",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.250000",
+        "quantity": 75
+      },
+      {
+        "participant": "p013",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.500000",
+        "quantity": 9
+      },
+      {
+        "participant": "p014",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.750000",
+        "quantity": 85
+      },
+      {
+        "participant": "p015",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.750000",
+        "quantity": 99
+      },
+      {
+        "participant": "p016",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.500000",
+        "quantity": 79
+      },
+      {
+        "participant": "p017",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.750000",
+        "quantity": 67
+      }
+    ],
+    "payouts": [
+      "768985",
+      "5515",
+      "81961",
+      "524323",
+      "1002755",
+      "530870",
+      "450787",
+      "450787",
+      "245884",
+      "450787",
+      "306725",
+      "746764",
+      "314911",
+      "122942",
+      "860049",
+      "1001705",
+      "931972",
+      "532268"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [2, 0, 8, 1, 5, 5, 8, 8, 8, 8, 5, 1, 0, 8, 2, 2, 5, 1],
+    "dust": "10"
+  },
+  {
+    "name": "lone NO, 24 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.333379",
+        "quantity": 85
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.189960",
+        "quantity": 10
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.905444",
+        "quantity": 23
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.993497",
+        "quantity": 68
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.401424",
+        "quantity": 81
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.638955",
+        "quantity": 28
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.252597",
+        "quantity": 27
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.897040",
+        "quantity": 68
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.221541",
+        "quantity": 35
+      },
+      {
+        "participant": "p009",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.751187",
+        "quantity": 63
+      },
+      {
+        "participant": "p010",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.711449",
+        "quantity": 42
+      },
+      {
+        "participant": "p011",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.682492",
+        "quantity": 51
+      },
+      {
+        "participant": "p012",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.761425",
+        "quantity": 70
+      },
+      {
+        "participant": "p013",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.636246",
+        "quantity": 71
+      },
+      {
+        "participant": "p014",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.160545",
+        "quantity": 94
+      },
+      {
+        "participant": "p015",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.836045",
+        "quantity": 85
+      },
+      {
+        "participant": "p016",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.840803",
+        "quantity": 86
+      },
+      {
+        "participant": "p017",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.293986",
+        "quantity": 39
+      },
+      {
+        "participant": "p018",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.187680",
+        "quantity": 18
+      },
+      {
+        "participant": "p019",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.566565",
+        "quantity": 89
+      },
+      {
+        "participant": "p020",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.479507",
+        "quantity": 22
+      },
+      {
+        "participant": "p021",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.056248",
+        "quantity": 97
+      },
+      {
+        "participant": "p022",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.161374",
+        "quantity": 53
+      },
+      {
+        "participant": "p023",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.513532",
+        "quantity": 70
+      }
+    ],
+    "payouts": [
+      "505895",
+      "33997",
+      "393805",
+      "1167367",
+      "587323",
+      "325050",
+      "125084",
+      "1161216",
+      "147712",
+      "943036",
+      "584321",
+      "662795",
+      "1064737",
+      "819647",
+      "241233",
+      "1405396",
+      "1426734",
+      "206084",
+      "59995",
+      "878897",
+      "183702",
+      "68429",
+      "137123",
+      "620409"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [
+      8, 4, 22, 23, 9, 14, 6, 21, 5, 17, 16, 15, 18, 13, 1, 19, 20, 7, 3, 12,
+      10, 0, 2, 11
+    ],
+    "dust": "13"
+  },
+  {
+    "name": "tight reads, 5 tickets (room 2)",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.697140",
+        "quantity": 47
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.506615",
+        "quantity": 20
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.644866",
+        "quantity": 92
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.651182",
+        "quantity": 76
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.621483",
+        "quantity": 33
+      }
+    ],
+    "payouts": ["132331", "359250", "997067", "778884", "412466"],
+    "status": ["settled", "settled", "settled", "settled", "settled"],
+    "won": [0, 4, 2, 1, 3],
+    "dust": "2"
+  },
+  {
+    "name": "mixed, 15 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.171767",
+        "quantity": 65
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.856114",
+        "quantity": 12
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.454171",
+        "quantity": 26
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.178959",
+        "quantity": 31
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.518581",
+        "quantity": 28
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.561891",
+        "quantity": 55
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.481701",
+        "quantity": 47
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.323703",
+        "quantity": 81
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.980546",
+        "quantity": 72
+      },
+      {
+        "participant": "p009",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.096221",
+        "quantity": 28
+      },
+      {
+        "participant": "p010",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.121480",
+        "quantity": 97
+      },
+      {
+        "participant": "p011",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.749528",
+        "quantity": 87
+      },
+      {
+        "participant": "p012",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.165744",
+        "quantity": 15
+      },
+      {
+        "participant": "p013",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.672247",
+        "quantity": 56
+      },
+      {
+        "participant": "p014",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.994053",
+        "quantity": 55
+      }
+    ],
+    "payouts": [
+      "587148",
+      "54867",
+      "452401",
+      "293233",
+      "474815",
+      "898586",
+      "808497",
+      "1259850",
+      "248781",
+      "130904",
+      "597046",
+      "801769",
+      "130250",
+      "728642",
+      "83204"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [6, 2, 14, 8, 12, 11, 13, 10, 2, 2, 4, 7, 5, 9, 0],
+    "dust": "7"
+  },
+  {
+    "name": "lone YES, 5 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.151919",
+        "quantity": 83
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.665087",
+        "quantity": 35
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.382968",
+        "quantity": 51
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.546326",
+        "quantity": 59
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.881295",
+        "quantity": 46
+      }
+    ],
+    "payouts": ["1408576", "176644", "565170", "512382", "77226"],
+    "status": ["settled", "settled", "settled", "settled", "settled"],
+    "won": [4, 1, 3, 2, 0],
+    "dust": "2"
+  },
+  {
+    "name": "everyone YES, 20 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.112682",
+        "quantity": 19
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.376433",
+        "quantity": 59
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.663793",
+        "quantity": 76
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.732101",
+        "quantity": 86
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.791576",
+        "quantity": 33
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.082656",
+        "quantity": 60
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.572624",
+        "quantity": 68
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.992379",
+        "quantity": 13
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.311173",
+        "quantity": 5
+      },
+      {
+        "participant": "p009",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.043907",
+        "quantity": 9
+      },
+      {
+        "participant": "p010",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.474415",
+        "quantity": 73
+      },
+      {
+        "participant": "p011",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.837953",
+        "quantity": 83
+      },
+      {
+        "participant": "p012",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.479161",
+        "quantity": 79
+      },
+      {
+        "participant": "p013",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.023033",
+        "quantity": 20
+      },
+      {
+        "participant": "p014",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.140845",
+        "quantity": 4
+      },
+      {
+        "participant": "p015",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.096320",
+        "quantity": 22
+      },
+      {
+        "participant": "p016",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.267332",
+        "quantity": 3
+      },
+      {
+        "participant": "p017",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.785310",
+        "quantity": 10
+      },
+      {
+        "participant": "p018",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.546112",
+        "quantity": 16
+      },
+      {
+        "participant": "p019",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.898107",
+        "quantity": 43
+      }
+    ],
+    "payouts": [
+      "50903",
+      "259116",
+      "962151",
+      "1266809",
+      "537572",
+      "106367",
+      "700494",
+      "237607",
+      "17819",
+      "5144",
+      "515066",
+      "1423751",
+      "567950",
+      "6263",
+      "13125",
+      "48106",
+      "10452",
+      "161441",
+      "152965",
+      "766890"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [
+      4, 8, 13, 14, 16, 2, 12, 19, 7, 1, 9, 17, 10, 0, 5, 3, 6, 15, 11, 18
+    ],
+    "dust": "9"
+  },
+  {
+    "name": "small YES camp, 9 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.493649",
+        "quantity": 31
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.940207",
+        "quantity": 60
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.419470",
+        "quantity": 31
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.889649",
+        "quantity": 41
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.512705",
+        "quantity": 32
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.459824",
+        "quantity": 25
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.616954",
+        "quantity": 61
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.506291",
+        "quantity": 68
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.991363",
+        "quantity": 28
+      }
+    ],
+    "payouts": [
+      "456427",
+      "186190",
+      "545881",
+      "234419",
+      "443904",
+      "403098",
+      "516153",
+      "963127",
+      "20795"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [6, 1, 8, 2, 4, 7, 3, 5, 0],
+    "dust": "6"
+  },
+  {
+    "name": "tied reads, 17 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.750000",
+        "quantity": 60
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.500000",
+        "quantity": 31
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.500000",
+        "quantity": 35
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.750000",
+        "quantity": 75
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.750000",
+        "quantity": 67
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.750000",
+        "quantity": 16
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.250000",
+        "quantity": 76
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.250000",
+        "quantity": 59
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.250000",
+        "quantity": 14
+      },
+      {
+        "participant": "p009",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.500000",
+        "quantity": 52
+      },
+      {
+        "participant": "p010",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.250000",
+        "quantity": 26
+      },
+      {
+        "participant": "p011",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.250000",
+        "quantity": 68
+      },
+      {
+        "participant": "p012",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.500000",
+        "quantity": 11
+      },
+      {
+        "participant": "p013",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.250000",
+        "quantity": 28
+      },
+      {
+        "participant": "p014",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.750000",
+        "quantity": 92
+      },
+      {
+        "participant": "p015",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.500000",
+        "quantity": 71
+      },
+      {
+        "participant": "p016",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.500000",
+        "quantity": 89
+      }
+    ],
+    "payouts": [
+      "256824",
+      "449848",
+      "507893",
+      "321030",
+      "238735",
+      "57011",
+      "774495",
+      "772714",
+      "183356",
+      "754585",
+      "264959",
+      "890586",
+      "145645",
+      "366712",
+      "393797",
+      "1030299",
+      "1291501"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [0, 11, 11, 0, 0, 0, 5, 6, 6, 11, 5, 6, 7, 6, 0, 11, 11],
+    "dust": "10"
+  },
+  {
+    "name": "lone NO, 19 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.540529",
+        "quantity": 81
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.976791",
+        "quantity": 25
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.504847",
+        "quantity": 7
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.176519",
+        "quantity": 84
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.214538",
+        "quantity": 1
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.677748",
+        "quantity": 6
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.271939",
+        "quantity": 10
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.763056",
+        "quantity": 70
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.666570",
+        "quantity": 67
+      },
+      {
+        "participant": "p009",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.249549",
+        "quantity": 64
+      },
+      {
+        "participant": "p010",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.567983",
+        "quantity": 46
+      },
+      {
+        "participant": "p011",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.412069",
+        "quantity": 60
+      },
+      {
+        "participant": "p012",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.032971",
+        "quantity": 2
+      },
+      {
+        "participant": "p013",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.582884",
+        "quantity": 12
+      },
+      {
+        "participant": "p014",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.652772",
+        "quantity": 23
+      },
+      {
+        "participant": "p015",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.172584",
+        "quantity": 72
+      },
+      {
+        "participant": "p016",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.793061",
+        "quantity": 44
+      },
+      {
+        "participant": "p017",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.677527",
+        "quantity": 84
+      },
+      {
+        "participant": "p018",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.096904",
+        "quantity": 3
+      }
+    ],
+    "payouts": [
+      "767784",
+      "460866",
+      "61153",
+      "189547",
+      "4037",
+      "88525",
+      "55502",
+      "1179211",
+      "963582",
+      "331195",
+      "482070",
+      "419448",
+      "52",
+      "133041",
+      "319898",
+      "151267",
+      "763786",
+      "1238751",
+      "275"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [9, 18, 8, 3, 4, 15, 6, 16, 13, 5, 10, 7, 0, 11, 12, 2, 17, 14, 1],
+    "dust": "10"
+  },
+  {
+    "name": "tight reads, 16 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.733537",
+        "quantity": 67
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.741349",
+        "quantity": 61
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.596084",
+        "quantity": 64
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.563061",
+        "quantity": 1
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.700293",
+        "quantity": 54
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.602475",
+        "quantity": 66
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.615638",
+        "quantity": 84
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.526465",
+        "quantity": 49
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.585211",
+        "quantity": 88
+      },
+      {
+        "participant": "p009",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.719087",
+        "quantity": 40
+      },
+      {
+        "participant": "p010",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.683150",
+        "quantity": 95
+      },
+      {
+        "participant": "p011",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.608953",
+        "quantity": 76
+      },
+      {
+        "participant": "p012",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.455700",
+        "quantity": 78
+      },
+      {
+        "participant": "p013",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.649779",
+        "quantity": 85
+      },
+      {
+        "participant": "p014",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.687265",
+        "quantity": 40
+      },
+      {
+        "participant": "p015",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.689128",
+        "quantity": 33
+      }
+    ],
+    "payouts": [
+      "223089",
+      "226980",
+      "796844",
+      "13778",
+      "348462",
+      "802854",
+      "966085",
+      "778802",
+      "1136589",
+      "209170",
+      "714126",
+      "919827",
+      "1373726",
+      "811367",
+      "270118",
+      "218176"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [1, 0, 11, 13, 3, 10, 8, 14, 12, 2, 6, 9, 15, 7, 5, 4],
+    "dust": "7"
+  },
+  {
+    "name": "four tickets: every stake returned",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.154642",
+        "quantity": 83
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.035656",
+        "quantity": 52
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.271219",
+        "quantity": 33
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.922693",
+        "quantity": 12
+      }
+    ],
+    "payouts": ["830000", "520000", "330000", "120000"],
+    "status": [
+      "returned_small_room",
+      "returned_small_room",
+      "returned_small_room",
+      "returned_small_room"
+    ],
+    "won": [0, 0, 0, 0],
+    "dust": "0"
+  },
+  {
+    "name": "five tickets, smallest live room",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.247536",
+        "quantity": 11
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.291505",
+        "quantity": 54
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.908883",
+        "quantity": 88
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.777379",
+        "quantity": 44
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.654193",
+        "quantity": 49
+      }
+    ],
+    "payouts": ["18523", "153224", "1065488", "551797", "670965"],
+    "status": ["settled", "settled", "settled", "settled", "settled"],
+    "won": [0, 1, 3, 3, 3],
+    "dust": "3"
+  },
+  {
+    "name": "five tickets, smallest live room (room 2)",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.105158",
+        "quantity": 34
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.595170",
+        "quantity": 79
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.962396",
+        "quantity": 49
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.833523",
+        "quantity": 85
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.876681",
+        "quantity": 4
+      }
+    ],
+    "payouts": ["307880", "1202278", "95657", "866299", "37883"],
+    "status": ["settled", "settled", "settled", "settled", "settled"],
+    "won": [2, 3, 0, 3, 2],
+    "dust": "3"
+  },
+  {
+    "name": "large room, 300 tickets",
+    "orders": [
+      {
+        "participant": "p000",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.618264",
+        "quantity": 49
+      },
+      {
+        "participant": "p001",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.608669",
+        "quantity": 66
+      },
+      {
+        "participant": "p002",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.546662",
+        "quantity": 79
+      },
+      {
+        "participant": "p003",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.604277",
+        "quantity": 73
+      },
+      {
+        "participant": "p004",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.550146",
+        "quantity": 39
+      },
+      {
+        "participant": "p005",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.724834",
+        "quantity": 43
+      },
+      {
+        "participant": "p006",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.734128",
+        "quantity": 48
+      },
+      {
+        "participant": "p007",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.530757",
+        "quantity": 2
+      },
+      {
+        "participant": "p008",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.621913",
+        "quantity": 36
+      },
+      {
+        "participant": "p009",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.543301",
+        "quantity": 70
+      },
+      {
+        "participant": "p010",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.669675",
+        "quantity": 80
+      },
+      {
+        "participant": "p011",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.686403",
+        "quantity": 9
+      },
+      {
+        "participant": "p012",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.733443",
+        "quantity": 78
+      },
+      {
+        "participant": "p013",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.617790",
+        "quantity": 100
+      },
+      {
+        "participant": "p014",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.590968",
+        "quantity": 54
+      },
+      {
+        "participant": "p015",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.662324",
+        "quantity": 71
+      },
+      {
+        "participant": "p016",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.657332",
+        "quantity": 63
+      },
+      {
+        "participant": "p017",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.706839",
+        "quantity": 35
+      },
+      {
+        "participant": "p018",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.631401",
+        "quantity": 10
+      },
+      {
+        "participant": "p019",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.606164",
+        "quantity": 92
+      },
+      {
+        "participant": "p020",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.639738",
+        "quantity": 31
+      },
+      {
+        "participant": "p021",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.540266",
+        "quantity": 46
+      },
+      {
+        "participant": "p022",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.518802",
+        "quantity": 3
+      },
+      {
+        "participant": "p023",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.657669",
+        "quantity": 22
+      },
+      {
+        "participant": "p024",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.720602",
+        "quantity": 40
+      },
+      {
+        "participant": "p025",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.560932",
+        "quantity": 35
+      },
+      {
+        "participant": "p026",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.628375",
+        "quantity": 13
+      },
+      {
+        "participant": "p027",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.542012",
+        "quantity": 39
+      },
+      {
+        "participant": "p028",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.642086",
+        "quantity": 7
+      },
+      {
+        "participant": "p029",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.605579",
+        "quantity": 92
+      },
+      {
+        "participant": "p030",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.583900",
+        "quantity": 28
+      },
+      {
+        "participant": "p031",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.791002",
+        "quantity": 70
+      },
+      {
+        "participant": "p032",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.565283",
+        "quantity": 28
+      },
+      {
+        "participant": "p033",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.531221",
+        "quantity": 15
+      },
+      {
+        "participant": "p034",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.630615",
+        "quantity": 60
+      },
+      {
+        "participant": "p035",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.704098",
+        "quantity": 79
+      },
+      {
+        "participant": "p036",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.615247",
+        "quantity": 47
+      },
+      {
+        "participant": "p037",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.560992",
+        "quantity": 23
+      },
+      {
+        "participant": "p038",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.603306",
+        "quantity": 26
+      },
+      {
+        "participant": "p039",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.795543",
+        "quantity": 94
+      },
+      {
+        "participant": "p040",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.673344",
+        "quantity": 72
+      },
+      {
+        "participant": "p041",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.605792",
+        "quantity": 100
+      },
+      {
+        "participant": "p042",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.686940",
+        "quantity": 38
+      },
+      {
+        "participant": "p043",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.664833",
+        "quantity": 48
+      },
+      {
+        "participant": "p044",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.625336",
+        "quantity": 6
+      },
+      {
+        "participant": "p045",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.637493",
+        "quantity": 12
+      },
+      {
+        "participant": "p046",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.648940",
+        "quantity": 6
+      },
+      {
+        "participant": "p047",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.620079",
+        "quantity": 87
+      },
+      {
+        "participant": "p048",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.576260",
+        "quantity": 76
+      },
+      {
+        "participant": "p049",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.514783",
+        "quantity": 23
+      },
+      {
+        "participant": "p050",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.598946",
+        "quantity": 91
+      },
+      {
+        "participant": "p051",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.654616",
+        "quantity": 87
+      },
+      {
+        "participant": "p052",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.660865",
+        "quantity": 76
+      },
+      {
+        "participant": "p053",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.669920",
+        "quantity": 94
+      },
+      {
+        "participant": "p054",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.683879",
+        "quantity": 88
+      },
+      {
+        "participant": "p055",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.637957",
+        "quantity": 29
+      },
+      {
+        "participant": "p056",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.812381",
+        "quantity": 94
+      },
+      {
+        "participant": "p057",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.609351",
+        "quantity": 1
+      },
+      {
+        "participant": "p058",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.586734",
+        "quantity": 20
+      },
+      {
+        "participant": "p059",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.577395",
+        "quantity": 63
+      },
+      {
+        "participant": "p060",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.586678",
+        "quantity": 48
+      },
+      {
+        "participant": "p061",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.528048",
+        "quantity": 38
+      },
+      {
+        "participant": "p062",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.804671",
+        "quantity": 33
+      },
+      {
+        "participant": "p063",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.694095",
+        "quantity": 87
+      },
+      {
+        "participant": "p064",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.469034",
+        "quantity": 59
+      },
+      {
+        "participant": "p065",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.676360",
+        "quantity": 38
+      },
+      {
+        "participant": "p066",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.713163",
+        "quantity": 69
+      },
+      {
+        "participant": "p067",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.642065",
+        "quantity": 45
+      },
+      {
+        "participant": "p068",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.690818",
+        "quantity": 54
+      },
+      {
+        "participant": "p069",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.666140",
+        "quantity": 61
+      },
+      {
+        "participant": "p070",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.500637",
+        "quantity": 45
+      },
+      {
+        "participant": "p071",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.716418",
+        "quantity": 14
+      },
+      {
+        "participant": "p072",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.640181",
+        "quantity": 10
+      },
+      {
+        "participant": "p073",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.642112",
+        "quantity": 80
+      },
+      {
+        "participant": "p074",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.625164",
+        "quantity": 71
+      },
+      {
+        "participant": "p075",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.683956",
+        "quantity": 50
+      },
+      {
+        "participant": "p076",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.721432",
+        "quantity": 67
+      },
+      {
+        "participant": "p077",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.493619",
+        "quantity": 22
+      },
+      {
+        "participant": "p078",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.486516",
+        "quantity": 88
+      },
+      {
+        "participant": "p079",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.597099",
+        "quantity": 80
+      },
+      {
+        "participant": "p080",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.622749",
+        "quantity": 83
+      },
+      {
+        "participant": "p081",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.518020",
+        "quantity": 13
+      },
+      {
+        "participant": "p082",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.565326",
+        "quantity": 72
+      },
+      {
+        "participant": "p083",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.656351",
+        "quantity": 46
+      },
+      {
+        "participant": "p084",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.572852",
+        "quantity": 88
+      },
+      {
+        "participant": "p085",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.745408",
+        "quantity": 57
+      },
+      {
+        "participant": "p086",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.596065",
+        "quantity": 8
+      },
+      {
+        "participant": "p087",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.671332",
+        "quantity": 32
+      },
+      {
+        "participant": "p088",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.625366",
+        "quantity": 8
+      },
+      {
+        "participant": "p089",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.645196",
+        "quantity": 35
+      },
+      {
+        "participant": "p090",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.726679",
+        "quantity": 8
+      },
+      {
+        "participant": "p091",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.595657",
+        "quantity": 95
+      },
+      {
+        "participant": "p092",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.543029",
+        "quantity": 80
+      },
+      {
+        "participant": "p093",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.639706",
+        "quantity": 36
+      },
+      {
+        "participant": "p094",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.638575",
+        "quantity": 8
+      },
+      {
+        "participant": "p095",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.660677",
+        "quantity": 81
+      },
+      {
+        "participant": "p096",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.715515",
+        "quantity": 80
+      },
+      {
+        "participant": "p097",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.553377",
+        "quantity": 49
+      },
+      {
+        "participant": "p098",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.780457",
+        "quantity": 56
+      },
+      {
+        "participant": "p099",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.707693",
+        "quantity": 56
+      },
+      {
+        "participant": "p100",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.744833",
+        "quantity": 23
+      },
+      {
+        "participant": "p101",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.737058",
+        "quantity": 36
+      },
+      {
+        "participant": "p102",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.670684",
+        "quantity": 73
+      },
+      {
+        "participant": "p103",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.541655",
+        "quantity": 13
+      },
+      {
+        "participant": "p104",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.691219",
+        "quantity": 2
+      },
+      {
+        "participant": "p105",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.673845",
+        "quantity": 13
+      },
+      {
+        "participant": "p106",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.611161",
+        "quantity": 99
+      },
+      {
+        "participant": "p107",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.599464",
+        "quantity": 29
+      },
+      {
+        "participant": "p108",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.554108",
+        "quantity": 74
+      },
+      {
+        "participant": "p109",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.587726",
+        "quantity": 24
+      },
+      {
+        "participant": "p110",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.579543",
+        "quantity": 11
+      },
+      {
+        "participant": "p111",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.704016",
+        "quantity": 39
+      },
+      {
+        "participant": "p112",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.550024",
+        "quantity": 64
+      },
+      {
+        "participant": "p113",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.632740",
+        "quantity": 34
+      },
+      {
+        "participant": "p114",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.715028",
+        "quantity": 13
+      },
+      {
+        "participant": "p115",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.605345",
+        "quantity": 51
+      },
+      {
+        "participant": "p116",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.615347",
+        "quantity": 25
+      },
+      {
+        "participant": "p117",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.583891",
+        "quantity": 35
+      },
+      {
+        "participant": "p118",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.662702",
+        "quantity": 40
+      },
+      {
+        "participant": "p119",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.663998",
+        "quantity": 23
+      },
+      {
+        "participant": "p120",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.440143",
+        "quantity": 76
+      },
+      {
+        "participant": "p121",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.615213",
+        "quantity": 13
+      },
+      {
+        "participant": "p122",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.630442",
+        "quantity": 100
+      },
+      {
+        "participant": "p123",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.622827",
+        "quantity": 93
+      },
+      {
+        "participant": "p124",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.755190",
+        "quantity": 56
+      },
+      {
+        "participant": "p125",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.732730",
+        "quantity": 79
+      },
+      {
+        "participant": "p126",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.631253",
+        "quantity": 58
+      },
+      {
+        "participant": "p127",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.518941",
+        "quantity": 5
+      },
+      {
+        "participant": "p128",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.565394",
+        "quantity": 43
+      },
+      {
+        "participant": "p129",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.502976",
+        "quantity": 46
+      },
+      {
+        "participant": "p130",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.526037",
+        "quantity": 2
+      },
+      {
+        "participant": "p131",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.750013",
+        "quantity": 38
+      },
+      {
+        "participant": "p132",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.583991",
+        "quantity": 41
+      },
+      {
+        "participant": "p133",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.639873",
+        "quantity": 47
+      },
+      {
+        "participant": "p134",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.715870",
+        "quantity": 45
+      },
+      {
+        "participant": "p135",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.610272",
+        "quantity": 94
+      },
+      {
+        "participant": "p136",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.638741",
+        "quantity": 7
+      },
+      {
+        "participant": "p137",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.688896",
+        "quantity": 92
+      },
+      {
+        "participant": "p138",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.710468",
+        "quantity": 70
+      },
+      {
+        "participant": "p139",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.622137",
+        "quantity": 26
+      },
+      {
+        "participant": "p140",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.629992",
+        "quantity": 10
+      },
+      {
+        "participant": "p141",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.706360",
+        "quantity": 64
+      },
+      {
+        "participant": "p142",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.640695",
+        "quantity": 36
+      },
+      {
+        "participant": "p143",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.518855",
+        "quantity": 47
+      },
+      {
+        "participant": "p144",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.614743",
+        "quantity": 7
+      },
+      {
+        "participant": "p145",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.521731",
+        "quantity": 64
+      },
+      {
+        "participant": "p146",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.598662",
+        "quantity": 17
+      },
+      {
+        "participant": "p147",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.555203",
+        "quantity": 38
+      },
+      {
+        "participant": "p148",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.527340",
+        "quantity": 15
+      },
+      {
+        "participant": "p149",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.693297",
+        "quantity": 66
+      },
+      {
+        "participant": "p150",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.624196",
+        "quantity": 10
+      },
+      {
+        "participant": "p151",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.617863",
+        "quantity": 34
+      },
+      {
+        "participant": "p152",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.633185",
+        "quantity": 2
+      },
+      {
+        "participant": "p153",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.432603",
+        "quantity": 58
+      },
+      {
+        "participant": "p154",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.664685",
+        "quantity": 57
+      },
+      {
+        "participant": "p155",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.742654",
+        "quantity": 79
+      },
+      {
+        "participant": "p156",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.606057",
+        "quantity": 64
+      },
+      {
+        "participant": "p157",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.566637",
+        "quantity": 64
+      },
+      {
+        "participant": "p158",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.646998",
+        "quantity": 38
+      },
+      {
+        "participant": "p159",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.579922",
+        "quantity": 89
+      },
+      {
+        "participant": "p160",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.682722",
+        "quantity": 100
+      },
+      {
+        "participant": "p161",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.630235",
+        "quantity": 42
+      },
+      {
+        "participant": "p162",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.499766",
+        "quantity": 15
+      },
+      {
+        "participant": "p163",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.529144",
+        "quantity": 99
+      },
+      {
+        "participant": "p164",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.681554",
+        "quantity": 80
+      },
+      {
+        "participant": "p165",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.694902",
+        "quantity": 77
+      },
+      {
+        "participant": "p166",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.573313",
+        "quantity": 63
+      },
+      {
+        "participant": "p167",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.598636",
+        "quantity": 29
+      },
+      {
+        "participant": "p168",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.714925",
+        "quantity": 85
+      },
+      {
+        "participant": "p169",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.651633",
+        "quantity": 2
+      },
+      {
+        "participant": "p170",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.696411",
+        "quantity": 31
+      },
+      {
+        "participant": "p171",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.589037",
+        "quantity": 56
+      },
+      {
+        "participant": "p172",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.556683",
+        "quantity": 60
+      },
+      {
+        "participant": "p173",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.603372",
+        "quantity": 83
+      },
+      {
+        "participant": "p174",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.682508",
+        "quantity": 14
+      },
+      {
+        "participant": "p175",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.581749",
+        "quantity": 63
+      },
+      {
+        "participant": "p176",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.511148",
+        "quantity": 10
+      },
+      {
+        "participant": "p177",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.795854",
+        "quantity": 36
+      },
+      {
+        "participant": "p178",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.648476",
+        "quantity": 7
+      },
+      {
+        "participant": "p179",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.579276",
+        "quantity": 84
+      },
+      {
+        "participant": "p180",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.563334",
+        "quantity": 75
+      },
+      {
+        "participant": "p181",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.592107",
+        "quantity": 77
+      },
+      {
+        "participant": "p182",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.665265",
+        "quantity": 54
+      },
+      {
+        "participant": "p183",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.757462",
+        "quantity": 94
+      },
+      {
+        "participant": "p184",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.557326",
+        "quantity": 47
+      },
+      {
+        "participant": "p185",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.678165",
+        "quantity": 76
+      },
+      {
+        "participant": "p186",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.661292",
+        "quantity": 28
+      },
+      {
+        "participant": "p187",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.708011",
+        "quantity": 70
+      },
+      {
+        "participant": "p188",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.583188",
+        "quantity": 58
+      },
+      {
+        "participant": "p189",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.504472",
+        "quantity": 74
+      },
+      {
+        "participant": "p190",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.543325",
+        "quantity": 56
+      },
+      {
+        "participant": "p191",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.675489",
+        "quantity": 33
+      },
+      {
+        "participant": "p192",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.581812",
+        "quantity": 10
+      },
+      {
+        "participant": "p193",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.620076",
+        "quantity": 13
+      },
+      {
+        "participant": "p194",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.661205",
+        "quantity": 15
+      },
+      {
+        "participant": "p195",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.597900",
+        "quantity": 84
+      },
+      {
+        "participant": "p196",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.630342",
+        "quantity": 25
+      },
+      {
+        "participant": "p197",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.732746",
+        "quantity": 61
+      },
+      {
+        "participant": "p198",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.623916",
+        "quantity": 93
+      },
+      {
+        "participant": "p199",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.498007",
+        "quantity": 14
+      },
+      {
+        "participant": "p200",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.758401",
+        "quantity": 2
+      },
+      {
+        "participant": "p201",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.577685",
+        "quantity": 76
+      },
+      {
+        "participant": "p202",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.544425",
+        "quantity": 1
+      },
+      {
+        "participant": "p203",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.675788",
+        "quantity": 51
+      },
+      {
+        "participant": "p204",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.710180",
+        "quantity": 27
+      },
+      {
+        "participant": "p205",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.625462",
+        "quantity": 98
+      },
+      {
+        "participant": "p206",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.520840",
+        "quantity": 85
+      },
+      {
+        "participant": "p207",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.563885",
+        "quantity": 97
+      },
+      {
+        "participant": "p208",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.531161",
+        "quantity": 74
+      },
+      {
+        "participant": "p209",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.646368",
+        "quantity": 42
+      },
+      {
+        "participant": "p210",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.653265",
+        "quantity": 59
+      },
+      {
+        "participant": "p211",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.612987",
+        "quantity": 74
+      },
+      {
+        "participant": "p212",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.551900",
+        "quantity": 38
+      },
+      {
+        "participant": "p213",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.631912",
+        "quantity": 22
+      },
+      {
+        "participant": "p214",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.581709",
+        "quantity": 96
+      },
+      {
+        "participant": "p215",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.622772",
+        "quantity": 24
+      },
+      {
+        "participant": "p216",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.666393",
+        "quantity": 3
+      },
+      {
+        "participant": "p217",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.517122",
+        "quantity": 95
+      },
+      {
+        "participant": "p218",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.704950",
+        "quantity": 45
+      },
+      {
+        "participant": "p219",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.654746",
+        "quantity": 66
+      },
+      {
+        "participant": "p220",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.590321",
+        "quantity": 98
+      },
+      {
+        "participant": "p221",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.642016",
+        "quantity": 41
+      },
+      {
+        "participant": "p222",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.530703",
+        "quantity": 47
+      },
+      {
+        "participant": "p223",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.751895",
+        "quantity": 54
+      },
+      {
+        "participant": "p224",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.589248",
+        "quantity": 22
+      },
+      {
+        "participant": "p225",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.639094",
+        "quantity": 34
+      },
+      {
+        "participant": "p226",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.541201",
+        "quantity": 68
+      },
+      {
+        "participant": "p227",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.638991",
+        "quantity": 75
+      },
+      {
+        "participant": "p228",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.610989",
+        "quantity": 86
+      },
+      {
+        "participant": "p229",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.590784",
+        "quantity": 60
+      },
+      {
+        "participant": "p230",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.641631",
+        "quantity": 43
+      },
+      {
+        "participant": "p231",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.678565",
+        "quantity": 50
+      },
+      {
+        "participant": "p232",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.598775",
+        "quantity": 97
+      },
+      {
+        "participant": "p233",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.591626",
+        "quantity": 91
+      },
+      {
+        "participant": "p234",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.607547",
+        "quantity": 10
+      },
+      {
+        "participant": "p235",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.586302",
+        "quantity": 57
+      },
+      {
+        "participant": "p236",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.669533",
+        "quantity": 14
+      },
+      {
+        "participant": "p237",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.513136",
+        "quantity": 68
+      },
+      {
+        "participant": "p238",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.618236",
+        "quantity": 49
+      },
+      {
+        "participant": "p239",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.611000",
+        "quantity": 93
+      },
+      {
+        "participant": "p240",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.501655",
+        "quantity": 11
+      },
+      {
+        "participant": "p241",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.643757",
+        "quantity": 100
+      },
+      {
+        "participant": "p242",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.619774",
+        "quantity": 74
+      },
+      {
+        "participant": "p243",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.542576",
+        "quantity": 43
+      },
+      {
+        "participant": "p244",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.490424",
+        "quantity": 29
+      },
+      {
+        "participant": "p245",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.674842",
+        "quantity": 85
+      },
+      {
+        "participant": "p246",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.659270",
+        "quantity": 41
+      },
+      {
+        "participant": "p247",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.606039",
+        "quantity": 61
+      },
+      {
+        "participant": "p248",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.660033",
+        "quantity": 73
+      },
+      {
+        "participant": "p249",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.657439",
+        "quantity": 84
+      },
+      {
+        "participant": "p250",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.619079",
+        "quantity": 33
+      },
+      {
+        "participant": "p251",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.719698",
+        "quantity": 55
+      },
+      {
+        "participant": "p252",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.609734",
+        "quantity": 30
+      },
+      {
+        "participant": "p253",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.655147",
+        "quantity": 46
+      },
+      {
+        "participant": "p254",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.590725",
+        "quantity": 11
+      },
+      {
+        "participant": "p255",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.572581",
+        "quantity": 43
+      },
+      {
+        "participant": "p256",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.620938",
+        "quantity": 31
+      },
+      {
+        "participant": "p257",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.668112",
+        "quantity": 21
+      },
+      {
+        "participant": "p258",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.660861",
+        "quantity": 93
+      },
+      {
+        "participant": "p259",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.502854",
+        "quantity": 19
+      },
+      {
+        "participant": "p260",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.710456",
+        "quantity": 25
+      },
+      {
+        "participant": "p261",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.682398",
+        "quantity": 19
+      },
+      {
+        "participant": "p262",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.676757",
+        "quantity": 67
+      },
+      {
+        "participant": "p263",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.522487",
+        "quantity": 83
+      },
+      {
+        "participant": "p264",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.626699",
+        "quantity": 29
+      },
+      {
+        "participant": "p265",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.639966",
+        "quantity": 81
+      },
+      {
+        "participant": "p266",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.631314",
+        "quantity": 26
+      },
+      {
+        "participant": "p267",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.509877",
+        "quantity": 93
+      },
+      {
+        "participant": "p268",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.690975",
+        "quantity": 41
+      },
+      {
+        "participant": "p269",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.698069",
+        "quantity": 70
+      },
+      {
+        "participant": "p270",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.704545",
+        "quantity": 61
+      },
+      {
+        "participant": "p271",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.742374",
+        "quantity": 92
+      },
+      {
+        "participant": "p272",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.584748",
+        "quantity": 60
+      },
+      {
+        "participant": "p273",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.643310",
+        "quantity": 1
+      },
+      {
+        "participant": "p274",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.682140",
+        "quantity": 57
+      },
+      {
+        "participant": "p275",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.701778",
+        "quantity": 11
+      },
+      {
+        "participant": "p276",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.554677",
+        "quantity": 50
+      },
+      {
+        "participant": "p277",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.626068",
+        "quantity": 80
+      },
+      {
+        "participant": "p278",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.595335",
+        "quantity": 86
+      },
+      {
+        "participant": "p279",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.744555",
+        "quantity": 69
+      },
+      {
+        "participant": "p280",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.533358",
+        "quantity": 3
+      },
+      {
+        "participant": "p281",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.571510",
+        "quantity": 19
+      },
+      {
+        "participant": "p282",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.678093",
+        "quantity": 46
+      },
+      {
+        "participant": "p283",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.628122",
+        "quantity": 23
+      },
+      {
+        "participant": "p284",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.703787",
+        "quantity": 55
+      },
+      {
+        "participant": "p285",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.661651",
+        "quantity": 58
+      },
+      {
+        "participant": "p286",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.563782",
+        "quantity": 97
+      },
+      {
+        "participant": "p287",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.367579",
+        "quantity": 87
+      },
+      {
+        "participant": "p288",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.499686",
+        "quantity": 17
+      },
+      {
+        "participant": "p289",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.600345",
+        "quantity": 64
+      },
+      {
+        "participant": "p290",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.719822",
+        "quantity": 78
+      },
+      {
+        "participant": "p291",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.654289",
+        "quantity": 2
+      },
+      {
+        "participant": "p292",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.494585",
+        "quantity": 49
+      },
+      {
+        "participant": "p293",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.670736",
+        "quantity": 76
+      },
+      {
+        "participant": "p294",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.696916",
+        "quantity": 73
+      },
+      {
+        "participant": "p295",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.637301",
+        "quantity": 68
+      },
+      {
+        "participant": "p296",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.510703",
+        "quantity": 80
+      },
+      {
+        "participant": "p297",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.540432",
+        "quantity": 48
+      },
+      {
+        "participant": "p298",
+        "kind": "human",
+        "side": "YES",
+        "limit": "0.664778",
+        "quantity": 65
+      },
+      {
+        "participant": "p299",
+        "kind": "human",
+        "side": "NO",
+        "limit": "0.704234",
+        "quantity": 80
+      }
+    ],
+    "payouts": [
+      "537063",
+      "742132",
+      "996563",
+      "829967",
+      "487670",
+      "265230",
+      "265225",
+      "25470",
+      "390286",
+      "886279",
+      "717337",
+      "74011",
+      "441254",
+      "1096958",
+      "632701",
+      "661939",
+      "600573",
+      "251177",
+      "105156",
+      "1042551",
+      "316530",
+      "581146",
+      "38748",
+      "208845",
+      "253352",
+      "433535",
+      "138087",
+      "491890",
+      "70851",
+      "1042622",
+      "332703",
+      "132866",
+      "344599",
+      "190961",
+      "632863",
+      "578516",
+      "519657",
+      "283701",
+      "296306",
+      "163759",
+      "636323",
+      "1132683",
+      "311497",
+      "440798",
+      "64358",
+      "123653",
+      "59229",
+      "948439",
+      "915607",
+      "295694",
+      "1047813",
+      "837031",
+      "713264",
+      "841826",
+      "730186",
+      "298340",
+      "100707",
+      "11224",
+      "236940",
+      "759853",
+      "568721",
+      "487812",
+      "44425",
+      "677305",
+      "758677",
+      "330589",
+      "471363",
+      "456119",
+      "429426",
+      "558667",
+      "585496",
+      "92043",
+      "101939",
+      "809653",
+      "761985",
+      "414690",
+      "421129",
+      "286574",
+      "1136794",
+      "926748",
+      "897521",
+      "166877",
+      "886054",
+      "439233",
+      "1066257",
+      "280216",
+      "92893",
+      "285718",
+      "85803",
+      "350596",
+      "48481",
+      "1101982",
+      "1013182",
+      "368052",
+      "82033",
+      "758525",
+      "536035",
+      "610386",
+      "144550",
+      "395502",
+      "113907",
+      "195731",
+      "653914",
+      "164877",
+      "15864",
+      "114081",
+      "1105966",
+      "333521",
+      "925155",
+      "283059",
+      "132151",
+      "285766",
+      "800390",
+      "356109",
+      "86496",
+      "579146",
+      "276334",
+      "417006",
+      "372277",
+      "212780",
+      "968758",
+      "143641",
+      "1055370",
+      "1005414",
+      "239885",
+      "450310",
+      "610212",
+      "64576",
+      "529116",
+      "598154",
+      "25554",
+      "171680",
+      "487088",
+      "479662",
+      "297259",
+      "1052575",
+      "71736",
+      "745323",
+      "488576",
+      "281680",
+      "105654",
+      "460943",
+      "366738",
+      "607047",
+      "77506",
+      "825182",
+      "196222",
+      "472298",
+      "191494",
+      "516522",
+      "107650",
+      "373094",
+      "20903",
+      "733780",
+      "523819",
+      "394411",
+      "724437",
+      "783055",
+      "377358",
+      "1068473",
+      "835396",
+      "443391",
+      "193700",
+      "1269815",
+      "676525",
+      "596251",
+      "762764",
+      "334155",
+      "572340",
+      "19487",
+      "237624",
+      "658735",
+      "747599",
+      "945749",
+      "117756",
+      "753730",
+      "129660",
+      "62177",
+      "69228",
+      "1009658",
+      "925751",
+      "901988",
+      "496613",
+      "388535",
+      "585111",
+      "651534",
+      "262275",
+      "497930",
+      "690098",
+      "954702",
+      "709005",
+      "288414",
+      "119288",
+      "141722",
+      "140125",
+      "969517",
+      "263928",
+      "342223",
+      "1002024",
+      "180830",
+      "7920",
+      "913347",
+      "12645",
+      "445030",
+      "188876",
+      "1050785",
+      "1089502",
+      "1196321",
+      "942118",
+      "418820",
+      "570942",
+      "823398",
+      "474198",
+      "230944",
+      "1145385",
+      "259505",
+      "27442",
+      "1220030",
+      "324541",
+      "636185",
+      "1152391",
+      "415650",
+      "602098",
+      "237294",
+      "258678",
+      "348368",
+      "862834",
+      "768742",
+      "961176",
+      "704850",
+      "436547",
+      "429866",
+      "1119323",
+      "1064760",
+      "112914",
+      "674159",
+      "126127",
+      "874834",
+      "537107",
+      "1039381",
+      "142001",
+      "1005747",
+      "807455",
+      "542041",
+      "377841",
+      "741977",
+      "387540",
+      "691478",
+      "687671",
+      "798227",
+      "360659",
+      "355530",
+      "336401",
+      "441551",
+      "129238",
+      "521242",
+      "336968",
+      "190512",
+      "870162",
+      "247071",
+      "172751",
+      "159911",
+      "581652",
+      "1069642",
+      "309718",
+      "826368",
+      "273487",
+      "1206478",
+      "327930",
+      "534701",
+      "445253",
+      "460951",
+      "711782",
+      "10074",
+      "480436",
+      "81207",
+      "621852",
+      "856169",
+      "1000258",
+      "342936",
+      "38128",
+      "230716",
+      "394507",
+      "244510",
+      "403672",
+      "540701",
+      "1191799",
+      "959767",
+      "221234",
+      "735778",
+      "497563",
+      "19315",
+      "638212",
+      "680611",
+      "561947",
+      "700509",
+      "1037477",
+      "609531",
+      "597071",
+      "585261"
+    ],
+    "status": [
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled",
+      "settled"
+    ],
+    "won": [
+      166, 182, 252, 190, 250, 22, 17, 268, 160, 255, 80, 58, 18, 170, 206, 91,
+      102, 38, 138, 184, 126, 263, 279, 100, 24, 242, 146, 259, 118, 188, 218,
+      4, 237, 266, 141, 43, 171, 241, 192, 3, 75, 187, 57, 86, 152, 133, 110,
+      162, 229, 283, 195, 106, 95, 79, 60, 132, 0, 181, 213, 228, 214, 271, 1,
+      51, 282, 70, 32, 119, 55, 84, 292, 27, 123, 117, 153, 59, 23, 297, 296,
+      200, 158, 280, 236, 103, 231, 11, 201, 76, 151, 114, 21, 202, 256, 127,
+      131, 97, 29, 248, 5, 37, 12, 16, 78, 259, 53, 74, 176, 194, 247, 212, 225,
+      44, 251, 136, 30, 189, 170, 219, 90, 89, 264, 173, 142, 156, 8, 20, 140,
+      277, 235, 289, 273, 10, 217, 125, 28, 179, 130, 56, 33, 159, 145, 39, 122,
+      278, 173, 275, 197, 245, 272, 52, 154, 168, 135, 259, 88, 14, 185, 234,
+      112, 224, 61, 144, 294, 270, 65, 50, 230, 198, 31, 109, 49, 211, 244, 191,
+      62, 222, 284, 2, 111, 226, 240, 204, 85, 7, 243, 67, 93, 36, 220, 288,
+      254, 72, 221, 163, 94, 199, 143, 19, 155, 296, 6, 227, 253, 71, 35, 150,
+      276, 238, 267, 113, 108, 174, 249, 137, 223, 157, 83, 282, 40, 105, 209,
+      120, 269, 9, 210, 128, 260, 129, 178, 207, 121, 66, 196, 205, 183, 215,
+      81, 284, 167, 177, 291, 115, 164, 258, 299, 73, 99, 186, 98, 101, 165, 26,
+      180, 104, 208, 232, 161, 82, 96, 290, 34, 63, 69, 274, 148, 124, 139, 287,
+      54, 47, 41, 15, 216, 116, 64, 46, 246, 149, 203, 13, 265, 233, 68, 147,
+      45, 92, 239, 173, 294, 193, 25, 107, 296, 77, 48, 134, 286, 262, 87, 42
+    ],
+    "dust": "157"
+  }
+]
