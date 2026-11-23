@@ -160,6 +160,9 @@ const applicationTables = [
   "mic_mics",
   "mic_runs",
   "mic_turns",
+  "mic_funds",
+  "mic_fund_pledges",
+  "mic_debate_ends",
 ];
 const container = `yaparena-isolation-${randomUUID().slice(0, 8)}`;
 const evidenceDirectory = `/tmp/${container}-evidence`;

@@ -37,6 +37,13 @@ function stub(overrides = {}) {
       pledge: record("pledge", { questionId, pledgeId, created: true }),
       withdraw: record("withdraw", { pledgeId, created: true }),
       fire: record("fire", { micId: pledgeId, state: "live", created: true }),
+      keep: record("keep", {
+        fundId: questionId,
+        pledgeId,
+        amount: 2,
+        funded: false,
+        created: true,
+      }),
       ...overrides,
     },
   };
@@ -77,6 +84,7 @@ const questions = `/api/debates/${debateId}/mic/questions`;
 const pledges = `${questions}/${questionId}/pledges`;
 const firing = `${questions}/${questionId}/fire`;
 const withdrawal = `/api/debates/${debateId}/mic/pledges/${pledgeId}`;
+const keeping = `/api/debates/${debateId}/mic/keep`;
 
 describe("the mic switch", () => {
   const logger = createLogger({ enabled: false });
@@ -104,6 +112,7 @@ describe("the mic switch", () => {
       ["post", pledges, { amount: 1, requestId: "r" }],
       ["post", firing, { requestId: "r" }],
       ["delete", withdrawal],
+      ["post", keeping, { amount: 1, requestId: "r" }],
     ])
       assert.equal(
         (await write(off, method, path, body)).status,
@@ -422,5 +431,98 @@ describe("the asker's turn routes", () => {
       (await write(refused, "post", turn, { action: "end" })).status,
       403,
     );
+  });
+});
+
+// Decision 0018, PR 3: keeping the asker on.
+describe("the keep-the-asker-on route", () => {
+  it("pledges whole Yap Coins to the open fund with the caller's session", async () => {
+    const { mic, calls } = stub();
+    const server = app(mic);
+    const response = await write(server, "post", keeping, {
+      amount: 5,
+      requestId: "k-1",
+    });
+    assert.equal(response.status, 201);
+    assert.deepEqual(response.body, {
+      fundId: questionId,
+      pledgeId,
+      amount: 2,
+      funded: false,
+      created: true,
+    });
+    assert.deepEqual(calls, [
+      [
+        "keep",
+        {
+          userId: "7",
+          sessionTokenHash: calls[0][1].sessionTokenHash,
+          expectedSessionId: "9",
+        },
+        debateId,
+        { amount: 50000n, requestId: "k-1" },
+      ],
+    ]);
+  });
+
+  it("refuses malformed requests, other origins and signed-out callers", async () => {
+    const { mic, calls } = stub();
+    const server = app(mic);
+    for (const [path, body, status] of [
+      [keeping, { amount: 0, requestId: "r" }],
+      [keeping, { amount: 1.5, requestId: "r" }],
+      [keeping, { amount: 1 }],
+      [keeping, { amount: 1, requestId: "r", add: "x" }],
+      ["/api/debates/nope/mic/keep", { amount: 1, requestId: "r" }, 404],
+    ]) {
+      const response = await write(server, "post", path, body);
+      assert.equal(response.status, status ?? 400, JSON.stringify(body));
+    }
+    const foreign = await request(server)
+      .post(keeping)
+      .set("Origin", "https://elsewhere.example")
+      .set("X-YapArena-Session", "9")
+      .send({ amount: 1, requestId: "r" });
+    assert.equal(foreign.status, 403);
+    assert.equal(
+      (
+        await write(app(mic, { signedIn: false }), "post", keeping, {
+          amount: 1,
+          requestId: "r",
+        })
+      ).status,
+      401,
+    );
+    assert.deepEqual(calls, []);
+  });
+
+  it("says when the fund has closed or the mic is paused", async () => {
+    for (const [error, status, code] of [
+      [new MicError("keep-the-asker-on isn't open"), 409, undefined],
+      [
+        new CoinOperationError(
+          "the mic is paused while Yap Coins are topped up; nothing was spent",
+          503,
+          "mic_paused",
+        ),
+        503,
+        "mic_paused",
+      ],
+    ]) {
+      const server = app(
+        stub({
+          keep: async () => {
+            throw error;
+          },
+        }).mic,
+      );
+      const response = await write(server, "post", keeping, {
+        amount: 1,
+        requestId: "r",
+      });
+      assert.equal(response.status, status);
+      assert.equal(response.body.error, error.message);
+      assert.equal(response.body.code, code);
+    }
   });
 });

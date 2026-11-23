@@ -68,11 +68,15 @@ function id(value: unknown, what: string) {
  * POST /api/debates/:id/mic/turn {action:"end"} ends it early, and
  * POST /api/debates/:id/mic/turn/text {text} puts their typed question on
  * screen (E9: shown as typed). Only the asker, only in their own turn.
+ *
+ * PR 3: POST /api/debates/:id/mic/keep {amount, requestId} pledges to keep
+ * the live mic's asker on (X): cut to what is left of the price, paid to the
+ * debaters once the price is reached, never withdrawn, refunded if unfunded.
  */
 export function createMicRouter(options: {
   mic: Pick<
     MicRepository,
-    "read" | "submitQuestion" | "pledge" | "withdraw" | "fire"
+    "read" | "submitQuestion" | "pledge" | "withdraw" | "fire" | "keep"
   >;
   turns?: Pick<MicTurns, "endAskerTurn" | "setAskerText">;
   requireAuth: RequestHandler;
@@ -193,6 +197,20 @@ export function createMicRouter(options: {
             requestId(body.requestId),
           ),
         );
+    },
+  );
+  router.post(
+    "/api/debates/:id/mic/keep",
+    ...writes,
+    async (request, response) => {
+      const debateId = id(request.params.id, "debate");
+      const body = fields(request.body, ["amount", "requestId"]);
+      response.status(201).json(
+        await mic.keep(context(request), debateId, {
+          amount: amount(body.amount),
+          requestId: requestId(body.requestId),
+        }),
+      );
     },
   );
   const { turns } = options;

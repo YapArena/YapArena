@@ -16,6 +16,7 @@ import {
 import { createWebPush } from "./platform/web-push.ts";
 import { createMediaRepository } from "./features/media/repository.ts";
 import { createMicTurns } from "./features/mic/turns.ts";
+import { createMicFunds } from "./features/mic/funds.ts";
 import { createMediaProvider, debateRoom } from "./features/media/provider.ts";
 import { AgentDispatchClient } from "livekit-server-sdk";
 import { createDebaterSettings } from "./features/transcription/debater-settings.ts";
@@ -235,6 +236,8 @@ export function createServices({
           onTurn: mediaProvider
             ? (debateId) => mediaProvider.setTurn(debateId, null)
             : undefined,
+          // PR 3: keep-the-asker-on refunds and the end of a debate.
+          funds: createMicFunds({ database, rail: "simulation", logger }),
           logger,
         })
       : undefined;

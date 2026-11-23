@@ -274,7 +274,12 @@ describe(
       assert.deepEqual(refunded.book, before.book);
       // A retried fire or a recovery pass starts and refunds nothing twice.
       await turns.start(debateId);
-      assert.deepEqual(await turns.recover(), { started: 0, voided: 0 });
+      assert.deepEqual(await turns.recover(), {
+        started: 0,
+        voided: 0,
+        refunded: 0,
+        ended: 0,
+      });
       assert.equal((await clock(debateId)).turnNumber, 8);
       // E9: the asker's text is on the public read with the turn.
       await turns.setAskerText(author, debateId, "Why now?");
