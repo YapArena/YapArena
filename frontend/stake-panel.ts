@@ -20,10 +20,14 @@ import {
   clock,
   confirmText,
   debatesHere,
+  decimalShare,
+  duelsText,
+  isDuel,
   liveWindow,
   percent,
   placementError,
   positionStatus,
+  presenceDue,
   price,
   reasonText,
   replayRound,
@@ -33,6 +37,7 @@ import {
   resultLine,
   resultsHeading,
   resultsSummary,
+  returnedText,
   secondsLeft,
   signedCoins,
   speakerLine,
@@ -511,6 +516,7 @@ if (root) {
       cents: value,
       turnNumber: current.turnNumber,
       closedTurn,
+      duel: isDuel(current.window ?? current.round),
     });
   }
   function renderReceipt(current: Target | null) {
@@ -518,13 +524,22 @@ if (root) {
     receipt.hidden = !own;
     if (!own || !current?.round) return;
     const round = current.round;
+    // Decision 0017: in a duel window the whole size rides on the read.
+    const duel = isDuel(round);
+    const returned = duel ? returnedText(round.duels) : null;
     const lines = [
-      `You said ${sideName(own.side)} · ${own.quantity} contracts · max ${price(paidCents(own))} each`,
+      duel
+        ? `You said ${sideName(own.side)} · read ${percent(decimalShare(own.limit))}% · ${own.quantity} YC at stake`
+        : `You said ${sideName(own.side)} · ${own.quantity} contracts · max ${price(paidCents(own))} each`,
       `${round.participants.toLocaleString()} ${round.participants === 1 ? "person" : "people"} in this window`,
       round.state === "settled" && round.outcome
-        ? round.outcome.executed
-          ? `Result: ${percent(round.pricing?.share)}% said yes · ${signedCoins(round.outcome.net)}`
-          : "Result: not filled · refunded"
+        ? returned
+          ? `Result: ${returned}`
+          : duel
+            ? `Result: ${percent(round.pricing?.share)}% said yes · ${duelsText(round.outcome)} · ${signedCoins(round.outcome.net)}`
+            : round.outcome.executed
+              ? `Result: ${percent(round.pricing?.share)}% said yes · ${signedCoins(round.outcome.net)}`
+              : "Result: not filled · refunded"
         : `Final. Yes and no totals stay hidden until results ${round.revealAt ? `on ${when(round.revealAt)}` : "5 days after the debate ends"}.`,
     ];
     receipt.replaceChildren(
@@ -815,10 +830,40 @@ if (root) {
     side = null;
     render();
   });
+  // Decision 0017: while a live duel window is open, a signed-in viewer's page
+  // says it is present, so the window can reach its ten viewers.
+  let presence: { at: number; windowId: string | null } | null = null;
+  function sendPresence() {
+    const live = windows
+      ? liveWindow(windows.windows, now(), windows.eventStatus)
+      : null;
+    if (
+      !presenceDue({
+        eventStatus: windows?.eventStatus,
+        signedIn,
+        session: summary !== null,
+        debater,
+        hidden: document.hidden,
+        window: live,
+        last: presence,
+        now: Date.now(),
+      })
+    )
+      return;
+    presence = { at: Date.now(), windowId: live!.id };
+    void coinApi(
+      `/debates/${encodeURIComponent(debateId)}/presence`,
+      "POST",
+      {},
+    ).catch(() => {
+      // The next heartbeat tries again.
+    });
+  }
   // Every second: the countdown, and a refresh just after a window's cutoff.
   let lastTarget: Target | null = null;
   let lastPoll = Date.now();
   window.setInterval(() => {
+    sendPresence();
     const current = target();
     if (current?.id !== lastTarget?.id) {
       // A window that closed under an open ticket reserved nothing; the
