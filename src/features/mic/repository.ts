@@ -58,6 +58,7 @@ import {
   type Question,
   type Side,
 } from "./rules.ts";
+import { askerKind, type MicTurnKind } from "./turn-kinds.ts";
 
 // Decision 0018, PR 2a: the list on the database and the coin ledger.
 //
@@ -309,7 +310,24 @@ export interface PublicMicList {
     holder: string | null;
     questionId: string;
     text: string;
+    // PR 2b: whether the turn engine has started it, and the turn it cut
+    // (F15: whom it cut and the time they lost).
+    started: boolean;
+    cut: { turnNumber: number; side: Side; lostMs: number } | null;
   }[];
+  // The mic turn now on the clock, or null in a debater's own turn.
+  turn: {
+    turnNumber: number;
+    micId: string;
+    kind: MicTurnKind;
+    // Who has the floor: the asker, in their own turns, or a debater.
+    speaker: "asker" | Side;
+    side: Side; // the clock's side, the asker's camp in their turns (E11)
+    asker: string | null;
+    target: Side;
+    text: string | null; // the asker's typed text, as typed (E9)
+    deadline: Date | null; // null while the debate is paused
+  } | null;
 }
 
 /**
@@ -354,6 +372,40 @@ export async function readList(
     ).rows.map((row) => [row.userId, row.handle]),
   );
   const handle = (account: string) => handles.get(account) ?? null;
+  const runs = new Map(
+    (
+      await client.query<{
+        micId: string;
+        turnNumber: number | null;
+        side: Side | null;
+        lostMs: number | null;
+      }>(
+        `SELECT mic_id AS "micId",cut_turn_number AS "turnNumber",cut_side AS side,
+          lost_ms AS "lostMs" FROM mic_runs WHERE debate_id=$1`,
+        [debateId],
+      )
+    ).rows.map((row) => [row.micId, row]),
+  );
+  const current = (
+    await client.query<{
+      turnNumber: number;
+      micId: string;
+      kind: MicTurnKind;
+      side: Side;
+      text: string | null;
+      holder: string;
+      target: Side;
+      deadline: Date | null;
+    }>(
+      `SELECT t.turn_number AS "turnNumber",t.mic_id AS "micId",t.kind,t.side,t.text,
+        m.holder_id::text AS holder,m.target,dm.turn_deadline_at AS deadline
+      FROM debate_media dm
+      JOIN mic_turns t ON t.debate_id=dm.debate_id AND t.turn_number=dm.turn_number
+      JOIN mic_mics m ON m.id=t.mic_id
+      WHERE dm.debate_id=$1 AND dm.state IN ('running','paused')`,
+      [debateId],
+    )
+  ).rows[0];
   const fired = new Map(
     (
       await client.query<{ id: string; body: string }>(
@@ -423,7 +475,25 @@ export async function readList(
       holder: handle(mic.holder),
       questionId: mic.questionId,
       text: fired.get(mic.questionId) ?? "",
+      started: runs.has(mic.id),
+      cut: ((run) =>
+        run?.turnNumber != null && run.side && run.lostMs != null
+          ? { turnNumber: run.turnNumber, side: run.side, lostMs: run.lostMs }
+          : null)(runs.get(mic.id)),
     })),
+    turn: current
+      ? {
+          turnNumber: current.turnNumber,
+          micId: current.micId,
+          kind: current.kind,
+          speaker: askerKind(current.kind) ? "asker" : current.side,
+          side: current.side,
+          asker: handle(current.holder),
+          target: current.target,
+          text: current.text,
+          deadline: current.deadline,
+        }
+      : null,
   };
 }
 
@@ -439,7 +509,11 @@ const idempotencyConflict = () =>
 export function createMicRepository(
   database: Pool,
   rail: SandboxRail,
-  options: { limits?: TransactionOptions } = {},
+  options: {
+    limits?: TransactionOptions;
+    // Starts a live mic in the turn engine; never throws (turns.ts start).
+    afterFire?: (debateId: string) => Promise<unknown>;
+  } = {},
 ) {
   const limits = options.limits ?? COIN_REQUEST_LIMITS;
   async function transaction<T>(work: (client: PoolClient) => Promise<T>) {
@@ -932,7 +1006,7 @@ export function createMicRepository(
      * to the seated debaters in equal halves, the camp's other questions are
      * refunded, and the mic goes live, or queues behind one live or queued.
      */
-    fire(
+    async fire(
       context: SandboxContext,
       debateId: string,
       questionId: string,
@@ -941,7 +1015,7 @@ export function createMicRepository(
       found(debateId, "debate");
       found(questionId, "question");
       const requestKey = reference(context.userId, "mic.fire", requestId);
-      return authorized(context, async (client) => {
+      const fired = await authorized(context, async (client) => {
         const list = await openList(client, debateId);
         const prior = (
           await client.query<{
@@ -1179,6 +1253,10 @@ export function createMicRepository(
           created: true,
         };
       });
+      // PR 2b: the turn engine starts the live mic after the fire commits,
+      // outside its locks (a retried fire starts nothing twice).
+      if (fired.state === "live") await options.afterFire?.(debateId);
+      return fired;
     },
   });
 }

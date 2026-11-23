@@ -41,12 +41,13 @@ function stub(overrides = {}) {
     },
   };
 }
-function app(mic, { signedIn = true } = {}) {
+function app(mic, { signedIn = true, turns } = {}) {
   const server = express();
   server.use(express.json(), cookieParser());
   server.use(
     createMicRouter({
       mic,
+      turns,
       requireAuth: (req, res, next) => {
         if (!signedIn)
           return res.status(401).json({ error: "authentication required" });
@@ -316,6 +317,110 @@ describe("the mic routes", () => {
     assert.equal(
       (await write(crash, "post", firing, { requestId: "r" })).status,
       500,
+    );
+  });
+});
+
+// Decision 0018, PR 2b: the asker's own turn controls.
+describe("the asker's turn routes", () => {
+  const turn = `/api/debates/${debateId}/mic/turn`;
+  const text = `${turn}/text`;
+  function turns(overrides = {}) {
+    const calls = [];
+    return {
+      calls,
+      turns: {
+        endAskerTurn: async (...args) => {
+          calls.push(["endAskerTurn", ...args]);
+          return { ended: false, side: "A" };
+        },
+        setAskerText: async (...args) => {
+          calls.push(["setAskerText", ...args]);
+          return { turnNumber: 8, text: args[2].trim() };
+        },
+        ...overrides,
+      },
+    };
+  }
+
+  it("stay unmounted without the turn engine", async () => {
+    const server = app(stub().mic);
+    assert.equal(
+      (await write(server, "post", turn, { action: "end" })).status,
+      404,
+    );
+    assert.equal(
+      (await write(server, "post", text, { text: "Why?" })).status,
+      404,
+    );
+  });
+
+  it("end the asker's turn and show their text, with the caller's session", async () => {
+    const { turns: engine, calls } = turns();
+    const server = app(stub().mic, { turns: engine });
+    const ended = await write(server, "post", turn, { action: "end" });
+    assert.equal(ended.status, 200);
+    assert.deepEqual(ended.body, { ended: false, side: "A" });
+    const shown = await write(server, "post", text, { text: " Why now? " });
+    assert.equal(shown.status, 200);
+    assert.deepEqual(shown.body, { turnNumber: 8, text: "Why now?" });
+    const context = {
+      userId: "7",
+      sessionTokenHash: calls[0][1].sessionTokenHash,
+      expectedSessionId: "9",
+    };
+    assert.deepEqual(calls, [
+      ["endAskerTurn", context, debateId],
+      ["setAskerText", context, debateId, " Why now? "],
+    ]);
+  });
+
+  it("refuse other requests, other origins and signed-out callers", async () => {
+    const { turns: engine, calls } = turns();
+    const server = app(stub().mic, { turns: engine });
+    for (const [path, body, status] of [
+      [turn, { action: "pass" }, 400],
+      [turn, {}, 400],
+      [turn, { action: "end", extra: 1 }, 400],
+      [text, { text: 5 }, 400],
+      [text, {}, 400],
+      [`/api/debates/nope/mic/turn`, { action: "end" }, 404],
+    ])
+      assert.equal(
+        (await write(server, "post", path, body)).status,
+        status,
+        JSON.stringify(body),
+      );
+    const foreign = await request(server)
+      .post(turn)
+      .set("Origin", "https://elsewhere.example")
+      .set("X-YapArena-Session", "9")
+      .send({ action: "end" });
+    assert.equal(foreign.status, 403);
+    assert.equal(
+      (
+        await write(
+          app(stub().mic, { turns: engine, signedIn: false }),
+          "post",
+          text,
+          {
+            text: "Why?",
+          },
+        )
+      ).status,
+      401,
+    );
+    assert.deepEqual(calls, []);
+    const refused = app(stub().mic, {
+      turns: turns({
+        endAskerTurn: async () => {
+          throw new MicError("only the asker can do this in their turn", 403);
+        },
+      }).turns,
+    });
+    assert.equal(
+      (await write(refused, "post", turn, { action: "end" })).status,
+      403,
     );
   });
 });

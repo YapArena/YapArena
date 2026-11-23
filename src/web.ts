@@ -92,6 +92,7 @@ export function createWebServer(
     sessions,
     accountSecurity,
     coinDebates,
+    micTurns,
     debaterSettings,
     transcription,
     transcriber,
@@ -158,8 +159,12 @@ export function createWebServer(
     turnWindows: config.turnWindowsEnabled ? coinDebates : undefined,
     // Decision 0018: MIC_ENABLED requires the coin sandbox.
     mic: config.micEnabled
-      ? createMicRepository(database, "simulation")
+      ? createMicRepository(database, "simulation", {
+          // PR 2b: a fired mic starts in the turn engine at once.
+          afterFire: micTurns?.start,
+        })
       : undefined,
+    micTurns: config.micEnabled ? micTurns : undefined,
     debaterSettings,
     transcriptionIngest:
       transcription && config.liveOutline.ingestSecret

@@ -2,6 +2,7 @@ import type { Pool, PoolClient } from "pg";
 import { createSharedRead } from "../../platform/shared-read.ts";
 import { withTransaction } from "../../platform/transaction.ts";
 import type { CompositeLayout } from "./recording-template.ts";
+import { MIC_SNAPSHOT_KEY, micOn, planMicAdvance } from "../mic/engine.ts";
 
 export class MediaConflictError extends Error {}
 export class MediaNotFoundError extends Error {}
@@ -37,7 +38,8 @@ type Rules = {
   initial_speaking_time_seconds?: number;
   maximum_duration_seconds?: number;
 };
-function timing(rules: Rules) {
+/** A debate's turn length and maximum length, from its rules snapshot. */
+export function timing(rules: Rules) {
   const turn = rules.initial_speaking_time_seconds;
   const maximum = rules.maximum_duration_seconds;
   if (
@@ -55,9 +57,18 @@ function timing(rules: Rules) {
   return { turnMs: turn * 1000, maximumMs: maximum * 1000 };
 }
 
+/** A turn the clock started: whose microphone opens, none in an asker's turn. */
+export interface TurnChange {
+  debateId: string;
+  side: "A" | "B" | null;
+}
+
 export function createMediaRepository(
   db: Pool,
   replayPublication?: { enabled: boolean; allowedRooms?: readonly string[] },
+  // Decision 0018: copied into each debate's rules snapshot when it starts,
+  // so flipping MIC_ENABLED never changes a debate already live.
+  options: { micEnabled?: boolean } = {},
 ) {
   async function pauseWithClient(
     client: PoolClient,
@@ -88,6 +99,111 @@ export function createMediaRepository(
       [debateId, actorId, reason],
     );
     return result.rows[0];
+  }
+  // The media clock: ends the current turn and starts the next, or ends the
+  // debate at its maximum length. Locks the debate row, then its media row.
+  // Without endEarly it acts only once the turn's deadline has passed; with
+  // it (Decision 0018, the asker ending their own turn) it acts now, after
+  // endEarly accepts the running turn.
+  async function advanceWithClient(
+    client: PoolClient,
+    debateId: string,
+    endEarly?: (state: MediaState) => Promise<void>,
+  ): Promise<{ ended: true } | { ended: false; turn: TurnChange } | null> {
+    const eventResult = await client.query<{
+      status: string;
+      rulesSnapshot: Rules;
+    }>(
+      `SELECT status, rules_snapshot AS "rulesSnapshot" FROM debates WHERE id = $1 FOR UPDATE`,
+      [debateId],
+    );
+    const event = eventResult.rows[0];
+    if (!event || event.status !== "live") return null;
+    const stateResult = await client.query<MediaState & { databaseNow: Date }>(
+      `SELECT ${fields}, clock_timestamp() AS "databaseNow" FROM debate_media WHERE debate_id = $1 FOR UPDATE`,
+      [debateId],
+    );
+    const state = stateResult.rows[0];
+    if (
+      !state ||
+      state.state !== "running" ||
+      !state.turnDeadlineAt ||
+      (!endEarly &&
+        new Date(state.turnDeadlineAt).getTime() >
+          new Date(state.databaseNow).getTime())
+    )
+      return null;
+    if (endEarly) await endEarly(state);
+    const { turnMs, maximumMs } = timing(event.rulesSnapshot);
+    const elapsed = Math.min(
+      state.remainingMs ?? turnMs,
+      Math.max(
+        0,
+        new Date(state.databaseNow).getTime() -
+          new Date(state.lastResumedAt!).getTime(),
+      ),
+    );
+    const activeMs = state.activeMs + elapsed;
+    // Decision 0018: a debate that started with the mic on runs mic turns.
+    const mic = micOn(event.rulesSnapshot)
+      ? await planMicAdvance(client, {
+          debateId,
+          turnNumber: state.turnNumber,
+          activeSide: state.activeSide!,
+          activeMs,
+          remainingMs:
+            new Date(state.turnDeadlineAt).getTime() -
+            new Date(state.databaseNow).getTime(),
+          turnMs,
+          maximumMs,
+        })
+      : null;
+    if (mic ? mic.end : activeMs >= maximumMs) {
+      await client.query(
+        `UPDATE debates SET status = 'ended', live_ended_at = CURRENT_TIMESTAMP,
+        ended_reason = 'maximum_duration', updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+        [debateId],
+      );
+      await client.query(
+        "UPDATE event_participants SET active = false WHERE debate_id = $1",
+        [debateId],
+      );
+      await client.query(
+        `UPDATE debate_media SET state = 'ended', active_side = NULL, turn_deadline_at = NULL,
+        last_resumed_at = NULL, active_ms = $2,
+        recording_status = CASE WHEN recording_status = 'recording' THEN 'processing' ELSE recording_status END,
+        revision = revision + 1,
+        updated_at = CURRENT_TIMESTAMP WHERE debate_id = $1`,
+        [debateId, activeMs],
+      );
+      await client.query(
+        `INSERT INTO event_history (debate_id, action, from_status, to_status, reason)
+        VALUES ($1, 'automatic_end', 'live', 'ended', 'maximum duration reached')`,
+        [debateId],
+      );
+      return { ended: true };
+    }
+    const next =
+      mic && !mic.end ? mic.side : state.activeSide === "A" ? "B" : "A";
+    const nextMs =
+      mic && !mic.end ? mic.nextMs : Math.min(turnMs, maximumMs - activeMs);
+    await client.query(
+      `UPDATE debate_media SET active_side = $2, turn_number = turn_number + 1,
+      active_ms = $3, remaining_ms = $4, last_resumed_at = CURRENT_TIMESTAMP,
+      turn_deadline_at = CURRENT_TIMESTAMP + ($4::integer * INTERVAL '1 millisecond'),
+      revision = revision + 1, updated_at = CURRENT_TIMESTAMP WHERE debate_id = $1`,
+      [debateId, next, activeMs, nextMs],
+    );
+    if (mic && !mic.end) await mic.record(client, state.turnNumber + 1);
+    await client.query(
+      `INSERT INTO event_history (debate_id, action, from_status, to_status, reason)
+      VALUES ($1, 'turn_advanced', 'live', 'live', $2)`,
+      [debateId, mic && !mic.end ? mic.reason : `side ${next} turn`],
+    );
+    return {
+      ended: false,
+      turn: { debateId, side: mic && !mic.end ? mic.speaking : next },
+    };
   }
   const readSnapshot = createSharedRead<{
     state: Pick<
@@ -247,6 +363,19 @@ export function createMediaRepository(
         if (event.status !== "ready")
           throw new MediaConflictError("both speakers must be ready");
         const { turnMs } = timing(event.rulesSnapshot);
+        // Decision 0018: the mic switch as this debate starts. A failed
+        // earlier start may have left it on; it follows the switch now.
+        if (options.micEnabled)
+          await client.query(
+            `UPDATE debates SET rules_snapshot = rules_snapshot || jsonb_build_object($2::text, true)
+            WHERE id = $1`,
+            [debateId, MIC_SNAPSHOT_KEY],
+          );
+        else if (micOn(event.rulesSnapshot))
+          await client.query(
+            "UPDATE debates SET rules_snapshot = rules_snapshot - $2::text WHERE id = $1",
+            [debateId, MIC_SNAPSHOT_KEY],
+          );
         const state = await client.query<MediaState>(
           `INSERT INTO debate_media
           (debate_id, state, active_side, turn_number, turn_deadline_at, remaining_ms,
@@ -320,89 +449,18 @@ export function createMediaRepository(
         debateId: string;
       }>(`SELECT debate_id AS "debateId" FROM debate_media
         WHERE state = 'running' AND turn_deadline_at <= CURRENT_TIMESTAMP ORDER BY turn_deadline_at, debate_id LIMIT 50`);
-      const turns: Array<{ debateId: string; side: "A" | "B" }> = [];
+      const turns: TurnChange[] = [];
       const ended: string[] = [];
       for (const { debateId } of due.rows) {
-        await withTransaction(db, async (client) => {
-          const eventResult = await client.query<{
-            status: string;
-            rulesSnapshot: Rules;
-          }>(
-            `SELECT status, rules_snapshot AS "rulesSnapshot" FROM debates WHERE id = $1 FOR UPDATE`,
-            [debateId],
-          );
-          const event = eventResult.rows[0];
-          if (!event || event.status !== "live") return;
-          const stateResult = await client.query<
-            MediaState & { databaseNow: Date }
-          >(
-            `SELECT ${fields}, clock_timestamp() AS "databaseNow" FROM debate_media WHERE debate_id = $1 FOR UPDATE`,
-            [debateId],
-          );
-          const state = stateResult.rows[0];
-          if (
-            !state ||
-            state.state !== "running" ||
-            !state.turnDeadlineAt ||
-            new Date(state.turnDeadlineAt).getTime() >
-              new Date(state.databaseNow).getTime()
-          )
-            return;
-          const { turnMs, maximumMs } = timing(event.rulesSnapshot);
-          const elapsed = Math.min(
-            state.remainingMs ?? turnMs,
-            Math.max(
-              0,
-              new Date(state.databaseNow).getTime() -
-                new Date(state.lastResumedAt!).getTime(),
-            ),
-          );
-          const activeMs = state.activeMs + elapsed;
-          if (activeMs >= maximumMs) {
-            await client.query(
-              `UPDATE debates SET status = 'ended', live_ended_at = CURRENT_TIMESTAMP,
-              ended_reason = 'maximum_duration', updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
-              [debateId],
-            );
-            await client.query(
-              "UPDATE event_participants SET active = false WHERE debate_id = $1",
-              [debateId],
-            );
-            await client.query(
-              `UPDATE debate_media SET state = 'ended', active_side = NULL, turn_deadline_at = NULL,
-              last_resumed_at = NULL, active_ms = $2,
-              recording_status = CASE WHEN recording_status = 'recording' THEN 'processing' ELSE recording_status END,
-              revision = revision + 1,
-              updated_at = CURRENT_TIMESTAMP WHERE debate_id = $1`,
-              [debateId, activeMs],
-            );
-            await client.query(
-              `INSERT INTO event_history (debate_id, action, from_status, to_status, reason)
-              VALUES ($1, 'automatic_end', 'live', 'ended', 'maximum duration reached')`,
-              [debateId],
-            );
-            ended.push(debateId);
-          } else {
-            const next = state.activeSide === "A" ? "B" : "A";
-            turns.push({ debateId, side: next });
-            const nextMs = Math.min(turnMs, maximumMs - activeMs);
-            await client.query(
-              `UPDATE debate_media SET active_side = $2, turn_number = turn_number + 1,
-              active_ms = $3, remaining_ms = $4, last_resumed_at = CURRENT_TIMESTAMP,
-              turn_deadline_at = CURRENT_TIMESTAMP + ($4::integer * INTERVAL '1 millisecond'),
-              revision = revision + 1, updated_at = CURRENT_TIMESTAMP WHERE debate_id = $1`,
-              [debateId, next, activeMs, nextMs],
-            );
-            await client.query(
-              `INSERT INTO event_history (debate_id, action, from_status, to_status, reason)
-              VALUES ($1, 'turn_advanced', 'live', 'live', $2)`,
-              [debateId, `side ${next} turn`],
-            );
-          }
-        });
+        const result = await withTransaction(db, (client) =>
+          advanceWithClient(client, debateId),
+        );
+        if (result?.ended) ended.push(debateId);
+        else if (result) turns.push(result.turn);
       }
       return { turns, ended };
     },
+    advanceWithClient,
     async claimRecordingStops() {
       const result = await db.query<{ debateId: string; egressId: string }>(
         `WITH due AS (
