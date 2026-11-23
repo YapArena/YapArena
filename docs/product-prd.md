@@ -211,6 +211,7 @@ Both markets ship together in the first release. The following capabilities are 
 | P0       | Sponsor coverage and winner rewards                     | Contracted exposure, allocation, and creator payments are traceable         |
 | P0       | Basic external distribution                             | Links and shareable event information bring users to the platform           |
 | P1       | Recap production tools and richer overlays              | Improve distribution without blocking the two-market core                   |
+| P1       | Borrow the microphone                                   | A viewer question backed with YC reaches a debater live; YC is reconciled   |
 | Later    | Seasons, complex ratings, advanced trading, native apps | Separate prioritization; none is implied by the core rules                  |
 
 The ongoing instrument’s supply, legal rights, redemption or closure treatment, and liquidity arrangements remain open despite confirmed order-book pricing. An order book determines transaction prices; it does not define what is owned. It must not be replaced by monthly performance contracts or administrative repricing.
@@ -283,6 +284,7 @@ Supporting operating measures: time to match; acceptance and no-show rates; comp
 | D18 | Confirmed (phase 1)        | One YC market per topic; YES+NO pair redeems for 1 YC; founder market maker; limit book; [brief](financial-architecture-options.md)       |
 | D19 | Partly confirmed           | Replay joins live minutes; debater/founder limits; void unopened rounds; sponsor split open; [brief](financial-architecture-options.md)   |
 | D20 | Requires specialist review | Eligibility, authorizations, identity checks, financial security, privacy; questions in [brief](financial-architecture-options.md)        |
+| D21 | Confirmed (YC only)        | Borrow the microphone: viewers pledge YC to questions, a camp's #1 fires; [Decision 0018](decisions/0018-borrow-the-mic.md)               |
 
 Principal risks are concentrated influence, baseline gaming, strategic last-minute purchases, thin liquidity, fabricated debates, cross-market information advantage, disclosure through event trades, sponsor dependence, and accounting or operational failure. Paid influence is intentional; controls must distinguish permitted influence from prohibited conduct rather than quietly replace the mechanism.
 
