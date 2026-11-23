@@ -122,6 +122,7 @@ describe("configuration", () => {
       landingFontFile: undefined,
       coinSandboxEnabled: false,
       turnWindowsEnabled: false,
+      duelWindowsEnabled: false,
       coinSandboxWebhookSecret: undefined,
       coinSandboxTransfersEnabled: false,
       coinTreasuryAlertUsdc: 200000,
@@ -183,6 +184,7 @@ describe("configuration", () => {
         landingFontFile: "/etc/secrets/landing-headline-font.b64",
         coinSandboxEnabled: false,
         turnWindowsEnabled: false,
+        duelWindowsEnabled: false,
         coinSandboxWebhookSecret: undefined,
         coinSandboxTransfersEnabled: false,
         coinTreasuryAlertUsdc: 200000,
@@ -313,6 +315,33 @@ describe("configuration", () => {
             TURN_WINDOWS_ENABLED: value,
           }),
         /TURN_WINDOWS_ENABLED must be true or false/,
+      );
+  });
+
+  it("opens duel windows only explicitly and only with turn windows", () => {
+    const turns = {
+      DATABASE_URL: databaseUrl,
+      COIN_SANDBOX_ENABLED: "true",
+      TURN_WINDOWS_ENABLED: "true",
+    };
+    assert.equal(loadConfig(turns).duelWindowsEnabled, false);
+    assert.equal(
+      loadConfig({ ...turns, DUEL_WINDOWS_ENABLED: "true" }).duelWindowsEnabled,
+      true,
+    );
+    assert.throws(
+      () =>
+        loadConfig({
+          DATABASE_URL: databaseUrl,
+          COIN_SANDBOX_ENABLED: "true",
+          DUEL_WINDOWS_ENABLED: "true",
+        }),
+      /requires TURN_WINDOWS_ENABLED/,
+    );
+    for (const value of ["1", "TRUE", "yes"])
+      assert.throws(
+        () => loadConfig({ ...turns, DUEL_WINDOWS_ENABLED: value }),
+        /DUEL_WINDOWS_ENABLED must be true or false/,
       );
   });
 

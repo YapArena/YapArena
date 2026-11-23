@@ -1,7 +1,8 @@
 # Decision 0017 — Forecast duels for debate windows
 
-Status: founder decisions, 2026-11-23. Pull request 1 is built: the settlement engine and its
-tests. Nothing calls the engine yet, so every window still settles under A4
+Status: founder decisions, 2026-11-23. Pull request 1 built the settlement engine; pull request 2
+settles live turn windows with it behind `DUEL_WINDOWS_ENABLED` (off by default). Until that switch
+is on, every window settles under A4
 ([Decision 0007](0007-a4-adjusted-ftm.md), [exact rules](../a4-mechanism.md)). When the switch
 ships, this record supersedes Decision 0007 for the turn windows of
 [Decision 0012](0012-live-argument-outline.md) and amends F10 and F11 of the
@@ -27,11 +28,12 @@ round opened under `a4-v1` keep A4.
 Assumed by this record until the founder says otherwise:
 
 - A viewer is a signed-in account connected to the live debate; the two debaters and signed-out
-  viewers do not count. The count is stored with the window when it locks.
+  viewers do not count. The page sends a heartbeat every 20 seconds; an account seen while the
+  window was open counts once, recorded before the cutoff, so the count is fixed when it closes.
 - A floor of 5 tickets applies as well (`minTickets`), because duels among very few tickets carry
   little information. The rule itself needs 3.
-- Read leverage 12.5; rounding dust goes to a visible system account; a returned window publishes
-  no share.
+- Read leverage 12.5. Rounding dust stays with the center, as under A4. A window that returns every
+  stake publishes no share and does not count toward the last-answer figure.
 
 ## The rule (`fd-v1`)
 
@@ -95,14 +97,38 @@ rooms were settled again by that same reference without the side bet.
 
 ## Delivery
 
-| Pull request | Ships                                                                                    |
-| ------------ | ---------------------------------------------------------------------------------------- |
-| 1            | This record, the engine and its tests. Nothing calls the engine                          |
-| Later        | A stored count of viewers present per window                                             |
-| Later        | Ledger postings for a zero-sum window, and settlement that follows each round's own rule |
-| Later        | Results at each close for live debates, and no replay tickets on duel windows            |
-| Later        | The wording and result display, within Decision 0016's ticket                            |
-| Later        | New live windows open under `fd-v1`                                                      |
+| Pull request | Ships                                                                                |
+| ------------ | ------------------------------------------------------------------------------------ |
+| 1            | This record, the engine and its tests. Nothing calls the engine                      |
+| 2            | Viewers present, duel settlement on the ledger, reveal at each close, cut-turn voids |
+| 3            | The heartbeat from the debate page, and the wording within Decision 0016's ticket    |
+| Switch       | `DUEL_WINDOWS_ENABLED=true` on web and worker, after the migration                   |
 
-Still open: how the last-answer figure treats a returned window, and how a window cut short by a
-departing debater is refunded.
+## Settling a duel window (pull request 2)
+
+- **Opening.** With `DUEL_WINDOWS_ENABLED=true` (it requires `TURN_WINDOWS_ENABLED`), each new live
+  turn window stores the terms `fd-v1` with `minViewers: 10`. The database gives such a window
+  per-round reveal whatever the debate's mode, so it settles at its own cutoff, and the replay order
+  guard, which takes five-day windows only, refuses replay tickets. Windows opened before the
+  switch keep their terms and settle under A4.
+- **Viewers present.** `POST /api/coin-sandbox/debates/:id/presence` (signed in, no body) records
+  the account in `debate_viewers` (latest heartbeat) and in `coin_window_viewers` for each duel
+  window open at that moment. Placing a ticket records presence too. A seated debater records
+  nothing, and rows are refused after a window's cutoff. `src/features/presence/repository.ts`
+  reads the count of a window, and the accounts present now (a heartbeat in the last 45 seconds,
+  without the current debaters), which the borrow-the-mic votes use.
+- **Ledger.** A ticket reserves its stake (size × 1 YC). The center sets aside twice the stake,
+  because a winner can receive up to twice its stake before the window's losers have settled
+  (settlement runs in batches, in any order). At settlement the whole stake is the ticket's cost
+  and its duel result is its net, through the same grant accounting as A4; the center's float
+  comes back whole, apart from rounding dust. A window with fewer than 10 viewers present or 5
+  tickets settles as `returned_few_viewers` or `returned_small_room`: every stake is released.
+- **What is published.** The round's result keeps a `duels` summary (status, viewers, tickets,
+  share, median read, verdict) beside `pricing`, whose `share` is the Yes share (null when
+  returned) so the turn bars, home list and charts read duel windows unchanged. The public window
+  list and the signed-in view add `duels`; each outcome adds `duelsWon` and `duelsLost`.
+- **A turn cut short.** `voidTurnWindow(debateId, turnNumber, "turn_cut")` refunds every position
+  of that turn's window in full, under either rule. The database lets the runtime void a turn
+  window with that reason; borrow the mic calls it for a cut turn (its E10, S12 and D9).
+
+Still open: the wording of a returned window and of the result plate, in pull request 3.

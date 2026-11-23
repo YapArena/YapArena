@@ -151,6 +151,8 @@ const applicationTables = [
   "endorsement_points",
   // Decision 0015 (D4): the founder's review of which side answers yes.
   "topic_answer_reviews",
+  "debate_viewers",
+  "coin_window_viewers",
 ];
 const container = `yaparena-isolation-${randomUUID().slice(0, 8)}`;
 const evidenceDirectory = `/tmp/${container}-evidence`;

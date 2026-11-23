@@ -180,6 +180,19 @@ became `cancelled` or `void_review`, with reason `debate_unavailable`, and settl
 rounds. The runtime may void only those; the database refuses any other runtime void, so
 `void-round` below remains the owner's command for everything else.
 
+## Forecast duel windows
+
+With `DUEL_WINDOWS_ENABLED=true` as well (web and worker; it requires `TURN_WINDOWS_ENABLED`),
+each new live turn window settles by forecast duels ([Decision 0017](decisions/0017-forecast-duels.md))
+and reveals at its own cutoff, whatever the debate's reveal mode; it takes no replay positions.
+It settles only when at least 10 signed-in viewers were present while it was open (the debate
+page's heartbeat, or a ticket) and it holds at least 5 tickets; otherwise every stake is
+released. The center sets aside twice each duel stake as a float and gets it back at settlement,
+so check that `center_available` covers twice the largest expected total stake of the open
+windows. Apply migration `1795459348000_add-forecast-duel-windows` before deploying the version
+that reads it, and turn the switch on only after that. Turning it off again affects only windows
+opened afterwards.
+
 ## Reveal mode and debaters
 
 Every debate round reveals in its debate's mode (Decision 0012, F11). **Five-day** is the default: rounds take orders until their cutoff, stay locked,

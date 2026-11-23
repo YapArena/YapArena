@@ -212,6 +212,7 @@ export function createServices({
   const coinDebates = config.coinSandboxEnabled
     ? createCoinDebateSandbox(database, "simulation", {
         turnWindows: config.turnWindowsEnabled,
+        duelWindows: config.duelWindowsEnabled,
         logger,
       })
     : undefined;

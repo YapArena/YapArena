@@ -10,6 +10,12 @@ import {
 import { createSessionRepository } from "../../dist/platform/auth/sessions.js";
 import { createSessionToken } from "../../dist/platform/auth/session-tokens.js";
 import { createMediaRepository } from "../../dist/features/media/repository.js";
+import { countedRoundSql } from "../../dist/features/endorsement/repository.js";
+import {
+  viewerIdsNow,
+  viewersInWindow,
+  viewersNow,
+} from "../../dist/features/presence/repository.js";
 import { attachSubject, openSandbox } from "./confirmations.js";
 
 // Decision 0012: one Yap Coins trading window per live speaking turn. These
@@ -36,7 +42,7 @@ describe(
   "turn-aligned Yap Coins trading windows",
   { skip: !ownerUrl || !runtimeUrl },
   () => {
-    let owner, runtime, sandbox, operator, windows, manual, topicId;
+    let owner, runtime, sandbox, operator, windows, manual, duels, topicId;
     before(async () => {
       for (const value of [ownerUrl, runtimeUrl]) {
         const url = new URL(value);
@@ -58,6 +64,12 @@ describe(
         turnWindows: true,
       });
       manual = createCoinDebateSandbox(runtime, "simulation", relaxed);
+      // Decision 0017: windows opened under forecast duels.
+      duels = createCoinDebateSandbox(runtime, "simulation", {
+        ...relaxed,
+        turnWindows: true,
+        duelWindows: true,
+      });
       topicId = (
         await owner.query(
           "INSERT INTO topics(slug,title,summary,side_a_label,side_b_label,publication_state) VALUES($1,'Turn windows','Synthetic turn window fixture','Support','Oppose','published') RETURNING id",
@@ -451,18 +463,22 @@ describe(
       for (const window of view.windows) {
         assert.deepEqual(Object.keys(window).sort(), [
           "closesAt",
+          "duels",
           "id",
           "opensAt",
           "pricing",
           "recording",
           "revealAt",
           "revealMode",
+          "rule",
           "side",
           "state",
           "turnNumber",
           "voidReason",
         ]);
+        assert.equal(window.rule, "a4-v1");
         assert.equal(window.pricing, null, "nothing priced before the reveal");
+        assert.equal(window.duels, null, "no duel summary before the reveal");
         assert.equal(window.revealMode, "per_round");
         assert.equal(window.revealAt, window.closesAt, "reveals at its cutoff");
       }
@@ -1019,6 +1035,331 @@ describe(
       const [view] = await windows.view(one, debateId);
       assert.equal(view.state, "settled");
       assert.ok(view.outcome);
+    });
+
+    // Decision 0017: forecast duel windows.
+    const example = [
+      ["YES", "0.60", 10],
+      ["YES", "0.70", 20],
+      ["YES", "0.55", 10],
+      ["NO", "0.66", 10],
+      ["NO", "0.50", 40],
+      ["YES", "0.75", 10],
+    ];
+    // Every YC an account holds: cash plus grant principal, reserved or not.
+    const holdings = async (context) => {
+      const { balances } = await sandbox.summary(context);
+      return (
+        BigInt(balances.cashAvailable) +
+        BigInt(balances.reserved) +
+        BigInt(balances.promotionalPrincipal) +
+        BigInt(balances.promotionalReserved)
+      );
+    };
+    async function duelWindow(viewers) {
+      const debateId = await liveDebate({ reveal: "five_day" });
+      await duels.openTurnWindows(20, [debateId]);
+      const [window] = await rounds(debateId);
+      const traders = [];
+      for (const [side, limit, quantity] of example) {
+        const context = await funded();
+        traders.push({ context, before: await holdings(context) });
+        await duels.submit(context, window.id, randomUUID(), {
+          side,
+          limit,
+          quantity,
+        });
+      }
+      for (let index = 0; index < viewers; index++)
+        assert.deepEqual(await duels.recordPresence(await actor(), debateId), {
+          present: true,
+        });
+      return { debateId, window, traders };
+    }
+    // Every projection matches its postings, and only backing goes negative.
+    async function reconcile() {
+      assert.equal(
+        (
+          await owner.query(`SELECT count(*)::int n FROM coin_accounts a WHERE environment='sandbox' AND balance<>
+      (SELECT COALESCE(sum(amount),0) FROM coin_postings p WHERE p.account_id=a.id)`)
+        ).rows[0].n,
+        0,
+      );
+      assert.equal(
+        (
+          await owner.query(
+            "SELECT count(*)::int n FROM coin_accounts WHERE environment='sandbox' AND kind<>'backing' AND balance<0",
+          )
+        ).rows[0].n,
+        0,
+      );
+    }
+
+    it("opens duel windows that reveal at each close and take no replay positions", async () => {
+      const debateId = await liveDebate({ reveal: "five_day" });
+      await duels.openTurnWindows(20, [debateId]);
+      const stored = (
+        await owner.query(
+          "SELECT terms,reveal_mode FROM coin_debate_rounds WHERE debate_id=$1",
+          [debateId],
+        )
+      ).rows[0];
+      assert.equal(stored.terms.rule, "fd-v1");
+      assert.equal(stored.terms.minViewers, 10);
+      // The debate is five-day; a duel window still reveals at its cutoff.
+      assert.equal(stored.reveal_mode, "per_round");
+      // A ticket reserves its stake; the center sets aside twice the stake.
+      const context = await funded();
+      const [window] = await rounds(debateId);
+      await duels.submit(context, window.id, randomUUID(), {
+        side: "NO",
+        limit: "0.4",
+        quantity: 25,
+      });
+      const order = (
+        await owner.query(
+          "SELECT center_reservation::text,promotional_reservation::text FROM coin_debate_orders WHERE round_id=$1",
+          [window.id],
+        )
+      ).rows[0];
+      assert.equal(order.center_reservation, "500000");
+      assert.ok(["0", "250000"].includes(order.promotional_reservation));
+      // Placing a ticket counts its account as present.
+      const client = await runtime.connect();
+      try {
+        assert.equal(await viewersInWindow(client, window.id), 1);
+      } finally {
+        client.release();
+      }
+      // After the debate ends, no replay position is taken.
+      await close(window.id);
+      await owner.query(
+        "UPDATE debates SET status='ended',live_ended_at=clock_timestamp() WHERE id=$1",
+        [debateId],
+      );
+      await assert.rejects(
+        duels.submit(await funded(), window.id, randomUUID(), {
+          side: "YES",
+          limit: "0.5",
+          quantity: 10,
+          replayPositionMs: 1000,
+        }),
+        (error) => error.code === "window_closed",
+      );
+    });
+
+    it("settles a duel window with ten viewers present, paying from the losers", async () => {
+      // Six tickets plus four accounts that only watch: ten present.
+      const { debateId, window, traders } = await duelWindow(4);
+      await close(window.id);
+      await duels.advance(20);
+      const [settled] = await rounds(debateId);
+      assert.equal(settled.state, "settled");
+      assert.equal(settled.result.duels.status, "settled");
+      assert.equal(settled.result.duels.viewers, 10);
+      assert.deepEqual(settled.result.duels.share, { n: "2", d: "3" });
+      // Each account's holdings move by exactly its duel result.
+      const nets = ["31325", "50150", "25075", "43375", "-162500", "12575"];
+      for (const [index, trader] of traders.entries()) {
+        assert.equal(
+          (await holdings(trader.context)) - trader.before,
+          BigInt(nets[index]),
+        );
+        const { balances } = await sandbox.summary(trader.context);
+        assert.equal(balances.reserved, "0");
+        assert.equal(balances.promotionalReserved, "0");
+      }
+      // The window is zero-sum, so the center's float comes back whole.
+      assert.equal(
+        nets.reduce((total, net) => total + BigInt(net), 0n),
+        0n,
+      );
+      await reconcile();
+      // Results show at once, to everyone.
+      const [published] = (await duels.publicWindows(debateId)).windows;
+      assert.equal(published.rule, "fd-v1");
+      assert.deepEqual(published.duels, settled.result.duels);
+      assert.deepEqual(published.pricing.share, { n: "2", d: "3" });
+      assert.equal(published.pricing.branch, "duels");
+      const own = (await duels.view(traders[4].context, debateId))[0];
+      assert.equal(own.outcome.net, "-162500");
+      assert.equal(own.outcome.duelsWon, 0);
+      const { results } = await duels.results(traders[1].context, new Date(0));
+      assert.equal(results[0].outcome.net, "50150");
+      assert.equal(results[0].outcome.duelsWon, 3);
+      // A settled duel window counts toward the last-answer figure.
+      assert.equal(
+        (
+          await owner.query(
+            `SELECT count(*)::int AS n FROM coin_debate_rounds r WHERE r.id=$1 AND ${countedRoundSql("$2")}`,
+            [window.id, "simulation"],
+          )
+        ).rows[0].n,
+        1,
+      );
+    });
+
+    it("returns every stake of a duel window with fewer than ten viewers", async () => {
+      const { debateId, window, traders } = await duelWindow(3);
+      await close(window.id);
+      await duels.advance(20);
+      const [returned] = await rounds(debateId);
+      assert.equal(returned.state, "settled");
+      assert.equal(returned.result.duels.status, "returned_few_viewers");
+      assert.equal(returned.result.duels.viewers, 9);
+      assert.equal(returned.result.duels.share, null);
+      for (const trader of traders)
+        assert.equal(await holdings(trader.context), trader.before);
+      await reconcile();
+      const [published] = (await duels.publicWindows(debateId)).windows;
+      assert.equal(published.pricing.share, null);
+      assert.equal(published.duels.status, "returned_few_viewers");
+      // A returned window publishes no share and is not counted.
+      assert.equal(
+        (
+          await owner.query(
+            `SELECT count(*)::int AS n FROM coin_debate_rounds r WHERE r.id=$1 AND ${countedRoundSql("$2")}`,
+            [window.id, "simulation"],
+          )
+        ).rows[0].n,
+        0,
+      );
+    });
+
+    it("voids a cut turn's window in full, under either rule", async () => {
+      for (const sandboxUnderTest of [duels, windows]) {
+        const context = await funded(),
+          before = await sandbox.summary(context);
+        const debateId = await liveDebate();
+        const round = await sandboxUnderTest.create(
+          context,
+          debateId,
+          randomUUID(),
+        );
+        await sandboxUnderTest.submit(context, round.id, randomUUID(), {
+          side: "YES",
+          limit: "0.6",
+          quantity: 10,
+        });
+        const voided = await sandboxUnderTest.voidTurnWindow(
+          debateId,
+          1,
+          "turn_cut",
+        );
+        assert.deepEqual(voided, { roundId: round.id, created: true });
+        assert.deepEqual(
+          await sandboxUnderTest.voidTurnWindow(debateId, 1, "turn_cut"),
+          { roundId: round.id, created: false },
+        );
+        assert.deepEqual(
+          await sandboxUnderTest.voidTurnWindow(debateId, 7, "turn_cut"),
+          { roundId: null, created: false },
+        );
+        const [stored] = await rounds(debateId);
+        assert.equal(stored.state, "void");
+        assert.equal(stored.result.voidReason, "turn_cut");
+        const after = await sandbox.summary(context);
+        assert.equal(after.balances.reserved, "0");
+        assert.deepEqual(after.book, before.book);
+      }
+      await reconcile();
+      // The runtime voids a manual round for a cut turn never.
+      const manualDebate = await liveDebate({ status: "ready" });
+      const manualRound = await manual.create(
+        await actor(),
+        manualDebate,
+        randomUUID(),
+      );
+      await assert.rejects(
+        runtime.query(
+          `UPDATE coin_debate_rounds SET state='void',revealed_at=clock_timestamp(),
+            result=jsonb_build_object('voidReason','turn_cut','snapshot','[]'::jsonb)
+          WHERE id=$1`,
+          [manualRound.id],
+        ),
+        /unauthorized outcome/,
+      );
+    });
+
+    it("counts signed-in viewers present, never a seated debater", async () => {
+      const debateId = await liveDebate();
+      await duels.openTurnWindows(20, [debateId]);
+      const [window] = await rounds(debateId);
+      const watching = [await actor(), await actor()];
+      for (const context of watching)
+        assert.deepEqual(await duels.recordPresence(context, debateId), {
+          present: true,
+        });
+      // A second heartbeat is one viewer, not two.
+      await duels.recordPresence(watching[0], debateId);
+      // A seated debater records nothing.
+      const debater = await actor();
+      const profile = (
+        await owner.query(
+          "INSERT INTO public_profiles(user_id,handle,display_name) VALUES($1,$2,'Seated') RETURNING id",
+          [debater.userId, `seated${randomUUID().slice(0, 8)}`],
+        )
+      ).rows[0].id;
+      await owner.query(
+        "UPDATE debates SET speaker_a_profile_id=$2 WHERE id=$1",
+        [debateId, profile],
+      );
+      assert.deepEqual(await duels.recordPresence(debater, debateId), {
+        present: false,
+      });
+      const client = await runtime.connect();
+      try {
+        assert.equal(await viewersInWindow(client, window.id), 2);
+        assert.equal(await viewersNow(client, debateId), 2);
+        assert.deepEqual(
+          await viewerIdsNow(client, debateId),
+          watching
+            .map((c) => String(c.userId))
+            .sort((a, b) => (BigInt(a) < BigInt(b) ? -1 : 1)),
+        );
+        // A viewer who takes a seat stops counting as present now at once.
+        const seat = (
+          await owner.query(
+            "INSERT INTO public_profiles(user_id,handle,display_name) VALUES($1,$2,'Took a seat') RETURNING id",
+            [watching[1].userId, `seat${randomUUID().slice(0, 8)}`],
+          )
+        ).rows[0].id;
+        await owner.query(
+          "UPDATE debates SET speaker_b_profile_id=$2 WHERE id=$1",
+          [debateId, seat],
+        );
+        assert.deepEqual(await viewerIdsNow(client, debateId), [
+          String(watching[0].userId),
+        ]);
+        // The window's count is fixed: it was a viewer when recorded.
+        assert.equal(await viewersInWindow(client, window.id), 2);
+        assert.equal(await viewersNow(client, debateId, 0), 0);
+      } finally {
+        client.release();
+      }
+      // No heartbeat counts after the window closes, nor once the debate ends.
+      await close(window.id);
+      const late = await actor();
+      await duels.recordPresence(late, debateId);
+      await owner.query("UPDATE debates SET status='ended' WHERE id=$1", [
+        debateId,
+      ]);
+      assert.deepEqual(await duels.recordPresence(await actor(), debateId), {
+        present: false,
+      });
+      const check = await runtime.connect();
+      try {
+        assert.equal(await viewersInWindow(check, window.id), 2);
+      } finally {
+        check.release();
+      }
+      await assert.rejects(
+        runtime.query(
+          "INSERT INTO coin_window_viewers(round_id,user_id) VALUES($1,$2)",
+          [window.id, late.userId],
+        ),
+        /this window is not open/,
+      );
     });
   },
 );
