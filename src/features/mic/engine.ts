@@ -1,4 +1,5 @@
 import type { PoolClient } from "pg";
+import { closeMicFund, extensionFunded, openMicFund } from "./funds.ts";
 import { createList } from "./repository.ts";
 import { MicError, nextTurn, otherSide, type Side } from "./rules.ts";
 import { askerKind, micTurnSide, type MicTurnKind } from "./turn-kinds.ts";
@@ -9,7 +10,9 @@ import { askerKind, micTurnSide, type MicTurnKind } from "./turn-kinds.ts";
 // locked the debate row and then its debate_media row, and only for a debate
 // whose rules snapshot says the mic is on (micOn). It locks the mic rows it
 // changes after those, the same order as starting a mic (turns.ts), which
-// takes only the debate_media row and then the mic rows.
+// takes only the debate_media row and then the mic rows. Keeping the asker
+// on adds only fund rows here (funds.ts): the clock opens and closes funds
+// and never takes a book or the ledger.
 
 /** The rules snapshot key a debate's start copies MIC_ENABLED into. */
 export const MIC_SNAPSHOT_KEY = "mic_enabled";
@@ -66,16 +69,11 @@ export async function currentMicTurn(
   );
 }
 
-// The exchange turns this pull request runs (keeping the asker on is later).
+// The turn after an exchange turn: never a debater's own turn or a new question.
 function exchangeKind(kind: ReturnType<typeof nextTurn>): MicTurnKind {
-  if (
-    kind === "answer" ||
-    kind === "followup" ||
-    kind === "answer2" ||
-    kind === "resume"
-  )
-    return kind;
-  throw new MicError("extensions are not run yet", 500);
+  if (kind === "debate" || kind === "question")
+    throw new MicError("not a turn after an exchange turn", 500);
+  return kind;
 }
 
 export async function insertMicTurn(
@@ -101,6 +99,14 @@ export async function insertMicTurn(
       input.allottedMs,
     ],
   );
+  // X1, X10: keep-the-asker-on opens with the asker's first turn of a segment.
+  if (input.kind === "question" || input.kind === "extq")
+    await openMicFund(client, {
+      debateId: input.debateId,
+      micId: input.micId,
+      turnNumber: input.turnNumber,
+      kind: input.kind,
+    });
 }
 
 function micTurn(
@@ -165,12 +171,18 @@ export async function planMicAdvance(
       ],
     );
   // E1, E4, E8: question, answer, follow-up, answer, then the resume turn.
-  // Keeping the asker on (X) is a later pull request, so nothing is funded.
+  // X1, X4, X7, X10: the fund closes when the asker's last turn of a segment
+  // ends; funded, the target's answer is followed by an extension question
+  // and answer, again and again (X8), else by the resume turn.
   if (current && current.kind !== "resume") {
+    await closeMicFund(client, current.micId, current.kind);
+    const funded =
+      (current.kind === "answer2" || current.kind === "exta") &&
+      (await extensionFunded(client, current.micId));
     return micTurn(
       debateId,
       current,
-      exchangeKind(nextTurn(current.kind, false)),
+      exchangeKind(nextTurn(current.kind, funded)),
       turnMs,
     );
   }

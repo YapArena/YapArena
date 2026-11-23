@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
 import {
   databaseFailure,
@@ -11,47 +11,28 @@ import {
   SessionUnavailableError,
 } from "../../platform/auth/sessions.ts";
 import { CoinOperationError } from "../account-wallet/external-operations.ts";
+import type { StakeFunding } from "../account-wallet/grant-accounting.ts";
 import {
-  commitStakeCost,
-  planStake,
-  refundStake,
-  type GrantAccountingBook,
-  type StakeFunding,
-} from "../account-wallet/grant-accounting.ts";
-import {
-  coinJournalReference,
-  postCoinJournal,
-  type CoinLedgerAsset,
-  type CoinPosting,
-} from "../account-wallet/ledger.ts";
-import {
-  appendSandboxBookEvent,
   assertSandboxFinancialOpen,
   assertSandboxOpened,
   assertSandboxRail,
-  ensureSandboxBuckets,
-  lockSandboxBooks,
-  type SandboxBookSnapshot,
-  type SandboxBuckets,
   type SandboxContext,
   type SandboxRail,
 } from "../account-wallet/sandbox-repository.ts";
-import {
-  COIN_REQUEST_LIMITS,
-  lockLedger,
-} from "../account-wallet/debate-sandbox.ts";
+import { COIN_REQUEST_LIMITS } from "../account-wallet/debate-sandbox.ts";
 import { viewerIdsNow } from "../presence/repository.ts";
 import {
   checkPledge,
   checkQuestion,
   fire,
+  fundPledge,
   MicError,
   ranked,
-  splitToDebaters,
   total,
   withdrawal,
   YC,
   type Actor,
+  type Fund,
   type Mic,
   type MicList,
   type Pledge,
@@ -59,6 +40,12 @@ import {
   type Side,
 } from "./rules.ts";
 import { askerKind, type MicTurnKind } from "./turn-kinds.ts";
+import {
+  createMicMoney,
+  lockMoney,
+  reference,
+  type HeldPledge,
+} from "./money.ts";
 
 // Decision 0018, PR 2a: the list on the database and the coin ledger.
 //
@@ -75,6 +62,11 @@ import { askerKind, type MicTurnKind } from "./turn-kinds.ts";
 // UPDATE, the sandbox books (ascending account id), then the ledger accounts
 // (lockLedger). The list lock decides "is this the #1?" and the fire under
 // one lock, so an outbid and a fire that arrive together cannot both win (F1).
+// The ledger moves themselves are shared with keeping the asker on (money.ts).
+//
+// PR 3: a keep-the-asker-on pledge locks the account row, then the fund row
+// FOR UPDATE, the books and the ledger; never debate_media or a mic turn row,
+// which the clock holds while it closes a fund (funds.ts).
 
 type ListRow = MicList & { debateId: string; n: number; extra: boolean };
 interface QuestionRow {
@@ -113,76 +105,11 @@ interface Loaded {
 }
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-const reference = (userId: string, operation: string, key: string) =>
-  coinJournalReference({
-    environment: "sandbox",
-    accountId: userId,
-    operation,
-    idempotencyKey: key,
-  });
-const digest = (value: unknown) =>
-  createHash("sha256").update(JSON.stringify(value)).digest("hex");
-const byAccount = (a: string, b: string) =>
-  BigInt(a) < BigInt(b) ? -1 : BigInt(a) > BigInt(b) ? 1 : 0;
 const coins = (atoms: bigint) => Number(atoms / YC);
 
 function found(id: string, what: string) {
   if (!uuid.test(id)) throw new MicError(`${what} not found`, 404);
 }
-// The grant and cash parts of a hold, as debate stakes split them (a grant's
-// principal is grant coins; its profit and purchases are cash-backed).
-function fundingTotals(funding: StakeFunding) {
-  let cash = 0n,
-    promo = 0n;
-  for (const source of funding.sources) {
-    if (source.kind === "grant") {
-      promo += BigInt(source.principal);
-      cash += BigInt(source.profit);
-    } else cash += BigInt(source.amount);
-  }
-  return { cash, promo };
-}
-function move(postings: CoinPosting[], accountId: string, amount: bigint) {
-  if (amount) postings.push({ accountId, amount: String(amount) });
-}
-function transfer(
-  postings: CoinPosting[],
-  from: string,
-  to: string,
-  amount: bigint,
-) {
-  move(postings, from, -amount);
-  move(postings, to, amount);
-}
-async function post(
-  client: PoolClient,
-  userId: string,
-  operation: "reserve" | "release" | "payout",
-  step: string,
-  key: string,
-  asset: CoinLedgerAsset,
-  postings: CoinPosting[],
-) {
-  if (!postings.length) return undefined;
-  return (
-    await postCoinJournal(client, {
-      id: randomUUID(),
-      environment: "sandbox",
-      asset,
-      operation,
-      reference: reference(userId, `mic.${step}.${asset.toLowerCase()}`, key),
-      postings,
-    })
-  ).id;
-}
-// The book after an appended event: the event's trigger bumps the version.
-const advanced = (
-  snapshot: SandboxBookSnapshot,
-  book: GrantAccountingBook,
-): SandboxBookSnapshot => ({
-  book,
-  version: String(BigInt(snapshot.version) + 1n),
-});
 
 /**
  * Opens a debate's next list, unless one is open already. The turn engine
@@ -314,7 +241,22 @@ export interface PublicMicList {
     // (F15: whom it cut and the time they lost).
     started: boolean;
     cut: { turnNumber: number; side: Side; lostMs: number } | null;
+    // PR 3: the extensions viewers funded for this mic (X4, X8).
+    extensions: number;
   }[];
+  // PR 3: keep-the-asker-on for the live mic, its latest fund: open while
+  // viewers can pledge, else funded, closing, failed or refunded.
+  fund: {
+    id: string;
+    micId: string;
+    price: number;
+    raised: number;
+    state: "open" | "closing" | "funded" | "failed" | "refunded";
+    // The asker's turn whose end closes it (X1, X10), and that turn's
+    // deadline once it runs (null before it starts or while paused).
+    closesAfter: Fund["closesAfter"];
+    closesAt: Date | null;
+  } | null;
   // The mic turn now on the clock, or null in a debater's own turn.
   turn: {
     turnNumber: number;
@@ -406,6 +348,38 @@ export async function readList(
       [debateId],
     )
   ).rows[0];
+  const extensions = new Map(
+    (
+      await client.query<{ micId: string; n: number }>(
+        `SELECT mic_id AS "micId",count(*)::int AS n FROM mic_funds
+        WHERE debate_id=$1 AND state='funded' GROUP BY mic_id`,
+        [debateId],
+      )
+    ).rows.map((row) => [row.micId, row.n]),
+  );
+  const fund = (
+    await client.query<{
+      id: string;
+      micId: string;
+      price: string;
+      raised: string;
+      state: NonNullable<PublicMicList["fund"]>["state"];
+      closesAfter: Fund["closesAfter"];
+      closesAt: Date | null;
+    }>(
+      `SELECT f.id,f.mic_id AS "micId",f.price::text,f.state,f.closes_after AS "closesAfter",
+        (SELECT COALESCE(sum(p.amount),0)::text FROM mic_fund_pledges p
+          WHERE p.fund_id=f.id AND p.state<>'refunded') AS raised,
+        (SELECT dm.turn_deadline_at FROM debate_media dm
+          JOIN mic_turns t ON t.debate_id=dm.debate_id AND t.turn_number=dm.turn_number
+          WHERE dm.debate_id=f.debate_id AND dm.state='running' AND t.mic_id=f.mic_id
+            AND t.kind=f.closes_after AND t.turn_number>=f.opened_turn_number) AS "closesAt"
+      FROM mic_funds f JOIN mic_mics m ON m.id=f.mic_id
+      WHERE f.debate_id=$1 AND m.state='live'
+      ORDER BY f.opened_turn_number DESC LIMIT 1`,
+      [debateId],
+    )
+  ).rows[0];
   const fired = new Map(
     (
       await client.query<{ id: string; body: string }>(
@@ -480,7 +454,19 @@ export async function readList(
         run?.turnNumber != null && run.side && run.lostMs != null
           ? { turnNumber: run.turnNumber, side: run.side, lostMs: run.lostMs }
           : null)(runs.get(mic.id)),
+      extensions: extensions.get(mic.id) ?? 0,
     })),
+    fund: fund
+      ? {
+          id: fund.id,
+          micId: fund.micId,
+          price: coins(BigInt(fund.price)),
+          raised: coins(BigInt(fund.raised)),
+          state: fund.state,
+          closesAfter: fund.closesAfter,
+          closesAt: fund.closesAt,
+        }
+      : null,
     turn: current
       ? {
           turnNumber: current.turnNumber,
@@ -516,6 +502,7 @@ export function createMicRepository(
   } = {},
 ) {
   const limits = options.limits ?? COIN_REQUEST_LIMITS;
+  const money = createMicMoney(rail);
   async function transaction<T>(work: (client: PoolClient) => Promise<T>) {
     return withTransaction(
       database,
@@ -635,18 +622,7 @@ export function createMicRepository(
       )
     ).rows[0];
   }
-  // Books in ascending account order, then their buckets, then every ledger
-  // account they can touch, before the first journal.
-  async function lockMoney(client: PoolClient, accounts: readonly string[]) {
-    const ids = [...new Set(accounts)].sort(byAccount);
-    const books = await lockSandboxBooks(client, ids);
-    const buckets = new Map<string, SandboxBuckets>();
-    for (const id of ids)
-      buckets.set(id, await ensureSandboxBuckets(client, id));
-    await lockLedger(client, [...buckets.values()]);
-    return { books, buckets };
-  }
-  // A pledge's hold: available to reserved, on the pledger's own accounts.
+  // A question pledge's hold, its row recorded with the funding it used.
   async function hold(
     client: PoolClient,
     input: {
@@ -661,135 +637,45 @@ export function createMicRepository(
     },
   ) {
     const { books, buckets } = await lockMoney(client, [input.userId]);
-    const before = books.get(input.userId)!,
-      bucket = buckets.get(input.userId)!;
-    let plan: ReturnType<typeof planStake>;
-    try {
-      plan = planStake(before.book, String(input.amount));
-    } catch (error) {
-      if (!(error instanceof CoinOperationError)) throw error;
-      throw new CoinOperationError(
-        "insufficient Yap Coins for this pledge",
-        409,
-        "insufficient_balance",
-      );
-    }
-    const parts = fundingTotals(plan.funding);
-    const cash: CoinPosting[] = [],
-      promo: CoinPosting[] = [];
-    transfer(cash, bucket.cashAvailable, bucket.cashReserved, parts.cash);
-    transfer(promo, bucket.promoAvailable, bucket.promoReserved, parts.promo);
-    const cashJournalId = await post(
-      client,
-      input.userId,
-      "reserve",
-      "hold",
-      input.pledgeId,
-      "USDC",
-      cash,
-    );
-    const promoJournalId = await post(
-      client,
-      input.userId,
-      "reserve",
-      "hold",
-      input.pledgeId,
-      "YC_PROMO",
-      promo,
-    );
-    await client.query(
-      `INSERT INTO mic_pledges(id,question_id,user_id,amount,wager,add_text,funding,request_id)
-      VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8)`,
-      [
-        input.pledgeId,
-        input.questionId,
-        input.userId,
-        String(input.amount),
-        input.wager,
-        input.add,
-        JSON.stringify(plan.funding),
-        input.requestKey,
-      ],
-    );
-    await appendSandboxBookEvent(client, {
+    await money.hold(client, books, buckets, {
       userId: input.userId,
-      snapshot: before,
-      book: plan.book,
-      kind: "mic.held",
-      reference: reference(input.userId, "mic.hold", input.pledgeId),
-      termsDigest: digest([
-        input.pledgeId,
-        input.questionId,
-        String(input.amount),
-        plan.funding,
-      ]),
-      cashJournalId,
-      promoJournalId,
-      metadata: {
-        debateId: input.debateId,
-        questionId: input.questionId,
-        pledgeId: input.pledgeId,
-        wager: input.wager,
-        funding: plan.funding,
-        rail,
-      },
+      pledgeId: input.pledgeId,
+      amount: input.amount,
+      scope: { questionId: input.questionId },
+      metadata: { debateId: input.debateId, wager: input.wager },
+      record: (funding) =>
+        client.query(
+          `INSERT INTO mic_pledges(id,question_id,user_id,amount,wager,add_text,funding,request_id)
+          VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8)`,
+          [
+            input.pledgeId,
+            input.questionId,
+            input.userId,
+            String(input.amount),
+            input.wager,
+            input.add,
+            JSON.stringify(funding),
+            input.requestKey,
+          ],
+        ),
     });
   }
-  // The exact reverse of a hold, to the same sources (as a voided stake).
-  async function release(
+  // A question pledge's refund, the exact reverse of its hold.
+  const release = (
     client: PoolClient,
+    locked: Awaited<ReturnType<typeof lockMoney>>,
     pledge: PledgeRow,
-    before: SandboxBookSnapshot,
-    bucket: SandboxBuckets,
     reason: "withdrawn" | "question_removed" | "camp_fired",
-  ) {
-    const parts = fundingTotals(pledge.funding);
-    const cash: CoinPosting[] = [],
-      promo: CoinPosting[] = [];
-    transfer(cash, bucket.cashReserved, bucket.cashAvailable, parts.cash);
-    transfer(promo, bucket.promoReserved, bucket.promoAvailable, parts.promo);
-    const cashJournalId = await post(
-      client,
-      pledge.user_id,
-      "release",
-      "release",
-      pledge.id,
-      "USDC",
-      cash,
-    );
-    const promoJournalId = await post(
-      client,
-      pledge.user_id,
-      "release",
-      "release",
-      pledge.id,
-      "YC_PROMO",
-      promo,
-    );
-    const book = refundStake(before.book, pledge.funding);
-    await appendSandboxBookEvent(client, {
-      userId: pledge.user_id,
-      snapshot: before,
-      book,
-      kind: "mic.released",
-      reference: reference(pledge.user_id, "mic.release", pledge.id),
-      termsDigest: digest([pledge.id, reason, pledge.funding]),
-      cashJournalId,
-      promoJournalId,
-      metadata: {
-        questionId: pledge.question_id,
-        pledgeId: pledge.id,
-        reason,
-        funding: pledge.funding,
-        rail,
-      },
+  ) =>
+    money.release(client, locked.books, locked.buckets, pledge, {
+      reason,
+      scope: { questionId: pledge.question_id },
+      record: () =>
+        client.query(
+          "UPDATE mic_pledges SET state='refunded',refund_reason=$2 WHERE id=$1",
+          [pledge.id, reason],
+        ),
     });
-    await client.query(
-      "UPDATE mic_pledges SET state='refunded',refund_reason=$2 WHERE id=$1",
-      [pledge.id, reason],
-    );
-    return advanced(before, book);
-  }
 
   return Object.freeze({
     /** Opens the debate's next list in its own transaction (see createList). */
@@ -972,20 +858,16 @@ export function createMicRepository(
           await actorFor(client, debateId, context.userId),
         );
         const refunds = plan.refund.map((p) => loaded.pledges.get(p.id)!);
-        const { books, buckets } = await lockMoney(
+        const locked = await lockMoney(
           client,
           refunds.map((p) => p.user_id),
         );
         for (const refund of refunds)
-          books.set(
-            refund.user_id,
-            await release(
-              client,
-              refund,
-              books.get(refund.user_id)!,
-              buckets.get(refund.user_id)!,
-              refund.id === pledgeId ? "withdrawn" : "question_removed",
-            ),
+          await release(
+            client,
+            locked,
+            refund,
+            refund.id === pledgeId ? "withdrawn" : "question_removed",
           );
         if (plan.removesQuestion)
           await client.query(
@@ -1061,33 +943,13 @@ export function createMicRepository(
         const debaters = { A: seat.A, B: seat.B };
         const paid = result.paid.map((p) => loaded.pledges.get(p.id)!);
         const refunded = result.refunded.map((p) => loaded.pledges.get(p.id)!);
-        const { books, buckets } = await lockMoney(client, [
+        const locked = await lockMoney(client, [
           ...paid.map((p) => p.user_id),
           ...refunded.map((p) => p.user_id),
           debaters.A,
           debaters.B,
         ]);
-        const center = buckets.get(debaters.A)!.system;
-        // The center pays the debaters the grant part it burns. Say so
-        // plainly when its float runs low, instead of the ledger's refusal.
-        const grantPart = paid.reduce(
-          (sum, p) => sum + fundingTotals(p.funding).promo,
-          0n,
-        );
-        const centerBalance = BigInt(
-          (
-            await client.query<{ balance: string }>(
-              "SELECT balance::text FROM coin_accounts WHERE id=$1",
-              [center.center_available],
-            )
-          ).rows[0]!.balance,
-        );
-        if (centerBalance < grantPart)
-          throw new CoinOperationError(
-            "the mic is paused while Yap Coins are topped up; nothing was spent",
-            503,
-            "mic_paused",
-          );
+        await money.assertCenterCovers(client, locked.buckets, debaters, paid);
         const micId = randomUUID();
         await client.query(
           `INSERT INTO mic_mics(id,list_id,debate_id,camp,question_id,holder_id,target,state,price,request_id)
@@ -1114,137 +976,21 @@ export function createMicRepository(
             "UPDATE mic_questions SET state='refunded' WHERE id=ANY($1::uuid[])",
             [result.refundedQuestions],
           );
-        const now = (
-          await client.query<{ now: Date }>(
-            "SELECT date_trunc('milliseconds',clock_timestamp()) AS now",
-          )
-        ).rows[0]!.now.toISOString();
-        const earned: Record<Side, bigint> = { A: 0n, B: 0n };
-        const journals: string[] = [];
-        for (const pledge of paid) {
-          const before = books.get(pledge.user_id)!,
-            bucket = buckets.get(pledge.user_id)!;
-          // The whole hold is spent: nothing is released back.
-          const committed = commitStakeCost(
-            before.book,
-            pledge.funding,
-            pledge.funding.amount,
-          );
-          const parts = fundingTotals(pledge.funding);
-          const cash: CoinPosting[] = [],
-            promo: CoinPosting[] = [];
-          move(cash, bucket.cashReserved, -parts.cash);
-          move(cash, bucket.system.center_available, -parts.promo);
-          for (const share of splitToDebaters(
-            BigInt(pledge.amount),
-            debaters,
-          )) {
-            move(
-              cash,
-              buckets.get(share.account!)!.cashAvailable,
-              share.amount,
-            );
-            earned[share.side] += share.amount;
-          }
-          transfer(
-            promo,
-            bucket.promoReserved,
-            bucket.system.grant_issuer,
-            parts.promo,
-          );
-          const cashJournalId = await post(
-            client,
-            pledge.user_id,
-            "payout",
-            "spend",
-            pledge.id,
-            "USDC",
-            cash,
-          );
-          const promoJournalId = await post(
-            client,
-            pledge.user_id,
-            "payout",
-            "spend",
-            pledge.id,
-            "YC_PROMO",
-            promo,
-          );
-          if (cashJournalId) journals.push(cashJournalId);
-          await appendSandboxBookEvent(client, {
-            userId: pledge.user_id,
-            snapshot: before,
-            book: committed.book,
-            kind: "mic.spent",
-            reference: reference(pledge.user_id, "mic.spend", pledge.id),
-            termsDigest: digest([pledge.id, micId, committed.funding]),
-            cashJournalId,
-            promoJournalId,
-            metadata: {
-              debateId,
-              micId,
-              questionId,
-              pledgeId: pledge.id,
-              funding: committed.funding,
-              rail,
-            },
-          });
-          books.set(pledge.user_id, advanced(before, committed.book));
-          await client.query(
-            "UPDATE mic_pledges SET state='paid' WHERE id=$1",
-            [pledge.id],
-          );
-        }
-        // Each debater's half arrives as cash-backed Yap Coins: a
-        // purchased_profit source on their book, matching the ledger credit.
-        for (const side of ["A", "B"] as const) {
-          const account = debaters[side],
-            amount = earned[side];
-          if (!amount) continue;
-          const before = books.get(account)!;
-          const id = `mic:${micId}`;
-          const book: GrantAccountingBook = {
-            ...before.book,
-            purchased: [
-              ...before.book.purchased,
-              {
-                id,
-                kind: "purchased_profit",
-                purchaseId: id,
-                createdAt: now,
-                balance: String(amount),
-              },
-            ],
-          };
-          await appendSandboxBookEvent(client, {
-            userId: account,
-            snapshot: before,
-            book,
-            kind: "mic.earned",
-            reference: reference(account, "mic.earned", micId),
-            termsDigest: digest([micId, side, String(amount)]),
-            metadata: {
-              debateId,
-              micId,
-              side,
-              amount: String(amount),
-              cashJournalIds: journals,
-              rail,
-            },
-          });
-          books.set(account, advanced(before, book));
-        }
+        await money.payDebaters(client, locked.books, locked.buckets, {
+          debateId,
+          micId,
+          key: micId,
+          source: `mic:${micId}`,
+          debaters,
+          pledges: paid,
+          scope: { questionId },
+          record: (pledge) =>
+            client.query("UPDATE mic_pledges SET state='paid' WHERE id=$1", [
+              pledge.id,
+            ]),
+        });
         for (const pledge of refunded)
-          books.set(
-            pledge.user_id,
-            await release(
-              client,
-              pledge,
-              books.get(pledge.user_id)!,
-              buckets.get(pledge.user_id)!,
-              "camp_fired",
-            ),
-          );
+          await release(client, locked, pledge, "camp_fired");
         return {
           micId,
           questionId,
@@ -1257,6 +1003,169 @@ export function createMicRepository(
       // outside its locks (a retried fire starts nothing twice).
       if (fired.state === "live") await options.afterFire?.(debateId);
       return fired;
+    },
+    /**
+     * X1, X2, X6, X11, X12: a pledge to keep the asker on, to the live mic's
+     * open fund. It is cut to what is left of the price; reaching the price
+     * pays every pledge of the fund to the seated debaters in equal halves at
+     * once, and the extension runs after the target's answer. Fund pledges
+     * can't be withdrawn; an unfunded fund is refunded when it closes (X7).
+     */
+    keep(
+      context: SandboxContext,
+      debateId: string,
+      input: { amount: bigint; requestId: string },
+    ) {
+      found(debateId, "debate");
+      const requestKey = reference(context.userId, "mic.keep", input.requestId);
+      return authorized(context, async (client) => {
+        const prior = (
+          await client.query<{
+            id: string;
+            fundId: string;
+            requested: string;
+            amount: string;
+            debateId: string;
+            fundState: string;
+          }>(
+            `SELECT p.id,p.fund_id AS "fundId",p.requested::text,p.amount::text,
+              f.debate_id AS "debateId",f.state AS "fundState"
+            FROM mic_fund_pledges p JOIN mic_funds f ON f.id=p.fund_id
+            WHERE p.request_id=$1`,
+            [requestKey],
+          )
+        ).rows[0];
+        if (prior) {
+          if (
+            prior.debateId !== debateId ||
+            BigInt(prior.requested) !== input.amount
+          )
+            throw idempotencyConflict();
+          return {
+            fundId: prior.fundId,
+            pledgeId: prior.id,
+            amount: coins(BigInt(prior.amount)),
+            funded: prior.fundState === "funded",
+            created: false,
+          };
+        }
+        // The fund row decides: a close (the clock) and a pledge that
+        // reaches the price cannot both win.
+        const fund = (
+          await client.query<{
+            id: string;
+            micId: string;
+            price: string;
+            state: string;
+            closesAfter: Fund["closesAfter"];
+          }>(
+            `SELECT id,mic_id AS "micId",price::text,state,closes_after AS "closesAfter"
+            FROM mic_funds WHERE debate_id=$1
+            ORDER BY opened_turn_number DESC LIMIT 1 FOR UPDATE`,
+            [debateId],
+          )
+        ).rows[0];
+        await assertLive(client, debateId);
+        if (!fund) throw new MicError("keep-the-asker-on isn't open");
+        const pledges = (
+          await client.query<HeldPledge>(
+            `SELECT id,user_id::text,amount::text,funding FROM mic_fund_pledges
+            WHERE fund_id=$1 AND state='held' ORDER BY created_at,id`,
+            [fund.id],
+          )
+        ).rows;
+        const result = fundPledge(
+          {
+            price: BigInt(fund.price),
+            closesAfter: fund.closesAfter,
+            state:
+              fund.state === "open"
+                ? "open"
+                : fund.state === "funded"
+                  ? "funded"
+                  : "failed",
+            pledges: pledges.map((p) => ({
+              account: p.user_id,
+              amount: BigInt(p.amount),
+            })),
+          },
+          await actorFor(client, debateId, context.userId),
+          input.amount,
+        );
+        let debaters: Record<Side, string> | null = null;
+        if (result.funded) {
+          const seat = await seats(client, debateId);
+          // As for firing: both halves need a seated debater (S13 is later).
+          if (!seat.A || !seat.B)
+            throw new MicError(
+              "both debater seats must be filled to keep the asker on",
+              409,
+            );
+          debaters = { A: seat.A, B: seat.B };
+        }
+        const locked = await lockMoney(client, [
+          context.userId,
+          ...(debaters
+            ? [...pledges.map((p) => p.user_id), debaters.A, debaters.B]
+            : []),
+        ]);
+        const pledgeId = randomUUID();
+        const held = await money.hold(client, locked.books, locked.buckets, {
+          userId: context.userId,
+          pledgeId,
+          amount: result.accepted,
+          scope: { fundId: fund.id },
+          metadata: { debateId, micId: fund.micId },
+          record: (funding) =>
+            client.query(
+              `INSERT INTO mic_fund_pledges(id,fund_id,user_id,requested,amount,funding,request_id)
+              VALUES($1,$2,$3,$4,$5,$6::jsonb,$7)`,
+              [
+                pledgeId,
+                fund.id,
+                context.userId,
+                String(input.amount),
+                String(result.accepted),
+                JSON.stringify(funding),
+                requestKey,
+              ],
+            ),
+        });
+        if (debaters) {
+          const paid = [...pledges, held];
+          await money.assertCenterCovers(
+            client,
+            locked.buckets,
+            debaters,
+            paid,
+          );
+          await client.query(
+            "UPDATE mic_funds SET state='funded' WHERE id=$1",
+            [fund.id],
+          );
+          await money.payDebaters(client, locked.books, locked.buckets, {
+            debateId,
+            micId: fund.micId,
+            key: `fund:${fund.id}`,
+            source: `mic-fund:${fund.id}`,
+            debaters,
+            pledges: paid,
+            scope: { fundId: fund.id },
+            record: (pledge) =>
+              client.query(
+                "UPDATE mic_fund_pledges SET state='paid' WHERE id=$1",
+                [pledge.id],
+              ),
+          });
+        }
+        return {
+          fundId: fund.id,
+          pledgeId,
+          amount: coins(result.accepted),
+          funded: result.funded,
+          created: true,
+        };
+      });
     },
   });
 }

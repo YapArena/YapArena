@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { createMediaRepository } from "../dist/features/media/repository.js";
 import { createMicTurns } from "../dist/features/mic/turns.js";
+import { createMicFunds } from "../dist/features/mic/funds.js";
 import { MicError } from "../dist/features/mic/rules.js";
 import { CoinOperationError } from "../dist/features/account-wallet/external-operations.js";
 
@@ -46,7 +47,9 @@ function fake({ mic = true, maximum = 3600, turn = 1, activeMs = 0 } = {}) {
     mics = [],
     runs = [],
     turns = [],
-    history = [];
+    history = [],
+    funds = [],
+    ends = [];
   const rows = (list = []) => ({ rows: list, rowCount: list.length });
   const micTurnRow = (t) => {
     const m = mics.find((x) => x.id === t.micId);
@@ -153,6 +156,41 @@ function fake({ mic = true, maximum = 3600, turn = 1, activeMs = 0 } = {}) {
       });
       return rows();
     }
+    // PR 3: keep-the-asker-on funds (funds.ts).
+    if (sql.startsWith("SELECT price::text FROM mic_mics"))
+      return rows([{ price: mics.find((m) => m.id === values[0]).price }]);
+    if (sql.startsWith("INSERT INTO mic_funds")) {
+      assert.ok(
+        !funds.some((x) => x.micId === values[1] && x.state === "open"),
+        "one open fund per mic",
+      );
+      funds.push({
+        id: values[0],
+        micId: values[1],
+        turnNumber: values[3],
+        closesAfter: values[4],
+        price: values[5],
+        state: "open",
+      });
+      return rows();
+    }
+    if (sql.startsWith("UPDATE mic_funds SET state='closing'")) {
+      const closing = funds.filter(
+        (x) =>
+          x.micId === values[0] &&
+          x.state === "open" &&
+          x.closesAfter === values[1],
+      );
+      for (const fund of closing) fund.state = "closing";
+      return { rows: [], rowCount: closing.length };
+    }
+    if (sql.startsWith("SELECT state FROM mic_funds"))
+      return rows(
+        funds
+          .filter((x) => x.micId === values[0])
+          .sort((a, b) => b.turnNumber - a.turnNumber)
+          .slice(0, 1),
+      );
     if (sql.startsWith("SELECT count(*)::int AS n FROM mic_turns"))
       return rows([
         { n: turns.filter((t) => t.turnNumber <= values[1]).length },
@@ -217,16 +255,30 @@ function fake({ mic = true, maximum = 3600, turn = 1, activeMs = 0 } = {}) {
       });
       return rows();
     }
-    if (sql.startsWith('SELECT mic_id AS "micId"'))
-      return rows(
-        runs
+    if (sql.startsWith("(SELECT mic_id::text AS key"))
+      return rows([
+        ...runs
           .filter((r) => r.void === "pending")
           .map((r) => ({
-            micId: r.micId,
+            key: r.micId,
+            source: "run",
             debateId: id,
             turnNumber: r.cut.turnNumber,
           })),
-      );
+        ...ends
+          .filter((e) => e.void === "pending")
+          .map((e) => ({
+            key: id,
+            source: "end",
+            debateId: id,
+            turnNumber: e.turnNumber,
+          })),
+      ]);
+    if (sql.startsWith("UPDATE mic_debate_ends SET cut_void")) {
+      const end = ends.find((e) => e.void === "pending");
+      if (end) end.void = values[1];
+      return rows();
+    }
     if (sql.startsWith("UPDATE mic_runs SET cut_void")) {
       const run = runs.find(
         (r) => r.micId === values[0] && r.void === "pending",
@@ -251,7 +303,24 @@ function fake({ mic = true, maximum = 3600, turn = 1, activeMs = 0 } = {}) {
     applied = [],
     logged = [];
   let voidFailure = null;
+  // The money side of keeping the asker on runs on PostgreSQL
+  // (mic-keep-postgres); here the engine only calls it.
+  const settled = [];
   const engine = createMicTurns({
+    funds: {
+      async settleClosing(debateId = null) {
+        settled.push(["closing", debateId]);
+        const closing = funds.filter((x) => x.state === "closing");
+        for (const fund of closing) fund.state = "failed";
+        return closing.length;
+      },
+      async settleEnded() {
+        settled.push(["ended"]);
+        if (event.status === "live" || ends.length) return 0;
+        ends.push({ turnNumber: media.turnNumber, void: "pending" });
+        return 1;
+      },
+    },
     database,
     media: mediaRepository,
     voidTurnWindow: async (...args) => {
@@ -275,6 +344,9 @@ function fake({ mic = true, maximum = 3600, turn = 1, activeMs = 0 } = {}) {
     runs,
     turns,
     history,
+    funds,
+    ends,
+    settled,
     seen,
     voids,
     applied,
@@ -290,6 +362,7 @@ function fake({ mic = true, maximum = 3600, turn = 1, activeMs = 0 } = {}) {
         target: camp === "A" ? "B" : "A",
         holder: asker,
         state,
+        price: "30000",
       });
     },
     later(ms) {
@@ -522,14 +595,20 @@ describe("borrow the microphone in the turn engine", () => {
     f.later(5_000);
     // The fire committed but its start never ran: the worker starts it.
     f.failVoids(new CoinOperationError("busy", 503, "busy"));
-    assert.deepEqual(await f.engine.recover(), { started: 1, voided: 0 });
+    const pass = (started, voided) => ({
+      started,
+      voided,
+      refunded: 0,
+      ended: 0,
+    });
+    assert.deepEqual(await f.engine.recover(), pass(1, 0));
     assert.equal(f.state.turnNumber, 8);
     assert.equal(f.runs[0].void, "pending");
     assert.ok(f.logged.some(([level]) => level === "error"));
     f.failVoids(null);
-    assert.deepEqual(await f.engine.recover(), { started: 0, voided: 1 });
+    assert.deepEqual(await f.engine.recover(), pass(0, 1));
     assert.equal(f.runs[0].void, "done");
-    assert.deepEqual(await f.engine.recover(), { started: 0, voided: 0 });
+    assert.deepEqual(await f.engine.recover(), pass(0, 0));
     assert.equal(f.voids.length, 3);
     assert.equal(f.state.turnNumber, 8);
   });
@@ -545,7 +624,12 @@ describe("borrow the microphone in the turn engine", () => {
     );
     await f.engine.start(id);
     assert.equal(f.runs[0].void, "refused");
-    assert.deepEqual(await f.engine.recover(), { started: 0, voided: 0 });
+    assert.deepEqual(await f.engine.recover(), {
+      started: 0,
+      voided: 0,
+      refunded: 0,
+      ended: 0,
+    });
   });
 
   it("lets only the asker end their own turn early (E1)", async () => {
@@ -612,5 +696,191 @@ describe("borrow the microphone in the turn engine", () => {
       refused(409, /isn't an asker's turn/),
     );
     assert.equal(f.turns[1].text, null);
+  });
+
+  // PR 3: keep the asker on (X).
+  it("opens a fund with the question and closes it unfunded after the follow-up (X1, X2, X7)", async () => {
+    const f = fake({ turn: 7, activeMs: 6 * TURN });
+    f.lists.push({ id: "list", state: "open" });
+    f.fire(micA, "B");
+    await f.engine.start(id);
+    assert.deepEqual(f.funds, [
+      {
+        id: f.funds[0].id,
+        micId: micA,
+        turnNumber: 8,
+        closesAfter: "followup",
+        price: "30000",
+        state: "open",
+      },
+    ]);
+    await f.deadline(); // question ends: still open through the answer
+    assert.equal(f.funds[0].state, "open");
+    await f.deadline(); // answer ends
+    assert.equal(f.current().kind, "followup");
+    assert.equal(f.funds[0].state, "open");
+    // The asker ends their follow-up: the fund closes and is refunded after.
+    await f.engine.endAskerTurn(context(asker), id);
+    assert.equal(f.current().kind, "answer2");
+    assert.deepEqual(f.settled, [["closing", id]]);
+    assert.equal(f.funds[0].state, "failed");
+    await f.deadline();
+    assert.equal(f.current().kind, "resume");
+    assert.equal(f.funds.length, 1, "no extension, no new fund");
+  });
+
+  it("runs funded extensions with their own turns and funds, without a cap (X4, X8, X10, X11)", async () => {
+    const f = fake({ turn: 7, activeMs: 6 * TURN });
+    f.lists.push({ id: "list", state: "open" });
+    f.fire(micA, "B"); // camp B asks debater A
+    await f.engine.start(id);
+    // A pledge reaches the price during the answer (the fund row's own
+    // transaction, repository.ts keep).
+    await f.deadline();
+    f.funds[0].state = "funded";
+    const sequence = [];
+    const step = async () => {
+      const { turns } = await f.deadline();
+      sequence.push([
+        f.state.turnNumber,
+        f.current()?.kind ?? null,
+        f.state.activeSide,
+        turns[0].side,
+      ]);
+    };
+    await step(); // follow-up: a funded fund stays funded at its close
+    assert.equal(f.funds[0].state, "funded");
+    await step(); // answer2
+    await step(); // extension question, its own fund
+    assert.deepEqual(
+      f.funds.map((x) => [x.turnNumber, x.closesAfter, x.state]),
+      [
+        [8, "followup", "funded"],
+        [12, "extq", "open"],
+      ],
+    );
+    f.funds.at(-1).state = "funded";
+    await step(); // extension answer
+    await step(); // a second extension question
+    await step(); // its answer; its fund was never funded
+    await step(); // the resume turn
+    await step(); // debater A's own turn
+    assert.deepEqual(sequence, [
+      [10, "followup", "B", null],
+      [11, "answer2", "A", "A"],
+      [12, "extq", "B", null],
+      [13, "exta", "A", "A"],
+      [14, "extq", "B", null],
+      [15, "exta", "A", "A"],
+      [16, "resume", "B", "B"],
+      [17, null, "A", "A"],
+    ]);
+    assert.deepEqual(
+      f.funds.map((x) => [x.turnNumber, x.closesAfter, x.state]),
+      [
+        [8, "followup", "funded"],
+        [12, "extq", "funded"],
+        [14, "extq", "closing"],
+      ],
+    );
+    assert.equal(f.mics[0].state, "done");
+    // Every extension turn is a full mic turn, off the debate's maximum.
+    assert.deepEqual(
+      f.turns.map((t) => [t.turnNumber, t.kind, t.usedMs]),
+      [
+        [8, "question", TURN],
+        [9, "answer", TURN],
+        [10, "followup", TURN],
+        [11, "answer2", TURN],
+        [12, "extq", TURN],
+        [13, "exta", TURN],
+        [14, "extq", TURN],
+        [15, "exta", TURN],
+        [16, "resume", TURN],
+      ],
+    );
+    assert.ok(f.history.some((line) => /mic extq turn, side B/.test(line)));
+  });
+
+  it("lets the asker show text in and end an extension question", async () => {
+    const f = fake({ turn: 7, activeMs: 6 * TURN });
+    f.lists.push({ id: "list", state: "open" });
+    f.fire(micA, "B");
+    await f.engine.start(id);
+    f.funds[0].state = "funded";
+    for (let step = 0; step < 4; step++) await f.deadline();
+    assert.equal(f.current().kind, "extq");
+    assert.deepEqual(
+      await f.engine.setAskerText(context(asker), id, "One more?"),
+      { turnNumber: 12, text: "One more?" },
+    );
+    assert.deepEqual(await f.engine.endAskerTurn(context(asker), id), {
+      ended: false,
+      side: "A",
+    });
+    assert.equal(f.current().kind, "exta");
+    assert.equal(f.funds[1].state, "failed", "closed, then refunded");
+    await f.deadline();
+    assert.equal(f.current().kind, "resume");
+  });
+
+  it("settles the mic's money once the debate ends and refunds the cut mic turn's window (D7, D9)", async () => {
+    const f = fake({ turn: 7, activeMs: 6 * TURN });
+    f.lists.push({ id: "list", state: "open" });
+    f.fire(micA, "B");
+    await f.engine.start(id);
+    const pass = { started: 0, voided: 0, refunded: 0, ended: 0 };
+    assert.deepEqual(await f.engine.recover(), pass);
+    // An operator ends the debate in the middle of the question turn.
+    f.event.status = "ended";
+    f.failVoids(new CoinOperationError("busy", 503, "busy"));
+    assert.deepEqual(await f.engine.recover(), { ...pass, ended: 1 });
+    assert.deepEqual(f.ends, [{ turnNumber: 8, void: "pending" }]);
+    f.failVoids(null);
+    assert.deepEqual(await f.engine.recover(), { ...pass, voided: 1 });
+    assert.deepEqual(f.ends, [{ turnNumber: 8, void: "done" }]);
+    assert.deepEqual(f.voids.at(-1), [id, 8, "turn_cut"]);
+    assert.deepEqual(await f.engine.recover(), pass);
+    assert.ok(f.settled.filter(([kind]) => kind === "ended").length >= 4);
+  });
+
+  it("logs and retries keep-the-asker-on refunds and end settlements that fail", async () => {
+    const logged = [];
+    const logger = { error: (details, message) => logged.push(message) };
+    const down = createMicFunds({
+      database: {
+        query: async () => {
+          throw new Error("database unavailable");
+        },
+      },
+      rail: "simulation",
+      logger,
+    });
+    assert.equal(await down.settleClosing(), 0);
+    assert.equal(await down.settleEnded(), 0);
+    // The list of due work loads, but each transaction fails: each is
+    // logged and left for the next pass.
+    const busy = createMicFunds({
+      database: {
+        query: async (sql) => ({
+          rows: sql.includes("mic_lists l")
+            ? [{ debateId: id }]
+            : [{ id: micA }],
+        }),
+        connect: async () => {
+          throw new Error("timeout exceeded when trying to connect");
+        },
+      },
+      rail: "simulation",
+      logger,
+    });
+    assert.equal(await busy.settleClosing(id), 0);
+    assert.equal(await busy.settleEnded(), 0);
+    assert.deepEqual(logged, [
+      "keep-the-asker-on refunds failed; retrying",
+      "mic refunds at the end failed; retrying",
+      "keep-the-asker-on refund failed; retrying",
+      "mic refunds at the debate's end failed; retrying",
+    ]);
   });
 });

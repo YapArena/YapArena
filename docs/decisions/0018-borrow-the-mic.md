@@ -1,8 +1,8 @@
 # Decision 0018 — Borrow the microphone
 
 Status: founder decisions, 2026-11-17 to 2026-11-20, tested in a simulator on 2026-11-20. Pull
-requests 1, 2a and 2b are built (see [How it is built](#how-it-is-built)); no debate offers the mic
-yet.
+requests 1, 2a, 2b and 3 are built (see [How it is built](#how-it-is-built)); no debate offers the
+mic yet.
 
 A viewer can put one question and one follow-up to a debater during a live debate, by voice or by
 text. Viewers compete for that right by pledging Yap Coins (YC) to questions; YC spent on a
@@ -78,6 +78,11 @@ The simulator runs these the same way.
   waits; YC paid during an empty seat waits for its next occupant; someone who held a seat never
   trades in that debate again.
 - Amounts are whole YC (10,000 atoms each), so halves are exact.
+- X7, X11, D9 as built: unfunded pledges are refunded by the worker's pass right after the closing
+  turn ends; a fund that reaches its price while a seat is empty is refused, as a fire is; a
+  funded extension that the debate's end stops stays paid; a queued mic is marked done at the
+  end. Only a cut mic turn's window is refunded at the end; a debater's turn cut by an operator's
+  end is not.
 - Until D1 ships, mic turns (the four exchange turns and the resume turn) do not count toward the
   rules' maximum length, so a mic never ends a debate mid-exchange; a mic stays live through its
   resume turn, so a mic fired then queues.
@@ -107,7 +112,11 @@ The [build plan](https://claude.ai/artifact/X3UWh8J7nEAmGSRhGFPjkj) ships in pha
    worker retrying both), each exchange turn and the resume turn get their own turn number and
    window, and the asker can end their turn early or put their text on screen.
 3. The asker's live voice, then the synthetic voice.
-4. Keep the asker on and extensions.
+4. Keep the asker on and extensions. PR 3 is built: a fund opens with each question and extension
+   question at the mic's price, `POST /api/debates/:id/mic/keep` holds whole YC cut to what is
+   left, reaching the price pays the debaters at once and runs an extension question and answer
+   with their own turns and windows, an unfunded fund is refunded after its turn, and every way a
+   debate ends refunds its open questions and funds (migration `1795490000000`).
 5. Votes, extra lists and the end of the fixed length.
 6. Seat replacement.
 

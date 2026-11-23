@@ -10,6 +10,7 @@ import {
   type MediaState,
 } from "../media/repository.ts";
 import { currentMicTurn, insertMicTurn, micOn } from "./engine.ts";
+import type { MicFunds } from "./funds.ts";
 import { askerKind, micTurnSide } from "./turn-kinds.ts";
 import { cutTurn, MicError, MIC_TERMS, type Side } from "./rules.ts";
 
@@ -38,6 +39,9 @@ export function createMicTurns(options: {
   voidTurnWindow: VoidTurnWindow;
   // Applies the debate's durable turn to the speakers' permissions.
   onTurn?: (debateId: string) => Promise<unknown>;
+  // PR 3: refunds unfunded keep-the-asker-on funds and settles the mic's
+  // money of ended debates, each in its own transaction (funds.ts).
+  funds?: Pick<MicFunds, "settleClosing" | "settleEnded">;
   logger: Pick<Logger, "warn" | "error">;
 }) {
   const { database, media, logger } = options;
@@ -148,18 +152,25 @@ export function createMicTurns(options: {
     return { micId: mic.id, cutTurnNumber: state.turnNumber, lostMs };
   }
 
-  // (c) Refunds each cut turn's window not yet refunded. A window whose
-  // settlement has already started is left to settle and recorded as refused.
+  // (c) Refunds each cut turn's window not yet refunded: the turns mics cut
+  // (mic_runs) and the mic turns a debate's end cut (mic_debate_ends). A
+  // window whose settlement has already started is left to settle and
+  // recorded as refused.
   async function voidCuts(debateId: string | null, limit = 20) {
     const due = (
       await database.query<{
-        micId: string;
+        key: string;
+        source: "run" | "end";
         debateId: string;
         turnNumber: number;
       }>(
-        `SELECT mic_id AS "micId", debate_id AS "debateId", cut_turn_number AS "turnNumber"
-        FROM mic_runs WHERE cut_void='pending' AND ($1::uuid IS NULL OR debate_id=$1)
-        ORDER BY started_at, mic_id LIMIT $2`,
+        `(SELECT mic_id::text AS key, 'run' AS source, debate_id AS "debateId",
+          cut_turn_number AS "turnNumber", started_at AS at
+        FROM mic_runs WHERE cut_void='pending' AND ($1::uuid IS NULL OR debate_id=$1))
+        UNION ALL
+        (SELECT debate_id::text, 'end', debate_id, cut_turn_number, settled_at
+        FROM mic_debate_ends WHERE cut_void='pending' AND ($1::uuid IS NULL OR debate_id=$1))
+        ORDER BY at, key LIMIT $2`,
         [debateId, limit],
       )
     ).rows;
@@ -184,8 +195,10 @@ export function createMicTurns(options: {
         outcome = "refused";
       }
       await database.query(
-        "UPDATE mic_runs SET cut_void=$2 WHERE mic_id=$1 AND cut_void='pending'",
-        [cut.micId, outcome],
+        cut.source === "run"
+          ? "UPDATE mic_runs SET cut_void=$2 WHERE mic_id=$1 AND cut_void='pending'"
+          : "UPDATE mic_debate_ends SET cut_void=$2 WHERE debate_id=$1 AND cut_void='pending'",
+        [cut.key, outcome],
       );
       if (outcome === "done") voided++;
     }
@@ -242,8 +255,10 @@ export function createMicTurns(options: {
   return Object.freeze({
     start,
     /**
-     * The worker's recovery pass: starts every live mic whose start did not
-     * happen and refunds every cut turn whose refund did not.
+     * The worker's recovery pass, after each clock pass: starts every live
+     * mic whose start did not happen, refunds every unfunded fund the clock
+     * closed, settles the mic's money of every debate that ended, and
+     * refunds every cut turn's window whose refund did not happen.
      */
     async recover(limit = 20) {
       const pending = (
@@ -260,7 +275,10 @@ export function createMicTurns(options: {
       ).rows;
       let started = 0;
       for (const { debateId } of pending) if (await start(debateId)) started++;
-      return { started, voided: await voidCuts(null, limit) };
+      // X7: unfunded funds the clock closed; D7, D9: debates that ended.
+      const refunded = (await options.funds?.settleClosing(null, limit)) ?? 0;
+      const ended = (await options.funds?.settleEnded(limit)) ?? 0;
+      return { started, voided: await voidCuts(null, limit), refunded, ended };
     },
     /** E1: the asker ends their own turn; the exchange moves on at once. */
     async endAskerTurn(context: SandboxContext, debateId: string) {
@@ -272,6 +290,8 @@ export function createMicTurns(options: {
       });
       if (!result) throw new MicError("the debate isn't running");
       await applied(debateId);
+      // X7: ending the asker's last turn of a segment may have closed a fund.
+      await options.funds?.settleClosing(debateId);
       return result.ended
         ? { ended: true }
         : { ended: false, side: result.turn.side };
