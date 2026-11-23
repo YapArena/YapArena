@@ -8,9 +8,15 @@ import {
   coins,
   confirmText,
   debatesHere,
+  decimalShare,
+  duelsText,
+  isDuel,
   liveWindow,
   percent,
   placementError,
+  presenceDue,
+  PRESENCE_MS,
+  returnedText,
   waitText,
   positionStatus,
   price,
@@ -513,5 +519,162 @@ describe("placement refusals in the panel's words", () => {
       }).text,
       "You don't have enough Yap Coins for this size. Nothing was reserved.",
     );
+  });
+});
+
+describe("forecast duel windows (Decision 0017)", () => {
+  const duelRound = (overrides = {}) =>
+    round({
+      terms: { rule: "fd-v1" },
+      own: { side: "YES", limit: "0.600000", quantity: 10, requestId: "q" },
+      ...overrides,
+    });
+  const settled = (duels, outcome) =>
+    duelRound({
+      state: "settled",
+      pricing: {
+        share: duels.share,
+        a: null,
+        b: null,
+        price: null,
+        branch: "duels",
+        reason: duels.status,
+      },
+      duels,
+      outcome,
+    });
+  const summary = (status, share = { n: "2", d: "3" }) => ({
+    rule: "fd-v1",
+    status,
+    viewers: status === "returned_few_viewers" ? 7 : 12,
+    tickets: 6,
+    share: status === "settled" ? share : null,
+    crowd: status === "settled" ? { n: "63", d: "100" } : null,
+    verdict: status === "settled" ? "YES" : null,
+  });
+
+  it("knows a duel window by its rule", () => {
+    assert.equal(isDuel({ rule: "fd-v1" }), true);
+    assert.equal(isDuel({ terms: { rule: "fd-v1" } }), true);
+    assert.equal(isDuel({ rule: "a4-v1" }), false);
+    assert.equal(isDuel({}), false);
+    assert.equal(isDuel(null), false);
+  });
+
+  it("names the whole size at stake on the ticket, whatever the read", () => {
+    const ticket = {
+      side: "NO",
+      size: 25,
+      cents: 42,
+      turnNumber: 7,
+      closedTurn: null,
+    };
+    assert.equal(confirmText(ticket), "Place No · 25 · max 10.50 YC");
+    assert.equal(
+      confirmText({ ...ticket, duel: true }),
+      "Place No · 25 · max 25 YC",
+    );
+    assert.equal(
+      confirmText({ ...ticket, duel: true, closedTurn: 6 }),
+      "Use for turn 7 · No · 25 · max 25 YC",
+    );
+  });
+
+  it("words a settled duel result by the read, not the side", () => {
+    assert.equal(decimalShare("0.540000").n, "540000");
+    const won = settled(summary("settled"), {
+      executed: true,
+      premium: "100000",
+      fee: "0",
+      payout: "131325",
+      net: "31325",
+      duelsWon: 3,
+      duelsLost: 2,
+    });
+    assert.equal(
+      resultLine(won),
+      "Turn 2 · Yes · 10 · read 60% · 67% said yes · your read beat 3 of 5 · +3.13 YC",
+    );
+    assert.equal(
+      positionStatus(won, () => ""),
+      "Settled: +3.13 YC",
+    );
+    assert.equal(duelsText({}), "your read beat 0 of 0");
+  });
+
+  it("says why a duel window returned every stake", () => {
+    const outcome = {
+      executed: false,
+      premium: "0",
+      fee: "0",
+      payout: "100000",
+      net: "0",
+    };
+    const few = settled(summary("returned_few_viewers"), outcome);
+    assert.equal(
+      resultLine(few),
+      "Turn 2 · Yes · 10 · read 60% · stakes returned",
+    );
+    assert.equal(
+      positionStatus(few, () => ""),
+      "Stakes returned",
+    );
+    const small = settled(summary("returned_small_room"), outcome);
+    assert.equal(
+      positionStatus(small, () => ""),
+      "Returned: fewer than 5 answers",
+    );
+    assert.equal(returnedText(summary("settled")), null);
+    assert.equal(returnedText(null), null);
+    assert.equal(
+      positionStatus(
+        round({ state: "void", voidReason: "turn_cut" }),
+        () => "",
+      ),
+      "Voided · refunded (the turn was cut short)",
+    );
+  });
+
+  it("sends the presence heartbeat only for a live duel window", () => {
+    const state = (overrides = {}) => ({
+      eventStatus: "live",
+      signedIn: true,
+      session: true,
+      debater: false,
+      hidden: false,
+      window: { id: "w3", rule: "fd-v1" },
+      last: null,
+      now: 100_000,
+      ...overrides,
+    });
+    assert.equal(PRESENCE_MS, 20_000);
+    assert.equal(presenceDue(state()), true);
+    // Every 20 seconds, and at once when a new window opens.
+    const sent = { at: 90_000, windowId: "w3" };
+    assert.equal(presenceDue(state({ last: sent })), false);
+    assert.equal(presenceDue(state({ last: sent, now: 110_000 })), true);
+    assert.equal(
+      presenceDue(state({ last: { at: 99_000, windowId: "w2" } })),
+      true,
+    );
+    // Never signed out, before the balance loads, for a debater, from a
+    // hidden page, between windows, for an A4 window or once not live.
+    for (const overrides of [
+      { signedIn: false },
+      { signedIn: null },
+      { session: false },
+      { debater: true },
+      { hidden: true },
+      { window: null },
+      { window: { id: "w3", rule: "a4-v1" } },
+      { window: { id: "w3" } },
+      { eventStatus: "ended" },
+      { eventStatus: undefined },
+    ])
+      assert.equal(
+        presenceDue(state(overrides)),
+        false,
+        JSON.stringify(overrides),
+      );
   });
 });
