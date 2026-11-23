@@ -204,9 +204,13 @@ const replayable = (round: string, debate: string, clock: string) =>
     AND ${debate}.live_ended_at+INTERVAL '${REVEAL_CLOSE_HOURS} hours'>clock_timestamp()
     AND ${clock}.started_at IS NOT NULL)`;
 // True when a round takes live orders: before its cutoff and, for a turn
-// window, while its debate is still live.
+// window, while its debate is still live and its turn is still the running
+// one. A turn that ends early (an asker who stops, Decision 0017) stops its
+// window's orders at once; the window still settles at its own cutoff.
 const liveAccepting = (round: string, debate: string) =>
-  `(clock_timestamp()<${round}.closes_at AND (${round}.turn_number IS NULL OR ${debate}.status='live'))`;
+  `(clock_timestamp()<${round}.closes_at AND (${round}.turn_number IS NULL OR (${debate}.status='live'
+    AND EXISTS (SELECT 1 FROM debate_media lm WHERE lm.debate_id=${round}.debate_id
+      AND lm.turn_number=${round}.turn_number))))`;
 // The replayable() conditions without the recording clock.
 const replayableUntimed = (round: string, debate: string) =>
   `(${round}.state='open' AND ${round}.turn_number IS NOT NULL AND ${round}.reveal_mode='five_day'
@@ -1287,11 +1291,15 @@ export function createCoinDebateSandbox(
           // Decision 0012: during a live debate the current speaking turn's
           // window is the only round to join; no five-minute round opens.
           const window =
+            // The running turn's window only: one whose turn ended early
+            // takes no more orders, though it stays open to its cutoff.
             (
               await client.query<{ id: string }>(
-                `SELECT id FROM coin_debate_rounds WHERE debate_id=$1 AND rail=$2
-                AND turn_number IS NOT NULL AND state='open' AND closes_at>clock_timestamp()
-                ORDER BY turn_number DESC LIMIT 1`,
+                `SELECT r.id FROM coin_debate_rounds r
+                JOIN debate_media m ON m.debate_id=r.debate_id AND m.turn_number=r.turn_number
+                WHERE r.debate_id=$1 AND r.rail=$2
+                AND r.state='open' AND r.closes_at>clock_timestamp()
+                LIMIT 1`,
                 [debateId, rail],
               )
             ).rows.map((row) => ({ id: row.id, created: false }))[0] ??

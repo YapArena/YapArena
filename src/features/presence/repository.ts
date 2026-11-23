@@ -48,9 +48,11 @@ export async function recordViewer(
 }
 
 /**
- * Records the account as present in every duel turn window of the debate that
- * is open now. Placing a ticket counts as presence too. Callers hold those
- * windows' round locks shared, so settlement never counts mid-insert.
+ * Records the account as present in the duel window of the debate's running
+ * turn, while it is open. A window whose turn ended early takes no more
+ * viewers, like it takes no more orders. Placing a ticket counts as presence
+ * too. Callers hold the open windows' round locks shared, so settlement never
+ * counts mid-insert.
  */
 export async function recordWindowViewer(
   client: PoolClient,
@@ -63,6 +65,8 @@ export async function recordWindowViewer(
     WHERE r.debate_id=$1 AND r.turn_number IS NOT NULL AND r.state='open'
       AND r.terms->>'rule'='fd-v1'
       AND clock_timestamp()>=r.opens_at AND clock_timestamp()<r.closes_at
+      AND EXISTS (SELECT 1 FROM debate_media m
+        WHERE m.debate_id=r.debate_id AND m.turn_number=r.turn_number)
     ON CONFLICT (round_id,user_id) DO NOTHING`,
     [debateId, userId],
   );

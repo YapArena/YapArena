@@ -266,7 +266,9 @@ export function speakerLine(
 /**
  * The window taking live orders at the server-adjusted time, if any. A
  * debate that is no longer live takes no live orders, even before a
- * window's cutoff.
+ * window's cutoff. When a turn ended early its window is still open until its
+ * cutoff, but only the running turn's window takes orders, so the newest
+ * open window is the one shown.
  */
 export function liveWindow(
   windows: readonly PublicWindow[],
@@ -274,14 +276,16 @@ export function liveWindow(
   eventStatus = "live",
 ) {
   if (eventStatus !== "live") return null;
-  return (
-    windows.find(
-      (window) =>
-        window.state === "open" &&
-        Date.parse(window.opensAt) <= serverNow &&
-        serverNow < Date.parse(window.closesAt),
-    ) ?? null
-  );
+  let newest: PublicWindow | null = null;
+  for (const window of windows)
+    if (
+      window.state === "open" &&
+      Date.parse(window.opensAt) <= serverNow &&
+      serverNow < Date.parse(window.closesAt) &&
+      (newest === null || window.turnNumber > newest.turnNumber)
+    )
+      newest = window;
+  return newest;
 }
 
 /** The turn window whose recording span holds a replay position, if any. */

@@ -183,6 +183,13 @@ describe("betting panel terms (Decision 0013)", () => {
     // The cutoff itself is closed, as on the server.
     assert.equal(liveWindow(windows, at(121).getTime()), null);
     assert.equal(liveWindow(windows, at(150).getTime()), null);
+    // A turn that ended early keeps its window open until its cutoff; only
+    // the running (newest) turn's window takes orders, so it is shown.
+    const early = [window(4, 0, 60), window(5, 20, 80), window(6, 90, 150)];
+    assert.equal(liveWindow(early, at(10).getTime())?.id, "w4");
+    assert.equal(liveWindow(early, at(30).getTime())?.id, "w5");
+    assert.equal(liveWindow([...early].reverse(), at(30).getTime())?.id, "w5");
+    assert.equal(liveWindow(early, at(70).getTime())?.id, "w5");
   });
 
   it("targets the replay window whose recording span holds the position", () => {
