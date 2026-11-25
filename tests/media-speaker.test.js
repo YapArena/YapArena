@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { it } from "node:test";
 
-import { joinSpeaker } from "../public/media-speaker.js";
+import {
+  joinSpeaker,
+  SPEAKER_CAMERA,
+  speakerCameraOptions,
+} from "../public/media-speaker.js";
 
 it("keeps deliberately muted rejoining from capturing the microphone", async () => {
   const paths = [];
@@ -249,4 +253,54 @@ it("keeps a checked microphone muted until its turn and stops it if joining fail
     /Could not open camera/,
   );
   assert.equal(failedMicrophone.stopped, true);
+});
+
+it("opens every speaker camera in the stage's 8:9 shape on the chosen device", async () => {
+  assert.equal(SPEAKER_CAMERA.width / SPEAKER_CAMERA.height, 8 / 9);
+  assert.equal(SPEAKER_CAMERA.aspectRatio, 8 / 9);
+  assert.deepEqual(speakerCameraOptions(), { resolution: SPEAKER_CAMERA });
+  let cameraOptions;
+  let shown;
+  await joinSpeaker({
+    button: {},
+    devices: { videoinput: "front-camera" },
+    microphoneWanted: false,
+    mediaDevices: {
+      async getUserMedia() {
+        return {
+          getVideoTracks: () => [{ stop() {} }],
+          getAudioTracks: () => [],
+          getTracks: () => [{ stop() {} }],
+        };
+      },
+    },
+    async request(path) {
+      return path === "/speaker-token"
+        ? { token: "synthetic", url: "wss://synthetic.example", side: "B" }
+        : { eventStatus: "live", state: { state: "running" } };
+    },
+    connect: async () => ({
+      localParticipant: {
+        identity: "speaker-2",
+        async setCameraEnabled(enabled, options) {
+          assert.equal(enabled, true);
+          cameraOptions = options;
+          return { track: { kind: "video" } };
+        },
+      },
+    }),
+    tracks: {
+      attach(...args) {
+        shown = args.slice(1);
+      },
+    },
+    setSide() {},
+    refresh: async () => {},
+  });
+  assert.deepEqual(cameraOptions, {
+    resolution: SPEAKER_CAMERA,
+    deviceId: { exact: "front-camera" },
+  });
+  // The speaker's own tile is marked as their mirror view.
+  assert.deepEqual(shown, ["speaker-2", "B", true]);
 });
