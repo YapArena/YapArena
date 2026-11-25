@@ -1163,6 +1163,10 @@ textarea::placeholder {
   border-radius: 0;
   background: var(--raised);
 }
+/* A speaker's own camera, on their own screen only, reads like a mirror. */
+.arena-page .arena-video-surface .media-videos video[data-self] {
+  transform: scaleX(-1);
+}
 .arena-page .arena-video-surface .media-videos > audio {
   display: none;
 }

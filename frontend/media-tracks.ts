@@ -55,6 +55,9 @@ export function createMediaTracks(
       track: AttachedTrack,
       identity: string,
       side: TrackSide | null = null,
+      // The speaker's own camera on their own screen. CSS mirrors it, like a
+      // phone's selfie preview; what others see and the recording stay true.
+      self = false,
     ) {
       if (
         (track.kind !== "video" && track.kind !== "audio") ||
@@ -67,6 +70,7 @@ export function createMediaTracks(
       const node = track.attach();
       node.dataset.participant = identity;
       if (side) node.dataset.side = side;
+      if (self && track.kind === "video") node.dataset.self = "";
       node.autoplay = true;
       if (track.kind === "video") node.setAttribute("playsinline", "");
       attached.set(track, {

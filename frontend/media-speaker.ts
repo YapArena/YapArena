@@ -2,6 +2,28 @@ import type { Room } from "livekit-client";
 import type { createMediaTracks } from "./media-tracks.js";
 import type { DeviceChoices, MediaRequest, Side } from "./media-types.js";
 
+/**
+ * Every speaker's camera is captured in one shape: 8:9, the shape of a side's
+ * half of the 16:9 stage on computers and phones and of its half of the
+ * recording. A phone held upright and a laptop then send the same framing, so
+ * the picture a speaker sees of themselves is the one everyone else gets.
+ * The values are ideals: a browser that cannot crop sends its nearest mode,
+ * and each box still crops it to fill (`object-fit: cover`).
+ */
+export const SPEAKER_CAMERA = {
+  width: 720,
+  height: 810,
+  frameRate: 30,
+  aspectRatio: 8 / 9,
+} as const;
+
+export function speakerCameraOptions(deviceId?: string) {
+  return {
+    resolution: { ...SPEAKER_CAMERA },
+    ...(deviceId ? { deviceId: { exact: deviceId } } : {}),
+  };
+}
+
 export async function joinSpeaker({
   button,
   mediaDevices,
@@ -85,13 +107,11 @@ export async function joinSpeaker({
     const participant = connectedRoom.localParticipant;
     const camera = await participant.setCameraEnabled(
       true,
-      devices.videoinput
-        ? { deviceId: { exact: devices.videoinput } }
-        : undefined,
+      speakerCameraOptions(devices.videoinput),
     );
     if (!camera?.track) throw new Error("Could not open camera");
     assertCurrent();
-    tracks.attach(camera.track, participant.identity, grant.side);
+    tracks.attach(camera.track, participant.identity, grant.side, true);
     setSide(grant.side);
 
     const joined = await request("");

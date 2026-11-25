@@ -135,3 +135,26 @@ it("reads a speaker's side from its token metadata", () => {
   assert.equal(sideFromMetadata(undefined), null);
   assert.equal(sideFromMetadata("null"), null);
 });
+
+it("marks only the speaker's own camera as a mirrored self view", () => {
+  const container = fakeContainer();
+  const tracks = createMediaTracks(container);
+  const own = fakeTrack(container);
+  const ownMicrophone = fakeTrack(container, "audio");
+  const other = fakeTrack(container);
+
+  tracks.attach(own, "speaker-a", "A", true);
+  tracks.attach(ownMicrophone, "speaker-a", "A", true);
+  tracks.attach(other, "speaker-b", "B");
+  const [ownNode, otherNode, microphoneNode] = [
+    container.nodes.find(
+      (node) =>
+        node.dataset.participant === "speaker-a" && node.tagName === "VIDEO",
+    ),
+    container.nodes.find((node) => node.dataset.participant === "speaker-b"),
+    container.nodes.find((node) => node.tagName === "AUDIO"),
+  ];
+  assert.equal(ownNode.dataset.self, "");
+  assert.equal("self" in otherNode.dataset, false);
+  assert.equal("self" in microphoneNode.dataset, false);
+});
