@@ -192,18 +192,23 @@ describe("public discovery", () => {
     const unavailable = () => {
       throw new Error("database unavailable");
     };
-    const shell = express().use(
-      createDiscoveryRouter({
-        discovery: {
-          ...discovery,
-          listTopics: unavailable,
-          listDebates: unavailable,
-          listWatchableDebates: unavailable,
-        },
-        mediaEnabled: true,
-        applicationOrigin: "https://arena.example",
-      }),
-    );
+    const shell = express()
+      .use((request, _response, next) => {
+        request.log = { error() {} };
+        next();
+      })
+      .use(
+        createDiscoveryRouter({
+          discovery: {
+            ...discovery,
+            listTopics: unavailable,
+            listDebates: unavailable,
+            listWatchableDebates: unavailable,
+          },
+          mediaEnabled: true,
+          applicationOrigin: "https://arena.example",
+        }),
+      );
     const home = await request(shell).get("/home");
     assert.equal(home.status, 503);
     assert.match(home.text, /class="container home-list"/);

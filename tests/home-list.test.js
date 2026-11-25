@@ -670,21 +670,33 @@ describe("the home and topic routes", () => {
     assert.equal((home.text.match(/data-home-key="33333333/g) ?? []).length, 1);
   });
 
-  it("fails as one state and retires the reference sample", async () => {
-    const broken = express().use(
-      createDiscoveryRouter({
-        discovery: {
-          listDebates: async () => {
-            throw new Error("offline");
+  it("fails as one state, logs why and retires the reference sample", async () => {
+    const logged = [];
+    const broken = express()
+      .use((request, _response, next) => {
+        // Stands in for pino-http's request logger.
+        request.log = { error: (...args) => logged.push(args) };
+        next();
+      })
+      .use(
+        createDiscoveryRouter({
+          discovery: {
+            listDebates: async () => {
+              throw new Error("offline");
+            },
           },
-        },
-        homepageReferenceEnabled: true,
-        applicationOrigin: origin,
-      }),
-    );
+          homepageReferenceEnabled: true,
+          applicationOrigin: origin,
+        }),
+      );
     const failed = await request(broken).get("/home");
     assert.equal(failed.status, 503);
     assert.match(failed.text, /Discovery temporarily unavailable/);
+    // The reader sees only the state; the log keeps the cause.
+    assert.doesNotMatch(failed.text, /offline/);
+    assert.equal(logged.length, 1);
+    assert.equal(logged[0][1], "home debate list failed");
+    assert.equal(logged[0][0].error.message, "offline");
     assert.equal((await request(broken).get("/home?reference=1")).status, 404);
   });
 
