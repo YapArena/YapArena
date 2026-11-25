@@ -111,17 +111,22 @@ it("adapts public topics/debates without manufacturing market histories or argum
 });
 it("retires the reference sample with the old home and never falls back to it on a real request failure", async () => {
   const app = (enabled) =>
-    express().use(
-      createDiscoveryRouter({
-        discovery: {
-          listTopics: async () => {
-            throw Error("offline");
+    express()
+      .use((request, _response, next) => {
+        request.log = { error() {} };
+        next();
+      })
+      .use(
+        createDiscoveryRouter({
+          discovery: {
+            listTopics: async () => {
+              throw Error("offline");
+            },
           },
-        },
-        homepageReferenceEnabled: enabled,
-        applicationOrigin: "https://arena.example",
-      }),
-    );
+          homepageReferenceEnabled: enabled,
+          applicationOrigin: "https://arena.example",
+        }),
+      );
   assert.equal(
     (await request(app(false)).get("/home?reference=1")).status,
     404,

@@ -369,7 +369,9 @@ export function createDiscoveryRouter({
         response,
         renderHome(origin, await homeListData(), emailFirst),
       );
-    } catch {
+    } catch (error) {
+      // The page only says discovery is unavailable; the log keeps the cause.
+      request.log.error({ error }, "home debate list failed");
       return html(
         response,
         renderHome(origin, emptyHomeList(new Date(), false), emailFirst),
