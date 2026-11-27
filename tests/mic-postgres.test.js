@@ -259,7 +259,7 @@ describe(
       error.status === status && pattern.test(error.message);
 
     it("holds a wager and a pledge from the pledger's own coins, grant coins first", async () => {
-      const { debateId } = await liveDebate();
+      const { debateId, debaters } = await liveDebate();
       const author = await viewer(debateId, { cash: "1000000" }),
         buyer = await viewer(debateId, { grant: false, cash: "1000000" }),
         mixed = await viewer(debateId, { cash: "1000000" });
@@ -297,6 +297,28 @@ describe(
       assert.equal(question.total, 2555);
       assert.equal(question.pledges, 3);
       assert.deepEqual(question.adds, [{ text: "Ask it twice", by: null }]);
+      // The interface's reads. This debate's rules snapshot carries no mic
+      // switch, and it has run no mic turn.
+      assert.equal(view.enabled, false);
+      assert.deepEqual(view.turns, []);
+      // Each viewer's own part: their held pledges, with the ids a
+      // withdrawal names; a seated debater is told so.
+      const held = (own) =>
+        own.pledges.map((p) => [p.id, p.questionId, p.amount, p.wager]);
+      const mine = await mic.readOwn(debateId, mixed.userId);
+      assert.equal(mine.seated, false);
+      assert.equal(mine.pledges.length, 1);
+      assert.deepEqual(held(mine)[0].slice(1), [asked.questionId, 2550, false]);
+      assert.deepEqual(mine.mics, []);
+      assert.equal(mine.kept, null);
+      assert.deepEqual(held(await mic.readOwn(debateId, author.userId)), [
+        [asked.pledgeId, asked.questionId, 3, true],
+      ]);
+      const seated = await mic.readOwn(debateId, debaters.A.userId);
+      assert.equal(seated.seated, true);
+      assert.deepEqual(seated.pledges, []);
+      assert.equal(await mic.readOwn(randomUUID(), author.userId), null);
+      assert.equal(await mic.readOwn("not-a-debate", author.userId), null);
       // An over-reach holds nothing.
       await assert.rejects(
         back(buyer, debateId, asked.questionId, 1000),

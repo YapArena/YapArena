@@ -26,6 +26,11 @@ const community = await import("../dist/features/community/web.js");
 const legal = await import("../dist/features/discovery/legal-web.js");
 const { emptyEndorsementView, endorsementView } =
   await import("./endorsement-fixtures.js");
+const profileB = {
+  handle: "morgan-lee",
+  displayName: "Morgan Lee",
+  avatarId: "yap-frog",
+};
 const { renderMeasurementDashboard } =
   await import("../dist/features/measurement/web.js");
 
@@ -197,6 +202,160 @@ it("renders a debate", (t) => {
     );
   snapshot(t, withBar({ ...counted, status: "live" }));
   snapshot(t, withBar({ ...counted, status: "replay", sideAIsYes: false }));
+  // Decision 0018: the mic's tab, panel, band and phone sheet on a debate
+  // that can still run one; a replay only loads the script. Decision 0017:
+  // "How results work" explains forecast duels with the duel switch on.
+  const withMic = (value, duels = false) =>
+    web.renderDebate(
+      origin,
+      value,
+      false,
+      null,
+      false,
+      undefined,
+      undefined,
+      false,
+      true,
+      duels,
+    );
+  snapshot(t, withMic({ ...debate, status: "live", speakerB: profileB }, true));
+  snapshot(t, withMic({ ...debate, status: "replay" }));
+});
+
+it("shows the mic only on a debate that can still run one, with the switch on", () => {
+  const page = (status, mic, duels = false) =>
+    String(
+      web.renderDebate(
+        origin,
+        { ...debate, status, speakerB: profileB },
+        false,
+        null,
+        false,
+        undefined,
+        undefined,
+        false,
+        mic,
+        duels,
+      ),
+    );
+  for (const status of ["scheduled", "live"]) {
+    const on = page(status, true);
+    assert.match(on, /data-mic="true"/);
+    assert.match(on, /id="arena-tab-mic"[^>]* hidden>Mic/);
+    assert.match(on, /id="arena-mic" data-mic-panel/);
+    assert.match(on, /data-watch-open="mic"[^>]* hidden>/);
+    assert.match(on, /data-watch-sheet="mic"/);
+    assert.match(on, /data-mic-band hidden/);
+    assert.match(on, /data-mic-incoming aria-hidden="true" hidden/);
+    assert.match(on, /assets\/mic\.css/);
+    assert.match(on, /assets\/mic\.js/);
+    // Each debater's first name heads their list, with its own Ask key.
+    assert.match(on, /id="mic-camp-A"><span>For Alex</);
+    assert.match(on, /id="mic-camp-B"><span>For Morgan</);
+    assert.match(on, /data-mic-ask-open hidden>Ask Morgan</);
+    // The phone full screen's invitation names both.
+    assert.match(
+      on,
+      /data-mic-invite hidden>.*Ask Alex or Morgan your question/,
+    );
+    const off = page(status, false);
+    for (const part of ["data-mic", "arena-tab-mic", "mic.css", "mic.js"])
+      assert.equal(off.includes(part), false, part);
+  }
+  // A replay names its mic turns from the script and shows no list.
+  const replay = page("replay", true);
+  assert.match(replay, /data-mic="true"/);
+  assert.match(replay, /assets\/mic\.js/);
+  for (const part of ["arena-tab-mic", "data-mic-panel", "mic.css"])
+    assert.equal(replay.includes(part), false, part);
+  // The right panel's order: Chat (where it is a tab), Mic, Results, About.
+  const live = page("live", true);
+  const at = (tab) => live.indexOf(`id="arena-tab-${tab}"`);
+  assert.ok(at("chat") < at("mic"));
+  assert.ok(at("mic") < at("results"));
+  assert.ok(at("results") < at("about"));
+});
+
+it("puts the debaters and the clock over the video, and the viewer's results with the results", () => {
+  const page = String(
+    web.renderDebate(origin, { ...debate, status: "live", speakerB: profileB }),
+  );
+  // A name tag for each debater and a timer, inside the video surface.
+  const surface = page.slice(
+    page.indexOf("data-arena-video"),
+    page.indexOf('class="media-status-row"'),
+  );
+  assert.match(surface, /data-stage-tag="A">.*Alex Public/);
+  assert.match(surface, /data-stage-tag="B">.*Morgan Lee/);
+  assert.match(surface, /data-stage-clock role="timer"/);
+  assert.match(page, /assets\/stage-hud\.js/);
+  // The viewer's own results and positions sit in Results, not under Yes
+  // and No.
+  const panel = page.slice(
+    page.indexOf("data-stake-panel"),
+    page.indexOf("data-insight"),
+  );
+  assert.equal(panel.includes("data-stake-results"), false);
+  assert.equal(panel.includes("data-stake-positions-wrap"), false);
+  const results = page.slice(page.indexOf('id="arena-results"'));
+  assert.ok(results.includes("data-stake-results"));
+  assert.ok(results.includes("data-stake-positions-wrap"));
+});
+
+it("marks the page to start watching as it opens only with the switch on", () => {
+  const page = (autoWatch) =>
+    String(
+      web.renderDebate(
+        origin,
+        { ...debate, status: "live" },
+        false,
+        null,
+        false,
+        undefined,
+        undefined,
+        false,
+        false,
+        false,
+        autoWatch,
+      ),
+    );
+  assert.match(page(true), / data-media-autowatch /);
+  assert.equal(page(false).includes("data-media-autowatch"), false);
+  assert.equal(
+    String(web.renderDebate(origin, debate)).includes("data-media-autowatch"),
+    false,
+  );
+});
+
+it("explains results by the rule a debate's windows settle under", () => {
+  const page = (status, duels) =>
+    String(
+      web.renderDebate(
+        origin,
+        { ...debate, status },
+        false,
+        null,
+        false,
+        undefined,
+        undefined,
+        false,
+        false,
+        duels,
+      ),
+    );
+  const a4 = /data-results-rule="a4">Each turn, a Yes contract/;
+  const duelsShown =
+    /data-results-rule="duels">Each turn, you answer Yes or No/;
+  assert.match(page("live", false), a4);
+  assert.match(page("live", false), /data-results-rule="duels" hidden>/);
+  assert.match(page("live", true), duelsShown);
+  assert.match(page("live", true), /data-results-rule="a4" hidden>/);
+  assert.match(page("scheduled", true), duelsShown);
+  // The phone's hint about the price draw goes with A4 windows.
+  assert.match(page("live", true), /data-price-hint hidden>/);
+  assert.match(page("live", false), /data-price-hint> · tap a turn/);
+  // A replay keeps A4's words until the page reads its windows' rule.
+  assert.match(page("replay", true), a4);
 });
 
 it("shows the last-answer bar only for a counted debate with turn windows on", () => {

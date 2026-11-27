@@ -31,7 +31,7 @@ import { mediaPresentation } from "./media-presentation.js";
 import { speakerButtonState, stopMediaSession } from "./media-session.js";
 import { joinSpeaker } from "./media-speaker.js";
 import { createMediaTracks, sideFromMetadata } from "./media-tracks.js";
-import type { TurnDetail } from "./debate-layout-model.js";
+import { speakingSide, type TurnDetail } from "./debate-layout-model.js";
 import {
   createDeadlineFollower,
   createSignalRefresh,
@@ -738,6 +738,8 @@ if (root) {
       viewerButton.hidden = !live || speakerConnected || Boolean(room);
       updateSpeakerButton();
       replay.hidden = !presentation.replayVisible;
+      // A debate that goes live while the page is open is watched at once.
+      void Promise.resolve().then(autoWatch);
       if (!room && !recovery.intent && video.hidden) say(presentation.message);
       if (live && !preparationStarted) {
         preparationStarted = true;
@@ -783,7 +785,8 @@ if (root) {
           recovery.intent === "speaker" &&
           live &&
           result.state?.state === "running" &&
-          result.state.activeSide === side;
+          // Decision 0018: no debater speaks in a viewer's own mic turn.
+          speakingSide(result.state) === side;
         if (microphoneChange) await microphoneChange.catch(() => {});
         if (preparedMicrophone?.readyState === "ended")
           stopPreparedMicrophone();
@@ -811,7 +814,7 @@ if (root) {
                 room === publishingRoom &&
                 microphoneWanted &&
                 currentState?.state === "running" &&
-                currentState?.activeSide === side &&
+                speakingSide(currentState) === side &&
                 Boolean(
                   publishingRoom.localParticipant.permissions?.canPublishSources?.includes(
                     Track.sourceToProto(Track.Source.Microphone),
@@ -837,7 +840,7 @@ if (root) {
                 !microphoneWanted ||
                 recovery.intent !== "speaker" ||
                 currentState?.state !== "running" ||
-                currentState?.activeSide !== side ||
+                speakingSide(currentState) !== side ||
                 !changingRoom.localParticipant.permissions?.canPublishSources?.includes(
                   Track.sourceToProto(Track.Source.Microphone),
                 ))
@@ -895,6 +898,9 @@ if (root) {
       eventStatus: eventStatus ?? "",
       state: currentState?.state ?? null,
       activeSide: currentState?.activeSide ?? null,
+      ...(currentState?.speakingSide === undefined
+        ? {}
+        : { speakingSide: currentState.speakingSide }),
       turnNumber: currentState?.turnNumber ?? null,
       turnDeadlineAt: currentState?.turnDeadlineAt ?? null,
       serverOffset,
@@ -934,6 +940,7 @@ if (root) {
       replayPlayer.background();
     }
     if (!document.hidden) {
+      autoWatch();
       replayPlayer.online();
       void refresh();
       pollStatus();
@@ -968,6 +975,38 @@ if (root) {
       if (data?.roles?.includes("operator")) operator.hidden = false;
     })
     .catch(() => {});
+  // Founder, 2026-11-25: opening a debate is watching it. A live debate is
+  // joined as a viewer as soon as the page knows it is live, and a replay
+  // starts, without pressing Join as viewer or Play replay: once for each
+  // page, from a visible tab, and never for a seated debater, who joins
+  // with their camera. The browser may still hold the sound until a tap
+  // ("Enable sound"), or refuse to start a replay that was not tapped; the
+  // buttons stay for that. On a phone the same press opens the full screen
+  // (frontend/watch-screen.ts).
+  const autoWatchOn = "mediaAutowatch" in root.dataset;
+  let autoWatched = false,
+    seatRead = false,
+    openedOnReplay = false;
+  function autoWatch() {
+    if (!autoWatchOn || autoWatched || !seatRead || disposed || document.hidden)
+      return;
+    if (eventStatus === "live") {
+      if (
+        seatSide !== undefined ||
+        room ||
+        recovery.intent ||
+        viewerButton.hidden ||
+        viewerJoining ||
+        joiningSpeaker
+      )
+        return;
+      autoWatched = true;
+      viewerButton.click();
+    } else if (openedOnReplay && !replay.hidden) {
+      autoWatched = true;
+      replay.click();
+    }
+  }
   void (async () => {
     try {
       const seat = await request("/speaker-seat");
@@ -996,6 +1035,11 @@ if (root) {
       diagnostics.start("speaker", preparationComplete);
       scheduleReconnect();
     }
+    // A page opened on a replay plays it; one that becomes a replay while
+    // the viewer sits on it waits for Play replay.
+    openedOnReplay = !replay.hidden;
+    seatRead = true;
+    autoWatch();
   })();
   let pollTimer: number | undefined;
   let streamLive = false;

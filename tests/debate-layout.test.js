@@ -163,3 +163,153 @@ describe("chat author colours", () => {
     assert.equal(authorTint(""), authorTint(""));
   });
 });
+
+// Decision 0018: a mic's turns on the scoreboard.
+describe("debate scoreboard with a mic", () => {
+  const mic = (turnNumber, kind) => ({
+    turnNumber,
+    micId: "mic-1",
+    kind,
+    asker: "zoe",
+    target: "B",
+    text: null,
+  });
+  const micTurns = [
+    mic(4, "question"),
+    mic(5, "answer"),
+    mic(6, "followup"),
+    mic(7, "answer2"),
+    mic(8, "resume"),
+  ];
+
+  it("shows nobody speaking while a viewer asks, and the debater asked as next", () => {
+    // The clock's side in the asker's turn is their camp, side A here.
+    assert.deepEqual(
+      liveTurnView(
+        turn({ turnNumber: 4, activeSide: "A", speakingSide: null }),
+        null,
+        names,
+        10,
+        micTurns,
+      ),
+      {
+        activeSide: null,
+        states: { A: "", B: "next" },
+        hole: "",
+        label: "Question · @zoe",
+        summary: "@zoe asks Léo Tremblay",
+      },
+    );
+    // Before the mic's list arrives, the snapshot alone says no debater speaks.
+    assert.deepEqual(
+      liveTurnView(
+        turn({ turnNumber: 4, speakingSide: null }),
+        null,
+        names,
+        10,
+      ),
+      {
+        activeSide: null,
+        states: { A: "", B: "" },
+        hole: "",
+        label: "Mic",
+        summary: "A viewer has the mic",
+      },
+    );
+  });
+
+  it("names the debater answering and the one taking the floor back", () => {
+    const answer = liveTurnView(
+      turn({ turnNumber: 5, activeSide: "B", speakingSide: "B" }),
+      null,
+      names,
+      10,
+      micTurns,
+    );
+    assert.equal(answer.activeSide, "B");
+    assert.equal(answer.label, "Answer · Léo Tremblay");
+    assert.equal(answer.summary, "Léo Tremblay answers @zoe");
+    const resume = liveTurnView(
+      turn({ turnNumber: 8, activeSide: "A" }),
+      null,
+      names,
+      10,
+      micTurns,
+    );
+    assert.equal(resume.activeSide, "A");
+    assert.equal(resume.summary, "Maya Chen has the floor back");
+  });
+
+  it("counts a mic's turns into the debate's total", () => {
+    const next = liveTurnView(
+      turn({ turnNumber: 9, activeSide: "B" }),
+      null,
+      names,
+      10,
+      micTurns,
+    );
+    assert.equal(next.label, "Turn 9 of 15");
+    assert.equal(next.summary, "Turn 9 of 15 · Léo Tremblay is speaking");
+    assert.equal(
+      liveTurnView(
+        turn({ state: "paused", turnNumber: 9, activeSide: "B" }),
+        null,
+        names,
+        10,
+        micTurns,
+      ).label,
+      "Turn 9 of 15",
+    );
+    // A pause in a viewer's turn marks no debater as next.
+    assert.deepEqual(
+      liveTurnView(
+        turn({ state: "paused", turnNumber: 4, speakingSide: null }),
+        null,
+        names,
+        10,
+        micTurns,
+      ).states,
+      { A: "", B: "" },
+    );
+  });
+
+  it("plays the later turn where a cut turn's span overlaps the next one's", () => {
+    const windows = [
+      window(3, "A", { recording: { startSeconds: 120, endSeconds: 180 } }),
+      // Turn 3 was cut at 2:37; the question starts there.
+      window(4, "A", { recording: { startSeconds: 157, endSeconds: 217 } }),
+    ];
+    assert.equal(playingTurn(windows, 150).turnNumber, 3);
+    assert.deepEqual(playingTurn(windows, 160), {
+      turnNumber: 4,
+      side: "A",
+      left: 57,
+    });
+    assert.deepEqual(
+      replayTurnView(playingTurn(windows, 160), 10, micTurns, names),
+      {
+        activeSide: null,
+        states: { A: "", B: "next" },
+        hole: "0:57",
+        label: "Question · @zoe",
+        summary: "",
+      },
+    );
+    assert.equal(
+      replayTurnView(playingTurn(windows, 150), 10, micTurns, names).label,
+      "Turn 3 of 15",
+    );
+  });
+
+  it("takes the newest open window when an ended turn's is still open", () => {
+    const at = Date.parse("2026-10-30T23:24:30Z");
+    const windows = [
+      window(3, "A", { closesAt: "2026-10-30T23:25:00Z" }),
+      window(4, "B", {
+        opensAt: "2026-10-30T23:24:10Z",
+        closesAt: "2026-10-30T23:25:10Z",
+      }),
+    ];
+    assert.equal(openWindow(windows, at).turnNumber, 4);
+  });
+});

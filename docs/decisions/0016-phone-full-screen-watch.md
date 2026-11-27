@@ -146,6 +146,58 @@ their words, and the word "bet" is not used on the page.
   answer bar opens the same sheet as the full screen, with the receipt, results and positions
   under the ticket as before.
 
+## Amended 2026-11-25: computers, and the mic on the full screen
+
+The founder, after seeing the mic's first interface: "remove the bottom panel with the big clock
+and the users and find a way to ergonomically put them on the screen while not taking too much
+space. i want the yes no thing to be on the bottom panel (just put yes/no and the slider on top
+without the small lettering and random sentences). on the right panel put the arguments, borrowing
+mic feature and the results (history). on phone; put an animated announcement that yappers can
+join if they want." This amends the "one ticket everywhere" amendment above for computers and
+tablets (every viewport that is not a phone), and the
+[debate page design](../debate-page-design.md#layout).
+
+- **Debaters and clock.** The panel under the video is gone. Each debater's name tag (avatar,
+  name, side) sits in a top corner of the video, solid white with moving bars while they speak,
+  and the turn clock is a 64 px ring between them on the seam.
+- **Answer bar.** Under the video: the read slider with its value and the size chips
+  10 · 25 · 50 · 75 · 100, then Yes and No as the full screen's solid pixel keys. Nothing is
+  written on it: the turn line, the status line, the receipt, "Size", the read's question and
+  the final line stay for screen readers only, and a reason for Yes and No being off is their
+  tooltip. A picked side's key becomes the key that places it, naming the terms ("Place Yes · 25
+  · max 25 YC", Decision 0013); once placed it reads "Yes · 25" and the other dims. An error or
+  the sign-in link shows under the keys only when needed. A debate that takes no more answers
+  shows no bar.
+- **Right panel.** The tabs at the page's height: AI outline, Chat (where chat is a tab), Mic,
+  Results, About. The viewer's own results and "Your positions" moved from under Yes and No to
+  the top of Results, on every screen size.
+- **Watching at once.** The founder, the same day: "make it so that when a user clicks on a
+  debate he watches it immediately in the interface designed for it instead of having to click
+  watch." A debate page joins a live debate as a viewer, or starts a replay, as it opens: once
+  for each page, from a visible tab, and never for a seated debater, who joins with their camera.
+  On a phone that opens the full screen. A debate that goes live while its page is open is joined
+  then; a replay published while a viewer sits on the ended page waits for Play replay. Join as
+  viewer and Play replay stay for a viewer who left or whose browser held playback, and the
+  browser may hold the sound until "Enable sound" is tapped. `DEBATE_AUTO_WATCH` turns it off; it
+  is on by default where `NODE_ENV` is production (staging and production) and off in development
+  and tests. It means every open page of a live debate holds a LiveKit viewer connection.
+- **Polish.** The read is a split track, green up to the share expected to say yes and red after
+  it. The status line and its actions ("Leave live debate", "Enable sound") share one line under
+  the video, and the answer bar follows it directly.
+- **Phone full screen, no box under the cameras.** The founder, the same day: "Keep the yes/no
+  on the bottom (phone) but remove the overly big black box in which it is. Remove the lettering
+  'no results...' and dont display something instead of this at any point." This amends point 2
+  and D1: the two cameras fill the whole screen, and Yes and No sit over the bottom of the lower
+  one with nothing behind them. The last-answer bar shows nothing before a result is revealed, no
+  line and no words; after one it is the two figures over the 4 px track above the keys, with no
+  words between them. Its card still opens on a tap once it shows.
+- **Phone full screen, the mic** ([Decision 0018](0018-borrow-the-mic.md#the-interface)).
+  Requested by the founder: when a list opens, an animated "Yappers, the mic is open" plays over
+  the cameras for about four seconds, once for each list, and a tap opens the Mic sheet. Approved
+  by the founder on 2026-11-27: the fourth rail button, Mic, under Turns; the Mic sheet; the band
+  on the seam between the cameras naming the mic's turn and the words on screen; and "Yapper
+  incoming" over the cameras. Points 2, 3 and 8 are otherwise unchanged.
+
 ## Engineering notes
 
 - **Replays.** A replay is one side-by-side recording (LiveKit room-composite egress).

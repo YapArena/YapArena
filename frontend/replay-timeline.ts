@@ -5,6 +5,9 @@
 // changes the player only by seeking (replay-seek.ts).
 /* global document, window */
 import { seekReplay } from "./replay-seek.js";
+import type { MicPastTurn } from "./mic-model.js";
+import { onMic } from "./mic-state.js";
+import type { PublicWindow } from "./stake-model.js";
 import { onStakeWindows } from "./stake-windows.js";
 import {
   isTurnWindow,
@@ -94,6 +97,7 @@ if (arena && timeline) {
         column.turnNumber,
         column.side,
         column.recording,
+        column.mic?.kind,
       ]),
     );
     if (next !== signature) {
@@ -102,9 +106,20 @@ if (arena && timeline) {
     }
     paint();
   }
-  onStakeWindows(debateId, (windows) => {
-    columns = turnColumns(windows.filter(isTurnWindow), null, null, false);
+  // Decision 0018: a mic's turns are named by their kind.
+  let turnWindows: PublicWindow[] = [];
+  let micTurns: readonly MicPastTurn[] = [];
+  function read() {
+    columns = turnColumns(turnWindows, null, null, false, micTurns);
     render();
+  }
+  onStakeWindows(debateId, (windows) => {
+    turnWindows = windows.filter(isTurnWindow);
+    read();
+  });
+  onMic(debateId, (shared) => {
+    micTurns = shared.mic?.turns ?? [];
+    read();
   });
   window.addEventListener("yap:playback", (event) => {
     if (event.detail.debateId !== debateId) return;

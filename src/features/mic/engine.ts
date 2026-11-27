@@ -14,13 +14,9 @@ import { askerKind, micTurnSide, type MicTurnKind } from "./turn-kinds.ts";
 // on adds only fund rows here (funds.ts): the clock opens and closes funds
 // and never takes a book or the ledger.
 
-/** The rules snapshot key a debate's start copies MIC_ENABLED into. */
-export const MIC_SNAPSHOT_KEY = "mic_enabled";
-export const micOn = (rules: unknown) =>
-  typeof rules === "object" &&
-  rules !== null &&
-  MIC_SNAPSHOT_KEY in rules &&
-  rules[MIC_SNAPSHOT_KEY] === true;
+// The rules snapshot key and its test live with the turn kinds, so the
+// list's public read (repository.ts) can use them without importing this file.
+export { MIC_SNAPSHOT_KEY, micOn } from "./turn-kinds.ts";
 
 /** L2: the list opens when both debaters have completed three rounds. */
 export const LIST_OPENS_AFTER_TURNS = 6;

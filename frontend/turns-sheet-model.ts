@@ -15,10 +15,12 @@ import {
 } from "./endorsement-bar-model.js";
 import type { PublicWindow } from "./stake-model.js";
 import type { DebateEndorsementView } from "./stake-windows.js";
+import type { MicPastTurn } from "./mic-model.js";
 import {
   barScale,
   barShape,
-  initials,
+  columnInitials,
+  columnTitle,
   percents,
   phoneColumns,
   turnColumns,
@@ -43,6 +45,8 @@ export interface TurnsSheetInput {
   /** A replay's position in seconds; null live. */
   position: number | null;
   now: number;
+  /** Decision 0018: the debate's mic turns, named by their kind. */
+  micTurns?: readonly MicPastTurn[];
 }
 
 export interface SheetShare {
@@ -54,7 +58,7 @@ export interface SheetShare {
 
 export interface TurnSlot {
   turnNumber: number;
-  /** The speaker's initials, when the turn's window names one. */
+  /** The speaker's initials, or "MIC" for a viewer's own turn. */
   who: string;
   /** A share to draw, a revealed turn without one, or a turn not shown yet. */
   state: "bar" | "none" | "later";
@@ -129,11 +133,15 @@ export function beforeClose(
   return !Number.isFinite(at) || at > now;
 }
 
-function slotText(column: TurnColumn) {
+function slotText(column: TurnColumn, names: Names) {
+  const turn = column.mic
+    ? columnTitle(column, names).replaceAll(" · ", ", ")
+    : `turn ${column.turnNumber}`;
   if (column.state === "revealed")
-    return `turn ${column.turnNumber} ${percents(column.yes!).yes}%`;
-  if (column.state === "empty") return `turn ${column.turnNumber} no answers`;
-  return `turn ${column.turnNumber} cancelled`;
+    return `${turn} ${percents(column.yes!).yes}%`;
+  if (column.state === "empty")
+    return `${turn} ${column.returned ? "stakes returned" : "no answers"}`;
+  return `${turn} ${column.voidReason === "turn_cut" ? "cut short" : "cancelled"}`;
 }
 
 /** The revealed turns as bars, with empty slots for the turns after them. */
@@ -141,18 +149,20 @@ export function turnSlots(
   columns: readonly TurnColumn[],
   names: Names,
   total: number | null,
+  micTurns: readonly MicPastTurn[] = [],
 ): TurnSlot[] {
   const revealed = phoneColumns(columns);
   const last = revealed.at(-1);
   if (!last) return [];
   const scale = barScale(revealed);
-  const count = Math.max(total ?? 0, last.turnNumber);
+  // A mic's turns take slots without counting toward the debate's total.
+  const count = Math.max(total ? total + micTurns.length : 0, last.turnNumber);
   const byTurn = new Map(columns.map((column) => [column.turnNumber, column]));
   const shown = new Set(revealed.map((column) => column.turnNumber));
   return Array.from({ length: count }, (_, index) => {
     const turnNumber = index + 1;
     const column = byTurn.get(turnNumber);
-    const who = column?.side ? initials(names[column.side]) : "";
+    const who = column ? columnInitials(column, names) : "";
     if (!column || !shown.has(turnNumber))
       return {
         turnNumber,
@@ -205,11 +215,21 @@ export function turnsSheetView(input: TurnsSheetInput): TurnsSheetView {
   const columns =
     hidden || waiting
       ? []
-      : turnColumns(input.windows, null, input.total, false).filter(
+      : turnColumns(
+          input.windows,
+          null,
+          input.total,
+          false,
+          input.micTurns,
+        ).filter(
           (column) => through === undefined || column.turnNumber <= through,
         );
-  const slots = turnSlots(columns, input.names, input.total);
-  const turnsLabel = `Share who said yes in each revealed turn: ${phoneColumns(columns).map(slotText).join(", ")}`;
+  const slots = turnSlots(columns, input.names, input.total, input.micTurns);
+  const turnsLabel = `Share who said yes in each revealed turn: ${phoneColumns(
+    columns,
+  )
+    .map((column) => slotText(column, input.names))
+    .join(", ")}`;
   const base = {
     heading: BAR_HEADING,
     turnsHeading: TURNS_HEADING,

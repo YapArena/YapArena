@@ -6,10 +6,20 @@
 import type { OutlineTimeline } from "../src/features/outline/public-types.ts";
 import { sharePercent } from "./arena-chart.js";
 import { firstName } from "./debate-layout-model.js";
-import type {
-  PublicWindow,
-  RecordingSpan,
-  SpeakingSide,
+import {
+  askerKind,
+  micTurnAt,
+  micTurnLabel,
+  micTurnSpeaker,
+  micTurnWho,
+  type MicPastTurn,
+} from "./mic-model.js";
+import {
+  returnedText,
+  type PublicWindow,
+  type RecordingSpan,
+  type SpeakingSide,
+  type VoidReason,
 } from "./stake-model.js";
 import { turnLabel, type RevealedWindow } from "./window-chart-model.js";
 
@@ -37,6 +47,14 @@ export interface TurnColumn {
   recording: RecordingSpan | null;
   /** The revealed window's id, which the price inspector uses. */
   windowId: string | null;
+  /** The mic turn this is, if it is one (Decision 0018). */
+  mic: MicPastTurn | null;
+  /** Why a cancelled window was cancelled; "turn_cut" when a mic cut the turn. */
+  voidReason: VoidReason | null;
+  /** A duel window that returned every stake says so instead of a share. */
+  returned: string | null;
+  /** Decision 0017: a settled duel window's median read, in percent. */
+  crowd: number | null;
 }
 
 export type Names = Record<SpeakingSide, string>;
@@ -65,16 +83,19 @@ export function turnColumns(
   timeline: Pick<OutlineTimeline, "turns"> | null,
   total: number | null,
   withUpcoming: boolean,
+  micTurns: readonly MicPastTurn[] = [],
 ): TurnColumn[] {
   const byTurn = new Map(windows.map((window) => [window.turnNumber, window]));
   const numbers = [...byTurn.keys()];
+  // A mic's turns take turn numbers without counting toward the total.
   if (withUpcoming && total)
-    for (let turn = 1; turn <= total; turn++)
+    for (let turn = 1; turn <= total + micTurns.length; turn++)
       if (!byTurn.has(turn)) numbers.push(turn);
   return numbers
     .sort((a, b) => a - b)
     .map((turnNumber) => {
       const window = byTurn.get(turnNumber);
+      const mic = micTurnAt(micTurns, turnNumber);
       if (!window)
         return {
           turnNumber,
@@ -84,12 +105,21 @@ export function turnColumns(
           label: null,
           recording: null,
           windowId: null,
+          mic,
+          voidReason: null,
+          returned: null,
+          crowd: null,
         };
       const revealed = window.state === "settled" && window.pricing != null;
       const yes = revealed ? sharePercent(window.pricing!.share) : null;
       return {
         turnNumber,
-        side: window.side,
+        mic,
+        voidReason: window.state === "void" ? window.voidReason : null,
+        returned: revealed ? returnedText(window.duels) : null,
+        crowd: revealed ? sharePercent(window.duels?.crowd ?? null) : null,
+        // In a viewer's own mic turn the window's side is only its camp.
+        side: mic ? micTurnSpeaker(mic) : window.side,
         state:
           window.state === "void"
             ? "void"
@@ -185,11 +215,20 @@ export function resultText(column: TurnColumn) {
   switch (column.state) {
     case "revealed": {
       const { yes, no } = percents(column.yes!);
-      return `${yes}% yes, ${no}% no`;
+      // A duel window also shows what the room expected: its median read.
+      return `${yes}% yes, ${no}% no${column.crowd == null ? "" : ` · median read ${Math.round(column.crowd)}%`}`;
     }
     case "empty":
+      // Decision 0017: a duel window short of viewers or answers.
+      if (column.returned)
+        return (
+          column.returned.charAt(0).toUpperCase() + column.returned.slice(1)
+        );
       return "No answers in this turn";
     case "void":
+      // Decision 0018 (E10): a mic cut the turn and its window was refunded.
+      if (column.voidReason === "turn_cut")
+        return "No result: a mic cut this turn short and its answers were refunded";
       return "No result: this turn's window was cancelled";
     case "hidden":
       return "Results not revealed yet";
@@ -198,12 +237,36 @@ export function resultText(column: TurnColumn) {
   }
 }
 
+/** "Turn 7 · Maya Chen"; a mic's turn adds its kind: "Turn 8 · Question · @zoe". */
+export function columnTitle(column: TurnColumn, names: Names) {
+  return [
+    `Turn ${column.turnNumber}`,
+    column.mic
+      ? micTurnLabel(column.mic, names)
+      : column.side
+        ? names[column.side]
+        : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+/** Under a bar: the speaker's first name, or the asker's handle. */
+export function columnName(column: TurnColumn, names: Names) {
+  if (column.mic) return firstName(micTurnWho(column.mic, names));
+  return column.side ? firstName(names[column.side]) : "";
+}
+
+/** Under a narrow bar: the speaker's initials, or "MIC" for the asker. */
+export function columnInitials(column: TurnColumn, names: Names) {
+  if (column.mic && askerKind(column.mic.kind)) return "MIC";
+  return column.side ? initials(names[column.side]) : "";
+}
+
 /** The line above the bars: the turn and speaker, its argument, its result. */
 export function captionParts(column: TurnColumn, names: Names) {
   return {
-    lead: [`Turn ${column.turnNumber}`, column.side ? names[column.side] : null]
-      .filter(Boolean)
-      .join(" · "),
+    lead: columnTitle(column, names),
     label: column.label,
     result: resultText(column),
   };
@@ -227,7 +290,7 @@ export function phoneColumns(columns: readonly TurnColumn[]) {
  */
 export function rowLine(column: TurnColumn, names: Names) {
   return [
-    column.side ? firstName(names[column.side]) : null,
+    columnName(column, names) || null,
     column.label ? `“${column.label}”` : null,
     column.state === "revealed" ? null : resultText(column),
   ]
@@ -237,8 +300,7 @@ export function rowLine(column: TurnColumn, names: Names) {
 
 /** A bar's accessible name, which carries everything the column shows. */
 export function barLabel(column: TurnColumn, names: Names, playing: boolean) {
-  const who = column.side ? `, ${names[column.side]}` : "";
-  return `Turn ${column.turnNumber}${who}: ${resultText(column)}.${column.label ? ` ${column.label}.` : ""}${playing ? " Playing now." : ""}`;
+  return `${columnTitle(column, names).replaceAll(" · ", ", ")}: ${resultText(column)}.${column.label ? ` ${column.label}.` : ""}${playing ? " Playing now." : ""}`;
 }
 
 /** "3:05" for a place in the recording. */
@@ -253,8 +315,10 @@ export function playingAt(
   position: number | null,
 ) {
   if (position === null) return null;
+  // A turn cut short keeps its full span, which overlaps the next turn's:
+  // the later turn is the one playing.
   return (
-    columns.find(
+    columns.findLast(
       ({ recording }) =>
         recording !== null &&
         recording.startSeconds <= position &&
@@ -293,7 +357,6 @@ export function timelineSegments(
 
 /** A timeline segment's accessible name. */
 export function segmentLabel(column: TurnColumn, names: Names) {
-  const who = column.side ? `, ${names[column.side]}` : "";
   const span = column.recording;
-  return `Turn ${column.turnNumber}${who}${span ? `, ${timestamp(span.startSeconds)} to ${timestamp(span.endSeconds)}` : ""}`;
+  return `${columnTitle(column, names).replaceAll(" · ", ", ")}${span ? `, ${timestamp(span.startSeconds)} to ${timestamp(span.endSeconds)}` : ""}`;
 }

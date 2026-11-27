@@ -293,6 +293,27 @@ describe(
         side: "A",
         lostMs: run.lost_ms,
       });
+      // The interface's reads: the debate started with the mic on, the turn
+      // is listed by its kind, and the asker's own part names their mic.
+      assert.equal(view.enabled, true);
+      assert.deepEqual(
+        view.turns.map((t) => [
+          t.turnNumber,
+          t.micId,
+          t.kind,
+          t.target,
+          t.text,
+        ]),
+        [[8, fired.micId, "question", "A", "Why now?"]],
+      );
+      assert.deepEqual((await mic.readOwn(debateId, author.userId)).mics, [
+        fired.micId,
+      ]);
+      // The media snapshot: the clock is on the asker's camp, and no debater
+      // speaks.
+      const asking = (await media.getPublicSnapshot(debateId)).state;
+      assert.equal(asking.activeSide, "B");
+      assert.equal(asking.speakingSide, null);
       // No debater's microphone opens in the asker's turns; the target's
       // opens to answer.
       const permissions = [];
@@ -331,6 +352,22 @@ describe(
         activeSide: "A",
         remainingMs: 60000,
       });
+      // A debater's own turn: they speak, and the mic's five turns stay
+      // listed for the page and the replay.
+      assert.equal(
+        (await media.getPublicSnapshot(debateId)).state.speakingSide,
+        "A",
+      );
+      assert.deepEqual(
+        (await mic.read(debateId)).turns.map((t) => [t.turnNumber, t.kind]),
+        [
+          [8, "question"],
+          [9, "answer"],
+          [10, "followup"],
+          [11, "answer2"],
+          [12, "resume"],
+        ],
+      );
       assert.equal(
         (
           await owner.query("SELECT state FROM mic_mics WHERE id=$1", [

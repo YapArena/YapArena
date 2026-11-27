@@ -305,3 +305,127 @@ describe("answer keys", () => {
     assert.equal(keyLook("YES", null, true), "off");
   });
 });
+
+// Decision 0018: a mic's turns on the phone clock.
+describe("clock on the seam with a mic", async () => {
+  const { clockTurnText, watchSheets } =
+    await import("../public/watch-phone.js");
+  const past = (turnNumber, kind) => ({
+    turnNumber,
+    micId: "mic-1",
+    kind,
+    asker: "zoe",
+    target: "B",
+    text: null,
+  });
+  const exchange = [past(8, "question"), past(9, "answer")];
+  const mic = (overrides = {}) => ({
+    turns: exchange,
+    mics: [],
+    fund: null,
+    ...overrides,
+  });
+  const over = (overrides) =>
+    turn({ turnDeadlineAt: new Date(now - 500).toISOString(), ...overrides });
+
+  it("has the Mic sheet beside Turns and More", () => {
+    assert.deepEqual(watchSheets, ["turns", "more", "mic"]);
+    assert.equal(
+      watchReducer(
+        { ...closedWatch, open: true },
+        { type: "sheet", sheet: "mic" },
+      ).sheet,
+      "mic",
+    );
+  });
+
+  it("says Mic in a mic's turn and counts its turns into the total", () => {
+    const question = watchClock(
+      input({ turn: turn({ turnNumber: 8, speakingSide: null }), mic: mic() }),
+    );
+    assert.equal(question.phase, "running");
+    assert.equal(question.mic, true);
+    assert.equal(question.total, 12);
+    assert.equal(clockTurnText(question), "Mic");
+    assert.equal(question.label, "15 seconds left: @zoe asks Léo Tremblay");
+    const debater = watchClock(
+      input({ turn: turn({ turnNumber: 10, activeSide: "A" }), mic: mic() }),
+    );
+    assert.equal(debater.mic, false);
+    assert.equal(clockTurnText(debater), "10 / 12");
+    assert.equal(debater.label, "15 seconds left in turn 10");
+    // Without a mic nothing changes.
+    assert.equal(clockTurnText(watchClock(input())), "7 / 10");
+    assert.equal(clockTurnText(watchClock(input({ total: null }))), "Turn 7");
+    assert.equal(clockTurnText(watchClock(input({ turn: null }))), "");
+  });
+
+  it("says who is next inside the exchange", () => {
+    const next = (kind, overrides = {}) => {
+      const turns = [past(8, kind)];
+      return watchClock(
+        input({
+          turn: over({ turnNumber: 8 }),
+          mic: mic({ turns, ...overrides }),
+        }),
+      );
+    };
+    // After the asker: the debater asked.
+    const asked = next("question");
+    assert.equal(asked.phase, "between");
+    assert.equal(asked.nextSide, "B");
+    assert.equal(asked.nextName, "Léo");
+    assert.equal(asked.mic, true);
+    assert.equal(asked.label, "Between turns. Léo Tremblay speaks next");
+    // After the first answer: the asker's follow-up, no debater.
+    const follow = next("answer");
+    assert.equal(follow.nextSide, null);
+    assert.equal(follow.nextName, "@zoe");
+    assert.equal(follow.label, "Between turns. @zoe speaks next");
+    // After the last answer: the other debater, or the asker if kept on.
+    assert.equal(next("answer2").nextSide, "A");
+    const kept = next("answer2", {
+      fund: { micId: "mic-1", state: "funded" },
+    });
+    assert.equal(kept.nextSide, null);
+    assert.equal(kept.nextName, "@zoe");
+    assert.equal(
+      next("answer2", { fund: { micId: "other", state: "funded" } }).nextSide,
+      "A",
+    );
+  });
+
+  it("hands over to a fired mic at a debater's turn end, else to the other debater", () => {
+    const waiting = watchClock(
+      input({
+        turn: over({ turnNumber: 7, activeSide: "A" }),
+        mic: mic({
+          turns: [],
+          mics: [{ state: "live", started: false, holder: "arjun" }],
+        }),
+      }),
+    );
+    assert.equal(waiting.nextSide, null);
+    assert.equal(waiting.nextName, "@arjun");
+    assert.equal(waiting.mic, true);
+    // The turn bar grows by the turn the mic is about to take.
+    assert.equal(
+      turnSegments({ ...waiting, turnNumber: 11, total: 10 }).length,
+      11,
+    );
+    const plain = watchClock(
+      input({
+        turn: over({ turnNumber: 10, activeSide: "B" }),
+        mic: mic({
+          turns: [...exchange, past(10, "resume")],
+          mics: [{ state: "live", started: true, holder: "zoe" }],
+        }),
+      }),
+    );
+    // After the turn that hands the floor back: the other debater.
+    assert.equal(plain.nextSide, "A");
+    assert.equal(plain.mic, false);
+    assert.equal(plain.turnNumber, 11);
+    assert.equal(plain.total, 13);
+  });
+});

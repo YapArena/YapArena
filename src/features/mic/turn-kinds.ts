@@ -15,3 +15,12 @@ export function micTurnSide(kind: MicTurnKind, camp: Side, target: Side) {
   // who was not asked resumes (E8).
   return askerKind(kind) || kind === "resume" ? camp : target;
 }
+
+/** The rules snapshot key a debate's start copies MIC_ENABLED into. */
+export const MIC_SNAPSHOT_KEY = "mic_enabled";
+/** Whether a debate's rules snapshot says it started with the mic on. */
+export const micOn = (rules: unknown) =>
+  typeof rules === "object" &&
+  rules !== null &&
+  MIC_SNAPSHOT_KEY in rules &&
+  rules[MIC_SNAPSHOT_KEY] === true;

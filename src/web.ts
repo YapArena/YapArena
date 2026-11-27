@@ -157,6 +157,8 @@ export function createWebServer(
         }
       : undefined,
     turnWindows: config.turnWindowsEnabled ? coinDebates : undefined,
+    duelWindows: config.duelWindowsEnabled,
+    debateAutoWatch: config.debateAutoWatch,
     // Decision 0018: MIC_ENABLED requires the coin sandbox.
     mic: config.micEnabled
       ? createMicRepository(database, "simulation", {

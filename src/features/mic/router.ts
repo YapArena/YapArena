@@ -72,11 +72,21 @@ function id(value: unknown, what: string) {
  * PR 3: POST /api/debates/:id/mic/keep {amount, requestId} pledges to keep
  * the live mic's asker on (X): cut to what is left of the price, paid to the
  * debaters once the price is reached, never withdrawn, refunded if unfunded.
+ *
+ * The interface: GET /api/debates/:id/mic/mine is the signed-in viewer's own
+ * open pledges (with the ids a withdrawal names), the mics they fired and
+ * what they pledged to the open fund. It moves nothing.
  */
 export function createMicRouter(options: {
   mic: Pick<
     MicRepository,
-    "read" | "submitQuestion" | "pledge" | "withdraw" | "fire" | "keep"
+    | "read"
+    | "readOwn"
+    | "submitQuestion"
+    | "pledge"
+    | "withdraw"
+    | "fire"
+    | "keep"
   >;
   turns?: Pick<MicTurns, "endAskerTurn" | "setAskerText">;
   requireAuth: RequestHandler;
@@ -97,6 +107,26 @@ export function createMicRouter(options: {
       ? response.json(list)
       : response.status(404).json({ error: "debate not found" });
   });
+  router.get(
+    "/api/debates/:id/mic/mine",
+    options.requireAuth,
+    createApiRateLimiter({
+      windowMs: 60_000,
+      limit: 120,
+      keyGenerator: (request) => request.user!.id,
+      shared: options.sharedRateLimits?.("mic-own", "open"),
+    }),
+    async (request, response) => {
+      response.set("Cache-Control", "private, no-store").set("Vary", "Cookie");
+      const debateId = String(request.params.id);
+      const own = uuid.test(debateId)
+        ? await mic.readOwn(debateId, request.user!.id)
+        : null;
+      return own
+        ? response.json(own)
+        : response.status(404).json({ error: "debate not found" });
+    },
+  );
   const context = (request: Request): SandboxContext => ({
     userId: request.user!.id,
     sessionTokenHash: hashSessionToken(

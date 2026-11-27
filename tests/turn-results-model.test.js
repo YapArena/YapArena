@@ -400,3 +400,157 @@ describe("the replay timeline", () => {
     assert.equal(timestamp(600), "10:00");
   });
 });
+
+// Decision 0018 (a mic's turns) and Decision 0017 (duel windows).
+describe("turn columns with a mic and duel windows", async () => {
+  const { columnInitials, columnName, columnTitle } =
+    await import("../public/turn-results-model.js");
+  const mic = (turnNumber, kind) => ({
+    turnNumber,
+    micId: "mic-1",
+    kind,
+    asker: "zoe",
+    target: "B",
+    text: null,
+  });
+  const micTurns = [mic(3, "question"), mic(4, "answer")];
+  const duels = (overrides = {}) => ({
+    rule: "fd-v1",
+    status: "settled",
+    viewers: 14,
+    tickets: 9,
+    share: share(67),
+    crowd: share(58),
+    verdict: "YES",
+    ...overrides,
+  });
+  const duel = (turnNumber, summary) => ({
+    ...window(turnNumber),
+    rule: "fd-v1",
+    pricing: {
+      share: summary.share,
+      a: null,
+      b: null,
+      price: null,
+      branch: "duels",
+    },
+    duels: summary,
+  });
+
+  it("names a viewer's turn by its kind and gives it no debater's side", () => {
+    // The question's window carries the asker's camp, side A.
+    const columns = turnColumns(
+      [window(2), window(3), window(4)],
+      null,
+      null,
+      false,
+      micTurns,
+    );
+    assert.equal(columns[0].mic, null);
+    assert.equal(columns[1].side, null);
+    assert.equal(columns[2].side, "B");
+    assert.equal(columnTitle(columns[0], names), "Turn 2 · Léo Tremblay");
+    assert.equal(columnTitle(columns[1], names), "Turn 3 · Question · @zoe");
+    assert.equal(
+      columnTitle(columns[2], names),
+      "Turn 4 · Answer · Léo Tremblay",
+    );
+    assert.equal(columnName(columns[1], names), "@zoe");
+    assert.equal(columnName(columns[2], names), "Léo");
+    assert.equal(columnInitials(columns[1], names), "MIC");
+    assert.equal(columnInitials(columns[2], names), "LT");
+    assert.equal(
+      captionParts(columns[1], names).lead,
+      "Turn 3 · Question · @zoe",
+    );
+    assert.match(rowLine(columns[1], names), /^@zoe/);
+    assert.match(
+      barLabel(columns[1], names, false),
+      /^Turn 3, Question, @zoe: /,
+    );
+    assert.match(
+      segmentLabel(columns[2], names),
+      /^Turn 4, Answer, Léo Tremblay, /,
+    );
+  });
+
+  it("adds a column for each turn a mic added", () => {
+    const columns = turnColumns([window(1)], null, 4, true, micTurns);
+    assert.deepEqual(
+      columns.map((column) => [column.turnNumber, column.state]),
+      [
+        [1, "revealed"],
+        [2, "upcoming"],
+        [3, "upcoming"],
+        [4, "upcoming"],
+        [5, "upcoming"],
+        [6, "upcoming"],
+      ],
+    );
+    assert.equal(columnTitle(columns[1], names), "Turn 2");
+    assert.equal(columnName(columns[1], names), "");
+    assert.equal(columnInitials(columns[1], names), "");
+  });
+
+  it("says a mic cut a turn, and that a duel window returned its stakes", () => {
+    const [cut, cancelled, few, small, settled] = turnColumns(
+      [
+        window(1, { state: "void", voidReason: "turn_cut", pricing: null }),
+        window(2, {
+          state: "void",
+          voidReason: "operator_cancelled",
+          pricing: null,
+        }),
+        duel(
+          3,
+          duels({
+            status: "returned_few_viewers",
+            share: null,
+            crowd: null,
+            verdict: null,
+          }),
+        ),
+        duel(
+          4,
+          duels({
+            status: "returned_small_room",
+            share: null,
+            crowd: null,
+            verdict: null,
+          }),
+        ),
+        duel(5, duels()),
+      ],
+      null,
+      null,
+      false,
+    );
+    assert.equal(
+      resultText(cut),
+      "No result: a mic cut this turn short and its answers were refunded",
+    );
+    assert.equal(
+      resultText(cancelled),
+      "No result: this turn's window was cancelled",
+    );
+    assert.equal(few.state, "empty");
+    assert.equal(resultText(few), "Stakes returned");
+    assert.equal(resultText(small), "Fewer than 5 answers · stakes returned");
+    // A settled duel window also shows the room's median read.
+    assert.equal(resultText(settled), "67% yes, 33% no · median read 58%");
+  });
+
+  it("plays the later turn where a cut turn's span overlaps the next one's", () => {
+    const columns = turnColumns(
+      [
+        window(1, { recording: { startSeconds: 0, endSeconds: 60 } }),
+        window(2, { recording: { startSeconds: 37, endSeconds: 97 } }),
+      ],
+      null,
+      null,
+      false,
+    );
+    assert.equal(playingAt(columns, 20), 1);
+    assert.equal(playingAt(columns, 40), 2);
+  });
+});

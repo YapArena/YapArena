@@ -206,20 +206,25 @@ export function createMediaRepository(
     };
   }
   const readSnapshot = createSharedRead<{
-    state: Pick<
-      MediaState,
-      | "debateId"
-      | "state"
-      | "activeSide"
-      | "turnNumber"
-      | "turnDeadlineAt"
-      | "remainingMs"
-      | "activeMs"
-      | "lastResumedAt"
-      | "revision"
-      | "recordingStatus"
-      | "hasCaptions"
-    > | null;
+    state:
+      | (Pick<
+          MediaState,
+          | "debateId"
+          | "state"
+          | "activeSide"
+          | "turnNumber"
+          | "turnDeadlineAt"
+          | "remainingMs"
+          | "activeMs"
+          | "lastResumedAt"
+          | "revision"
+          | "recordingStatus"
+          | "hasCaptions"
+        > & {
+          // Decision 0018: the debater speaking; none in a viewer's turns.
+          speakingSide: "A" | "B" | null;
+        })
+      | null;
     eventStatus: string;
     automaticReplayPublication: boolean;
     streamRevision: string;
@@ -239,6 +244,12 @@ export function createMediaRepository(
           COALESCE(r.cursor::text, '0') AS "streamRevision", clock_timestamp() AS "serverNow",
           CASE WHEN m.debate_id IS NULL THEN NULL ELSE json_build_object(
             'debateId',m.debate_id,'state',m.state,'activeSide',m.active_side,
+            -- Decision 0018: the debater whose microphone the turn opens; none in
+            -- a viewer's own turns, where activeSide is only the clock's side.
+            'speakingSide',CASE WHEN EXISTS (SELECT 1 FROM mic_turns mt
+              WHERE mt.debate_id=m.debate_id AND mt.turn_number=m.turn_number
+                AND mt.kind IN ('question','followup','extq'))
+              THEN NULL ELSE m.active_side END,
             'turnNumber',m.turn_number,'turnDeadlineAt',m.turn_deadline_at,
             'remainingMs',m.remaining_ms,'activeMs',m.active_ms,'lastResumedAt',m.last_resumed_at,
             'revision',m.revision,'recordingStatus',m.recording_status,'hasCaptions',m.captions_vtt IS NOT NULL) END AS state

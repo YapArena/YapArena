@@ -65,3 +65,26 @@ describe("media page state", () => {
     assert.match(complete.message, /ready/);
   });
 });
+
+// Decision 0018: in a viewer's own mic turn no debater has the floor.
+describe("media page state with a mic", () => {
+  it("says a viewer has the mic instead of naming the clock's side", () => {
+    const state = {
+      state: "running",
+      activeSide: "A",
+      recordingStatus: "recording",
+    };
+    assert.equal(
+      mediaPresentation("live", state).message,
+      "Live. Speaker A has the floor. Recording recording.",
+    );
+    assert.equal(
+      mediaPresentation("live", { ...state, speakingSide: "A" }).message,
+      "Live. Speaker A has the floor. Recording recording.",
+    );
+    assert.equal(
+      mediaPresentation("live", { ...state, speakingSide: null }).message,
+      "Live. A viewer has the mic. Recording recording.",
+    );
+  });
+});

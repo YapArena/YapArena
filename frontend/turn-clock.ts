@@ -5,6 +5,8 @@
 // on a replay it follows the turn that's playing. One animation frame loop
 // runs only while a turn runs, the tab is visible and the clock is on screen,
 // and the canvas is redrawn only when the drawn tiles change.
+import { micTurnAt, type MicPastTurn } from "./mic-model.js";
+import { onMic } from "./mic-state.js";
 import {
   createEmblem,
   emblemTiles,
@@ -121,7 +123,13 @@ if (arena && face && clock) {
         colors(),
       );
     }
-    const label = running ? timerLabel(state.left, turnNumber) : "";
+    // Decision 0018: a mic's turn is named by its kind, not its number.
+    const label = running
+      ? timerLabel(
+          state.left,
+          micTurnAt(micTurns, turnNumber) ? null : turnNumber,
+        )
+      : "";
     if (label !== labelled) {
       labelled = label;
       if (label) clock!.setAttribute("aria-label", label);
@@ -148,6 +156,12 @@ if (arena && face && clock) {
   window.addEventListener("yap:turn", (event) => {
     if (event.detail.debateId !== debateId) return;
     turn = event.detail;
+    schedule();
+  });
+  let micTurns: readonly MicPastTurn[] | undefined;
+  onMic(debateId, (shared) => {
+    micTurns = shared.mic?.turns;
+    labelled = "";
     schedule();
   });
   onStakeWindows(debateId, (shared) => {

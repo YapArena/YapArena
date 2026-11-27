@@ -241,17 +241,16 @@ it("follows the replay's playing turn and shows the latest otherwise", () => {
   );
 });
 
-it("writes the dock's line in the phone full screen (Decision 0016)", () => {
-  assert.deepEqual(dockReadout(barView(input(figure()), labels), 3491), {
+it("writes the dock's two figures in the phone full screen (Decision 0016)", () => {
+  assert.deepEqual(dockReadout(barView(input(figure()), labels)), {
     empty: false,
     yes: 47,
     no: 53,
-    note: "last answers · 3,491",
   });
-  assert.deepEqual(dockReadout(barView(input(null), labels), 0), {
+  // Nothing before a result: no figures and no words.
+  assert.deepEqual(dockReadout(barView(input(null), labels)), {
     empty: true,
     yes: 0,
     no: 0,
-    note: "No results revealed yet",
   });
 });

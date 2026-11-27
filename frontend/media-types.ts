@@ -8,6 +8,12 @@ export type PlaybackMode = "live" | "speaker" | "replay";
 export interface MediaState {
   state: "idle" | "running" | "paused" | "ended";
   activeSide: Side | null;
+  /**
+   * Decision 0018: the debater whose microphone the turn opens; null in a
+   * viewer's own mic turns, where activeSide is only the clock's side. Older
+   * servers omit it: the active side speaks.
+   */
+  speakingSide?: Side | null;
   turnDeadlineAt: string | null;
   /** The running turn's number; older servers omit it. */
   turnNumber?: number;

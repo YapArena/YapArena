@@ -147,3 +147,14 @@ Decision 0016's ticket is unchanged: Yes and No, the size chips, the read slider
   "Returned: fewer than 5 answers"; a cut turn reads "Voided · refunded (the turn was cut short)".
 - **Unchanged.** The result plate, the results notice, the turn bars and the debate bar read the
   net and the Yes share as before; a returned window shows as a turn with no share.
+
+Added with the mic's interface ([Decision 0018](0018-borrow-the-mic.md#the-interface)):
+
+- **Results by turn.** A settled duel window's line adds the room's median read ("67% yes, 33% no
+  · median read 58%"); a returned one reads "Stakes returned" or "Fewer than 5 answers · stakes
+  returned" instead of "No answers in this turn". A duel window has no price draw, so the
+  "Price and typical limits" card and the phone's "tap a turn for its price draw" show only for
+  windows that had one.
+- **About.** "How results work" explains the rule the debate's windows settle under: forecast
+  duels on a debate still to be played once the switch is on, and whatever a replay's own windows
+  say.

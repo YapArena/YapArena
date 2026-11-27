@@ -11,7 +11,10 @@ export function mediaPresentation(
   if (live && state?.state === "paused")
     message = `Debate paused: ${state.incident || "operator review"}`;
   else if (live && state?.state === "running")
-    message = `Live. Speaker ${state.activeSide} has the floor. Recording ${state.recordingStatus}.`;
+    message =
+      state.speakingSide === null
+        ? `Live. A viewer has the mic. Recording ${state.recordingStatus}.`
+        : `Live. Speaker ${state.activeSide} has the floor. Recording ${state.recordingStatus}.`;
   else if (eventStatus === "ended" && state?.recordingStatus === "failed")
     message =
       "Recording failed. Replay is unavailable. Operator review required.";
