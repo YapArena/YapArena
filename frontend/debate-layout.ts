@@ -13,6 +13,8 @@ import {
   type TurnDetail,
   type TurnView,
 } from "./debate-layout-model.js";
+import type { MicPastTurn } from "./mic-model.js";
+import { onMic } from "./mic-state.js";
 import type { PublicWindow } from "./stake-model.js";
 import { onStakeWindows } from "./stake-windows.js";
 import { PHONE_WATCH_QUERY } from "./watch-phone.js";
@@ -67,6 +69,12 @@ if (arena) {
       '.arena-side[data-side="B"] [data-side-state]',
     ),
   };
+  // Computers and tablets show the debaters as name tags over the video
+  // (frontend/stage-hud.ts runs the clock between them).
+  const stageTags = {
+    A: arena.querySelector<HTMLElement>('[data-stage-tag="A"]'),
+    B: arena.querySelector<HTMLElement>('[data-stage-tag="B"]'),
+  };
   function apply(view: TurnView) {
     if (view.activeSide) arena!.dataset.activeSide = view.activeSide;
     else delete arena!.dataset.activeSide;
@@ -74,6 +82,15 @@ if (arena) {
       const node = cardStates[side];
       if (node && node.textContent !== view.states[side])
         node.textContent = view.states[side];
+      const tag = stageTags[side];
+      if (tag && tag.dataset.state !== view.states[side]) {
+        tag.dataset.state = view.states[side];
+        const spoken = tag.querySelector("[data-stage-tag-state]");
+        if (spoken)
+          spoken.textContent = view.states[side]
+            ? `, ${view.states[side]}`
+            : "";
+      }
     }
     inscribed(hole, view.hole);
     inscribed(label, view.label);
@@ -84,10 +101,17 @@ if (arena) {
   let turn: TurnDetail | null = null;
   let windows: readonly PublicWindow[] = [];
   let position: number | null = null;
+  // Decision 0018: a mic's turns, which the scoreboard names by their kind.
+  let micTurns: readonly MicPastTurn[] | undefined;
   function render() {
     if (status === "replay" || status === "finalized") {
       if (position === null) return;
-      const view = replayTurnView(playingTurn(windows, position), total);
+      const view = replayTurnView(
+        playingTurn(windows, position),
+        total,
+        micTurns,
+        names,
+      );
       if (view) apply(view);
       return;
     }
@@ -96,9 +120,13 @@ if (arena) {
       turn?.turnNumber == null
         ? openWindow(windows, Date.now() + offset)
         : null;
-    const view = liveTurnView(turn, window, names, total);
+    const view = liveTurnView(turn, window, names, total, micTurns);
     if (view) apply(view);
   }
+  onMic(debateId, (shared) => {
+    micTurns = shared.mic?.turns;
+    render();
+  });
   window.addEventListener("yap:turn", (event) => {
     if (event.detail.debateId !== debateId) return;
     turn = event.detail;
@@ -258,6 +286,36 @@ if (arena) {
         sync();
       }).observe(surface);
     sync();
+  }
+
+  // Computers (founder, 2026-11-25): the answer bar sits right under the
+  // video's status line. The video is the largest 16:9 box its column
+  // allows, so on a wide, tall window the column has room left under it;
+  // the bar moves up by that much (public/arena.css reads --stage-slack)
+  // instead of leaving a gap between the video and its controls.
+  const watch = arena.querySelector<HTMLElement>(".arena-watch");
+  if (watch && surface) {
+    const oneScreen = matchMedia("(min-width: 960px) and (min-height: 500px)");
+    const measure = () => {
+      let slack = 0;
+      if (oneScreen.matches && !surface.classList.contains("is-expanded")) {
+        const box = watch.getBoundingClientRect();
+        let bottom = box.top;
+        for (const child of watch.children) {
+          const rect = child.getBoundingClientRect();
+          if (rect.height > 1) bottom = Math.max(bottom, rect.bottom);
+        }
+        slack = Math.max(0, Math.floor(box.bottom - bottom));
+      }
+      const value = `${slack}px`;
+      if (arena.style.getPropertyValue("--stage-slack") !== value)
+        arena.style.setProperty("--stage-slack", value);
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(watch);
+    for (const child of watch.children) observer.observe(child);
+    oneScreen.addEventListener("change", measure);
+    measure();
   }
 
   // Wide screens: chat over the video, which the viewer can hide (like

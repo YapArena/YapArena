@@ -1,8 +1,10 @@
 # Decision 0018 — Borrow the microphone
 
 Status: founder decisions, 2026-11-17 to 2026-11-20, tested in a simulator on 2026-11-20. Pull
-requests 1, 2a, 2b and 3 are built (see [How it is built](#how-it-is-built)); no debate offers the
-mic yet.
+requests 1, 2a, 2b and 3 and the interface are built (see [How it is built](#how-it-is-built) and
+[The interface](#the-interface)); no debate offers the mic yet. The founder approved the
+interface, its phone full-screen placement included, on 2026-11-27 ("implement the designs and i
+will turn on the mechanism and the borrowing the mic feature on render").
 
 A viewer can put one question and one follow-up to a debater during a live debate, by voice or by
 text. Viewers compete for that right by pledging Yap Coins (YC) to questions; YC spent on a
@@ -92,7 +94,8 @@ The simulator runs these the same way.
 - The outbid-and-fire race: with no close, the #1 can fire the instant they lead.
 - An asker who speaks for neither camp.
 - Where the list, the Fire button, the asker and the animation sit on the phone full screen. Decision
-  0016 fixes that screen, so the mic's interface needs the founder's approval there.
+  0016 fixes that screen, so the mic's interface needed the founder's approval there. Approved
+  on 2026-11-27 as [The interface](#the-interface) describes it.
 - D1 amends D12 of the [PRD](../product-prd.md#10-risks-dependencies-and-decision-log) ("universal
   bounded-time rules") once it ships; LiveKit offers no spend limit, so an operating ceiling on
   length stays in configuration.
@@ -119,6 +122,64 @@ The [build plan](https://claude.ai/artifact/X3UWh8J7nEAmGSRhGFPjkj) ships in pha
    debate ends refunds its open questions and funds (migration `1795490000000`).
 5. Votes, extra lists and the end of the fixed length.
 6. Seat replacement.
+
+## The interface
+
+Built with the list and the exchange; the asker's voice (phase 3), votes, extra lists and seats
+have no interface yet. `frontend/mic.ts` reads `GET /api/debates/:id/mic` (every 4 seconds live, 2
+while a mic is live or queued) and, signed in, `GET /api/debates/:id/mic/mine`: the viewer's own
+held pledges with the ids a withdrawal names, the mics they fired and what they pledged to the open
+fund. The public read adds `enabled` (the debate started with the mic on) and `turns` (every mic
+turn's number, kind, asker, target and typed text). A page with `MIC_ENABLED` on loads the script;
+a debate that started without the mic shows nothing.
+
+- **The Mic tab.** In the right panel on computers and tablets, where it has the page's height
+  ([Decision 0016, amended 2026-11-25](0016-phone-full-screen-watch.md#amended-2026-11-25-computers-and-the-mic-on-the-full-screen)),
+  and in the phone page's tabs; it shows the open questions or "#1" when the viewer's own
+  question can fire. Its panel has one list for each debater ("For Maya", "For Léo"), most backed
+  first, as rows: rank, question, total, author and pledge count, paid comments. Under each
+  question, "+10", "+50" and "Other" (an amount and an optional comment) pledge at once; the
+  viewer's own pledges have Withdraw; "Ask Maya" opens the one question form with its pledge. The
+  live mic sits on top with the keep-the-asker-on meter and the same quick amounts, then the mics
+  waiting. The page says "pledge" for the author's wager too, and never "bet". Fire is one orange
+  key pinned to the top of the panel when the viewer's own question is first; a second press
+  within five seconds fires it, as it spends the question's total for good. Withdrawing one's own
+  question asks for the same second press. No sentence explains a missing button.
+- **The Mic on a phone.** The founder, 2026-11-25, of the phone's Mic sheet: "it feels 2008, make
+  it better according both to the overall theme and the industry's best practices." On a phone
+  (the sheet and the phone page's tab) the same panel shows one debater's questions at a time
+  behind a two-way switch with each list's count, starting on the debater the viewer asked, else
+  the one with the most backed question. A question is a card: its place in a stepped tile, the
+  words (the first in the display face), who asked, paid comments, the viewer's own pledges with
+  Withdraw, then the total beside one Pledge button that opens "+10", "+50" and "Other" under it,
+  one question at a time. A line along the card's foot is its total against the leader's. In the
+  sheet the heading and the switch stay put while the list scrolls, and the bottom edge holds the
+  viewer's next step: an "Ask Maya" bar that opens the question form there, lifted clear of the
+  on-screen keyboard, or the sign-in key. What a press did shows as a line over the list for six
+  seconds. Computers keep the two lists and their quick amounts.
+- **Over the video.** A band names the mic turn and shows the words on screen: the asker's typed
+  text, or the backed question until they type (E7, E9), on one line while the debater answers,
+  with the fund's progress while it takes pledges. "Yapper incoming" (F15) covers the stage for
+  2.7 seconds when a mic's question or an extension question starts, naming the asker, the
+  debater asked and, when the mic cut a turn, whom it cut and the time lost; it only fades under
+  reduced motion and is said once to screen readers. A page opened mid-turn plays nothing.
+- **The asker.** In their own turn the panel opens by itself with "You have the mic": their
+  backed question ready to put on screen, "Show on screen" and "End my turn".
+- **Phone full screen.** When a list opens, "Yappers, the mic is open" plays over the cameras
+  for about four seconds, once for each list on a device (founder, 2026-11-25); a tap opens the
+  Mic sheet. Approved by the founder on 2026-11-27 (Decision 0016): the rail's fourth button, Mic,
+  under Turns, with the same badge, opening a Mic sheet that holds the page's own panel; the band
+  on the seam between the two cameras, left of the clock; the animation over the whole picture,
+  with Yes and No on top of it in reach. The rail's steps for shorter phones each start one button taller.
+- **Turns.** Every turn keeps one number everywhere. A mic's turns are also named by their kind
+  ("Question · @zoe", "Answer · Léo", "Floor back · Maya") on the scoreboard, the clocks, the
+  answer panel, the results bars, the Turns sheet and the replay timeline, and each one makes the
+  debate's total one longer ("Turn 13 of 15"). In the asker's own turns no debater is shown
+  speaking: the media snapshot carries `speakingSide` (null then), and a debater's page no longer
+  waits for a microphone it will not get. A cut turn reads "a mic cut this turn short and its
+  answers were refunded".
+- **Viewers present.** With the mic on, a signed-in viewer's page sends the presence heartbeat
+  all through the live debate, between windows too, since the list is for viewers present.
 
 Shared with [Decision 0017](0017-forecast-duels.md): the count of viewers present
 (`src/features/presence/`) and the void of a cut turn's window (`voidTurnWindow`, reason `turn_cut`)

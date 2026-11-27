@@ -3,12 +3,13 @@
 // line above the bars for the turn being looked at. a4-inline.ts feeds it the
 // turn windows; the rules are in turn-results-model.ts.
 /* global document */
-import { firstName } from "./debate-layout-model.js";
 import {
   barLabel,
   barScale,
   barShape,
   captionParts,
+  columnInitials,
+  columnName,
   initials,
   percents,
   phoneColumns,
@@ -139,16 +140,12 @@ export function createTurnBars(
         who.setAttribute("aria-hidden", "true");
         who.append(
           text("b", "arena-turn-bar-number", String(column.turnNumber)),
-          text(
-            "span",
-            "arena-turn-bar-name",
-            column.side ? firstName(names[column.side]) : "",
-          ),
+          text("span", "arena-turn-bar-name", columnName(column, names)),
           // Narrow charts have room for initials only.
           text(
             "span",
             "arena-turn-bar-initials",
-            column.side ? initials(names[column.side]) : "",
+            columnInitials(column, names),
           ),
           text("span", "arena-turn-bar-playing", "playing"),
         );

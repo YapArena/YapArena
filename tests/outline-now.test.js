@@ -98,6 +98,20 @@ describe("the argument line's rules", () => {
     assert.equal(LISTENING, "Listening for the next argument…");
   });
 
+  it("keeps the last argument while a viewer has the mic (Decision 0018)", () => {
+    const current = turn(5, [argument("t5a1", "Fares fund a third")]);
+    // Turn 6 is a viewer's question on side B's clock: no debater speaks.
+    const asking = { ...live(6, "B"), speakingSide: null };
+    assert.equal(nowLine(view(current), asking, sides).kind, "argument");
+    assert.equal(nowLine(view(null), asking, sides), null);
+    // Their answer is a debater speaking again.
+    assert.equal(
+      nowLine(view(current), { ...live(7, "A"), speakingSide: "A" }, sides)
+        .kind,
+      "listening",
+    );
+  });
+
   it("shows nothing without a view, an argument, or once the debate ended", () => {
     const current = turn(5, [argument("t5a1", "Fares fund a third")]);
     assert.equal(nowLine(null, live(5, "A"), sides), null);

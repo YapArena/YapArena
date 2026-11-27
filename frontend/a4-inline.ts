@@ -19,6 +19,9 @@ import {
   onStakeWindowsStale,
 } from "./stake-windows.js";
 import { createTurnBars } from "./turn-results.js";
+import type { MicPastTurn } from "./mic-model.js";
+import { onMic } from "./mic-state.js";
+import { isDuel, type PublicWindow } from "./stake-model.js";
 import { PHONE_WATCH_QUERY } from "./watch-phone.js";
 import {
   isTurnWindow,
@@ -94,6 +97,7 @@ if (root) {
   const inspector = root.querySelector<HTMLElement>(".arena-price-inspector");
   let mode: "bars" | "line" | "empty" = lineChart ? "line" : "empty";
   let columns: TurnColumn[] = [];
+  let micTurns: readonly MicPastTurn[] = [];
   // This viewer's own limits by window id, from the answer panel.
   let ownLimits: Record<string, string> = {};
   const phone = matchMedia("(max-width: 599px)");
@@ -168,7 +172,7 @@ if (root) {
   function renderTurns(points: RoundPoint[]) {
     const turnWindows = windows.filter(isTurnWindow);
     setMode("bars");
-    columns = turnColumns(turnWindows, timeline, total, !replay);
+    columns = turnColumns(turnWindows, timeline, total, !replay, micTurns);
     if (!columns.some((column) => column.turnNumber === selectedTurn))
       selectedTurn = null;
     const selected = selectedTurn ?? latestRevealed(columns);
@@ -182,6 +186,10 @@ if (root) {
     });
     root.querySelector<HTMLElement>("[data-shared-arguments]")!.hidden = true;
     if (volume) volume.hidden = true;
+    // Decision 0017: a duel window has no price draw, so the price card and
+    // the page's words about prices show only for windows that had one.
+    showRule(turnWindows);
+    points = points.filter((point) => point.branch !== "duels");
     if (priceDetails) priceDetails.hidden = !points.length;
     if (!points.length) return;
     const latest = points.at(-1)!;
@@ -197,6 +205,26 @@ if (root) {
       points.find((point) => point.number === selected) ?? null,
       "Turn",
     );
+  }
+  // The newest window's rule words "How results work" and the phone's hint;
+  // before the first window the server's words stand.
+  const arena = root.closest<HTMLElement>("[data-arena]") ?? root;
+  function showRule(turnWindows: readonly PublicWindow[]) {
+    const newest = turnWindows.reduce<PublicWindow | null>(
+      (latest, window) =>
+        latest === null || window.turnNumber > latest.turnNumber
+          ? window
+          : latest,
+      null,
+    );
+    if (!newest) return;
+    const duels = isDuel(newest);
+    for (const text of arena.querySelectorAll<HTMLElement>(
+      "[data-results-rule]",
+    ))
+      text.hidden = (text.dataset.resultsRule === "duels") !== duels;
+    const hint = arena.querySelector<HTMLElement>("[data-price-hint]");
+    if (hint) hint.hidden = duels;
   }
   function renderShared() {
     const revealed = windowPoints(windows, timeline).map((point) => ({
@@ -272,6 +300,11 @@ if (root) {
     windows = shared;
     if (timelineState === "idle" && windowPoints(windows, null).length)
       void loadTimeline();
+    renderShared();
+  });
+  // Decision 0018: a mic's turns are named by their kind on the bars.
+  onMic(debateId, (shared) => {
+    micTurns = shared.mic?.turns ?? [];
     renderShared();
   });
   // The turns come from the answer panel's reads; say when they can't refresh.

@@ -16,6 +16,13 @@ const debateId = "33333333-3333-4333-8333-333333333333";
 const questionId = "44444444-4444-4444-8444-444444444444";
 const pledgeId = "55555555-5555-4555-8555-555555555555";
 const list = { debateId, list: null, mics: [] };
+const own = {
+  debateId,
+  seated: false,
+  pledges: [{ id: pledgeId, questionId, amount: 20, wager: false }],
+  mics: [],
+  kept: null,
+};
 
 function stub(overrides = {}) {
   const calls = [];
@@ -29,6 +36,7 @@ function stub(overrides = {}) {
     calls,
     mic: {
       read: record("read", list),
+      readOwn: record("readOwn", own),
       submitQuestion: record("submitQuestion", {
         questionId,
         pledgeId,
@@ -145,6 +153,33 @@ describe("the mic routes", () => {
       404,
     );
     assert.deepEqual(calls, [["read", debateId]]);
+  });
+
+  it("serve a signed-in viewer their own pledges, privately", async () => {
+    const { mic, calls } = stub();
+    const mine = `/api/debates/${debateId}/mic/mine`;
+    assert.equal(
+      (await request(app(mic, { signedIn: false })).get(mine)).status,
+      401,
+    );
+    // A read: no origin or session header is needed, and nothing is cached.
+    const response = await request(app(mic)).get(mine);
+    assert.equal(response.status, 200);
+    assert.equal(response.headers["cache-control"], "private, no-store");
+    assert.equal(response.headers.vary, "Cookie");
+    assert.deepEqual(response.body, own);
+    assert.deepEqual(calls, [["readOwn", debateId, "7"]]);
+    assert.equal(
+      (await request(app(mic)).get("/api/debates/not-a-debate/mic/mine"))
+        .status,
+      404,
+    );
+    assert.equal(
+      (await request(app(stub({ readOwn: async () => null }).mic)).get(mine))
+        .status,
+      404,
+    );
+    assert.equal(calls.length, 1);
   });
 
   it("require a signed-in account, this origin and the current session for writes", async () => {

@@ -99,7 +99,6 @@ function start(bar: HTMLElement, card: HTMLElement, debateId: string) {
   const readout = {
     yes: bar.querySelector<HTMLElement>("[data-endorsement-yes]"),
     no: bar.querySelector<HTMLElement>("[data-endorsement-no]"),
-    note: bar.querySelector<HTMLElement>("[data-endorsement-note]"),
   };
   let signature = "";
   function render(next: BarView, accounts: number) {
@@ -113,10 +112,9 @@ function start(bar: HTMLElement, card: HTMLElement, debateId: string) {
     bar.style.setProperty("--yes-share", `${next.yesPercent}%`);
     bar.setAttribute("aria-valuenow", String(next.yesPercent));
     bar.setAttribute("aria-valuetext", next.valueText);
-    const line = dockReadout(next, accounts);
+    const line = dockReadout(next);
     if (readout.yes) readout.yes.textContent = line.empty ? "" : `${line.yes}%`;
     if (readout.no) readout.no.textContent = line.empty ? "" : `${line.no}%`;
-    if (readout.note) readout.note.textContent = line.note;
     card.replaceChildren(...cardContent(next));
     place();
   }

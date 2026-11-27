@@ -124,6 +124,7 @@ describe("configuration", () => {
       turnWindowsEnabled: false,
       duelWindowsEnabled: false,
       micEnabled: false,
+      debateAutoWatch: false,
       coinSandboxWebhookSecret: undefined,
       coinSandboxTransfersEnabled: false,
       coinTreasuryAlertUsdc: 200000,
@@ -187,6 +188,7 @@ describe("configuration", () => {
         turnWindowsEnabled: false,
         duelWindowsEnabled: false,
         micEnabled: false,
+        debateAutoWatch: true,
         coinSandboxWebhookSecret: undefined,
         coinSandboxTransfersEnabled: false,
         coinTreasuryAlertUsdc: 200000,
@@ -362,6 +364,24 @@ describe("configuration", () => {
       assert.throws(
         () => loadConfig({ ...coins, MIC_ENABLED: value }),
         /MIC_ENABLED must be true or false/,
+      );
+  });
+
+  it("starts watching as a debate page opens on production builds, unless told otherwise", () => {
+    const base = { DATABASE_URL: databaseUrl };
+    assert.equal(loadConfig(base).debateAutoWatch, false);
+    assert.equal(
+      loadConfig({ ...base, NODE_ENV: "test" }).debateAutoWatch,
+      false,
+    );
+    assert.equal(
+      loadConfig({ ...base, DEBATE_AUTO_WATCH: "true" }).debateAutoWatch,
+      true,
+    );
+    for (const value of ["1", "TRUE", "yes"])
+      assert.throws(
+        () => loadConfig({ ...base, DEBATE_AUTO_WATCH: value }),
+        /DEBATE_AUTO_WATCH must be true or false/,
       );
   });
 

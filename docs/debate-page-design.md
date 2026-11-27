@@ -50,6 +50,13 @@ preloads `headline.woff2` as the landing does; without the file, the labels show
 
 ## Layout
 
+Amended 2026-11-25 ([Decision 0016](decisions/0016-phone-full-screen-watch.md#amended-2026-11-25-computers-and-the-mic-on-the-full-screen)):
+on every viewport that is not a phone, the scoreboard under the video is replaced by name tags and
+a 64 px clock over the video, the answer panel is a bar under the video (the read and the size
+chips over the Yes and No keys, with no lettering), and the right panel is the tabs alone, at the
+page's height. Where the table and the Stage and Rail sections below still describe the
+scoreboard or the answer panel in the rail, they describe the phone page.
+
 | Width       | Layout                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ≥ 1200 px   | Grid `minmax(0, 1fr) 400px`, gap 24, max width 1920. The page fits one screen: the footer is hidden (its links are in About) and the video takes the largest 16:9 size above the status line and scoreboard (968 × 544 at 1440 × 900). Chat sits over the video when the video is at least 800 × 480 px; on a smaller video (about 1280 × 900 windows and smaller) it is a tab, as below 1200 px. The rail is the answer panel, then the tabs panel; the rail scrolls inside itself when the ticket is tall.   |
@@ -73,10 +80,12 @@ never plays the video inline.
   dialog named by the question, with focus kept inside. `[data-arena]` carries `data-watch="open"`
   and `data-watch-orientation`. Back, Escape or the browser's back closes it: a live debate is
   left, a replay pauses where it was, and focus returns to the button that opened it.
-- **Vertical:** side A's camera over side B's in the top 82% (`object-fit: cover`), the listener's
-  camera dimmed; the 76 px turn clock on the seam (coral in the last 10 s, "NEXT" and the next
-  speaker between turns) and the turn bar along the top; the 146 px dock with the last-answer bar
-  (a line of figures over a 4 px track; a tap still opens its card) above the Yes and No keys.
+- **Vertical:** side A's camera over side B's, filling the screen (`object-fit: cover`), the
+  listener's camera dimmed; the 76 px turn clock on the seam (coral in the last 10 s, "NEXT" and
+  the next speaker between turns) and the turn bar along the top; the Yes and No keys over the
+  bottom of the lower camera with nothing behind them, and above them, once a result is revealed,
+  the last-answer bar (two figures over a 4 px track; a tap opens its card). Before a result the
+  bar shows nothing.
   The keys press the answer panel's own Yes and No, so the answer sheet opens over the full screen
   and gives focus back to the key; after placing, the key reads "Yes · 25" and the other dims.
 - **Always shown:** LIVE with the watching count, and the rail: Chat (the page's own chat,
@@ -96,6 +105,29 @@ never plays the video inline.
   over the right camera and moves the cluster and question left. Turns, ··· and the answer sheet
   are 392 px right-side sheets, and while one is open the rail, B's tag, the question, the
   cluster and chat step aside.
+
+### Borrow the mic
+
+[Decision 0018](decisions/0018-borrow-the-mic.md#the-interface), only on a debate that started
+with the mic on. `public/mic.css`, `frontend/mic.ts` and `frontend/mic-model.ts`.
+
+- **Mic tab:** between Chat and Results, "Mic · 5" with the open questions or "Mic · #1" (orange)
+  when the viewer's own question can fire. On phones the tab row tightens to 13 px names (12 px
+  under 360 px). Two lists, each under its debater's name in Forum 20 px; questions are rows
+  divided by a line, the top one in 16 px, the viewer's own with a white left edge. Quick amounts
+  are 32 px pills ("+10", "+50", "Other"; 44 px on phones). Keys are the site's stepped pixel
+  keys in white, 40 px; Fire is the one orange key, 52 px, pinned to the top of the panel.
+- **Band:** over the video's bottom left on computers (black at 78%, a 3 px white left edge), at
+  most 34rem wide; the asker's words in Forum 20 px, up to five lines, one line while a debater
+  answers. On a phone it shows only in the full screen, on the seam between the cameras.
+- **Yapper incoming:** a black wipe over the stage for 2.7 s, the two words rising in Dydema
+  Capitals, a white rule, then who asks whom and, in red capitals, whom the mic cut and the time
+  lost. Reduced motion: a fade.
+- **Phone full screen:** "Yappers, the mic is open" wipes in over the upper camera for about four
+  seconds when a list opens, with an orange left edge; a tap opens the Mic sheet. A fourth rail
+  button, Mic, with a badge; its sheet is 620 px tall and holds the page's own panel: a switch
+  between the two debaters' questions, question cards with one Pledge button each, and the Ask bar
+  pinned to its bottom edge.
 
 ## Stage
 

@@ -1,6 +1,14 @@
 // Pure rules for the debate page's scoreboard (direction BC1,
 // docs/debate-page-design.md): who has the floor, what each card and the
 // centre of the scoreboard say. frontend/debate-layout.ts applies them.
+import {
+  askerName,
+  micTurnAt,
+  micTurnSentence,
+  micTurnSpeaker,
+  turnTitle,
+  type MicPastTurn,
+} from "./mic-model.js";
 import type { PublicWindow } from "./stake-model.js";
 
 export type Side = "A" | "B";
@@ -12,11 +20,22 @@ export interface TurnDetail {
   eventStatus: string;
   state: "idle" | "running" | "paused" | "ended" | null;
   activeSide: Side | null;
+  /**
+   * Decision 0018: the debater speaking; null in a viewer's own mic turns.
+   * Absent from an older server or page: the active side speaks.
+   */
+  speakingSide?: Side | null;
   turnNumber: number | null;
   turnDeadlineAt: string | null;
   /** Server time minus this browser's time, in milliseconds. */
   serverOffset: number;
 }
+
+/** The debater speaking in a turn: the active side, unless a viewer has the mic. */
+export const speakingSide = (
+  turn: Pick<TurnDetail, "activeSide" | "speakingSide">,
+): Side | null =>
+  turn.speakingSide === undefined ? turn.activeSide : turn.speakingSide;
 
 declare global {
   interface WindowEventMap {
@@ -72,13 +91,15 @@ function speaking(side: Side): TurnView {
 /**
  * The live scoreboard from the media snapshot, or from the open turn window
  * when the snapshot has no turn number. Null when the debate isn't live and
- * the server's text stands.
+ * the server's text stands. Decision 0018: `micTurns` names a mic's turns;
+ * in a viewer's own turn no card is speaking and the debater asked is next.
  */
 export function liveTurnView(
   turn: TurnDetail | null,
   window: Pick<PublicWindow, "turnNumber" | "side"> | null,
   names: Record<Side, string>,
   total: number | null,
+  micTurns?: readonly MicPastTurn[],
 ): TurnView | null {
   if (turn && turn.eventStatus !== "live") {
     if (turn.eventStatus === "ended" || turn.state === "ended")
@@ -91,30 +112,47 @@ export function liveTurnView(
       };
     return null;
   }
+  const title = (turnNumber: number | null) =>
+    turnTitle({ turnNumber, total, turns: micTurns, names });
   const running =
     turn?.state === "running" && turn.activeSide
-      ? { side: turn.activeSide, turnNumber: turn.turnNumber }
+      ? {
+          side: speakingSide(turn),
+          turnNumber: turn.turnNumber ?? window?.turnNumber ?? null,
+        }
       : !turn && window
         ? { side: window.side, turnNumber: window.turnNumber }
         : null;
   if (running) {
-    const label = turnLabel(
-      running.turnNumber ?? window?.turnNumber ?? null,
-      total,
-    );
+    const mic = micTurnAt(micTurns, running.turnNumber);
+    const side = mic ? micTurnSpeaker(mic) : running.side;
+    const label = title(running.turnNumber);
+    if (side)
+      return {
+        ...speaking(side),
+        label,
+        summary: mic
+          ? `${micTurnSentence(mic, names)}`
+          : `${label ? `${label} · ` : ""}${names[side]} is speaking`,
+      };
+    // A viewer has the mic: the clock runs and nobody on camera speaks.
     return {
-      ...speaking(running.side),
-      label,
-      summary: `${label ? `${label} · ` : ""}${names[running.side]} is speaking`,
+      activeSide: null,
+      states: mic ? cards(mic.target, "next", "") : { A: "", B: "" },
+      hole: "",
+      label: mic ? label : "Mic",
+      summary: mic
+        ? micTurnSentence(mic, names)
+        : `${askerName(null)} has the mic`,
     };
   }
   if (turn?.state === "paused") {
-    const side = turn.activeSide;
+    const side = speakingSide(turn);
     return {
       activeSide: null,
       states: side ? cards(side, "next", "") : { A: "", B: "" },
       hole: "Paused",
-      label: turnLabel(turn.turnNumber, total),
+      label: title(turn.turnNumber),
       summary: "The debate is paused.",
     };
   }
@@ -131,18 +169,23 @@ export function liveTurnView(
 
 /**
  * The replay's playing turn: the turn window whose span in the recording
- * holds the position, and the time left in it.
+ * holds the position, and the time left in it. A turn cut short by a mic, or
+ * ended early, keeps its full span, which then overlaps the next turn's: the
+ * later turn is the one playing.
  */
 export function playingTurn(
   windows: readonly PublicWindow[],
   positionSeconds: number,
 ) {
-  const playing = windows.find(
-    (window) =>
+  let playing: PublicWindow | null = null;
+  for (const window of windows)
+    if (
       window.recording != null &&
       window.recording.startSeconds <= positionSeconds &&
-      positionSeconds < window.recording.endSeconds,
-  );
+      positionSeconds < window.recording.endSeconds &&
+      (playing === null || window.turnNumber > playing.turnNumber)
+    )
+      playing = window;
   return playing?.recording
     ? {
         turnNumber: playing.turnNumber,
@@ -155,25 +198,46 @@ export function playingTurn(
 export function replayTurnView(
   playing: ReturnType<typeof playingTurn>,
   total: number | null,
+  micTurns?: readonly MicPastTurn[],
+  names?: Record<Side, string>,
 ): TurnView | null {
   if (!playing) return null;
-  return {
-    ...speaking(playing.side),
-    hole: clockText(playing.left),
-    label: turnLabel(playing.turnNumber, total),
-  };
+  const mic = micTurnAt(micTurns, playing.turnNumber);
+  const side = mic ? micTurnSpeaker(mic) : playing.side;
+  const label = names
+    ? turnTitle({
+        turnNumber: playing.turnNumber,
+        total,
+        turns: micTurns,
+        names,
+      })
+    : turnLabel(playing.turnNumber, total);
+  if (!side)
+    return {
+      activeSide: null,
+      states: mic ? cards(mic.target, "next", "") : { A: "", B: "" },
+      hole: clockText(playing.left),
+      label,
+      summary: "",
+    };
+  return { ...speaking(side), hole: clockText(playing.left), label };
 }
 
-/** The open turn window at a time, if any. */
+/**
+ * The open turn window at a time, if any. When a turn ended early its window
+ * stays open until its cutoff, so the newest open window is the running one.
+ */
 export function openWindow(windows: readonly PublicWindow[], at: number) {
-  return (
-    windows.find(
-      (window) =>
-        window.state === "open" &&
-        Date.parse(window.opensAt) <= at &&
-        at < Date.parse(window.closesAt),
-    ) ?? null
-  );
+  let open: PublicWindow | null = null;
+  for (const window of windows)
+    if (
+      window.state === "open" &&
+      Date.parse(window.opensAt) <= at &&
+      at < Date.parse(window.closesAt) &&
+      (open === null || window.turnNumber > open.turnNumber)
+    )
+      open = window;
+  return open;
 }
 
 /** A stable 0–4 index into the visit's five colours for a chat author. */

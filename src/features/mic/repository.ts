@@ -39,7 +39,7 @@ import {
   type Question,
   type Side,
 } from "./rules.ts";
-import { askerKind, type MicTurnKind } from "./turn-kinds.ts";
+import { askerKind, micOn, type MicTurnKind } from "./turn-kinds.ts";
 import {
   createMicMoney,
   lockMoney,
@@ -218,6 +218,9 @@ interface PublicQuestion {
 }
 export interface PublicMicList {
   debateId: string;
+  // Whether this debate started with the mic on (its rules snapshot). The
+  // page shows no list for a debate that will never open one.
+  enabled: boolean;
   list: {
     id: string;
     n: number;
@@ -270,6 +273,37 @@ export interface PublicMicList {
     text: string | null; // the asker's typed text, as typed (E9)
     deadline: Date | null; // null while the debate is paused
   } | null;
+  // Every mic turn the debate has run, oldest first: the page and a replay
+  // label these turns by their kind, and count the debaters' own turns
+  // without them (they don't count toward the debate's length).
+  turns: {
+    turnNumber: number;
+    micId: string;
+    kind: MicTurnKind;
+    asker: string | null;
+    target: Side;
+    text: string | null; // an asker turn's typed text (E9), else null
+  }[];
+}
+
+/**
+ * What the signed-in viewer holds in a debate's mic: their open pledges
+ * (a wager is the pledge that carries their own question), the mics they
+ * fired, and what they pledged to the open keep-the-asker-on fund. Pledge ids
+ * are what a withdrawal names; nothing here is public.
+ */
+export interface OwnMic {
+  debateId: string;
+  // A seated debater takes no part in the list (L17).
+  seated: boolean;
+  pledges: {
+    id: string;
+    questionId: string;
+    amount: number;
+    wager: boolean;
+  }[];
+  mics: string[];
+  kept: { fundId: string; amount: number } | null;
 }
 
 /**
@@ -283,16 +317,14 @@ export async function readList(
   debateId: string,
 ): Promise<PublicMicList | null> {
   if (!uuid.test(debateId)) return null;
-  if (
-    !(
-      await client.query(
-        `SELECT 1 FROM debates d JOIN topics t ON t.id=d.topic_id
-        WHERE d.id=$1 AND d.publication_state='published' AND t.publication_state='published'`,
-        [debateId],
-      )
-    ).rowCount
-  )
-    return null;
+  const debate = (
+    await client.query<{ rules: unknown }>(
+      `SELECT d.rules_snapshot AS rules FROM debates d JOIN topics t ON t.id=d.topic_id
+      WHERE d.id=$1 AND d.publication_state='published' AND t.publication_state='published'`,
+      [debateId],
+    )
+  ).rows[0];
+  if (!debate) return null;
   const list = (
     await client.query<ListRow>(
       `SELECT id,debate_id AS "debateId",n,extra,state,opened_round AS "openedRound"
@@ -389,6 +421,22 @@ export async function readList(
       )
     ).rows.map((row) => [row.id, row.body]),
   );
+  const turns = (
+    await client.query<{
+      turnNumber: number;
+      micId: string;
+      kind: MicTurnKind;
+      text: string | null;
+      holder: string;
+      target: Side;
+    }>(
+      `SELECT t.turn_number AS "turnNumber",t.mic_id AS "micId",t.kind,t.text,
+        m.holder_id::text AS holder,m.target
+      FROM mic_turns t JOIN mic_mics m ON m.id=t.mic_id
+      WHERE t.debate_id=$1 ORDER BY t.turn_number`,
+      [debateId],
+    )
+  ).rows;
   const loaded = list
     ? await loadList(client, list)
     : {
@@ -426,6 +474,7 @@ export async function readList(
   };
   return {
     debateId,
+    enabled: micOn(debate.rules),
     list: list
       ? {
           id: list.id,
@@ -479,6 +528,76 @@ export async function readList(
           text: current.text,
           deadline: current.deadline,
         }
+      : null,
+    turns: turns.map((turn) => ({
+      turnNumber: turn.turnNumber,
+      micId: turn.micId,
+      kind: turn.kind,
+      asker: handle(turn.holder),
+      target: turn.target,
+      text: turn.text,
+    })),
+  };
+}
+
+/** The signed-in viewer's own part of a debate's mic; see OwnMic. */
+export async function readOwn(
+  client: PoolClient,
+  debateId: string,
+  userId: string,
+): Promise<OwnMic | null> {
+  if (!uuid.test(debateId)) return null;
+  const debate = (
+    await client.query<{ seated: boolean }>(
+      `SELECT EXISTS (SELECT 1 FROM public_profiles p WHERE p.user_id=$2
+          AND p.id IN (d.speaker_a_profile_id,d.speaker_b_profile_id)) AS seated
+      FROM debates d JOIN topics t ON t.id=d.topic_id
+      WHERE d.id=$1 AND d.publication_state='published' AND t.publication_state='published'`,
+      [debateId, userId],
+    )
+  ).rows[0];
+  if (!debate) return null;
+  const pledges = (
+    await client.query<{
+      id: string;
+      questionId: string;
+      amount: string;
+      wager: boolean;
+    }>(
+      `SELECT p.id,p.question_id AS "questionId",p.amount::text,p.wager
+      FROM mic_pledges p JOIN mic_questions q ON q.id=p.question_id
+      WHERE q.debate_id=$1 AND p.user_id=$2 AND p.state='held' AND q.state='open'
+      ORDER BY p.created_at,p.id`,
+      [debateId, userId],
+    )
+  ).rows;
+  const mics = (
+    await client.query<{ id: string }>(
+      "SELECT id FROM mic_mics WHERE debate_id=$1 AND holder_id=$2 ORDER BY fired_at,id",
+      [debateId, userId],
+    )
+  ).rows;
+  const kept = (
+    await client.query<{ fundId: string; amount: string }>(
+      `SELECT f.id AS "fundId",sum(p.amount)::text AS amount
+      FROM mic_fund_pledges p JOIN mic_funds f ON f.id=p.fund_id
+      WHERE f.debate_id=$1 AND f.state='open' AND p.user_id=$2 AND p.state='held'
+      GROUP BY f.id,f.opened_turn_number ORDER BY f.opened_turn_number DESC LIMIT 1`,
+      [debateId, userId],
+    )
+  ).rows[0];
+  return {
+    debateId,
+    seated: debate.seated,
+    pledges: pledges.map((pledge) => ({
+      id: pledge.id,
+      questionId: pledge.questionId,
+      amount: coins(BigInt(pledge.amount)),
+      wager: pledge.wager,
+    })),
+    mics: mics.map((mic) => mic.id),
+    kept: kept
+      ? { fundId: kept.fundId, amount: coins(BigInt(kept.amount)) }
       : null,
   };
 }
@@ -687,6 +806,10 @@ export function createMicRepository(
     /** The public list; null when the debate is not published. */
     read(debateId: string) {
       return transaction((client) => readList(client, debateId));
+    },
+    /** The signed-in viewer's own pledges and mics; null as for read. */
+    readOwn(debateId: string, userId: string) {
+      return transaction((client) => readOwn(client, debateId, userId));
     },
     /** L5, L16, L21: a viewer's question with its wager, held at once. */
     submitQuestion(

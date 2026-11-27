@@ -345,7 +345,7 @@ try {
     );
 
   // 1. A finalized replay at 1440 × 900: the timeline under the video,
-  //    Results by turn under the scoreboard, no Results tab.
+  //    Results by turn under it, no Results tab.
   {
     const { context, page, errors } = await open(1440, 900);
     await page.locator("[data-replay-timeline]:not([data-waiting])").waitFor();
@@ -359,18 +359,28 @@ try {
         const timeline = document
           .querySelector("[data-replay-timeline]")!
           .getBoundingClientRect();
-        const scoreboard = document
-          .querySelector(".arena-scoreboard")!
-          .getBoundingClientRect();
+        // Since 2026-11-25 the debaters and the clock sit over the video
+        // on computers; the scoreboard element stays for phones.
+        const tags = [
+          ...document.querySelectorAll<HTMLElement>("[data-stage-tag]"),
+        ].map((tag) => tag.getBoundingClientRect());
         return {
           resultsTab: document.querySelectorAll("#arena-tab-results").length,
           inStage: results.parentElement!.matches(".arena-watch"),
           afterScoreboard:
             results.previousElementSibling!.matches(".arena-scoreboard"),
           timelineUnderVideo:
-            timeline.top >= video.bottom && timeline.bottom <= scoreboard.top,
-          // The scoreboard still ends on the first screen.
-          scoreboardOnFirstScreen: scoreboard.bottom <= window.innerHeight,
+            timeline.top >= video.bottom &&
+            timeline.bottom <= results.getBoundingClientRect().top,
+          // The debaters' name tags sit over the video.
+          namesOnVideo:
+            tags.length === 2 &&
+            tags.every(
+              (tag) =>
+                tag.width > 0 &&
+                tag.top >= video.top &&
+                tag.bottom <= video.bottom,
+            ),
           segments: document.querySelectorAll("[data-timeline-turn]").length,
           bars: document.querySelectorAll("[data-turn-bar]").length,
         };
@@ -380,7 +390,7 @@ try {
         inStage: true,
         afterScoreboard: true,
         timelineUnderVideo: true,
-        scoreboardOnFirstScreen: true,
+        namesOnVideo: true,
         segments: 10,
         bars: 10,
       },

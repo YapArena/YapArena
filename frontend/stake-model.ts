@@ -9,6 +9,8 @@ import {
 } from "./lib/coin-format.js";
 import type { DebateEndorsement } from "../src/features/endorsement/types.ts";
 
+import { micTurnAt, micTurnLabel, type MicPastTurn } from "./mic-model.js";
+
 export type StakeSide = "YES" | "NO";
 export type SpeakingSide = "A" | "B";
 export type EligibilityReason =
@@ -251,6 +253,26 @@ export function percent(value: Fraction | null | undefined) {
   if (!value) return null;
   const d = Number(value.d);
   return d ? Math.round((Number(value.n) / d) * 100) : null;
+}
+
+/**
+ * The answer panel's line for the turn it shows. Decision 0018: a mic's turn
+ * is named by its kind and who has the floor ("Question · @zoe"), since its
+ * window's side is only the asker's camp.
+ */
+export function turnHeading(input: {
+  turnNumber: number;
+  side: SpeakingSide | null;
+  replay: boolean;
+  speakers: { A: string; B: string };
+  labels: { A: string; B: string };
+  micTurns?: readonly MicPastTurn[];
+}) {
+  const mic = micTurnAt(input.micTurns, input.turnNumber);
+  const what = mic
+    ? micTurnLabel(mic, input.speakers)
+    : `${input.replay ? "turn" : "Turn"} ${input.turnNumber} · ${speakerLine(input.side, input.speakers, input.labels)}`;
+  return input.replay ? `Replay · ${what}` : what;
 }
 
 /** "Maya speaking (People first)", never a Yes or No side. */
@@ -606,7 +628,9 @@ export const PRESENCE_MS = 20_000;
  * duel window settles only with enough signed-in viewers present while it is
  * open, so a signed-in viewer of a live debate who is not one of its debaters
  * says so every 20 seconds while the page is visible, and at once when a new
- * duel window opens. A4 windows need no count, so nothing is sent for them.
+ * duel window opens. A4 windows need no count, so nothing is sent for them,
+ * unless the debate has the mic on (Decision 0018): its list is for viewers
+ * present, between windows too.
  */
 export function presenceDue(state: {
   eventStatus: string | undefined;
@@ -617,6 +641,8 @@ export function presenceDue(state: {
   hidden: boolean;
   /** The live window taking orders now, if any. */
   window: Pick<PublicWindow, "id" | "rule"> | null;
+  /** Decision 0018: the debate has the mic on. */
+  mic?: boolean;
   last: { at: number; windowId: string | null } | null;
   now: number;
 }) {
@@ -625,14 +651,14 @@ export function presenceDue(state: {
     state.signedIn !== true ||
     !state.session ||
     state.debater ||
-    state.hidden ||
-    !state.window ||
-    !isDuel(state.window)
+    state.hidden
   )
     return false;
+  const duel = state.window && isDuel(state.window) ? state.window : null;
+  if (!duel && !state.mic) return false;
   return (
     state.last === null ||
-    state.last.windowId !== state.window.id ||
+    (duel !== null && state.last.windowId !== duel.id) ||
     state.now - state.last.at >= PRESENCE_MS
   );
 }

@@ -364,3 +364,80 @@ describe("a debate whose figure isn't counted", () => {
     assert.equal(view.status, "Fills after each turn's answers are revealed.");
   });
 });
+
+// Decision 0018: a mic's turns in the Turns sheet.
+describe("Turns sheet with a mic", () => {
+  const mic = (turnNumber, kind) => ({
+    turnNumber,
+    micId: "mic-1",
+    kind,
+    asker: "zoe",
+    target: "B",
+    text: null,
+  });
+  const micTurns = [mic(3, "question"), mic(4, "answer")];
+
+  it("marks a viewer's turn as the mic's and adds a slot per mic turn", () => {
+    const view = turnsSheetView({
+      figure: null,
+      labels: null,
+      windows: [
+        window(1, 61),
+        window(2, null, {
+          state: "void",
+          voidReason: "turn_cut",
+          pricing: null,
+        }),
+        window(3, 55),
+        window(4, 48),
+      ],
+      total: 6,
+      names,
+      position: null,
+      now,
+      micTurns,
+    });
+    // Six debaters' turns and two mic turns.
+    assert.equal(view.slots.length, 8);
+    assert.deepEqual(
+      view.slots.slice(0, 5).map((slot) => [slot.turnNumber, slot.who]),
+      [
+        [1, "MC"],
+        [2, "LT"],
+        [3, "MIC"],
+        [4, "LT"],
+        [5, ""],
+      ],
+    );
+    assert.equal(
+      view.turnsLabel,
+      "Share who said yes in each revealed turn: turn 1 61%, turn 2 cut short, Turn 3, Question, @zoe 55%, Turn 4, Answer, Léo Tremblay 48%",
+    );
+  });
+
+  it("says a returned duel window's stakes were returned", () => {
+    const view = turnsSheetView({
+      figure: null,
+      labels: null,
+      windows: [
+        window(1, null, {
+          duels: { status: "returned_few_viewers" },
+        }),
+        window(2, null),
+        window(3, null, {
+          state: "void",
+          voidReason: "operator_cancelled",
+          pricing: null,
+        }),
+      ],
+      total: 4,
+      names,
+      position: null,
+      now,
+    });
+    assert.equal(
+      view.turnsLabel,
+      "Share who said yes in each revealed turn: turn 1 stakes returned, turn 2 no answers, turn 3 cancelled",
+    );
+  });
+});

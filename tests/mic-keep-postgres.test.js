@@ -398,6 +398,12 @@ describe(
         ...small,
         created: false,
       });
+      // The interface's read of the viewer's own part names what they
+      // pledged to the open fund.
+      assert.deepEqual((await mic.readOwn(debateId, backer.userId)).kept, {
+        fundId: opened.id,
+        amount: 1,
+      });
       await assert.rejects(
         keep(backer, debateId, 2, requestId),
         refused(409, /different request/),

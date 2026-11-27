@@ -12,6 +12,15 @@ import {
   type TurnDetail,
 } from "./debate-layout-model.js";
 import {
+  askerName,
+  micTurnAt,
+  micTurnSentence,
+  nextAfterMicTurn,
+  totalTurns,
+  type MicPastTurn,
+  type MicPublic,
+} from "./mic-model.js";
+import {
   liveWindow,
   replayWindow,
   type PublicWindow,
@@ -35,7 +44,9 @@ export function watchOrientation(
   return width > height ? "horizontal" : "vertical";
 }
 
-export type WatchSheet = "turns" | "more";
+/** Decision 0018 adds the mic's list as a third sheet. */
+export type WatchSheet = "turns" | "more" | "mic";
+export const watchSheets: readonly WatchSheet[] = ["turns", "more", "mic"];
 
 export interface WatchState {
   open: boolean;
@@ -97,7 +108,13 @@ export interface WatchClock {
   spent: number;
   /** The turn shown under the clock: the running one, or the next one. */
   turnNumber: number | null;
+  /**
+   * The debate's turns; each mic turn so far makes it one longer, as a mic's
+   * turns don't count toward the debate's length (Decision 0018).
+   */
   total: number | null;
+  /** A mic's turn is running or about to: the clock says "Mic". */
+  mic: boolean;
   /** Between turns: who speaks next, and their first name. */
   nextSide: Side | null;
   nextName: string;
@@ -121,7 +138,12 @@ export interface WatchClockInput {
   total: number | null;
   names: Record<Side, string>;
   reduced?: boolean;
+  /** Decision 0018: the debate's mic, when the page read one. */
+  mic?: Pick<MicPublic, "turns" | "mics" | "fund"> | null;
 }
+
+const micTurns = (input: WatchClockInput): readonly MicPastTurn[] | undefined =>
+  input.mic?.turns;
 
 function rest(input: WatchClockInput, word: string): WatchClock {
   return {
@@ -130,7 +152,8 @@ function rest(input: WatchClockInput, word: string): WatchClock {
     warn: false,
     spent: 0,
     turnNumber: null,
-    total: input.total,
+    total: totalTurns(input.total, micTurns(input)),
+    mic: false,
     nextSide: null,
     nextName: "",
     word,
@@ -149,30 +172,36 @@ function running(
     total: input.turnSeconds,
     reduced: Boolean(input.reduced),
   });
+  const mic = micTurnAt(micTurns(input), turnNumber);
   return {
     phase: "running",
     text: clockText(left),
     warn: left <= WARNING_SECONDS,
     spent: frame.spent,
     turnNumber,
-    total: input.total,
+    total: totalTurns(input.total, micTurns(input)),
+    mic: mic !== null,
     nextSide: null,
     nextName: "",
     word: "",
-    label: timerLabel(left, turnNumber),
+    label: mic
+      ? `${timerLabel(left, null)}: ${micTurnSentence(mic, input.names)}`
+      : timerLabel(left, turnNumber),
   };
 }
 
 function between(
   input: WatchClockInput,
-  next: Side,
+  next: { side: Side | null; name: string; full: string; mic: boolean },
   turnNumber: number | null,
 ): WatchClock {
+  // The next turn may be a mic's, which the list doesn't hold yet.
+  const total = totalTurns(input.total, micTurns(input));
   const shown =
     turnNumber === null
       ? null
-      : input.total
-        ? Math.min(input.total, turnNumber)
+      : total && !next.mic
+        ? Math.min(total, turnNumber)
         : turnNumber;
   return {
     phase: "between",
@@ -180,12 +209,50 @@ function between(
     warn: false,
     spent: 1,
     turnNumber: shown,
-    total: input.total,
-    nextSide: next,
-    nextName: firstName(input.names[next]),
+    total,
+    mic: next.mic,
+    nextSide: next.side,
+    nextName: next.name,
     word: "",
-    label: `Between turns. ${input.names[next]} speaks next`,
+    label: `Between turns. ${next.full} speaks next`,
   };
+}
+const debater = (input: WatchClockInput, side: Side) => ({
+  side,
+  name: firstName(input.names[side]),
+  full: input.names[side],
+  mic: false,
+});
+
+/**
+ * Who speaks after the turn that just ended. A debater's turn hands over to
+ * the other debater, unless a mic has fired and waits for this boundary;
+ * inside a mic's exchange the asker and the debater asked take turns
+ * (Decision 0018).
+ */
+function nextSpeaker(input: WatchClockInput, turn: TurnDetail) {
+  const mic = micTurnAt(micTurns(input), turn.turnNumber);
+  if (mic) {
+    const funded =
+      input.mic?.fund?.micId === mic.micId && input.mic.fund.state === "funded";
+    const next = nextAfterMicTurn(mic, funded, input.names);
+    if (next)
+      return {
+        ...next,
+        full: next.side ? input.names[next.side] : next.name,
+        // Every turn of the exchange, and the turn that hands the floor
+        // back, is the mic's.
+        mic: true,
+      };
+  }
+  const waiting = input.mic?.mics?.find(
+    (entry) => entry.state === "live" && !entry.started,
+  );
+  if (waiting) {
+    const name = askerName(waiting.holder);
+    return { side: null, name, full: name, mic: true };
+  }
+  return debater(input, other(turn.activeSide!));
 }
 
 /**
@@ -211,7 +278,7 @@ export function watchClock(input: WatchClockInput): WatchClock {
       ? running(input, turn.turnNumber, left)
       : between(
           input,
-          other(turn.activeSide),
+          nextSpeaker(input, turn),
           turn.turnNumber === null ? null : turn.turnNumber + 1,
         );
   }
@@ -221,7 +288,7 @@ export function watchClock(input: WatchClockInput): WatchClock {
     if (left > 0) return running(input, input.window.turnNumber, left);
   }
   // Live, before the first turn: side A opens.
-  if (turn) return between(input, "A", turn.turnNumber ?? 1);
+  if (turn) return between(input, debater(input, "A"), turn.turnNumber ?? 1);
   return rest(input, "");
 }
 
@@ -234,7 +301,11 @@ export interface TurnSegment {
 
 /** The turn bar at the top: one segment per turn, the running one filling. */
 export function turnSegments(clock: WatchClock): TurnSegment[] {
-  const total = clock.total ?? 0;
+  // Between turns the next turn may be a mic's, one more than the total.
+  const total = Math.max(
+    clock.total ?? 0,
+    clock.total && clock.turnNumber ? clock.turnNumber : 0,
+  );
   if (!total) return [];
   // Between turns, the shown number is the next turn; the one before it is over.
   const current =
@@ -252,6 +323,15 @@ export function turnSegments(clock: WatchClock): TurnSegment[] {
         : { done: true, fill: 1 };
     return { done: false, fill: 0 };
   });
+}
+
+/** Under the clock: "7 / 10", "Turn 7", or "Mic" in a mic's turn. */
+export function clockTurnText(clock: WatchClock) {
+  if (clock.mic) return "Mic";
+  if (clock.turnNumber === null) return "";
+  return clock.total
+    ? `${clock.turnNumber} / ${clock.total}`
+    : `Turn ${clock.turnNumber}`;
 }
 
 export interface OwnPosition {

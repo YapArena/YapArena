@@ -1,0 +1,1460 @@
+/* Decision 0018, borrow the microphone, on the debate page. The Mic tab's
+   panel (frontend/mic.ts fills it; the phone full screen shows the same
+   element in its Mic sheet), the band over the video and the "Yapper
+   incoming" animation. Loaded only by a debate page with the mic's markup.
+   Green and red stay Yes and No's; the mic's one accent is the warning
+   orange, on the key that fires. */
+
+/* ---- The panel: a tab in the right panel, a sheet on the phone full screen ---- */
+.arena-page .arena-workspace[data-tab="mic"] .arena-insight > #arena-mic {
+  display: flex;
+}
+.arena-page .arena-workspace .mic-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  color: var(--text);
+  font-size: var(--text-14);
+}
+.arena-page .arena-workspace .mic-panel:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: -2px;
+}
+.arena-page .arena-workspace .mic-panel p {
+  margin: 0;
+}
+.arena-page .arena-workspace .mic-panel :is(.mic-state, .mic-status):empty {
+  display: none;
+}
+.arena-page .arena-workspace .mic-panel .mic-state {
+  color: var(--muted);
+}
+.arena-page .arena-workspace .mic-panel .mic-status {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-inner);
+  background: var(--raised);
+  font-size: var(--text-12);
+}
+
+/* The viewer's own turn and the live mic: the only two boxes. */
+.arena-page .arena-workspace :is(.mic-you, .mic-live) {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-inner);
+  background: var(--raised);
+}
+.arena-page .arena-workspace .mic-you {
+  box-shadow: inset 0 0 0 1px var(--acid);
+}
+.arena-page .arena-workspace .mic-you h3 {
+  font-size: var(--text-16);
+}
+.arena-page .arena-workspace .mic-live-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 700;
+}
+.arena-page .arena-workspace .mic-live-line::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--acid);
+}
+.arena-page .arena-workspace .mic-fund {
+  display: grid;
+  gap: var(--space-2);
+}
+.arena-page .arena-workspace .mic-fund-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.arena-page .arena-workspace .mic-fund-title strong {
+  flex: none;
+  color: var(--text);
+  font: 400 var(--text-16) / 1.1 var(--font-number);
+  font-variant-numeric: tabular-nums;
+}
+.arena-page .arena-workspace .mic-meter {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 16%);
+}
+.arena-page .arena-workspace .mic-meter > span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--acid);
+}
+.arena-page .arena-workspace .mic-queued {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  color: var(--muted);
+  font-size: var(--text-12);
+  list-style: none;
+}
+
+/* The two lists, one for each debater, most backed first. Questions are
+   rows divided by a line, not boxes. */
+.arena-page .arena-workspace .mic-camps {
+  display: grid;
+  gap: var(--space-5);
+}
+.arena-page .arena-workspace .mic-camp {
+  display: grid;
+  gap: var(--space-2);
+}
+.arena-page .arena-workspace .mic-camp-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--control-border);
+  font: 400 var(--text-20) / 1.1 var(--font-number);
+}
+.arena-page .arena-workspace .mic-camp-count {
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+.arena-page .arena-workspace .mic-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.arena-page .arena-workspace .mic-list:empty {
+  display: none;
+}
+.arena-page .arena-workspace .mic-q {
+  display: grid;
+  gap: 6px;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+.arena-page .arena-workspace .mic-q[data-own] {
+  padding-left: var(--space-3);
+  box-shadow: inset 2px 0 0 var(--acid);
+}
+.arena-page .arena-workspace .mic-q-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+.arena-page .arena-workspace :is(.mic-q-rank, .mic-q-total) {
+  font: 400 var(--text-16) / 1.3 var(--font-number);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.arena-page .arena-workspace .mic-q-rank {
+  color: var(--muted);
+}
+.arena-page .arena-workspace .mic-q[data-rank="1"] .mic-q-rank {
+  color: var(--text);
+}
+.arena-page .arena-workspace .mic-q-text {
+  font-size: var(--text-14);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.arena-page .arena-workspace .mic-q[data-rank="1"] .mic-q-text {
+  font-size: var(--text-16);
+}
+.arena-page .arena-workspace .mic-q-meta {
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.arena-page .arena-workspace :is(.mic-q-adds, .mic-q-mine) {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-12);
+}
+.arena-page .arena-workspace .mic-q-adds {
+  padding-left: var(--space-2);
+  border-left: 2px solid var(--control-border);
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.arena-page .arena-workspace .mic-q-mine li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.arena-page .arena-workspace .mic-empty {
+  color: var(--muted);
+  font-size: var(--text-12);
+}
+.arena-page .arena-workspace .mic-signin a {
+  color: var(--text);
+}
+
+/* Quick amounts: one tap pledges 10 or 50 YC; Other asks for the amount. */
+.arena-page .arena-workspace .mic-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.arena-page .arena-workspace :is(.mic-chip, .mic-plain) {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text);
+  font-size: var(--text-12);
+  font-weight: 700;
+}
+.arena-page .arena-workspace .mic-chip:hover {
+  border-color: var(--acid);
+}
+.arena-page .arena-workspace .mic-plain {
+  justify-self: start;
+  min-height: 36px;
+}
+.arena-page .arena-workspace .mic-ask-open {
+  justify-self: stretch;
+  min-height: 40px;
+  border-style: dashed;
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+.arena-page .arena-workspace .mic-ask-open::before {
+  content: "+ ";
+}
+.arena-page .arena-workspace .mic-ask-open:hover {
+  border-color: var(--acid);
+  color: var(--text);
+}
+.arena-page .arena-workspace .mic-link {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--muted);
+  font-size: var(--text-12);
+  font-weight: 400;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* The two forms: a question, and an amount of one's own. */
+.arena-page .arena-workspace .mic-form {
+  display: grid;
+  gap: var(--space-2);
+}
+.arena-page .arena-workspace .mic-form :is(textarea, input) {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--control-border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  /* 16 px keeps a phone from zooming into the field. */
+  font-size: var(--text-16);
+}
+.arena-page .arena-workspace .mic-form textarea {
+  min-height: 64px;
+  resize: vertical;
+}
+.arena-page .arena-workspace .mic-form :is(textarea, input):focus-visible {
+  border-color: var(--acid);
+  outline: 1px solid var(--acid);
+}
+.arena-page .arena-workspace .mic-form-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.arena-page .arena-workspace .mic-form-row input[type="number"] {
+  flex: 0 0 5.5rem;
+  width: 5.5rem;
+}
+.arena-page .arena-workspace .mic-form-row .mic-key {
+  flex: 1 1 auto;
+}
+.arena-page .arena-workspace .mic-form-row .mic-plain {
+  flex: none;
+}
+
+/* The key: the site's stepped pixel corners and key-cap edge, in white.
+   Firing is the one orange key, pinned to the top of the panel. */
+.arena-page .arena-workspace .mic-key {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 0;
+  background: var(--acid);
+  color: var(--on-acid);
+  font: 700 var(--text-14) / 1.2 var(--font-body);
+  clip-path: polygon(
+    0 6px,
+    3px 6px,
+    3px 3px,
+    6px 3px,
+    6px 0,
+    calc(100% - 6px) 0,
+    calc(100% - 6px) 3px,
+    calc(100% - 3px) 3px,
+    calc(100% - 3px) 6px,
+    100% 6px,
+    100% calc(100% - 6px),
+    calc(100% - 3px) calc(100% - 6px),
+    calc(100% - 3px) calc(100% - 3px),
+    calc(100% - 6px) calc(100% - 3px),
+    calc(100% - 6px) 100%,
+    6px 100%,
+    6px calc(100% - 3px),
+    3px calc(100% - 3px),
+    3px calc(100% - 6px),
+    0 calc(100% - 6px)
+  );
+  box-shadow: inset 0 -4px 0 rgb(0 0 0 / 24%);
+  transition:
+    transform 0.06s,
+    box-shadow 0.06s;
+}
+.arena-page .arena-workspace .mic-key.mic-fire {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  flex: none;
+  min-height: 52px;
+  background: var(--warning);
+  color: #2a0d02;
+  font-size: var(--text-16);
+}
+.arena-page .arena-workspace .mic-key:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 24%);
+}
+.arena-page .arena-workspace .mic-key:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 3px var(--bg),
+    inset 0 -4px 0 rgb(0 0 0 / 24%);
+}
+.arena-page
+  .arena-workspace
+  .mic-panel[data-busy]
+  :is(.mic-key, .mic-plain, .mic-chip, .mic-link) {
+  opacity: 0.5;
+  pointer-events: none;
+}
+/* The tab's count: a small pill, orange when the viewer can fire. */
+.arena-page .arena-workspace .mic-tab-badge {
+  display: inline-block;
+  min-width: 18px;
+  margin-left: 6px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  border-radius: 9px;
+  background: rgb(255 255 255 / 14%);
+  color: var(--text);
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+  vertical-align: 1px;
+}
+.arena-page .arena-workspace .mic-tab-badge:empty {
+  display: none;
+}
+.arena-page
+  .arena-workspace
+  .arena-tabs
+  button[aria-selected="true"]
+  .mic-tab-badge {
+  background: rgb(0 0 0 / 12%);
+  color: inherit;
+}
+.arena-page .arena-workspace .arena-tabs .mic-tab-badge[data-fire] {
+  background: var(--warning);
+  color: #2a0d02;
+}
+/* The key that fires breathes, so a viewer who just became first sees it. */
+.arena-page .arena-workspace .mic-key.mic-fire {
+  animation: mic-breathe 1.8s ease-in-out infinite;
+}
+@keyframes mic-breathe {
+  50% {
+    filter: brightness(1.14);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arena-page .arena-workspace .mic-key.mic-fire {
+    animation: none;
+  }
+}
+
+/* ---- The band over the video: who has the mic, and the words on screen ---- */
+.arena-page .arena-workspace .mic-band {
+  position: absolute;
+  bottom: 22px;
+  left: var(--space-4);
+  z-index: 4;
+  display: grid;
+  gap: 4px;
+  box-sizing: border-box;
+  max-width: min(34rem, calc(100% - 2 * var(--space-4)));
+  padding: 10px 14px;
+  border-left: 3px solid var(--acid);
+  border-radius: 0 var(--radius-inner) var(--radius-inner) 0;
+  background: rgb(0 0 0 / 78%);
+  color: #f4f4f4;
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+  animation: mic-fade 0.3s ease both;
+}
+/* From 1200 px chat sits over the video's right side. */
+@media (min-width: 1200px) {
+  .arena-page
+    .arena-workspace
+    .arena-video-surface:has(> .arena-chat):not([data-chat="hidden"])
+    .mic-band {
+    max-width: min(34rem, 52%);
+  }
+}
+.arena-page .arena-workspace .mic-band p {
+  margin: 0;
+}
+.arena-page .arena-workspace .mic-band-kicker {
+  color: #c9c9c9;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.arena-page .arena-workspace .mic-band-line {
+  font-size: var(--text-14);
+  font-weight: 700;
+}
+.arena-page .arena-workspace .mic-band-text {
+  display: -webkit-box;
+  overflow: hidden;
+  font: 400 var(--text-20) / 1.25 var(--font-number);
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+}
+/* While a debater answers, the question takes one line. */
+.arena-page .arena-workspace .mic-band[data-asking="false"] .mic-band-text {
+  color: #c9c9c9;
+  font-size: var(--text-14);
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+.arena-page .arena-workspace .mic-band-fund {
+  display: grid;
+  gap: 4px;
+  margin-top: 2px;
+  color: #c9c9c9;
+  font-size: var(--text-12);
+}
+.arena-page .arena-workspace .mic-band-fund .mic-meter {
+  height: 4px;
+}
+
+/* ---- "Yapper incoming": a black wipe over the stage, the two words rising ---- */
+.arena-page .arena-workspace .mic-incoming {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  color: #f4f4f4;
+  pointer-events: none;
+  animation:
+    mic-wipe-in 0.35s var(--ease-expo) both,
+    mic-wipe-out 0.45s cubic-bezier(0.7, 0, 0.84, 0) 2.2s forwards;
+}
+.arena-page .arena-workspace .mic-incoming[hidden] {
+  display: none;
+}
+.arena-page .arena-workspace .mic-incoming-inner {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: var(--space-5);
+  text-align: center;
+}
+.arena-page .arena-workspace .mic-incoming-word {
+  display: block;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 9cqw, 5.6rem);
+  font-size: clamp(2.6rem, 11vmin, 5.6rem);
+  line-height: 0.95;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.arena-page .arena-workspace .mic-incoming-word > span {
+  display: inline-block;
+  animation: mic-rise 0.6s var(--ease-expo) 0.15s both;
+}
+.arena-page .arena-workspace .mic-incoming-second > span {
+  animation-delay: 0.27s;
+}
+.arena-page .arena-workspace .mic-incoming-rule {
+  width: 0;
+  height: 2px;
+  background: var(--acid);
+  animation: mic-grow 0.7s var(--ease-expo) 0.4s forwards;
+}
+.arena-page .arena-workspace .mic-incoming p {
+  margin: 0;
+}
+.arena-page .arena-workspace .mic-incoming-who {
+  font-size: var(--text-16);
+  animation: mic-fade 0.4s ease 0.6s both;
+}
+.arena-page .arena-workspace .mic-incoming-cut {
+  color: var(--answer-no);
+  font-size: var(--text-12);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  animation: mic-fade 0.4s ease 0.75s both;
+}
+.arena-page .arena-workspace .mic-incoming-cut:empty {
+  display: none;
+}
+@keyframes mic-wipe-in {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes mic-wipe-out {
+  to {
+    clip-path: inset(0 0 0 100%);
+  }
+}
+@keyframes mic-rise {
+  from {
+    transform: translateY(105%);
+  }
+}
+@keyframes mic-grow {
+  to {
+    width: min(420px, 70%);
+  }
+}
+@keyframes mic-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arena-page .arena-workspace .mic-incoming {
+    animation: mic-fade-only 2.7s linear both;
+  }
+  .arena-page .arena-workspace .mic-incoming * {
+    animation: none;
+  }
+  .arena-page .arena-workspace .mic-incoming-rule {
+    width: min(420px, 70%);
+  }
+  .arena-page .arena-workspace .mic-key {
+    transition: none;
+  }
+}
+@keyframes mic-fade-only {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  10%,
+  85% {
+    opacity: 1;
+  }
+}
+
+/* ---- "Yappers, the mic is open": the phone full screen's invitation ----
+   Two lines rise over the upper camera on a black band that wipes in and
+   out; a tap opens the Mic sheet. It shows only in the phone full screen. */
+.arena-page .arena-workspace .mic-invite {
+  display: none;
+}
+.arena-page .arena-workspace[data-watch="open"] .mic-invite:not([hidden]) {
+  position: absolute;
+  top: calc(var(--watch-top) + 56px);
+  right: 12px;
+  left: 12px;
+  z-index: 6;
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+  min-height: 0;
+  padding: 14px 16px 16px;
+  border: 0;
+  border-left: 4px solid var(--warning);
+  border-radius: 0 var(--radius-inner) var(--radius-inner) 0;
+  background: rgb(0 0 0 / 88%);
+  color: #f4f4f4;
+  text-align: left;
+  animation:
+    mic-wipe-in 0.35s var(--ease-expo) both,
+    mic-wipe-out 0.4s cubic-bezier(0.7, 0, 0.84, 0) 3.7s forwards;
+}
+.arena-page .arena-workspace .mic-invite-word {
+  display: block;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 8.4vw, 2.4rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.arena-page .arena-workspace .mic-invite-word > span {
+  display: inline-block;
+  animation: mic-rise 0.6s var(--ease-expo) 0.15s both;
+}
+.arena-page .arena-workspace .mic-invite-second > span {
+  animation-delay: 0.27s;
+}
+.arena-page .arena-workspace .mic-invite-line {
+  margin-top: 8px;
+  color: #c9c9c9;
+  font-size: var(--text-14);
+  font-weight: 400;
+  animation: mic-fade 0.4s ease 0.6s both;
+}
+.arena-page .arena-workspace .mic-invite-line::after {
+  content: " →";
+  color: var(--warning);
+}
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
+  .mic-invite:not([hidden]) {
+  top: calc(var(--watch-top) + 44px);
+  right: auto;
+  left: 50%;
+  width: min(26rem, 60%);
+  translate: -50% 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .arena-page .arena-workspace[data-watch="open"] .mic-invite:not([hidden]) {
+    animation: mic-fade-only 4.2s linear both;
+  }
+  .arena-page .arena-workspace .mic-invite * {
+    animation: none;
+  }
+}
+
+/* ---- The phone full screen (Decision 0016's shell) ---- */
+/* The rail's Mic button and its badge: the open questions, or "#1" in
+   orange when the viewer's own question can fire. */
+.arena-page .arena-workspace .watch-mic[hidden] {
+  display: none;
+}
+.arena-page .arena-workspace .watch-mic .watch-round {
+  position: relative;
+}
+.arena-page .arena-workspace .watch-mic-badge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 9px;
+  background: var(--acid);
+  color: var(--on-acid);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+.arena-page .arena-workspace .watch-mic-badge:empty {
+  display: none;
+}
+.arena-page .arena-workspace .watch-mic-badge[data-fire] {
+  background: var(--warning);
+  color: #2a0d02;
+}
+/* The Mic sheet holds the page's own panel while it is open. Its heading
+   stays put and the panel scrolls under it. */
+.arena-page .arena-workspace .watch-sheet[data-watch-sheet="mic"] {
+  height: 620px;
+  gap: 12px;
+  padding-bottom: 0;
+  overflow: hidden;
+}
+.arena-page
+  .arena-workspace
+  .watch-sheet[data-watch-sheet="mic"]
+  .watch-sheet-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  margin-inline: -20px;
+  padding-inline: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.arena-page
+  .arena-workspace[data-watch-orientation="horizontal"]
+  .watch-sheet[data-watch-sheet="mic"]
+  .watch-sheet-body {
+  margin-inline: 0;
+  padding-inline: 0;
+}
+.arena-page .arena-workspace .watch-sheet .mic-panel {
+  --mic-foot: max(16px, env(safe-area-inset-bottom, 0px));
+  flex: 1 0 auto;
+  padding-bottom: var(--mic-foot);
+}
+.arena-page .arena-workspace .watch-sheet .mic-panel:focus-visible {
+  outline: none;
+}
+
+/* ---- The Mic on a phone (founder, 2026-11-25): one debater's questions at
+   a time behind a two-way switch, each question a card with one Pledge
+   button that opens its amounts, and the question field pinned to the
+   bottom of the sheet. Computers keep the two lists and their chips. ---- */
+.arena-page .arena-workspace :is(.mic-switch, .mic-q-add) {
+  display: none;
+}
+@media (max-width: 599px), (orientation: landscape) and (max-height: 499px) {
+  .arena-page .arena-workspace .mic-panel {
+    /* The site's stepped pixel corner, at the size of a small key. */
+    --mic-pixel: polygon(
+      0 4px,
+      2px 4px,
+      2px 2px,
+      4px 2px,
+      4px 0,
+      calc(100% - 4px) 0,
+      calc(100% - 4px) 2px,
+      calc(100% - 2px) 2px,
+      calc(100% - 2px) 4px,
+      100% 4px,
+      100% calc(100% - 4px),
+      calc(100% - 2px) calc(100% - 4px),
+      calc(100% - 2px) calc(100% - 2px),
+      calc(100% - 4px) calc(100% - 2px),
+      calc(100% - 4px) 100%,
+      4px 100%,
+      4px calc(100% - 2px),
+      2px calc(100% - 2px),
+      2px calc(100% - 4px),
+      0 calc(100% - 4px)
+    );
+    gap: 12px;
+  }
+
+  /* The switch: whose questions are showing. */
+  .arena-page .arena-workspace .mic-switch:not([hidden]) {
+    position: relative;
+    display: grid;
+    flex: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 4px;
+    border-radius: 14px;
+    background: var(--raised);
+  }
+  .arena-page .arena-workspace .mic-switch::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    background: var(--acid);
+    clip-path: var(--mic-pixel);
+    transition: translate 0.32s var(--ease-expo);
+  }
+  .arena-page .arena-workspace .mic-switch[data-shown="B"]::before {
+    translate: 100% 0;
+  }
+  .arena-page .arena-workspace .mic-switch-key {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--muted);
+    font: 700 var(--text-14) / 1 var(--font-body);
+    transition: color 0.2s;
+  }
+  .arena-page .arena-workspace .mic-switch-key > span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .arena-page .arena-workspace .mic-switch-key[aria-pressed="true"] {
+    color: var(--on-acid);
+  }
+  .arena-page .arena-workspace .mic-switch-key:focus-visible {
+    outline: 2px solid var(--acid);
+    outline-offset: 2px;
+  }
+  .arena-page .arena-workspace .mic-switch-count {
+    flex: none;
+    min-width: 20px;
+    padding: 0 6px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    background: rgb(255 255 255 / 10%);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    line-height: 20px;
+    text-align: center;
+  }
+  .arena-page
+    .arena-workspace
+    .mic-switch-key[aria-pressed="true"]
+    .mic-switch-count {
+    background: rgb(0 0 0 / 12%);
+  }
+  .arena-page .arena-workspace .mic-switch-count:empty {
+    display: none;
+  }
+
+  /* One list at a time; the switch names it. */
+  .arena-page .arena-workspace .mic-camps:not([hidden]) {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+    gap: 0;
+  }
+  .arena-page .arena-workspace .mic-camps[data-shown="A"] > [data-mic-camp="B"],
+  .arena-page .arena-workspace .mic-camps[data-shown="B"] > [data-mic-camp="A"],
+  .arena-page .arena-workspace .mic-camp-head {
+    display: none;
+  }
+  .arena-page .arena-workspace .mic-camp {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .arena-page .arena-workspace .mic-list {
+    gap: 10px;
+  }
+  .arena-page .arena-workspace .mic-empty:not([hidden]) {
+    display: grid;
+    flex: 1 0 auto;
+    place-items: center;
+    min-height: 120px;
+    padding: 0 var(--space-5);
+    font: 400 var(--text-20) / 1.25 var(--font-number);
+    text-align: center;
+  }
+
+  /* A question: a card. Its place in a stepped tile, the words, who asked,
+     then the total beside the one Pledge button; the line along its foot is
+     its total against the leader's. */
+  .arena-page .arena-workspace .mic-q {
+    position: relative;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "rank text text"
+      "rank meta meta"
+      "adds adds adds"
+      "mine mine mine"
+      "total total add"
+      "tray tray tray";
+    gap: 0 12px;
+    padding: 14px 14px 15px;
+    overflow: hidden;
+    border: 0;
+    border-radius: var(--radius-card);
+    background: var(--raised);
+    box-shadow: none;
+    animation: mic-card 0.36s var(--ease-expo) both;
+  }
+  .arena-page .arena-workspace .mic-q[data-rank="1"] {
+    background: #1d1d1d;
+  }
+  .arena-page .arena-workspace .mic-q[data-own] {
+    padding-left: 14px;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 42%);
+  }
+  .arena-page .arena-workspace .mic-q::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: var(--share, 0%);
+    height: 2px;
+    background: rgb(255 255 255 / 26%);
+    transition: width 0.5s var(--ease-expo);
+  }
+  .arena-page .arena-workspace .mic-q[data-rank="1"]::after {
+    background: rgb(255 255 255 / 62%);
+  }
+  .arena-page .arena-workspace .mic-q-head {
+    display: contents;
+  }
+  .arena-page .arena-workspace .mic-q-rank {
+    display: grid;
+    grid-area: rank;
+    align-self: start;
+    place-items: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 4px;
+    box-sizing: border-box;
+    background: rgb(255 255 255 / 9%);
+    color: var(--muted);
+    font-size: var(--text-14);
+    line-height: 1;
+    clip-path: var(--mic-pixel);
+  }
+  .arena-page .arena-workspace .mic-q[data-rank="1"] .mic-q-rank {
+    background: var(--acid);
+    color: var(--on-acid);
+  }
+  .arena-page .arena-workspace .mic-q-text {
+    grid-area: text;
+    font-size: var(--text-16);
+    line-height: 1.35;
+  }
+  .arena-page .arena-workspace .mic-q[data-rank="1"] .mic-q-text {
+    font: 400 var(--text-20) / 1.25 var(--font-number);
+  }
+  .arena-page .arena-workspace .mic-q-meta {
+    grid-area: meta;
+    margin-top: 4px;
+  }
+  .arena-page .arena-workspace .mic-q-adds {
+    grid-area: adds;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 0;
+    border: 0;
+  }
+  .arena-page .arena-workspace .mic-q-adds li {
+    padding: 8px 12px;
+    border-radius: 4px 12px 12px;
+    background: rgb(255 255 255 / 6%);
+    color: #c9c9c9;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+  .arena-page .arena-workspace .mic-q-mine {
+    grid-area: mine;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .arena-page .arena-workspace .mic-q-mine li {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    min-height: 44px;
+    padding-left: 12px;
+    border-radius: 12px;
+    background: rgb(255 255 255 / 6%);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .arena-page .arena-workspace .mic-link {
+    flex: none;
+    min-height: 44px;
+    padding: 0 14px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .arena-page .arena-workspace .mic-q-total {
+    grid-area: total;
+    align-self: center;
+    margin-top: 12px;
+    font-size: 22px;
+    line-height: 1;
+    transform-origin: left center;
+  }
+  .arena-page .arena-workspace .mic-q-total.mic-bump {
+    animation: mic-bump 0.5s var(--ease-expo);
+  }
+  .arena-page .arena-workspace .mic-q-add:not([hidden]) {
+    display: inline-flex;
+    grid-area: add;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    margin-top: 12px;
+    padding: 0 16px 0 12px;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: rgb(255 255 255 / 11%);
+    color: var(--text);
+    font: 700 var(--text-14) / 1 var(--font-body);
+    transition:
+      background-color 0.18s,
+      color 0.18s;
+  }
+  /* A 44 px touch target around the 40 px pill. */
+  .arena-page .arena-workspace .mic-q-add {
+    position: relative;
+  }
+  .arena-page .arena-workspace .mic-q-add::after {
+    content: "";
+    position: absolute;
+    inset: -4px 0;
+  }
+  .arena-page .arena-workspace .mic-q-add::before {
+    content: "+";
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1;
+    transition: rotate 0.24s var(--ease-expo);
+  }
+  .arena-page .arena-workspace .mic-q-add[aria-expanded="true"] {
+    background: var(--acid);
+    color: var(--on-acid);
+  }
+  .arena-page .arena-workspace .mic-q-add[aria-expanded="true"]::before {
+    rotate: 45deg;
+  }
+  .arena-page .arena-workspace .mic-q-add:focus-visible {
+    outline: 2px solid var(--acid);
+    outline-offset: 2px;
+  }
+  /* The amounts are three keys; a question's open under it. */
+  .arena-page .arena-workspace .mic-chips {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .arena-page .arena-workspace .mic-q > .mic-chips {
+    grid-area: tray;
+    margin-top: 12px;
+    animation: mic-tray 0.26s var(--ease-expo) both;
+  }
+  .arena-page .arena-workspace .mic-q:not([data-tray]) > .mic-chips {
+    display: none;
+  }
+  .arena-page .arena-workspace .mic-chips .mic-chip {
+    min-height: 48px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: #2c2c2c;
+    box-shadow: inset 0 -4px 0 rgb(0 0 0 / 30%);
+    color: var(--text);
+    font: 400 var(--text-20) / 1 var(--font-number);
+    clip-path: var(--mic-pixel);
+    transition:
+      transform 0.06s,
+      box-shadow 0.06s;
+  }
+  .arena-page .arena-workspace .mic-chips .mic-chip[data-mic-other] {
+    font: 700 var(--text-14) / 1 var(--font-body);
+  }
+  .arena-page .arena-workspace .mic-chips .mic-chip:active {
+    box-shadow: inset 0 -2px 0 rgb(0 0 0 / 30%);
+    transform: translateY(2px);
+  }
+  .arena-page .arena-workspace .mic-q > .mic-back {
+    grid-area: tray;
+    margin-top: 12px;
+    animation: mic-tray 0.26s var(--ease-expo) both;
+  }
+
+  /* The live mic, the viewer's own turn and where the list stands. */
+  .arena-page .arena-workspace :is(.mic-you, .mic-live) {
+    flex: none;
+    padding: 14px;
+    border-radius: var(--radius-card);
+  }
+  .arena-page .arena-workspace .mic-panel .mic-state:not(:empty) {
+    display: grid;
+    flex: 1 0 auto;
+    place-items: center;
+    min-height: 160px;
+    padding: 0 var(--space-5);
+    font: 400 var(--text-20) / 1.25 var(--font-number);
+    text-align: center;
+  }
+  .arena-page .arena-workspace .mic-key.mic-fire {
+    min-height: 56px;
+  }
+  .arena-page .arena-workspace .mic-form :is(textarea, input) {
+    border-color: transparent;
+    border-radius: 12px;
+    background: rgb(255 255 255 / 7%);
+  }
+  .arena-page .arena-workspace .mic-form :is(textarea, input):focus-visible {
+    border-color: var(--acid);
+    outline: none;
+  }
+  .arena-page .arena-workspace .mic-form-row .mic-key {
+    min-height: 48px;
+  }
+  .arena-page .arena-workspace .mic-form-row .mic-plain {
+    border: 0;
+    color: var(--muted);
+  }
+}
+
+/* In the full screen's sheet the bottom edge is the viewer's own: the
+   question field (a bar that opens the form), the form, the sign-in key
+   and the line that says what a press did all stay there as the list
+   scrolls, clear of the on-screen keyboard. */
+.arena-page
+  .arena-workspace
+  .watch-sheet
+  :is(.mic-ask-open, .mic-ask, .mic-signin, .mic-status) {
+  position: sticky;
+  bottom: calc(var(--mic-foot) + var(--mic-keyboard, 0px));
+  z-index: 2;
+  /* The sheet's own colour around it, so the list passes behind cleanly. */
+  box-shadow:
+    0 calc(var(--mic-foot) + 2px) 0 12px var(--panel),
+    0 -14px 16px 6px var(--panel);
+}
+.arena-page .arena-workspace .watch-sheet .mic-ask-open {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  margin-top: auto;
+  padding: 0 8px 0 18px;
+  border: 0;
+  border-radius: 26px;
+  background: #1f1f1f;
+  color: #c9c9c9;
+  font-size: var(--text-16);
+  font-weight: 400;
+}
+.arena-page .arena-workspace .watch-sheet .mic-ask-open::before {
+  content: none;
+}
+.arena-page .arena-workspace .watch-sheet .mic-ask-open::after {
+  content: "↑";
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--acid);
+  color: var(--on-acid);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+.arena-page .arena-workspace .watch-sheet .mic-ask-open:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 2px;
+}
+.arena-page .arena-workspace .watch-sheet .mic-ask:not([hidden]) {
+  flex: none;
+  margin-top: auto;
+  padding: 12px;
+  border-radius: var(--radius-card);
+  background: #1f1f1f;
+  animation: mic-tray 0.26s var(--ease-expo) both;
+}
+/* Cancel is a small cross in the field's corner, so the key keeps the row. */
+.arena-page .arena-workspace .watch-sheet .mic-ask textarea {
+  padding-right: 48px;
+}
+.arena-page .arena-workspace .watch-sheet .mic-ask [data-mic-ask-cancel] {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 32px;
+  min-height: 0;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 10%);
+  color: var(--text);
+  font-size: 0;
+}
+.arena-page
+  .arena-workspace
+  .watch-sheet
+  .mic-ask
+  [data-mic-ask-cancel]::before {
+  content: "✕";
+  font-size: 12px;
+  font-weight: 700;
+}
+.arena-page
+  .arena-workspace
+  .watch-sheet
+  .mic-ask
+  [data-mic-ask-cancel]::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+}
+/* The switch stays under the sheet's heading, below the key that fires. */
+.arena-page .arena-workspace .watch-sheet .mic-switch {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  box-shadow: 0 -12px 0 12px var(--panel);
+}
+.arena-page
+  .arena-workspace
+  .watch-sheet
+  .mic-panel:has(.mic-fire-top:not([hidden]))
+  .mic-switch {
+  top: 68px;
+}
+.arena-page .arena-workspace .watch-sheet .mic-key.mic-fire {
+  z-index: 3;
+}
+.arena-page .arena-workspace .watch-sheet .mic-signin:not([hidden]) {
+  flex: none;
+}
+.arena-page .arena-workspace .watch-sheet .mic-signin a {
+  display: grid;
+  place-items: center;
+  min-height: 52px;
+  background: var(--acid);
+  color: var(--on-acid);
+  font-weight: 700;
+  text-decoration: none;
+  clip-path: var(--mic-pixel);
+}
+.arena-page .arena-workspace .watch-sheet .mic-status:not(:empty) {
+  bottom: calc(var(--mic-foot) + var(--mic-keyboard, 0px) + 64px);
+  z-index: 3;
+  align-self: center;
+  max-width: 100%;
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--acid);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 50%);
+  color: var(--on-acid);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  animation: mic-tray 0.26s var(--ease-expo) both;
+}
+@keyframes mic-card {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+@keyframes mic-tray {
+  from {
+    opacity: 0;
+    translate: 0 -6px;
+  }
+}
+@keyframes mic-bump {
+  30% {
+    scale: 1.16;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arena-page
+    .arena-workspace
+    .mic-panel
+    :is(.mic-q, .mic-chips, .mic-back, .mic-ask, .mic-status, .mic-q-total) {
+    animation: none;
+  }
+  .arena-page .arena-workspace .mic-switch::before,
+  .arena-page .arena-workspace .mic-q::after,
+  .arena-page .arena-workspace .mic-q-add::before {
+    transition: none;
+  }
+}
+.arena-page .arena-workspace .watch-sheet[data-watch-sheet="mic"] .mic-note {
+  margin-top: 0;
+}
+/* The band: on the seam between the two cameras, left of the clock, where
+   it covers one debater's chest and the space over the other's head rather
+   than a face. While a debater answers it is two short lines. */
+.arena-page .arena-workspace[data-watch="open"] .mic-band {
+  top: var(--watch-seam);
+  right: 104px;
+  bottom: auto;
+  left: 12px;
+  z-index: 4;
+  max-width: none;
+  translate: 0 -50%;
+}
+.arena-page .arena-workspace[data-watch="open"] .mic-band-text {
+  font-size: 18px;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+}
+.arena-page
+  .arena-workspace[data-watch="open"]
+  .mic-band[data-asking="false"]
+  .mic-band-kicker {
+  display: none;
+}
+/* The animation covers the whole picture, and Yes and No stay on top of it
+   in reach. */
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="vertical"]
+  .arena-video-surface:has(.mic-incoming:not([hidden]))
+  .watch-dock {
+  z-index: 26;
+}
+/* Horizontal: the band sits between the two name tags, top centre; the
+   animation covers the whole picture, as the keys sit over it there. */
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
+  .mic-band {
+  top: calc(var(--watch-top) + 40px);
+  right: auto;
+  left: 50%;
+  width: min(26rem, 56%);
+  translate: -50% 0;
+  border-left: 0;
+  border-radius: var(--radius-inner);
+}
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"]
+  .mic-band-text {
+  font-size: var(--text-16);
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+/* A sheet beside the picture hides the band with the rest of that side. */
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="horizontal"][data-watch-layer]
+  .mic-band {
+  display: none;
+}
+/* The phone page's Mic tab and sheet: touch-sized keys. */
+@media (max-width: 599px), (orientation: landscape) and (max-height: 499px) {
+  .arena-page .arena-workspace :is(.mic-plain, .mic-chip) {
+    min-height: 44px;
+    padding: 0 16px;
+  }
+  .arena-page .arena-workspace .mic-link {
+    min-height: 44px;
+  }
+}
+/* The phone page's tab row takes a fifth tab: tighter names, and the row
+   scrolls sideways before a name is cut. */
+@media (max-width: 599px) {
+  .arena-page .arena-workspace .arena-tabs:has(#arena-tab-mic:not([hidden])) {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .arena-page
+    .arena-workspace
+    .arena-tabs:has(#arena-tab-mic:not([hidden]))
+    button {
+    flex: 1 0 auto;
+    padding: 0 6px;
+    font-size: 13px;
+  }
+}
+@media (max-width: 359px) {
+  .arena-page .arena-workspace .arena-tabs:has(#arena-tab-mic:not([hidden])) {
+    gap: 0;
+  }
+  .arena-page
+    .arena-workspace
+    .arena-tabs:has(#arena-tab-mic:not([hidden]))
+    button {
+    padding: 0 2px;
+    font-size: 12px;
+  }
+}
+/* On a phone the picture plays only in the full screen (Decision 0016), so
+   the band and the animation show only there; the page keeps the Mic tab. */
+@media (max-width: 599px), (orientation: landscape) and (max-height: 499px) {
+  .arena-page
+    .arena-workspace:not([data-watch="open"])
+    :is(.mic-band, .mic-incoming) {
+    display: none;
+  }
+}
+/* The rail with a fourth button: Decision 0016's steps for shorter phones
+   (the rail moves down to the dock, tightens to 42 px buttons, drops its
+   words, then the clock steps left of it) each start one button taller. */
+@media (max-height: 930px) {
+  .arena-page
+    .arena-workspace[data-watch-orientation="vertical"]
+    .watch-rail:has(.watch-mic:not([hidden])) {
+    top: auto;
+    bottom: calc(var(--watch-dock) + 12px);
+    gap: 8px;
+  }
+}
+@media (max-height: 815px) {
+  .arena-page
+    .arena-workspace[data-watch-orientation="vertical"]
+    .watch-rail:has(.watch-mic:not([hidden])) {
+    gap: 6px;
+  }
+  .arena-page
+    .arena-workspace[data-watch-orientation="vertical"]
+    .watch-rail:has(.watch-mic:not([hidden]))
+    .watch-rail-button {
+    gap: 3px;
+  }
+  .arena-page
+    .arena-workspace[data-watch-orientation="vertical"]
+    .watch-rail:has(.watch-mic:not([hidden]))
+    .watch-round {
+    width: 42px;
+    height: 42px;
+  }
+}
+@media (max-height: 763px) {
+  .arena-page
+    .arena-workspace[data-watch-orientation="vertical"]
+    .watch-rail:has(.watch-mic:not([hidden])) {
+    gap: 10px;
+  }
+  .arena-page
+    .arena-workspace[data-watch-orientation="vertical"]
+    .watch-rail:has(.watch-mic:not([hidden]))
+    .watch-rail-label {
+    display: none;
+  }
+}
+@media (max-height: 657px) {
+  .arena-page
+    .arena-workspace[data-watch-orientation="vertical"]:has(
+      .watch-mic:not([hidden])
+    )
+    .watch-clock {
+    right: 66px;
+  }
+  .arena-page
+    .arena-workspace[data-watch="open"][data-watch-orientation="vertical"]
+    .mic-band {
+    right: 150px;
+  }
+}

@@ -40,13 +40,16 @@ import {
   returnedText,
   secondsLeft,
   signedCoins,
-  speakerLine,
+  turnHeading,
   watchSheetName,
   type PublicWindow,
   type PublicWindows,
   type StakeRound,
   type StakeSide,
 } from "./stake-model.js";
+import { micPhase, type MicPastTurn } from "./mic-model.js";
+import { keyLook, keyText, PHONE_WATCH_QUERY } from "./watch-phone.js";
+import { onMic } from "./mic-state.js";
 import {
   reportStakeWindowsFailure,
   shareStakeRounds,
@@ -68,9 +71,23 @@ const root = document.querySelector<HTMLElement>("[data-stake-panel]");
 if (root) {
   const one = <T extends Element = HTMLElement>(selector: string) =>
     root.querySelector<T>(selector)!;
+  // The viewer's results and positions are filled here and sit with the
+  // page's results, outside the panel.
+  const page = root.closest<HTMLElement>("[data-arena]") ?? document.body;
+  const outside = <T extends Element = HTMLElement>(selector: string) =>
+    page.querySelector<T>(selector)!;
   const debateId = root.dataset.debateId!;
   const speakers = { A: root.dataset.speakerA!, B: root.dataset.speakerB! };
   const labels = { A: root.dataset.sideA!, B: root.dataset.sideB! };
+  // Decision 0018: a mic's turns are named by their kind, and a debate with
+  // the mic on counts its viewers present all along (see sendPresence).
+  let micTurns: readonly MicPastTurn[] | undefined;
+  let micOn = false;
+  onMic(debateId, (shared) => {
+    micTurns = shared.mic?.turns;
+    micOn = micPhase(shared.mic, "live") !== "off";
+    render();
+  });
   const turnBar = one("[data-stake-turn]");
   const turnTitle = one("[data-stake-turn-title]");
   const turnClock = one("[data-stake-clock]");
@@ -89,12 +106,20 @@ if (root) {
   const confirm = one<HTMLButtonElement>("[data-stake-confirm]");
   const receipt = one("[data-stake-receipt]");
   const signIn = one("[data-stake-signin]");
-  const positionsWrap = one<HTMLDetailsElement>("[data-stake-positions-wrap]");
-  const positionsList = one("[data-stake-positions]");
-  const positionsCount = one("[data-stake-positions-count]");
-  const results = one("[data-stake-results]");
-  const resultsTitle = one("[data-stake-results-title]");
-  const resultsList = one("[data-stake-results-list]");
+  const positionsWrap = outside<HTMLDetailsElement>(
+    "[data-stake-positions-wrap]",
+  );
+  const positionsList = outside("[data-stake-positions]");
+  const positionsCount = outside("[data-stake-positions-count]");
+  const results = outside("[data-stake-results]");
+  const resultsTitle = outside("[data-stake-results-title]");
+  const resultsList = outside("[data-stake-results-list]");
+  // Computers and tablets (founder, 2026-11-25): the panel is a bar under
+  // the video with the read and the sizes over Yes and No. The read and the
+  // sizes always show; a picked side's key becomes the key that places it,
+  // and once placed it reads "Yes · 25". A phone keeps its sheet.
+  const phone = matchMedia(PHONE_WATCH_QUERY);
+  const bar = () => !phone.matches;
   // Decision 0016 (amended 2026-11-16): one ticket wherever a viewer
   // answers, with the side word and clock on top, the five size chips, the
   // read and one key naming the terms. On a phone it is a sheet, also over
@@ -390,10 +415,14 @@ if (root) {
         0,
         Math.min(100, ((Date.parse(current.closesAt) - now()) / span) * 100),
       );
-      turnTitle.textContent =
-        current.via === "replay"
-          ? `Replay · turn ${current.turnNumber} · ${speakerLine(current.side, speakers, labels)}`
-          : `Turn ${current.turnNumber} · ${speakerLine(current.side, speakers, labels)}`;
+      turnTitle.textContent = turnHeading({
+        turnNumber: current.turnNumber,
+        side: current.side,
+        replay: current.via === "replay",
+        speakers,
+        labels,
+        micTurns,
+      });
       turnClock.textContent = current.via === "live" ? clock(left) : "";
       turnClock.classList.toggle(
         "is-ending",
@@ -426,6 +455,7 @@ if (root) {
       meta.textContent = "The next window opens when the next speaker starts.";
     }
   }
+  const closedText = "Answers for this debate are closed.";
   function statusText(current: Target | null) {
     const eventStatus = windows?.eventStatus ?? root!.dataset.debateStatus;
     // A debater can't answer any turn, whatever else failed to load.
@@ -469,7 +499,7 @@ if (root) {
         : playback
           ? "You can join the window for the turn that's playing."
           : "Play the replay to answer the turn that's playing.";
-    return "Answers for this debate are closed.";
+    return closedText;
   }
   function joinable(current: Target | null): current is Target {
     // A turn takes an answer once the signed-in view brings its eligibility;
@@ -484,17 +514,31 @@ if (root) {
       })
     );
   }
-  function renderTicket(current: Target | null) {
+  function renderTicket(current: Target | null, why: string) {
     const open = joinable(current);
+    const asBar = bar();
+    const own = current?.round?.own ?? null;
+    const placed = own ? { side: own.side, quantity: own.quantity } : null;
     for (const button of sideButtons) {
+      const value: StakeSide = button.dataset.stakeSide === "NO" ? "NO" : "YES";
       button.disabled = busy || !open;
-      button.setAttribute(
-        "aria-pressed",
-        String(button.dataset.stakeSide === side),
-      );
+      button.setAttribute("aria-pressed", String(value === side));
+      // The bar's keys say what was placed and why they are off, as the
+      // full screen's do; elsewhere they read Yes and No.
+      const text = asBar ? keyText(value, placed) : sideName(value);
+      if (button.textContent !== text) button.textContent = text;
+      if (asBar) button.dataset.look = keyLook(value, placed, button.disabled);
+      else delete button.dataset.look;
+      button.title = asBar && button.disabled && !placed ? why : "";
     }
     const showTicket = Boolean(open && signedIn && side);
-    ticket.hidden = !showTicket;
+    ticket.hidden = asBar ? false : !showTicket;
+    confirm.hidden = asBar && !showTicket;
+    readInput.disabled = asBar && (busy || !open);
+    for (const chip of sizeChips) chip.disabled = asBar && (busy || !open);
+    readOut.textContent = `${readInput.value}%`;
+    // The bar's slider is a split track, green up to the read.
+    readInput.style.setProperty("--read", `${readInput.value}%`);
     ticketSide.textContent = side ? sideName(side) : "";
     if (side) {
       ticket.dataset.side = side;
@@ -502,7 +546,6 @@ if (root) {
     }
     if (!showTicket || !side || !current) return;
     const value = cents();
-    readOut.textContent = `${readInput.value}%`;
     // What a position reserves (one coin per contract) must fit the balance
     // before the confirm tap.
     const short = shortfall();
@@ -594,7 +637,10 @@ if (root) {
     renderTurn(current);
     const text = statusText(current);
     if (status.textContent !== text) status.textContent = text;
-    renderTicket(current);
+    // A debate that takes no more answers has no use for the bar under the
+    // video on computers; the page's styles put it away.
+    root!.toggleAttribute("data-closed", text === closedText);
+    renderTicket(current, text);
     renderReceipt(current);
     renderResults();
     renderPositions();
@@ -708,7 +754,9 @@ if (root) {
         const chip = sizeChips.find(
           (item) => item.getAttribute("aria-pressed") === "true",
         );
-        if (!ticket.hidden) (chip ?? confirm).focus({ preventScroll: true });
+        // In the bar the picked key itself became the key that places.
+        if (!ticket.hidden)
+          (bar() ? confirm : (chip ?? confirm)).focus({ preventScroll: true });
       });
     });
   for (const chip of sizeChips)
@@ -727,6 +775,7 @@ if (root) {
     attributeFilter: ["data-sheet"],
   });
   readInput.addEventListener("input", render);
+  phone.addEventListener("change", render);
   // Placing is immediate: the key names the exact terms (Decision 0013).
   ticket.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -831,7 +880,9 @@ if (root) {
     render();
   });
   // Decision 0017: while a live duel window is open, a signed-in viewer's page
-  // says it is present, so the window can reach its ten viewers.
+  // says it is present, so the window can reach its ten viewers. Decision
+  // 0018: with the mic on it says so all through the live debate, because
+  // asking, pledging and firing are for viewers present.
   let presence: { at: number; windowId: string | null } | null = null;
   function sendPresence() {
     const live = windows
@@ -845,12 +896,13 @@ if (root) {
         debater,
         hidden: document.hidden,
         window: live,
+        mic: micOn,
         last: presence,
         now: Date.now(),
       })
     )
       return;
-    presence = { at: Date.now(), windowId: live!.id };
+    presence = { at: Date.now(), windowId: live?.id ?? null };
     void coinApi(
       `/debates/${encodeURIComponent(debateId)}/presence`,
       "POST",

@@ -4179,9 +4179,13 @@ html.watch-open .cookie-choice {
   container-type: normal;
 }
 .arena-page .arena-workspace[data-watch="open"] .arena-video-surface {
-  --watch-dock: max(146px, calc(112px + env(safe-area-inset-bottom, 0px)));
+  /* Founder, 2026-11-25: no box under the cameras. They fill the screen and
+     Yes and No sit over the lower one; --watch-dock is the room those keys
+     (and the last-answer figures, once there are any) take at the bottom. */
+  --watch-foot: max(14px, env(safe-area-inset-bottom, 0px));
+  --watch-dock: calc(68px + var(--watch-foot));
   --watch-top: max(env(safe-area-inset-top, 0px), 6px);
-  --watch-cams: calc(100% - var(--watch-dock));
+  --watch-cams: 100%;
   --watch-seam: calc(var(--watch-cams) / 2);
   --watch-ink: #f4f4f4;
   --watch-soft: #c9c9c9;
@@ -4334,6 +4338,11 @@ html.watch-open .cookie-choice {
   outline: 2px solid var(--acid);
   outline-offset: -4px;
 }
+.arena-page
+  .arena-workspace[data-watch="open"][data-watch-orientation="vertical"]
+  .arena-video-surface:has(.watch-bar .arena-endorsement[data-empty="false"]) {
+  --watch-dock: calc(110px + var(--watch-foot));
+}
 .arena-page .watch-shade {
   position: absolute;
   right: 0;
@@ -4347,14 +4356,22 @@ html.watch-open .cookie-choice {
   background: linear-gradient(rgb(0 0 0 / 66%), rgb(0 0 0 / 0%));
 }
 .arena-page .watch-shade-bottom {
-  bottom: var(--watch-dock);
-  height: 138px;
-  background: linear-gradient(rgb(0 0 0 / 0%), rgb(0 0 0 / 30%));
+  bottom: 0;
+  height: calc(var(--watch-dock) + 138px);
+  background: linear-gradient(
+    rgb(0 0 0 / 0%),
+    rgb(0 0 0 / 30%) 138px,
+    rgb(0 0 0 / 44%)
+  );
 }
 .arena-page
   .arena-workspace:is([data-watch-controls="shown"], [data-watch-chat="open"])
   .watch-shade-bottom {
-  background: linear-gradient(rgb(0 0 0 / 0%), rgb(0 0 0 / 78%));
+  background: linear-gradient(
+    rgb(0 0 0 / 0%),
+    rgb(0 0 0 / 78%) 138px,
+    rgb(0 0 0 / 82%)
+  );
 }
 
 /* The turn bar: one segment per turn. */
@@ -4957,7 +4974,8 @@ html.watch-open .cookie-choice {
   pointer-events: none;
 }
 
-/* The dock: the last-answer bar, then Yes and No. */
+/* The dock: the last-answer figures, then Yes and No, over the lower
+   camera with nothing behind them. */
 .arena-page .watch-dock {
   position: absolute;
   right: 0;
@@ -4968,15 +4986,15 @@ html.watch-open .cookie-choice {
   flex-direction: column;
   gap: 10px;
   box-sizing: border-box;
-  height: var(--watch-dock);
-  padding: 10px max(16px, env(safe-area-inset-right, 0px)) 0
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) var(--watch-foot)
     max(16px, env(safe-area-inset-left, 0px));
-  background: var(--bg);
 }
 .arena-page .watch-bar {
   position: relative;
 }
-.arena-page .watch-bar:empty {
+/* Nothing shows until a result is revealed: no line, no words. */
+.arena-page .watch-bar:empty,
+.arena-page .watch-bar:has(.arena-endorsement[data-empty="true"]) {
   display: none;
 }
 /* D1: in the dock the bar is a line of figures over a 4 px track; a tap
@@ -4999,7 +5017,7 @@ html.watch-open .cookie-choice {
   inset: auto 0 0;
   height: 4px;
   border-radius: 2px;
-  background: rgb(255 255 255 / 16%);
+  background: rgb(255 255 255 / 24%);
 }
 .arena-page
   .arena-workspace[data-watch="open"]
@@ -5019,33 +5037,16 @@ html.watch-open .cookie-choice {
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-2);
-  color: var(--muted);
+  color: var(--watch-soft);
   font-size: var(--text-12);
   line-height: 22px;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 70%);
 }
 .arena-page .watch-bar .arena-endorsement-readout b {
   color: var(--watch-ink);
   font-family: var(--font-number);
   font-size: 18px;
   font-weight: 400;
-}
-.arena-page .watch-bar .arena-endorsement-note {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.arena-page
-  .watch-bar
-  .arena-endorsement[data-empty="true"]
-  :is(.arena-endorsement-yes, .arena-endorsement-no) {
-  display: none;
-}
-.arena-page
-  .watch-bar
-  .arena-endorsement[data-empty="true"]
-  .arena-endorsement-readout {
-  justify-content: center;
 }
 .arena-page .watch-bar .arena-endorsement-card {
   bottom: calc(100% + 8px);
@@ -6525,4 +6526,626 @@ html.watch-open .cookie-choice {
     opacity: 0;
     transform: translateX(40px);
   }
+}
+
+/* Computers and tablets (founder, 2026-11-25): the debaters and the turn
+   clock sit over the video, the slider and Yes/No are a bar under it, and
+   the right panel holds the arguments, the mic and the results at full
+   height. A phone keeps its page and its full screen (Decision 0016): the
+   query is everything PHONE_WATCH_QUERY is not. */
+.arena-page .stage-hud {
+  display: none;
+}
+@media (min-width: 600px) and (min-height: 500px) {
+  /* ---- The video: a name tag in each top corner, the clock between ---- */
+  .arena-page .arena-workspace .arena-scoreboard,
+  .arena-page .arena-workspace .arena-frame-tag {
+    display: none;
+  }
+  .arena-page .stage-hud {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: block;
+    pointer-events: none;
+  }
+  .arena-page .arena-workspace .stage-tag {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-sizing: border-box;
+    max-width: calc(50% - 56px);
+    min-height: 44px;
+    margin: 0;
+    padding: 5px 14px 5px 5px;
+    border-radius: var(--radius-pill);
+    background: rgb(0 0 0 / 58%);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 10%);
+    color: #f4f4f4;
+    backdrop-filter: blur(10px);
+    pointer-events: auto;
+    transition:
+      background 0.2s,
+      color 0.2s;
+  }
+  .arena-page .arena-workspace .stage-tag[data-stage-tag="B"] {
+    right: 12px;
+    left: auto;
+    flex-direction: row-reverse;
+    padding: 5px 5px 5px 14px;
+    text-align: right;
+  }
+  .arena-page .stage-tag-avatar {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #1b1b1b;
+    object-fit: cover;
+    image-rendering: pixelated;
+  }
+  .arena-page .stage-tag-who {
+    display: grid;
+    min-width: 0;
+    line-height: 1.2;
+  }
+  .arena-page .stage-tag-who > * {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .arena-page .arena-workspace .stage-tag-who :is(a, strong) {
+    color: inherit;
+    font-size: var(--text-14);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .arena-page .arena-workspace .stage-tag-who a:hover {
+    text-decoration: underline;
+  }
+  .arena-page .stage-tag-who > span {
+    color: #c9c9c9;
+    font-size: 11px;
+  }
+  /* The speaker's tag is solid white, with three moving bars. */
+  .arena-page .arena-workspace .stage-tag[data-state="speaking"] {
+    background: var(--acid);
+    color: var(--on-acid);
+  }
+  .arena-page .stage-tag[data-state="speaking"] .stage-tag-who > span {
+    color: #4b4b4b;
+  }
+  .arena-page .arena-workspace .stage-tag[data-state="next"] {
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 55%);
+  }
+  .arena-page .stage-eq {
+    display: none;
+    flex: none;
+    align-items: flex-end;
+    gap: 2px;
+    height: 14px;
+  }
+  .arena-page .stage-tag[data-state="speaking"] .stage-eq {
+    display: flex;
+  }
+  .arena-page .stage-eq i {
+    width: 3px;
+    height: 100%;
+    background: currentColor;
+    transform-origin: bottom;
+    animation: stage-eq 0.9s ease-in-out infinite;
+  }
+  .arena-page .stage-eq i:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .arena-page .stage-eq i:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  /* The clock: a 64 px ring on the seam at the top, coral in the last 10 s. */
+  .arena-page .stage-clock {
+    --stage-ring: var(--acid);
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    box-sizing: border-box;
+    width: 64px;
+    height: 64px;
+    border: 1px solid rgb(255 255 255 / 16%);
+    border-radius: 50%;
+    background: rgb(0 0 0 / 78%);
+    box-shadow: 0 2px 14px rgb(0 0 0 / 45%);
+    color: #f4f4f4;
+    backdrop-filter: blur(10px);
+    transform: translateX(-50%);
+  }
+  .arena-page .stage-clock[data-warn="true"] {
+    --stage-ring: var(--warning);
+  }
+  .arena-page .stage-ring {
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 16%);
+    -webkit-mask:
+      radial-gradient(
+        circle at center,
+        transparent 20px,
+        #000 21px 26px,
+        transparent 27px
+      ),
+      repeating-conic-gradient(#000 0 6deg, transparent 6deg 9deg);
+    -webkit-mask-composite: source-in;
+    mask:
+      radial-gradient(
+        circle at center,
+        transparent 20px,
+        #000 21px 26px,
+        transparent 27px
+      ),
+      repeating-conic-gradient(#000 0 6deg, transparent 6deg 9deg);
+    mask-composite: intersect;
+  }
+  .arena-page .stage-clock[data-phase="running"] .stage-ring {
+    --watch-spent: var(--spent, 0%);
+    background: conic-gradient(
+      rgb(255 255 255 / 16%) 0 var(--watch-spent),
+      var(--stage-ring) var(--watch-spent) 100%
+    );
+    transition: --watch-spent 0.25s linear;
+  }
+  .arena-page .stage-clock-face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+  .arena-page .stage-clock-time {
+    max-width: 44px;
+    overflow: hidden;
+    font-family: var(--font-number);
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .arena-page .stage-clock[data-phase="running"] .stage-clock-time {
+    color: var(--stage-ring);
+    font-size: 19px;
+  }
+  .arena-page .stage-clock-next,
+  .arena-page .stage-clock-turn {
+    color: var(--muted);
+    font-size: 8px;
+    letter-spacing: 0.12em;
+  }
+  .arena-page .stage-clock-next {
+    display: none;
+    margin-bottom: 2px;
+  }
+  .arena-page .stage-clock[data-phase="between"] .stage-clock-next {
+    display: block;
+  }
+  .arena-page .stage-clock-turn {
+    margin-top: 2px;
+  }
+  .arena-page .stage-clock :is(.stage-clock-turn, .stage-clock-time):empty {
+    display: none;
+  }
+  /* The corners the tags took: what shows on hover moves down a row. */
+  .arena-page .arena-workspace .arena-video-overlay,
+  .arena-page .arena-workspace .arena-video-expand,
+  .arena-page .arena-workspace .arena-chat-toggle {
+    top: 68px;
+  }
+
+  /* ---- The bar under the video: the read and the sizes, then Yes and No ---- */
+  .arena-page .arena-workspace .arena-rail {
+    display: contents;
+  }
+  .arena-page .arena-workspace .stake-panel {
+    order: 0;
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 10px 12px;
+    margin: var(--space-3) 0 0;
+    padding: 12px 16px 14px;
+    border-radius: var(--radius-card);
+    box-shadow: none;
+  }
+  .arena-page .arena-workspace .stake-panel[data-closed] {
+    display: none;
+  }
+  /* Kept for screen readers: the turn, why Yes and No are off, the receipt
+     and the line under the key. Sighted viewers get the bar alone. */
+  .arena-page
+    .arena-workspace
+    .stake-panel
+    :is(
+      .stake-turn,
+      .stake-status,
+      .stake-receipt,
+      .stake-final,
+      .stake-size legend
+    ) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .arena-page
+    .arena-workspace
+    .stake-panel
+    :is(.stake-sheet-close, .stake-ticket-head) {
+    display: none;
+  }
+  .arena-page .arena-workspace .stake-panel :is(.stake-sides, .stake-ticket) {
+    display: contents;
+  }
+  .arena-page .arena-workspace .stake-panel .stake-read {
+    grid-row: 1;
+    grid-column: 1 / span 7;
+    display: block;
+    /* The question stays the slider's name; the bar shows no lettering. */
+    font-size: 0;
+  }
+  .arena-page .arena-workspace .stake-panel .stake-read-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    height: 40px;
+  }
+  /* The read as a split track: green up to the share expected to say yes,
+     red for the rest, so the bar needs no words. */
+  .arena-page .arena-workspace .stake-panel .stake-read-row input {
+    --read: 50%;
+    --read-yes: var(--answer-yes);
+    --read-no: var(--answer-no);
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 30px;
+    background: transparent;
+    appearance: none;
+    cursor: pointer;
+  }
+  .arena-page .arena-workspace .stake-panel .stake-read-row input:disabled {
+    --read-yes: #3a3a3a;
+    --read-no: #242424;
+    cursor: default;
+  }
+  .arena-page
+    .arena-workspace
+    .stake-panel
+    .stake-read-row
+    input::-webkit-slider-runnable-track {
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(
+      to right,
+      var(--read-yes) var(--read),
+      var(--read-no) var(--read)
+    );
+  }
+  .arena-page
+    .arena-workspace
+    .stake-panel
+    .stake-read-row
+    input::-moz-range-track {
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(
+      to right,
+      var(--read-yes) var(--read),
+      var(--read-no) var(--read)
+    );
+  }
+  .arena-page
+    .arena-workspace
+    .stake-panel
+    .stake-read-row
+    input::-webkit-slider-thumb {
+    width: 22px;
+    height: 22px;
+    margin-top: -7px;
+    border: 3px solid var(--panel);
+    border-radius: 50%;
+    background: var(--acid);
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 35%);
+    appearance: none;
+  }
+  .arena-page
+    .arena-workspace
+    .stake-panel
+    .stake-read-row
+    input::-moz-range-thumb {
+    box-sizing: border-box;
+    width: 22px;
+    height: 22px;
+    border: 3px solid var(--panel);
+    border-radius: 50%;
+    background: var(--acid);
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 35%);
+  }
+  .arena-page
+    .arena-workspace
+    .stake-panel
+    .stake-read-row
+    input:disabled::-webkit-slider-thumb {
+    background: #6f6f6f;
+    box-shadow: none;
+  }
+  .arena-page
+    .arena-workspace
+    .stake-panel
+    .stake-read-row
+    input:disabled::-moz-range-thumb {
+    background: #6f6f6f;
+    box-shadow: none;
+  }
+  .arena-page
+    .arena-workspace
+    .stake-panel
+    .stake-read-row
+    input:focus-visible {
+    outline: none;
+  }
+  .arena-page
+    .arena-workspace
+    .stake-panel
+    .stake-read-row
+    input:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 2px var(--acid);
+  }
+  .arena-page
+    .arena-workspace
+    .stake-panel
+    .stake-read-row
+    input:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 2px var(--acid);
+  }
+  .arena-page .arena-workspace .stake-panel :is(.stake-chips button):disabled,
+  .arena-page
+    .arena-workspace
+    .stake-panel
+    .stake-read-row:has(input:disabled)
+    output {
+    opacity: 0.4;
+  }
+  .arena-page .arena-workspace .stake-panel .stake-read-row output {
+    flex: none;
+    min-width: 3.2ch;
+    font-size: 24px;
+    text-align: right;
+  }
+  .arena-page .arena-workspace .stake-panel .stake-size {
+    grid-row: 1;
+    grid-column: 8 / span 5;
+  }
+  .arena-page .arena-workspace .stake-panel .stake-chips button {
+    height: 40px;
+    min-height: 40px;
+  }
+  .arena-page .arena-workspace .stake-panel :is(.stake-side, .stake-confirm) {
+    height: 54px;
+    min-height: 54px;
+    margin: 0;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: inset 0 -5px 0 rgb(0 0 0 / 24%);
+    clip-path: polygon(
+      0 8px,
+      4px 8px,
+      4px 4px,
+      8px 4px,
+      8px 0,
+      calc(100% - 8px) 0,
+      calc(100% - 8px) 4px,
+      calc(100% - 4px) 4px,
+      calc(100% - 4px) 8px,
+      100% 8px,
+      100% calc(100% - 8px),
+      calc(100% - 4px) calc(100% - 8px),
+      calc(100% - 4px) calc(100% - 4px),
+      calc(100% - 8px) calc(100% - 4px),
+      calc(100% - 8px) 100%,
+      8px 100%,
+      8px calc(100% - 4px),
+      4px calc(100% - 4px),
+      4px calc(100% - 8px),
+      0 calc(100% - 8px)
+    );
+  }
+  .arena-page .arena-workspace .stake-panel .stake-side {
+    font: 400 24px / 1 var(--font-number);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .arena-page .arena-workspace .stake-panel .stake-yes {
+    grid-row: 2;
+    grid-column: 1 / span 6;
+    background: var(--answer-yes);
+    color: var(--on-yes);
+  }
+  .arena-page .arena-workspace .stake-panel .stake-no {
+    grid-row: 2;
+    grid-column: 7 / span 6;
+    background: var(--answer-no);
+    color: var(--on-no);
+  }
+  .arena-page .arena-workspace .stake-panel .stake-side:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: inset 0 -2px 0 rgb(0 0 0 / 24%);
+  }
+  .arena-page .arena-workspace .stake-panel .stake-side:focus-visible {
+    outline: none;
+    box-shadow:
+      inset 0 0 0 3px var(--acid),
+      inset 0 -5px 0 rgb(0 0 0 / 24%);
+  }
+  .arena-page .arena-workspace .stake-panel .stake-side[data-look="off"] {
+    background: #1b1b1b;
+    color: #6f6f6f;
+    box-shadow: none;
+    opacity: 1;
+  }
+  .arena-page .arena-workspace .stake-panel .stake-yes[data-look="placed"] {
+    background: #174f31;
+    color: #bfeed4;
+    box-shadow: none;
+    opacity: 1;
+  }
+  .arena-page .arena-workspace .stake-panel .stake-no[data-look="placed"] {
+    background: #5c1f29;
+    color: #ffc9d1;
+    box-shadow: none;
+    opacity: 1;
+  }
+  /* A picked side's key becomes the key that places it, naming the terms. */
+  .arena-page
+    .arena-workspace
+    .stake-panel:has(.stake-confirm:not([hidden]))
+    .stake-side[aria-pressed="true"] {
+    display: none;
+  }
+  .arena-page
+    .arena-workspace
+    .stake-panel
+    .stake-ticket[data-side="YES"]
+    .stake-confirm {
+    grid-row: 2;
+    grid-column: 1 / span 6;
+  }
+  .arena-page
+    .arena-workspace
+    .stake-panel
+    .stake-ticket[data-side="NO"]
+    .stake-confirm {
+    grid-row: 2;
+    grid-column: 7 / span 6;
+  }
+  .arena-page .arena-workspace .stake-panel .stake-confirm[hidden] {
+    display: none;
+  }
+  .arena-page .arena-workspace .stake-panel :is(.stake-error, .stake-signin) {
+    grid-row: 3;
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+  .arena-page .arena-workspace .stake-panel .stake-signin a {
+    min-height: 40px;
+  }
+
+  /* ---- One line under the video: the status, and small actions at its
+     right end ---- */
+  .arena-page .arena-workspace .arena-watch .media-status-row {
+    flex-wrap: nowrap;
+    min-height: 32px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .arena-page .arena-workspace .arena-watch .media-status-row p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .arena-page
+    .arena-workspace
+    .arena-watch
+    .media-status-row:has(+ .media-actions > button:not([hidden])) {
+    padding-right: 21rem;
+  }
+  .arena-page .arena-workspace .arena-watch .media-actions {
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    height: 32px;
+    margin: -32px 0 0;
+    pointer-events: none;
+  }
+  .arena-page .arena-workspace .arena-watch .media-actions button {
+    min-height: 32px;
+    padding: 0 14px;
+    background: transparent;
+    font-size: var(--text-12);
+    white-space: nowrap;
+    pointer-events: auto;
+  }
+
+  /* ---- The right panel: the tabs at full height ---- */
+  .arena-page .arena-workspace .arena-insight {
+    min-height: 0;
+  }
+}
+@media (min-width: 960px) and (min-height: 500px) {
+  .arena-page .arena-workspace {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "banner rail"
+      "watch rail"
+      "answer rail";
+  }
+  /* The bar follows the status line: frontend/debate-layout.ts measures
+     the room left under it in the stage's column. */
+  .arena-page .arena-workspace .stake-panel {
+    grid-area: answer;
+    /* Moved, not re-laid-out: the rows keep their sizes, so the measure
+       can't feed on itself. */
+    translate: 0 calc(-1 * var(--stage-slack, 0px));
+  }
+  .arena-page .arena-workspace .arena-insight {
+    grid-area: rail;
+    height: auto;
+  }
+  /* Without the scoreboard only the status line sits under the video. */
+  .arena-page .arena-watch {
+    --stage-rest: 38px;
+  }
+  .arena-page .arena-watch:has(.live-captions),
+  .arena-page .arena-watch:has(.arena-timeline) {
+    --stage-rest: calc(38px + 52px);
+  }
+}
+/* One column: the video, the bar, then the tabs. */
+@media (min-width: 600px) and (max-width: 959px) and (min-height: 500px) {
+  .arena-page .arena-workspace .arena-insight {
+    margin-top: var(--space-5);
+  }
+}
+@keyframes stage-eq {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arena-page .stage-eq i {
+    animation: none;
+  }
+  .arena-page .stage-clock[data-phase="running"] .stage-ring,
+  .arena-page .arena-workspace .stage-tag {
+    transition: none;
+  }
+}
+
+/* The viewer's own results and open positions, at the top of Results. */
+.arena-page .arena-results :is(.stake-results, .stake-positions) {
+  margin-top: 0;
+}
+.arena-page .arena-workspace .arena-results .stake-results h3 {
+  font-size: var(--text-14);
 }

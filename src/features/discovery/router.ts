@@ -158,6 +158,9 @@ export function createDiscoveryRouter({
   firstRunTips = false,
   pushKey,
   endorsementBar = false,
+  micEnabled = false,
+  duelWindowsEnabled = false,
+  autoWatch = false,
   signedIn = async () => false,
 }: {
   discovery: Repository;
@@ -184,6 +187,12 @@ export function createDiscoveryRouter({
   pushKey?: string;
   // Decision 0015: the debate's last-answer bar on the video, with turn windows on.
   endorsementBar?: boolean;
+  // Decision 0018: debate pages carry the mic's list and load its script.
+  micEnabled?: boolean;
+  // Decision 0017: debate pages explain results as forecast duels.
+  duelWindowsEnabled?: boolean;
+  // Debate pages join a live debate, or start a replay, as they open.
+  autoWatch?: boolean;
   // Whether the request carries a valid session; / sends those readers to /home.
   signedIn?: (request: Request) => Promise<boolean>;
 }) {
@@ -487,6 +496,9 @@ export function createDiscoveryRouter({
               : undefined,
             pushKey,
             endorsementBar,
+            micEnabled,
+            duelWindowsEnabled,
+            autoWatch,
           ),
         )
       : html(response, renderNotFound(origin), 404);

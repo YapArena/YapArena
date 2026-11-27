@@ -430,24 +430,31 @@ export async function verifyArenaBrowser({
     );
     await page.emulateMedia({ reducedMotion: "no-preference" });
     checks.rapidScrubbingAndReducedMotion = true;
-    // Layout since 2026-10-30 (direction BC1, amending Decision 0013): one
-    // screen; the stage on the left with chat over the video from 1200px;
-    // the rail on the right holds the answer panel and, below it, the AI
-    // outline, results and about panel. The video and the panel start level.
+    // Layout since 2026-11-25 (founder): one screen; the stage on the left
+    // with chat over the video from 1200px, the debaters' name tags in its
+    // top corners and the turn clock between them; under it the answer bar
+    // (the read and the sizes over Yes and No, with no lettering); the right
+    // panel holds the AI outline, results and about at the page's height.
     await page.evaluate(() => window.scrollTo(0, 0));
-    const sidebar = (await page.locator("[data-stake-panel]").boundingBox())!,
+    const answerBar = (await page.locator("[data-stake-panel]").boundingBox())!,
       video = (await page.locator("[data-arena-video]").boundingBox())!,
       insight = (await page.locator("[data-insight]").boundingBox())!,
       chatPanel = (await page
         .locator("[data-community-chat-panel]")
         .boundingBox())!;
     assert.ok(
-      Math.abs(sidebar.y - video.y) <= 2,
-      "video and answer panel start level",
+      answerBar.y >= video.y + video.height &&
+        answerBar.x + answerBar.width <= insight.x,
+      "the answer bar is under the video, left of the right panel",
     );
     assert.ok(
-      video.x + video.width < sidebar.x,
-      "the video is left of the rail",
+      video.x + video.width < insight.x && Math.abs(insight.y - video.y) <= 2,
+      "the right panel starts level with the video, to its right",
+    );
+    assert.ok(
+      answerBar.y - (video.y + video.height) <= 72 &&
+        answerBar.y + answerBar.height <= insight.y + insight.height + 2,
+      "the answer bar follows the video's status line and ends within the right panel's height",
     );
     assert.ok(
       chatPanel.x >= video.x &&
@@ -457,26 +464,71 @@ export async function verifyArenaBrowser({
       "chat sits over the video",
     );
     assert.ok(
-      Math.abs(insight.x - sidebar.x) <= 1 &&
-        insight.y >= sidebar.y + sidebar.height,
-      "the outline, results and about panel is in the rail, below the answer panel",
-    );
-    assert.ok(
       await page.evaluate(
         () => document.documentElement.scrollHeight <= window.innerHeight + 1,
       ),
       "the page fits one screen",
     );
-    // The turn clock: a timer on the emblem, between the debaters' cards.
-    assert.equal(
-      await page
-        .locator(".arena-turn-face [data-media-clock]")
-        .getAttribute("role"),
-      "timer",
-    );
-    assert.equal(
-      await page.locator(".arena-turn-face canvas.arena-ring").count(),
-      1,
+    // The debaters and the clock sit over the video: the panel under it is
+    // gone, and the bar shows no sentence, only its controls.
+    assert.deepEqual(
+      await page.evaluate(() => {
+        const video = document
+          .querySelector("[data-arena-video]")!
+          .getBoundingClientRect();
+        const inVideo = (selector: string) => {
+          const box = document.querySelector(selector)!.getBoundingClientRect();
+          return (
+            box.width > 0 &&
+            box.left >= video.left &&
+            box.right <= video.right &&
+            box.top >= video.top &&
+            box.bottom <= video.bottom
+          );
+        };
+        const shown = (selector: string) =>
+          [
+            ...document.querySelectorAll<HTMLElement>(
+              `[data-stake-panel] ${selector}`,
+            ),
+          ].some((node) => {
+            const box = node.getBoundingClientRect();
+            return box.width > 2 && box.height > 2;
+          });
+        return {
+          scoreboard: getComputedStyle(
+            document.querySelector(".arena-scoreboard")!,
+          ).display,
+          tagA: inVideo('[data-stage-tag="A"]'),
+          tagB: inVideo('[data-stage-tag="B"]'),
+          clock: inVideo("[data-stage-clock]"),
+          clockRole: document
+            .querySelector("[data-stage-clock]")!
+            .getAttribute("role"),
+          lettering: [
+            ".stake-turn",
+            ".stake-status",
+            ".stake-final",
+            ".stake-size legend",
+            ".stake-receipt",
+          ].filter(shown),
+          controls: [
+            'input[name="read"]',
+            "[data-stake-size]",
+            '[data-stake-side="YES"]',
+            '[data-stake-side="NO"]',
+          ].filter(shown).length,
+        };
+      }),
+      {
+        scoreboard: "none",
+        tagA: true,
+        tagB: true,
+        clock: true,
+        clockRole: "timer",
+        lettering: [],
+        controls: 4,
+      },
     );
     // Chat over the video can be hidden and shown again.
     await page.locator("[data-arena-video]").hover();
@@ -857,14 +909,11 @@ export async function verifyArenaBrowser({
       const anchor = document
         .querySelector(".watch-result-anchor")!
         .getBoundingClientRect();
-      // The cameras fill the screen above the dock.
+      // The cameras fill the whole screen; Yes and No sit over the lower one.
       const screen = document
         .querySelector("[data-arena-video]")!
         .getBoundingClientRect();
-      const dock = document
-        .querySelector(".watch-dock")!
-        .getBoundingClientRect();
-      return Math.abs(anchor.y - (screen.y + (dock.y - screen.y) / 2));
+      return Math.abs(anchor.y - (screen.y + screen.height / 2));
     });
     assert.ok(seam <= 1, `the plate centres on the camera seam (${seam} px)`);
     await page.waitForTimeout(1500);

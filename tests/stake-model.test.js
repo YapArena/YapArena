@@ -32,6 +32,7 @@ import {
   sizeChoices,
   speakerLine,
   ticketTerms,
+  turnHeading,
   watchSheetName,
 } from "../public/stake-model.js";
 
@@ -683,5 +684,68 @@ describe("forecast duel windows (Decision 0017)", () => {
         false,
         JSON.stringify(overrides),
       );
+    // Decision 0018: with the mic on, a viewer is counted present all
+    // through the live debate, between windows and in A4 windows too.
+    const mic = (overrides = {}) => state({ mic: true, ...overrides });
+    assert.equal(presenceDue(mic({ window: null })), true);
+    assert.equal(
+      presenceDue(mic({ window: { id: "w3", rule: "a4-v1" } })),
+      true,
+    );
+    const between = { at: 90_000, windowId: null };
+    assert.equal(presenceDue(mic({ window: null, last: between })), false);
+    assert.equal(
+      presenceDue(mic({ window: null, last: between, now: 110_000 })),
+      true,
+    );
+    // A new duel window still says so at once.
+    assert.equal(presenceDue(mic({ last: between })), true);
+    for (const overrides of [
+      { signedIn: false },
+      { debater: true },
+      { hidden: true },
+      { eventStatus: "ended" },
+    ])
+      assert.equal(presenceDue(mic(overrides)), false);
+  });
+
+  it("heads the panel with the turn, or a mic's turn by its kind", () => {
+    const speakers = { A: "Maya Chen", B: "Léo Tremblay" };
+    const labels = { A: "People first", B: "Markets first" };
+    const heading = (overrides = {}) =>
+      turnHeading({
+        turnNumber: 8,
+        side: "A",
+        replay: false,
+        speakers,
+        labels,
+        ...overrides,
+      });
+    assert.equal(heading(), "Turn 8 · Maya Chen speaking (People first)");
+    assert.equal(
+      heading({ replay: true }),
+      "Replay · turn 8 · Maya Chen speaking (People first)",
+    );
+    // The question's window is on the asker's camp, side A; nobody on that
+    // side is speaking.
+    const micTurns = [
+      {
+        turnNumber: 8,
+        micId: "mic-1",
+        kind: "question",
+        asker: "zoe",
+        target: "B",
+        text: null,
+      },
+    ];
+    assert.equal(heading({ micTurns }), "Question · @zoe");
+    assert.equal(
+      heading({ micTurns, replay: true }),
+      "Replay · Question · @zoe",
+    );
+    assert.equal(
+      heading({ micTurns, turnNumber: 9, side: "B" }),
+      "Turn 9 · Léo Tremblay speaking (Markets first)",
+    );
   });
 });

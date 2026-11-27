@@ -403,6 +403,16 @@ export function loadConfig(
     throw new Error("MIC_ENABLED must be true or false");
   if (mic === "true" && coinSandbox !== "true")
     throw new Error("MIC_ENABLED requires COIN_SANDBOX_ENABLED");
+  // Founder, 2026-11-25: opening a debate page is watching it: a live debate
+  // is joined as a viewer and a replay starts without pressing a button. On
+  // by default where NODE_ENV is production (staging and production); off in
+  // development and tests, where pages are loaded without a media provider
+  // and browser checks press the buttons themselves.
+  const autoWatch =
+    environment.DEBATE_AUTO_WATCH ??
+    (nodeEnvironment === "production" ? "true" : "false");
+  if (!["true", "false"].includes(autoWatch))
+    throw new Error("DEBATE_AUTO_WATCH must be true or false");
   // The simulated purchase, withdrawal and error-report flows (financial
   // brief F06, founder D2/D3): off by default, and never on the production
   // service, where Yap Coins can't be bought or withdrawn.
@@ -684,6 +694,7 @@ export function loadConfig(
     turnWindowsEnabled: turnWindows === "true",
     duelWindowsEnabled: duelWindows === "true",
     micEnabled: mic === "true",
+    debateAutoWatch: autoWatch === "true",
     coinSandboxWebhookSecret,
     coinSandboxTransfersEnabled: coinTransfers === "true",
     coinTreasuryAlertUsdc,

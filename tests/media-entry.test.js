@@ -25,6 +25,7 @@ import {
 } from "../public/media-session.js";
 import { joinSpeaker } from "../public/media-speaker.js";
 import { mediaPresentation } from "../public/media-presentation.js";
+import { speakingSide } from "../public/debate-layout-model.js";
 import {
   createDeadlineFollower,
   createSignalRefresh,
@@ -91,7 +92,7 @@ function node() {
     },
   };
 }
-function fixture() {
+function fixture({ autowatch = false } = {}) {
   const elements = new Map();
   for (const name of [
     "status",
@@ -117,6 +118,8 @@ function fixture() {
     dataset: {
       mediaEvent: "33333333-3333-4333-8333-333333333333",
       mediaReplayPlayer: "/assets/replay.bundle.js",
+      // Founder, 2026-11-25: the debate page watches as soon as it opens.
+      ...(autowatch ? { mediaAutowatch: "" } : {}),
     },
     querySelector: (selector) => elements.get(selector),
     // The scoreboard's yap:turn events (frontend/debate-layout.ts).
@@ -334,6 +337,7 @@ function fixture() {
     stopMediaSession,
     joinSpeaker,
     mediaPresentation,
+    speakingSide,
     createDeadlineFollower,
     createSignalRefresh,
     watchRoom,
@@ -427,6 +431,70 @@ it("keeps an automatically published replay paused until Play replay is pressed"
   assert.equal(video.paused, false);
   assert.equal(video.hidden, false);
   f.listeners.get("pagehide")();
+});
+
+it("joins a live debate as a viewer as soon as the page opens, once", async () => {
+  const f = fixture({ autowatch: true });
+  await f.start();
+  const joins = () =>
+    f.requests.filter((url) => url.endsWith("/viewer-token")).length;
+  assert.equal(joins(), 1);
+  assert.ok(f.calls.includes("connect"));
+  assert.equal(f.element("leave").hidden, false);
+  // Leaving stays left: later status reads don't join again.
+  await f.element("leave").click();
+  await f.timer(viewerPoll);
+  assert.equal(joins(), 1);
+  f.listeners.get("pagehide")();
+});
+
+it("waits for a visible tab before watching, and leaves a seated debater to join with their camera", async () => {
+  const hidden = fixture({ autowatch: true });
+  hidden.document.hidden = true;
+  await hidden.start();
+  const joins = (f) =>
+    f.requests.filter((url) => url.endsWith("/viewer-token")).length;
+  assert.equal(joins(hidden), 0);
+  hidden.document.hidden = false;
+  hidden.listeners.get("visibilitychange")();
+  await settle();
+  assert.equal(joins(hidden), 1);
+  hidden.listeners.get("pagehide")();
+
+  const seated = fixture({ autowatch: true });
+  seated.speaker();
+  await seated.start();
+  assert.equal(joins(seated), 0);
+  assert.equal(seated.calls.includes("connect"), false);
+  seated.listeners.get("pagehide")();
+});
+
+it("plays a replay the page opened on, and waits for Play replay on one published later", async () => {
+  const state = { revision: 1, state: "ended", recordingStatus: "ready" };
+  const snapshot = (f, eventStatus) =>
+    f.response({
+      eventStatus,
+      automaticReplayPublication: true,
+      state,
+      serverNow: new Date().toISOString(),
+    });
+  const opened = fixture({ autowatch: true });
+  opened.setStateResponse(snapshot(opened, "replay"));
+  await opened.start();
+  const video = opened.element("replay-video");
+  assert.ok(video.playCalls > 0);
+  assert.equal(video.hidden, false);
+  opened.listeners.get("pagehide")();
+
+  // The viewer was on the ended page when the replay was published.
+  const later = fixture({ autowatch: true });
+  later.setStateResponse(snapshot(later, "ended"));
+  await later.start();
+  later.setStateResponse(snapshot(later, "replay"));
+  await later.timer(viewerPoll);
+  assert.equal(later.element("replay").hidden, false);
+  assert.equal(later.element("replay-video").playCalls, 0);
+  later.listeners.get("pagehide")();
 });
 
 it("prepares without joining or capturing and rejoins viewers only after terminal transport failure", async () => {

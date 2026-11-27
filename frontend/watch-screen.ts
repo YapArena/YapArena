@@ -7,6 +7,7 @@
 // frontend/watch-phone.ts; this module only applies them. Computers and
 // tablets never open it.
 import {
+  clockTurnText,
   closedWatch,
   currentPosition,
   keyLook,
@@ -16,6 +17,7 @@ import {
   watchClock,
   watchOrientation,
   watchReducer,
+  watchSheets,
   type OwnPosition,
   type WatchAction,
   type WatchOrientation,
@@ -36,6 +38,8 @@ import { mountReplaySplit } from "./replay-split.js";
 import { mountPauseKey } from "./replay-pause.js";
 import { replayBadgeWords, replayWatchMode } from "./replay-split-model.js";
 import { mountTurnsSheet } from "./turns-sheet.js";
+import type { MicPublic } from "./mic-model.js";
+import { onMic } from "./mic-state.js";
 
 declare global {
   interface WindowEventMap {
@@ -76,7 +80,7 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
   const bar = surface.querySelector<HTMLElement>("[data-endorsement-bar]");
   const card = surface.querySelector<HTMLElement>("[data-endorsement-card]");
   const sheets = new Map<WatchSheet, HTMLElement>();
-  for (const name of ["turns", "more"] as const) {
+  for (const name of watchSheets) {
     const sheet = one(`[data-watch-sheet="${name}"]`);
     if (sheet) sheets.set(name, sheet);
   }
@@ -154,8 +158,11 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
       "aria-label",
       next.chat ? "Hide chat" : "Show chat",
     );
-    if (next.sheet === "more" && previous.sheet !== "more") lendToMore();
-    if (previous.sheet === "more" && next.sheet !== "more") returnFromMore();
+    if (next.sheet !== previous.sheet) {
+      returnLent();
+      if (next.sheet === "more") lend(lentToMore);
+      if (next.sheet === "mic") lend(lentToMic);
+    }
     for (const [name, sheet] of sheets) sheet.hidden = next.sheet !== name;
     // The Turns sheet's body follows the window reads only while it shows.
     if (next.sheet === "turns" && !stopTurns && turnsBody)
@@ -192,26 +199,35 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
   // the review switch are gone). Each element moves into its slot while the
   // sheet is open, keeping its listeners and state, and goes back to a
   // marker at its place on the page when it closes.
-  const lent = [
-    ["outline", arena.querySelector<HTMLElement>("#arena-outline")],
-    ["about", arena.querySelector<HTMLElement>("#arena-about")],
+  type Lent = readonly (readonly [HTMLElement | null, HTMLElement | null])[];
+  const moreSlot = (name: string) => one(`[data-more-slot="${name}"]`);
+  const lentToMore: Lent = [
+    [arena.querySelector<HTMLElement>("#arena-outline"), moreSlot("outline")],
+    [arena.querySelector<HTMLElement>("#arena-about"), moreSlot("about")],
     [
-      "positions",
-      panel?.querySelector<HTMLElement>("[data-stake-positions-wrap]"),
+      // The viewer's positions sit with the page's results.
+      arena.querySelector<HTMLElement>("[data-stake-positions-wrap]"),
+      moreSlot("positions"),
     ],
-  ] as const;
+  ];
+  // Decision 0018: the Mic sheet shows the page's own mic panel the same way.
+  const lentToMic: Lent = [
+    [
+      arena.querySelector<HTMLElement>("#arena-mic"),
+      one("[data-mic-sheet-body]"),
+    ],
+  ];
   const markers = new Map<HTMLElement, Comment>();
-  function lendToMore() {
-    for (const [name, element] of lent) {
-      const slot = one(`[data-more-slot="${name}"]`);
+  function lend(items: Lent) {
+    for (const [element, slot] of items) {
       if (!element || !slot || markers.has(element)) continue;
-      const marker = document.createComment(`watch-more ${name}`);
+      const marker = document.createComment("watch-sheet");
       element.before(marker);
       markers.set(element, marker);
       slot.append(element);
     }
   }
-  function returnFromMore() {
+  function returnLent() {
     for (const [element, marker] of markers) marker.replaceWith(element);
     markers.clear();
   }
@@ -375,10 +391,10 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
   ))
     button.addEventListener("click", () => {
       sheetOpener = button;
-      dispatch({
-        type: "sheet",
-        sheet: button.dataset.watchOpen === "more" ? "more" : "turns",
-      });
+      const sheet = watchSheets.find(
+        (name) => name === button.dataset.watchOpen,
+      );
+      if (sheet) dispatch({ type: "sheet", sheet });
     });
   for (const button of ui.querySelectorAll<HTMLButtonElement>(
     "[data-watch-sheet-close]",
@@ -479,6 +495,12 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
   window.addEventListener("yap:playback", (event) => {
     if (event.detail.debateId !== debateId) return;
     position = event.detail.positionSeconds;
+    tick();
+  });
+  // Decision 0018: the debate's mic names its turns on the clock.
+  let mic: MicPublic | null = null;
+  onMic(debateId, (shared) => {
+    mic = shared.mic;
     tick();
   });
   let keySignature = "";
@@ -590,6 +612,7 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
       total,
       names,
       reduced: reducedMotion.matches,
+      mic,
     });
     arena!.dataset.watchPhase = view.phase;
     if (view.nextSide) arena!.dataset.watchNext = view.nextSide;
@@ -603,6 +626,7 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
       view.nextName,
       view.word,
       view.label,
+      view.mic,
     ]);
     if (signature === clockSignature) return;
     clockSignature = signature;
@@ -612,12 +636,7 @@ function start(arena: HTMLElement, surface: HTMLElement, ui: HTMLElement) {
         : view.phase === "between"
           ? view.nextName
           : view.word;
-    clockTurn.textContent =
-      view.turnNumber === null
-        ? ""
-        : view.total
-          ? `${view.turnNumber} / ${view.total}`
-          : `Turn ${view.turnNumber}`;
+    clockTurn.textContent = clockTurnText(view);
     if (view.label) clock.setAttribute("aria-label", view.label);
     else clock.removeAttribute("aria-label");
     const parts = turnSegments(view);

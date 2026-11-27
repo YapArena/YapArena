@@ -207,6 +207,8 @@ export function createApp({
   coinSandbox,
   coinWebhook,
   turnWindows,
+  duelWindows = false,
+  debateAutoWatch = false,
   mic,
   micTurns,
   debaterSettings,
@@ -295,6 +297,11 @@ export function createApp({
   coinWebhook?: RequestHandler;
   // Decision 0012: public turn-window timing, mounted only when enabled.
   turnWindows?: Parameters<typeof createTurnWindowRouter>[0];
+  // Decision 0017: new live windows settle by forecast duels; debate pages
+  // explain their results that way.
+  duelWindows?: boolean;
+  // Founder, 2026-11-25: debate pages start watching as they open.
+  debateAutoWatch?: boolean;
   // Decision 0018: borrow the microphone, mounted only when MIC_ENABLED.
   mic?: Parameters<typeof createMicRouter>[0]["mic"];
   // Decision 0018, PR 2b: the asker's own turn controls, with the media clock.
@@ -556,6 +563,9 @@ export function createApp({
           : undefined,
         pushKey: matchmaking ? webPush?.publicKey : undefined,
         endorsementBar: Boolean(turnWindows),
+        micEnabled: Boolean(mic),
+        duelWindowsEnabled: duelWindows,
+        autoWatch: debateAutoWatch,
       }),
     );
   }

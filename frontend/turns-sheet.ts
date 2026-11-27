@@ -5,6 +5,8 @@
 // live, and on a replay it follows the yap:playback position. The rules are
 // in frontend/turns-sheet-model.ts.
 import type { BarLabels } from "./endorsement-bar-model.js";
+import type { MicPastTurn } from "./mic-model.js";
+import { onMic } from "./mic-state.js";
 import type { PublicWindow } from "./stake-model.js";
 import {
   onDebateEndorsement,
@@ -135,6 +137,7 @@ export function mountTurnsSheet(body: HTMLElement) {
   let figure: DebateEndorsementView | null = null;
   let windows: PublicWindow[] = [];
   let position: number | null = null;
+  let micTurns: readonly MicPastTurn[] | undefined;
   let signature = "";
   function render() {
     const view = turnsSheetView({
@@ -145,6 +148,7 @@ export function mountTurnsSheet(body: HTMLElement) {
       names,
       position,
       now: Date.now(),
+      micTurns,
     });
     // The replay reports its position about four times a second; only a
     // different view touches the page.
@@ -168,6 +172,14 @@ export function mountTurnsSheet(body: HTMLElement) {
     debateId,
     (next) => {
       windows = next.filter(isTurnWindow);
+      render();
+    },
+    controller.signal,
+  );
+  onMic(
+    debateId,
+    (shared) => {
+      micTurns = shared.mic?.turns;
       render();
     },
     controller.signal,

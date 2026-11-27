@@ -1,5 +1,5 @@
 import type { OutlineSide } from "../src/features/outline/reducer.ts";
-import type { TurnDetail } from "./debate-layout-model.js";
+import { speakingSide, type TurnDetail } from "./debate-layout-model.js";
 import type { SideLabel } from "./outline-panel.js";
 import type { OutlineView } from "./outline-state.js";
 
@@ -11,7 +11,7 @@ import type { OutlineView } from "./outline-state.js";
 /** The live turn from the media snapshot, as `yap:turn` reports it. */
 export type LiveTurn = Pick<
   TurnDetail,
-  "eventStatus" | "state" | "activeSide" | "turnNumber"
+  "eventStatus" | "state" | "activeSide" | "speakingSide" | "turnNumber"
 >;
 
 export interface NowLine {
@@ -51,10 +51,11 @@ export function nowLine(
     return null;
   const current = view.current;
   const newest = current?.arguments.at(-1);
+  // Decision 0018: in a viewer's own mic turn no debater speaks, so the
+  // line keeps the last argument instead of listening for one.
+  const side = turn ? speakingSide(turn) : null;
   const speaking =
-    turn?.turnNumber && turn.activeSide
-      ? { turnNumber: turn.turnNumber, side: turn.activeSide }
-      : null;
+    turn?.turnNumber && side ? { turnNumber: turn.turnNumber, side } : null;
   if (
     speaking &&
     (!current || !newest || current.turnNumber < speaking.turnNumber)
